@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>成绩发布 · 竞赛通管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.admin-nav{background:linear-gradient(135deg,#1A237E,#283593);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.admin-nav .back-btn{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.admin-nav-title{font-size:17px;font-weight:700;color:white;flex:1;}
+
+.score-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;overflow:hidden;}
+.sc-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--c-gray-50);}
+.sc-contest-icon{width:46px;height:46px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.sc-info{flex:1;}
+.sc-name{font-size:15px;font-weight:700;color:var(--c-gray-900);}
+.sc-meta{font-size:12px;color:var(--c-gray-500);margin-top:3px;}
+.sc-status{font-size:12px;font-weight:700;padding:4px 10px;border-radius:var(--radius-full);}
+
+.sc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--c-gray-50);}
+.sc-stat-cell{padding:12px;text-align:center;border-right:1px solid var(--c-gray-50);}
+.sc-stat-cell:last-child{border-right:none;}
+.sc-stat-num{font-size:18px;font-weight:900;color:var(--c-gray-900);}
+.sc-stat-label{font-size:11px;color:var(--c-gray-500);margin-top:3px;}
+
+.sc-footer{padding:10px 16px 14px;display:flex;gap:8px;}
+.btn-preview{flex:1;height:42px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:var(--radius-sm);font-size:13px;font-weight:600;color:var(--c-gray-700);cursor:pointer;}
+.btn-publish{flex:2;height:42px;background:linear-gradient(135deg,#1A237E,#3F51B5);color:white;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation;}
+.btn-published{flex:2;height:42px;background:var(--c-success-50);border:1px solid rgba(39,174,96,0.3);border-radius:var(--radius-sm);font-size:13px;font-weight:700;color:var(--c-success);cursor:default;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1A237E;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="admin-nav animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="admin-nav-title">成绩发布</div>
+</div>
+
+<div style="padding:12px 16px 4px;font-size:12px;font-weight:700;color:var(--c-gray-500);text-transform:uppercase;letter-spacing:0.5px;">待发布（2场）</div>
+
+<div class="score-card animate-in animate-in-d1">
+  <div class="sc-header">
+    <div class="sc-contest-icon" style="background:linear-gradient(135deg,#4A0E8F,#9C27B0);">🏆</div>
+    <div class="sc-info">
+      <div class="sc-name">安徒生(国际)艺术奖</div>
+      <div class="sc-meta">成绩已导入，等待发布 · 更新时间 2026-03-18</div>
+    </div>
+    <div class="sc-status" style="background:var(--c-warning-50);color:var(--c-warning);">待发布</div>
+  </div>
+  <div class="sc-stats">
+    <div class="sc-stat-cell"><div class="sc-stat-num">1,248</div><div class="sc-stat-label">参赛人数</div></div>
+    <div class="sc-stat-cell"><div class="sc-stat-num" style="color:var(--c-gold);">312</div><div class="sc-stat-label">获奖人次</div></div>
+    <div class="sc-stat-cell"><div class="sc-stat-num" style="color:var(--c-success);">25%</div><div class="sc-stat-label">获奖率</div></div>
+  </div>
+  <div class="sc-footer">
+    <button class="btn-preview">预览成绩</button>
+    <button class="btn-publish" onclick="doPublish(this,'安徒生艺术奖')">📣 立即发布</button>
+  </div>
+</div>
+
+<div class="score-card animate-in animate-in-d2">
+  <div class="sc-header">
+    <div class="sc-contest-icon" style="background:linear-gradient(135deg,#B71C1C,#E53935);">🏟️</div>
+    <div class="sc-info">
+      <div class="sc-name">"鸟巢杯"文化艺术活动</div>
+      <div class="sc-meta">成绩已导入，等待发布 · 更新时间 2026-03-17</div>
+    </div>
+    <div class="sc-status" style="background:var(--c-warning-50);color:var(--c-warning);">待发布</div>
+  </div>
+  <div class="sc-stats">
+    <div class="sc-stat-cell"><div class="sc-stat-num">856</div><div class="sc-stat-label">参赛人数</div></div>
+    <div class="sc-stat-cell"><div class="sc-stat-num" style="color:var(--c-gold);">214</div><div class="sc-stat-label">获奖人次</div></div>
+    <div class="sc-stat-cell"><div class="sc-stat-num" style="color:var(--c-success);">25%</div><div class="sc-stat-label">获奖率</div></div>
+  </div>
+  <div class="sc-footer">
+    <button class="btn-preview">预览成绩</button>
+    <button class="btn-publish" onclick="doPublish(this,'鸟巢杯')">📣 立即发布</button>
+  </div>
+</div>
+
+<div style="padding:14px 16px 4px;font-size:12px;font-weight:700;color:var(--c-gray-500);text-transform:uppercase;letter-spacing:0.5px;">已发布</div>
+<div class="score-card animate-in">
+  <div class="sc-header">
+    <div class="sc-contest-icon" style="background:linear-gradient(135deg,#1A237E,#3949AB);">🎭</div>
+    <div class="sc-info">
+      <div class="sc-name">人民艺术全国展演活动</div>
+      <div class="sc-meta">已发布 · 2026-03-10 14:30</div>
+    </div>
+    <div class="sc-status" style="background:var(--c-success-50);color:var(--c-success);">✅ 已发布</div>
+  </div>
+  <div class="sc-footer">
+    <button class="btn-preview">查看成绩</button>
+    <button class="btn-published">✅ 已发布</button>
+  </div>
+</div>
+
+<script>
+function doPublish(btn, name) {
+  if(!confirm(`确认发布「${name}」成绩？发布后所有参赛学生将收到通知。`)) return;
+  btn.disabled=true;btn.textContent='发布中...';
+  setTimeout(()=>{
+    const t=document.createElement('div');t.className='toast';
+    t.textContent=`📣 「${name}」成绩已发布，通知已推送给 ${name==='安徒生艺术奖'?1248:856} 名参赛学生`;
+    document.body.appendChild(t);setTimeout(()=>t.remove(),3000);
+    btn.className='btn-published';btn.textContent='✅ 已发布';
+    btn.previousElementSibling.previousElementSibling.querySelector('.sc-status').textContent='✅ 已发布';
+    btn.previousElementSibling.previousElementSibling.querySelector('.sc-status').style.cssText='background:var(--c-success-50);color:var(--c-success);';
+  },1000);
+}
+</script>
+</body>
+</html>

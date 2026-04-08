@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.order.mapper.lookup.RebateLedgerInsertMapper">
+
+    <insert id="insertLedger">
+        insert into jst_rebate_ledger (
+            order_id, item_id, channel_id, contest_id, rule_id, list_amount, net_pay_amount,
+            service_fee, rebate_base, rebate_amount, direction, status, accrual_time, event_end_time,
+            create_by, create_time, del_flag, remark
+        ) values (
+            #{orderId}, #{itemId}, #{channelId}, #{contestId}, #{ruleId}, #{listAmount}, #{netPayAmount},
+            #{serviceFee}, #{rebateBase}, #{rebateAmount}, 'positive', 'pending_accrual', #{createTime}, #{eventEndTime},
+            #{createBy}, #{createTime}, '0', #{remark}
+        )
+    </insert>
+</mapper>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstAppointmentRecordMapper">
+    
+    <resultMap type="JstAppointmentRecord" id="JstAppointmentRecordResult">
+        <result property="appointmentId"    column="appointment_id"    />
+        <result property="appointmentNo"    column="appointment_no"    />
+        <result property="contestId"    column="contest_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="participantId"    column="participant_id"    />
+        <result property="channelId"    column="channel_id"    />
+        <result property="appointmentType"    column="appointment_type"    />
+        <result property="teamAppointmentId"    column="team_appointment_id"    />
+        <result property="appointmentDate"    column="appointment_date"    />
+        <result property="sessionCode"    column="session_code"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="mainStatus"    column="main_status"    />
+        <result property="qrCode"    column="qr_code"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstAppointmentRecordVo">
+        select appointment_id, appointment_no, contest_id, user_id, participant_id, channel_id, appointment_type, team_appointment_id, appointment_date, session_code, order_id, main_status, qr_code, create_by, create_time, update_by, update_time, remark, del_flag from jst_appointment_record
+    </sql>
+
+    <select id="selectJstAppointmentRecordList" parameterType="JstAppointmentRecord" resultMap="JstAppointmentRecordResult">
+        <include refid="selectJstAppointmentRecordVo"/>
+        <where>  
+            <if test="appointmentNo != null  and appointmentNo != ''"> and appointment_no = #{appointmentNo}</if>
+            <if test="contestId != null "> and contest_id = #{contestId}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="participantId != null "> and participant_id = #{participantId}</if>
+            <if test="channelId != null "> and channel_id = #{channelId}</if>
+            <if test="appointmentType != null  and appointmentType != ''"> and appointment_type = #{appointmentType}</if>
+            <if test="teamAppointmentId != null "> and team_appointment_id = #{teamAppointmentId}</if>
+            <if test="appointmentDate != null "> and appointment_date = #{appointmentDate}</if>
+            <if test="sessionCode != null  and sessionCode != ''"> and session_code = #{sessionCode}</if>
+            <if test="orderId != null "> and order_id = #{orderId}</if>
+            <if test="mainStatus != null  and mainStatus != ''"> and main_status = #{mainStatus}</if>
+            <if test="qrCode != null  and qrCode != ''"> and qr_code = #{qrCode}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstAppointmentRecordByAppointmentId" parameterType="Long" resultMap="JstAppointmentRecordResult">
+        <include refid="selectJstAppointmentRecordVo"/>
+        where appointment_id = #{appointmentId}
+    </select>
+
+    <insert id="insertJstAppointmentRecord" parameterType="JstAppointmentRecord" useGeneratedKeys="true" keyProperty="appointmentId">
+        insert into jst_appointment_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="appointmentNo != null and appointmentNo != ''">appointment_no,</if>
+            <if test="contestId != null">contest_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="participantId != null">participant_id,</if>
+            <if test="channelId != null">channel_id,</if>
+            <if test="appointmentType != null and appointmentType != ''">appointment_type,</if>
+            <if test="teamAppointmentId != null">team_appointment_id,</if>
+            <if test="appointmentDate != null">appointment_date,</if>
+            <if test="sessionCode != null">session_code,</if>
+            <if test="orderId != null">order_id,</if>
+            <if test="mainStatus != null and mainStatus != ''">main_status,</if>
+            <if test="qrCode != null">qr_code,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="appointmentNo != null and appointmentNo != ''">#{appointmentNo},</if>
+            <if test="contestId != null">#{contestId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="participantId != null">#{participantId},</if>
+            <if test="channelId != null">#{channelId},</if>
+            <if test="appointmentType != null and appointmentType != ''">#{appointmentType},</if>
+            <if test="teamAppointmentId != null">#{teamAppointmentId},</if>
+            <if test="appointmentDate != null">#{appointmentDate},</if>
+            <if test="sessionCode != null">#{sessionCode},</if>
+            <if test="orderId != null">#{orderId},</if>
+            <if test="mainStatus != null and mainStatus != ''">#{mainStatus},</if>
+            <if test="qrCode != null">#{qrCode},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstAppointmentRecord" parameterType="JstAppointmentRecord">
+        update jst_appointment_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="appointmentNo != null and appointmentNo != ''">appointment_no = #{appointmentNo},</if>
+            <if test="contestId != null">contest_id = #{contestId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="participantId != null">participant_id = #{participantId},</if>
+            <if test="channelId != null">channel_id = #{channelId},</if>
+            <if test="appointmentType != null and appointmentType != ''">appointment_type = #{appointmentType},</if>
+            <if test="teamAppointmentId != null">team_appointment_id = #{teamAppointmentId},</if>
+            <if test="appointmentDate != null">appointment_date = #{appointmentDate},</if>
+            <if test="sessionCode != null">session_code = #{sessionCode},</if>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="mainStatus != null and mainStatus != ''">main_status = #{mainStatus},</if>
+            <if test="qrCode != null">qr_code = #{qrCode},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where appointment_id = #{appointmentId}
+    </update>
+
+    <delete id="deleteJstAppointmentRecordByAppointmentId" parameterType="Long">
+        delete from jst_appointment_record where appointment_id = #{appointmentId}
+    </delete>
+
+    <delete id="deleteJstAppointmentRecordByAppointmentIds" parameterType="String">
+        delete from jst_appointment_record where appointment_id in 
+        <foreach item="appointmentId" collection="array" open="(" separator="," close=")">
+            #{appointmentId}
+        </foreach>
+    </delete>
+</mapper>

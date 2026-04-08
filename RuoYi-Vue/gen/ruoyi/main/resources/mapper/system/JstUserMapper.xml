@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstUserMapper">
+    
+    <resultMap type="JstUser" id="JstUserResult">
+        <result property="userId"    column="user_id"    />
+        <result property="openid"    column="openid"    />
+        <result property="unionid"    column="unionid"    />
+        <result property="mobile"    column="mobile"    />
+        <result property="nickname"    column="nickname"    />
+        <result property="avatar"    column="avatar"    />
+        <result property="realName"    column="real_name"    />
+        <result property="gender"    column="gender"    />
+        <result property="birthday"    column="birthday"    />
+        <result property="idCardNo"    column="id_card_no"    />
+        <result property="guardianName"    column="guardian_name"    />
+        <result property="guardianMobile"    column="guardian_mobile"    />
+        <result property="userType"    column="user_type"    />
+        <result property="currentLevelId"    column="current_level_id"    />
+        <result property="totalPoints"    column="total_points"    />
+        <result property="availablePoints"    column="available_points"    />
+        <result property="frozenPoints"    column="frozen_points"    />
+        <result property="growthValue"    column="growth_value"    />
+        <result property="boundChannelId"    column="bound_channel_id"    />
+        <result property="status"    column="status"    />
+        <result property="riskFlag"    column="risk_flag"    />
+        <result property="registerTime"    column="register_time"    />
+        <result property="lastLoginTime"    column="last_login_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstUserVo">
+        select user_id, openid, unionid, mobile, nickname, avatar, real_name, gender, birthday, id_card_no, guardian_name, guardian_mobile, user_type, current_level_id, total_points, available_points, frozen_points, growth_value, bound_channel_id, status, risk_flag, register_time, last_login_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_user
+    </sql>
+
+    <select id="selectJstUserList" parameterType="JstUser" resultMap="JstUserResult">
+        <include refid="selectJstUserVo"/>
+        <where>  
+            <if test="openid != null  and openid != ''"> and openid = #{openid}</if>
+            <if test="unionid != null  and unionid != ''"> and unionid = #{unionid}</if>
+            <if test="mobile != null  and mobile != ''"> and mobile = #{mobile}</if>
+            <if test="nickname != null  and nickname != ''"> and nickname like concat('%', #{nickname}, '%')</if>
+            <if test="avatar != null  and avatar != ''"> and avatar = #{avatar}</if>
+            <if test="realName != null  and realName != ''"> and real_name like concat('%', #{realName}, '%')</if>
+            <if test="gender != null "> and gender = #{gender}</if>
+            <if test="birthday != null "> and birthday = #{birthday}</if>
+            <if test="idCardNo != null  and idCardNo != ''"> and id_card_no = #{idCardNo}</if>
+            <if test="guardianName != null  and guardianName != ''"> and guardian_name like concat('%', #{guardianName}, '%')</if>
+            <if test="guardianMobile != null  and guardianMobile != ''"> and guardian_mobile = #{guardianMobile}</if>
+            <if test="userType != null  and userType != ''"> and user_type = #{userType}</if>
+            <if test="currentLevelId != null "> and current_level_id = #{currentLevelId}</if>
+            <if test="totalPoints != null "> and total_points = #{totalPoints}</if>
+            <if test="availablePoints != null "> and available_points = #{availablePoints}</if>
+            <if test="frozenPoints != null "> and frozen_points = #{frozenPoints}</if>
+            <if test="growthValue != null "> and growth_value = #{growthValue}</if>
+            <if test="boundChannelId != null "> and bound_channel_id = #{boundChannelId}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="riskFlag != null "> and risk_flag = #{riskFlag}</if>
+            <if test="registerTime != null "> and register_time = #{registerTime}</if>
+            <if test="lastLoginTime != null "> and last_login_time = #{lastLoginTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstUserByUserId" parameterType="Long" resultMap="JstUserResult">
+        <include refid="selectJstUserVo"/>
+        where user_id = #{userId}
+    </select>
+
+    <insert id="insertJstUser" parameterType="JstUser" useGeneratedKeys="true" keyProperty="userId">
+        insert into jst_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="openid != null">openid,</if>
+            <if test="unionid != null">unionid,</if>
+            <if test="mobile != null">mobile,</if>
+            <if test="nickname != null">nickname,</if>
+            <if test="avatar != null">avatar,</if>
+            <if test="realName != null">real_name,</if>
+            <if test="gender != null">gender,</if>
+            <if test="birthday != null">birthday,</if>
+            <if test="idCardNo != null">id_card_no,</if>
+            <if test="guardianName != null">guardian_name,</if>
+            <if test="guardianMobile != null">guardian_mobile,</if>
+            <if test="userType != null and userType != ''">user_type,</if>
+            <if test="currentLevelId != null">current_level_id,</if>
+            <if test="totalPoints != null">total_points,</if>
+            <if test="availablePoints != null">available_points,</if>
+            <if test="frozenPoints != null">frozen_points,</if>
+            <if test="growthValue != null">growth_value,</if>
+            <if test="boundChannelId != null">bound_channel_id,</if>
+            <if test="status != null">status,</if>
+            <if test="riskFlag != null">risk_flag,</if>
+            <if test="registerTime != null">register_time,</if>
+            <if test="lastLoginTime != null">last_login_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="openid != null">#{openid},</if>
+            <if test="unionid != null">#{unionid},</if>
+            <if test="mobile != null">#{mobile},</if>
+            <if test="nickname != null">#{nickname},</if>
+            <if test="avatar != null">#{avatar},</if>
+            <if test="realName != null">#{realName},</if>
+            <if test="gender != null">#{gender},</if>
+            <if test="birthday != null">#{birthday},</if>
+            <if test="idCardNo != null">#{idCardNo},</if>
+            <if test="guardianName != null">#{guardianName},</if>
+            <if test="guardianMobile != null">#{guardianMobile},</if>
+            <if test="userType != null and userType != ''">#{userType},</if>
+            <if test="currentLevelId != null">#{currentLevelId},</if>
+            <if test="totalPoints != null">#{totalPoints},</if>
+            <if test="availablePoints != null">#{availablePoints},</if>
+            <if test="frozenPoints != null">#{frozenPoints},</if>
+            <if test="growthValue != null">#{growthValue},</if>
+            <if test="boundChannelId != null">#{boundChannelId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="riskFlag != null">#{riskFlag},</if>
+            <if test="registerTime != null">#{registerTime},</if>
+            <if test="lastLoginTime != null">#{lastLoginTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstUser" parameterType="JstUser">
+        update jst_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="openid != null">openid = #{openid},</if>
+            <if test="unionid != null">unionid = #{unionid},</if>
+            <if test="mobile != null">mobile = #{mobile},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="realName != null">real_name = #{realName},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="birthday != null">birthday = #{birthday},</if>
+            <if test="idCardNo != null">id_card_no = #{idCardNo},</if>
+            <if test="guardianName != null">guardian_name = #{guardianName},</if>
+            <if test="guardianMobile != null">guardian_mobile = #{guardianMobile},</if>
+            <if test="userType != null and userType != ''">user_type = #{userType},</if>
+            <if test="currentLevelId != null">current_level_id = #{currentLevelId},</if>
+            <if test="totalPoints != null">total_points = #{totalPoints},</if>
+            <if test="availablePoints != null">available_points = #{availablePoints},</if>
+            <if test="frozenPoints != null">frozen_points = #{frozenPoints},</if>
+            <if test="growthValue != null">growth_value = #{growthValue},</if>
+            <if test="boundChannelId != null">bound_channel_id = #{boundChannelId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="riskFlag != null">risk_flag = #{riskFlag},</if>
+            <if test="registerTime != null">register_time = #{registerTime},</if>
+            <if test="lastLoginTime != null">last_login_time = #{lastLoginTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where user_id = #{userId}
+    </update>
+
+    <delete id="deleteJstUserByUserId" parameterType="Long">
+        delete from jst_user where user_id = #{userId}
+    </delete>
+
+    <delete id="deleteJstUserByUserIds" parameterType="String">
+        delete from jst_user where user_id in 
+        <foreach item="userId" collection="array" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </delete>
+</mapper>

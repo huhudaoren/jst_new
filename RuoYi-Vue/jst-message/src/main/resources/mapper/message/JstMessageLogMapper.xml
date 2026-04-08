@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.message.mapper.JstMessageLogMapper">
+    
+    <resultMap type="JstMessageLog" id="JstMessageLogResult">
+        <result property="logId"    column="log_id"    />
+        <result property="templateCode"    column="template_code"    />
+        <result property="channel"    column="channel"    />
+        <result property="targetUserId"    column="target_user_id"    />
+        <result property="targetMobile"    column="target_mobile"    />
+        <result property="triggerSource"    column="trigger_source"    />
+        <result property="content"    column="content"    />
+        <result property="sendStatus"    column="send_status"    />
+        <result property="failReason"    column="fail_reason"    />
+        <result property="sendTime"    column="send_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstMessageLogVo">
+        select log_id, template_code, channel, target_user_id, target_mobile, trigger_source, content, send_status, fail_reason, send_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_message_log
+    </sql>
+
+    <select id="selectJstMessageLogList" parameterType="JstMessageLog" resultMap="JstMessageLogResult">
+        <include refid="selectJstMessageLogVo"/>
+        <where>  
+            <if test="templateCode != null  and templateCode != ''"> and template_code = #{templateCode}</if>
+            <if test="channel != null  and channel != ''"> and channel = #{channel}</if>
+            <if test="targetUserId != null "> and target_user_id = #{targetUserId}</if>
+            <if test="targetMobile != null  and targetMobile != ''"> and target_mobile = #{targetMobile}</if>
+            <if test="triggerSource != null  and triggerSource != ''"> and trigger_source = #{triggerSource}</if>
+            <if test="content != null  and content != ''"> and content = #{content}</if>
+            <if test="sendStatus != null  and sendStatus != ''"> and send_status = #{sendStatus}</if>
+            <if test="failReason != null  and failReason != ''"> and fail_reason = #{failReason}</if>
+            <if test="sendTime != null "> and send_time = #{sendTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstMessageLogByLogId" parameterType="Long" resultMap="JstMessageLogResult">
+        <include refid="selectJstMessageLogVo"/>
+        where log_id = #{logId}
+    </select>
+
+    <insert id="insertJstMessageLog" parameterType="JstMessageLog" useGeneratedKeys="true" keyProperty="logId">
+        insert into jst_message_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="templateCode != null and templateCode != ''">template_code,</if>
+            <if test="channel != null and channel != ''">channel,</if>
+            <if test="targetUserId != null">target_user_id,</if>
+            <if test="targetMobile != null">target_mobile,</if>
+            <if test="triggerSource != null">trigger_source,</if>
+            <if test="content != null">content,</if>
+            <if test="sendStatus != null and sendStatus != ''">send_status,</if>
+            <if test="failReason != null">fail_reason,</if>
+            <if test="sendTime != null">send_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="templateCode != null and templateCode != ''">#{templateCode},</if>
+            <if test="channel != null and channel != ''">#{channel},</if>
+            <if test="targetUserId != null">#{targetUserId},</if>
+            <if test="targetMobile != null">#{targetMobile},</if>
+            <if test="triggerSource != null">#{triggerSource},</if>
+            <if test="content != null">#{content},</if>
+            <if test="sendStatus != null and sendStatus != ''">#{sendStatus},</if>
+            <if test="failReason != null">#{failReason},</if>
+            <if test="sendTime != null">#{sendTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstMessageLog" parameterType="JstMessageLog">
+        update jst_message_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="templateCode != null and templateCode != ''">template_code = #{templateCode},</if>
+            <if test="channel != null and channel != ''">channel = #{channel},</if>
+            <if test="targetUserId != null">target_user_id = #{targetUserId},</if>
+            <if test="targetMobile != null">target_mobile = #{targetMobile},</if>
+            <if test="triggerSource != null">trigger_source = #{triggerSource},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="sendStatus != null and sendStatus != ''">send_status = #{sendStatus},</if>
+            <if test="failReason != null">fail_reason = #{failReason},</if>
+            <if test="sendTime != null">send_time = #{sendTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where log_id = #{logId}
+    </update>
+
+    <delete id="deleteJstMessageLogByLogId" parameterType="Long">
+        delete from jst_message_log where log_id = #{logId}
+    </delete>
+
+    <delete id="deleteJstMessageLogByLogIds" parameterType="String">
+        delete from jst_message_log where log_id in 
+        <foreach item="logId" collection="array" open="(" separator="," close=")">
+            #{logId}
+        </foreach>
+    </delete>
+</mapper>

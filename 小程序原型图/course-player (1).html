@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>课程学习 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: #0E1117; padding-bottom: 0 !important; }
+
+/* ===== 视频区 ===== */
+.video-container {
+  width: 100%;
+  background: #000;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+.video-mock {
+  width: 100%; height: 100%;
+  background: linear-gradient(145deg, #0D1B2A 0%, #1B2A3E 100%);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 12px;
+  position: relative;
+}
+.video-mock::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(26,124,217,0.08) 0%, transparent 70%);
+}
+.video-play-btn {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: all var(--duration-fast) ease;
+  position: relative; z-index: 1;
+  touch-action: manipulation;
+}
+.video-play-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.25); }
+.video-title-overlay {
+  font-size: 14px; color: rgba(255,255,255,0.8); font-weight: 500;
+  text-align: center; max-width: 240px; line-height: 1.4;
+  position: relative; z-index: 1;
+}
+.video-duration-badge {
+  position: absolute; bottom: 10px; right: 12px;
+  background: rgba(0,0,0,0.6); color: white;
+  font-size: 11px; font-weight: 600; padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+/* 进度条 */
+.progress-bar-wrap {
+  background: #1A1F2E;
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.progress-track {
+  flex: 1; height: 4px; background: rgba(255,255,255,0.15);
+  border-radius: 2px; cursor: pointer; position: relative;
+}
+.progress-fill {
+  height: 100%; background: var(--c-primary-400);
+  border-radius: 2px; transition: width 0.3s ease;
+  position: relative;
+}
+.progress-fill::after {
+  content: ''; position: absolute; right: -5px; top: -4px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: white; box-shadow: 0 0 4px rgba(26,124,217,0.5);
+}
+.progress-time { font-size: 11px; color: rgba(255,255,255,0.6); white-space: nowrap; flex-shrink: 0; }
+
+/* 控制栏 */
+.ctrl-bar {
+  background: #1A1F2E;
+  padding: 8px 16px 10px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.ctrl-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; touch-action: manipulation;
+  transition: opacity var(--duration-fast) ease;
+  min-width: 40px;
+}
+.ctrl-btn:active { opacity: 0.6; }
+.ctrl-btn-icon { font-size: 20px; color: white; line-height: 1; }
+.ctrl-btn-label { font-size: 10px; color: rgba(255,255,255,0.5); }
+
+/* 倍速选择 */
+.speed-selector {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  color: white; font-size: 13px; font-weight: 700;
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast);
+}
+.speed-selector:active { background: rgba(255,255,255,0.2); }
+.ctrl-spacer { flex: 1; }
+
+/* 下方内容区 */
+.player-content {
+  background: var(--c-gray-50);
+  min-height: calc(100vh - 56.25vw - 60px);
+}
+
+/* Tab 导航 */
+.player-tabs {
+  background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: sticky; top: 44px; z-index: 30;
+}
+.player-tabs::-webkit-scrollbar { display: none; }
+.player-tab {
+  flex-shrink: 0; padding: 0 20px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 500; color: var(--c-gray-500);
+  cursor: pointer; touch-action: manipulation;
+  position: relative; white-space: nowrap;
+  transition: color var(--duration-fast) ease;
+}
+.player-tab.active { color: var(--c-primary-600); font-weight: 700; }
+.player-tab.active::after {
+  content: ''; position: absolute; bottom: 0; left: 16px; right: 16px;
+  height: 2px; background: var(--c-primary-600); border-radius: 1px;
+}
+
+/* ===== 章节目录 ===== */
+.chapter-section { padding: 0; }
+.chapter-group-title {
+  padding: 14px 16px 8px;
+  font-size: 12px; font-weight: 700; color: var(--c-gray-500);
+  letter-spacing: 0.4px; background: var(--c-gray-50);
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.chapter-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--c-gray-100);
+  cursor: pointer; touch-action: manipulation;
+  background: var(--c-white);
+  transition: background var(--duration-fast) ease;
+}
+.chapter-item.active { background: var(--c-primary-50); }
+.chapter-item:active { background: var(--c-gray-50); }
+.chapter-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+  background: var(--c-gray-100); color: var(--c-gray-500);
+}
+.chapter-item.active .chapter-num {
+  background: var(--c-primary-600); color: white;
+}
+.chapter-item.done .chapter-num {
+  background: var(--c-success); color: white;
+}
+.chapter-info { flex: 1; min-width: 0; }
+.chapter-title {
+  font-size: 14px; font-weight: 500; color: var(--c-gray-900);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chapter-item.active .chapter-title { color: var(--c-primary-600); font-weight: 700; }
+.chapter-item.locked .chapter-title { color: var(--c-gray-300); }
+.chapter-meta { font-size: 11px; color: var(--c-gray-500); margin-top: 3px; display: flex; gap: 8px; }
+.chapter-right { flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
+.chapter-lock { font-size: 14px; color: var(--c-gray-300); }
+.chapter-progress-pill {
+  font-size: 10px; font-weight: 700; padding: 2px 7px;
+  border-radius: var(--radius-full);
+}
+
+/* ===== 课程介绍 ===== */
+.intro-section { padding: 16px; }
+.course-intro-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); overflow: hidden; margin-bottom: 12px;
+}
+.cic-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: center; gap: 8px;
+}
+.cic-icon {
+  width: 26px; height: 26px; border-radius: var(--radius-sm);
+  background: var(--c-primary-50);
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.cic-title { font-size: 15px; font-weight: 700; color: var(--c-gray-900); }
+.cic-body { padding: 14px 16px; }
+.course-desc { font-size: 14px; color: var(--c-gray-700); line-height: 1.8; }
+.course-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+
+/* 讲师卡 */
+.teacher-card {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.teacher-avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-600));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+  border: 2px solid var(--c-primary-200);
+}
+.teacher-name { font-size: 15px; font-weight: 700; color: var(--c-gray-900); }
+.teacher-school { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.teacher-intro { font-size: 13px; color: var(--c-gray-700); margin-top: 8px; line-height: 1.6; }
+
+/* ===== 资料下载 ===== */
+.material-section { padding: 16px; }
+.material-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 14px;
+  background: var(--c-white); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs); margin-bottom: 8px;
+  cursor: pointer; touch-action: manipulation;
+  transition: box-shadow var(--duration-fast) ease;
+}
+.material-item:active { box-shadow: none; }
+.material-icon {
+  width: 40px; height: 40px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.material-info { flex: 1; min-width: 0; }
+.material-name { font-size: 14px; font-weight: 600; color: var(--c-gray-900); }
+.material-meta { font-size: 11px; color: var(--c-gray-500); margin-top: 2px; }
+.material-dl-btn {
+  flex-shrink: 0; height: 32px; padding: 0 12px;
+  background: var(--c-primary-50); border: 1px solid var(--c-primary-200);
+  border-radius: var(--radius-sm); color: var(--c-primary-600);
+  font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; gap: 3px;
+  touch-action: manipulation;
+}
+
+/* 顶部返回条（黑色背景） */
+.player-nav {
+  background: #0E1117;
+  height: 44px;
+  display: flex; align-items: center; padding: 0 16px;
+  position: sticky; top: 0; z-index: 50;
+}
+.player-back {
+  width: 32px; height: 32px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: white; cursor: pointer;
+  touch-action: manipulation; flex-shrink: 0;
+}
+.player-nav-title {
+  flex: 1; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.85);
+  margin-left: 10px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.player-nav-more {
+  font-size: 14px; color: rgba(255,255,255,0.6);
+  cursor: pointer; padding-left: 10px;
+}
+
+/* 倍速 sheet */
+.speed-sheet {
+  position: fixed; inset: 0;
+  background: rgba(26,31,46,0.55);
+  z-index: 200; display: none;
+  align-items: flex-end; justify-content: center;
+}
+.speed-sheet.show { display: flex; }
+.speed-sheet-inner {
+  background: var(--c-white);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  width: 100%; max-width: 390px;
+  overflow: hidden; animation: sheet-up 0.3s var(--ease-out);
+}
+@keyframes sheet-up { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.speed-handle { width: 36px; height: 4px; background: var(--c-gray-100); border-radius: 2px; margin: 12px auto 0; }
+.speed-title { text-align: center; font-size: 16px; font-weight: 700; color: var(--c-gray-900); padding: 14px 0 10px; border-bottom: 1px solid var(--c-gray-100); }
+.speed-options { padding: 8px 0 20px; }
+.speed-option {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 20px; font-size: 16px; font-weight: 500; color: var(--c-gray-700);
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast) ease;
+}
+.speed-option:active { background: var(--c-gray-50); }
+.speed-option.active { color: var(--c-primary-600); font-weight: 700; }
+.speed-option.active::before { content: '✓'; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- 状态栏（深色） -->
+<div class="status-bar" style="background:#0E1117;color:white;">
+  <span class="time">9:41</span>
+  <span class="icons">📶 🔋</span>
+</div>
+
+<!-- 播放器顶部导航 -->
+<div class="player-nav">
+  <div class="player-back" onclick="history.back()">←</div>
+  <div class="player-nav-title" id="navTitle">竞赛数学精讲 · 高中组</div>
+  <div class="player-nav-more">⋮</div>
+</div>
+
+<!-- ===== 视频区 ===== -->
+<div class="video-container">
+  <div class="video-mock" id="videoArea" onclick="togglePlay()">
+    <div class="video-play-btn" id="playBtn">▶</div>
+    <div class="video-title-overlay" id="videoTitle">第3讲：函数与方程——零点定理的竞赛应用</div>
+    <div class="video-duration-badge" id="durationBadge">23:47 / 45:12</div>
+  </div>
+</div>
+
+<!-- 进度条 -->
+<div class="progress-bar-wrap">
+  <div class="progress-track" onclick="seekTo(event)" id="progressTrack">
+    <div class="progress-fill" id="progressFill" style="width:52%;"></div>
+  </div>
+  <div class="progress-time" id="progressTime">23:47 / 45:12</div>
+</div>
+
+<!-- 控制栏 -->
+<div class="ctrl-bar">
+  <div class="ctrl-btn" onclick="togglePlay()">
+    <div class="ctrl-btn-icon" id="ctrlPlay">⏸</div>
+    <div class="ctrl-btn-label" id="ctrlPlayLabel">暂停</div>
+  </div>
+  <div class="ctrl-btn" onclick="skip(-10)">
+    <div class="ctrl-btn-icon">⏪</div>
+    <div class="ctrl-btn-label">-10s</div>
+  </div>
+  <div class="ctrl-btn" onclick="skip(10)">
+    <div class="ctrl-btn-icon">⏩</div>
+    <div class="ctrl-btn-label">+10s</div>
+  </div>
+  <div class="ctrl-spacer"></div>
+  <div class="speed-selector" onclick="showSpeedSheet()" id="speedDisplay">1.0x</div>
+  <div class="ctrl-btn" onclick="toggleFullscreen()">
+    <div class="ctrl-btn-icon">⛶</div>
+    <div class="ctrl-btn-label">全屏</div>
+  </div>
+</div>
+
+<!-- ===== 内容区 ===== -->
+<div class="player-content">
+
+  <!-- Tab -->
+  <div class="player-tabs">
+    <div class="player-tab active" onclick="switchPlayerTab('chapters', this)">课程目录</div>
+    <div class="player-tab" onclick="switchPlayerTab('intro', this)">课程介绍</div>
+    <div class="player-tab" onclick="switchPlayerTab('materials', this)">资料下载</div>
+  </div>
+
+  <!-- ===== 目录 ===== -->
+  <div id="tab-chapters">
+    <div class="chapter-group-title">第一章 · 代数基础（共 6 讲）</div>
+
+    <div class="chapter-item done" onclick="playChapter(this, '第1讲：多项式与因式分解', '38:20', 1)">
+      <div class="chapter-num">✓</div>
+      <div class="chapter-info">
+        <div class="chapter-title">第1讲：多项式与因式分解</div>
+        <div class="chapter-meta"><span>38:20</span><span>已学完</span></div>
+      </div>
+      <div class="chapter-right"><span class="chapter-progress-pill" style="background:var(--c-success-50);color:var(--c-success);">100%</span></div>
+    </div>
+
+    <div class="chapter-item done" onclick="playChapter(this, '第2讲：代数恒等变换技巧', '41:55', 2)">
+      <div class="chapter-num">✓</div>
+      <div class="chapter-info">
+        <div class="chapter-title">第2讲：代数恒等变换技巧</div>
+        <div class="chapter-meta"><span>41:55</span><span>已学完</span></div>
+      </div>
+      <div class="chapter-right"><span class="chapter-progress-pill" style="background:var(--c-success-50);color:var(--c-success);">100%</span></div>
+    </div>
+
+    <div class="chapter-item active" onclick="playChapter(this, '第3讲：函数与方程——零点定理的竞赛应用', '45:12', 3)">
+      <div class="chapter-num">3</div>
+      <div class="chapter-info">
+        <div class="chapter-title">第3讲：函数与方程——零点定理</div>
+        <div class="chapter-meta"><span>45:12</span><span>学习中</span></div>
+      </div>
+      <div class="chapter-right"><span class="chapter-progress-pill" style="background:var(--c-primary-50);color:var(--c-primary-600);">52%</span></div>
+    </div>
+
+    <div class="chapter-item" onclick="playChapter(this, '第4讲：不等式的基本方法', '39:44', 4)">
+      <div class="chapter-num">4</div>
+      <div class="chapter-info">
+        <div class="chapter-title">第4讲：不等式的基本方法</div>
+        <div class="chapter-meta"><span>39:44</span><span>未开始</span></div>
+      </div>
+      <div class="chapter-right"><span class="chapter-progress-pill" style="background:var(--c-gray-100);color:var(--c-gray-500);">0%</span></div>
+    </div>
+
+    <div class="chapter-item" onclick="playChapter(this, '第5讲：数列与递推', '44:18', 5)">
+      <div class="chapter-num">5</div>
+      <div class="chapter-info">
+        <div class="chapter-title">第5讲：数列与递推</div>
+        <div class="chapter-meta"><span>44:18</span><span>未开始</span></div>
+      </div>
+      <div class="chapter-right"><span class="chapter-progress-pill" style="background:var(--c-gray-100);color:var(--c-gray-500);">0%</span></div>
+    </div>
+
+    <div class="chapter-item" onclick="playChapter(this, '第6讲：整体思路综合练习', '50:02', 6)">
+      <div class="chapter-num">6</div>
+      <div class="chapter-info">
+        <div class="chapter-title">第6讲：整体思路综合练习</div>
+        <div class="chapter-meta"><span>50:02</span><span>未开始</span></div>
+      </div>
+      <div class="chapter-right"><span class="chapter-progress-pill" style="background:var(--c-gray-100);color:var(--c-gray-500);">0%</span></div>
+    </div>
+
+    <div class="chapter-group-title">第二章 · 平面几何（共 5 讲）</div>
+
+    <div class="chapter-item locked">
+      <div class="chapter-num" style="background:var(--c-gray-50);">7</div>
+      <div class="chapter-info">
+        <div class="chapter-title">第7讲：圆与直线的位置关系</div>
+        <div class="chapter-meta"><span>42:30</span><span>第二章</span></div>
+      </div>
+      <div class="chapter-right"><div class="chapter-lock">🔒</div></div>
+    </div>
+
+    <div class="chapter-item locked">
+      <div class="chapter-num" style="background:var(--c-gray-50);">8</div>
+      <div class="chapter-info">
+        <div class="chapter-title">第8讲：三角形的五心</div>
+        <div class="chapter-meta"><span>47:15</span><span>第二章</span></div>
+      </div>
+      <div class="chapter-right"><div class="chapter-lock">🔒</div></div>
+    </div>
+
+    <div style="text-align:center;padding:16px;font-size:13px;color:var(--c-gray-500);">
+      第二章 · 完成第一章后自动解锁
+    </div>
+
+    <div class="chapter-group-title">第三章 · 数论初步（共 5 讲）</div>
+    <div class="chapter-item locked">
+      <div class="chapter-num" style="background:var(--c-gray-50);">12</div>
+      <div class="chapter-info">
+        <div class="chapter-title">第12讲：整除与同余</div>
+        <div class="chapter-meta"><span>36:40</span><span>第三章</span></div>
+      </div>
+      <div class="chapter-right"><div class="chapter-lock">🔒</div></div>
+    </div>
+
+    <div style="text-align:center;padding:16px 16px 24px;font-size:13px;color:var(--c-gray-500);">
+      共 24 讲 · 已学 2 讲 · 学习进度 8%
+    </div>
+  </div>
+
+  <!-- ===== 介绍 ===== -->
+  <div id="tab-intro" style="display:none;">
+    <div class="intro-section">
+      <div class="course-intro-card">
+        <div class="cic-header">
+          <div class="cic-icon">📖</div>
+          <div class="cic-title">课程简介</div>
+        </div>
+        <div class="cic-body">
+          <div class="course-desc">本课程专为备战安徒生(国际)艺术奖（CMO预选赛）设计，涵盖代数、几何、数论、组合四大核心模块。以历年真题为主线，系统梳理竞赛必考知识点，培养解题思维与技巧。</div>
+          <div class="course-tags">
+            <span class="tag tag-primary">数学</span>
+            <span class="tag tag-primary">高中组</span>
+            <span class="tag tag-gray">共24讲</span>
+            <span class="tag tag-gray">约18小时</span>
+            <span class="tag tag-success">线上录播</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="teacher-card">
+        <div class="teacher-avatar">👨‍🏫</div>
+        <div>
+          <div class="teacher-name">王建国 主讲老师</div>
+          <div class="teacher-school">广州市第二中学 · 数学高级教师</div>
+          <div class="teacher-intro">从事数学竞赛辅导18年，培养多名全国数学联赛一等奖学生，擅长将复杂知识点用直观方式呈现，深受学生喜爱。</div>
+        </div>
+      </div>
+
+      <div class="course-intro-card">
+        <div class="cic-header">
+          <div class="cic-icon">🎯</div>
+          <div class="cic-title">学习目标</div>
+        </div>
+        <div class="cic-body">
+          <div style="font-size:13px;color:var(--c-gray-700);line-height:1.9;">
+            ✅ 掌握数学联赛四大板块核心知识体系<br>
+            ✅ 熟练运用竞赛中常见的解题方法与技巧<br>
+            ✅ 通过100+道历年真题的精讲练习<br>
+            ✅ 具备独立完成联赛卷的解题能力
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 资料 ===== -->
+  <div id="tab-materials" style="display:none;">
+    <div class="material-section">
+      <div class="notice notice-info" style="margin-bottom:14px;">
+        <span class="notice-icon">ℹ️</span>
+        <div>资料仅限已购课程学员下载，请勿传播</div>
+      </div>
+
+      <div class="material-item" onclick="downloadFile('竞赛数学精讲·讲义合集.pdf')">
+        <div class="material-icon" style="background:var(--c-accent-50);">📄</div>
+        <div class="material-info">
+          <div class="material-name">竞赛数学精讲·讲义合集</div>
+          <div class="material-meta">PDF · 全24讲 · 3.2MB</div>
+        </div>
+        <div class="material-dl-btn">⬇️ 下载</div>
+      </div>
+
+      <div class="material-item" onclick="downloadFile('第1-6讲·练习题集.pdf')">
+        <div class="material-icon" style="background:var(--c-primary-50);">📋</div>
+        <div class="material-info">
+          <div class="material-name">第1-6讲·练习题集</div>
+          <div class="material-meta">PDF · 代数基础 · 1.8MB</div>
+        </div>
+        <div class="material-dl-btn">⬇️ 下载</div>
+      </div>
+
+      <div class="material-item" onclick="downloadFile('历年数学联赛真题·2020-2024.zip')">
+        <div class="material-icon" style="background:var(--c-success-50);">🗂️</div>
+        <div class="material-info">
+          <div class="material-name">历年数学联赛真题·2020-2024</div>
+          <div class="material-meta">ZIP · 含答案解析 · 8.5MB</div>
+        </div>
+        <div class="material-dl-btn">⬇️ 下载</div>
+      </div>
+
+      <div class="material-item" onclick="downloadFile('公式速查手册.pdf')">
+        <div class="material-icon" style="background:var(--c-warning-50);">📊</div>
+        <div class="material-info">
+          <div class="material-name">公式速查手册</div>
+          <div class="material-meta">PDF · 竞赛必备公式 · 0.6MB</div>
+        </div>
+        <div class="material-dl-btn">⬇️ 下载</div>
+      </div>
+
+      <div style="height:20px;"></div>
+    </div>
+  </div>
+
+</div><!-- /player-content -->
+
+<!-- ===== 倍速选择 Sheet ===== -->
+<div class="speed-sheet" id="speedSheet" onclick="hideSpeedSheet()">
+  <div class="speed-sheet-inner" onclick="event.stopPropagation()">
+    <div class="speed-handle"></div>
+    <div class="speed-title">播放速度</div>
+    <div class="speed-options">
+      <div class="speed-option" onclick="setSpeed(0.5)">0.5x  慢速</div>
+      <div class="speed-option" onclick="setSpeed(0.75)">0.75x  稍慢</div>
+      <div class="speed-option active" onclick="setSpeed(1.0)" id="speed-1.0">1.0x  正常</div>
+      <div class="speed-option" onclick="setSpeed(1.25)" id="speed-1.25">1.25x  稍快</div>
+      <div class="speed-option" onclick="setSpeed(1.5)" id="speed-1.5">1.5x  快速</div>
+      <div class="speed-option" onclick="setSpeed(2.0)" id="speed-2.0">2.0x  极速</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let isPlaying = true;
+let currentSpeed = 1.0;
+let progressPct = 52;
+
+function togglePlay() {
+  isPlaying = !isPlaying;
+  document.getElementById('ctrlPlay').textContent = isPlaying ? '⏸' : '▶';
+  document.getElementById('ctrlPlayLabel').textContent = isPlaying ? '暂停' : '播放';
+  document.getElementById('playBtn').textContent = isPlaying ? '⏸' : '▶';
+}
+
+function skip(sec) {
+  const total = 45 * 60 + 12;
+  const current = Math.floor(progressPct / 100 * total);
+  const newCurrent = Math.max(0, Math.min(total, current + sec));
+  progressPct = (newCurrent / total * 100);
+  updateProgress();
+  showToast((sec > 0 ? '⏩' : '⏪') + ' ' + (sec > 0 ? '+' : '') + sec + 's');
+}
+
+function seekTo(e) {
+  const track = document.getElementById('progressTrack');
+  const rect = track.getBoundingClientRect();
+  progressPct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = 45 * 60 + 12;
+  const current = Math.floor(progressPct / 100 * total);
+  const fmt = s => String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+  const timeStr = fmt(current) + ' / 45:12';
+  document.getElementById('progressFill').style.width = progressPct + '%';
+  document.getElementById('progressTime').textContent = timeStr;
+  document.getElementById('durationBadge').textContent = timeStr;
+  document.getElementById('videoTitle').textContent = '第3讲：函数与方程——零点定理的竞赛应用';
+}
+
+function showSpeedSheet() { document.getElementById('speedSheet').classList.add('show'); }
+function hideSpeedSheet() { document.getElementById('speedSheet').classList.remove('show'); }
+function setSpeed(s) {
+  currentSpeed = s;
+  document.getElementById('speedDisplay').textContent = s + 'x';
+  document.querySelectorAll('.speed-option').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('speed-' + s);
+  if (el) el.classList.add('active');
+  hideSpeedSheet();
+  showToast('播放速度：' + s + 'x');
+}
+
+function toggleFullscreen() { showToast('全屏播放（原型演示）'); }
+
+function playChapter(el, title, duration, num) {
+  document.querySelectorAll('.chapter-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('videoTitle').textContent = '第' + num + '讲：' + title.replace(/第\d+讲：/, '');
+  document.getElementById('navTitle').textContent = '竞赛数学精讲 · 第' + num + '讲';
+  progressPct = el.classList.contains('done') ? 100 : 0;
+  updateProgress();
+  if (!isPlaying) togglePlay();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  showToast('▶ 正在播放：第' + num + '讲');
+}
+
+function switchPlayerTab(id, el) {
+  ['chapters','intro','materials'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === id ? 'block' : 'none';
+  });
+  document.querySelectorAll('.player-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function downloadFile(name) {
+  showToast('⬇️ 正在下载：' + name);
+}
+
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
+}
+
+function toggleNote() {
+  const panel = document.getElementById('notePanel');
+  const showing = panel.style.display !== 'none';
+  panel.style.display = showing ? 'none' : 'block';
+  if (!showing) {
+    document.getElementById('noteInput').focus();
+    document.getElementById('noteTimestamp').textContent = '当前时间点：' + formatTime(videoProgress || 204);
+  }
+}
+function saveNote() {
+  const text = document.getElementById('noteInput').value.trim();
+  if (!text) { showToast('请输入笔记内容'); return; }
+  document.getElementById('noteInput').value = '';
+  toggleNote();
+  showToast('✓ 笔记已保存');
+  noteCount = (noteCount || 0) + 1;
+}
+</script>
+
+  <!-- 笔记区域 -->
+  <div id="notePanel" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:var(--c-white);border-top:1px solid var(--c-gray-100);z-index:90;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.1);">
+    <div style="font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+      <span>📝 添加笔记</span>
+      <span style="font-size:20px;color:var(--c-gray-400);cursor:pointer;" onclick="toggleNote()">✕</span>
+    </div>
+    <div style="font-size:11px;color:var(--c-primary-600);margin-bottom:6px;" id="noteTimestamp">当前时间点：00:03:24</div>
+    <textarea id="noteInput" style="width:100%;height:80px;border:1.5px solid var(--c-gray-100);border-radius:var(--radius-md);padding:10px;font-size:15px;font-family:var(--font-body);color:var(--c-gray-900);resize:none;outline:none;box-sizing:border-box;" placeholder="在此记录笔记，将自动关联当前时间点..." oninput="this.style.borderColor=this.value?'var(--c-primary-400)':'var(--c-gray-100)'"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="btn btn-ghost btn-md" style="flex:1;" onclick="toggleNote()">取消</button>
+      <button class="btn btn-primary btn-md" style="flex:2;" onclick="saveNote()">保存笔记</button>
+    </div>
+  </div>
+</body>
+</html>

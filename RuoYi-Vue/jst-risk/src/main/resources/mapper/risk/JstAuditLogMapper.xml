@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.risk.mapper.JstAuditLogMapper">
+    
+    <resultMap type="JstAuditLog" id="JstAuditLogResult">
+        <result property="auditId"    column="audit_id"    />
+        <result property="operatorId"    column="operator_id"    />
+        <result property="operatorName"    column="operator_name"    />
+        <result property="operatorType"    column="operator_type"    />
+        <result property="module"    column="module"    />
+        <result property="action"    column="action"    />
+        <result property="targetType"    column="target_type"    />
+        <result property="targetId"    column="target_id"    />
+        <result property="beforeJson"    column="before_json"    />
+        <result property="afterJson"    column="after_json"    />
+        <result property="ip"    column="ip"    />
+        <result property="terminal"    column="terminal"    />
+        <result property="result"    column="result"    />
+        <result property="opTime"    column="op_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstAuditLogVo">
+        select audit_id, operator_id, operator_name, operator_type, module, action, target_type, target_id, before_json, after_json, ip, terminal, result, op_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_audit_log
+    </sql>
+
+    <select id="selectJstAuditLogList" parameterType="JstAuditLog" resultMap="JstAuditLogResult">
+        <include refid="selectJstAuditLogVo"/>
+        <where>  
+            <if test="operatorId != null "> and operator_id = #{operatorId}</if>
+            <if test="operatorName != null  and operatorName != ''"> and operator_name like concat('%', #{operatorName}, '%')</if>
+            <if test="operatorType != null  and operatorType != ''"> and operator_type = #{operatorType}</if>
+            <if test="module != null  and module != ''"> and module = #{module}</if>
+            <if test="action != null  and action != ''"> and action = #{action}</if>
+            <if test="targetType != null  and targetType != ''"> and target_type = #{targetType}</if>
+            <if test="targetId != null  and targetId != ''"> and target_id = #{targetId}</if>
+            <if test="beforeJson != null  and beforeJson != ''"> and before_json = #{beforeJson}</if>
+            <if test="afterJson != null  and afterJson != ''"> and after_json = #{afterJson}</if>
+            <if test="ip != null  and ip != ''"> and ip = #{ip}</if>
+            <if test="terminal != null  and terminal != ''"> and terminal = #{terminal}</if>
+            <if test="result != null  and result != ''"> and result = #{result}</if>
+            <if test="opTime != null "> and op_time = #{opTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstAuditLogByAuditId" parameterType="Long" resultMap="JstAuditLogResult">
+        <include refid="selectJstAuditLogVo"/>
+        where audit_id = #{auditId}
+    </select>
+
+    <insert id="insertJstAuditLog" parameterType="JstAuditLog" useGeneratedKeys="true" keyProperty="auditId">
+        insert into jst_audit_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="operatorId != null">operator_id,</if>
+            <if test="operatorName != null">operator_name,</if>
+            <if test="operatorType != null and operatorType != ''">operator_type,</if>
+            <if test="module != null and module != ''">module,</if>
+            <if test="action != null and action != ''">action,</if>
+            <if test="targetType != null">target_type,</if>
+            <if test="targetId != null">target_id,</if>
+            <if test="beforeJson != null">before_json,</if>
+            <if test="afterJson != null">after_json,</if>
+            <if test="ip != null">ip,</if>
+            <if test="terminal != null">terminal,</if>
+            <if test="result != null and result != ''">result,</if>
+            <if test="opTime != null">op_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="operatorId != null">#{operatorId},</if>
+            <if test="operatorName != null">#{operatorName},</if>
+            <if test="operatorType != null and operatorType != ''">#{operatorType},</if>
+            <if test="module != null and module != ''">#{module},</if>
+            <if test="action != null and action != ''">#{action},</if>
+            <if test="targetType != null">#{targetType},</if>
+            <if test="targetId != null">#{targetId},</if>
+            <if test="beforeJson != null">#{beforeJson},</if>
+            <if test="afterJson != null">#{afterJson},</if>
+            <if test="ip != null">#{ip},</if>
+            <if test="terminal != null">#{terminal},</if>
+            <if test="result != null and result != ''">#{result},</if>
+            <if test="opTime != null">#{opTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstAuditLog" parameterType="JstAuditLog">
+        update jst_audit_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="operatorId != null">operator_id = #{operatorId},</if>
+            <if test="operatorName != null">operator_name = #{operatorName},</if>
+            <if test="operatorType != null and operatorType != ''">operator_type = #{operatorType},</if>
+            <if test="module != null and module != ''">module = #{module},</if>
+            <if test="action != null and action != ''">action = #{action},</if>
+            <if test="targetType != null">target_type = #{targetType},</if>
+            <if test="targetId != null">target_id = #{targetId},</if>
+            <if test="beforeJson != null">before_json = #{beforeJson},</if>
+            <if test="afterJson != null">after_json = #{afterJson},</if>
+            <if test="ip != null">ip = #{ip},</if>
+            <if test="terminal != null">terminal = #{terminal},</if>
+            <if test="result != null and result != ''">result = #{result},</if>
+            <if test="opTime != null">op_time = #{opTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where audit_id = #{auditId}
+    </update>
+
+    <delete id="deleteJstAuditLogByAuditId" parameterType="Long">
+        delete from jst_audit_log where audit_id = #{auditId}
+    </delete>
+
+    <delete id="deleteJstAuditLogByAuditIds" parameterType="String">
+        delete from jst_audit_log where audit_id in 
+        <foreach item="auditId" collection="array" open="(" separator="," close=")">
+            #{auditId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,209 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "\u7ade\u8d5b\u901a",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/contest/list",
+      "style": {
+        "navigationBarTitleText": "\u8d5b\u4e8b",
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/course/list",
+      "style": {
+        "navigationBarTitleText": "\u8bfe\u7a0b",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/notice/list",
+      "style": {
+        "navigationBarTitleText": "\u516c\u544a\u8d44\u8baf",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/my/index",
+      "style": {
+        "navigationBarTitleText": "\u6211\u7684",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "\u767b\u5f55",
+        "navigationStyle": "custom"
+      }
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "pages-sub/my",
+      "pages": [
+        {
+          "path": "profile-edit",
+          "style": {
+            "navigationBarTitleText": "\u7f16\u8f91\u8d44\u6599",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "participant",
+          "style": {
+            "navigationBarTitleText": "\u6211\u7684\u6863\u6848",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "enroll",
+          "style": {
+            "navigationBarTitleText": "\u6211\u7684\u62a5\u540d",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "enroll-detail",
+          "style": {
+            "navigationBarTitleText": "\u62a5\u540d\u8be6\u60c5",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "binding",
+          "style": {
+            "navigationBarTitleText": "\u6211\u7684\u7ed1\u5b9a",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "course",
+          "style": {
+            "navigationBarTitleText": "\u6211\u7684\u8bfe\u7a0b",
+            "navigationStyle": "custom"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages-sub/contest",
+      "pages": [
+        {
+          "path": "enroll",
+          "style": {
+            "navigationBarTitleText": "\u62a5\u540d",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "detail",
+          "style": {
+            "navigationBarTitleText": "\u8d5b\u4e8b\u8be6\u60c5",
+            "navigationStyle": "custom"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages-sub/notice",
+      "pages": [
+        {
+          "path": "detail",
+          "style": {
+            "navigationBarTitleText": "\u516c\u544a\u8be6\u60c5",
+            "navigationStyle": "custom"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages-sub/course",
+      "pages": [
+        {
+          "path": "detail",
+          "style": {
+            "navigationBarTitleText": "\u8bfe\u7a0b\u8be6\u60c5",
+            "navigationStyle": "custom"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages-sub/public",
+      "pages": [
+        {
+          "path": "partner-apply",
+          "style": {
+            "navigationBarTitleText": "\u8d5b\u4e8b\u65b9\u5165\u9a7b",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "apply-status",
+          "style": {
+            "navigationBarTitleText": "\u7533\u8bf7\u72b6\u6001\u67e5\u8be2",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "help",
+          "style": {
+            "navigationBarTitleText": "\u5ba2\u670d\u4e0e\u5e2e\u52a9",
+            "navigationStyle": "custom"
+          }
+        }
+      ]
+    }
+  ],
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#FF6B35",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "\u9996\u9875",
+        "iconPath": "static/tab/index.png",
+        "selectedIconPath": "static/tab/index-on.png"
+      },
+      {
+        "pagePath": "pages/contest/list",
+        "text": "\u8d5b\u4e8b",
+        "iconPath": "static/tab/contest.png",
+        "selectedIconPath": "static/tab/contest-on.png"
+      },
+      {
+        "pagePath": "pages/course/list",
+        "text": "\u8bfe\u7a0b",
+        "iconPath": "static/tab/course.png",
+        "selectedIconPath": "static/tab/course-on.png"
+      },
+      {
+        "pagePath": "pages/notice/list",
+        "text": "\u516c\u544a",
+        "iconPath": "static/tab/notice.png",
+        "selectedIconPath": "static/tab/notice-on.png"
+      },
+      {
+        "pagePath": "pages/my/index",
+        "text": "\u6211\u7684",
+        "iconPath": "static/tab/my.png",
+        "selectedIconPath": "static/tab/my-on.png"
+      }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "\u7ade\u8d5b\u901a",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#F5F5F5"
+  }
+}

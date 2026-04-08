@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.finance.mapper.JstInvoiceRecordMapper">
+    
+    <resultMap type="JstInvoiceRecord" id="JstInvoiceRecordResult">
+        <result property="invoiceId"    column="invoice_id"    />
+        <result property="invoiceNo"    column="invoice_no"    />
+        <result property="targetType"    column="target_type"    />
+        <result property="targetId"    column="target_id"    />
+        <result property="refSettlementNo"    column="ref_settlement_no"    />
+        <result property="invoiceTitle"    column="invoice_title"    />
+        <result property="taxNo"    column="tax_no"    />
+        <result property="amount"    column="amount"    />
+        <result property="status"    column="status"    />
+        <result property="fileUrl"    column="file_url"    />
+        <result property="expressStatus"    column="express_status"    />
+        <result property="issueTime"    column="issue_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstInvoiceRecordVo">
+        select invoice_id, invoice_no, target_type, target_id, ref_settlement_no, invoice_title, tax_no, amount, status, file_url, express_status, issue_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_invoice_record
+    </sql>
+
+    <select id="selectJstInvoiceRecordList" parameterType="JstInvoiceRecord" resultMap="JstInvoiceRecordResult">
+        <include refid="selectJstInvoiceRecordVo"/>
+        <where>  
+            <if test="invoiceNo != null  and invoiceNo != ''"> and invoice_no = #{invoiceNo}</if>
+            <if test="targetType != null  and targetType != ''"> and target_type = #{targetType}</if>
+            <if test="targetId != null "> and target_id = #{targetId}</if>
+            <if test="refSettlementNo != null  and refSettlementNo != ''"> and ref_settlement_no = #{refSettlementNo}</if>
+            <if test="invoiceTitle != null  and invoiceTitle != ''"> and invoice_title = #{invoiceTitle}</if>
+            <if test="taxNo != null  and taxNo != ''"> and tax_no = #{taxNo}</if>
+            <if test="amount != null "> and amount = #{amount}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="fileUrl != null  and fileUrl != ''"> and file_url = #{fileUrl}</if>
+            <if test="expressStatus != null  and expressStatus != ''"> and express_status = #{expressStatus}</if>
+            <if test="issueTime != null "> and issue_time = #{issueTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstInvoiceRecordByInvoiceId" parameterType="Long" resultMap="JstInvoiceRecordResult">
+        <include refid="selectJstInvoiceRecordVo"/>
+        where invoice_id = #{invoiceId}
+    </select>
+
+    <insert id="insertJstInvoiceRecord" parameterType="JstInvoiceRecord" useGeneratedKeys="true" keyProperty="invoiceId">
+        insert into jst_invoice_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="invoiceNo != null">invoice_no,</if>
+            <if test="targetType != null and targetType != ''">target_type,</if>
+            <if test="targetId != null">target_id,</if>
+            <if test="refSettlementNo != null">ref_settlement_no,</if>
+            <if test="invoiceTitle != null and invoiceTitle != ''">invoice_title,</if>
+            <if test="taxNo != null">tax_no,</if>
+            <if test="amount != null">amount,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="fileUrl != null">file_url,</if>
+            <if test="expressStatus != null">express_status,</if>
+            <if test="issueTime != null">issue_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="invoiceNo != null">#{invoiceNo},</if>
+            <if test="targetType != null and targetType != ''">#{targetType},</if>
+            <if test="targetId != null">#{targetId},</if>
+            <if test="refSettlementNo != null">#{refSettlementNo},</if>
+            <if test="invoiceTitle != null and invoiceTitle != ''">#{invoiceTitle},</if>
+            <if test="taxNo != null">#{taxNo},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="fileUrl != null">#{fileUrl},</if>
+            <if test="expressStatus != null">#{expressStatus},</if>
+            <if test="issueTime != null">#{issueTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstInvoiceRecord" parameterType="JstInvoiceRecord">
+        update jst_invoice_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="invoiceNo != null">invoice_no = #{invoiceNo},</if>
+            <if test="targetType != null and targetType != ''">target_type = #{targetType},</if>
+            <if test="targetId != null">target_id = #{targetId},</if>
+            <if test="refSettlementNo != null">ref_settlement_no = #{refSettlementNo},</if>
+            <if test="invoiceTitle != null and invoiceTitle != ''">invoice_title = #{invoiceTitle},</if>
+            <if test="taxNo != null">tax_no = #{taxNo},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="fileUrl != null">file_url = #{fileUrl},</if>
+            <if test="expressStatus != null">express_status = #{expressStatus},</if>
+            <if test="issueTime != null">issue_time = #{issueTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where invoice_id = #{invoiceId}
+    </update>
+
+    <delete id="deleteJstInvoiceRecordByInvoiceId" parameterType="Long">
+        delete from jst_invoice_record where invoice_id = #{invoiceId}
+    </delete>
+
+    <delete id="deleteJstInvoiceRecordByInvoiceIds" parameterType="String">
+        delete from jst_invoice_record where invoice_id in 
+        <foreach item="invoiceId" collection="array" open="(" separator="," close=")">
+            #{invoiceId}
+        </foreach>
+    </delete>
+</mapper>

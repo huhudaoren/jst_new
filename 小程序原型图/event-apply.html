@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>赛事方入驻申请 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:90px;}
+.a-nav{background:linear-gradient(135deg,#1B5E20,#2E7D32);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.a-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.a-title{font-size:17px;font-weight:700;color:white;flex:1;}
+/* 步骤条 */
+.steps-bar{background:var(--c-white);padding:16px;border-bottom:1px solid var(--c-gray-100);display:flex;align-items:center;}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;}
+.step:not(:last-child)::after{content:'';position:absolute;top:12px;left:60%;right:-40%;height:2px;background:var(--c-gray-100);}
+.step.done::after{background:var(--c-success);}
+.step-circle{width:24px;height:24px;border-radius:50%;border:2px solid var(--c-gray-200);background:var(--c-white);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--c-gray-400);z-index:1;}
+.step.active .step-circle{border-color:var(--c-success);color:var(--c-success);box-shadow:0 0 0 3px rgba(39,174,96,.15);}
+.step.done .step-circle{border-color:var(--c-success);background:var(--c-success);color:white;}
+.step-label{font-size:10px;color:var(--c-gray-500);text-align:center;}
+.step.active .step-label{color:var(--c-success);font-weight:700;}
+.form-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px 16px 0;padding:16px;}
+.fc-title{font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--c-gray-100);display:flex;align-items:center;gap:6px;}
+.fc-title::before{content:'';width:3px;height:14px;background:var(--c-success);border-radius:2px;}
+.form-row{margin-bottom:14px;}
+.form-row label{display:block;font-size:12px;font-weight:700;color:var(--c-gray-600);margin-bottom:7px;}
+.form-row label .req{color:var(--c-accent);}
+.form-row input,.form-row select,.form-row textarea{width:100%;border:1.5px solid var(--c-gray-100);border-radius:var(--radius-md);padding:12px 14px;font-size:15px;font-family:var(--font-body);color:var(--c-gray-900);background:var(--c-white);outline:none;-webkit-appearance:none;}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--c-success);}
+.form-row textarea{min-height:72px;resize:none;line-height:1.6;}
+.upload-zone{border:2px dashed var(--c-gray-100);border-radius:var(--radius-md);padding:20px;text-align:center;cursor:pointer;background:var(--c-gray-50);touch-action:manipulation;}
+.upload-zone:active{border-color:var(--c-success);background:var(--c-success-50);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.cta-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:var(--c-white);border-top:1px solid var(--c-gray-100);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:100;}
+.btn-draft{flex:1;height:50px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:var(--radius-md);font-size:15px;font-weight:700;color:var(--c-gray-700);cursor:pointer;}
+.btn-submit{flex:2;height:50px;background:linear-gradient(135deg,#1B5E20,#43A047);color:white;border:none;border-radius:var(--radius-md);font-size:15px;font-weight:800;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1B5E20;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="a-nav animate-in">
+  <div class="a-back" onclick="history.back()">←</div>
+  <div class="a-title">赛事方入驻申请</div>
+</div>
+<div class="steps-bar">
+  <div class="step active"><div class="step-circle">1</div><div class="step-label">公司信息</div></div>
+  <div class="step"><div class="step-circle">2</div><div class="step-label">资质材料</div></div>
+  <div class="step"><div class="step-circle">3</div><div class="step-label">结算信息</div></div>
+  <div class="step"><div class="step-circle">4</div><div class="step-label">提交审核</div></div>
+</div>
+
+<div class="form-card animate-in animate-in-d1">
+  <div class="fc-title">公司基本信息</div>
+  <div class="form-row"><label>公司名称 <span class="req">*</span></label><input type="text" value="北京艺术星文化传媒有限公司"></div>
+  <div class="grid2">
+    <div class="form-row"><label>统一社会信用代码 <span class="req">*</span></label><input type="text" value="91110108XXXXXXXXXX"></div>
+    <div class="form-row"><label>成立年份</label><input type="text" value="2018"></div>
+  </div>
+  <div class="form-row"><label>主营赛事类型 <span class="req">*</span></label><select><option>艺术类（综合艺术/视觉艺术）</option><option>音乐类</option><option>舞蹈类</option><option>其他</option></select></div>
+  <div class="form-row"><label>过往赛事规模</label><textarea placeholder="简述历届赛事规模、参与人数、知名度等">已举办3届全国美育大赛，每届参赛约5,000人次，覆盖全国15个省市。</textarea></div>
+</div>
+
+<div class="form-card animate-in animate-in-d2">
+  <div class="fc-title">联系人信息</div>
+  <div class="grid2">
+    <div class="form-row"><label>联系人姓名 <span class="req">*</span></label><input type="text" value="李总"></div>
+    <div class="form-row"><label>联系电话 <span class="req">*</span></label><input type="tel" value="18811112222"></div>
+  </div>
+  <div class="form-row"><label>联系邮箱 <span class="req">*</span></label><input type="email" value="partner@artstar.com"></div>
+</div>
+
+<div class="form-card animate-in animate-in-d3">
+  <div class="fc-title">上传资质材料</div>
+  <div class="form-row">
+    <label>营业执照 <span class="req">*</span></label>
+    <div class="upload-zone" onclick="showToast('已上传：营业执照.pdf')">
+      <div style="font-size:28px;margin-bottom:8px;">✅</div>
+      <div style="font-size:13px;color:var(--c-success);font-weight:700;">营业执照.pdf · 已上传</div>
+    </div>
+  </div>
+  <div class="form-row">
+    <label>赛事相关资质（选填）</label>
+    <div class="upload-zone" onclick="showToast('点击上传赛事资质证书')">
+      <div style="font-size:28px;margin-bottom:8px;">📎</div>
+      <div style="font-size:13px;color:var(--c-gray-500);">点击上传 · 支持图片/PDF</div>
+    </div>
+  </div>
+</div>
+
+<div class="cta-bar">
+  <button class="btn-draft" onclick="showToast('草稿已保存')">保存草稿</button>
+  <button class="btn-submit" onclick="submitApply()">下一步 →</button>
+</div>
+<script>
+function submitApply(){showToast('资料完整，正在提交审核…');setTimeout(()=>location.href='event-home.html',1200);}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400);}
+</script>
+</body>
+</html>

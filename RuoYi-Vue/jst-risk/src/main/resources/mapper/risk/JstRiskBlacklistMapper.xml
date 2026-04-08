@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.risk.mapper.JstRiskBlacklistMapper">
+    
+    <resultMap type="JstRiskBlacklist" id="JstRiskBlacklistResult">
+        <result property="listId"    column="list_id"    />
+        <result property="listType"    column="list_type"    />
+        <result property="targetType"    column="target_type"    />
+        <result property="targetValue"    column="target_value"    />
+        <result property="reason"    column="reason"    />
+        <result property="effectiveTime"    column="effective_time"    />
+        <result property="expireTime"    column="expire_time"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstRiskBlacklistVo">
+        select list_id, list_type, target_type, target_value, reason, effective_time, expire_time, status, create_by, create_time, update_by, update_time, remark, del_flag from jst_risk_blacklist
+    </sql>
+
+    <select id="selectJstRiskBlacklistList" parameterType="JstRiskBlacklist" resultMap="JstRiskBlacklistResult">
+        <include refid="selectJstRiskBlacklistVo"/>
+        <where>  
+            <if test="listType != null  and listType != ''"> and list_type = #{listType}</if>
+            <if test="targetType != null  and targetType != ''"> and target_type = #{targetType}</if>
+            <if test="targetValue != null  and targetValue != ''"> and target_value = #{targetValue}</if>
+            <if test="reason != null  and reason != ''"> and reason = #{reason}</if>
+            <if test="effectiveTime != null "> and effective_time = #{effectiveTime}</if>
+            <if test="expireTime != null "> and expire_time = #{expireTime}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstRiskBlacklistByListId" parameterType="Long" resultMap="JstRiskBlacklistResult">
+        <include refid="selectJstRiskBlacklistVo"/>
+        where list_id = #{listId}
+    </select>
+
+    <insert id="insertJstRiskBlacklist" parameterType="JstRiskBlacklist" useGeneratedKeys="true" keyProperty="listId">
+        insert into jst_risk_blacklist
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="listType != null and listType != ''">list_type,</if>
+            <if test="targetType != null and targetType != ''">target_type,</if>
+            <if test="targetValue != null and targetValue != ''">target_value,</if>
+            <if test="reason != null">reason,</if>
+            <if test="effectiveTime != null">effective_time,</if>
+            <if test="expireTime != null">expire_time,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="listType != null and listType != ''">#{listType},</if>
+            <if test="targetType != null and targetType != ''">#{targetType},</if>
+            <if test="targetValue != null and targetValue != ''">#{targetValue},</if>
+            <if test="reason != null">#{reason},</if>
+            <if test="effectiveTime != null">#{effectiveTime},</if>
+            <if test="expireTime != null">#{expireTime},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstRiskBlacklist" parameterType="JstRiskBlacklist">
+        update jst_risk_blacklist
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="listType != null and listType != ''">list_type = #{listType},</if>
+            <if test="targetType != null and targetType != ''">target_type = #{targetType},</if>
+            <if test="targetValue != null and targetValue != ''">target_value = #{targetValue},</if>
+            <if test="reason != null">reason = #{reason},</if>
+            <if test="effectiveTime != null">effective_time = #{effectiveTime},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where list_id = #{listId}
+    </update>
+
+    <delete id="deleteJstRiskBlacklistByListId" parameterType="Long">
+        delete from jst_risk_blacklist where list_id = #{listId}
+    </delete>
+
+    <delete id="deleteJstRiskBlacklistByListIds" parameterType="String">
+        delete from jst_risk_blacklist where list_id in 
+        <foreach item="listId" collection="array" open="(" separator="," close=")">
+            #{listId}
+        </foreach>
+    </delete>
+</mapper>

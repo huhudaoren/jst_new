@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstRefundRecordMapper">
+    
+    <resultMap type="JstRefundRecord" id="JstRefundRecordResult">
+        <result property="refundId"    column="refund_id"    />
+        <result property="refundNo"    column="refund_no"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="itemId"    column="item_id"    />
+        <result property="refundType"    column="refund_type"    />
+        <result property="applySource"    column="apply_source"    />
+        <result property="reason"    column="reason"    />
+        <result property="applyCash"    column="apply_cash"    />
+        <result property="applyPoints"    column="apply_points"    />
+        <result property="actualCash"    column="actual_cash"    />
+        <result property="actualPoints"    column="actual_points"    />
+        <result property="couponReturned"    column="coupon_returned"    />
+        <result property="status"    column="status"    />
+        <result property="auditRemark"    column="audit_remark"    />
+        <result property="operatorId"    column="operator_id"    />
+        <result property="completeTime"    column="complete_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstRefundRecordVo">
+        select refund_id, refund_no, order_id, item_id, refund_type, apply_source, reason, apply_cash, apply_points, actual_cash, actual_points, coupon_returned, status, audit_remark, operator_id, complete_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_refund_record
+    </sql>
+
+    <select id="selectJstRefundRecordList" parameterType="JstRefundRecord" resultMap="JstRefundRecordResult">
+        <include refid="selectJstRefundRecordVo"/>
+        <where>  
+            <if test="refundNo != null  and refundNo != ''"> and refund_no = #{refundNo}</if>
+            <if test="orderId != null "> and order_id = #{orderId}</if>
+            <if test="itemId != null "> and item_id = #{itemId}</if>
+            <if test="refundType != null  and refundType != ''"> and refund_type = #{refundType}</if>
+            <if test="applySource != null  and applySource != ''"> and apply_source = #{applySource}</if>
+            <if test="reason != null  and reason != ''"> and reason = #{reason}</if>
+            <if test="applyCash != null "> and apply_cash = #{applyCash}</if>
+            <if test="applyPoints != null "> and apply_points = #{applyPoints}</if>
+            <if test="actualCash != null "> and actual_cash = #{actualCash}</if>
+            <if test="actualPoints != null "> and actual_points = #{actualPoints}</if>
+            <if test="couponReturned != null "> and coupon_returned = #{couponReturned}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="auditRemark != null  and auditRemark != ''"> and audit_remark = #{auditRemark}</if>
+            <if test="operatorId != null "> and operator_id = #{operatorId}</if>
+            <if test="completeTime != null "> and complete_time = #{completeTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstRefundRecordByRefundId" parameterType="Long" resultMap="JstRefundRecordResult">
+        <include refid="selectJstRefundRecordVo"/>
+        where refund_id = #{refundId}
+    </select>
+
+    <insert id="insertJstRefundRecord" parameterType="JstRefundRecord" useGeneratedKeys="true" keyProperty="refundId">
+        insert into jst_refund_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="refundNo != null and refundNo != ''">refund_no,</if>
+            <if test="orderId != null">order_id,</if>
+            <if test="itemId != null">item_id,</if>
+            <if test="refundType != null and refundType != ''">refund_type,</if>
+            <if test="applySource != null and applySource != ''">apply_source,</if>
+            <if test="reason != null">reason,</if>
+            <if test="applyCash != null">apply_cash,</if>
+            <if test="applyPoints != null">apply_points,</if>
+            <if test="actualCash != null">actual_cash,</if>
+            <if test="actualPoints != null">actual_points,</if>
+            <if test="couponReturned != null">coupon_returned,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="auditRemark != null">audit_remark,</if>
+            <if test="operatorId != null">operator_id,</if>
+            <if test="completeTime != null">complete_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="refundNo != null and refundNo != ''">#{refundNo},</if>
+            <if test="orderId != null">#{orderId},</if>
+            <if test="itemId != null">#{itemId},</if>
+            <if test="refundType != null and refundType != ''">#{refundType},</if>
+            <if test="applySource != null and applySource != ''">#{applySource},</if>
+            <if test="reason != null">#{reason},</if>
+            <if test="applyCash != null">#{applyCash},</if>
+            <if test="applyPoints != null">#{applyPoints},</if>
+            <if test="actualCash != null">#{actualCash},</if>
+            <if test="actualPoints != null">#{actualPoints},</if>
+            <if test="couponReturned != null">#{couponReturned},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="auditRemark != null">#{auditRemark},</if>
+            <if test="operatorId != null">#{operatorId},</if>
+            <if test="completeTime != null">#{completeTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstRefundRecord" parameterType="JstRefundRecord">
+        update jst_refund_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="refundNo != null and refundNo != ''">refund_no = #{refundNo},</if>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="itemId != null">item_id = #{itemId},</if>
+            <if test="refundType != null and refundType != ''">refund_type = #{refundType},</if>
+            <if test="applySource != null and applySource != ''">apply_source = #{applySource},</if>
+            <if test="reason != null">reason = #{reason},</if>
+            <if test="applyCash != null">apply_cash = #{applyCash},</if>
+            <if test="applyPoints != null">apply_points = #{applyPoints},</if>
+            <if test="actualCash != null">actual_cash = #{actualCash},</if>
+            <if test="actualPoints != null">actual_points = #{actualPoints},</if>
+            <if test="couponReturned != null">coupon_returned = #{couponReturned},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
+            <if test="operatorId != null">operator_id = #{operatorId},</if>
+            <if test="completeTime != null">complete_time = #{completeTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where refund_id = #{refundId}
+    </update>
+
+    <delete id="deleteJstRefundRecordByRefundId" parameterType="Long">
+        delete from jst_refund_record where refund_id = #{refundId}
+    </delete>
+
+    <delete id="deleteJstRefundRecordByRefundIds" parameterType="String">
+        delete from jst_refund_record where refund_id in 
+        <foreach item="refundId" collection="array" open="(" separator="," close=")">
+            #{refundId}
+        </foreach>
+    </delete>
+</mapper>

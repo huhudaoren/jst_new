@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>赛事结算 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:90px;}
+.e-nav{background:linear-gradient(135deg,#1B5E20,#2E7D32);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.e-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.e-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.e-action{padding:6px 14px;border-radius:var(--radius-full);background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);font-size:12px;font-weight:700;color:white;cursor:pointer;touch-action:manipulation;}
+.tab-bar{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);overflow-x:auto;}
+.tab-item{flex-shrink:0;padding:0 16px;height:44px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--c-gray-500);cursor:pointer;position:relative;white-space:nowrap;touch-action:manipulation;}
+.tab-item.active{color:#2E7D32;font-weight:700;}
+.tab-item.active::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2.5px;background:#2E7D32;border-radius:1px;}
+.form-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px 16px 0;padding:16px;}
+.fc-title{font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--c-gray-100);}
+.form-row{margin-bottom:14px;}
+.form-row label{display:block;font-size:12px;font-weight:700;color:var(--c-gray-600);margin-bottom:7px;}
+.form-row input,.form-row select,.form-row textarea{width:100%;border:1.5px solid var(--c-gray-100);border-radius:var(--radius-md);padding:12px 14px;font-size:15px;font-family:var(--font-body);color:var(--c-gray-900);background:var(--c-white);outline:none;}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--c-success);}
+.form-row textarea{min-height:72px;resize:none;line-height:1.6;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--c-gray-100);}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-label{font-size:14px;font-weight:600;color:var(--c-gray-900);}
+.toggle-desc{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+.switch{position:relative;display:inline-flex;width:46px;height:26px;flex-shrink:0;cursor:pointer;}
+.switch input{opacity:0;width:0;height:0;position:absolute;}
+.slider{position:absolute;inset:0;border-radius:999px;background:var(--c-gray-100);transition:.2s;}
+.slider::before{content:'';position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:white;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:.2s;}
+.switch input:checked + .slider{background:var(--c-success);}
+.switch input:checked + .slider::before{transform:translateX(20px);}
+.cta-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:var(--c-white);border-top:1px solid var(--c-gray-100);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:100;}
+.btn-draft{flex:1;height:50px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:var(--radius-md);font-size:15px;font-weight:700;color:var(--c-gray-700);cursor:pointer;}
+.btn-submit{flex:2;height:50px;background:linear-gradient(135deg,#1B5E20,#43A047);color:white;border:none;border-radius:var(--radius-md);font-size:15px;font-weight:800;cursor:pointer;}
+body{padding-bottom:24px;}</style></head><body>
+<div class="status-bar" style="background:#1B5E20;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="e-nav animate-in"><div class="e-back" onclick="history.back()">←</div><div class="e-title">赛事结算中心</div></div>
+<div class="tab-bar"><div class="tab-item active" onclick="switchTab(this)">全部</div><div class="tab-item" onclick="switchTab(this)">待确认</div><div class="tab-item" onclick="switchTab(this)">审核中</div><div class="tab-item" onclick="switchTab(this)">已打款</div><div class="tab-item" onclick="switchTab(this)">已驳回</div></div>
+<div style="background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:10px 16px 0;overflow:hidden;" class="animate-in animate-in-d1">
+  <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--c-gray-100);">
+    <div style="width:44px;height:44px;border-radius:var(--radius-md);background:linear-gradient(135deg,#4A0E8F,#9C27B0);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏆</div>
+    <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--c-gray-900);">春季艺术大赛</div><div style="font-size:11px;color:var(--c-gray-500);margin-top:2px;">结算周期：2026-03-01 至 2026-07-15</div></div>
+    <span class="tag tag-success tag-dot">已打款</span>
+  </div>
+  <div style="padding:12px 16px;background:var(--c-gray-50);">
+    <div style="font-size:12px;font-weight:700;color:var(--c-gray-500);margin-bottom:8px;">结算明细</div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;"><span style="color:var(--c-gray-700);">净收入</span><span style="font-weight:600;">¥22,680.00</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;"><span style="color:var(--c-gray-700);">渠道返点</span><span style="color:var(--c-danger);font-weight:600;">-¥2,680.00</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;"><span style="color:var(--c-gray-700);">平台服务费（5%）</span><span style="color:var(--c-danger);font-weight:600;">-¥1,134.00</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;"><span style="color:var(--c-gray-700);">退款扣减</span><span style="color:var(--c-danger);font-weight:600;">-¥360.00</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;"><span style="color:var(--c-gray-700);">合同约定扣项</span><span style="font-weight:600;">¥0.00</span></div>
+    <div style="height:1px;background:var(--c-gray-100);margin:8px 0;"></div>
+    <div style="display:flex;justify-content:space-between;font-size:15px;"><span style="font-weight:700;color:var(--c-gray-900);">最终结算金额</span><span style="font-weight:900;color:var(--c-success);font-size:18px;">¥18,506.00</span></div>
+  </div>
+  <div style="padding:10px 16px;font-size:12px;color:var(--c-gray-600);">
+    打款状态：✅ 已打款 2026-07-20 · 收款账户：中信银行 6250****1234<br>
+    发票状态：✅ 增值税专用发票已开具
+  </div>
+  <div style="padding:0 16px 12px;display:flex;gap:8px;">
+    <div style="flex:1;height:36px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--c-gray-700);cursor:pointer;" onclick="showToast('查看打款凭证')">查看打款凭证</div>
+    <div style="flex:1;height:36px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--c-gray-700);cursor:pointer;" onclick="showToast('查看发票')">查看发票</div>
+  </div>
+</div>
+<script>function switchTab(el){document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));el.classList.add('active');}function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400);}</script>
+</body></html>

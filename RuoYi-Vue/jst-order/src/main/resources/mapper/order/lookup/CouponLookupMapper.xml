@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.order.mapper.lookup.CouponLookupMapper">
+
+    <select id="selectUserCoupon" resultType="map">
+        select uc.user_coupon_id as userCouponId,
+               uc.user_id as userId,
+               uc.status as status,
+               uc.valid_start as validStart,
+               uc.valid_end as validEnd,
+               uc.order_id as orderId,
+               ct.coupon_template_id as couponTemplateId,
+               ct.coupon_type as couponType,
+               ct.face_value as couponFaceValue,
+               ct.discount_rate as couponDiscountRate,
+               ct.threshold_amount as couponThresholdAmount,
+               ct.applicable_contest_ids as applicableContestIds,
+               ct.status as templateStatus
+        from jst_user_coupon uc
+        inner join jst_coupon_template ct on ct.coupon_template_id = uc.coupon_template_id and ct.del_flag = '0'
+        where uc.user_coupon_id = #{userCouponId}
+          and uc.del_flag = '0'
+        limit 1
+    </select>
+
+    <update id="lockCoupon">
+        update jst_user_coupon
+        set status = 'locked',
+            order_id = #{orderId},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where user_coupon_id = #{userCouponId}
+          and user_id = #{userId}
+          and status = 'unused'
+          and del_flag = '0'
+    </update>
+
+    <update id="unlockCoupon">
+        update jst_user_coupon
+        set status = 'unused',
+            order_id = null,
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where user_coupon_id = #{userCouponId}
+          and order_id = #{orderId}
+          and status = 'locked'
+          and del_flag = '0'
+    </update>
+
+    <update id="useCoupon">
+        update jst_user_coupon
+        set status = 'used',
+            use_time = #{updateTime},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where user_coupon_id = #{userCouponId}
+          and order_id = #{orderId}
+          and status = 'locked'
+          and del_flag = '0'
+    </update>
+</mapper>

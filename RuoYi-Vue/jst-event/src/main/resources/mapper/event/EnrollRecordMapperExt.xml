@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.EnrollRecordMapperExt">
+
+    <resultMap id="EnrollRecordResult" type="com.ruoyi.jst.event.domain.JstEnrollRecord">
+        <id property="enrollId" column="enroll_id"/>
+        <result property="enrollNo" column="enroll_no"/>
+        <result property="contestId" column="contest_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="participantId" column="participant_id"/>
+        <result property="channelId" column="channel_id"/>
+        <result property="enrollSource" column="enroll_source"/>
+        <result property="templateId" column="template_id"/>
+        <result property="templateVersion" column="template_version"/>
+        <result property="formSnapshotJson" column="form_snapshot_json"/>
+        <result property="orderId" column="order_id"/>
+        <result property="materialStatus" column="material_status"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="supplementRemark" column="supplement_remark"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <resultMap id="EnrollListResult" type="com.ruoyi.jst.event.vo.EnrollListVO">
+        <id property="enrollId" column="enroll_id"/>
+        <result property="enrollNo" column="enroll_no"/>
+        <result property="contestId" column="contest_id"/>
+        <result property="contestName" column="contest_name"/>
+        <result property="partnerId" column="partner_id"/>
+        <result property="participantId" column="participant_id"/>
+        <result property="participantName" column="participant_name"/>
+        <result property="guardianMobileMasked" column="guardian_mobile"/>
+        <result property="materialStatus" column="material_status"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="EnrollDetailResult" type="com.ruoyi.jst.event.vo.EnrollDetailVO">
+        <id property="enrollId" column="enroll_id"/>
+        <result property="enrollNo" column="enroll_no"/>
+        <result property="contestId" column="contest_id"/>
+        <result property="contestName" column="contest_name"/>
+        <result property="partnerId" column="partner_id"/>
+        <result property="participantId" column="participant_id"/>
+        <result property="participantName" column="participant_name"/>
+        <result property="guardianName" column="guardian_name"/>
+        <result property="guardianMobileMasked" column="guardian_mobile"/>
+        <result property="school" column="school"/>
+        <result property="templateId" column="template_id"/>
+        <result property="templateVersion" column="template_version"/>
+        <result property="formSnapshotJson" column="form_snapshot_json"/>
+        <result property="materialStatus" column="material_status"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="supplementRemark" column="supplement_remark"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="EnrollDetailColumns">
+        select er.enroll_id, er.enroll_no, er.contest_id, c.contest_name, c.partner_id,
+               er.participant_id, p.name as participant_name, p.guardian_name, p.guardian_mobile, p.school,
+               er.template_id, er.template_version, er.form_snapshot_json, er.material_status,
+               er.audit_status, er.audit_remark, er.supplement_remark, er.submit_time, er.update_time, er.remark
+        from jst_enroll_record er
+                 left join jst_contest c on c.contest_id = er.contest_id and c.del_flag = '0'
+                 left join jst_participant p on p.participant_id = er.participant_id and p.del_flag = '0'
+    </sql>
+
+    <select id="selectById" resultMap="EnrollRecordResult">
+        select enroll_id, enroll_no, contest_id, user_id, participant_id, channel_id, enroll_source,
+               template_id, template_version, form_snapshot_json, order_id, material_status, audit_status,
+               audit_remark, supplement_remark, submit_time, remark, create_by, create_time, update_by, update_time, del_flag
+        from jst_enroll_record
+        where enroll_id = #{enrollId}
+          and del_flag = '0'
+    </select>
+
+    <select id="selectLatestDraft" resultMap="EnrollRecordResult">
+        select enroll_id, enroll_no, contest_id, user_id, participant_id, channel_id, enroll_source,
+               template_id, template_version, form_snapshot_json, order_id, material_status, audit_status,
+               audit_remark, supplement_remark, submit_time, remark, create_by, create_time, update_by, update_time, del_flag
+        from jst_enroll_record
+        where contest_id = #{contestId}
+          and participant_id = #{participantId}
+          and user_id = #{userId}
+          and material_status = 'draft'
+          and del_flag = '0'
+        order by update_time desc, enroll_id desc
+        limit 1
+    </select>
+
+    <select id="countDuplicatePending" resultType="int">
+        select count(1)
+        from jst_enroll_record
+        where contest_id = #{contestId}
+          and participant_id = #{participantId}
+          and user_id = #{userId}
+          and audit_status in ('pending', 'supplement')
+          and del_flag = '0'
+          <if test="excludeEnrollId != null">
+              and enroll_id <![CDATA[<>]]> #{excludeEnrollId}
+          </if>
+    </select>
+
+    <select id="countOwnedParticipant" resultType="int">
+        select count(distinct p.participant_id)
+        from jst_participant p
+                 left join jst_participant_user_map m
+                           on m.participant_id = p.participant_id
+                               and m.status = 'active'
+                               and m.del_flag = '0'
+        where p.participant_id = #{participantId}
+          and p.del_flag = '0'
+          and (p.user_id = #{userId}
+            or p.claimed_user_id = #{userId}
+            or m.user_id = #{userId})
+    </select>
+
+    <select id="selectAdminList" resultMap="EnrollListResult">
+        select er.enroll_id, er.enroll_no, er.contest_id, c.contest_name, c.partner_id, er.participant_id,
+               p.name as participant_name, p.guardian_mobile, er.material_status, er.audit_status,
+               er.submit_time, er.update_time
+        from jst_enroll_record er
+                 left join jst_contest c on c.contest_id = er.contest_id and c.del_flag = '0'
+                 left join jst_participant p on p.participant_id = er.participant_id and p.del_flag = '0'
+        <where>
+            er.del_flag = '0'
+            <if test="query != null and query.partnerId != null">
+                and c.partner_id = #{query.partnerId}
+            </if>
+            <if test="query != null and query.contestId != null">
+                and er.contest_id = #{query.contestId}
+            </if>
+            <if test="query != null and query.auditStatus != null and query.auditStatus != ''">
+                and er.audit_status = #{query.auditStatus}
+            </if>
+            <if test="query != null and query.materialStatus != null and query.materialStatus != ''">
+                and er.material_status = #{query.materialStatus}
+            </if>
+            <if test="query != null and query.enrollNo != null and query.enrollNo != ''">
+                and er.enroll_no = #{query.enrollNo}
+            </if>
+            <if test="query != null and query.participantName != null and query.participantName != ''">
+                and p.name like concat('%', #{query.participantName}, '%')
+            </if>
+            <if test="query != null and query.guardianMobile != null and query.guardianMobile != ''">
+                and p.guardian_mobile like concat('%', #{query.guardianMobile}, '%')
+            </if>
+        </where>
+        order by er.update_time desc, er.enroll_id desc
+    </select>
+
+    <select id="selectAdminDetail" resultMap="EnrollDetailResult">
+        <include refid="EnrollDetailColumns"/>
+        where er.enroll_id = #{enrollId}
+          and er.del_flag = '0'
+    </select>
+
+    <select id="selectMyList" resultMap="EnrollListResult">
+        select er.enroll_id, er.enroll_no, er.contest_id, c.contest_name, c.partner_id, er.participant_id,
+               p.name as participant_name, p.guardian_mobile, er.material_status, er.audit_status,
+               er.submit_time, er.update_time
+        from jst_enroll_record er
+                 left join jst_contest c on c.contest_id = er.contest_id and c.del_flag = '0'
+                 left join jst_participant p on p.participant_id = er.participant_id and p.del_flag = '0'
+        where er.del_flag = '0'
+          and er.user_id = #{userId}
+        <if test="auditStatus != null and auditStatus != ''">
+            and er.audit_status = #{auditStatus}
+        </if>
+        order by er.update_time desc, er.enroll_id desc
+    </select>
+
+    <select id="selectWxDetail" resultMap="EnrollDetailResult">
+        <include refid="EnrollDetailColumns"/>
+        where er.enroll_id = #{enrollId}
+          and er.del_flag = '0'
+    </select>
+
+    <update id="updateAuditByExpected">
+        update jst_enroll_record
+        set audit_status = #{targetAuditStatus},
+            <if test="materialStatus != null">
+                material_status = #{materialStatus},
+            </if>
+            audit_remark = #{auditRemark},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where enroll_id = #{enrollId}
+          and audit_status = #{expectedAuditStatus}
+          and del_flag = '0'
+    </update>
+
+    <update id="updateSupplementRecord" parameterType="com.ruoyi.jst.event.domain.JstEnrollRecord">
+        update jst_enroll_record
+        set template_id = #{templateId},
+            template_version = #{templateVersion},
+            form_snapshot_json = #{formSnapshotJson},
+            audit_status = #{auditStatus},
+            audit_remark = #{auditRemark},
+            submit_time = #{submitTime},
+            supplement_remark = #{supplementRemark},
+            remark = null,
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where enroll_id = #{enrollId}
+          and del_flag = '0'
+    </update>
+</mapper>

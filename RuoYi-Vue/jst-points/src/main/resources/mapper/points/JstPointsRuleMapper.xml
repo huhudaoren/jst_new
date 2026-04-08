@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.points.mapper.JstPointsRuleMapper">
+    
+    <resultMap type="JstPointsRule" id="JstPointsRuleResult">
+        <result property="ruleId"    column="rule_id"    />
+        <result property="ruleType"    column="rule_type"    />
+        <result property="sourceType"    column="source_type"    />
+        <result property="rewardMode"    column="reward_mode"    />
+        <result property="rewardValue"    column="reward_value"    />
+        <result property="applicableRole"    column="applicable_role"    />
+        <result property="effectiveTime"    column="effective_time"    />
+        <result property="expireTime"    column="expire_time"    />
+        <result property="mutexGroup"    column="mutex_group"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstPointsRuleVo">
+        select rule_id, rule_type, source_type, reward_mode, reward_value, applicable_role, effective_time, expire_time, mutex_group, status, create_by, create_time, update_by, update_time, remark, del_flag from jst_points_rule
+    </sql>
+
+    <select id="selectJstPointsRuleList" parameterType="JstPointsRule" resultMap="JstPointsRuleResult">
+        <include refid="selectJstPointsRuleVo"/>
+        <where>  
+            <if test="ruleType != null  and ruleType != ''"> and rule_type = #{ruleType}</if>
+            <if test="sourceType != null  and sourceType != ''"> and source_type = #{sourceType}</if>
+            <if test="rewardMode != null  and rewardMode != ''"> and reward_mode = #{rewardMode}</if>
+            <if test="rewardValue != null "> and reward_value = #{rewardValue}</if>
+            <if test="applicableRole != null  and applicableRole != ''"> and applicable_role = #{applicableRole}</if>
+            <if test="effectiveTime != null "> and effective_time = #{effectiveTime}</if>
+            <if test="expireTime != null "> and expire_time = #{expireTime}</if>
+            <if test="mutexGroup != null  and mutexGroup != ''"> and mutex_group = #{mutexGroup}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstPointsRuleByRuleId" parameterType="Long" resultMap="JstPointsRuleResult">
+        <include refid="selectJstPointsRuleVo"/>
+        where rule_id = #{ruleId}
+    </select>
+
+    <insert id="insertJstPointsRule" parameterType="JstPointsRule" useGeneratedKeys="true" keyProperty="ruleId">
+        insert into jst_points_rule
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ruleType != null and ruleType != ''">rule_type,</if>
+            <if test="sourceType != null and sourceType != ''">source_type,</if>
+            <if test="rewardMode != null and rewardMode != ''">reward_mode,</if>
+            <if test="rewardValue != null">reward_value,</if>
+            <if test="applicableRole != null and applicableRole != ''">applicable_role,</if>
+            <if test="effectiveTime != null">effective_time,</if>
+            <if test="expireTime != null">expire_time,</if>
+            <if test="mutexGroup != null">mutex_group,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ruleType != null and ruleType != ''">#{ruleType},</if>
+            <if test="sourceType != null and sourceType != ''">#{sourceType},</if>
+            <if test="rewardMode != null and rewardMode != ''">#{rewardMode},</if>
+            <if test="rewardValue != null">#{rewardValue},</if>
+            <if test="applicableRole != null and applicableRole != ''">#{applicableRole},</if>
+            <if test="effectiveTime != null">#{effectiveTime},</if>
+            <if test="expireTime != null">#{expireTime},</if>
+            <if test="mutexGroup != null">#{mutexGroup},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstPointsRule" parameterType="JstPointsRule">
+        update jst_points_rule
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="ruleType != null and ruleType != ''">rule_type = #{ruleType},</if>
+            <if test="sourceType != null and sourceType != ''">source_type = #{sourceType},</if>
+            <if test="rewardMode != null and rewardMode != ''">reward_mode = #{rewardMode},</if>
+            <if test="rewardValue != null">reward_value = #{rewardValue},</if>
+            <if test="applicableRole != null and applicableRole != ''">applicable_role = #{applicableRole},</if>
+            <if test="effectiveTime != null">effective_time = #{effectiveTime},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+            <if test="mutexGroup != null">mutex_group = #{mutexGroup},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where rule_id = #{ruleId}
+    </update>
+
+    <delete id="deleteJstPointsRuleByRuleId" parameterType="Long">
+        delete from jst_points_rule where rule_id = #{ruleId}
+    </delete>
+
+    <delete id="deleteJstPointsRuleByRuleIds" parameterType="String">
+        delete from jst_points_rule where rule_id in 
+        <foreach item="ruleId" collection="array" open="(" separator="," close=")">
+            #{ruleId}
+        </foreach>
+    </delete>
+</mapper>

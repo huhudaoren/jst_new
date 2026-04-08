@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>提现与结算 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.s-nav{background:linear-gradient(135deg,#1A237E,#283593);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.s-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.s-title{font-size:17px;font-weight:700;color:white;flex:1;}
+
+.filter-tabs{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);overflow-x:auto;}
+.ft{flex-shrink:0;padding:0 14px;height:44px;display:flex;align-items:center;font-size:12px;font-weight:500;color:var(--c-gray-500);cursor:pointer;white-space:nowrap;position:relative;touch-action:manipulation;}
+.ft.active{color:#F5A623;font-weight:700;}
+.ft.active::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2.5px;background:#F5A623;border-radius:1px;}
+
+.settlement-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:10px var(--space-4) 0;overflow:hidden;}
+.sc-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--c-gray-100);}
+.sc-id{flex:1;}
+.sc-no{font-size:13px;font-weight:700;color:var(--c-gray-900);}
+.sc-time{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+.sc-amount{font-size:20px;font-weight:900;color:var(--c-gold);}
+.sc-rows{padding:0;}
+.sc-row{display:flex;padding:10px 16px;border-bottom:1px solid var(--c-gray-50);}
+.sc-row:last-child{border-bottom:none;}
+.sc-key{font-size:12px;color:var(--c-gray-500);width:80px;flex-shrink:0;}
+.sc-val{font-size:13px;color:var(--c-gray-900);flex:1;font-weight:500;}
+.sc-val.gold{color:var(--c-gold);font-weight:700;}
+.sc-val.ok{color:var(--c-success);}
+.sc-val.warn{color:var(--c-warning);}
+.sc-footer{padding:10px 16px;display:flex;gap:8px;border-top:1px solid var(--c-gray-100);}
+.sc-link{flex:1;height:38px;border:1px solid var(--c-gray-100);border-radius:var(--radius-sm);background:var(--c-gray-50);font-size:13px;font-weight:600;color:var(--c-gray-700);display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;gap:4px;}
+
+/* 新建提现申请表单卡 */
+.apply-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;padding:16px;}
+.apply-title{font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.apply-title::before{content:'';width:3px;height:14px;background:var(--c-gold);border-radius:2px;}
+.form-row{margin-bottom:14px;}
+.form-row label{font-size:12px;font-weight:700;color:var(--c-gray-700);display:block;margin-bottom:7px;}
+.form-row input,.form-row select{width:100%;height:46px;border:1.5px solid var(--c-gray-100);border-radius:var(--radius-md);padding:0 14px;font-size:14px;font-family:var(--font-body);color:var(--c-gray-900);background:var(--c-white);outline:none;}
+.form-row input:focus,.form-row select:focus{border-color:var(--c-primary-400);}
+.apply-amount-row{background:var(--c-gold-50);border:1px solid rgba(245,166,35,.3);border-radius:var(--radius-md);padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.apply-amount-label{font-size:13px;color:var(--c-gray-700);flex:1;}
+.apply-amount-num{font-size:22px;font-weight:900;color:var(--c-gold);}
+
+/* 子入口 */
+.sub-links{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px var(--space-4) 0;}
+.sub-link{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;touch-action:manipulation;transition:background var(--duration-fast);}
+.sub-link:active{background:var(--c-gray-50);}
+.sub-link-icon{font-size:24px;flex-shrink:0;}
+.sub-link-name{font-size:13px;font-weight:700;color:var(--c-gray-900);}
+.sub-link-desc{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1A237E;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+
+<div class="s-nav animate-in">
+  <div class="s-back" onclick="history.back()">←</div>
+  <div class="s-title">提现与结算单</div>
+</div>
+
+<div class="filter-tabs">
+  <div class="ft active" onclick="switchTab(this)">全部</div>
+  <div class="ft" onclick="switchTab(this)">待提交</div>
+  <div class="ft" onclick="switchTab(this)">审核中</div>
+  <div class="ft" onclick="switchTab(this)">已撤回</div>
+  <div class="ft" onclick="switchTab(this)">已驳回</div>
+  <div class="ft" onclick="switchTab(this)">待打款</div>
+  <div class="ft" onclick="switchTab(this)">已打款</div>
+</div>
+
+<!-- 结算单1：已打款 -->
+<div class="settlement-card animate-in animate-in-d1">
+  <div class="sc-header">
+    <div class="sc-id">
+      <div class="sc-no">结算单 #JS-2026-001</div>
+      <div class="sc-time">申请时间：2026-03-10 14:30</div>
+    </div>
+    <div class="sc-amount">¥3,200.00</div>
+  </div>
+  <div class="sc-rows">
+    <div class="sc-row"><div class="sc-key">审核状态</div><div class="sc-val ok">✅ 已通过</div></div>
+    <div class="sc-row"><div class="sc-key">打款状态</div><div class="sc-val ok">✅ 已打款 2026-03-15</div></div>
+    <div class="sc-row"><div class="sc-key">收款账户</div><div class="sc-val">中国工商银行 · 6222****8888</div></div>
+    <div class="sc-row"><div class="sc-key">发票状态</div><div class="sc-val ok">✅ 已开票</div></div>
+    <div class="sc-row"><div class="sc-key">结算周期</div><div class="sc-val">2026-01-01 至 2026-03-09</div></div>
+  </div>
+  <div class="sc-footer">
+    <div class="sc-link" onclick="showToast('查看打款凭证')">🧾 查看打款凭证</div>
+    <div class="sc-link" onclick="location.href='invoice-center.html'">📄 查看发票</div>
+  </div>
+</div>
+
+<!-- 结算单2：审核中 -->
+<div class="settlement-card animate-in animate-in-d2">
+  <div class="sc-header">
+    <div class="sc-id">
+      <div class="sc-no">结算单 #JS-2026-002</div>
+      <div class="sc-time">申请时间：2026-03-19 09:20</div>
+    </div>
+    <div class="sc-amount" style="color:var(--c-warning);">¥680.00</div>
+  </div>
+  <div class="sc-rows">
+    <div class="sc-row"><div class="sc-key">审核状态</div><div class="sc-val warn">⏳ 审核中</div></div>
+    <div class="sc-row"><div class="sc-key">打款状态</div><div class="sc-val" style="color:var(--c-gray-300);">待审核通过后打款</div></div>
+    <div class="sc-row"><div class="sc-key">收款账户</div><div class="sc-val">中国工商银行 · 6222****8888</div></div>
+    <div class="sc-row"><div class="sc-key">发票状态</div><div class="sc-val warn">⏳ 待开票</div></div>
+    <div class="sc-row"><div class="sc-key">关联返点</div><div class="sc-val">安徒生艺术奖 2 笔 + 鸟巢杯 3 笔</div></div>
+  </div>
+  <div class="sc-footer">
+    <div class="sc-link" onclick="showToast('申请已提交，请等待财务审核')">📋 查看明细</div>
+    <div class="sc-link" onclick="showToast('撤回申请成功')">↩ 撤回申请</div>
+  </div>
+</div>
+
+<!-- 新建提现申请表单 -->
+<div class="apply-card animate-in animate-in-d3">
+  <div class="apply-title">申请新一笔提现</div>
+  <div class="apply-amount-row">
+    <div class="apply-amount-label">当前可提现余额</div>
+    <div class="apply-amount-num">¥680.00</div>
+  </div>
+  <div class="form-row">
+    <label>收款账户</label>
+    <select>
+      <option>中国工商银行 · 6222****8888（默认）</option>
+      <option>新增收款账户</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label>发票抬头</label>
+    <input type="text" value="广州竞赛通教育科技有限公司" placeholder="请输入发票抬头">
+  </div>
+  <div class="form-row">
+    <label>税号</label>
+    <input type="text" value="91440101MA5FXXX0XX" placeholder="请输入税号">
+  </div>
+  <button onclick="submitWithdraw()" style="width:100%;height:50px;background:linear-gradient(135deg,#F5A623,#FF9800);border:none;border-radius:var(--radius-md);font-size:16px;font-weight:800;color:white;cursor:pointer;touch-action:manipulation;">
+    💸 提交提现申请 ¥680.00
+  </button>
+</div>
+
+<!-- 子入口：合同/开票 -->
+<div class="sub-links animate-in animate-in-d3">
+  <div class="sub-link" onclick="location.href='contract-center.html'">
+    <div class="sub-link-icon">📄</div>
+    <div>
+      <div class="sub-link-name">合同中心</div>
+      <div class="sub-link-desc">查看合作合同</div>
+    </div>
+  </div>
+  <div class="sub-link" onclick="location.href='invoice-center.html'">
+    <div class="sub-link-icon">🧾</div>
+    <div>
+      <div class="sub-link-name">开票中心</div>
+      <div class="sub-link-desc">申请开发票</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(el){document.querySelectorAll('.ft').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function submitWithdraw(){showToast('提现申请已提交，预计 1-3 个工作日审核');}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400);}
+</script>
+</body>
+</html>

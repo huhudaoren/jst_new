@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.points.mapper.JstGrowthLedgerMapper">
+    
+    <resultMap type="JstGrowthLedger" id="JstGrowthLedgerResult">
+        <result property="ledgerId"    column="ledger_id"    />
+        <result property="accountId"    column="account_id"    />
+        <result property="changeType"    column="change_type"    />
+        <result property="sourceType"    column="source_type"    />
+        <result property="sourceRefId"    column="source_ref_id"    />
+        <result property="growthChange"    column="growth_change"    />
+        <result property="balanceAfter"    column="balance_after"    />
+        <result property="levelBefore"    column="level_before"    />
+        <result property="levelAfter"    column="level_after"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstGrowthLedgerVo">
+        select ledger_id, account_id, change_type, source_type, source_ref_id, growth_change, balance_after, level_before, level_after, create_by, create_time, update_by, update_time, remark, del_flag from jst_growth_ledger
+    </sql>
+
+    <select id="selectJstGrowthLedgerList" parameterType="JstGrowthLedger" resultMap="JstGrowthLedgerResult">
+        <include refid="selectJstGrowthLedgerVo"/>
+        <where>  
+            <if test="accountId != null "> and account_id = #{accountId}</if>
+            <if test="changeType != null  and changeType != ''"> and change_type = #{changeType}</if>
+            <if test="sourceType != null  and sourceType != ''"> and source_type = #{sourceType}</if>
+            <if test="sourceRefId != null "> and source_ref_id = #{sourceRefId}</if>
+            <if test="growthChange != null "> and growth_change = #{growthChange}</if>
+            <if test="balanceAfter != null "> and balance_after = #{balanceAfter}</if>
+            <if test="levelBefore != null "> and level_before = #{levelBefore}</if>
+            <if test="levelAfter != null "> and level_after = #{levelAfter}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstGrowthLedgerByLedgerId" parameterType="Long" resultMap="JstGrowthLedgerResult">
+        <include refid="selectJstGrowthLedgerVo"/>
+        where ledger_id = #{ledgerId}
+    </select>
+
+    <insert id="insertJstGrowthLedger" parameterType="JstGrowthLedger" useGeneratedKeys="true" keyProperty="ledgerId">
+        insert into jst_growth_ledger
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="accountId != null">account_id,</if>
+            <if test="changeType != null and changeType != ''">change_type,</if>
+            <if test="sourceType != null and sourceType != ''">source_type,</if>
+            <if test="sourceRefId != null">source_ref_id,</if>
+            <if test="growthChange != null">growth_change,</if>
+            <if test="balanceAfter != null">balance_after,</if>
+            <if test="levelBefore != null">level_before,</if>
+            <if test="levelAfter != null">level_after,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="accountId != null">#{accountId},</if>
+            <if test="changeType != null and changeType != ''">#{changeType},</if>
+            <if test="sourceType != null and sourceType != ''">#{sourceType},</if>
+            <if test="sourceRefId != null">#{sourceRefId},</if>
+            <if test="growthChange != null">#{growthChange},</if>
+            <if test="balanceAfter != null">#{balanceAfter},</if>
+            <if test="levelBefore != null">#{levelBefore},</if>
+            <if test="levelAfter != null">#{levelAfter},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstGrowthLedger" parameterType="JstGrowthLedger">
+        update jst_growth_ledger
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="accountId != null">account_id = #{accountId},</if>
+            <if test="changeType != null and changeType != ''">change_type = #{changeType},</if>
+            <if test="sourceType != null and sourceType != ''">source_type = #{sourceType},</if>
+            <if test="sourceRefId != null">source_ref_id = #{sourceRefId},</if>
+            <if test="growthChange != null">growth_change = #{growthChange},</if>
+            <if test="balanceAfter != null">balance_after = #{balanceAfter},</if>
+            <if test="levelBefore != null">level_before = #{levelBefore},</if>
+            <if test="levelAfter != null">level_after = #{levelAfter},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where ledger_id = #{ledgerId}
+    </update>
+
+    <delete id="deleteJstGrowthLedgerByLedgerId" parameterType="Long">
+        delete from jst_growth_ledger where ledger_id = #{ledgerId}
+    </delete>
+
+    <delete id="deleteJstGrowthLedgerByLedgerIds" parameterType="String">
+        delete from jst_growth_ledger where ledger_id in 
+        <foreach item="ledgerId" collection="array" open="(" separator="," close=")">
+            #{ledgerId}
+        </foreach>
+    </delete>
+</mapper>

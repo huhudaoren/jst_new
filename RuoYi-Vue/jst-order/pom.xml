@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>ruoyi</artifactId>
+        <groupId>com.ruoyi</groupId>
+        <version>3.9.2</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jst-order</artifactId>
+
+    <description>
+        竞赛通-资金流转域（订单/混合支付/退款/团队预约/部分核销）
+        关联表：jst_order_main / jst_order_item / jst_payment_record / jst_refund_record /
+                jst_team_appointment / jst_team_appointment_member / jst_appointment_record /
+                jst_appointment_writeoff_item
+        关联状态机：SM-1 订单 / SM-2 退款 / SM-7 凭证审核 / SM-11 个人预约 / SM-12 核销子项 / SM-13 团队预约
+        高并发点：团队核销(Redisson lock:team_appt:{id}) / 商城兑换库存
+        外部依赖：微信支付 SDK 占位（决策 Q4=B Mock 实现）
+        跨模块依赖：jst-user / jst-event / jst-channel / jst-points / jst-marketing
+                    （首次实现时按需在此 pom 增加 dependency）
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>jst-common</artifactId>
+        </dependency>
+
+        <!-- 微信支付 V3 SDK：本期 Mock 实现，真实接入时直接 @Profile 切换 -->
+        <dependency>
+            <groupId>com.github.wechatpay-apiv3</groupId>
+            <artifactId>wechatpay-java</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

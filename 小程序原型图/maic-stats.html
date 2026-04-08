@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI课程数据 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.t-nav{background:linear-gradient(135deg,#2D1B69,#4A0E8F);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.t-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;}
+.t-title{font-size:17px;font-weight:700;color:white;flex:1;}
+
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px var(--space-4) 0;}
+.kpi-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);padding:16px;}
+.kpi-icon{font-size:24px;margin-bottom:8px;}
+.kpi-num{font-size:26px;font-weight:900;color:var(--c-gray-900);line-height:1;}
+.kpi-label{font-size:12px;color:var(--c-gray-500);margin-top:5px;}
+.kpi-trend{font-size:11px;margin-top:3px;}
+.kpi-trend.up{color:var(--c-success);}
+
+.section-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;padding:16px;}
+.sc-title{font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.sc-title::before{content:'';width:3px;height:14px;background:#7C3AED;border-radius:2px;}
+
+/* 场景完成率 */
+.scene-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.scene-bar-row:last-child{margin-bottom:0;}
+.sbl{font-size:12px;color:var(--c-gray-700);width:120px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sbt{flex:1;height:8px;background:var(--c-gray-100);border-radius:4px;overflow:hidden;}
+.sbf{height:100%;border-radius:4px;transition:width 0.8s var(--ease-out);}
+.sbv{font-size:12px;font-weight:700;color:var(--c-gray-900);width:36px;text-align:right;flex-shrink:0;}
+
+/* 学生明细 */
+.student-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--c-gray-50);}
+.student-row:last-child{border-bottom:none;}
+.sr-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1B5E20,#66BB6A);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sr-info{flex:1;}
+.sr-name{font-size:13px;font-weight:700;color:var(--c-gray-900);}
+.sr-meta{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+.sr-score{font-size:15px;font-weight:900;color:#7C3AED;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#2D1B69;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="t-nav animate-in">
+  <div class="t-back" onclick="history.back()">←</div>
+  <div class="t-title">📊 AI课程学习数据</div>
+</div>
+
+<!-- 课程信息简介 -->
+<div style="background:linear-gradient(135deg,#4A0E8F,#9C27B0);margin:14px var(--space-4) 0;border-radius:var(--radius-lg);padding:14px 16px;">
+  <div style="font-size:14px;font-weight:700;color:white;">儿童水彩零基础：向日葵的色彩</div>
+  <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:4px;">🤖 AI生成 · 6个场景 · 发布于 2026-03-19</div>
+</div>
+
+<!-- KPI -->
+<div class="kpi-grid animate-in animate-in-d1">
+  <div class="kpi-card">
+    <div class="kpi-icon">👩‍🎓</div>
+    <div class="kpi-num">18</div>
+    <div class="kpi-label">学习人次</div>
+    <div class="kpi-trend up">↑ 6 较上周</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">✅</div>
+    <div class="kpi-num">94%</div>
+    <div class="kpi-label">完课率</div>
+    <div class="kpi-trend up">↑ 4% 较上周</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">🎯</div>
+    <div class="kpi-num">88</div>
+    <div class="kpi-label">测验平均分</div>
+    <div class="kpi-trend up">↑ 2 较上周</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">⏱</div>
+    <div class="kpi-num">42分</div>
+    <div class="kpi-label">平均学习时长</div>
+  </div>
+</div>
+
+<!-- 场景完成率 -->
+<div class="section-card animate-in animate-in-d2">
+  <div class="sc-title">各场景完成率</div>
+  <div class="scene-bar-row">
+    <div class="sbl">📊 认识水彩颜料</div>
+    <div class="sbt"><div class="sbf" style="width:100%;background:linear-gradient(90deg,#7C3AED,#A78BFA);"></div></div>
+    <div class="sbv">100%</div>
+  </div>
+  <div class="scene-bar-row">
+    <div class="sbl">✅ 工具认知测验</div>
+    <div class="sbt"><div class="sbf" style="width:100%;background:linear-gradient(90deg,#7C3AED,#A78BFA);"></div></div>
+    <div class="sbv">100%</div>
+  </div>
+  <div class="scene-bar-row">
+    <div class="sbl">📊 调色技巧讲解</div>
+    <div class="sbt"><div class="sbf" style="width:97%;background:linear-gradient(90deg,#7C3AED,#A78BFA);"></div></div>
+    <div class="sbv">97%</div>
+  </div>
+  <div class="scene-bar-row">
+    <div class="sbl">🎨 AI白板演示</div>
+    <div class="sbt"><div class="sbf" style="width:94%;background:linear-gradient(90deg,#4A0E8F,#7C3AED);"></div></div>
+    <div class="sbv">94%</div>
+  </div>
+  <div class="scene-bar-row">
+    <div class="sbl">📊 向日葵步骤</div>
+    <div class="sbt"><div class="sbf" style="width:91%;background:linear-gradient(90deg,#4A0E8F,#7C3AED);"></div></div>
+    <div class="sbv">91%</div>
+  </div>
+  <div class="scene-bar-row">
+    <div class="sbl">🎨 跟着画</div>
+    <div class="sbt"><div class="sbf" style="width:88%;background:linear-gradient(90deg,#1A237E,#3F51B5);"></div></div>
+    <div class="sbv">88%</div>
+  </div>
+</div>
+
+<!-- 学生明细 -->
+<div class="section-card animate-in animate-in-d3">
+  <div class="sc-title">学生学习明细（前5位）</div>
+  <div class="student-row">
+    <div class="sr-avatar">🧒</div>
+    <div class="sr-info">
+      <div class="sr-name">张小明</div>
+      <div class="sr-meta">✅ 全部完成 · 学习42分钟 · 2026-03-20</div>
+    </div>
+    <div class="sr-score">95分</div>
+  </div>
+  <div class="student-row">
+    <div class="sr-avatar" style="background:linear-gradient(135deg,#0D47A1,#42A5F5);">👧</div>
+    <div class="sr-info">
+      <div class="sr-name">李晓雨</div>
+      <div class="sr-meta">✅ 全部完成 · 学习38分钟 · 2026-03-20</div>
+    </div>
+    <div class="sr-score">92分</div>
+  </div>
+  <div class="student-row">
+    <div class="sr-avatar" style="background:linear-gradient(135deg,#4A148C,#7B1FA2);">🧒</div>
+    <div class="sr-info">
+      <div class="sr-name">王大宝</div>
+      <div class="sr-meta">⏳ 学习至场景5 · 进行中</div>
+    </div>
+    <div class="sr-score" style="color:var(--c-warning);">--</div>
+  </div>
+  <div class="student-row">
+    <div class="sr-avatar" style="background:linear-gradient(135deg,#1B5E20,#43A047);">👧</div>
+    <div class="sr-info">
+      <div class="sr-name">陈小玲</div>
+      <div class="sr-meta">✅ 全部完成 · 学习50分钟 · 2026-03-19</div>
+    </div>
+    <div class="sr-score">88分</div>
+  </div>
+  <div class="student-row">
+    <div class="sr-avatar" style="background:linear-gradient(135deg,#E65100,#FF8A65);">🧒</div>
+    <div class="sr-info">
+      <div class="sr-name">孙浩然</div>
+      <div class="sr-meta">✅ 全部完成 · 学习44分钟 · 2026-03-19</div>
+    </div>
+    <div class="sr-score">83分</div>
+  </div>
+</div>
+
+</body>
+</html>

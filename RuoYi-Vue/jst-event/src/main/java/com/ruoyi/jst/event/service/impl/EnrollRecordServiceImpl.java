@@ -1,0 +1,508 @@
+package com.ruoyi.jst.event.service.impl;
+
+import com.alibaba.fastjson2.JSON;
+import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.jst.common.audit.OperateLog;
+import com.ruoyi.jst.common.context.JstLoginContext;
+import com.ruoyi.jst.common.exception.BizErrorCode;
+import com.ruoyi.jst.common.id.SnowflakeIdWorker;
+import com.ruoyi.jst.common.lock.JstLockTemplate;
+import com.ruoyi.jst.common.security.SecurityCheck;
+import com.ruoyi.jst.common.util.MaskUtil;
+import com.ruoyi.jst.event.domain.JstContest;
+import com.ruoyi.jst.event.domain.JstEnrollFormTemplate;
+import com.ruoyi.jst.event.domain.JstEnrollRecord;
+import com.ruoyi.jst.event.dto.EnrollAuditReqDTO;
+import com.ruoyi.jst.event.dto.EnrollDraftDTO;
+import com.ruoyi.jst.event.dto.EnrollQueryReqDTO;
+import com.ruoyi.jst.event.dto.EnrollSubmitDTO;
+import com.ruoyi.jst.event.dto.EnrollSupplementDTO;
+import com.ruoyi.jst.event.enums.ContestAuditStatus;
+import com.ruoyi.jst.event.enums.ContestBizStatus;
+import com.ruoyi.jst.event.enums.EnrollAuditStatus;
+import com.ruoyi.jst.event.enums.EnrollMaterialStatus;
+import com.ruoyi.jst.event.mapper.EnrollRecordMapperExt;
+import com.ruoyi.jst.event.mapper.JstContestMapper;
+import com.ruoyi.jst.event.mapper.JstEnrollFormTemplateMapper;
+import com.ruoyi.jst.event.mapper.JstEnrollRecordMapper;
+import com.ruoyi.jst.event.service.EnrollRecordService;
+import com.ruoyi.jst.event.vo.EnrollDetailVO;
+import com.ruoyi.jst.event.vo.EnrollListVO;
+import com.ruoyi.jst.event.vo.EnrollSubmitResVO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+/**
+ * 报名记录领域服务实现。
+ *
+ * @author jst
+ * @since 1.0.0
+ */
+@Service
+public class EnrollRecordServiceImpl implements EnrollRecordService {
+
+    private static final String ROLE_PARTNER = "jst_partner";
+    private static final Set<String> UPLOAD_FIELD_TYPES = Set.of("file", "image", "audio", "video");
+
+    @Autowired private JstEnrollRecordMapper jstEnrollRecordMapper;
+    @Autowired private EnrollRecordMapperExt enrollRecordMapperExt;
+    @Autowired private JstContestMapper jstContestMapper;
+    @Autowired private JstEnrollFormTemplateMapper jstEnrollFormTemplateMapper;
+    @Autowired private JstLockTemplate jstLockTemplate;
+    @Autowired private SnowflakeIdWorker snowflakeIdWorker;
+
+    /**
+     * 保存报名草稿。
+     * @param req 草稿请求
+     * @return 保存结果
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @OperateLog(module = "赛事", action = "ENROLL_DRAFT", target = "#{req.enrollId}", recordResult = true)
+    public EnrollSubmitResVO saveDraft(EnrollDraftDTO req) {
+        // TX: 草稿保存
+        Long userId = currentUserId();
+        assertParticipantOwned(req.getParticipantId(), userId);
+        JstContest contest = requireContest(req.getContestId());
+        assertContestOnline(contest);
+        JstEnrollFormTemplate template = requireApprovedTemplate(contest.getFormTemplateId());
+        JstEnrollRecord record = req.getEnrollId() == null
+                ? enrollRecordMapperExt.selectLatestDraft(req.getContestId(), req.getParticipantId(), userId)
+                : requireOwnedEnroll(req.getEnrollId(), userId);
+        if (record != null) {
+            assertSameContestAndParticipant(record, req.getContestId(), req.getParticipantId());
+            assertDraftEditable(record);
+        }
+        if (record == null) {
+            record = buildNewRecord(req.getContestId(), req.getParticipantId(), userId);
+            record.setMaterialStatus(EnrollMaterialStatus.DRAFT.dbValue());
+            record.setAuditStatus(EnrollAuditStatus.PENDING.dbValue());
+            record.setCreateBy(currentOperatorName());
+            record.setCreateTime(DateUtils.getNowDate());
+            record.setUpdateBy(currentOperatorName());
+            record.setUpdateTime(DateUtils.getNowDate());
+            fillSnapshot(record, template, req.getFormData(), req.getAttachments());
+            jstEnrollRecordMapper.insertJstEnrollRecord(record);
+        } else {
+            fillSnapshot(record, template, req.getFormData(), req.getAttachments());
+            record.setUpdateBy(currentOperatorName());
+            record.setUpdateTime(DateUtils.getNowDate());
+            jstEnrollRecordMapper.updateJstEnrollRecord(record);
+        }
+        return buildResVO(record);
+    }
+
+    /**
+     * 提交报名。
+     * @param req 提交请求
+     * @return 提交结果
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @OperateLog(module = "赛事", action = "ENROLL_SUBMIT", target = "#{req.enrollId}", recordResult = true)
+    public EnrollSubmitResVO submit(EnrollSubmitDTO req) {
+        // TX: 报名提交
+        Long userId = currentUserId();
+        assertParticipantOwned(req.getParticipantId(), userId);
+        // LOCK: lock:enroll:submit:{userId}:{contestId}
+        return jstLockTemplate.execute("lock:enroll:submit:" + userId + ":" + req.getContestId(), 3, 5, () -> {
+            JstContest contest = requireContest(req.getContestId());
+            assertContestSubmittable(contest);
+            JstEnrollFormTemplate template = requireApprovedTemplate(contest.getFormTemplateId());
+            validateRequiredFields(template, req.getFormData(), req.getAttachments());
+            if (enrollRecordMapperExt.countDuplicatePending(req.getContestId(), req.getParticipantId(), userId, req.getEnrollId()) > 0) {
+                throw new ServiceException(BizErrorCode.JST_EVENT_ENROLL_DUPLICATE_PENDING.message(),
+                        BizErrorCode.JST_EVENT_ENROLL_DUPLICATE_PENDING.code());
+            }
+            JstEnrollRecord record = req.getEnrollId() == null
+                    ? enrollRecordMapperExt.selectLatestDraft(req.getContestId(), req.getParticipantId(), userId)
+                    : requireOwnedEnroll(req.getEnrollId(), userId);
+            if (record != null) {
+                assertSameContestAndParticipant(record, req.getContestId(), req.getParticipantId());
+                assertDraftEditable(record);
+            }
+            if (record == null) {
+                record = buildNewRecord(req.getContestId(), req.getParticipantId(), userId);
+                record.setCreateBy(currentOperatorName());
+                record.setCreateTime(DateUtils.getNowDate());
+            }
+            fillSnapshot(record, template, req.getFormData(), req.getAttachments());
+            record.setMaterialStatus(EnrollMaterialStatus.SUBMITTED.dbValue());
+            record.setAuditStatus(EnrollAuditStatus.PENDING.dbValue());
+            record.setAuditRemark(null);
+            record.setSubmitTime(DateUtils.getNowDate());
+            record.setUpdateBy(currentOperatorName());
+            record.setUpdateTime(DateUtils.getNowDate());
+            if (record.getEnrollId() == null) {
+                jstEnrollRecordMapper.insertJstEnrollRecord(record);
+            } else {
+                jstEnrollRecordMapper.updateJstEnrollRecord(record);
+            }
+            return buildResVO(record);
+        });
+    }
+
+    /**
+     * 查询小程序报名详情。
+     * @param enrollId 报名 ID
+     * @return 详情
+     */
+    @Override
+    public EnrollDetailVO getWxDetail(Long enrollId) {
+        Long userId = currentUserId();
+        JstEnrollRecord record = requireOwnedEnroll(enrollId, userId);
+        SecurityCheck.assertSameUser(record.getUserId());
+        EnrollDetailVO vo = enrollRecordMapperExt.selectWxDetail(enrollId);
+        if (vo == null) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_ENROLL_NOT_FOUND.message(),
+                    BizErrorCode.JST_EVENT_ENROLL_NOT_FOUND.code());
+        }
+        return maskAndParseDetail(vo);
+    }
+
+    /**
+     * 提交补件。
+     * @param enrollId 报名 ID
+     * @param req 补件请求
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @OperateLog(module = "赛事", action = "ENROLL_SUPPLEMENT", target = "#{enrollId}")
+    public void supplement(Long enrollId, EnrollSupplementDTO req) {
+        // TX: 补件提交
+        JstEnrollRecord record = requireOwnedEnroll(enrollId, currentUserId());
+        EnrollAuditStatus.fromDb(record.getAuditStatus()).assertCanTransitTo(EnrollAuditStatus.PENDING); // SM-6
+        if (!EnrollMaterialStatus.SUPPLEMENT.dbValue().equals(record.getMaterialStatus())) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_ENROLL_ILLEGAL_TRANSIT.message(),
+                    BizErrorCode.JST_EVENT_ENROLL_ILLEGAL_TRANSIT.code());
+        }
+        JstContest contest = requireContest(record.getContestId());
+        JstEnrollFormTemplate template = requireApprovedTemplate(contest.getFormTemplateId());
+        validateRequiredFields(template, req.getFormData(), req.getAttachments());
+        fillSnapshot(record, template, req.getFormData(), req.getAttachments());
+        record.setAuditStatus(EnrollAuditStatus.PENDING.dbValue());
+        record.setAuditRemark(null);
+        record.setSubmitTime(DateUtils.getNowDate());
+        record.setSupplementRemark(req.getSupplementRemark());
+        record.setRemark(null);
+        record.setUpdateBy(currentOperatorName());
+        record.setUpdateTime(DateUtils.getNowDate());
+        int updated = enrollRecordMapperExt.updateSupplementRecord(record);
+        if (updated <= 0) {
+            throw new ServiceException(BizErrorCode.JST_COMMON_DATA_TAMPERED.message(),
+                    BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
+        }
+    }
+
+    /**
+     * 查询后台报名列表。
+     * @param query 查询条件
+     * @return 列表
+     */
+    @Override
+    public List<EnrollListVO> selectAdminList(EnrollQueryReqDTO query) {
+        if (query == null) query = new EnrollQueryReqDTO();
+        if (isPartnerUser() && query.getPartnerId() == null) query.setPartnerId(JstLoginContext.currentPartnerId());
+        List<EnrollListVO> list = enrollRecordMapperExt.selectAdminList(query);
+        for (EnrollListVO vo : list) vo.setGuardianMobileMasked(MaskUtil.mobile(vo.getGuardianMobileMasked()));
+        return list;
+    }
+
+    /**
+     * 小程序-我的报名列表 (从 SecurityUtils 取当前 userId)
+     */
+    @Override
+    public List<EnrollListVO> selectMyList(String auditStatus) {
+        Long userId = com.ruoyi.common.utils.SecurityUtils.getUserId();
+        if (userId == null) {
+            throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
+                    BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+        }
+        List<EnrollListVO> list = enrollRecordMapperExt.selectMyList(userId, auditStatus);
+        for (EnrollListVO vo : list) vo.setGuardianMobileMasked(MaskUtil.mobile(vo.getGuardianMobileMasked()));
+        return list;
+    }
+
+    /**
+     * 查询后台报名详情。
+     * @param enrollId 报名 ID
+     * @return 详情
+     */
+    @Override
+    public EnrollDetailVO getAdminDetail(Long enrollId) {
+        JstEnrollRecord record = requireEnroll(enrollId);
+        assertEnrollPartnerOwnership(record);
+        EnrollDetailVO vo = enrollRecordMapperExt.selectAdminDetail(enrollId);
+        if (vo == null) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_ENROLL_NOT_FOUND.message(),
+                    BizErrorCode.JST_EVENT_ENROLL_NOT_FOUND.code());
+        }
+        return maskAndParseDetail(vo);
+    }
+
+    /**
+     * 审核报名记录。
+     * @param enrollId 报名 ID
+     * @param req 审核请求
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @OperateLog(module = "赛事", action = "ENROLL_AUDIT", target = "#{enrollId}")
+    public void audit(Long enrollId, EnrollAuditReqDTO req) {
+        // TX: 报名审核
+        // LOCK: lock:enroll:audit:{enrollId}
+        jstLockTemplate.execute("lock:enroll:audit:" + enrollId, 3, 5, () -> {
+            JstEnrollRecord record = requireEnroll(enrollId);
+            assertEnrollPartnerOwnership(record);
+            EnrollAuditStatus current = EnrollAuditStatus.fromDb(record.getAuditStatus());
+            EnrollAuditStatus target = EnrollAuditStatus.fromDb(req.getResult());
+            current.assertCanTransitTo(target); // SM-6
+            String materialStatus = target == EnrollAuditStatus.SUPPLEMENT ? EnrollMaterialStatus.SUPPLEMENT.dbValue() : null;
+            int updated = enrollRecordMapperExt.updateAuditByExpected(enrollId, current.dbValue(), target.dbValue(),
+                    materialStatus, req.getAuditRemark(), currentOperatorName(), DateUtils.getNowDate());
+            if (updated == 0) {
+                throw new ServiceException("报名审核失败，状态已变更，请刷新后重试",
+                        BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
+            }
+            return null;
+        });
+    }
+
+    private JstEnrollRecord buildNewRecord(Long contestId, Long participantId, Long userId) {
+        JstEnrollRecord record = new JstEnrollRecord();
+        record.setEnrollNo(snowflakeIdWorker.nextBizNo("EN"));
+        record.setContestId(contestId);
+        record.setUserId(userId);
+        record.setParticipantId(participantId);
+        record.setEnrollSource("self");
+        record.setDelFlag("0");
+        return record;
+    }
+
+    private void fillSnapshot(JstEnrollRecord record, JstEnrollFormTemplate template, Map<String, Object> formData, List<String> attachments) {
+        Map<String, Object> snapshot = new LinkedHashMap<>();
+        snapshot.put("template_id", template.getTemplateId());
+        snapshot.put("template_version", toInteger(template.getTemplateVersion()));
+        snapshot.put("formData", normalizeFormData(formData));
+        snapshot.put("attachments", normalizeAttachments(attachments));
+        record.setTemplateId(template.getTemplateId());
+        record.setTemplateVersion(template.getTemplateVersion());
+        record.setFormSnapshotJson(JSON.toJSONString(snapshot));
+    }
+
+    private void validateRequiredFields(JstEnrollFormTemplate template, Map<String, Object> formData, List<String> attachments) {
+        Object schema = parseJson(template.getSchemaJson());
+        List<String> missing = new ArrayList<>();
+        collectMissingRequiredFields(schema, normalizeFormData(formData), normalizeAttachments(attachments), missing);
+        if (!missing.isEmpty()) {
+            throw new ServiceException("必填字段缺失: " + String.join("、", missing),
+                    BizErrorCode.JST_EVENT_FORM_VALIDATION_FAIL.code());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void collectMissingRequiredFields(Object schema, Map<String, Object> formData, List<String> attachments, List<String> missing) {
+        if (schema instanceof Map<?, ?> map) {
+            Object fields = map.get("fields");
+            if (fields != null) {
+                collectMissingRequiredFields(fields, formData, attachments, missing);
+                return;
+            }
+            String key = stringValue(map.get("key"));
+            String label = stringValue(map.get("label"));
+            String type = stringValue(map.get("type"));
+            if (isRequired(map.get("required")) && !hasFieldValue(key, type, formData, attachments)) {
+                missing.add(StringUtils.isBlank(label) ? key : label);
+            }
+            return;
+        }
+        if (schema instanceof Collection<?> collection) {
+            for (Object item : collection) collectMissingRequiredFields(item, formData, attachments, missing);
+        }
+    }
+
+    private boolean hasFieldValue(String key, String type, Map<String, Object> formData, List<String> attachments) {
+        Object value = key == null ? null : formData.get(key);
+        if (hasValue(value)) return true;
+        return type != null && UPLOAD_FIELD_TYPES.contains(type) && !attachments.isEmpty();
+    }
+
+    private boolean hasValue(Object value) {
+        if (value == null) return false;
+        if (value instanceof String text) return StringUtils.isNotBlank(text);
+        if (value instanceof Collection<?> collection) return !collection.isEmpty();
+        if (value instanceof Map<?, ?> map) return !map.isEmpty();
+        if (value.getClass().isArray()) return Array.getLength(value) > 0;
+        return true;
+    }
+
+    private boolean isRequired(Object value) {
+        if (value instanceof Boolean bool) return bool;
+        if (value instanceof String text) return "true".equalsIgnoreCase(text) || "1".equals(text);
+        if (value instanceof Number number) return number.intValue() != 0;
+        return false;
+    }
+
+    private JstEnrollRecord requireEnroll(Long enrollId) {
+        JstEnrollRecord record = enrollRecordMapperExt.selectById(enrollId);
+        if (record == null) throw new ServiceException(BizErrorCode.JST_EVENT_ENROLL_NOT_FOUND.message(),
+                BizErrorCode.JST_EVENT_ENROLL_NOT_FOUND.code());
+        return record;
+    }
+
+    private JstEnrollRecord requireOwnedEnroll(Long enrollId, Long userId) {
+        JstEnrollRecord record = requireEnroll(enrollId);
+        if (!Objects.equals(record.getUserId(), userId)) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_ENROLL_NOT_OWN.message(),
+                    BizErrorCode.JST_EVENT_ENROLL_NOT_OWN.code());
+        }
+        return record;
+    }
+
+    private void assertParticipantOwned(Long participantId, Long userId) {
+        if (enrollRecordMapperExt.countOwnedParticipant(participantId, userId) <= 0) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_ENROLL_PARTICIPANT_NOT_OWN.message(),
+                    BizErrorCode.JST_EVENT_ENROLL_PARTICIPANT_NOT_OWN.code());
+        }
+    }
+
+    private void assertDraftEditable(JstEnrollRecord record) {
+        if (!EnrollMaterialStatus.DRAFT.dbValue().equals(record.getMaterialStatus())) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_ENROLL_ILLEGAL_TRANSIT.message(),
+                    BizErrorCode.JST_EVENT_ENROLL_ILLEGAL_TRANSIT.code());
+        }
+    }
+
+    private void assertSameContestAndParticipant(JstEnrollRecord record, Long contestId, Long participantId) {
+        if (!Objects.equals(record.getContestId(), contestId) || !Objects.equals(record.getParticipantId(), participantId)) {
+            throw new ServiceException("报名记录与当前赛事/参赛人不匹配", BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+        }
+    }
+
+    private JstContest requireContest(Long contestId) {
+        JstContest contest = jstContestMapper.selectJstContestByContestId(contestId);
+        if (contest == null || !"0".equals(defaultDelFlag(contest.getDelFlag()))) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_CONTEST_NOT_FOUND.message(),
+                    BizErrorCode.JST_EVENT_CONTEST_NOT_FOUND.code());
+        }
+        return contest;
+    }
+
+    private JstEnrollFormTemplate requireApprovedTemplate(Long templateId) {
+        if (templateId == null) throw new ServiceException(BizErrorCode.JST_EVENT_FORM_TEMPLATE_NOT_FOUND.message(),
+                BizErrorCode.JST_EVENT_FORM_TEMPLATE_NOT_FOUND.code());
+        JstEnrollFormTemplate template = jstEnrollFormTemplateMapper.selectJstEnrollFormTemplateByTemplateId(templateId);
+        if (template == null || !"0".equals(defaultDelFlag(template.getDelFlag()))) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_FORM_TEMPLATE_NOT_FOUND.message(),
+                    BizErrorCode.JST_EVENT_FORM_TEMPLATE_NOT_FOUND.code());
+        }
+        if (!"approved".equals(template.getAuditStatus()) || template.getStatus() == null || template.getStatus() != 1) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_FORM_TEMPLATE_INVALID.message(),
+                    BizErrorCode.JST_EVENT_FORM_TEMPLATE_INVALID.code());
+        }
+        return template;
+    }
+
+    private void assertContestOnline(JstContest contest) {
+        if (!ContestAuditStatus.ONLINE.dbValue().equals(contest.getAuditStatus())) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_CONTEST_NOT_ONLINE.message(),
+                    BizErrorCode.JST_EVENT_CONTEST_NOT_ONLINE.code());
+        }
+    }
+
+    private void assertContestSubmittable(JstContest contest) {
+        assertContestOnline(contest);
+        Date now = DateUtils.getNowDate();
+        boolean inWindow = contest.getEnrollStartTime() != null && contest.getEnrollEndTime() != null
+                && !now.before(contest.getEnrollStartTime()) && !now.after(contest.getEnrollEndTime());
+        if (!ContestBizStatus.ENROLLING.dbValue().equals(contest.getStatus()) || !inWindow) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_CONTEST_NOT_ENROLLING.message(),
+                    BizErrorCode.JST_EVENT_CONTEST_NOT_ENROLLING.code());
+        }
+    }
+
+    private void assertEnrollPartnerOwnership(JstEnrollRecord record) {
+        if (!isPartnerUser()) return;
+        Long partnerId = JstLoginContext.currentPartnerId();
+        if (!Objects.equals(requireContest(record.getContestId()).getPartnerId(), partnerId)) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_ENROLL_NOT_OWN.message(),
+                    BizErrorCode.JST_EVENT_ENROLL_NOT_OWN.code());
+        }
+    }
+
+    private boolean isPartnerUser() {
+        return JstLoginContext.currentPartnerId() != null
+                && JstLoginContext.hasRole(ROLE_PARTNER)
+                && !JstLoginContext.hasRole("jst_platform_op");
+    }
+
+    private Long currentUserId() {
+        Long userId = SecurityUtils.getUserId();
+        if (userId == null) throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
+                BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+        return userId;
+    }
+
+    private String currentOperatorName() {
+        String username = SecurityUtils.getUsername();
+        return StringUtils.isBlank(username) ? "system" : username;
+    }
+
+    private EnrollSubmitResVO buildResVO(JstEnrollRecord record) {
+        EnrollSubmitResVO vo = new EnrollSubmitResVO();
+        vo.setEnrollId(record.getEnrollId());
+        vo.setEnrollNo(record.getEnrollNo());
+        return vo;
+    }
+
+    private EnrollDetailVO maskAndParseDetail(EnrollDetailVO vo) {
+        vo.setGuardianMobileMasked(MaskUtil.mobile(vo.getGuardianMobileMasked()));
+        vo.setFormSnapshotJson(parseJson(vo.getFormSnapshotJson()));
+        return vo;
+    }
+
+    private Map<String, Object> normalizeFormData(Map<String, Object> formData) {
+        return formData == null ? new LinkedHashMap<>() : new LinkedHashMap<>(formData);
+    }
+
+    private List<String> normalizeAttachments(List<String> attachments) {
+        if (attachments == null || attachments.isEmpty()) return Collections.emptyList();
+        LinkedHashSet<String> set = new LinkedHashSet<>();
+        for (String attachment : attachments) if (StringUtils.isNotBlank(attachment)) set.add(attachment);
+        return new ArrayList<>(set);
+    }
+
+    private Object parseJson(Object raw) {
+        if (!(raw instanceof String text)) return raw;
+        if (StringUtils.isBlank(text)) return null;
+        try { return JSON.parse(text); } catch (Exception ex) { return text; }
+    }
+
+    private String stringValue(Object value) {
+        return value == null ? null : String.valueOf(value);
+    }
+
+    private String defaultDelFlag(String delFlag) {
+        return StringUtils.isBlank(delFlag) ? "0" : delFlag;
+    }
+
+    private Integer toInteger(Long value) {
+        return value == null ? null : value.intValue();
+    }
+}

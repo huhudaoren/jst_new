@@ -1,0 +1,116 @@
+package com.ruoyi.jst.organizer.vo;
+
+import java.util.Date;
+
+/**
+ * 渠道认证申请-展示 VO
+ * <p>
+ * 关联表：jst_channel_auth_apply
+ * 关联状态机：SM-3
+ * 输出约束：不返回敏感手机号/证件号/银行卡明文
+ *
+ * @author jst
+ * @since 1.0.0
+ */
+public class ChannelAuthApplyVO {
+
+    private Long applyId;
+    private String applyNo;
+    private Long userId;
+    private Long channelId;
+    private String channelType;
+    private String applyName;
+    private String materialsJson;
+    private String applyStatus;
+    private String auditRemark;
+    private Date submitTime;
+    private Date auditTime;
+
+    public Long getApplyId() {
+        return applyId;
+    }
+
+    public void setApplyId(Long applyId) {
+        this.applyId = applyId;
+    }
+
+    public String getApplyNo() {
+        return applyNo;
+    }
+
+    public void setApplyNo(String applyNo) {
+        this.applyNo = applyNo;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getChannelId() {
+        return channelId;
+    }
+
+    public void setChannelId(Long channelId) {
+        this.channelId = channelId;
+    }
+
+    public String getChannelType() {
+        return channelType;
+    }
+
+    public void setChannelType(String channelType) {
+        this.channelType = channelType;
+    }
+
+    public String getApplyName() {
+        return applyName;
+    }
+
+    public void setApplyName(String applyName) {
+        this.applyName = applyName;
+    }
+
+    public String getMaterialsJson() {
+        return materialsJson;
+    }
+
+    public void setMaterialsJson(String materialsJson) {
+        this.materialsJson = materialsJson;
+    }
+
+    public String getApplyStatus() {
+        return applyStatus;
+    }
+
+    public void setApplyStatus(String applyStatus) {
+        this.applyStatus = applyStatus;
+    }
+
+    public String getAuditRemark() {
+        return auditRemark;
+    }
+
+    public void setAuditRemark(String auditRemark) {
+        this.auditRemark = auditRemark;
+    }
+
+    public Date getSubmitTime() {
+        return submitTime;
+    }
+
+    public void setSubmitTime(Date submitTime) {
+        this.submitTime = submitTime;
+    }
+
+    public Date getAuditTime() {
+        return auditTime;
+    }
+
+    public void setAuditTime(Date auditTime) {
+        this.auditTime = auditTime;
+    }
+}

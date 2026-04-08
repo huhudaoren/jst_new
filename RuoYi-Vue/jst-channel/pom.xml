@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>ruoyi</artifactId>
+        <groupId>com.ruoyi</groupId>
+        <version>3.9.2</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jst-channel</artifactId>
+
+    <description>
+        竞赛通-渠道返点与结算域
+        关联表：jst_rebate_rule / jst_rebate_ledger / jst_rebate_settlement / jst_event_settlement
+        关联状态机：SM-8 返点台账 / SM-9 渠道提现 / SM-10 赛事方结算
+        关键业务：负向台账抵扣，必须 Redisson lock:rebate:settle:{channelId}
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>jst-common</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

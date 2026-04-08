@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.user.mapper.ParticipantMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.jst.user.domain.Participant">
+        <id     column="participant_id"        property="participantId"/>
+        <result column="user_id"               property="userId"/>
+        <result column="participant_type"      property="participantType"/>
+        <result column="name"                  property="name"/>
+        <result column="gender"                property="gender"/>
+        <result column="birthday"              property="birthday"/>
+        <result column="age"                   property="age"/>
+        <result column="guardian_name"         property="guardianName"/>
+        <result column="guardian_mobile"       property="guardianMobile"/>
+        <result column="school"                property="school"/>
+        <result column="organization"          property="organization"/>
+        <result column="class_name"            property="className"/>
+        <result column="id_card_type"          property="idCardType"/>
+        <!-- 证件号字段级 AES 自动加解密 -->
+        <result column="id_card_no"            property="idCardNo"
+                typeHandler="com.ruoyi.jst.common.crypto.AesTypeHandler"/>
+        <result column="created_by_channel_id" property="createdByChannelId"/>
+        <result column="claim_status"          property="claimStatus"/>
+        <result column="claimed_user_id"       property="claimedUserId"/>
+        <result column="claimed_time"          property="claimedTime"/>
+        <result column="visible_scope"         property="visibleScope"/>
+        <result column="create_by"             property="createBy"/>
+        <result column="create_time"           property="createTime"/>
+        <result column="update_by"             property="updateBy"/>
+        <result column="update_time"           property="updateTime"/>
+        <result column="remark"                property="remark"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        participant_id, user_id, participant_type, name, gender, birthday, age,
+        guardian_name, guardian_mobile, school, organization, class_name,
+        id_card_type, id_card_no, created_by_channel_id,
+        claim_status, claimed_user_id, claimed_time, visible_scope,
+        create_by, create_time, update_by, update_time, remark
+    </sql>
+
+    <select id="selectByPk" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM jst_participant
+        WHERE participant_id = #{participantId} AND del_flag = '0'
+    </select>
+
+    <select id="selectByGuardianMobileAndName" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM jst_participant
+        WHERE guardian_mobile = #{guardianMobile}
+          AND name = #{name}
+          AND claim_status = 'unclaimed'
+          AND del_flag = '0'
+    </select>
+
+    <select id="selectByGuardianMobile" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM jst_participant
+        WHERE guardian_mobile = #{guardianMobile}
+          AND claim_status = 'unclaimed'
+          AND del_flag = '0'
+    </select>
+
+    <!--
+        关键:UPDATE WHERE claim_status=#{expectedStatus} 实现乐观锁
+        效果:并发场景下只有一个线程能更新成功(返回 1),其余返回 0,Service 层据此判断
+    -->
+    <update id="updateClaimStatus">
+        UPDATE jst_participant
+        SET claim_status   = #{newStatus},
+            claimed_user_id = #{claimedUserId},
+            claimed_time    = NOW(),
+            update_time     = NOW()
+        WHERE participant_id = #{participantId}
+          AND claim_status   = #{expectedStatus}
+          AND del_flag       = '0'
+    </update>
+
+</mapper>

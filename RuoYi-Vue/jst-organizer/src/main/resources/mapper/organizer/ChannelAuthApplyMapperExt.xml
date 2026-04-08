@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.organizer.mapper.ChannelAuthApplyMapperExt">
+
+    <resultMap id="ChannelAuthApplyEntityResult"
+               type="com.ruoyi.jst.organizer.domain.JstChannelAuthApply">
+        <id property="applyId" column="apply_id"/>
+        <result property="applyNo" column="apply_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="channelId" column="channel_id"/>
+        <result property="channelType" column="channel_type"/>
+        <result property="applyName" column="apply_name"/>
+        <result property="materialsJson" column="materials_json"/>
+        <result property="applyStatus" column="apply_status"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="auditUserId" column="audit_user_id"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <resultMap id="ChannelAuthApplyVOResult"
+               type="com.ruoyi.jst.organizer.vo.ChannelAuthApplyVO">
+        <id property="applyId" column="apply_id"/>
+        <result property="applyNo" column="apply_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="channelId" column="channel_id"/>
+        <result property="channelType" column="channel_type"/>
+        <result property="applyName" column="apply_name"/>
+        <result property="materialsJson" column="materials_json"/>
+        <result property="applyStatus" column="apply_status"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="auditTime" column="audit_time"/>
+    </resultMap>
+
+    <sql id="applyColumns">
+        apply_id, apply_no, user_id, channel_id, channel_type, apply_name, materials_json,
+        apply_status, audit_remark, audit_user_id, submit_time, audit_time,
+        create_by, create_time, update_by, update_time, remark, del_flag
+    </sql>
+
+    <select id="countActiveApplyByUserId" resultType="int">
+        select count(1)
+        from jst_channel_auth_apply
+        where del_flag = '0'
+          and user_id = #{userId}
+          and apply_status in ('pending', 'approved')
+    </select>
+
+    <select id="selectApplyById" resultMap="ChannelAuthApplyEntityResult">
+        select <include refid="applyColumns"/>
+        from jst_channel_auth_apply
+        where apply_id = #{applyId}
+          and del_flag = '0'
+    </select>
+
+    <select id="selectMyApplyList" resultMap="ChannelAuthApplyVOResult">
+        select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, materials_json,
+               apply_status, audit_remark, submit_time, audit_time
+        from jst_channel_auth_apply
+        where del_flag = '0'
+          and user_id = #{userId}
+        order by submit_time desc, apply_id desc
+    </select>
+
+    <select id="selectAdminApplyList" resultMap="ChannelAuthApplyVOResult">
+        select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, materials_json,
+               apply_status, audit_remark, submit_time, audit_time
+        from jst_channel_auth_apply
+        <where>
+            del_flag = '0'
+            <if test="applyNo != null and applyNo != ''">
+                and apply_no = #{applyNo}
+            </if>
+            <if test="applyName != null and applyName != ''">
+                and apply_name like concat('%', #{applyName}, '%')
+            </if>
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
+            <if test="applyStatus != null and applyStatus != ''">
+                and apply_status = #{applyStatus}
+            </if>
+            <if test="channelType != null and channelType != ''">
+                and channel_type = #{channelType}
+            </if>
+        </where>
+        order by submit_time desc, apply_id desc
+    </select>
+
+    <select id="selectApplyDetail" resultMap="ChannelAuthApplyVOResult">
+        select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, materials_json,
+               apply_status, audit_remark, submit_time, audit_time
+        from jst_channel_auth_apply
+        where apply_id = #{applyId}
+          and del_flag = '0'
+    </select>
+
+    <insert id="insertApply" parameterType="com.ruoyi.jst.organizer.domain.JstChannelAuthApply"
+            useGeneratedKeys="true" keyProperty="applyId">
+        insert into jst_channel_auth_apply (
+            apply_no, user_id, channel_type, apply_name, materials_json,
+            apply_status, submit_time, create_by, create_time
+        ) values (
+            #{applyNo}, #{userId}, #{channelType}, #{applyName}, #{materialsJson},
+            #{applyStatus}, #{submitTime}, #{createBy}, #{createTime}
+        )
+    </insert>
+
+    <update id="updateApplyStatus">
+        update jst_channel_auth_apply
+        set apply_status = #{targetStatus},
+            <if test="channelId != null">
+                channel_id = #{channelId},
+            </if>
+            audit_remark = #{auditRemark},
+            audit_user_id = #{auditUserId},
+            audit_time = #{auditTime},
+            update_by = #{updateBy},
+            update_time = now()
+        where apply_id = #{applyId}
+          and apply_status = #{expectedStatus}
+          and del_flag = '0'
+    </update>
+</mapper>

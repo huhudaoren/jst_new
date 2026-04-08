@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>ruoyi</artifactId>
+        <groupId>com.ruoyi</groupId>
+        <version>3.9.2</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jst-event</artifactId>
+
+    <description>
+        竞赛通-赛事报名 + 成绩证书课程域
+        关联表：jst_event_partner / jst_contest / jst_enroll_form_template / jst_enroll_record /
+                jst_score_record / jst_cert_record / jst_cert_template / jst_course / jst_course_learn_record
+        关联状态机：SM-5 赛事 / SM-6 报名审核 / SM-19 成绩 / SM-20 证书 / SM-21 课程审核 / SM-25 表单模板审核
+        外部依赖：阿里云 VOD（jst_course 视频点播）
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>jst-common</artifactId>
+        </dependency>
+
+        <!-- 阿里云 VOD 视频点播：课程视频上传/转码/播放凭证 -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-vod</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

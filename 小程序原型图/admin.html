@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>管理工作台 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); padding-bottom: 24px; }
+
+/* ===== Hero ===== */
+.admin-hero {
+  background: linear-gradient(150deg, #0D1B2A 0%, #1A237E 50%, #283593 100%);
+  padding: 16px var(--space-4) 0; position: relative; overflow: hidden;
+}
+.admin-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 85% 20%, rgba(92,107,192,0.18) 0%, transparent 50%),
+    radial-gradient(circle at 10% 80%, rgba(26,124,217,0.10) 0%, transparent 45%);
+}
+.admin-hero::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 24px; background: var(--c-gray-50); border-radius: 24px 24px 0 0;
+}
+
+/* 导航 */
+.ah-nav {
+  display: flex; align-items: center;
+  position: relative; z-index: 1; margin-bottom: 16px;
+}
+.ah-title { flex: 1; font-size: 17px; font-weight: 700; color: white; }
+.ah-role-badge {
+  padding: 5px 12px; border-radius: var(--radius-full);
+  background: rgba(92,107,192,0.3); border: 1px solid rgba(92,107,192,0.5);
+  font-size: 11px; color: #B0BEC5; font-weight: 600;
+}
+.ah-logout {
+  width: 34px; height: 34px; border-radius: 50%; margin-left: 10px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; cursor: pointer; touch-action: manipulation;
+}
+
+/* 管理员信息卡 */
+.admin-info-card {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-lg); padding: 14px 16px;
+  position: relative; z-index: 1; margin-bottom: 20px;
+}
+.ai-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, #3F51B5, #5C6BC0);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(63,81,181,0.4);
+}
+.ai-info { flex: 1; }
+.ai-name { font-size: 16px; font-weight: 700; color: white; margin-bottom: 3px; }
+.ai-meta { font-size: 12px; color: rgba(255,255,255,0.5); }
+.ai-status {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: #A5D6A7;
+}
+.ai-dot { width: 6px; height: 6px; border-radius: 50%; background: #66BB6A; }
+
+/* ===== 待处理任务区 ===== */
+.todo-section {
+  margin: 0 var(--space-4) 16px; padding-top: 4px;
+}
+.section-title {
+  font-size: 13px; font-weight: 700; color: var(--c-gray-500);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.section-title::before {
+  content: ''; width: 3px; height: 13px;
+  background: var(--c-accent); border-radius: 2px;
+}
+
+/* 待处理 4格 */
+.todo-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.todo-cell {
+  background: var(--c-white); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs); padding: 12px 10px;
+  text-align: center; cursor: pointer;
+  touch-action: manipulation; transition: transform var(--duration-fast);
+  position: relative; overflow: hidden;
+}
+.todo-cell:active { transform: scale(0.96); }
+.todo-cell-num {
+  font-size: 22px; font-weight: 900; line-height: 1;
+  margin-bottom: 5px;
+}
+.todo-cell-num.urgent { color: var(--c-danger); }
+.todo-cell-num.warn   { color: var(--c-warning); }
+.todo-cell-num.info   { color: var(--c-info); }
+.todo-cell-num.ok     { color: var(--c-success); }
+.todo-cell-label { font-size: 11px; color: var(--c-gray-500); line-height: 1.3; }
+.todo-cell-dot {
+  position: absolute; top: 8px; right: 8px;
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.todo-cell-dot.pulse-red {
+  background: var(--c-danger);
+  animation: breathe 1.8s infinite;
+}
+@keyframes breathe {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* ===== 功能模块卡片（竖排大按钮风格）===== */
+.module-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); margin: 0 var(--space-4) 12px;
+  overflow: hidden;
+}
+.module-card-header {
+  padding: 14px 16px 0;
+  font-size: 14px; font-weight: 700; color: var(--c-gray-900);
+  display: flex; align-items: center; gap: 8px;
+}
+.module-card-header .mch-icon {
+  width: 26px; height: 26px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+
+.module-list { padding: 8px 0; }
+.module-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 16px; cursor: pointer;
+  touch-action: manipulation;
+  transition: background var(--duration-fast);
+  border-bottom: 1px solid var(--c-gray-50);
+}
+.module-row:last-child { border-bottom: none; }
+.module-row:active { background: var(--c-gray-50); }
+.module-row-icon {
+  width: 38px; height: 38px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.module-row-info { flex: 1; min-width: 0; }
+.module-row-name { font-size: 14px; font-weight: 600; color: var(--c-gray-900); }
+.module-row-desc { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.module-row-right {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.module-badge {
+  min-width: 20px; height: 20px; padding: 0 6px;
+  background: var(--c-danger); color: white;
+  font-size: 11px; font-weight: 700; border-radius: var(--radius-full);
+  display: flex; align-items: center; justify-content: center;
+}
+.module-badge.warn { background: var(--c-warning); }
+.module-badge.info { background: var(--c-info); }
+.module-row-arr { font-size: 16px; color: var(--c-gray-300); }
+
+/* ===== 快捷统计 ===== */
+.quick-stats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin: 0 var(--space-4) 16px;
+}
+.qs-card {
+  background: var(--c-white); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs); padding: 14px 16px;
+}
+.qs-label { font-size: 12px; color: var(--c-gray-500); margin-bottom: 6px; }
+.qs-num { font-size: 22px; font-weight: 900; color: var(--c-gray-900); }
+.qs-num span { font-size: 14px; color: var(--c-gray-500); font-weight: 400; margin-left: 3px; }
+.qs-trend {
+  font-size: 11px; margin-top: 4px;
+  display: flex; align-items: center; gap: 3px;
+}
+.qs-trend.up { color: var(--c-success); }
+.qs-trend.down { color: var(--c-danger); }
+
+/* ===== 最近操作日志 ===== */
+.log-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 11px 16px; border-bottom: 1px solid var(--c-gray-50);
+}
+.log-item:last-child { border-bottom: none; }
+.log-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 6px;
+}
+.log-info { flex: 1; min-width: 0; }
+.log-action { font-size: 13px; color: var(--c-gray-900); line-height: 1.5; }
+.log-time { font-size: 11px; color: var(--c-gray-500); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:#0D1B2A;">
+  <span class="time">9:41</span>
+  <span class="icons" style="color:rgba(255,255,255,0.6);">📶 🔋</span>
+</div>
+
+<!-- ===== HERO ===== -->
+<div class="admin-hero animate-in">
+  <div class="ah-nav">
+    <div class="ah-title">🛡️ 管理工作台</div>
+    <div class="ah-role-badge">超级管理员</div>
+    <div class="ah-logout" onclick="confirmLogout()" title="退出">⎋</div>
+  </div>
+
+  <!-- 管理员信息 -->
+  <div class="admin-info-card">
+    <div class="ai-avatar">👤</div>
+    <div class="ai-info">
+      <div class="ai-name">admin · 超级管理员</div>
+      <div class="ai-meta">上次登录：2026-03-19 08:42  ·  192.168.1.10</div>
+    </div>
+    <div class="ai-status">
+      <div class="ai-dot"></div>
+      在线
+    </div>
+  </div>
+</div>
+
+<!-- ===== 待处理任务（V4.0：8格）===== -->
+<div class="todo-section animate-in animate-in-d1">
+  <div class="section-title">待处理任务</div>
+  <div class="todo-grid" style="grid-template-columns:repeat(4,1fr);">
+    <div class="todo-cell" onclick="location.href='admin-identity.html'">
+      <div class="todo-cell-dot pulse-red"></div>
+      <div class="todo-cell-num urgent">3</div>
+      <div class="todo-cell-label">待审核<br>渠道认证</div>
+    </div>
+    <div class="todo-cell" onclick="location.href='admin-enroll.html'">
+      <div class="todo-cell-num warn">12</div>
+      <div class="todo-cell-label">待审核<br>报名</div>
+    </div>
+    <div class="todo-cell" onclick="location.href='admin-voucher.html'">
+      <div class="todo-cell-num info">5</div>
+      <div class="todo-cell-label">待审核<br>凭证</div>
+    </div>
+    <div class="todo-cell" onclick="location.href='admin-score-publish.html'">
+      <div class="todo-cell-num ok">2</div>
+      <div class="todo-cell-label">待发布<br>成绩</div>
+    </div>
+  </div>
+  <!-- 第二行4格（V4.0新增）-->
+  <div class="todo-grid" style="grid-template-columns:repeat(4,1fr);margin-top:8px;">
+    <div class="todo-cell" onclick="location.href='admin-partner-review.html'">
+      <div class="todo-cell-dot pulse-red"></div>
+      <div class="todo-cell-num urgent">2</div>
+      <div class="todo-cell-label">赛事方<br>待入驻审核</div>
+    </div>
+    <div class="todo-cell" onclick="location.href='admin-channel-settlement.html'">
+      <div class="todo-cell-num warn">4</div>
+      <div class="todo-cell-label">渠道提现<br>待审核</div>
+    </div>
+    <div class="todo-cell" onclick="location.href='admin-event-settlement.html'">
+      <div class="todo-cell-num info">1</div>
+      <div class="todo-cell-label">赛事结算<br>待审核</div>
+    </div>
+    <div class="todo-cell" style="cursor:pointer;touch-action:manipulation;" onclick="showToast('风险工单确认入口（PC后台处理）')">
+      <div class="todo-cell-num" style="color:var(--c-danger);">6</div>
+      <div class="todo-cell-label">风险工单<br>待确认</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 快捷统计 ===== -->
+<div class="quick-stats animate-in animate-in-d1">
+  <div class="qs-card">
+    <div class="qs-label">今日报名</div>
+    <div class="qs-num">48 <span>人</span></div>
+    <div class="qs-trend up">↑ 12% 较昨日</div>
+  </div>
+  <div class="qs-card">
+    <div class="qs-label">今日流水</div>
+    <div class="qs-num">¥8,640</div>
+    <div class="qs-trend up">↑ 6% 较昨日</div>
+  </div>
+</div>
+
+<!-- ===== 审核管理 ===== -->
+<div class="module-card animate-in animate-in-d2">
+  <div class="module-card-header">
+    <div class="mch-icon" style="background:#FDEDEC;">🔍</div>
+    审核管理
+  </div>
+  <div class="module-list">
+    <div class="module-row" onclick="location.href='admin-partner-review.html'">
+      <div class="module-row-icon" style="background:#E8F5E9;">🏢</div>
+      <div class="module-row-info">
+        <div class="module-row-name">赛事方入驻 / 赛事审核</div>
+        <div class="module-row-desc">赛事公司资质审核与赛事上线审核</div>
+      </div>
+      <div class="module-row-right">
+        <div class="module-badge">2</div>
+        <div class="module-row-arr">›</div>
+      </div>
+    </div>
+    <div class="module-row" onclick="location.href='admin-channel-settlement.html'">
+      <div class="module-row-icon" style="background:var(--c-gold-50);">💰</div>
+      <div class="module-row-info">
+        <div class="module-row-name">渠道提现审核</div>
+        <div class="module-row-desc">审核渠道方提现申请，标记打款</div>
+      </div>
+      <div class="module-row-right">
+        <div class="module-badge warn">4</div>
+        <div class="module-row-arr">›</div>
+      </div>
+    </div>
+    <div class="module-row" onclick="location.href='admin-event-settlement.html'">
+      <div class="module-row-icon" style="background:#E0F2F1;">🏆</div>
+      <div class="module-row-info">
+        <div class="module-row-name">赛事结算审核</div>
+        <div class="module-row-desc">审核赛事方结算单，标记打款</div>
+      </div>
+      <div class="module-row-right">
+        <div class="module-badge info">1</div>
+        <div class="module-row-arr">›</div>
+      </div>
+    </div>
+    <div class="module-row" onclick="location.href='admin-identity.html'">
+      <div class="module-row-icon" style="background:#EEF0FF;">📋</div>
+      <div class="module-row-info">
+        <div class="module-row-name">身份认证审核</div>
+        <div class="module-row-desc">老师/机构资质材料审核</div>
+      </div>
+      <div class="module-row-right">
+        <div class="module-badge">3</div>
+        <div class="module-row-arr">›</div>
+      </div>
+    </div>
+    <div class="module-row" onclick="location.href='admin-enroll.html'">
+      <div class="module-row-icon" style="background:#EBF4FC;">📝</div>
+      <div class="module-row-info">
+        <div class="module-row-name">报名材料审核</div>
+        <div class="module-row-desc">学生报名信息与作品审核</div>
+      </div>
+      <div class="module-row-right">
+        <div class="module-badge warn">12</div>
+        <div class="module-row-arr">›</div>
+      </div>
+    </div>
+    <div class="module-row" onclick="location.href='admin-voucher.html'">
+      <div class="module-row-icon" style="background:#FFF3EE;">💳</div>
+      <div class="module-row-info">
+        <div class="module-row-name">对公转账凭证审核</div>
+        <div class="module-row-desc">确认到账金额与转账信息</div>
+      </div>
+      <div class="module-row-right">
+        <div class="module-badge warn">5</div>
+        <div class="module-row-arr">›</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 内容运营 ===== -->
+<div class="module-card animate-in animate-in-d2">
+  <div class="module-card-header">
+    <div class="mch-icon" style="background:#EAFAF1;">📢</div>
+    内容运营
+  </div>
+  <div class="module-list">
+    <div class="module-row" onclick="location.href='admin-notice-edit.html'">
+      <div class="module-row-icon" style="background:#EAFAF1;">📣</div>
+      <div class="module-row-info">
+        <div class="module-row-name">发布公告</div>
+        <div class="module-row-desc">快速发布赛事通知、平台公告</div>
+      </div>
+      <div class="module-row-right"><div class="module-row-arr">›</div></div>
+    </div>
+    <div class="module-row" onclick="location.href='admin-score-publish.html'">
+      <div class="module-row-icon" style="background:#FEF9EC;">🎯</div>
+      <div class="module-row-info">
+        <div class="module-row-name">成绩发布</div>
+        <div class="module-row-desc">确认并发布赛事成绩</div>
+      </div>
+      <div class="module-row-right">
+        <div class="module-badge info">2</div>
+        <div class="module-row-arr">›</div>
+      </div>
+    </div>
+    <div class="module-row" onclick="location.href='admin-maic.html'">
+      <div class="module-row-icon" style="background:#F3E8FF;">🤖</div>
+      <div class="module-row-info">
+        <div class="module-row-name">AI课程审核</div>
+        <div class="module-row-desc">审核老师发布的AI定制课程</div>
+      </div>
+      <div class="module-row-right"><div class="module-row-arr">›</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 用户管理 ===== -->
+<div class="module-card animate-in animate-in-d3">
+  <div class="module-card-header">
+    <div class="mch-icon" style="background:#EBF4FC;">👥</div>
+    用户管理
+  </div>
+  <div class="module-list">
+    <div class="module-row" onclick="location.href='admin-users.html'">
+      <div class="module-row-icon" style="background:#EBF4FC;">👤</div>
+      <div class="module-row-info">
+        <div class="module-row-name">用户列表</div>
+        <div class="module-row-desc">搜索用户、封禁/解封账号</div>
+      </div>
+      <div class="module-row-right"><div class="module-row-arr">›</div></div>
+    </div>
+    <div class="module-row" onclick="location.href='admin-identity.html'">
+      <div class="module-row-icon" style="background:#F5EEF8;">🏫</div>
+      <div class="module-row-info">
+        <div class="module-row-name">老师/机构管理</div>
+        <div class="module-row-desc">查看认证列表与认证状态</div>
+      </div>
+      <div class="module-row-right"><div class="module-row-arr">›</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 最近操作 ===== -->
+<div class="module-card animate-in animate-in-d3">
+  <div class="module-card-header">
+    <div class="mch-icon" style="background:#EEF0FF;">🕓</div>
+    最近操作
+  </div>
+  <div class="module-list">
+    <div class="log-item">
+      <div class="log-dot" style="background:var(--c-success);"></div>
+      <div class="log-info">
+        <div class="log-action">通过 王建国 的老师身份认证</div>
+        <div class="log-time">2026-03-19 09:12</div>
+      </div>
+    </div>
+    <div class="log-item">
+      <div class="log-dot" style="background:var(--c-warning);"></div>
+      <div class="log-info">
+        <div class="log-action">驳回报名 #20251101-2588（资料不清晰）</div>
+        <div class="log-time">2026-03-19 08:55</div>
+      </div>
+    </div>
+    <div class="log-item">
+      <div class="log-dot" style="background:var(--c-info);"></div>
+      <div class="log-info">
+        <div class="log-action">发布公告《安徒生艺术奖作品提交说明》</div>
+        <div class="log-time">2026-03-18 16:30</div>
+      </div>
+    </div>
+    <div class="log-item">
+      <div class="log-dot" style="background:var(--c-success);"></div>
+      <div class="log-info">
+        <div class="log-action">审核通过转账凭证，订单 JST-2025-003291</div>
+        <div class="log-time">2026-03-18 14:20</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 退出确认 Modal -->
+<div id="logoutModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);display:none;align-items:flex-end;">
+  <div style="background:var(--c-white);border-radius:24px 24px 0 0;padding:24px var(--space-4) 40px;width:100%;">
+    <div style="font-size:17px;font-weight:700;color:var(--c-gray-900);text-align:center;margin-bottom:8px;">确认退出登录？</div>
+    <div style="font-size:14px;color:var(--c-gray-500);text-align:center;margin-bottom:24px;">退出后需重新验证身份才能访问管理功能</div>
+    <button onclick="doLogout()" style="width:100%;height:50px;background:var(--c-danger);color:white;border:none;border-radius:var(--radius-md);font-size:16px;font-weight:700;margin-bottom:12px;cursor:pointer;">退出登录</button>
+    <button onclick="closeLogout()" style="width:100%;height:50px;background:var(--c-gray-50);color:var(--c-gray-700);border:none;border-radius:var(--radius-md);font-size:16px;font-weight:600;cursor:pointer;">取消</button>
+  </div>
+</div>
+
+<script>
+function confirmLogout() {
+  document.getElementById('logoutModal').style.display = 'flex';
+}
+function closeLogout() {
+  document.getElementById('logoutModal').style.display = 'none';
+}
+function doLogout() {
+  location.href = 'admin-login.html';
+}
+</script>
+</body>
+</html>

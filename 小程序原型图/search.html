@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>搜索 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+
+/* 搜索头部 */
+.search-header {
+  background: var(--c-white);
+  padding: 10px var(--space-4) 0;
+  border-bottom: 1px solid var(--c-gray-100);
+  position: sticky; top: 44px; z-index: 40;
+  box-shadow: var(--shadow-xs);
+}
+.search-input-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 0;
+}
+.search-back {
+  font-size: 22px; color: var(--c-gray-700);
+  cursor: pointer; touch-action: manipulation; flex-shrink: 0;
+  width: 32px; text-align: center;
+}
+.search-input-wrap {
+  flex: 1;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--c-gray-50);
+  border: 1.5px solid var(--c-primary-400);
+  border-radius: var(--radius-full);
+  height: 40px; padding: 0 14px;
+  box-shadow: 0 0 0 3px rgba(26,124,217,0.10);
+}
+.search-input-wrap input {
+  flex: 1; border: none; background: transparent;
+  outline: none; font-family: var(--font-body);
+  font-size: 16px; color: var(--c-gray-900);
+}
+.search-input-wrap input::placeholder { color: var(--c-gray-300); }
+.search-clear {
+  font-size: 16px; color: var(--c-gray-300);
+  cursor: pointer; touch-action: manipulation; flex-shrink: 0;
+}
+.search-submit {
+  font-size: 14px; font-weight: 700;
+  color: var(--c-primary-600); cursor: pointer;
+  touch-action: manipulation; flex-shrink: 0;
+  padding: 8px 0 8px 4px;
+}
+.search-submit:active { opacity: 0.7; }
+
+/* 结果类型 Tab */
+.result-tabs {
+  display: flex; overflow-x: auto; padding: 0;
+  -webkit-overflow-scrolling: touch;
+}
+.result-tabs::-webkit-scrollbar { display: none; }
+.result-tab {
+  flex-shrink: 0; height: 42px; padding: 0 16px;
+  font-size: 14px; font-weight: 500; color: var(--c-gray-500);
+  display: flex; align-items: center; gap: 5px;
+  cursor: pointer; touch-action: manipulation;
+  position: relative; white-space: nowrap;
+  transition: color var(--duration-fast);
+}
+.result-tab.active { color: var(--c-primary-600); font-weight: 700; }
+.result-tab.active::after {
+  content: ''; position: absolute; bottom: 0; left: 16px; right: 16px;
+  height: 2px; background: var(--c-primary-600); border-radius: 1px;
+}
+.result-count {
+  background: var(--c-gray-100); color: var(--c-gray-500);
+  font-size: 11px; font-weight: 700;
+  padding: 1px 6px; border-radius: var(--radius-full);
+}
+.result-tab.active .result-count {
+  background: var(--c-primary-50); color: var(--c-primary-600);
+}
+
+/* 热门搜索 / 历史搜索（无关键词时显示） */
+.suggest-section { padding: 16px var(--space-4) 0; }
+.suggest-title {
+  font-size: 14px; font-weight: 700; color: var(--c-gray-900);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+}
+.suggest-title::before {
+  content: ''; width: 3px; height: 14px;
+  background: var(--c-primary-600); border-radius: 2px; display: inline-block;
+}
+.suggest-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.suggest-tag {
+  padding: 6px 14px; border-radius: var(--radius-full);
+  background: var(--c-white); border: 1.5px solid var(--c-gray-100);
+  font-size: 13px; color: var(--c-gray-700); font-weight: 500;
+  cursor: pointer; touch-action: manipulation;
+  transition: all var(--duration-fast);
+}
+.suggest-tag:active { background: var(--c-primary-50); border-color: var(--c-primary-200); color: var(--c-primary-600); }
+.history-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 0; border-bottom: 1px solid var(--c-gray-100);
+  cursor: pointer; touch-action: manipulation;
+}
+.history-row:last-child { border-bottom: none; }
+.history-row:active { background: var(--c-gray-50); }
+.history-icon { font-size: 14px; color: var(--c-gray-300); flex-shrink: 0; }
+.history-text { flex: 1; font-size: 14px; color: var(--c-gray-700); }
+.history-del { font-size: 16px; color: var(--c-gray-300); cursor: pointer; touch-action: manipulation; padding: 4px; }
+
+/* 搜索结果 */
+.result-wrap { padding: 12px var(--space-4) 0; display: none; }
+.result-meta {
+  font-size: 13px; color: var(--c-gray-500); margin-bottom: 12px;
+}
+.result-meta strong { color: var(--c-gray-900); }
+
+/* 搜索结果 - 赛事条目 */
+.search-contest-item {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); margin-bottom: 10px;
+  padding: 14px; cursor: pointer; touch-action: manipulation;
+  display: flex; gap: 12px; align-items: flex-start;
+  transition: box-shadow var(--duration-fast);
+}
+.search-contest-item:active { box-shadow: none; }
+.sci-thumb {
+  width: 60px; height: 60px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; flex-shrink: 0;
+}
+.sci-body { flex: 1; min-width: 0; }
+.sci-title {
+  font-size: 15px; font-weight: 700; color: var(--c-gray-900);
+  margin-bottom: 6px; line-height: 1.4;
+}
+.sci-title mark {
+  background: var(--c-primary-50); color: var(--c-primary-600);
+  border-radius: 2px; padding: 0 1px;
+}
+.sci-meta { font-size: 12px; color: var(--c-gray-500); margin-bottom: 6px; }
+.sci-footer { display: flex; align-items: center; justify-content: space-between; }
+.sci-price { font-size: 15px; font-weight: 700; color: var(--c-accent); }
+.sci-price.free { color: var(--c-success); }
+
+/* 搜索结果 - 课程条目 */
+.search-course-item {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); margin-bottom: 10px;
+  display: flex; overflow: hidden;
+  cursor: pointer; touch-action: manipulation;
+  transition: box-shadow var(--duration-fast);
+}
+.search-course-item:active { box-shadow: none; }
+.sco-thumb {
+  width: 90px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+}
+.sco-body { flex: 1; padding: 12px; min-width: 0; }
+.sco-title {
+  font-size: 14px; font-weight: 700; color: var(--c-gray-900);
+  margin-bottom: 4px; line-height: 1.4;
+}
+.sco-title mark { background: var(--c-primary-50); color: var(--c-primary-600); border-radius: 2px; padding: 0 1px; }
+.sco-meta { font-size: 12px; color: var(--c-gray-500); margin-bottom: 6px; }
+.sco-price { font-size: 15px; font-weight: 700; color: var(--c-accent); }
+
+/* 公告条目 */
+.search-notice-item {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); margin-bottom: 10px;
+  padding: 14px; cursor: pointer; touch-action: manipulation;
+}
+.search-notice-item:active { background: var(--c-gray-50); }
+.sni-title {
+  font-size: 14px; font-weight: 600; color: var(--c-gray-900);
+  margin-bottom: 6px; line-height: 1.4;
+}
+.sni-title mark { background: var(--c-primary-50); color: var(--c-primary-600); border-radius: 2px; }
+.sni-preview { font-size: 13px; color: var(--c-gray-500); line-height: 1.6; margin-bottom: 8px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sni-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--c-gray-300); }
+
+/* 空状态 */
+.search-empty { text-align: center; padding: 48px 24px; display: none; }
+.search-empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.5; }
+.search-empty-title { font-size: 17px; font-weight: 700; color: var(--c-gray-700); margin-bottom: 8px; }
+.search-empty-desc { font-size: 14px; color: var(--c-gray-500); line-height: 1.6; margin-bottom: 20px; }
+</style>
+</head>
+<body class="has-tabbar">
+
+<div class="status-bar" style="background:var(--c-primary);"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+
+<!-- 搜索头部 -->
+<div class="search-header animate-in">
+  <div class="search-input-row" style="padding-bottom:10px;">
+    <div class="search-back" onclick="history.back()">←</div>
+    <div class="search-input-wrap">
+      <span style="font-size:16px;color:var(--c-gray-300);flex-shrink:0;">🔍</span>
+      <input type="search" id="searchInput" placeholder="搜索赛事、课程、公告..."
+             autofocus oninput="onInput(this.value)" onkeydown="if(event.key==='Enter')doSearch()">
+      <span class="search-clear" id="clearBtn" onclick="clearSearch()" style="display:none;">✕</span>
+    </div>
+    <div class="search-submit" onclick="doSearch()">搜索</div>
+  </div>
+
+  <!-- 结果类型 Tab（搜索后显示） -->
+  <div class="result-tabs" id="resultTabs" style="display:none;">
+    <div class="result-tab active" onclick="switchTab(this,'all')">全部 <span class="result-count" id="cnt-all">0</span></div>
+    <div class="result-tab" onclick="switchTab(this,'contest')">赛事 <span class="result-count" id="cnt-contest">0</span></div>
+    <div class="result-tab" onclick="switchTab(this,'course')">课程 <span class="result-count" id="cnt-course">0</span></div>
+    <div class="result-tab" onclick="switchTab(this,'notice')">公告 <span class="result-count" id="cnt-notice">0</span></div>
+  </div>
+</div>
+
+<!-- 默认：热门搜索 + 历史 -->
+<div id="defaultView">
+  <div class="suggest-section animate-in animate-in-d1">
+    <div class="suggest-title">🔥 热门搜索</div>
+    <div class="suggest-tags">
+      <div class="suggest-tag" onclick="quickSearch('安徒生艺术奖')">安徒生艺术奖</div>
+      <div class="suggest-tag" onclick="quickSearch('鸟巢杯艺术')">鸟巢杯艺术</div>
+      <div class="suggest-tag" onclick="quickSearch('人民艺术')">人民艺术</div>
+      <div class="suggest-tag" onclick="quickSearch('科技创新')">科技创新</div>
+      <div class="suggest-tag" onclick="quickSearch('书法大赛')">书法大赛</div>
+      <div class="suggest-tag" onclick="quickSearch('音乐展演')">音乐展演</div>
+      <div class="suggest-tag" onclick="quickSearch('艺术展演')">艺术展演</div>
+      <div class="suggest-tag" onclick="quickSearch('免费赛事')">免费赛事</div>
+    </div>
+  </div>
+
+  <div class="suggest-section animate-in animate-in-d2">
+    <div class="suggest-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>🕐 最近搜索</span>
+      <span style="font-size:13px;font-weight:400;color:var(--c-gray-500);cursor:pointer;" onclick="clearHistory()">清除</span>
+    </div>
+    <div id="historyList">
+      <div class="history-row" onclick="quickSearch('安徒生(国际)安徒生艺术奖')">
+        <span class="history-icon">🕐</span>
+        <span class="history-text">安徒生(国际)安徒生艺术奖</span>
+        <span class="history-del" onclick="event.stopPropagation();this.parentElement.remove()">✕</span>
+      </div>
+      <div class="history-row" onclick="quickSearch('"鸟巢杯"艺术活动')">
+        <span class="history-icon">🕐</span>
+        <span class="history-text">"鸟巢杯"艺术活动</span>
+        <span class="history-del" onclick="event.stopPropagation();this.parentElement.remove()">✕</span>
+      </div>
+      <div class="history-row" onclick="quickSearch('竞赛数学精讲')">
+        <span class="history-icon">🕐</span>
+        <span class="history-text">竞赛数学精讲</span>
+        <span class="history-del" onclick="event.stopPropagation();this.parentElement.remove()">✕</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="suggest-section animate-in animate-in-d2">
+    <div class="suggest-title">📂 分类浏览</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div onclick="location.href='contest-list.html'" style="background:var(--c-white);border-radius:var(--radius-md);box-shadow:var(--shadow-xs);padding:14px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;touch-action:manipulation;">
+        <span style="font-size:24px;">🏆</span><div><div style="font-size:13px;font-weight:700;color:var(--c-gray-900);">全部赛事</div><div style="font-size:11px;color:var(--c-gray-500);margin-top:2px;">500+ 场赛事</div></div>
+      </div>
+      <div onclick="location.href='course-list.html'" style="background:var(--c-white);border-radius:var(--radius-md);box-shadow:var(--shadow-xs);padding:14px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;touch-action:manipulation;">
+        <span style="font-size:24px;">📚</span><div><div style="font-size:13px;font-weight:700;color:var(--c-gray-900);">全部课程</div><div style="font-size:11px;color:var(--c-gray-500);margin-top:2px;">50+ 门课程</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="height:20px;"></div>
+</div>
+
+<!-- 搜索结果 -->
+<div id="resultView" style="display:none;">
+  <div class="result-wrap" id="resultWrap">
+    <div class="result-meta" id="resultMeta"></div>
+
+    <!-- 赛事结果 -->
+    <div id="contestResults">
+      <div class="search-contest-item" onclick="location.href='contest-detail.html'">
+        <div class="sci-thumb" style="background:linear-gradient(135deg,var(--c-primary),var(--c-primary-600));">🔢</div>
+        <div class="sci-body">
+          <div class="sci-title" id="r1-title">2025年安徒生(国际)<mark>数学</mark>联赛</div>
+          <div class="sci-meta">高中组 · 2025-10-19 · 线上 · 中国数学学会</div>
+          <div class="sci-footer">
+            <div style="display:flex;gap:4px;">
+              <span class="tag tag-primary" style="font-size:10px;">数学</span>
+              <span class="tag tag-accent" style="font-size:10px;">报名中</span>
+            </div>
+            <div class="sci-price">¥80</div>
+          </div>
+        </div>
+      </div>
+      <div class="search-contest-item" onclick="location.href='contest-detail.html'">
+        <div class="sci-thumb" style="background:linear-gradient(135deg,#E65100,#FFAB40);">🔬</div>
+        <div class="sci-body">
+          <div class="sci-title">全国初中生物学联赛预选赛</div>
+          <div class="sci-meta">初中组 · 2025-09-15 · 线上 · 中国动物学会</div>
+          <div class="sci-footer">
+            <div style="display:flex;gap:4px;">
+              <span class="tag tag-primary" style="font-size:10px;">生物</span>
+              <span class="tag tag-gray" style="font-size:10px;">已截止</span>
+            </div>
+            <div class="sci-price">¥45</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 课程结果 -->
+    <div id="courseResults">
+      <div class="search-course-item" onclick="location.href='course-detail.html'">
+        <div class="sco-thumb" style="background:linear-gradient(135deg,var(--c-primary),var(--c-primary-600));">🔢</div>
+        <div class="sco-body">
+          <div class="sco-title">竞赛<mark>数学</mark>精讲 · 高中组</div>
+          <div class="sco-meta">王老师 · 共24讲 · 线上课程</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="sco-price">¥299</div>
+            <span class="tag tag-info" style="font-size:10px;">线上</span>
+          </div>
+        </div>
+      </div>
+      <div class="search-course-item" onclick="location.href='course-detail.html'">
+        <div class="sco-thumb" style="background:linear-gradient(135deg,#1B5E20,#66BB6A);">📐</div>
+        <div class="sco-body">
+          <div class="sco-title">联赛冲刺班（线下·周末）</div>
+          <div class="sco-meta">周末班 · 全程辅导 · 线下</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="sco-price">¥1800</div>
+            <span class="tag tag-accent" style="font-size:10px;">线下</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 公告结果 -->
+    <div id="noticeResults">
+      <div class="search-notice-item" onclick="location.href='notice.html'">
+        <div class="sni-title">2025年安徒生(国际)<mark>数学</mark>联赛报名通知及注意事项</div>
+        <div class="sni-preview">各参赛学校及同学们：报名截止时间为2025年10月15日23:59，请认真阅读报名须知并按时完成报名缴费...</div>
+        <div class="sni-meta"><span class="tag tag-gray" style="font-size:10px;">平台公告</span><span>2025-09-01</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 空状态 -->
+  <div class="search-empty" id="searchEmpty">
+    <div class="search-empty-icon">🔍</div>
+    <div class="search-empty-title">未找到相关内容</div>
+    <div class="search-empty-desc">换个关键词试试，或浏览下方分类</div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-outline btn-sm" onclick="quickSearch('数学')">🔢 数学</button>
+      <button class="btn btn-outline btn-sm" onclick="quickSearch('英语')">🎤 英语</button>
+      <button class="btn btn-outline btn-sm" onclick="quickSearch('编程')">💻 编程</button>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="nav-tab" onclick="location.href='index.html'"><span class="nav-tab-icon">🏠</span><span class="nav-tab-label">首页</span></div>
+  <div class="nav-tab" onclick="location.href='contest-list.html'"><span class="nav-tab-icon">🏆</span><span class="nav-tab-label">赛事</span></div>
+  <div class="nav-tab" onclick="location.href='course-list.html'"><span class="nav-tab-icon">📚</span><span class="nav-tab-label">课程</span></div>
+  <div class="nav-tab" onclick="location.href='notice.html'"><span class="nav-tab-icon">📢</span><span class="nav-tab-label">公告</span></div>
+  <div class="nav-tab" onclick="location.href='my.html'"><span class="nav-tab-icon">👤</span><span class="nav-tab-label">我的</span></div>
+</nav>
+
+<script>
+let currentQuery = '';
+
+function onInput(val) {
+  document.getElementById('clearBtn').style.display = val ? 'block' : 'none';
+  if (!val) {
+    showDefault();
+  }
+}
+
+function clearSearch() {
+  const inp = document.getElementById('searchInput');
+  inp.value = '';
+  inp.focus();
+  document.getElementById('clearBtn').style.display = 'none';
+  showDefault();
+}
+
+function showDefault() {
+  document.getElementById('defaultView').style.display = 'block';
+  document.getElementById('resultView').style.display = 'none';
+  document.getElementById('resultTabs').style.display = 'none';
+}
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  currentQuery = q;
+
+  // 高亮关键词
+  document.querySelectorAll('.sci-title, .sco-title, .sni-title').forEach(el => {
+    const orig = el.dataset.orig || el.textContent;
+    el.dataset.orig = orig;
+    el.innerHTML = orig.replace(new RegExp(q, 'gi'), m => `<mark>${m}</mark>`);
+  });
+
+  // 模拟结果数量
+  const contestCnt = q.length >= 2 ? 2 : 0;
+  const courseCnt  = q.length >= 2 ? 2 : 0;
+  const noticeCnt  = q.length >= 2 ? 1 : 0;
+  const totalCnt   = contestCnt + courseCnt + noticeCnt;
+
+  document.getElementById('cnt-all').textContent = totalCnt;
+  document.getElementById('cnt-contest').textContent = contestCnt;
+  document.getElementById('cnt-course').textContent = courseCnt;
+  document.getElementById('cnt-notice').textContent = noticeCnt;
+
+  document.getElementById('resultMeta').innerHTML = `"<strong>${q}</strong>" 的搜索结果，共 ${totalCnt} 条`;
+
+  document.getElementById('defaultView').style.display = 'none';
+  document.getElementById('resultView').style.display = 'block';
+  document.getElementById('resultTabs').style.display = 'flex';
+  document.getElementById('resultWrap').style.display = 'block';
+  document.getElementById('searchEmpty').style.display = totalCnt === 0 ? 'block' : 'none';
+
+  // 显示/隐藏各类结果
+  document.getElementById('contestResults').style.display = contestCnt > 0 ? 'block' : 'none';
+  document.getElementById('courseResults').style.display = courseCnt > 0 ? 'block' : 'none';
+  document.getElementById('noticeResults').style.display = noticeCnt > 0 ? 'block' : 'none';
+
+  // 激活"全部" tab
+  document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.result-tab').classList.add('active');
+}
+
+function quickSearch(kw) {
+  document.getElementById('searchInput').value = kw;
+  document.getElementById('clearBtn').style.display = 'block';
+  doSearch();
+}
+
+function switchTab(el, type) {
+  document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const show = type === 'all';
+  document.getElementById('contestResults').style.display = (show || type === 'contest') ? 'block' : 'none';
+  document.getElementById('courseResults').style.display  = (show || type === 'course')  ? 'block' : 'none';
+  document.getElementById('noticeResults').style.display  = (show || type === 'notice')  ? 'block' : 'none';
+}
+
+function clearHistory() {
+  document.getElementById('historyList').innerHTML =
+    '<div style="text-align:center;padding:16px;font-size:13px;color:var(--c-gray-300);">暂无搜索记录</div>';
+}
+
+// 从 URL 参数获取关键词
+const urlQ = new URLSearchParams(location.search).get('q');
+if (urlQ) {
+  document.getElementById('searchInput').value = urlQ;
+  document.getElementById('clearBtn').style.display = 'block';
+  doSearch();
+}
+</script>
+</body>
+</html>

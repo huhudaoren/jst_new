@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>竞赛通 · 发现好赛事</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+/* ===== 首页专属样式 ===== */
+
+/* Header 品牌区 */
+.home-header {
+  background: linear-gradient(150deg, var(--c-primary) 0%, var(--c-primary-600) 55%, #1A5FB0 100%);
+  padding: 10px var(--space-4) 0;
+  position: relative;
+  overflow: hidden;
+}
+.home-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 85% 20%, rgba(255,255,255,0.06) 0%, transparent 45%),
+    radial-gradient(circle at 10% 80%, rgba(255,255,255,0.04) 0%, transparent 40%);
+  pointer-events: none;
+}
+.home-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 20px;
+  background: var(--c-gray-50);
+  border-radius: 20px 20px 0 0;
+}
+
+.header-top {
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative; z-index: 1;
+  margin-bottom: 10px;
+}
+.header-logo {
+  display: flex; align-items: center; gap: 8px;
+}
+.header-logo-icon {
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.18);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.header-logo-text {
+  font-size: 20px; font-weight: 900;
+  color: white; letter-spacing: -0.5px;
+}
+.header-logo-text em {
+  font-style: normal; color: rgba(255,200,100,0.95);
+}
+.header-actions {
+  display: flex; gap: 8px; align-items: center;
+}
+.header-btn {
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: var(--radius-full);
+  color: white; font-size: 13px; font-weight: 500;
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast) ease;
+}
+.header-btn:active { background: rgba(255,255,255,0.25); }
+.header-msg-btn {
+  width: 34px; height: 34px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer; position: relative;
+  touch-action: manipulation;
+}
+.header-msg-dot {
+  position: absolute; top: 5px; right: 5px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--c-accent); border: 1.5px solid var(--c-primary);
+}
+
+/* 搜索框 */
+.header-search {
+  position: relative; z-index: 1;
+  margin-bottom: 12px;
+}
+.header-search .search-bar {
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.22);
+}
+.header-search .search-bar input {
+  color: white;
+}
+.header-search .search-bar input::placeholder { color: rgba(255,255,255,0.55); }
+.header-search .search-icon { color: rgba(255,255,255,0.6); }
+
+/* Banner 轮播 */
+.banner-wrap {
+  padding: 10px var(--space-4) 0;
+  position: relative;
+}
+.banner-slider {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+  height: 156px;
+  background: var(--c-primary-600);
+  box-shadow: var(--shadow-md);
+}
+.banner-slide {
+  position: absolute; inset: 0;
+  display: flex; align-items: center;
+  padding: 20px 24px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.banner-slide.active { opacity: 1; }
+.banner-slide-1 { background: linear-gradient(125deg, #4A0E8F 0%, #9C27B0 60%, #E040FB 100%); }
+.banner-slide-2 { background: linear-gradient(125deg, #B71C1C 0%, #E53935 55%, #FF6E6E 100%); }
+.banner-slide-3 { background: linear-gradient(125deg, #1A237E 0%, #3949AB 55%, #7986CB 100%); }
+.banner-slide::before {
+  content: '';
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 160px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 150'%3E%3Ccircle cx='130' cy='30' r='60' fill='rgba(255,255,255,0.05)'/%3E%3Ccircle cx='80' cy='120' r='80' fill='rgba(255,255,255,0.04)'/%3E%3C/svg%3E") no-repeat center;
+  background-size: cover;
+}
+.banner-tag {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.9);
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: var(--radius-full);
+  margin-bottom: 8px; letter-spacing: 0.3px;
+}
+.banner-title {
+  font-size: 18px; font-weight: 700; color: white;
+  line-height: 1.35; margin-bottom: 10px;
+  max-width: 200px;
+}
+.banner-cta {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: white; color: var(--c-primary-600);
+  font-size: 12px; font-weight: 600;
+  padding: 6px 14px; border-radius: var(--radius-full);
+  cursor: pointer; touch-action: manipulation;
+}
+.banner-dots {
+  position: absolute; bottom: 10px; right: 14px;
+  display: flex; gap: 5px;
+}
+.banner-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  transition: all 0.3s ease;
+}
+.banner-dot.active { width: 16px; border-radius: 3px; background: white; }
+
+/* 快捷功能区 */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+  padding: 20px var(--space-4) 4px;
+}
+.qe-icon-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer; padding: 4px 0;
+  touch-action: manipulation;
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+.qe-icon-wrap:active { transform: scale(0.88); }
+.qe-icon {
+  width: 48px; height: 48px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: var(--shadow-xs);
+}
+.qe-label { font-size: 11px; font-weight: 500; color: var(--c-gray-700); text-align: center; line-height: 1.3; }
+
+/* 页面内容区 */
+.page-content { padding: 0 var(--space-4); }
+
+/* Section 标题行 */
+.section-hd {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 20px 0 14px;
+}
+.section-hd-title {
+  font-size: 17px; font-weight: 700; color: var(--c-gray-900);
+  letter-spacing: -0.3px;
+  display: flex; align-items: center; gap: 6px;
+}
+.section-hd-title::before {
+  content: '';
+  display: inline-block; width: 4px; height: 16px;
+  background: var(--c-primary-600);
+  border-radius: 2px; flex-shrink: 0;
+}
+.section-hd-more {
+  font-size: 13px; color: var(--c-primary-600); font-weight: 500;
+  display: flex; align-items: center; gap: 2px;
+  cursor: pointer; touch-action: manipulation;
+}
+
+/* 赛事横向滑动列表 */
+.contest-scroll {
+  display: flex; gap: 12px;
+  overflow-x: auto; overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+.contest-scroll::-webkit-scrollbar { display: none; }
+.contest-scroll .contest-card {
+  min-width: 200px; flex-shrink: 0;
+  scroll-snap-align: start;
+}
+.contest-scroll .contest-card:last-child { margin-right: 0; }
+
+/* 赛事列表竖排 */
+.contest-list-item {
+  display: flex; gap: 12px;
+  padding: 14px;
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  margin-bottom: 10px;
+  cursor: pointer; touch-action: manipulation;
+  transition: box-shadow var(--duration-fast) ease;
+}
+.contest-list-item:active { box-shadow: none; }
+.contest-list-thumb {
+  width: 72px; height: 72px; border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-600) 100%);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  position: relative; overflow: hidden;
+}
+.contest-list-thumb::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.12) 0%, transparent 60%);
+}
+.contest-list-body { flex: 1; min-width: 0; }
+.contest-list-title {
+  font-size: 14px; font-weight: 600; color: var(--c-gray-900);
+  line-height: 1.4; margin-bottom: 6px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.contest-list-meta {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px;
+}
+.contest-list-footer {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.contest-price {
+  font-size: 15px; font-weight: 700; color: var(--c-accent);
+}
+.contest-price.free { color: var(--c-success); }
+.contest-deadline { font-size: 11px; color: var(--c-gray-500); }
+
+/* 课程横向滑动 */
+.course-scroll {
+  display: flex; gap: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+.course-scroll::-webkit-scrollbar { display: none; }
+.course-scroll .course-card {
+  min-width: 160px; flex-shrink: 0;
+  scroll-snap-align: start;
+}
+.course-scroll .course-card:last-child { margin-right: 0; }
+
+/* 公告列表 */
+.notice-list { margin-bottom: 4px; }
+.notice-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 14px;
+  background: var(--c-white);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast) ease;
+  box-shadow: var(--shadow-xs);
+}
+.notice-item:active { background: var(--c-gray-50); }
+.notice-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--c-accent); flex-shrink: 0;
+}
+.notice-dot.read { background: var(--c-gray-300); }
+.notice-item-title {
+  flex: 1; font-size: 14px; color: var(--c-gray-900);
+  font-weight: 500; line-height: 1.4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.notice-item-time { font-size: 11px; color: var(--c-gray-500); flex-shrink: 0; }
+
+/* 平台介绍区 */
+.platform-intro {
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-xs);
+}
+.platform-intro-title {
+  font-size: 15px; font-weight: 700; color: var(--c-gray-900);
+  margin-bottom: 14px;
+}
+.platform-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px; margin-bottom: 16px;
+}
+.stat-item { text-align: center; }
+.stat-num {
+  font-size: 22px; font-weight: 900; color: var(--c-primary-600);
+  letter-spacing: -0.5px; line-height: 1;
+}
+.stat-num em { font-style: normal; font-size: 14px; }
+.stat-label { font-size: 11px; color: var(--c-gray-500); margin-top: 4px; }
+.platform-tags {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.platform-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--c-primary-50); color: var(--c-primary-600);
+  font-size: 12px; font-weight: 500;
+  padding: 5px 10px; border-radius: var(--radius-full);
+}
+
+/* 客服悬浮 */
+.float-cs {
+  position: fixed; right: 16px; bottom: 100px;
+  width: 48px; height: 48px;
+  background: var(--c-primary-600);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: var(--shadow-md);
+  cursor: pointer; z-index: 40;
+  touch-action: manipulation;
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+.float-cs:active { transform: scale(0.92); }
+
+/* 分区灰块 */
+.divider-block {
+  height: 8px; background: var(--c-gray-50);
+  margin: 4px calc(-1 * var(--space-4));
+}
+</style>
+</head>
+<body class="has-tabbar">
+
+<!-- 状态栏 -->
+<div class="status-bar" style="background: var(--c-primary);">
+  <span class="time">9:41</span>
+  <span class="icons">📶 🔋</span>
+</div>
+
+<!-- ===== HEADER ===== -->
+<div class="home-header animate-in">
+  <div class="header-top">
+    <div class="header-logo">
+      <div class="header-logo-icon">🏆</div>
+      <div class="header-logo-text">竞赛<em>通</em></div>
+    </div>
+    <div class="header-actions">
+      <div class="header-msg-btn" onclick="location.href='my.html'">
+        💬
+        <div class="header-msg-dot"></div>
+      </div>
+      <div class="header-btn" onclick="location.href='login.html'">登录</div>
+    </div>
+  </div>
+  <div class="header-search">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="搜索赛事、课程、公告..." readonly onclick="location.href='search.html'">
+    </div>
+  </div>
+</div>
+
+<!-- ===== BANNER ===== -->
+<div class="banner-wrap animate-in animate-in-d1">
+  <div class="banner-slider" id="bannerSlider">
+    <div class="banner-slide banner-slide-1 active">
+      <div>
+        <div class="banner-tag">🏆 国际赛事</div>
+        <div class="banner-title">安徒生(国际)艺术奖</div>
+        <div class="banner-cta" onclick="location.href='contest-detail.html'">
+          立即报名 →
+        </div>
+      </div>
+    </div>
+    <div class="banner-slide banner-slide-2">
+      <div>
+        <div class="banner-tag">🎨 文化艺术</div>
+        <div class="banner-title">"鸟巢杯"文化艺术活动</div>
+        <div class="banner-cta" onclick="location.href='contest-detail.html'">
+          了解详情 →
+        </div>
+      </div>
+    </div>
+    <div class="banner-slide banner-slide-3">
+      <div>
+        <div class="banner-tag">🎭 人民艺术</div>
+        <div class="banner-title">人民艺术全国展演活动</div>
+        <div class="banner-cta" onclick="location.href='contest-detail.html'">
+          查看赛事 →
+        </div>
+      </div>
+    </div>
+    <div class="banner-dots">
+      <div class="banner-dot active" id="dot0"></div>
+      <div class="banner-dot" id="dot1"></div>
+      <div class="banner-dot" id="dot2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- V4.0 积分活动横幅 -->
+<div style="margin:10px var(--space-4) 0;background:linear-gradient(90deg,#4A0072,#7B1FA2);border-radius:var(--radius-lg);padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;touch-action:manipulation;" onclick="location.href='campaign-topic.html'">
+  <div style="font-size:28px;flex-shrink:0;">🎟️</div>
+  <div style="flex:1;">
+    <div style="font-size:14px;font-weight:800;color:white;">春季艺术大赛专题活动</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;">领券最高减 ¥50 · 积分报名抵扣上线</div>
+  </div>
+  <div style="font-size:18px;color:rgba(255,255,255,.5);">›</div>
+</div>
+
+<!-- ===== 快捷入口 ===== -->
+<div class="animate-in animate-in-d2">
+  <div class="quick-grid">
+    <div class="qe-icon-wrap" onclick="location.href='contest-list.html'">
+      <div class="qe-icon" style="background: linear-gradient(135deg,#EBF4FC,#C8E0F4);">🏆</div>
+      <span class="qe-label">热门赛事</span>
+    </div>
+    <div class="qe-icon-wrap" onclick="location.href='contest-list.html'">
+      <div class="qe-icon" style="background: linear-gradient(135deg,#FFF3EE,#FFD5C8);">📋</div>
+      <span class="qe-label">赛事分类</span>
+    </div>
+    <div class="qe-icon-wrap" onclick="location.href='my-enroll.html'">
+      <div class="qe-icon" style="background: linear-gradient(135deg,#EAFAF1,#C0EDCF);">📝</div>
+      <span class="qe-label">报名查询</span>
+    </div>
+    <div class="qe-icon-wrap" onclick="location.href='score-query.html'">
+      <div class="qe-icon" style="background: linear-gradient(135deg,#FEF9EC,#FAD98A);">🎯</div>
+      <span class="qe-label">成绩查询</span>
+    </div>
+    <div class="qe-icon-wrap" onclick="location.href='my-cert.html'">
+      <div class="qe-icon" style="background: linear-gradient(135deg,#F5EEF8,#D7A8EB);">🏅</div>
+      <span class="qe-label">积分中心</span>
+    </div>
+    <div class="qe-icon-wrap" onclick="location.href='course-list.html'">
+      <div class="qe-icon" style="background: linear-gradient(135deg,#EAF4FC,#A8CDEE);">📚</div>
+      <span class="qe-label">课程入口</span>
+    </div>
+  </div>
+</div>
+
+<div class="divider-block" style="margin-top:12px"></div>
+
+<!-- ===== 推荐赛事 ===== -->
+<div class="page-content animate-in animate-in-d2">
+  <div class="section-hd">
+    <div class="section-hd-title">推荐赛事</div>
+    <div class="section-hd-more" onclick="location.href='contest-list.html'">全部 ›</div>
+  </div>
+</div>
+
+<div>
+  <div class="contest-scroll animate-in animate-in-d3">
+    <!-- 安徒生(国际)艺术奖 -->
+    <div class="contest-card" onclick="location.href='contest-detail.html'">
+      <div class="contest-card-thumb" style="background:linear-gradient(135deg,#4A0E8F,#9C27B0);position:relative;overflow:hidden;">
+        <span class="tag tag-gold" style="position:relative;z-index:1;">⭐ 国际赛事</span>
+        <span style="position:absolute;bottom:8px;right:10px;font-size:28px;opacity:.45;z-index:0;">🏆</span>
+      </div>
+      <div class="contest-card-body">
+        <div class="contest-card-title">安徒生(国际)艺术奖</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">
+          <span class="tag tag-primary">艺术</span>
+          <span class="tag tag-gray">全学段</span>
+          <span class="tag tag-info">线上+线下</span>
+        </div>
+        <div class="contest-card-meta">
+          <div class="contest-card-price">¥180 <span>/ 人</span></div>
+          <span class="tag tag-accent">报名中</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 鸟巢杯 -->
+    <div class="contest-card" onclick="location.href='contest-detail.html'">
+      <div class="contest-card-thumb" style="background:linear-gradient(135deg,#B71C1C,#E53935);position:relative;overflow:hidden;">
+        <span class="tag tag-accent" style="position:relative;z-index:1;">报名中</span>
+        <span style="position:absolute;bottom:8px;right:10px;font-size:28px;opacity:.45;z-index:0;">🏟️</span>
+      </div>
+      <div class="contest-card-body">
+        <div class="contest-card-title">"鸟巢杯"文化艺术活动</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">
+          <span class="tag tag-primary">艺术</span>
+          <span class="tag tag-gray">小学/初中</span>
+          <span class="tag tag-info">线下</span>
+        </div>
+        <div class="contest-card-meta">
+          <div class="contest-card-price">¥150 <span>/ 人</span></div>
+          <span class="tag tag-gray" style="font-size:10px;">截止 11/30</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 人民艺术 -->
+    <div class="contest-card" onclick="location.href='contest-detail.html'">
+      <div class="contest-card-thumb" style="background:linear-gradient(135deg,#1A237E,#3949AB);position:relative;overflow:hidden;">
+        <span class="tag tag-warning tag-dot" style="position:relative;z-index:1;">即将截止</span>
+        <span style="position:absolute;bottom:8px;right:10px;font-size:28px;opacity:.45;z-index:0;">🎭</span>
+      </div>
+      <div class="contest-card-body">
+        <div class="contest-card-title">人民艺术全国展演活动</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">
+          <span class="tag tag-primary">艺术</span>
+          <span class="tag tag-gray">全学段</span>
+        </div>
+        <div class="contest-card-meta">
+          <div class="contest-card-price free">免费</div>
+          <span class="tag tag-warning tag-dot">即将截止</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 全国艺术展演 -->
+    <div class="contest-card" onclick="location.href='contest-detail.html'">
+      <div class="contest-card-thumb" style="background:linear-gradient(135deg,#004D40,#00897B);position:relative;overflow:hidden;">
+        <span class="tag tag-success tag-dot" style="position:relative;z-index:1;">报名中</span>
+        <span style="position:absolute;bottom:8px;right:10px;font-size:28px;opacity:.45;z-index:0;">🎨</span>
+      </div>
+      <div class="contest-card-body">
+        <div class="contest-card-title">全国中小学生艺术展演活动</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">
+          <span class="tag tag-primary">艺术</span>
+          <span class="tag tag-gray">小学/初中</span>
+          <span class="tag tag-info">线下</span>
+        </div>
+        <div class="contest-card-meta">
+          <div class="contest-card-price">¥60 <span>/ 人</span></div>
+          <span class="tag tag-gray" style="font-size:10px;">截止 11/30</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider-block" style="margin-top:12px"></div>
+
+<!-- ===== 精选赛事（竖排列表） ===== -->
+<div class="page-content animate-in animate-in-d3">
+  <div class="section-hd">
+    <div class="section-hd-title">精选赛事</div>
+    <div class="section-hd-more" onclick="location.href='contest-list.html'">更多 ›</div>
+  </div>
+
+  <div class="contest-list-item" onclick="location.href='contest-detail.html'">
+    <div class="contest-list-thumb" style="background:linear-gradient(135deg,#1B5E20,#66BB6A);">🎨</div>
+    <div class="contest-list-body">
+      <div class="contest-list-title">全国中小学生艺术展演活动 2025</div>
+      <div class="contest-list-meta">
+        <span class="tag tag-primary">艺术</span>
+        <span class="tag tag-gray">小学/初中</span>
+        <span class="tag tag-info">线下</span>
+      </div>
+      <div class="contest-list-footer">
+        <span class="contest-price">¥60</span>
+        <span class="contest-deadline">截止 2025-11-30</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="contest-list-item" onclick="location.href='contest-detail.html'">
+    <div class="contest-list-thumb" style="background:linear-gradient(135deg,#880E4F,#F06292);">🏃</div>
+    <div class="contest-list-body">
+      <div class="contest-list-title">全国中学生田径锦标赛2025</div>
+      <div class="contest-list-meta">
+        <span class="tag tag-primary">体育</span>
+        <span class="tag tag-gray">初高中</span>
+        <span class="tag tag-info">线下</span>
+      </div>
+      <div class="contest-list-footer">
+        <span class="contest-price free">免费</span>
+        <span class="contest-deadline">截止 2025-09-20</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="contest-list-item" onclick="location.href='contest-detail.html'">
+    <div class="contest-list-thumb" style="background:linear-gradient(135deg,#E65100,#FFAB40);">🔬</div>
+    <div class="contest-list-body">
+      <div class="contest-list-title">初中生物学联赛全国预选赛</div>
+      <div class="contest-list-meta">
+        <span class="tag tag-primary">生物</span>
+        <span class="tag tag-gray">初中组</span>
+        <span class="tag tag-info">线上</span>
+      </div>
+      <div class="contest-list-footer">
+        <span class="contest-price">¥45</span>
+        <span class="contest-deadline">截止 2025-10-01</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider-block"></div>
+
+<!-- ===== 推荐课程 ===== -->
+<div class="page-content animate-in animate-in-d4">
+  <div class="section-hd">
+    <div class="section-hd-title">推荐课程</div>
+    <div class="section-hd-more" onclick="location.href='course-list.html'">全部 ›</div>
+  </div>
+</div>
+
+<div>
+  <div class="course-scroll animate-in animate-in-d4">
+    <div class="course-card">
+      <div class="course-card-thumb">
+        <span style="font-size:32px;position:relative;z-index:1;">🎨</span>
+      </div>
+      <div class="course-card-body">
+        <div class="course-card-title">儿童水彩绘画零基础入门</div>
+        <div style="font-size:11px;color:var(--c-gray-500);margin-bottom:6px;">李老师 · 共18讲</div>
+        <div class="course-card-info">
+          <span class="course-price">¥299</span>
+          <span class="tag tag-info" style="font-size:10px;">线上</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="course-card">
+      <div class="course-card-thumb" style="background:linear-gradient(135deg,#880E4F,#E91E63);">
+        <span style="font-size:32px;position:relative;z-index:1;">✏️</span>
+      </div>
+      <div class="course-card-body">
+        <div class="course-card-title">素描与速写基础训练</div>
+        <div style="font-size:11px;color:var(--c-gray-500);margin-bottom:6px;">张老师 · 共12讲</div>
+        <div class="course-card-info">
+          <span class="course-free">免费</span>
+          <span class="tag tag-success" style="font-size:10px;">线上</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="course-card">
+      <div class="course-card-thumb" style="background:linear-gradient(135deg,#1B5E20,#66BB6A);">
+        <span style="font-size:32px;position:relative;z-index:1;">📐</span>
+      </div>
+      <div class="course-card-body">
+        <div class="course-card-title">声乐表演与舞台技巧</div>
+        <div style="font-size:11px;color:var(--c-gray-500);margin-bottom:6px;">周末班 · 全程辅导</div>
+        <div class="course-card-info">
+          <span class="course-price">¥1800</span>
+          <span class="tag tag-accent" style="font-size:10px;">线下</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="course-card">
+      <div class="course-card-thumb" style="background:linear-gradient(135deg,#4A148C,#9C27B0);">
+        <span style="font-size:32px;position:relative;z-index:1;">🖌️</span>
+      </div>
+      <div class="course-card-body">
+        <div class="course-card-title">书法国画启蒙精讲班</div>
+        <div style="font-size:11px;color:var(--c-gray-500);margin-bottom:6px;">李老师 · 共36讲</div>
+        <div class="course-card-info">
+          <span class="course-price">¥399</span>
+          <span class="tag tag-info" style="font-size:10px;">线上</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider-block" style="margin-top:12px;"></div>
+
+<!-- ===== 最新公告 ===== -->
+<div class="page-content animate-in animate-in-d4">
+  <div class="section-hd">
+    <div class="section-hd-title">最新公告</div>
+    <div class="section-hd-more" onclick="location.href='notice.html'">更多 ›</div>
+  </div>
+
+  <div class="notice-list">
+    <div class="notice-item">
+      <div class="notice-dot"></div>
+      <div class="notice-item-title">安徒生(国际)艺术奖2025参赛报名通知</div>
+      <div class="notice-item-time">今天</div>
+    </div>
+    <div class="notice-item">
+      <div class="notice-dot"></div>
+      <div class="notice-item-title">"鸟巢杯"文化艺术活动评审评分标准说明</div>
+      <div class="notice-item-time">昨天</div>
+    </div>
+    <div class="notice-item">
+      <div class="notice-dot read"></div>
+      <div class="notice-item-title">平台系统升级维护通知（2025年10月8日）</div>
+      <div class="notice-item-time">3天前</div>
+    </div>
+    <div class="notice-item">
+      <div class="notice-dot read"></div>
+      <div class="notice-item-title">关于竞赛证书下载功能新增PDF格式的说明</div>
+      <div class="notice-item-time">10/01</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider-block"></div>
+
+<!-- ===== 平台介绍 ===== -->
+<div class="page-content animate-in animate-in-d5">
+  <div class="platform-intro" style="margin-top:12px;">
+    <div class="platform-intro-title">竞赛通 · 一站式竞赛服务平台</div>
+    <div class="platform-stats">
+      <div class="stat-item">
+        <div class="stat-num">500<em>+</em></div>
+        <div class="stat-label">赛事资源</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">10<em>万+</em></div>
+        <div class="stat-label">注册学生</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">98<em>%</em></div>
+        <div class="stat-label">好评率</div>
+      </div>
+    </div>
+    <div class="platform-tags">
+      <span class="platform-tag">✅ 官方授权赛事</span>
+      <span class="platform-tag">🔒 信息安全保障</span>
+      <span class="platform-tag">📱 微信一键报名</span>
+      <span class="platform-tag">🏆 证书在线下载</span>
+    </div>
+  </div>
+
+  <!-- 客服入口 -->
+  <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:16px 0 8px;">
+    <div style="font-size:12px;color:var(--c-gray-500);">遇到问题？</div>
+    <button class="btn btn-outline btn-sm btn-icon" style="gap:4px;">
+      💬 在线客服
+    </button>
+  </div>
+</div>
+
+<!-- ===== 底部 Tab 导航 ===== -->
+<!-- V4.0 赛事方入驻引导入口 -->
+<div style="margin:12px var(--space-4) 0;padding:14px 16px;background:linear-gradient(90deg,#E8F5E9,white);border:1px solid rgba(27,94,32,.15);border-radius:var(--radius-lg);display:flex;align-items:center;gap:12px;cursor:pointer;touch-action:manipulation;" onclick="location.href='event-apply.html'">
+  <div style="font-size:24px;flex-shrink:0;">🏢</div>
+  <div style="flex:1;">
+    <div style="font-size:14px;font-weight:700;color:#1B5E20;">赛事方入驻合作</div>
+    <div style="font-size:12px;color:#2E7D32;margin-top:2px;">发布赛事 · 管理报名 · 结算收款</div>
+  </div>
+  <div style="font-size:13px;font-weight:700;color:#1B5E20;background:rgba(27,94,32,.1);padding:5px 12px;border-radius:var(--radius-full);">申请入驻</div>
+</div>
+<div style="height:8px;"></div>
+
+<nav class="bottom-nav">
+  <div class="nav-tab active" onclick="location.href='index.html'">
+    <span class="nav-tab-icon">🏠</span>
+    <span class="nav-tab-label" style="color:var(--c-primary-600);">首页</span>
+  </div>
+  <div class="nav-tab" onclick="location.href='contest-list.html'">
+    <span class="nav-tab-icon">🏆</span>
+    <span class="nav-tab-label">赛事</span>
+  </div>
+  <div class="nav-tab" onclick="location.href='course-list.html'">
+    <span class="nav-tab-icon">📚</span>
+    <span class="nav-tab-label">课程</span>
+    <div class="nav-tab-dot"></div>
+  </div>
+  <div class="nav-tab" onclick="location.href='notice.html'">
+    <span class="nav-tab-icon">📢</span>
+    <span class="nav-tab-label">公告</span>
+  </div>
+  <div class="nav-tab" onclick="location.href='my.html'">
+    <span class="nav-tab-icon">👤</span>
+    <span class="nav-tab-label">我的</span>
+  </div>
+</nav>
+
+<!-- 客服悬浮按钮 -->
+<div class="float-cs" title="在线客服">💬</div>
+
+<script>
+// Banner 自动轮播
+let current = 0;
+const slides = document.querySelectorAll('.banner-slide');
+const dots = document.querySelectorAll('.banner-dot');
+
+function goTo(n) {
+  slides[current].classList.remove('active');
+  dots[current].classList.remove('active');
+  current = (n + slides.length) % slides.length;
+  slides[current].classList.add('active');
+  dots[current].classList.add('active');
+}
+
+let timer = setInterval(() => goTo(current + 1), 3800);
+
+dots.forEach((d, i) => {
+  d.addEventListener('click', () => { clearInterval(timer); goTo(i); timer = setInterval(() => goTo(current + 1), 3800); });
+});
+
+// Banner 触摸滑动
+const slider = document.getElementById('bannerSlider');
+let startX = 0;
+slider.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - startX;
+  if (Math.abs(dx) > 40) { clearInterval(timer); goTo(current + (dx < 0 ? 1 : -1)); timer = setInterval(() => goTo(current + 1), 3800); }
+}, { passive: true });
+</script>
+</body>
+</html>

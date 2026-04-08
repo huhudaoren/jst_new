@@ -1,0 +1,550 @@
+### =====================================================================
+### 竞赛通 - 管理后台 (admin) + 赛事方 (partner) 测试文件
+### =====================================================================
+### 用法: IntelliJ 打开本文件,顶部 ▶️ Run All Requests in File
+### 前置:
+###   1. 业务表已建,99-test-fixtures.sql 已导入
+###   2. 97-disable-captcha-dev.sql 已跑(关闭 admin 登录验证码)
+###   3. 96-grant-jst-partner-permissions.sql 已跑(给 jst_partner 角色赋权)
+###   4. ruoyi-admin 启动在 8080
+### 特点:
+###   - admin 视角 + 赛事方视角的完整 CRUD + 状态机流转
+###   - wx 端测试在 wx-tests.http
+### =====================================================================
+
+@baseUrl = http://127.0.0.1:8080
+@contentType = application/json
+### =====================================================================
+### F9. 报名记录与表单快照 (jst-event / EnrollRecordController)
+### 前置: fixture 中 8901=pending, 8902=approved, 8903=supplement，且 8201 属于 partner_f7_a
+### =====================================================================
+
+### F9-0. 赛事方 A 登录
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_a",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("partner_a_token", response.body.token);
+%}
+
+### F9-1. 赛事方查询报名列表
+GET {{baseUrl}}/jst/event/enroll/list?contestId=8201&pageNum=1&pageSize=10
+Authorization: Bearer {{partner_a_token}}
+
+> {%
+client.test("F9 报名列表查询成功", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F9-2. 查看报名详情 (fixture 8901)
+GET {{baseUrl}}/jst/event/enroll/8901
+Authorization: Bearer {{partner_a_token}}
+
+> {%
+client.test("F9 报名详情返回快照", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.formSnapshotJson, "应返回 formSnapshotJson");
+});
+%}
+
+### F9-3. 审核通过 pending 报名 (fixture 8901)
+POST {{baseUrl}}/jst/event/enroll/8901/audit
+Content-Type: {{contentType}}
+Authorization: Bearer {{partner_a_token}}
+
+{
+  "result": "approved",
+  "auditRemark": "资料完整，审核通过"
+}
+
+### F9-4. 已 approved 记录再次审核应失败 (fixture 8902)
+POST {{baseUrl}}/jst/event/enroll/8902/audit
+Content-Type: {{contentType}}
+Authorization: Bearer {{partner_a_token}}
+
+{
+  "result": "rejected",
+  "auditRemark": "重复审核"
+}
+
+> {%
+client.test("F9 已审核记录重复审核应失败", function() {
+    client.assert(response.body.code !== 200);
+});
+%}
+
+### =====================================================================
+### C2-admin. 订单混合支付后台查询 (jst-order / OrderAdminController)
+### 前置: 先执行 wx-tests.http 的 C2 创建订单块，生成 c2_order_paid_id / c2_order_mix_id
+### =====================================================================
+
+### C2-admin-0. admin 登录
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("admin_token", response.body.token);
+%}
+
+### C2-admin-1. 后台订单列表
+GET {{baseUrl}}/jst/order/main/list?pageNum=1&pageSize=10&contestId=8201
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("C2 admin 订单列表查询成功", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C2-admin-2. 后台订单详情
+GET {{baseUrl}}/jst/order/main/{{c2_order_paid_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("C2 admin 订单详情查询成功", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### =====================================================================
+### A. admin 平台运营登录
+### =====================================================================
+
+### A1. admin 登录(若依默认 admin/admin123,captcha 已关)
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("admin_token", response.body.token);
+client.test("admin 登录成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.token !== null);
+});
+%}
+
+
+### =====================================================================
+### B. 临时档案 admin (jst-user / ParticipantClaimController) - F3
+### =====================================================================
+
+### B1. 管理员手动认领临时档案 3002 (李大宝)
+POST {{baseUrl}}/jst/user/participant/claim/admin
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "participantId": 3002,
+  "userId": 1002,
+  "reason": "测试管理员手动认领"
+}
+
+### B2. 撤销认领
+POST {{baseUrl}}/jst/user/participant/claim/revoke?participantId=3002&reason=测试撤销
+Authorization: Bearer {{admin_token}}
+
+
+### =====================================================================
+### C. 学生-渠道绑定 admin (jst-user / BindingAdminController) - F4
+### =====================================================================
+
+### C1. admin 查询绑定列表
+GET {{baseUrl}}/jst/user/binding/list?pageNum=1&pageSize=10
+Authorization: Bearer {{admin_token}}
+
+### C2. admin 按 userId 筛选
+GET {{baseUrl}}/jst/user/binding/list?userId=1001&status=active
+Authorization: Bearer {{admin_token}}
+
+
+### =====================================================================
+### D. 赛事方入驻审核 (jst-organizer / PartnerApplyAdminController) - F5
+### =====================================================================
+
+### D1. 公开提交一份新申请(用唯一手机号)
+POST {{baseUrl}}/jst/public/organizer/partner/apply
+Content-Type: {{contentType}}
+
+{
+  "partnerName": "测试_admin侧入驻",
+  "contactName": "测试_负责人",
+  "contactMobile": "13800007777",
+  "businessLicenseNo": "91110000ADM00001"
+}
+
+> {%
+if (response.body.code === 200) {
+    client.global.set("partner_apply_id", response.body.data.applyId);
+    client.global.set("partner_apply_no", response.body.data.applyNo);
+}
+%}
+
+### D2. admin 查询入驻申请列表
+GET {{baseUrl}}/jst/organizer/partner/apply/list?pageNum=1&pageSize=10
+Authorization: Bearer {{admin_token}}
+
+### D3. admin 查申请详情
+GET {{baseUrl}}/jst/organizer/partner/apply/{{partner_apply_id}}
+Authorization: Bearer {{admin_token}}
+
+### D4. admin 审核通过 → 创建 sys_user + jst_partner 角色
+POST {{baseUrl}}/jst/organizer/partner/apply/{{partner_apply_id}}/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "auditRemark": "材料齐全",
+  "username": "partner_admin_test",
+  "email": "test@example.com"
+}
+
+### D5. 重复 approve 应失败(状态机非法跃迁)
+POST {{baseUrl}}/jst/organizer/partner/apply/{{partner_apply_id}}/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "auditRemark": "重复",
+  "username": "partner_admin_test2",
+  "email": ""
+}
+
+> {%
+client.test("重复 approve 应失败", function() {
+    client.assert(response.body.code !== 200);
+});
+%}
+
+
+### =====================================================================
+### E. 渠道认证审核 (jst-organizer / ChannelAuthApplyAdminController) - F6
+### 前置: wx 端先提交申请获得 apply_id (这里用 fixture 6001 直接测)
+### =====================================================================
+
+### E1. admin 查渠道认证申请列表
+GET {{baseUrl}}/jst/organizer/channel/apply/list?pageNum=1&pageSize=10
+Authorization: Bearer {{admin_token}}
+
+### E2. admin 审核通过 fixture 6001 (假设 fixture 中预置一条 pending 申请)
+POST {{baseUrl}}/jst/organizer/channel/apply/6001/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "auditRemark": "通过",
+  "tags": "美术,书法"
+}
+
+
+### =====================================================================
+### F. 公告 admin (jst-message / JstNoticeController) - F-NOTICE
+### =====================================================================
+
+### F1. admin 创建公告草稿
+POST {{baseUrl}}/jst/message/notice/add
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "title": "测试_admin侧公告",
+  "category": "platform",
+  "content": "<p>这是 admin-tests.http 创建的公告。</p>",
+  "coverImage": "https://fixture.example.com/notice/admin.png",
+  "topFlag": 0
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("notice_id", response.body.data.noticeId || response.body.data);
+}
+%}
+
+### F2. admin 发布公告
+POST {{baseUrl}}/jst/message/notice/{{notice_id}}/publish
+Authorization: Bearer {{admin_token}}
+
+### F3. admin 公告列表
+GET {{baseUrl}}/jst/message/notice/list?pageNum=1&pageSize=10
+Authorization: Bearer {{admin_token}}
+
+
+### =====================================================================
+### G. 课程 admin (jst-event / CourseController) - F-COURSE
+### =====================================================================
+
+### G1. admin 创建课程草稿
+POST {{baseUrl}}/jst/event/course/add
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "courseName": "测试_admin侧课程",
+  "courseType": "normal",
+  "coverImage": "https://fixture.example.com/course-admin.jpg",
+  "description": "admin-tests 创建的课程",
+  "price": 99.00,
+  "pointsPrice": 9900,
+  "creatorType": "platform",
+  "creatorId": 1,
+  "visibleScope": "all"
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("course_id", response.body.data.courseId || response.body.data);
+}
+%}
+
+### G2. admin 提审课程
+POST {{baseUrl}}/jst/event/course/{{course_id}}/submit
+Authorization: Bearer {{admin_token}}
+
+### G3. admin 审核通过课程
+POST {{baseUrl}}/jst/event/course/{{course_id}}/audit/approve
+Authorization: Bearer {{admin_token}}
+
+### G4. admin 上架课程
+POST {{baseUrl}}/jst/event/course/{{course_id}}/on
+Authorization: Bearer {{admin_token}}
+
+### G5. admin 课程列表
+GET {{baseUrl}}/jst/event/course/list?pageNum=1&pageSize=10
+Authorization: Bearer {{admin_token}}
+
+### G6. 未审核通过的草稿不允许上架(用 fixture 7203 假设是 draft)
+POST {{baseUrl}}/jst/event/course/7203/on
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("draft 上架应失败", function() {
+    client.assert(response.body.code !== 200);
+});
+%}
+
+
+### =====================================================================
+### H. 赛事方 (jst_partner) 登录 + 赛事 CRUD (F7)
+### 前置: fixture 中预置了 partner_f7_a / partner_f7_b 账号
+### =====================================================================
+
+### H1. 赛事方 A 登录
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_a",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("partner_a_token", response.body.token);
+%}
+
+### H2. 赛事方 B 登录
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_b",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("partner_b_token", response.body.token);
+%}
+
+### H3. 赛事方 A 创建赛事草稿
+POST {{baseUrl}}/jst/event/contest/add
+Content-Type: {{contentType}}
+Authorization: Bearer {{partner_a_token}}
+
+{
+  "contestName": "测试_admin侧新建赛事",
+  "category": "culture",
+  "groupLevels": "小学组,初中组",
+  "coverImage": "https://fixture.example.com/contest-admin.jpg",
+  "description": "admin-tests 创建的赛事",
+  "enrollStartTime": "2026-04-01 09:00:00",
+  "enrollEndTime": "2026-05-01 18:00:00",
+  "eventStartTime": "2026-05-10 09:00:00",
+  "eventEndTime": "2026-05-12 18:00:00",
+  "price": 88.00,
+  "supportChannelEnroll": 1,
+  "supportPointsDeduct": 1,
+  "supportAppointment": 0,
+  "certRuleJson": "{}",
+  "scoreRuleJson": "{}",
+  "formTemplateId": null,
+  "aftersaleDays": 7
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("contest_id", response.body.data.contestId || response.body.data);
+}
+%}
+
+### H4. 赛事方 A 提交审核
+POST {{baseUrl}}/jst/event/contest/{{contest_id}}/submit
+Authorization: Bearer {{partner_a_token}}
+
+### H5. admin 审核通过
+POST {{baseUrl}}/jst/event/contest/{{contest_id}}/audit/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{ "auditRemark": "测试通过" }
+
+### H6. admin 上线
+POST {{baseUrl}}/jst/event/contest/{{contest_id}}/online
+Authorization: Bearer {{admin_token}}
+
+### H7. 越权: 赛事方 B 编辑 A 的赛事应失败
+PUT {{baseUrl}}/jst/event/contest/edit
+Content-Type: {{contentType}}
+Authorization: Bearer {{partner_b_token}}
+
+{
+  "contestId": {{contest_id}},
+  "contestName": "测试_越权修改",
+  "category": "culture",
+  "groupLevels": "小学组",
+  "enrollStartTime": "2026-04-01 09:00:00",
+  "enrollEndTime": "2026-05-01 18:00:00",
+  "price": 88.00,
+  "supportChannelEnroll": 1,
+  "supportPointsDeduct": 0,
+  "supportAppointment": 0,
+  "aftersaleDays": 7
+}
+
+> {%
+client.test("越权应失败", function() {
+    client.assert(response.body.code !== 200);
+});
+%}
+
+
+### =====================================================================
+### I. 动态表单模板 admin (jst-event / FormTemplateController) - F8
+### =====================================================================
+
+### I1. admin 创建表单模板草稿
+POST {{baseUrl}}/jst/event/form/template/save
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "templateName": "测试_admin侧模板",
+  "ownerType": "platform",
+  "schemaJson": {
+    "fields": [
+      { "key": "name", "type": "text", "label": "姓名", "required": true },
+      { "key": "gender", "type": "radio", "label": "性别", "required": true }
+    ]
+  }
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("template_id", response.body.data.templateId || response.body.data);
+}
+%}
+
+### I2. admin 修改模板(版本 +1)
+POST {{baseUrl}}/jst/event/form/template/save
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "templateId": {{template_id}},
+  "templateName": "测试_admin侧模板_v2",
+  "ownerType": "platform",
+  "schemaJson": {
+    "fields": [
+      { "key": "name", "type": "text", "label": "姓名", "required": true },
+      { "key": "gender", "type": "radio", "label": "性别", "required": true },
+      { "key": "school", "type": "text", "label": "学校", "required": false }
+    ]
+  }
+}
+
+### I3. admin 提交审核
+POST {{baseUrl}}/jst/event/form/template/{{template_id}}/submit
+Authorization: Bearer {{admin_token}}
+
+### I4. admin 审核通过
+POST {{baseUrl}}/jst/event/form/template/{{template_id}}/audit/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{ "auditRemark": "测试通过" }
+
+### I5. 非法字段类型应被拒绝
+POST {{baseUrl}}/jst/event/form/template/save
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "templateName": "测试_非法类型",
+  "ownerType": "platform",
+  "schemaJson": {
+    "fields": [
+      { "key": "x", "type": "unknown_type", "label": "非法", "required": true }
+    ]
+  }
+}
+
+> {%
+client.test("非法字段类型应被拒绝", function() {
+    client.assert(response.body.code !== 200);
+});
+%}
+
+
+### =====================================================================
+### 全部 admin + partner 测试结束 (~35 个测试块)
+### =====================================================================
+
+### =====================================================================
+### DEBT-1. 代码债清理验证补充
+### =====================================================================
+
+### DEBT-1-T2. 复查入驻审核详情，partnerId 应已回填
+GET {{baseUrl}}/jst/organizer/partner/apply/{{partner_apply_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("DEBT-1 partner approve 后应回填 partnerId", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.partnerId, "应返回 partnerId");
+});
+%}
+
+### DEBT-1-T1. 执行 F6-E2 后，到 wx-tests.http 的 DEBT-1-W1 验证 roles 已从 sys_user_role 读取

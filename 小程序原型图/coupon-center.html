@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>我的优惠券 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.p-nav{background:linear-gradient(135deg,var(--c-accent-600),var(--c-accent));padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.p-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.p-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.tab-bar{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);}
+.tab-item{flex:1;height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:var(--c-gray-500);cursor:pointer;position:relative;touch-action:manipulation;}
+.tab-item.active{color:var(--c-accent);font-weight:700;}
+.tab-item.active::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2.5px;background:var(--c-accent);border-radius:1px;}
+
+/* 优惠券卡 */
+.coupon-card{margin:10px 16px 0;border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);display:flex;cursor:pointer;touch-action:manipulation;transition:opacity var(--duration-fast);}
+.coupon-card:active{opacity:.88;}
+.cc-left{width:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 8px;flex-shrink:0;position:relative;}
+.cc-left::after{content:'';position:absolute;right:-8px;top:0;bottom:0;width:16px;background:radial-gradient(circle at 0 50%, var(--c-gray-50) 8px, transparent 8px);}
+.cc-amount{font-size:28px;font-weight:900;color:white;line-height:1;}
+.cc-amount-unit{font-size:13px;font-weight:700;color:rgba(255,255,255,.8);}
+.cc-type{font-size:10px;color:rgba(255,255,255,.8);margin-top:4px;font-weight:600;}
+.cc-right{flex:1;background:var(--c-white);padding:14px 14px 14px 20px;}
+.cc-name{font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:5px;}
+.cc-threshold{font-size:12px;color:var(--c-gray-500);margin-bottom:5px;}
+.cc-scope{font-size:11px;color:var(--c-gray-400);}
+.cc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--c-gray-100);}
+.cc-expire{font-size:11px;color:var(--c-gray-400);}
+.cc-use-btn{font-size:12px;font-weight:700;color:white;padding:5px 14px;border-radius:var(--radius-full);border:none;cursor:pointer;touch-action:manipulation;}
+
+.coupon-card.expired .cc-left{background:var(--c-gray-300)!important;}
+.coupon-card.expired .cc-right{opacity:.6;}
+.coupon-card.expired .cc-use-btn{background:var(--c-gray-300);pointer-events:none;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:var(--c-accent-600);"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="p-nav animate-in">
+  <div class="p-back" onclick="history.back()">←</div>
+  <div class="p-title">我的优惠券</div>
+</div>
+<div class="tab-bar">
+  <div class="tab-item active" onclick="switchTab(this)">未使用 (3)</div>
+  <div class="tab-item" onclick="switchTab(this)">已使用</div>
+  <div class="tab-item" onclick="switchTab(this)">已过期</div>
+</div>
+
+<!-- 满减券 -->
+<div class="coupon-card animate-in animate-in-d1" onclick="location.href='contest-list.html'">
+  <div class="cc-left" style="background:linear-gradient(135deg,var(--c-accent-600),var(--c-accent));">
+    <div class="cc-amount-unit">满减</div>
+    <div class="cc-amount">¥20</div>
+    <div class="cc-type">满80元可用</div>
+  </div>
+  <div class="cc-right">
+    <div class="cc-name">报名立减20元券</div>
+    <div class="cc-threshold">订单满 ¥80.00 可用</div>
+    <div class="cc-scope">适用：全部赛事报名</div>
+    <div class="cc-footer">
+      <div class="cc-expire">有效至 2026-04-30</div>
+      <button class="cc-use-btn" style="background:var(--c-accent);" onclick="event.stopPropagation();location.href='contest-list.html'">去使用</button>
+    </div>
+  </div>
+</div>
+
+<!-- 折扣券 -->
+<div class="coupon-card animate-in animate-in-d2" onclick="location.href='contest-list.html'">
+  <div class="cc-left" style="background:linear-gradient(135deg,#7B1FA2,#AB47BC);">
+    <div class="cc-amount-unit">折扣</div>
+    <div class="cc-amount">9折</div>
+    <div class="cc-type">无门槛</div>
+  </div>
+  <div class="cc-right">
+    <div class="cc-name">艺术赛事九折券</div>
+    <div class="cc-threshold">无最低金额限制</div>
+    <div class="cc-scope">适用：安徒生艺术奖 / 鸟巢杯</div>
+    <div class="cc-footer">
+      <div class="cc-expire">有效至 2026-05-31</div>
+      <button class="cc-use-btn" style="background:#7B1FA2;" onclick="event.stopPropagation();location.href='contest-list.html'">去使用</button>
+    </div>
+  </div>
+</div>
+
+<!-- 直减券 -->
+<div class="coupon-card animate-in animate-in-d3" onclick="location.href='campaign-topic.html'">
+  <div class="cc-left" style="background:linear-gradient(135deg,#F5A623,#FF8F00);">
+    <div class="cc-amount-unit">直减</div>
+    <div class="cc-amount">¥50</div>
+    <div class="cc-type">活动专属</div>
+  </div>
+  <div class="cc-right">
+    <div class="cc-name">春季报名活动直减券</div>
+    <div class="cc-threshold">无最低金额限制</div>
+    <div class="cc-scope">适用：春季艺术大赛专题活动</div>
+    <div class="cc-footer">
+      <div class="cc-expire">有效至 2026-04-15</div>
+      <button class="cc-use-btn" style="background:#F5A623;" onclick="event.stopPropagation();location.href='campaign-topic.html'">查看活动</button>
+    </div>
+  </div>
+</div>
+
+<!-- 已过期券（展示态） -->
+<div class="coupon-card expired" style="margin-top:24px;display:none;" id="expiredSection">
+  <div class="cc-left" style="background:var(--c-gray-300);">
+    <div class="cc-amount-unit">满减</div>
+    <div class="cc-amount">¥30</div>
+    <div class="cc-type">已过期</div>
+  </div>
+  <div class="cc-right">
+    <div class="cc-name">新春特惠券</div>
+    <div class="cc-threshold">满 ¥100 可用</div>
+    <div class="cc-scope">适用：全部赛事</div>
+    <div class="cc-footer">
+      <div class="cc-expire">已于 2026-02-28 过期</div>
+      <button class="cc-use-btn" style="background:var(--c-gray-300);">已过期</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(el){
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  const txt=el.textContent;
+  document.getElementById('expiredSection').style.display=txt.includes('过期')?'flex':'none';
+}
+</script>
+</body>
+</html>

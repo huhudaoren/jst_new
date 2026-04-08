@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstParticipantMapper">
+    
+    <resultMap type="JstParticipant" id="JstParticipantResult">
+        <result property="participantId"    column="participant_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="participantType"    column="participant_type"    />
+        <result property="name"    column="name"    />
+        <result property="gender"    column="gender"    />
+        <result property="birthday"    column="birthday"    />
+        <result property="age"    column="age"    />
+        <result property="guardianName"    column="guardian_name"    />
+        <result property="guardianMobile"    column="guardian_mobile"    />
+        <result property="school"    column="school"    />
+        <result property="organization"    column="organization"    />
+        <result property="className"    column="class_name"    />
+        <result property="idCardType"    column="id_card_type"    />
+        <result property="idCardNo"    column="id_card_no"    />
+        <result property="createdByChannelId"    column="created_by_channel_id"    />
+        <result property="claimStatus"    column="claim_status"    />
+        <result property="claimedUserId"    column="claimed_user_id"    />
+        <result property="claimedTime"    column="claimed_time"    />
+        <result property="visibleScope"    column="visible_scope"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstParticipantVo">
+        select participant_id, user_id, participant_type, name, gender, birthday, age, guardian_name, guardian_mobile, school, organization, class_name, id_card_type, id_card_no, created_by_channel_id, claim_status, claimed_user_id, claimed_time, visible_scope, create_by, create_time, update_by, update_time, remark, del_flag from jst_participant
+    </sql>
+
+    <select id="selectJstParticipantList" parameterType="JstParticipant" resultMap="JstParticipantResult">
+        <include refid="selectJstParticipantVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="participantType != null  and participantType != ''"> and participant_type = #{participantType}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="gender != null "> and gender = #{gender}</if>
+            <if test="birthday != null "> and birthday = #{birthday}</if>
+            <if test="age != null "> and age = #{age}</if>
+            <if test="guardianName != null  and guardianName != ''"> and guardian_name like concat('%', #{guardianName}, '%')</if>
+            <if test="guardianMobile != null  and guardianMobile != ''"> and guardian_mobile = #{guardianMobile}</if>
+            <if test="school != null  and school != ''"> and school = #{school}</if>
+            <if test="organization != null  and organization != ''"> and organization = #{organization}</if>
+            <if test="className != null  and className != ''"> and class_name like concat('%', #{className}, '%')</if>
+            <if test="idCardType != null  and idCardType != ''"> and id_card_type = #{idCardType}</if>
+            <if test="idCardNo != null  and idCardNo != ''"> and id_card_no = #{idCardNo}</if>
+            <if test="createdByChannelId != null "> and created_by_channel_id = #{createdByChannelId}</if>
+            <if test="claimStatus != null  and claimStatus != ''"> and claim_status = #{claimStatus}</if>
+            <if test="claimedUserId != null "> and claimed_user_id = #{claimedUserId}</if>
+            <if test="claimedTime != null "> and claimed_time = #{claimedTime}</if>
+            <if test="visibleScope != null  and visibleScope != ''"> and visible_scope = #{visibleScope}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstParticipantByParticipantId" parameterType="Long" resultMap="JstParticipantResult">
+        <include refid="selectJstParticipantVo"/>
+        where participant_id = #{participantId}
+    </select>
+
+    <insert id="insertJstParticipant" parameterType="JstParticipant" useGeneratedKeys="true" keyProperty="participantId">
+        insert into jst_participant
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="participantType != null and participantType != ''">participant_type,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="gender != null">gender,</if>
+            <if test="birthday != null">birthday,</if>
+            <if test="age != null">age,</if>
+            <if test="guardianName != null">guardian_name,</if>
+            <if test="guardianMobile != null">guardian_mobile,</if>
+            <if test="school != null">school,</if>
+            <if test="organization != null">organization,</if>
+            <if test="className != null">class_name,</if>
+            <if test="idCardType != null">id_card_type,</if>
+            <if test="idCardNo != null">id_card_no,</if>
+            <if test="createdByChannelId != null">created_by_channel_id,</if>
+            <if test="claimStatus != null and claimStatus != ''">claim_status,</if>
+            <if test="claimedUserId != null">claimed_user_id,</if>
+            <if test="claimedTime != null">claimed_time,</if>
+            <if test="visibleScope != null and visibleScope != ''">visible_scope,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="participantType != null and participantType != ''">#{participantType},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="gender != null">#{gender},</if>
+            <if test="birthday != null">#{birthday},</if>
+            <if test="age != null">#{age},</if>
+            <if test="guardianName != null">#{guardianName},</if>
+            <if test="guardianMobile != null">#{guardianMobile},</if>
+            <if test="school != null">#{school},</if>
+            <if test="organization != null">#{organization},</if>
+            <if test="className != null">#{className},</if>
+            <if test="idCardType != null">#{idCardType},</if>
+            <if test="idCardNo != null">#{idCardNo},</if>
+            <if test="createdByChannelId != null">#{createdByChannelId},</if>
+            <if test="claimStatus != null and claimStatus != ''">#{claimStatus},</if>
+            <if test="claimedUserId != null">#{claimedUserId},</if>
+            <if test="claimedTime != null">#{claimedTime},</if>
+            <if test="visibleScope != null and visibleScope != ''">#{visibleScope},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstParticipant" parameterType="JstParticipant">
+        update jst_participant
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="participantType != null and participantType != ''">participant_type = #{participantType},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="birthday != null">birthday = #{birthday},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="guardianName != null">guardian_name = #{guardianName},</if>
+            <if test="guardianMobile != null">guardian_mobile = #{guardianMobile},</if>
+            <if test="school != null">school = #{school},</if>
+            <if test="organization != null">organization = #{organization},</if>
+            <if test="className != null">class_name = #{className},</if>
+            <if test="idCardType != null">id_card_type = #{idCardType},</if>
+            <if test="idCardNo != null">id_card_no = #{idCardNo},</if>
+            <if test="createdByChannelId != null">created_by_channel_id = #{createdByChannelId},</if>
+            <if test="claimStatus != null and claimStatus != ''">claim_status = #{claimStatus},</if>
+            <if test="claimedUserId != null">claimed_user_id = #{claimedUserId},</if>
+            <if test="claimedTime != null">claimed_time = #{claimedTime},</if>
+            <if test="visibleScope != null and visibleScope != ''">visible_scope = #{visibleScope},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where participant_id = #{participantId}
+    </update>
+
+    <delete id="deleteJstParticipantByParticipantId" parameterType="Long">
+        delete from jst_participant where participant_id = #{participantId}
+    </delete>
+
+    <delete id="deleteJstParticipantByParticipantIds" parameterType="String">
+        delete from jst_participant where participant_id in 
+        <foreach item="participantId" collection="array" open="(" separator="," close=")">
+            #{participantId}
+        </foreach>
+    </delete>
+</mapper>

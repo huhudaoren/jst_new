@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>机构工作台 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+.teacher-hero { background:linear-gradient(150deg,#1A237E 0%,#283593 45%,#3949AB 100%);padding:20px var(--space-4) 0;position:relative;overflow:hidden; }
+.teacher-hero::before { content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 85% 20%,rgba(255,255,255,.08) 0%,transparent 45%),radial-gradient(circle at 15% 80%,rgba(255,255,255,.05) 0%,transparent 40%); }
+.teacher-hero::after { content:'';position:absolute;bottom:-1px;left:0;right:0;height:24px;background:var(--c-gray-50);border-radius:24px 24px 0 0; }
+.t-nav { display:flex;align-items:center;position:relative;z-index:1;margin-bottom:16px; }
+.t-back { width:36px;height:36px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;margin-right:12px;touch-action:manipulation; }
+.t-back:active { background:rgba(255,255,255,.25); }
+.t-title { font-size:17px;font-weight:700;color:white;flex:1; }
+.identity-card { display:flex;align-items:center;gap:14px;position:relative;z-index:1;margin-bottom:16px; }
+.identity-avatar { width:56px;height:56px;border-radius:var(--radius-md);background:linear-gradient(135deg,#FFD54F,#FF8A65);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;border:3px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.2);border-radius:12px; }
+.identity-info { flex:1; }
+.identity-name { font-size:18px;font-weight:800;color:white;letter-spacing:-.3px; }
+.identity-badges { display:flex;gap:6px;flex-wrap:wrap;margin-top:6px; }
+.identity-badge { display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.95);font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-full); }
+.identity-badge.verified { background:rgba(39,174,96,.3);border-color:rgba(39,174,96,.5); }
+
+/* 视角切换 */
+.view-switch { display:flex;background:rgba(255,255,255,.12);border-radius:var(--radius-full);padding:3px;position:relative;z-index:1;margin-bottom:20px;align-self:flex-start; }
+.vsw-btn { padding:5px 16px;border-radius:var(--radius-full);font-size:12px;font-weight:600;color:rgba(255,255,255,.65);cursor:pointer;touch-action:manipulation;transition:all var(--duration-fast);white-space:nowrap; }
+.vsw-btn.active { background:white;color:#3F51B5;box-shadow:var(--shadow-xs); }
+
+/* Stats */
+.stats-row { display:grid;grid-template-columns:repeat(4,1fr);background:var(--c-white);border-radius:var(--radius-lg);margin:12px var(--space-4) 0;box-shadow:var(--shadow-sm);overflow:hidden; }
+.stat-cell { padding:14px 8px;text-align:center;border-right:1px solid var(--c-gray-100);cursor:pointer;touch-action:manipulation;transition:background var(--duration-fast); }
+.stat-cell:last-child { border-right:none; }
+.stat-cell:active { background:var(--c-gray-50); }
+.stat-num { font-size:20px;font-weight:900;color:#3F51B5;line-height:1;margin-bottom:4px; }
+.stat-label { font-size:10px;color:var(--c-gray-500);font-weight:500; }
+
+/* 老师列表 */
+.section-hd { display:flex;justify-content:space-between;align-items:center;margin:16px var(--space-4) 10px; }
+.section-hd-title { font-size:16px;font-weight:700;color:var(--c-gray-900);display:flex;align-items:center;gap:6px; }
+.section-hd-title::before { content:'';width:3px;height:16px;background:#3F51B5;border-radius:2px;display:inline-block; }
+.section-hd-more { font-size:13px;color:#3F51B5;font-weight:500;cursor:pointer;touch-action:manipulation; }
+
+.teacher-card { background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:0 var(--space-4) 10px;overflow:hidden; }
+.teacher-card-main { display:flex;align-items:center;gap:12px;padding:14px 14px 10px; }
+.tc-avatar { width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:white;flex-shrink:0; }
+.tc-info { flex:1;min-width:0; }
+.tc-name { font-size:15px;font-weight:700;color:var(--c-gray-900); }
+.tc-meta { font-size:12px;color:var(--c-gray-500);margin-top:2px; }
+.teacher-card-stats { display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--c-gray-100); }
+.tc-stat { padding:10px 8px;text-align:center;border-right:1px solid var(--c-gray-100);cursor:pointer;touch-action:manipulation; }
+.tc-stat:last-child { border-right:none; }
+.tc-stat:active { background:var(--c-gray-50); }
+.tc-stat-num { font-size:16px;font-weight:800;color:#3F51B5; }
+.tc-stat-label { font-size:10px;color:var(--c-gray-500);margin-top:2px; }
+.teacher-card-actions { display:flex;border-top:1px solid var(--c-gray-100); }
+.tc-action { flex:1;height:38px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--c-gray-700);cursor:pointer;touch-action:manipulation;border-right:1px solid var(--c-gray-100);transition:background var(--duration-fast); }
+.tc-action:last-child { border-right:none; }
+.tc-action:active { background:var(--c-gray-50); }
+.tc-action.primary { color:#3F51B5; }
+
+/* 功能格 */
+.func-grid { display:grid;grid-template-columns:repeat(4,1fr);background:var(--c-white);border-radius:var(--radius-lg);margin:0 var(--space-4);box-shadow:var(--shadow-xs);overflow:hidden; }
+.func-item { padding:16px 8px;text-align:center;border-right:1px solid var(--c-gray-100);border-bottom:1px solid var(--c-gray-100);cursor:pointer;touch-action:manipulation;transition:background var(--duration-fast); }
+.func-item:nth-child(4n) { border-right:none; }
+.func-item:nth-last-child(-n+4) { border-bottom:none; }
+.func-item:active { background:var(--c-gray-50); }
+.func-icon { width:44px;height:44px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 8px; }
+.func-label { font-size:12px;font-weight:500;color:var(--c-gray-700); }
+.func-badge { display:inline-block;min-width:16px;height:16px;border-radius:var(--radius-full);background:var(--c-accent);color:white;font-size:10px;font-weight:700;line-height:16px;padding:0 4px;margin-top:3px; }
+</style>
+</head>
+<body class="has-tabbar">
+<div class="status-bar" style="background:#1A237E;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+
+<div class="teacher-hero animate-in">
+  <div class="t-nav">
+    <div class="t-back" onclick="history.back()">←</div>
+    <div class="t-title">机构工作台</div>
+    <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:16px;color:white;cursor:pointer;touch-action:manipulation;position:relative;" onclick="location.href='notice-msg.html'">🔔<div style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--c-accent);border:1.5px solid #283593;"></div></div>
+  </div>
+  <div class="identity-card">
+    <div class="identity-avatar">🏫</div>
+    <div class="identity-info">
+      <div class="identity-name">启明教育培训机构</div>
+      <div class="identity-badges">
+        <span class="identity-badge verified">✅ 机构认证</span>
+        <span class="identity-badge">📚 数学 · 物理 · 英语</span>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:4px;">广州市天河区 · 旗下 5 位老师 · 48 位学生</div>
+    </div>
+  </div>
+  <div style="position:relative;z-index:1;margin-bottom:20px;">
+    <div class="view-switch">
+      <div class="vsw-btn" onclick="location.href='teacher-home.html'">👨‍🏫 老师视角</div>
+      <div class="vsw-btn active">🏫 机构视角</div>
+    </div>
+  </div>
+</div>
+
+<!-- 机构数据统计 -->
+<div class="stats-row animate-in animate-in-d1">
+  <div class="stat-cell" onclick="showToast('查看全部老师')">
+    <div class="stat-num">5</div>
+    <div class="stat-label">旗下老师</div>
+  </div>
+  <div class="stat-cell" onclick="showToast('查看全部学生')">
+    <div class="stat-num">48</div>
+    <div class="stat-label">绑定学生</div>
+  </div>
+  <div class="stat-cell" onclick="location.href='teacher-orders.html'">
+    <div class="stat-num" style="color:var(--c-accent);">7</div>
+    <div class="stat-label">待支付</div>
+  </div>
+  <div class="stat-cell" onclick="location.href='my-enroll.html'">
+    <div class="stat-num">¥<span style="font-size:14px;">8.6k</span></div>
+    <div class="stat-label">累计支付</div>
+  </div>
+</div>
+
+<!-- 功能快捷入口 -->
+<div class="section-hd animate-in animate-in-d1" style="margin-top:16px;">
+  <div class="section-hd-title">快捷功能</div>
+</div>
+<div class="func-grid animate-in animate-in-d1">
+  <div class="func-item" onclick="showToast('老师管理功能开发中')">
+    <div class="func-icon" style="background:#EEF0FF;">👨‍🏫</div>
+    <div class="func-label">老师管理</div>
+  </div>
+  <div class="func-item" onclick="location.href='teacher-students.html'">
+    <div class="func-icon" style="background:var(--c-primary-50);">👨‍🎓</div>
+    <div class="func-label">学生管理</div>
+  </div>
+  <div class="func-item" onclick="location.href='contest-list.html'">
+    <div class="func-icon" style="background:var(--c-primary-50);">📋</div>
+    <div class="func-label">代报名</div>
+  </div>
+  <div class="func-item" onclick="location.href='teacher-orders.html'">
+    <div class="func-icon" style="background:var(--c-accent-50);">🧾</div>
+    <div class="func-label">批量支付</div>
+    <div class="func-badge">7</div>
+  </div>
+  <div class="func-item" onclick="location.href='my-enroll.html'">
+    <div class="func-icon" style="background:#EAFAF1;">📊</div>
+    <div class="func-label">报名数据</div>
+  </div>
+  <div class="func-item" onclick="location.href='my-score.html'">
+    <div class="func-icon" style="background:var(--c-gold-50);">🎯</div>
+    <div class="func-label">学生成绩</div>
+  </div>
+  <div class="func-item" onclick="location.href='my-cert.html'">
+    <div class="func-icon" style="background:#F5EEF8;">🏅</div>
+    <div class="func-label">学生证书</div>
+  </div>
+  <div class="func-item" onclick="location.href='teacher-students.html#qrcode'">
+    <div class="func-icon" style="background:#EEF0FF;">🔲</div>
+    <div class="func-label">机构二维码</div>
+  </div>
+</div>
+
+<!-- 老师列表 -->
+<div class="section-hd animate-in animate-in-d2">
+  <div class="section-hd-title">旗下老师（5）</div>
+  <div class="section-hd-more" onclick="showToast('查看全部老师')">管理 ›</div>
+</div>
+
+<div class="teacher-card animate-in animate-in-d2">
+  <div class="teacher-card-main">
+    <div class="tc-avatar" style="background:linear-gradient(135deg,#3F51B5,#5C6BC0);">王</div>
+    <div class="tc-info">
+      <div class="tc-name">王建国老师</div>
+      <div class="tc-meta">广州市第二中学 · 数学 · 物理 · 12名学生</div>
+    </div>
+    <span class="tag tag-success tag-dot" style="flex-shrink:0;">在职</span>
+  </div>
+  <div class="teacher-card-stats">
+    <div class="tc-stat"><div class="tc-stat-num">12</div><div class="tc-stat-label">绑定学生</div></div>
+    <div class="tc-stat"><div class="tc-stat-num" style="color:var(--c-accent);">3</div><div class="tc-stat-label">待支付</div></div>
+    <div class="tc-stat"><div class="tc-stat-num">24</div><div class="tc-stat-label">代报名总数</div></div>
+  </div>
+  <div class="teacher-card-actions">
+    <div class="tc-action primary" onclick="location.href='teacher-students.html'">👨‍🎓 学生管理</div>
+    <div class="tc-action" onclick="location.href='my-enroll.html'">📊 数据</div>
+    <div class="tc-action" onclick="showToast('联系老师')">💬 联系</div>
+  </div>
+</div>
+
+<div class="teacher-card animate-in animate-in-d2">
+  <div class="teacher-card-main">
+    <div class="tc-avatar" style="background:linear-gradient(135deg,#E65100,#FF7043);">李</div>
+    <div class="tc-info">
+      <div class="tc-name">李明慧老师</div>
+      <div class="tc-meta">广州外国语学校 · 英语 · 8名学生</div>
+    </div>
+    <span class="tag tag-success tag-dot" style="flex-shrink:0;">在职</span>
+  </div>
+  <div class="teacher-card-stats">
+    <div class="tc-stat"><div class="tc-stat-num">8</div><div class="tc-stat-label">绑定学生</div></div>
+    <div class="tc-stat"><div class="tc-stat-num" style="color:var(--c-accent);">2</div><div class="tc-stat-label">待支付</div></div>
+    <div class="tc-stat"><div class="tc-stat-num">15</div><div class="tc-stat-label">代报名总数</div></div>
+  </div>
+  <div class="teacher-card-actions">
+    <div class="tc-action primary" onclick="location.href='teacher-students.html'">👨‍🎓 学生管理</div>
+    <div class="tc-action" onclick="location.href='my-enroll.html'">📊 数据</div>
+    <div class="tc-action" onclick="showToast('联系老师')">💬 联系</div>
+  </div>
+</div>
+
+<div style="text-align:center;padding:14px var(--space-4);">
+  <button class="btn btn-outline btn-sm" style="width:100%;border-color:#C5CAE9;color:#3F51B5;" onclick="showToast('查看全部5位老师')">查看全部 5 位老师 →</button>
+</div>
+
+<!-- 新增老师入口 -->
+<div style="background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:0 var(--space-4) 16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;touch-action:manipulation;border:1.5px dashed var(--c-gray-100);" onclick="showToast('邀请老师加入机构')" class="animate-in animate-in-d3">
+  <div style="width:40px;height:40px;border-radius:50%;background:var(--c-primary-50);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">➕</div>
+  <div style="flex:1;">
+    <div style="font-size:14px;font-weight:700;color:var(--c-primary-600);">邀请老师加入机构</div>
+    <div style="font-size:12px;color:var(--c-gray-500);margin-top:2px;">生成机构邀请码，发送给老师完成绑定</div>
+  </div>
+  <span style="font-size:16px;color:var(--c-gray-300);">›</span>
+</div>
+
+<nav class="bottom-nav">
+  <div class="nav-tab" onclick="location.href='index.html'"><span class="nav-tab-icon">🏠</span><span class="nav-tab-label">首页</span></div>
+  <div class="nav-tab" onclick="location.href='contest-list.html'"><span class="nav-tab-icon">🏆</span><span class="nav-tab-label">赛事</span></div>
+  <div class="nav-tab" onclick="location.href='course-list.html'"><span class="nav-tab-icon">📚</span><span class="nav-tab-label">课程</span></div>
+  <div class="nav-tab" onclick="location.href='notice.html'"><span class="nav-tab-icon">📢</span><span class="nav-tab-label">公告</span></div>
+  <div class="nav-tab active"><span class="nav-tab-icon">👤</span><span class="nav-tab-label" style="color:#3F51B5;">我的</span></div>
+</nav>
+<script>
+function showToast(msg) { const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+</script>
+</body>
+</html>

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>我的课程 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); padding-bottom: 20px !important; }
+
+/* Tab 筛选 */
+.tab-bar {
+  display: flex; background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.tab-item {
+  flex: 1; height: 44px; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 500; color: var(--c-gray-500);
+  cursor: pointer; position: relative;
+  touch-action: manipulation; transition: color var(--duration-fast);
+}
+.tab-item.active { color: var(--c-primary-600); font-weight: 700; }
+.tab-item.active::after {
+  content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
+  height: 2px; background: var(--c-primary-600); border-radius: 1px;
+}
+
+/* 已购课程卡片 */
+.my-course-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); margin-bottom: 12px; overflow: hidden;
+}
+.mcc-header {
+  display: flex; gap: 12px; padding: 14px 16px; align-items: flex-start;
+}
+.mcc-thumb {
+  width: 80px; height: 80px; border-radius: var(--radius-md);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+}
+.mcc-info { flex: 1; min-width: 0; }
+.mcc-name {
+  font-size: 15px; font-weight: 700; color: var(--c-gray-900);
+  line-height: 1.4; margin-bottom: 5px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.mcc-teacher { font-size: 12px; color: var(--c-gray-500); margin-bottom: 8px; }
+.mcc-expire { font-size: 12px; display: flex; align-items: center; gap: 4px; }
+.mcc-expire.forever { color: var(--c-success); }
+.mcc-expire.expiring { color: var(--c-warning); }
+
+/* 学习进度 */
+.progress-section {
+  padding: 0 16px 14px;
+  border-top: 1px solid var(--c-gray-100);
+}
+.progress-header {
+  display: flex; justify-content: space-between;
+  align-items: center; padding: 10px 0 8px;
+}
+.progress-text { font-size: 13px; color: var(--c-gray-700); }
+.progress-pct { font-size: 15px; font-weight: 800; color: var(--c-primary-600); }
+.progress-bar {
+  height: 8px; background: var(--c-gray-100); border-radius: 4px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--c-primary-600) 0%, var(--c-primary-400) 100%);
+  transition: width 0.6s var(--ease-out);
+}
+.progress-fill.done { background: linear-gradient(90deg, var(--c-success) 0%, #52D68A 100%); }
+.progress-detail {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--c-gray-500); margin-top: 6px;
+}
+
+/* 课程操作 */
+.mcc-actions {
+  padding: 10px 16px 14px;
+  display: flex; gap: 8px; border-top: 1px solid var(--c-gray-100);
+}
+
+/* 最近学习章节 */
+.last-chapter {
+  margin: 0 16px 12px;
+  padding: 10px 14px;
+  background: var(--c-primary-50);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; gap: 10px;
+}
+.lc-info { flex: 1; }
+.lc-label { font-size: 11px; color: var(--c-primary-400); margin-bottom: 2px; }
+.lc-title { font-size: 13px; font-weight: 600; color: var(--c-primary-600); }
+.lc-btn {
+  background: var(--c-primary-600); color: white;
+  border: none; border-radius: var(--radius-sm);
+  padding: 7px 14px; font-size: 12px; font-weight: 700;
+  cursor: pointer; flex-shrink: 0; touch-action: manipulation;
+}
+.lc-btn:active { opacity: 0.85; }
+
+/* 预约记录卡 */
+.reserve-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); margin-bottom: 10px; overflow: hidden;
+}
+.rc-header {
+  padding: 12px 14px; border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rc-course { font-size: 14px; font-weight: 700; color: var(--c-gray-900); }
+.rc-body { padding: 12px 14px; }
+.rc-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; color: var(--c-gray-700); }
+.rc-row:last-child { margin-bottom: 0; }
+.rc-icon { font-size: 14px; flex-shrink: 0; }
+
+/* 空状态 */
+.empty-state { padding: 60px 24px; text-align: center; }
+.empty-icon { font-size: 52px; opacity: 0.6; margin-bottom: 14px; }
+.empty-title { font-size: 16px; font-weight: 700; color: var(--c-gray-700); margin-bottom: 8px; }
+.empty-desc { font-size: 13px; color: var(--c-gray-500); margin-bottom: 20px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:var(--c-primary);">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<div class="page-header">
+  <div class="page-header-back" onclick="history.back()">←</div>
+  <div class="page-header-title">我的课程</div>
+  <div class="page-header-action" onclick="location.href='course-list.html'">去选课</div>
+</div>
+
+<!-- Tab -->
+<div class="tab-bar animate-in">
+  <div class="tab-item active" onclick="switchTab(this,'bought')">已购课程</div>
+  <div class="tab-item" onclick="switchTab(this,'ai')">🤖 AI课堂</div>
+  <div class="tab-item" onclick="switchTab(this,'reserve')">预约记录</div>
+</div>
+
+<!-- ===== 已购课程 ===== -->
+<div id="tab-bought" style="padding:12px 16px 0;">
+
+  <!-- 学习概览 -->
+  <div style="background:linear-gradient(135deg,var(--c-primary) 0%,var(--c-primary-600) 100%);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;display:flex;gap:12px;align-items:center;" class="animate-in">
+    <div style="font-size:40px;">📚</div>
+    <div style="flex:1;">
+      <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-bottom:4px;">学习成就</div>
+      <div style="display:flex;gap:16px;">
+        <div style="text-align:center;">
+          <div style="font-size:20px;font-weight:900;color:white;">2</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);">已购课程</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:20px;font-weight:900;color:white;">3</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);">已学讲次</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:20px;font-weight:900;color:white;">178</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);">学习分钟</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 课程1：进行中 -->
+  <div class="my-course-card animate-in animate-in-d1">
+    <div class="mcc-header">
+      <div class="mcc-thumb" style="background:linear-gradient(135deg,#1565C0,#42A5F5);">🔢</div>
+      <div class="mcc-info">
+        <div class="mcc-name">竞赛数学精讲 · 高中组（标准版）</div>
+        <div class="mcc-teacher">王振宇 老师 · 24讲视频</div>
+        <div class="mcc-expire forever">✓ 永久有效</div>
+      </div>
+    </div>
+    <!-- 最近学习 -->
+    <div class="last-chapter">
+      <div style="font-size:22px;">🎬</div>
+      <div class="lc-info">
+        <div class="lc-label">上次学到</div>
+        <div class="lc-title">第2讲：整数的质因数分解</div>
+      </div>
+      <button class="lc-btn" onclick="location.href='course-player.html'">继续学习</button>
+    </div>
+    <div class="progress-section">
+      <div class="progress-header">
+        <div class="progress-text">学习进度：已学 <strong>2</strong> / 24 讲</div>
+        <div class="progress-pct">8%</div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:8%;"></div>
+      </div>
+      <div class="progress-detail">
+        <span>已学 178 分钟</span>
+        <span>预计剩余 2,100+ 分钟</span>
+      </div>
+    </div>
+    <div class="mcc-actions">
+      <button class="btn btn-ghost btn-sm" onclick="location.href='course-detail.html'">课程详情</button>
+      <button class="btn btn-outline btn-sm">下载讲义</button>
+      <button class="btn btn-solid-blue btn-sm" onclick="location.href='course-player.html'">继续学习 ▶</button>
+    </div>
+  </div>
+
+  <!-- 课程2：已完成 -->
+  <div class="my-course-card animate-in animate-in-d2">
+    <div class="mcc-header">
+      <div class="mcc-thumb" style="background:linear-gradient(135deg,#880E4F,#E91E63);">🎤</div>
+      <div class="mcc-info">
+        <div class="mcc-name">英语演讲基础入门课（免费）</div>
+        <div class="mcc-teacher">张慧敏 老师 · 12讲视频</div>
+        <div class="mcc-expire forever">✓ 永久有效</div>
+      </div>
+    </div>
+    <div class="progress-section">
+      <div class="progress-header">
+        <div class="progress-text">🎉 课程已完成！</div>
+        <div class="progress-pct" style="color:var(--c-success);">100%</div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill done" style="width:100%;"></div>
+      </div>
+      <div class="progress-detail">
+        <span>共学习 12 讲 · 720 分钟</span>
+        <span style="color:var(--c-success);">✓ 已完成</span>
+      </div>
+    </div>
+    <div class="mcc-actions">
+      <button class="btn btn-ghost btn-sm" onclick="location.href='course-detail.html'">查看详情</button>
+      <button class="btn btn-outline btn-sm">下载资料</button>
+      <button class="btn btn-ghost btn-sm">重温课程 ↺</button>
+    </div>
+  </div>
+
+  <!-- 推荐更多 -->
+  <div style="background:var(--c-white);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow-xs);margin-bottom:12px;text-align:center;" class="animate-in animate-in-d3">
+    <div style="font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:6px;">继续学习，备战联赛</div>
+    <div style="font-size:13px;color:var(--c-gray-500);margin-bottom:14px;">数学联赛冲刺班已开课，立即加入提升胜率</div>
+    <button class="btn btn-primary btn-md" onclick="location.href='course-list.html'">浏览更多课程</button>
+  </div>
+</div>
+
+<!-- ===== AI 互动课堂 Tab ===== -->
+<div id="tab-ai" style="display:none;padding:12px 16px 0;">
+
+  <!-- AI课堂说明横幅 -->
+  <div style="background:linear-gradient(135deg,#2D1B69,#4A0E8F,#7B1FA2);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;position:relative;overflow:hidden;" class="animate-in">
+    <div style="position:absolute;top:-20px;right:-10px;font-size:80px;opacity:0.08;">🤖</div>
+    <div style="display:flex;align-items:flex-start;gap:12px;position:relative;z-index:1;">
+      <div style="font-size:32px;">🤖</div>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:800;color:white;margin-bottom:4px;">AI互动课堂</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.7);line-height:1.6;">由老师定制 · AI多智能体实时讲解<br>完成测验后可查看学习报告</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.12);">
+      <div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:white;">3</div><div style="font-size:10px;color:rgba(255,255,255,0.6);">已学课程</div></div>
+      <div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:#E9D5FF;">94%</div><div style="font-size:10px;color:rgba(255,255,255,0.6);">完课率</div></div>
+      <div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:#A7F3D0;">88</div><div style="font-size:10px;color:rgba(255,255,255,0.6);">测验均分</div></div>
+      <div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:#FDE68A;">126</div><div style="font-size:10px;color:rgba(255,255,255,0.6);">学习分钟</div></div>
+    </div>
+  </div>
+
+  <!-- AI课程卡片 1 -->
+  <div class="my-course-card animate-in animate-in-d1">
+    <div class="mcc-header">
+      <div class="mcc-thumb" style="background:linear-gradient(135deg,#4A0E8F,#9C27B0);font-size:32px;">🎨</div>
+      <div class="mcc-info">
+        <div class="mcc-name">儿童水彩零基础：向日葵的色彩</div>
+        <div class="mcc-teacher" style="display:flex;align-items:center;gap:6px;">
+          <span style="background:#F3E8FF;color:#7B1FA2;font-size:10px;font-weight:700;padding:2px 7px;border-radius:var(--radius-full);">🤖 AI生成</span>
+          <span>王建国老师定制 · 6个场景</span>
+        </div>
+        <div class="mcc-expire forever">✓ 永久有效</div>
+      </div>
+    </div>
+    <!-- 学习进度 -->
+    <div class="progress-section">
+      <div class="progress-header">
+        <div class="progress-text">已完成 <strong>6</strong> / 6 个场景</div>
+        <div class="progress-pct" style="color:var(--c-success);">100%</div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill done" style="width:100%;"></div>
+      </div>
+      <div class="progress-detail">
+        <span>测验成绩：<strong style="color:#7B1FA2;">95分</strong></span>
+        <span style="color:var(--c-success);">🎉 已完成</span>
+      </div>
+    </div>
+    <div class="mcc-actions">
+      <button class="btn btn-ghost btn-sm" onclick="location.href='maic-stats.html'">学习报告</button>
+      <button class="btn btn-ghost btn-sm">重新学习</button>
+      <button class="btn btn-sm" style="background:linear-gradient(135deg,#4A0E8F,#7B1FA2);color:white;border:none;" onclick="enterMaic()">进入课堂 ▶</button>
+    </div>
+  </div>
+
+  <!-- AI课程卡片 2 -->
+  <div class="my-course-card animate-in animate-in-d2">
+    <div class="mcc-header">
+      <div class="mcc-thumb" style="background:linear-gradient(135deg,#0D47A1,#42A5F5);font-size:32px;">🎵</div>
+      <div class="mcc-info">
+        <div class="mcc-name">钢琴乐理基础：五线谱认识与节拍入门</div>
+        <div class="mcc-teacher" style="display:flex;align-items:center;gap:6px;">
+          <span style="background:#F3E8FF;color:#7B1FA2;font-size:10px;font-weight:700;padding:2px 7px;border-radius:var(--radius-full);">🤖 AI生成</span>
+          <span>陈志远老师定制 · 8个场景</span>
+        </div>
+        <div class="mcc-expire forever">✓ 永久有效</div>
+      </div>
+    </div>
+    <!-- 最近学到 -->
+    <div class="last-chapter" style="background:#F3E8FF;">
+      <div style="font-size:22px;">🤖</div>
+      <div class="lc-info">
+        <div class="lc-label" style="color:#9C27B0;">上次学到</div>
+        <div class="lc-title" style="color:#7B1FA2;">场景5：音符时值与节拍认识</div>
+      </div>
+      <button class="lc-btn" style="background:linear-gradient(135deg,#4A0E8F,#7B1FA2);" onclick="enterMaic()">继续学习</button>
+    </div>
+    <div class="progress-section">
+      <div class="progress-header">
+        <div class="progress-text">已完成 <strong>5</strong> / 8 个场景</div>
+        <div class="progress-pct" style="color:#7B1FA2;">63%</div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:63%;background:linear-gradient(90deg,#4A0E8F,#9C27B0);"></div>
+      </div>
+      <div class="progress-detail">
+        <span>已学 58 分钟</span>
+        <span>还有 3 个场景</span>
+      </div>
+    </div>
+    <div class="mcc-actions">
+      <button class="btn btn-ghost btn-sm" onclick="location.href='maic-stats.html'">学习报告</button>
+      <button class="btn btn-sm" style="flex:2;background:linear-gradient(135deg,#4A0E8F,#7B1FA2);color:white;border:none;" onclick="enterMaic()">🤖 继续进入AI课堂</button>
+    </div>
+  </div>
+
+  <!-- AI课程卡片 3 - 新课未开始 -->
+  <div class="my-course-card animate-in animate-in-d3">
+    <div class="mcc-header">
+      <div class="mcc-thumb" style="background:linear-gradient(135deg,#7B1FA2,#CE93D8);font-size:32px;">✏️</div>
+      <div class="mcc-info">
+        <div class="mcc-name">书法入门：楷书基本笔画练习</div>
+        <div class="mcc-teacher" style="display:flex;align-items:center;gap:6px;">
+          <span style="background:#F3E8FF;color:#7B1FA2;font-size:10px;font-weight:700;padding:2px 7px;border-radius:var(--radius-full);">🤖 AI生成</span>
+          <span>王建国老师定制 · 5个场景</span>
+        </div>
+        <div class="mcc-expire" style="color:#7B1FA2;">📅 2026-03-20 上线</div>
+      </div>
+    </div>
+    <div style="padding:0 16px 14px;">
+      <div style="padding:12px 14px;background:#F3E8FF;border-radius:var(--radius-md);display:flex;align-items:center;gap:10px;">
+        <div style="font-size:22px;">🆕</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:#7B1FA2;">新课程已就绪</div>
+          <div style="font-size:12px;color:#9C27B0;margin-top:2px;">AI已生成5个场景，点击立即开始学习</div>
+        </div>
+        <button class="btn btn-sm" style="background:linear-gradient(135deg,#4A0E8F,#7B1FA2);color:white;border:none;flex-shrink:0;" onclick="enterMaic()">开始</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== 预约记录 Tab ===== -->
+<div id="tab-reserve" style="display:none;padding:12px 16px 0;">
+
+  <div class="reserve-card animate-in">
+    <div class="rc-header">
+      <div class="rc-course">数学联赛冲刺班（线下周末）</div>
+      <span class="tag tag-warning tag-dot">待确认</span>
+    </div>
+    <div class="rc-body">
+      <div class="rc-row"><div class="rc-icon">👤</div><div>预约姓名：张小明</div></div>
+      <div class="rc-row"><div class="rc-icon">📞</div><div>联系手机：138****8001</div></div>
+      <div class="rc-row"><div class="rc-icon">🏫</div><div>意向校区：广州天河校区</div></div>
+      <div class="rc-row"><div class="rc-icon">🕐</div><div>预约时间：2025-09-25 16:30</div></div>
+    </div>
+    <div style="padding:0 14px 12px;">
+      <div class="notice notice-warning" style="font-size:12px;padding:10px 12px;">
+        <span class="notice-icon">⏰</span>
+        <div>老师将在 <strong>1个工作日</strong> 内电话联系您，请保持手机畅通。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reserve-card animate-in animate-in-d1">
+    <div class="rc-header">
+      <div class="rc-course">英语演讲进阶班（线下·预约试听）</div>
+      <span class="tag tag-success tag-dot">已确认</span>
+    </div>
+    <div class="rc-body">
+      <div class="rc-row"><div class="rc-icon">👤</div><div>预约姓名：张小明</div></div>
+      <div class="rc-row"><div class="rc-icon">📞</div><div>联系手机：138****8001</div></div>
+      <div class="rc-row"><div class="rc-icon">🏫</div><div>试听校区：广州海珠校区</div></div>
+      <div class="rc-row"><div class="rc-icon">📅</div><div>试听时间：2025-09-28 周六 14:00</div></div>
+    </div>
+    <div style="padding:0 14px 12px;">
+      <div class="notice notice-success" style="font-size:12px;padding:10px 12px;">
+        <span class="notice-icon">✅</span>
+        <div>试听已确认！请于试听时间前10分钟到达校区。地址：广州市海珠区X路X号。</div>
+      </div>
+    </div>
+    <div style="padding:0 14px 12px;display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost btn-sm">取消预约</button>
+      <button class="btn btn-outline btn-sm" onclick="showToast('已复制地址到剪贴板')">📍 查看地址</button>
+    </div>
+  </div>
+
+  <!-- 空状态提示 -->
+  <div style="background:var(--c-white);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow-xs);margin-bottom:12px;text-align:center;" class="animate-in animate-in-d2">
+    <div style="font-size:13px;color:var(--c-gray-500);margin-bottom:12px;">想体验线下课程？预约免费试听</div>
+    <button class="btn btn-outline btn-sm" onclick="location.href='course-list.html'">浏览线下课程</button>
+  </div>
+
+</div>
+
+<script>
+function switchTab(el, id) {
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-bought').style.display  = id === 'bought'  ? 'block' : 'none';
+  document.getElementById('tab-ai').style.display      = id === 'ai'      ? 'block' : 'none';
+  document.getElementById('tab-reserve').style.display = id === 'reserve' ? 'block' : 'none';
+}
+
+function enterMaic() {
+  location.href = 'maic-classroom.html';
+}
+
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2500);
+}
+</script>
+</body>
+</html>

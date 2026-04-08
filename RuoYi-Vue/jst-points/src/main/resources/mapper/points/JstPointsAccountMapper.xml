@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.points.mapper.JstPointsAccountMapper">
+    
+    <resultMap type="JstPointsAccount" id="JstPointsAccountResult">
+        <result property="accountId"    column="account_id"    />
+        <result property="ownerType"    column="owner_type"    />
+        <result property="ownerId"    column="owner_id"    />
+        <result property="availablePoints"    column="available_points"    />
+        <result property="frozenPoints"    column="frozen_points"    />
+        <result property="totalEarn"    column="total_earn"    />
+        <result property="totalSpend"    column="total_spend"    />
+        <result property="growthValue"    column="growth_value"    />
+        <result property="currentLevelId"    column="current_level_id"    />
+        <result property="version"    column="version"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstPointsAccountVo">
+        select account_id, owner_type, owner_id, available_points, frozen_points, total_earn, total_spend, growth_value, current_level_id, version, create_by, create_time, update_by, update_time, remark, del_flag from jst_points_account
+    </sql>
+
+    <select id="selectJstPointsAccountList" parameterType="JstPointsAccount" resultMap="JstPointsAccountResult">
+        <include refid="selectJstPointsAccountVo"/>
+        <where>  
+            <if test="ownerType != null  and ownerType != ''"> and owner_type = #{ownerType}</if>
+            <if test="ownerId != null "> and owner_id = #{ownerId}</if>
+            <if test="availablePoints != null "> and available_points = #{availablePoints}</if>
+            <if test="frozenPoints != null "> and frozen_points = #{frozenPoints}</if>
+            <if test="totalEarn != null "> and total_earn = #{totalEarn}</if>
+            <if test="totalSpend != null "> and total_spend = #{totalSpend}</if>
+            <if test="growthValue != null "> and growth_value = #{growthValue}</if>
+            <if test="currentLevelId != null "> and current_level_id = #{currentLevelId}</if>
+            <if test="version != null "> and version = #{version}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstPointsAccountByAccountId" parameterType="Long" resultMap="JstPointsAccountResult">
+        <include refid="selectJstPointsAccountVo"/>
+        where account_id = #{accountId}
+    </select>
+
+    <insert id="insertJstPointsAccount" parameterType="JstPointsAccount" useGeneratedKeys="true" keyProperty="accountId">
+        insert into jst_points_account
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ownerType != null and ownerType != ''">owner_type,</if>
+            <if test="ownerId != null">owner_id,</if>
+            <if test="availablePoints != null">available_points,</if>
+            <if test="frozenPoints != null">frozen_points,</if>
+            <if test="totalEarn != null">total_earn,</if>
+            <if test="totalSpend != null">total_spend,</if>
+            <if test="growthValue != null">growth_value,</if>
+            <if test="currentLevelId != null">current_level_id,</if>
+            <if test="version != null">version,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ownerType != null and ownerType != ''">#{ownerType},</if>
+            <if test="ownerId != null">#{ownerId},</if>
+            <if test="availablePoints != null">#{availablePoints},</if>
+            <if test="frozenPoints != null">#{frozenPoints},</if>
+            <if test="totalEarn != null">#{totalEarn},</if>
+            <if test="totalSpend != null">#{totalSpend},</if>
+            <if test="growthValue != null">#{growthValue},</if>
+            <if test="currentLevelId != null">#{currentLevelId},</if>
+            <if test="version != null">#{version},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstPointsAccount" parameterType="JstPointsAccount">
+        update jst_points_account
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="ownerType != null and ownerType != ''">owner_type = #{ownerType},</if>
+            <if test="ownerId != null">owner_id = #{ownerId},</if>
+            <if test="availablePoints != null">available_points = #{availablePoints},</if>
+            <if test="frozenPoints != null">frozen_points = #{frozenPoints},</if>
+            <if test="totalEarn != null">total_earn = #{totalEarn},</if>
+            <if test="totalSpend != null">total_spend = #{totalSpend},</if>
+            <if test="growthValue != null">growth_value = #{growthValue},</if>
+            <if test="currentLevelId != null">current_level_id = #{currentLevelId},</if>
+            <if test="version != null">version = #{version},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where account_id = #{accountId}
+    </update>
+
+    <delete id="deleteJstPointsAccountByAccountId" parameterType="Long">
+        delete from jst_points_account where account_id = #{accountId}
+    </delete>
+
+    <delete id="deleteJstPointsAccountByAccountIds" parameterType="String">
+        delete from jst_points_account where account_id in 
+        <foreach item="accountId" collection="array" open="(" separator="," close=")">
+            #{accountId}
+        </foreach>
+    </delete>
+</mapper>

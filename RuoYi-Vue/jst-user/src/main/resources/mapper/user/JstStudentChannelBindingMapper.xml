@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.user.mapper.JstStudentChannelBindingMapper">
+    
+    <resultMap type="JstStudentChannelBinding" id="JstStudentChannelBindingResult">
+        <result property="bindingId"    column="binding_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="channelId"    column="channel_id"    />
+        <result property="bindTime"    column="bind_time"    />
+        <result property="unbindTime"    column="unbind_time"    />
+        <result property="status"    column="status"    />
+        <result property="unbindReason"    column="unbind_reason"    />
+        <result property="operatorId"    column="operator_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstStudentChannelBindingVo">
+        select binding_id, user_id, channel_id, bind_time, unbind_time, status, unbind_reason, operator_id, create_by, create_time, update_by, update_time, remark, del_flag from jst_student_channel_binding
+    </sql>
+
+    <select id="selectJstStudentChannelBindingList" parameterType="JstStudentChannelBinding" resultMap="JstStudentChannelBindingResult">
+        <include refid="selectJstStudentChannelBindingVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="channelId != null "> and channel_id = #{channelId}</if>
+            <if test="bindTime != null "> and bind_time = #{bindTime}</if>
+            <if test="unbindTime != null "> and unbind_time = #{unbindTime}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="unbindReason != null  and unbindReason != ''"> and unbind_reason = #{unbindReason}</if>
+            <if test="operatorId != null "> and operator_id = #{operatorId}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstStudentChannelBindingByBindingId" parameterType="Long" resultMap="JstStudentChannelBindingResult">
+        <include refid="selectJstStudentChannelBindingVo"/>
+        where binding_id = #{bindingId}
+    </select>
+
+    <insert id="insertJstStudentChannelBinding" parameterType="JstStudentChannelBinding" useGeneratedKeys="true" keyProperty="bindingId">
+        insert into jst_student_channel_binding
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="channelId != null">channel_id,</if>
+            <if test="bindTime != null">bind_time,</if>
+            <if test="unbindTime != null">unbind_time,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="unbindReason != null">unbind_reason,</if>
+            <if test="operatorId != null">operator_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="channelId != null">#{channelId},</if>
+            <if test="bindTime != null">#{bindTime},</if>
+            <if test="unbindTime != null">#{unbindTime},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="unbindReason != null">#{unbindReason},</if>
+            <if test="operatorId != null">#{operatorId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstStudentChannelBinding" parameterType="JstStudentChannelBinding">
+        update jst_student_channel_binding
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="channelId != null">channel_id = #{channelId},</if>
+            <if test="bindTime != null">bind_time = #{bindTime},</if>
+            <if test="unbindTime != null">unbind_time = #{unbindTime},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="unbindReason != null">unbind_reason = #{unbindReason},</if>
+            <if test="operatorId != null">operator_id = #{operatorId},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where binding_id = #{bindingId}
+    </update>
+
+    <delete id="deleteJstStudentChannelBindingByBindingId" parameterType="Long">
+        delete from jst_student_channel_binding where binding_id = #{bindingId}
+    </delete>
+
+    <delete id="deleteJstStudentChannelBindingByBindingIds" parameterType="String">
+        delete from jst_student_channel_binding where binding_id in 
+        <foreach item="bindingId" collection="array" open="(" separator="," close=")">
+            #{bindingId}
+        </foreach>
+    </delete>
+</mapper>

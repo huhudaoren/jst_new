@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>报名审核详情 · 竞赛通管理</title>
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background:var(--c-gray-50); padding-bottom:100px; }
+.admin-nav { background:linear-gradient(135deg,#1A237E,#283593); padding:14px var(--space-4); display:flex; align-items:center; gap:12px; }
+.back-btn { width:34px; height:34px; border-radius:var(--radius-sm); background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:18px; color:white; cursor:pointer; touch-action:manipulation; }
+.admin-nav-title { font-size:17px; font-weight:700; color:white; flex:1; }
+
+/* 状态 Hero */
+.enroll-hero { background:linear-gradient(135deg,#F59E0B,#FBBF24); padding:16px 20px; margin-bottom:0; }
+.eh-label { font-size:12px; color:rgba(255,255,255,0.8); margin-bottom:4px; }
+.eh-title { font-size:20px; font-weight:900; color:white; margin-bottom:6px; }
+.eh-meta { font-size:13px; color:rgba(255,255,255,0.85); }
+
+/* 区块卡片 */
+.section-card { background:var(--c-white); margin:12px var(--space-4) 0; border-radius:var(--radius-lg); box-shadow:var(--shadow-xs); overflow:hidden; }
+.sc-header { padding:14px 16px 0; display:flex; align-items:center; gap:8px; margin-bottom:2px; }
+.sc-icon { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+.sc-title { font-size:14px; font-weight:700; color:var(--c-gray-900); flex:1; }
+.sc-action { font-size:12px; color:var(--c-primary-600); font-weight:600; cursor:pointer; }
+
+/* 信息行 */
+.info-row { display:flex; align-items:flex-start; padding:11px 16px; border-bottom:1px solid var(--c-gray-50); }
+.info-row:last-child { border-bottom:none; }
+.ir-key { font-size:13px; color:var(--c-gray-500); width:90px; flex-shrink:0; padding-top:1px; }
+.ir-val { font-size:13px; color:var(--c-gray-900); font-weight:500; flex:1; line-height:1.5; }
+.ir-val.highlight { color:var(--c-primary-600); font-weight:700; }
+.ir-val.warn { color:var(--c-warning); }
+
+/* 证件照/图片预览 */
+.photo-row { padding:12px 16px; display:flex; gap:10px; flex-wrap:wrap; }
+.photo-item { position:relative; }
+.photo-thumb { width:80px; height:80px; border-radius:var(--radius-md); object-fit:cover; background:var(--c-gray-100); display:flex; align-items:center; justify-content:center; font-size:32px; cursor:pointer; border:1.5px solid var(--c-gray-100); overflow:hidden; transition:opacity 0.2s; touch-action:manipulation; }
+.photo-thumb:active { opacity:0.8; }
+.photo-label { font-size:11px; color:var(--c-gray-500); text-align:center; margin-top:4px; }
+.photo-badge { position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.55); color:white; font-size:9px; padding:2px 5px; border-radius:4px; }
+
+/* 作品大图 */
+.artwork-preview { margin:0 16px 14px; border-radius:var(--radius-md); overflow:hidden; background:var(--c-gray-100); position:relative; }
+.artwork-img { width:100%; height:200px; object-fit:cover; display:flex; align-items:center; justify-content:center; font-size:60px; background:linear-gradient(135deg,#EDE9FE,#DDD6FE); cursor:pointer; }
+.artwork-info { padding:10px 12px; font-size:12px; color:var(--c-gray-500); }
+.artwork-info strong { color:var(--c-gray-900); }
+.artwork-expand-btn { position:absolute; bottom:52px; right:12px; background:rgba(0,0,0,0.5); color:white; border:none; border-radius:6px; padding:5px 10px; font-size:12px; cursor:pointer; touch-action:manipulation; }
+
+/* 历史记录 */
+.history-item { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--c-gray-50); }
+.history-item:last-child { border-bottom:none; }
+.hist-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.hist-info { flex:1; }
+.hist-contest { font-size:13px; color:var(--c-gray-900); font-weight:500; }
+.hist-meta { font-size:11px; color:var(--c-gray-500); margin-top:2px; }
+
+/* 操作备注弹层 */
+.reject-sheet-overlay { position:fixed; inset:0; background:rgba(26,31,46,0.55); z-index:200; display:none; align-items:flex-end; justify-content:center; }
+.reject-sheet-overlay.show { display:flex; }
+.reject-sheet { background:var(--c-white); border-radius:var(--radius-xl) var(--radius-xl) 0 0; width:100%; max-width:390px; padding:20px; animation:sheet-up 0.3s var(--ease-out); }
+.reject-sheet h3 { font-size:16px; font-weight:700; color:var(--c-gray-900); margin-bottom:6px; }
+.reject-sheet p { font-size:13px; color:var(--c-gray-500); margin-bottom:16px; }
+.reject-textarea { width:100%; min-height:100px; border:1.5px solid var(--c-gray-100); border-radius:var(--radius-md); padding:12px; font-size:14px; font-family:inherit; resize:none; outline:none; box-sizing:border-box; }
+.reject-textarea:focus { border-color:var(--c-danger); }
+.reject-quick { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 16px; }
+.reject-quick-btn { padding:5px 10px; border:1px solid var(--c-gray-200); border-radius:20px; font-size:12px; color:var(--c-gray-600); cursor:pointer; background:var(--c-gray-50); touch-action:manipulation; }
+.reject-quick-btn:active { background:var(--c-gray-100); }
+
+/* 底部操作栏 */
+.action-bar { position:fixed; bottom:0; left:0; right:0; max-width:390px; margin:0 auto; background:var(--c-white); border-top:1px solid var(--c-gray-100); padding:12px 16px calc(12px + env(safe-area-inset-bottom)); display:flex; gap:10px; z-index:100; }
+.btn-pass { flex:2; height:50px; background:var(--c-success); color:white; border:none; border-radius:var(--radius-md); font-size:15px; font-weight:700; cursor:pointer; touch-action:manipulation; }
+.btn-reject { flex:1; height:50px; background:var(--c-white); color:var(--c-danger); border:1.5px solid var(--c-danger); border-radius:var(--radius-md); font-size:15px; font-weight:700; cursor:pointer; }
+.btn-hold { flex:1; height:50px; background:var(--c-gray-50); color:var(--c-gray-600); border:1px solid var(--c-gray-200); border-radius:var(--radius-md); font-size:14px; font-weight:600; cursor:pointer; }
+
+/* 图片大图弹层 */
+.img-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:300; display:none; align-items:center; justify-content:center; }
+.img-overlay.show { display:flex; }
+.img-overlay img { max-width:90vw; max-height:85vh; border-radius:8px; }
+.img-overlay-close { position:absolute; top:20px; right:20px; width:36px; height:36px; background:rgba(255,255,255,0.15); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:20px; cursor:pointer; }
+
+/* 成功弹层 */
+.success-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:400; display:none; align-items:center; justify-content:center; }
+.success-overlay.show { display:flex; }
+.success-card { background:var(--c-white); border-radius:20px; padding:32px 24px; text-align:center; margin:0 32px; }
+.success-icon { font-size:52px; margin-bottom:12px; }
+.success-title { font-size:18px; font-weight:800; color:var(--c-gray-900); margin-bottom:6px; }
+.success-desc { font-size:14px; color:var(--c-gray-500); margin-bottom:24px; }
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:#1A237E;">
+  <span class="time">9:41</span>
+  <span class="icons">📶 🔋</span>
+</div>
+
+<div class="admin-nav animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="admin-nav-title">报名审核详情</div>
+  <div style="font-size:12px;color:rgba(255,255,255,0.6);">1 / 12</div>
+</div>
+
+<!-- 状态 Hero -->
+<div class="enroll-hero animate-in">
+  <div class="eh-label">待审核 · 报名号</div>
+  <div class="eh-title">#20251101-2588</div>
+  <div class="eh-meta">📅 提交于 2026-03-19 09:05 · 安徒生(国际)艺术奖</div>
+</div>
+
+<!-- 参赛信息 -->
+<div class="section-card animate-in animate-in-d1">
+  <div class="sc-header">
+    <div class="sc-icon" style="background:#EDE9FE;">🏆</div>
+    <div class="sc-title">参赛信息</div>
+  </div>
+  <div class="info-row">
+    <div class="ir-key">赛事名称</div>
+    <div class="ir-val highlight">安徒生(国际)艺术奖</div>
+  </div>
+  <div class="info-row">
+    <div class="ir-key">参赛类别</div>
+    <div class="ir-val">绘画类</div>
+  </div>
+  <div class="info-row">
+    <div class="ir-key">参赛组别</div>
+    <div class="ir-val">小学高年级组（4-6年级）</div>
+  </div>
+  <div class="info-row">
+    <div class="ir-key">报名方式</div>
+    <div class="ir-val"><span class="tag tag-info">代报名</span> <span style="font-size:12px;color:var(--c-gray-500);">代报老师：王建国</span></div>
+  </div>
+  <div class="info-row">
+    <div class="ir-key">报名费</div>
+    <div class="ir-val">¥180 · <span style="color:var(--c-success);font-weight:600;">已支付（微信）</span></div>
+  </div>
+</div>
+
+<!-- 学生信息 -->
+<div class="section-card animate-in animate-in-d1">
+  <div class="sc-header">
+    <div class="sc-icon" style="background:#EEF0FF;">👤</div>
+    <div class="sc-title">学生信息</div>
+    <div class="sc-action" onclick="copyInfo()">复制</div>
+  </div>
+  <div class="info-row">
+    <div class="ir-key">姓名</div>
+    <div class="ir-val">张小明</div>
+  </div>
+  <div class="info-row">
+    <div class="ir-key">证件号</div>
+    <div class="ir-val">440***********5237 <span onclick="toggleIdCard()" style="font-size:12px;color:var(--c-primary-600);margin-left:6px;cursor:pointer;" id="idToggle">查看</span></div>
+  </div>
+  <div class="info-row">
+    <div class="ir-key">联系手机</div>
+    <div class="ir-val">138****8888</div>
+  </div>
+  <div class="info-row">
+    <div class="ir-key">就读学校</div>
+    <div class="ir-val">广州市天河区天府路小学</div>
+  </div>
+  <div class="info-row">
+    <div class="ir-key">年级</div>
+    <div class="ir-val">五年级</div>
+  </div>
+
+  <!-- 证件照 + 作品 -->
+  <div class="sc-header" style="padding-top:10px;">
+    <div class="sc-title" style="font-size:13px;color:var(--c-gray-500);">上传材料</div>
+  </div>
+  <div class="photo-row">
+    <div class="photo-item">
+      <div class="photo-thumb" onclick="showImg('id_photo')" style="background:linear-gradient(135deg,#E0E7FF,#C7D2FE);">🧒</div>
+      <div class="photo-label">证件照</div>
+    </div>
+    <div class="photo-item">
+      <div class="photo-thumb" onclick="showImg('artwork')" style="background:linear-gradient(135deg,#EDE9FE,#DDD6FE); width:120px; height:80px;">🎨</div>
+      <div class="photo-label">作品电子稿</div>
+      <div class="photo-badge">JPG · 4.2M</div>
+    </div>
+  </div>
+
+  <!-- 作品大图展示 -->
+  <div class="artwork-preview">
+    <div class="artwork-img" onclick="showImg('artwork')">🎨</div>
+    <button class="artwork-expand-btn" onclick="showImg('artwork')">⛶ 大图</button>
+    <div class="artwork-info">
+      <strong>山水画·水彩</strong> · 张小明 · 2026-03-15 上传<br>
+      分辨率：3200×2400px · 300DPI · JPG格式 · 4.2MB（符合要求）
+    </div>
+  </div>
+</div>
+
+<!-- 历史报名记录 -->
+<div class="section-card animate-in animate-in-d2">
+  <div class="sc-header">
+    <div class="sc-icon" style="background:#EAFAF1;">📂</div>
+    <div class="sc-title">历史报名（参考）</div>
+  </div>
+  <div class="history-item">
+    <div class="hist-dot" style="background:var(--c-success);"></div>
+    <div class="hist-info">
+      <div class="hist-contest">"鸟巢杯"文化艺术活动</div>
+      <div class="hist-meta">2025-11 · 绘画类 · <span style="color:var(--c-success);">已通过</span></div>
+    </div>
+    <span class="tag tag-success tag-dot" style="font-size:11px;">通过</span>
+  </div>
+  <div class="history-item">
+    <div class="hist-dot" style="background:var(--c-gray-300);"></div>
+    <div class="hist-info">
+      <div class="hist-contest">全国中小学生艺术展演活动</div>
+      <div class="hist-meta">2025-09 · 绘画类 · <span style="color:var(--c-warning);">已截止</span></div>
+    </div>
+    <span class="tag tag-gray" style="font-size:11px;">已结束</span>
+  </div>
+</div>
+
+<!-- 操作备注区 -->
+<div class="section-card animate-in animate-in-d2" style="margin-bottom:12px;">
+  <div class="sc-header">
+    <div class="sc-icon" style="background:#FEF9EC;">📝</div>
+    <div class="sc-title">审核备注（可选）</div>
+  </div>
+  <div style="padding:10px 16px 14px;">
+    <textarea id="remarkInput" style="width:100%;min-height:72px;border:1.5px solid var(--c-gray-100);border-radius:var(--radius-md);padding:10px 12px;font-size:14px;font-family:inherit;resize:none;outline:none;box-sizing:border-box;" placeholder="填写审核备注，通过可不填..."></textarea>
+  </div>
+</div>
+
+<!-- 底部操作栏 -->
+<div class="action-bar">
+  <button class="btn-hold" onclick="holdEnroll()">暂缓</button>
+  <button class="btn-reject" onclick="openRejectSheet()">驳回</button>
+  <button class="btn-pass" onclick="passEnroll()">✅ 通过审核</button>
+</div>
+
+<!-- 驳回原因 Sheet -->
+<div class="reject-sheet-overlay" id="rejectSheet" onclick="closeRejectSheet()">
+  <div class="reject-sheet" onclick="event.stopPropagation()">
+    <div style="width:36px;height:4px;background:var(--c-gray-100);border-radius:2px;margin:0 auto 16px;"></div>
+    <h3>驳回报名</h3>
+    <p>请说明驳回原因，将发送给学生（或代报名老师）</p>
+    <textarea class="reject-textarea" id="rejectReason" placeholder="请输入驳回原因..."></textarea>
+    <div class="reject-quick">
+      <div class="reject-quick-btn" onclick="fillReason(this)">作品图片模糊</div>
+      <div class="reject-quick-btn" onclick="fillReason(this)">证件照不清晰</div>
+      <div class="reject-quick-btn" onclick="fillReason(this)">组别与年龄不符</div>
+      <div class="reject-quick-btn" onclick="fillReason(this)">作品尺寸不达标</div>
+      <div class="reject-quick-btn" onclick="fillReason(this)">信息填写有误</div>
+    </div>
+    <button style="width:100%;height:50px;background:var(--c-danger);color:white;border:none;border-radius:var(--radius-md);font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;" onclick="confirmReject()">确认驳回</button>
+    <button style="width:100%;height:46px;background:var(--c-gray-50);color:var(--c-gray-600);border:none;border-radius:var(--radius-md);font-size:14px;cursor:pointer;" onclick="closeRejectSheet()">取消</button>
+  </div>
+</div>
+
+<!-- 大图预览 -->
+<div class="img-overlay" id="imgOverlay" onclick="closeImg()">
+  <div class="img-overlay-close">✕</div>
+  <div style="font-size:100px;">🎨</div>
+</div>
+
+<!-- 成功反馈 -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon" id="successIcon">✅</div>
+    <div class="success-title" id="successTitle">审核通过</div>
+    <div class="success-desc" id="successDesc">已通知学生，可继续审核下一条</div>
+    <button style="width:100%;height:48px;background:var(--c-primary-600);color:white;border:none;border-radius:var(--radius-md);font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;" onclick="nextItem()">审核下一条</button>
+    <button style="width:100%;height:44px;background:var(--c-gray-50);color:var(--c-gray-600);border:none;border-radius:var(--radius-md);font-size:14px;cursor:pointer;" onclick="backToList()">返回列表</button>
+  </div>
+</div>
+
+<script>
+function toggleIdCard() {
+  const toggle = document.getElementById('idToggle');
+  if (toggle.textContent === '查看') {
+    toggle.textContent = '隐藏';
+    toggle.parentElement.querySelector('div') || 0;
+    toggle.previousSibling.textContent = '440101201504125237 ';
+  } else {
+    toggle.textContent = '查看';
+    toggle.previousSibling.textContent = '440***********5237 ';
+  }
+}
+
+function passEnroll() {
+  document.getElementById('successIcon').textContent = '✅';
+  document.getElementById('successTitle').textContent = '审核通过';
+  document.getElementById('successDesc').textContent = '已通知学生，报名状态更新为「审核通过」';
+  document.getElementById('successOverlay').classList.add('show');
+}
+
+function openRejectSheet() { document.getElementById('rejectSheet').classList.add('show'); }
+function closeRejectSheet() { document.getElementById('rejectSheet').classList.remove('show'); }
+function fillReason(el) { document.getElementById('rejectReason').value = el.textContent; }
+function confirmReject() {
+  const reason = document.getElementById('rejectReason').value.trim();
+  if (!reason) { showToast('请填写驳回原因'); return; }
+  closeRejectSheet();
+  document.getElementById('successIcon').textContent = '📋';
+  document.getElementById('successTitle').textContent = '已驳回';
+  document.getElementById('successDesc').textContent = '驳回原因：' + reason + '。已通知学生补充资料';
+  document.getElementById('successOverlay').classList.add('show');
+}
+
+function holdEnroll() { showToast('已标记为「暂缓」，稍后再处理'); }
+function showImg(type) { document.getElementById('imgOverlay').classList.add('show'); }
+function closeImg() { document.getElementById('imgOverlay').classList.remove('show'); }
+function nextItem() { document.getElementById('successOverlay').classList.remove('show'); window.scrollTo(0,0); showToast('下一条：王芳芳 · 鸟巢杯'); }
+function backToList() { location.href = 'admin-enroll.html'; }
+function copyInfo() { showToast('信息已复制'); }
+
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2500);
+}
+</script>
+</body>
+</html>

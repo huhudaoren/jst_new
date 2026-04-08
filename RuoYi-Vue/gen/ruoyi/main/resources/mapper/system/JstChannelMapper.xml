@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstChannelMapper">
+    
+    <resultMap type="JstChannel" id="JstChannelResult">
+        <result property="channelId"    column="channel_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="channelType"    column="channel_type"    />
+        <result property="channelName"    column="channel_name"    />
+        <result property="contactMobile"    column="contact_mobile"    />
+        <result property="idCardNo"    column="id_card_no"    />
+        <result property="businessLicenseNo"    column="business_license_no"    />
+        <result property="certMaterialsJson"    column="cert_materials_json"    />
+        <result property="authStatus"    column="auth_status"    />
+        <result property="authTime"    column="auth_time"    />
+        <result property="authRemark"    column="auth_remark"    />
+        <result property="currentLevelId"    column="current_level_id"    />
+        <result property="status"    column="status"    />
+        <result property="riskFlag"    column="risk_flag"    />
+        <result property="tags"    column="tags"    />
+        <result property="bankAccountName"    column="bank_account_name"    />
+        <result property="bankAccountNo"    column="bank_account_no"    />
+        <result property="bankName"    column="bank_name"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstChannelVo">
+        select channel_id, user_id, channel_type, channel_name, contact_mobile, id_card_no, business_license_no, cert_materials_json, auth_status, auth_time, auth_remark, current_level_id, status, risk_flag, tags, bank_account_name, bank_account_no, bank_name, create_by, create_time, update_by, update_time, remark, del_flag from jst_channel
+    </sql>
+
+    <select id="selectJstChannelList" parameterType="JstChannel" resultMap="JstChannelResult">
+        <include refid="selectJstChannelVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="channelType != null  and channelType != ''"> and channel_type = #{channelType}</if>
+            <if test="channelName != null  and channelName != ''"> and channel_name like concat('%', #{channelName}, '%')</if>
+            <if test="contactMobile != null  and contactMobile != ''"> and contact_mobile = #{contactMobile}</if>
+            <if test="idCardNo != null  and idCardNo != ''"> and id_card_no = #{idCardNo}</if>
+            <if test="businessLicenseNo != null  and businessLicenseNo != ''"> and business_license_no = #{businessLicenseNo}</if>
+            <if test="certMaterialsJson != null  and certMaterialsJson != ''"> and cert_materials_json = #{certMaterialsJson}</if>
+            <if test="authStatus != null  and authStatus != ''"> and auth_status = #{authStatus}</if>
+            <if test="authTime != null "> and auth_time = #{authTime}</if>
+            <if test="authRemark != null  and authRemark != ''"> and auth_remark = #{authRemark}</if>
+            <if test="currentLevelId != null "> and current_level_id = #{currentLevelId}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="riskFlag != null "> and risk_flag = #{riskFlag}</if>
+            <if test="tags != null  and tags != ''"> and tags = #{tags}</if>
+            <if test="bankAccountName != null  and bankAccountName != ''"> and bank_account_name like concat('%', #{bankAccountName}, '%')</if>
+            <if test="bankAccountNo != null  and bankAccountNo != ''"> and bank_account_no = #{bankAccountNo}</if>
+            <if test="bankName != null  and bankName != ''"> and bank_name like concat('%', #{bankName}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectJstChannelByChannelId" parameterType="Long" resultMap="JstChannelResult">
+        <include refid="selectJstChannelVo"/>
+        where channel_id = #{channelId}
+    </select>
+
+    <insert id="insertJstChannel" parameterType="JstChannel" useGeneratedKeys="true" keyProperty="channelId">
+        insert into jst_channel
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="channelType != null and channelType != ''">channel_type,</if>
+            <if test="channelName != null and channelName != ''">channel_name,</if>
+            <if test="contactMobile != null and contactMobile != ''">contact_mobile,</if>
+            <if test="idCardNo != null">id_card_no,</if>
+            <if test="businessLicenseNo != null">business_license_no,</if>
+            <if test="certMaterialsJson != null">cert_materials_json,</if>
+            <if test="authStatus != null and authStatus != ''">auth_status,</if>
+            <if test="authTime != null">auth_time,</if>
+            <if test="authRemark != null">auth_remark,</if>
+            <if test="currentLevelId != null">current_level_id,</if>
+            <if test="status != null">status,</if>
+            <if test="riskFlag != null">risk_flag,</if>
+            <if test="tags != null">tags,</if>
+            <if test="bankAccountName != null">bank_account_name,</if>
+            <if test="bankAccountNo != null">bank_account_no,</if>
+            <if test="bankName != null">bank_name,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="channelType != null and channelType != ''">#{channelType},</if>
+            <if test="channelName != null and channelName != ''">#{channelName},</if>
+            <if test="contactMobile != null and contactMobile != ''">#{contactMobile},</if>
+            <if test="idCardNo != null">#{idCardNo},</if>
+            <if test="businessLicenseNo != null">#{businessLicenseNo},</if>
+            <if test="certMaterialsJson != null">#{certMaterialsJson},</if>
+            <if test="authStatus != null and authStatus != ''">#{authStatus},</if>
+            <if test="authTime != null">#{authTime},</if>
+            <if test="authRemark != null">#{authRemark},</if>
+            <if test="currentLevelId != null">#{currentLevelId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="riskFlag != null">#{riskFlag},</if>
+            <if test="tags != null">#{tags},</if>
+            <if test="bankAccountName != null">#{bankAccountName},</if>
+            <if test="bankAccountNo != null">#{bankAccountNo},</if>
+            <if test="bankName != null">#{bankName},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstChannel" parameterType="JstChannel">
+        update jst_channel
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="channelType != null and channelType != ''">channel_type = #{channelType},</if>
+            <if test="channelName != null and channelName != ''">channel_name = #{channelName},</if>
+            <if test="contactMobile != null and contactMobile != ''">contact_mobile = #{contactMobile},</if>
+            <if test="idCardNo != null">id_card_no = #{idCardNo},</if>
+            <if test="businessLicenseNo != null">business_license_no = #{businessLicenseNo},</if>
+            <if test="certMaterialsJson != null">cert_materials_json = #{certMaterialsJson},</if>
+            <if test="authStatus != null and authStatus != ''">auth_status = #{authStatus},</if>
+            <if test="authTime != null">auth_time = #{authTime},</if>
+            <if test="authRemark != null">auth_remark = #{authRemark},</if>
+            <if test="currentLevelId != null">current_level_id = #{currentLevelId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="riskFlag != null">risk_flag = #{riskFlag},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="bankAccountName != null">bank_account_name = #{bankAccountName},</if>
+            <if test="bankAccountNo != null">bank_account_no = #{bankAccountNo},</if>
+            <if test="bankName != null">bank_name = #{bankName},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where channel_id = #{channelId}
+    </update>
+
+    <delete id="deleteJstChannelByChannelId" parameterType="Long">
+        delete from jst_channel where channel_id = #{channelId}
+    </delete>
+
+    <delete id="deleteJstChannelByChannelIds" parameterType="String">
+        delete from jst_channel where channel_id in 
+        <foreach item="channelId" collection="array" open="(" separator="," close=")">
+            #{channelId}
+        </foreach>
+    </delete>
+</mapper>

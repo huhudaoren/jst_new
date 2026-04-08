@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstCertRecordMapper">
+    
+    <resultMap type="JstCertRecord" id="JstCertRecordResult">
+        <result property="certId"    column="cert_id"    />
+        <result property="certNo"    column="cert_no"    />
+        <result property="contestId"    column="contest_id"    />
+        <result property="scoreId"    column="score_id"    />
+        <result property="enrollId"    column="enroll_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="participantId"    column="participant_id"    />
+        <result property="templateId"    column="template_id"    />
+        <result property="certFileUrl"    column="cert_file_url"    />
+        <result property="issueStatus"    column="issue_status"    />
+        <result property="issueTime"    column="issue_time"    />
+        <result property="voidReason"    column="void_reason"    />
+        <result property="verifyCode"    column="verify_code"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstCertRecordVo">
+        select cert_id, cert_no, contest_id, score_id, enroll_id, user_id, participant_id, template_id, cert_file_url, issue_status, issue_time, void_reason, verify_code, create_by, create_time, update_by, update_time, remark, del_flag from jst_cert_record
+    </sql>
+
+    <select id="selectJstCertRecordList" parameterType="JstCertRecord" resultMap="JstCertRecordResult">
+        <include refid="selectJstCertRecordVo"/>
+        <where>  
+            <if test="certNo != null  and certNo != ''"> and cert_no = #{certNo}</if>
+            <if test="contestId != null "> and contest_id = #{contestId}</if>
+            <if test="scoreId != null "> and score_id = #{scoreId}</if>
+            <if test="enrollId != null "> and enroll_id = #{enrollId}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="participantId != null "> and participant_id = #{participantId}</if>
+            <if test="templateId != null "> and template_id = #{templateId}</if>
+            <if test="certFileUrl != null  and certFileUrl != ''"> and cert_file_url = #{certFileUrl}</if>
+            <if test="issueStatus != null  and issueStatus != ''"> and issue_status = #{issueStatus}</if>
+            <if test="issueTime != null "> and issue_time = #{issueTime}</if>
+            <if test="voidReason != null  and voidReason != ''"> and void_reason = #{voidReason}</if>
+            <if test="verifyCode != null  and verifyCode != ''"> and verify_code = #{verifyCode}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstCertRecordByCertId" parameterType="Long" resultMap="JstCertRecordResult">
+        <include refid="selectJstCertRecordVo"/>
+        where cert_id = #{certId}
+    </select>
+
+    <insert id="insertJstCertRecord" parameterType="JstCertRecord" useGeneratedKeys="true" keyProperty="certId">
+        insert into jst_cert_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="certNo != null and certNo != ''">cert_no,</if>
+            <if test="contestId != null">contest_id,</if>
+            <if test="scoreId != null">score_id,</if>
+            <if test="enrollId != null">enroll_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="participantId != null">participant_id,</if>
+            <if test="templateId != null">template_id,</if>
+            <if test="certFileUrl != null">cert_file_url,</if>
+            <if test="issueStatus != null and issueStatus != ''">issue_status,</if>
+            <if test="issueTime != null">issue_time,</if>
+            <if test="voidReason != null">void_reason,</if>
+            <if test="verifyCode != null">verify_code,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="certNo != null and certNo != ''">#{certNo},</if>
+            <if test="contestId != null">#{contestId},</if>
+            <if test="scoreId != null">#{scoreId},</if>
+            <if test="enrollId != null">#{enrollId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="participantId != null">#{participantId},</if>
+            <if test="templateId != null">#{templateId},</if>
+            <if test="certFileUrl != null">#{certFileUrl},</if>
+            <if test="issueStatus != null and issueStatus != ''">#{issueStatus},</if>
+            <if test="issueTime != null">#{issueTime},</if>
+            <if test="voidReason != null">#{voidReason},</if>
+            <if test="verifyCode != null">#{verifyCode},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstCertRecord" parameterType="JstCertRecord">
+        update jst_cert_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="certNo != null and certNo != ''">cert_no = #{certNo},</if>
+            <if test="contestId != null">contest_id = #{contestId},</if>
+            <if test="scoreId != null">score_id = #{scoreId},</if>
+            <if test="enrollId != null">enroll_id = #{enrollId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="participantId != null">participant_id = #{participantId},</if>
+            <if test="templateId != null">template_id = #{templateId},</if>
+            <if test="certFileUrl != null">cert_file_url = #{certFileUrl},</if>
+            <if test="issueStatus != null and issueStatus != ''">issue_status = #{issueStatus},</if>
+            <if test="issueTime != null">issue_time = #{issueTime},</if>
+            <if test="voidReason != null">void_reason = #{voidReason},</if>
+            <if test="verifyCode != null">verify_code = #{verifyCode},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where cert_id = #{certId}
+    </update>
+
+    <delete id="deleteJstCertRecordByCertId" parameterType="Long">
+        delete from jst_cert_record where cert_id = #{certId}
+    </delete>
+
+    <delete id="deleteJstCertRecordByCertIds" parameterType="String">
+        delete from jst_cert_record where cert_id in 
+        <foreach item="certId" collection="array" open="(" separator="," close=")">
+            #{certId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>我的预约 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); padding-bottom: 24px; }
+
+/* 顶部导航 */
+.r-nav {
+  background: linear-gradient(135deg, #4A0E8F, #7B1FA2);
+  padding: 14px var(--space-4);
+  display: flex; align-items: center; gap: 12px;
+}
+.r-back {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: white; cursor: pointer; touch-action: manipulation;
+}
+.r-title { flex: 1; font-size: 17px; font-weight: 700; color: white; }
+
+/* 预约信息横幅 */
+.reserve-banner {
+  margin: 12px var(--space-4) 0;
+  background: linear-gradient(135deg, #4A0E8F, #7B1FA2);
+  border-radius: var(--radius-xl); padding: 18px;
+  box-shadow: 0 6px 20px rgba(74,14,143,.3);
+  position: relative; overflow: hidden;
+}
+.reserve-banner::before {
+  content: ''; position: absolute; top: -20px; right: -20px;
+  width: 110px; height: 110px; border-radius: 50%;
+  background: rgba(255,255,255,.06);
+}
+.rb-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3);
+  border-radius: var(--radius-full); padding: 3px 10px;
+  font-size: 11px; font-weight: 700; color: white; margin-bottom: 10px;
+}
+.rb-event { font-size: 17px; font-weight: 900; color: white; margin-bottom: 3px; }
+.rb-date  { font-size: 14px; color: rgba(255,255,255,.8); margin-bottom: 12px; }
+.rb-meta  {
+  display: flex; gap: 16px;
+  background: rgba(255,255,255,.1); border-radius: var(--radius-md);
+  padding: 10px 14px;
+}
+.rb-meta-item { text-align: center; flex: 1; }
+.rb-meta-num  { font-size: 18px; font-weight: 900; color: white; line-height: 1; }
+.rb-meta-label{ font-size: 10px; color: rgba(255,255,255,.65); margin-top: 3px; }
+
+/* 核销码区块 */
+.codes-section {
+  background: var(--c-white); border-radius: var(--radius-xl);
+  margin: 12px var(--space-4) 0; overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.codes-header {
+  padding: 14px 16px 12px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.codes-title { flex: 1; font-size: 15px; font-weight: 700; color: var(--c-gray-900); }
+.codes-tip   { font-size: 12px; color: var(--c-gray-500); }
+
+/* 单个核销码卡 */
+.qr-code-card {
+  padding: 16px;
+  border-bottom: 1px solid var(--c-gray-100);
+  transition: background var(--duration-fast);
+}
+.qr-code-card:last-child { border-bottom: none; }
+.qr-code-card.used { opacity: .55; }
+
+.qrc-top {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+}
+.qrc-type-icon {
+  width: 44px; height: 44px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.qrc-info { flex: 1; }
+.qrc-name  { font-size: 15px; font-weight: 700; color: var(--c-gray-900); }
+.qrc-desc  { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.qrc-status{ flex-shrink: 0; }
+
+/* 二维码展示区 */
+.qr-display {
+  display: flex; flex-direction: column; align-items: center;
+  background: linear-gradient(135deg, #F3E8FF, #EDE7F6);
+  border-radius: var(--radius-lg); padding: 20px;
+  cursor: pointer; touch-action: manipulation;
+  transition: opacity var(--duration-fast);
+}
+.qr-display:active { opacity: .88; }
+.qr-display.used-display {
+  background: var(--c-gray-50); filter: grayscale(.8);
+}
+/* 模拟二维码图案 */
+.qr-svg-wrap {
+  width: 160px; height: 160px;
+  background: white;
+  border: 3px solid var(--c-gray-200);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+  position: relative; overflow: hidden;
+}
+.qr-code-no {
+  font-size: 11px; font-weight: 700; color: var(--c-gray-500);
+  letter-spacing: .5px; margin-bottom: 4px;
+}
+.qr-hint { font-size: 12px; color: var(--c-gray-500); }
+.qr-used-overlay {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,.85);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 6px;
+}
+.qr-used-text { font-size: 18px; font-weight: 900; color: var(--c-success); }
+.qr-used-sub  { font-size: 11px; color: var(--c-gray-500); }
+
+/* 展开/收起按钮 */
+.qrc-expand-btn {
+  width: 100%; height: 36px; margin-top: 10px;
+  background: var(--c-gray-50); border: 1px solid var(--c-gray-100);
+  border-radius: var(--radius-sm); font-size: 13px; font-weight: 600;
+  color: var(--c-gray-700); cursor: pointer; touch-action: manipulation;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.qrc-expand-btn:active { background: var(--c-gray-100); }
+
+/* 预约详情信息 */
+.detail-card {
+  background: var(--c-white); border-radius: var(--radius-xl);
+  margin: 12px var(--space-4) 0; box-shadow: var(--shadow-xs); overflow: hidden;
+}
+.dc-header {
+  padding: 14px 16px 10px;
+  font-size: 14px; font-weight: 700; color: var(--c-gray-900);
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: center; gap: 6px;
+}
+.dc-header::before {
+  content: ''; width: 3px; height: 14px;
+  background: #7B1FA2; border-radius: 2px;
+}
+.dc-row {
+  display: flex; padding: 11px 16px;
+  border-bottom: 1px solid var(--c-gray-100); font-size: 13px;
+}
+.dc-row:last-child { border-bottom: none; }
+.dc-key { color: var(--c-gray-500); width: 80px; flex-shrink: 0; }
+.dc-val { color: var(--c-gray-900); font-weight: 500; flex: 1; }
+
+/* 注意事项 */
+.notice-card {
+  margin: 12px var(--space-4) 0;
+  background: #FEF9EC; border: 1px solid rgba(243,156,18,.2);
+  border-radius: var(--radius-lg); padding: 14px 16px;
+}
+.nc-title { font-size: 13px; font-weight: 700; color: #8B5E06; margin-bottom: 8px; }
+.nc-item  { font-size: 12px; color: #8B5E06; margin-bottom: 5px; line-height: 1.6; }
+.nc-item:last-child { margin-bottom: 0; }
+
+/* 状态 Tab */
+.tab-bar { display: flex; background: var(--c-white); border-bottom: 1px solid var(--c-gray-100); }
+.tab-item {
+  flex: 1; height: 44px; display: flex; align-items: center;
+  justify-content: center; font-size: 13px; font-weight: 500;
+  color: var(--c-gray-500); cursor: pointer; position: relative; touch-action: manipulation;
+}
+.tab-item.active { color: #7B1FA2; font-weight: 700; }
+.tab-item.active::after {
+  content: ''; position: absolute; bottom: 0; left: 15%; right: 15%;
+  height: 2.5px; background: #7B1FA2; border-radius: 1px;
+}
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:#4A0E8F;">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<div class="r-nav animate-in">
+  <div class="r-back" onclick="history.back()">←</div>
+  <div class="r-title">我的预约</div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab-item active" onclick="switchTab(this,'upcoming')">即将参加</div>
+  <div class="tab-item" onclick="switchTab(this,'past')">已结束</div>
+  <div class="tab-item" onclick="switchTab(this,'cancelled')">已取消</div>
+</div>
+
+<!-- ===== 预约卡：安徒生艺术奖颁奖典礼 ===== -->
+<div id="panel-upcoming">
+
+  <!-- 活动信息横幅 -->
+  <div class="reserve-banner animate-in animate-in-d1">
+    <div class="rb-tag">🎟️ 已预约 · 凭码入场</div>
+    <div class="rb-event">安徒生(国际)艺术奖·颁奖典礼</div>
+    <div class="rb-date">📅 2026年4月10日（周五）· 19:00–21:30 · 晚场（含颁奖典礼）</div>
+    <div class="rb-meta">
+      <div class="rb-meta-item">
+        <div class="rb-meta-num">3</div>
+        <div class="rb-meta-label">核销码总数</div>
+      </div>
+      <div class="rb-meta-item">
+        <div class="rb-meta-num" style="color:#69F0AE;">1</div>
+        <div class="rb-meta-label">已核销</div>
+      </div>
+      <div class="rb-meta-item">
+        <div class="rb-meta-num" style="color:#FFD54F;">2</div>
+        <div class="rb-meta-label">待核销</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 核销码展示区 -->
+  <div class="codes-section animate-in animate-in-d2">
+    <div class="codes-header">
+      <div class="codes-title">📱 现场核销码</div>
+      <div class="codes-tip">点击展开，对准扫码枪</div>
+    </div>
+
+    <!-- 核销码 1：入场码（待核销）-->
+    <div class="qr-code-card" id="qrc-1">
+      <div class="qrc-top">
+        <div class="qrc-type-icon" style="background:linear-gradient(135deg,#EDE7F6,#CE93D8);">🚪</div>
+        <div class="qrc-info">
+          <div class="qrc-name">① 到场入场码</div>
+          <div class="qrc-desc">进入活动现场时扫码核销</div>
+        </div>
+        <span class="tag tag-warning tag-dot">待核销</span>
+      </div>
+      <div id="qr1-body" style="display:none;">
+        <div class="qr-display" onclick="showFullQR('qr1-body','到场入场码','JST-RES-2026-001-A')">
+          <div class="qr-svg-wrap">
+            <!-- 模拟二维码图案 SVG -->
+            <svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="5" width="35" height="35" rx="3" fill="none" stroke="#4A0E8F" stroke-width="4"/>
+              <rect x="13" y="13" width="19" height="19" rx="1" fill="#4A0E8F"/>
+              <rect x="80" y="5" width="35" height="35" rx="3" fill="none" stroke="#4A0E8F" stroke-width="4"/>
+              <rect x="88" y="13" width="19" height="19" rx="1" fill="#4A0E8F"/>
+              <rect x="5" y="80" width="35" height="35" rx="3" fill="none" stroke="#4A0E8F" stroke-width="4"/>
+              <rect x="13" y="88" width="19" height="19" rx="1" fill="#4A0E8F"/>
+              <g fill="#4A0E8F" opacity=".9">
+                <rect x="50" y="5" width="5" height="5"/><rect x="58" y="5" width="5" height="5"/>
+                <rect x="66" y="5" width="5" height="5"/><rect x="50" y="13" width="5" height="5"/>
+                <rect x="50" y="21" width="5" height="5"/><rect x="58" y="21" width="5" height="5"/>
+                <rect x="66" y="13" width="5" height="5"/><rect x="5" y="50" width="5" height="5"/>
+                <rect x="13" y="50" width="5" height="5"/><rect x="21" y="50" width="5" height="5"/>
+                <rect x="5" y="58" width="5" height="5"/><rect x="21" y="58" width="5" height="5"/>
+                <rect x="5" y="66" width="5" height="5"/><rect x="13" y="66" width="5" height="5"/>
+                <rect x="50" y="50" width="5" height="5"/><rect x="58" y="58" width="5" height="5"/>
+                <rect x="66" y="66" width="5" height="5"/><rect x="74" y="50" width="5" height="5"/>
+                <rect x="50" y="74" width="5" height="5"/><rect x="66" y="50" width="5" height="5"/>
+                <rect x="74" y="66" width="5" height="5"/><rect x="82" y="74" width="5" height="5"/>
+                <rect x="90" y="50" width="5" height="5"/><rect x="98" y="58" width="5" height="5"/>
+                <rect x="106" y="50" width="5" height="5"/><rect x="90" y="66" width="5" height="5"/>
+                <rect x="98" y="74" width="5" height="5"/><rect x="50" y="82" width="5" height="5"/>
+                <rect x="58" y="90" width="5" height="5"/><rect x="66" y="82" width="5" height="5"/>
+                <rect x="74" y="90" width="5" height="5"/><rect x="66" y="98" width="5" height="5"/>
+                <rect x="82" y="90" width="5" height="5"/><rect x="90" y="82" width="5" height="5"/>
+                <rect x="98" y="90" width="5" height="5"/><rect x="106" y="82" width="5" height="5"/>
+              </g>
+            </svg>
+          </div>
+          <div class="qr-code-no">JST-RES-2026-001-A</div>
+          <div class="qr-hint">点击放大 · 对准扫码枪扫描</div>
+        </div>
+      </div>
+      <button class="qrc-expand-btn" onclick="toggleQR('qr1-body',this)">
+        <span>📱</span> 展开入场码
+      </button>
+    </div>
+
+    <!-- 核销码 2：礼品码（待核销）-->
+    <div class="qr-code-card" id="qrc-2">
+      <div class="qrc-top">
+        <div class="qrc-type-icon" style="background:linear-gradient(135deg,#FFF8E1,#FFE082);">🎁</div>
+        <div class="qrc-info">
+          <div class="qrc-name">② 礼品领取码</div>
+          <div class="qrc-desc">在礼品发放区扫码领取纪念品</div>
+        </div>
+        <span class="tag tag-warning tag-dot">待核销</span>
+      </div>
+      <div id="qr2-body" style="display:none;">
+        <div class="qr-display" onclick="showFullQR('qr2-body','礼品领取码','JST-RES-2026-001-B')">
+          <div class="qr-svg-wrap">
+            <svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="5" width="35" height="35" rx="3" fill="none" stroke="#F5A623" stroke-width="4"/>
+              <rect x="13" y="13" width="19" height="19" rx="1" fill="#F5A623"/>
+              <rect x="80" y="5" width="35" height="35" rx="3" fill="none" stroke="#F5A623" stroke-width="4"/>
+              <rect x="88" y="13" width="19" height="19" rx="1" fill="#F5A623"/>
+              <rect x="5" y="80" width="35" height="35" rx="3" fill="none" stroke="#F5A623" stroke-width="4"/>
+              <rect x="13" y="88" width="19" height="19" rx="1" fill="#F5A623"/>
+              <g fill="#F5A623" opacity=".85">
+                <rect x="50" y="5" width="5" height="5"/><rect x="58" y="13" width="5" height="5"/>
+                <rect x="66" y="5" width="5" height="5"/><rect x="50" y="21" width="5" height="5"/>
+                <rect x="58" y="5" width="5" height="5"/><rect x="66" y="21" width="5" height="5"/>
+                <rect x="5" y="50" width="5" height="5"/><rect x="21" y="50" width="5" height="5"/>
+                <rect x="13" y="58" width="5" height="5"/><rect x="5" y="66" width="5" height="5"/>
+                <rect x="21" y="66" width="5" height="5"/><rect x="50" y="50" width="5" height="5"/>
+                <rect x="66" y="58" width="5" height="5"/><rect x="50" y="66" width="5" height="5"/>
+                <rect x="74" y="50" width="5" height="5"/><rect x="82" y="58" width="5" height="5"/>
+                <rect x="90" y="50" width="5" height="5"/><rect x="98" y="66" width="5" height="5"/>
+                <rect x="106" y="50" width="5" height="5"/><rect x="82" y="82" width="5" height="5"/>
+                <rect x="90" y="74" width="5" height="5"/><rect x="98" y="82" width="5" height="5"/>
+                <rect x="106" y="74" width="5" height="5"/><rect x="50" y="74" width="5" height="5"/>
+                <rect x="58" y="82" width="5" height="5"/><rect x="66" y="74" width="5" height="5"/>
+                <rect x="74" y="82" width="5" height="5"/><rect x="50" y="90" width="5" height="5"/>
+                <rect x="66" y="90" width="5" height="5"/>
+              </g>
+            </svg>
+          </div>
+          <div class="qr-code-no">JST-RES-2026-001-B</div>
+          <div class="qr-hint">点击放大 · 在礼品区出示</div>
+        </div>
+      </div>
+      <button class="qrc-expand-btn" onclick="toggleQR('qr2-body',this)">
+        <span>🎁</span> 展开礼品码
+      </button>
+    </div>
+
+    <!-- 核销码 3：颁奖典礼码（已核销）-->
+    <div class="qr-code-card used" id="qrc-3">
+      <div class="qrc-top">
+        <div class="qrc-type-icon" style="background:linear-gradient(135deg,#EAFAF1,#A9DFBF);">🏆</div>
+        <div class="qrc-info">
+          <div class="qrc-name">③ 颁奖典礼入场码</div>
+          <div class="qrc-desc">进入颁奖典礼专区时扫码</div>
+        </div>
+        <span class="tag tag-success tag-dot">已核销</span>
+      </div>
+      <div id="qr3-body" style="display:none;">
+        <div class="qr-display used-display">
+          <div class="qr-svg-wrap">
+            <svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" opacity=".3">
+              <rect x="5" y="5" width="35" height="35" rx="3" fill="none" stroke="#27AE60" stroke-width="4"/>
+              <rect x="13" y="13" width="19" height="19" rx="1" fill="#27AE60"/>
+              <rect x="80" y="5" width="35" height="35" rx="3" fill="none" stroke="#27AE60" stroke-width="4"/>
+              <rect x="88" y="13" width="19" height="19" rx="1" fill="#27AE60"/>
+              <rect x="5" y="80" width="35" height="35" rx="3" fill="none" stroke="#27AE60" stroke-width="4"/>
+              <rect x="13" y="88" width="19" height="19" rx="1" fill="#27AE60"/>
+            </svg>
+            <div class="qr-used-overlay">
+              <div class="qr-used-text">✅ 已核销</div>
+              <div class="qr-used-sub">2026-04-10 18:55</div>
+            </div>
+          </div>
+          <div class="qr-code-no">JST-RES-2026-001-C</div>
+          <div class="qr-hint" style="color:var(--c-success);">核销完成 · 2026-04-10 18:55</div>
+        </div>
+      </div>
+      <button class="qrc-expand-btn" onclick="toggleQR('qr3-body',this)">
+        <span>🏆</span> 查看颁奖码（已使用）
+      </button>
+    </div>
+
+  </div>
+
+  <!-- 预约详情 -->
+  <div class="detail-card animate-in animate-in-d3">
+    <div class="dc-header">预约详情</div>
+    <div class="dc-row"><div class="dc-key">活动名称</div><div class="dc-val">安徒生(国际)艺术奖·2026颁奖典礼</div></div>
+    <div class="dc-row"><div class="dc-key">预约日期</div><div class="dc-val">2026年4月10日（周五）</div></div>
+    <div class="dc-row"><div class="dc-key">活动时间</div><div class="dc-val">19:00 – 21:30（晚场·含颁奖典礼）</div></div>
+    <div class="dc-row"><div class="dc-key">活动地点</div><div class="dc-val">广州天河区天河体育中心·主馆</div></div>
+    <div class="dc-row"><div class="dc-key">预约人</div><div class="dc-val">张小明</div></div>
+    <div class="dc-row"><div class="dc-key">联系方式</div><div class="dc-val">138****8001</div></div>
+    <div class="dc-row"><div class="dc-key">预约编号</div><div class="dc-val">RES-2026-001</div></div>
+    <div class="dc-row"><div class="dc-key">预约时间</div><div class="dc-val">2026-03-20 14:30（已确认）</div></div>
+  </div>
+
+  <!-- 注意事项 -->
+  <div class="notice-card animate-in">
+    <div class="nc-title">⚠️ 温馨提示</div>
+    <div class="nc-item">· <strong>入场码</strong>：活动开始前凭此码通过门口扫码入场，每人仅限使用一次</div>
+    <div class="nc-item">· <strong>礼品码</strong>：在礼品发放区领取纪念品，发放时段 17:00–19:00</div>
+    <div class="nc-item">· <strong>颁奖典礼码</strong>：进入颁奖专区时扫码，仅限颁奖典礼场次持有者</div>
+    <div class="nc-item">· 每个核销码独立有效，请分别在对应环节出示</div>
+    <div class="nc-item">· 请提前 15 分钟到场，高峰期排队耗时较长</div>
+    <div class="nc-item">· 如需取消预约请在活动开始 24 小时前操作</div>
+  </div>
+
+  <div style="margin:12px 16px 0;display:flex;gap:8px;">
+    <button onclick="location.href='reserve.html'" style="flex:1;height:46px;background:var(--c-white);border:1.5px solid var(--c-gray-100);border-radius:var(--radius-md);font-size:14px;font-weight:700;color:var(--c-gray-700);cursor:pointer;touch-action:manipulation;">
+      再次预约
+    </button>
+    <button onclick="cancelReserve()" style="flex:1;height:46px;background:var(--c-danger-50);border:1.5px solid rgba(231,76,60,.2);border-radius:var(--radius-md);font-size:14px;font-weight:700;color:var(--c-danger);cursor:pointer;touch-action:manipulation;">
+      取消预约
+    </button>
+  </div>
+
+</div><!-- /panel-upcoming -->
+
+<div id="panel-past" style="display:none;">
+  <div style="padding:40px 24px;text-align:center;color:var(--c-gray-500);">
+    <div style="font-size:48px;margin-bottom:12px;opacity:.5;">📋</div>
+    <div style="font-size:15px;font-weight:700;">暂无已结束的预约</div>
+  </div>
+</div>
+
+<div id="panel-cancelled" style="display:none;">
+  <div style="padding:40px 24px;text-align:center;color:var(--c-gray-500);">
+    <div style="font-size:48px;margin-bottom:12px;opacity:.5;">🚫</div>
+    <div style="font-size:15px;font-weight:700;">暂无已取消的预约</div>
+  </div>
+</div>
+
+<!-- 全屏二维码 Modal -->
+<div id="qrModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;" onclick="closeQRModal()">
+  <div style="background:white;border-radius:20px;padding:24px;text-align:center;max-width:280px;width:100%;" onclick="event.stopPropagation()">
+    <div id="modalTitle" style="font-size:16px;font-weight:700;color:var(--c-gray-900);margin-bottom:4px;"></div>
+    <div id="modalNo" style="font-size:12px;color:var(--c-gray-500);margin-bottom:16px;"></div>
+    <div id="modalQR" style="width:200px;height:200px;margin:0 auto 16px;"></div>
+    <div style="font-size:13px;color:var(--c-gray-500);">对准扫码枪或工作人员手机扫描</div>
+    <button onclick="closeQRModal()" style="width:100%;height:44px;margin-top:16px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:var(--radius-md);font-size:14px;font-weight:700;color:var(--c-gray-700);cursor:pointer;">收起</button>
+  </div>
+</div>
+
+<script>
+function switchTab(el,id){
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['upcoming','past','cancelled'].forEach(p=>{
+    const el=document.getElementById('panel-'+p);
+    if(el) el.style.display=p===id?'block':'none';
+  });
+}
+
+function toggleQR(bodyId,btn){
+  const body=document.getElementById(bodyId);
+  const open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  const icon=btn.querySelector('span');
+  if(!open){
+    btn.innerHTML=`<span>🔼</span> 收起`;
+  } else {
+    const labels={'qr1-body':'📱 展开入场码','qr2-body':'🎁 展开礼品码','qr3-body':'🏆 查看颁奖码（已使用）'};
+    btn.innerHTML=`<span>📱</span> ${labels[bodyId]||'展开'}`;
+  }
+}
+
+function showFullQR(bodyId,name,code){
+  document.getElementById('modalTitle').textContent=name;
+  document.getElementById('modalNo').textContent=code;
+  // 从 body div 内找 .qr-svg-wrap（id 就是 bodyId 本身，如 'qr1-body'）
+  const src=document.querySelector('#'+bodyId+' .qr-svg-wrap');
+  const modal=document.getElementById('modalQR');
+  modal.innerHTML='';
+  if(src){
+    const clone=src.cloneNode(true);
+    Object.assign(clone.style,{width:'200px',height:'200px',borderRadius:'12px',
+      border:'3px solid var(--c-gray-100)',margin:'0 auto'});
+    modal.appendChild(clone);
+  } else {
+    // fallback：显示占位
+    modal.innerHTML='<div style="width:200px;height:200px;background:#f5f5f5;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:48px;">📱</div>';
+  }
+  document.getElementById('qrModal').style.display='flex';
+}
+function closeQRModal(){document.getElementById('qrModal').style.display='none';}
+
+function cancelReserve(){
+  if(confirm('确认取消预约？取消后核销码将失效。')){
+    showToast('预约已取消，如有疑问请联系客服');
+  }
+}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400);}
+</script>
+</body>
+</html>

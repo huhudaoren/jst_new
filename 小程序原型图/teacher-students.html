@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>学生管理 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+
+/* 顶部导航 */
+.page-header {
+  height: 56px; background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: center; padding: 0 var(--space-4);
+  position: sticky; top: 44px; z-index: 40; box-shadow: var(--shadow-xs);
+}
+.back-btn {
+  width: 36px; height: 36px; border-radius: var(--radius-sm);
+  background: var(--c-gray-50);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; margin-right: 12px;
+  touch-action: manipulation;
+}
+.back-btn:active { background: var(--c-gray-100); }
+.header-title { font-size: 17px; font-weight: 700; color: var(--c-gray-900); flex: 1; }
+.header-action {
+  font-size: 13px; color: #3F51B5; font-weight: 600;
+  cursor: pointer; touch-action: manipulation;
+  padding: 6px 0 6px 12px;
+}
+
+/* 搜索 */
+.search-wrap {
+  padding: 12px var(--space-4);
+  background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+  position: sticky; top: 100px; z-index: 39;
+}
+
+/* 二维码卡（核心） */
+.qr-section {
+  padding: 14px var(--space-4) 0;
+}
+.qr-card {
+  background: linear-gradient(145deg, #1A237E 0%, #283593 50%, #3949AB 100%);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 8px 28px rgba(26,35,126,0.3);
+}
+.qr-card::before {
+  content: '';
+  position: absolute; top: -30px; right: -30px;
+  width: 140px; height: 140px; border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+}
+.qr-card::after {
+  content: '';
+  position: absolute; bottom: -40px; left: -20px;
+  width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+.qr-card-label {
+  font-size: 11px; color: rgba(255,255,255,0.65);
+  letter-spacing: 1px; margin-bottom: 4px; position: relative; z-index: 1;
+}
+.qr-card-title {
+  font-size: 18px; font-weight: 900; color: white;
+  margin-bottom: 16px; position: relative; z-index: 1;
+}
+.qr-content {
+  display: flex; align-items: center; gap: 16px; position: relative; z-index: 1;
+}
+.qr-code-box {
+  width: 100px; height: 100px; border-radius: var(--radius-md);
+  background: white; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 60px; position: relative;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+.qr-code-box::after {
+  content: '扫码绑定';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(26,35,126,0.75); color: white;
+  font-size: 10px; font-weight: 700; text-align: center; padding: 4px 0;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+.qr-info { flex: 1; }
+.qr-name { font-size: 16px; font-weight: 800; color: white; margin-bottom: 6px; }
+.qr-school { font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 10px; }
+.qr-actions { display: flex; gap: 8px; }
+.qr-btn {
+  flex: 1; height: 34px;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: var(--radius-sm);
+  color: white; font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast) ease;
+}
+.qr-btn:active { background: rgba(255,255,255,0.28); }
+.qr-expire {
+  margin-top: 12px; font-size: 11px; color: rgba(255,255,255,0.55);
+  position: relative; z-index: 1; display: flex; align-items: center; gap: 4px;
+}
+
+/* 手动绑定入口 */
+.manual-bind {
+  background: var(--c-primary-50);
+  border: 1px solid var(--c-primary-200);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 10px; cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast);
+}
+.manual-bind:active { background: var(--c-primary-200); }
+.manual-bind-icon { font-size: 20px; flex-shrink: 0; }
+.manual-bind-text { flex: 1; font-size: 13px; font-weight: 600; color: var(--c-primary-600); }
+.manual-bind-desc { font-size: 11px; color: var(--c-gray-500); margin-top: 2px; }
+
+/* 说明标注 */
+.rule-note {
+  background: var(--c-white); border-radius: var(--radius-md);
+  margin: 10px 0 0;
+  padding: 10px 14px;
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12px; color: var(--c-gray-500); line-height: 1.6;
+  border: 1px solid var(--c-gray-100);
+}
+.rule-note strong { color: var(--c-gray-700); }
+
+/* 筛选 Tab */
+.filter-wrap {
+  padding: 14px var(--space-4) 0;
+  display: flex; gap: 8px; overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.filter-wrap::-webkit-scrollbar { display: none; }
+.filter-chip {
+  flex-shrink: 0; height: 32px; padding: 0 14px;
+  border: 1.5px solid var(--c-gray-100);
+  border-radius: var(--radius-full); background: var(--c-white);
+  font-size: 13px; font-weight: 500; color: var(--c-gray-700);
+  display: flex; align-items: center; gap: 4px;
+  cursor: pointer; touch-action: manipulation;
+  white-space: nowrap;
+  transition: all var(--duration-fast) ease;
+}
+.filter-chip.active {
+  border-color: #3F51B5; background: #EEF0FF; color: #3F51B5; font-weight: 700;
+}
+
+/* 学生列表 */
+.student-list { padding: 14px var(--space-4) 0; }
+.student-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); margin-bottom: 10px;
+  overflow: hidden;
+}
+.student-card-main {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 14px 10px;
+}
+.s-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.s-info { flex: 1; min-width: 0; }
+.s-name { font-size: 15px; font-weight: 700; color: var(--c-gray-900); }
+.s-meta { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.s-bind-time { font-size: 11px; color: var(--c-gray-300); margin-top: 3px; }
+
+/* 学生操作行 */
+.student-actions {
+  display: flex; border-top: 1px solid var(--c-gray-100);
+}
+.s-action {
+  flex: 1; height: 40px;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  font-size: 12px; font-weight: 600; color: var(--c-gray-700);
+  cursor: pointer; touch-action: manipulation;
+  border-right: 1px solid var(--c-gray-100);
+  transition: background var(--duration-fast) ease;
+}
+.s-action:last-child { border-right: none; }
+.s-action:active { background: var(--c-gray-50); }
+.s-action.primary { color: #3F51B5; }
+.s-action.danger  { color: var(--c-danger); }
+
+/* 空状态 */
+.empty-state { text-align: center; padding: 48px 24px; }
+.empty-state-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.6; }
+.empty-state-title { font-size: 17px; font-weight: 700; color: var(--c-gray-700); margin-bottom: 8px; }
+.empty-state-desc { font-size: 14px; color: var(--c-gray-500); line-height: 1.6; margin-bottom: 20px; }
+
+/* 批量操作 footer */
+.batch-footer {
+  position: sticky; bottom: 0;
+  background: rgba(255,255,255,0.97);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border-top: 1px solid var(--c-gray-100);
+  padding: 12px var(--space-4);
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(12,61,107,0.08);
+  display: flex; align-items: center; gap: 10px;
+}
+.batch-info { flex: 1; font-size: 13px; color: var(--c-gray-500); }
+.batch-info strong { color: var(--c-gray-900); }
+
+/* 代报名/解绑 sheet */
+.action-sheet {
+  position: fixed; inset: 0;
+  background: rgba(26,31,46,0.55);
+  z-index: 200; display: none;
+  align-items: flex-end; justify-content: center;
+}
+.action-sheet.show { display: flex; }
+.action-sheet-inner {
+  background: var(--c-white);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  width: 100%; max-width: 390px; overflow: hidden;
+  animation: sheet-up 0.3s var(--ease-out);
+}
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.sheet-handle { width: 36px; height: 4px; background: var(--c-gray-100); border-radius: 2px; margin: 12px auto 0; }
+.sheet-header { padding: 14px 20px; border-bottom: 1px solid var(--c-gray-100); }
+.sheet-title { font-size: 16px; font-weight: 700; color: var(--c-gray-900); }
+.sheet-sub   { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.sheet-body  { padding: 12px 20px; }
+.sheet-option {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px; border-radius: var(--radius-md);
+  background: var(--c-gray-50); margin-bottom: 8px;
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast);
+}
+.sheet-option:active { background: var(--c-gray-100); }
+.sheet-option-icon {
+  width: 40px; height: 40px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+}
+.sheet-option-name { font-size: 14px; font-weight: 700; color: var(--c-gray-900); }
+.sheet-option-desc { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.sheet-option-arrow { font-size: 16px; color: var(--c-gray-300); margin-left: auto; }
+.sheet-footer { padding: 8px 20px 28px; }
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:#1A237E;">
+  <span class="time">9:41</span>
+  <span class="icons">📶 🔋</span>
+</div>
+
+<div class="page-header animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="header-title">学生管理</div>
+  <div class="header-action" onclick="showManualBind()">手动绑定</div>
+</div>
+
+<!-- 搜索 -->
+<div class="search-wrap animate-in animate-in-d1">
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="搜索学生姓名、手机号...">
+  </div>
+</div>
+
+<!-- ===== 绑定二维码 ===== -->
+<div class="qr-section animate-in animate-in-d1" id="qrcode">
+  <div class="qr-card">
+    <div class="qr-card-label">👨‍🏫 老师专属 · 仅认证账号可见</div>
+    <div class="qr-card-title">我的学生绑定二维码</div>
+    <div class="qr-content">
+      <div class="qr-code-box">🔲</div>
+      <div class="qr-info">
+        <div class="qr-name">王建国老师</div>
+        <div class="qr-school">广州市第二中学 · 数学 · 物理</div>
+        <div class="qr-actions">
+          <div class="qr-btn" onclick="showToast('🔗 链接已复制')">🔗 复制链接</div>
+          <div class="qr-btn" onclick="showToast('📱 保存至相册')">💾 保存图片</div>
+        </div>
+      </div>
+    </div>
+    <div class="qr-expire">
+      🔄 二维码有效期：2025-11-01 · <span style="color:rgba(255,200,100,0.9);cursor:pointer;" onclick="showToast('二维码已刷新')">点击刷新</span>
+    </div>
+  </div>
+
+  <!-- 手动绑定入口 -->
+  <div class="manual-bind" onclick="showManualBind()">
+    <div class="manual-bind-icon">🔢</div>
+    <div>
+      <div class="manual-bind-text">学生手动输入绑定码</div>
+      <div class="manual-bind-desc">学生在「个人中心→绑定关系」输入绑定码：<strong>WANG-2025-8832</strong></div>
+    </div>
+    <span style="font-size:16px;color:var(--c-primary-400);">›</span>
+  </div>
+
+  <!-- 规则说明 -->
+  <div class="rule-note">
+    <span style="font-size:14px;flex-shrink:0;">ℹ️</span>
+    <div>
+      每位学生<strong>只能绑定一个老师/机构</strong>（一对一关系）。已绑定其他老师的学生，需先由原老师或学生本人解绑，方可重新绑定。
+    </div>
+  </div>
+</div>
+
+<!-- 筛选 -->
+<div class="filter-wrap animate-in animate-in-d2">
+  <div class="filter-chip active" onclick="switchFilter(this)">全部学生(12)</div>
+  <div class="filter-chip" onclick="switchFilter(this)">待支付(3)</div>
+  <div class="filter-chip" onclick="switchFilter(this)">已报名(7)</div>
+  <div class="filter-chip" onclick="switchFilter(this)">高中组(8)</div>
+  <div class="filter-chip" onclick="switchFilter(this)">初中组(4)</div>
+</div>
+
+<!-- ===== 学生列表 ===== -->
+<div class="student-list">
+
+  <div class="student-card animate-in animate-in-d2">
+    <div class="student-card-main">
+      <div class="s-avatar" style="background:linear-gradient(135deg,#3F51B5,#5C6BC0);">李</div>
+      <div class="s-info">
+        <div class="s-name">李小红</div>
+        <div class="s-meta">广州市第三中学 · 高中二年级 · 138****2345</div>
+        <div class="s-bind-time">绑定于 2025-10-15 · 共报名 2 次</div>
+      </div>
+      <span class="tag tag-warning tag-dot">待支付</span>
+    </div>
+    <div class="student-actions">
+      <div class="s-action primary" onclick="goEnroll('李小红')">📋 代报名</div>
+      <div class="s-action" onclick="showStudentDetail('李小红')">📊 查看记录</div>
+      <div class="s-action" onclick="location.href='my-score.html'">🎯 成绩</div>
+      <div class="s-action danger" onclick="confirmUnbind('李小红')">🔓 解绑</div>
+    </div>
+  </div>
+
+  <div class="student-card animate-in animate-in-d2">
+    <div class="student-card-main">
+      <div class="s-avatar" style="background:linear-gradient(135deg,#E65100,#FF7043);">张</div>
+      <div class="s-info">
+        <div class="s-name">张伟</div>
+        <div class="s-meta">广州市第一中学 · 高中三年级 · 139****8812</div>
+        <div class="s-bind-time">绑定于 2025-10-08 · 共报名 5 次</div>
+      </div>
+      <span class="tag tag-success tag-dot">已报名</span>
+    </div>
+    <div class="student-actions">
+      <div class="s-action primary" onclick="goEnroll('张伟')">📋 代报名</div>
+      <div class="s-action" onclick="showStudentDetail('张伟')">📊 查看记录</div>
+      <div class="s-action" onclick="location.href='my-score.html'">🎯 成绩</div>
+      <div class="s-action danger" onclick="confirmUnbind('张伟')">🔓 解绑</div>
+    </div>
+  </div>
+
+  <div class="student-card animate-in animate-in-d3">
+    <div class="student-card-main">
+      <div class="s-avatar" style="background:linear-gradient(135deg,#1B5E20,#66BB6A);">陈</div>
+      <div class="s-info">
+        <div class="s-name">陈美玲</div>
+        <div class="s-meta">广州外国语学校 · 初中三年级 · 137****5566</div>
+        <div class="s-bind-time">绑定于 2025-10-01 · 共报名 3 次</div>
+      </div>
+      <span class="tag tag-primary">报名中</span>
+    </div>
+    <div class="student-actions">
+      <div class="s-action primary" onclick="goEnroll('陈美玲')">📋 代报名</div>
+      <div class="s-action" onclick="showStudentDetail('陈美玲')">📊 查看记录</div>
+      <div class="s-action" onclick="location.href='my-score.html'">🎯 成绩</div>
+      <div class="s-action danger" onclick="confirmUnbind('陈美玲')">🔓 解绑</div>
+    </div>
+  </div>
+
+  <div class="student-card animate-in animate-in-d3">
+    <div class="student-card-main">
+      <div class="s-avatar" style="background:linear-gradient(135deg,#880E4F,#F06292);">刘</div>
+      <div class="s-info">
+        <div class="s-name">刘思思</div>
+        <div class="s-meta">广州市执信中学 · 高中一年级 · 186****0011</div>
+        <div class="s-bind-time">绑定于 2025-09-28 · 共报名 1 次</div>
+      </div>
+      <span class="tag tag-gray tag-dot">暂无报名</span>
+    </div>
+    <div class="student-actions">
+      <div class="s-action primary" onclick="goEnroll('刘思思')">📋 代报名</div>
+      <div class="s-action" onclick="showStudentDetail('刘思思')">📊 查看记录</div>
+      <div class="s-action" onclick="location.href='my-score.html'">🎯 成绩</div>
+      <div class="s-action danger" onclick="confirmUnbind('刘思思')">🔓 解绑</div>
+    </div>
+  </div>
+
+  <div class="student-card animate-in animate-in-d3">
+    <div class="student-card-main">
+      <div class="s-avatar" style="background:linear-gradient(135deg,#4527A0,#7E57C2);">赵</div>
+      <div class="s-info">
+        <div class="s-name">赵磊</div>
+        <div class="s-meta">广雅中学 · 高中二年级 · 152****7733</div>
+        <div class="s-bind-time">绑定于 2025-09-20 · 共报名 4 次</div>
+      </div>
+      <span class="tag tag-success tag-dot">已报名</span>
+    </div>
+    <div class="student-actions">
+      <div class="s-action primary" onclick="goEnroll('赵磊')">📋 代报名</div>
+      <div class="s-action" onclick="showStudentDetail('赵磊')">📊 查看记录</div>
+      <div class="s-action" onclick="location.href='my-score.html'">🎯 成绩</div>
+      <div class="s-action danger" onclick="confirmUnbind('赵磊')">🔓 解绑</div>
+    </div>
+  </div>
+
+  <!-- 更多学生占位 -->
+  <div style="text-align:center;padding:16px 0 8px;font-size:14px;color:var(--c-gray-500);">
+    还有 7 位学生 · <span style="color:#3F51B5;font-weight:600;cursor:pointer;">加载更多</span>
+  </div>
+  <div style="height:80px;"></div>
+</div>
+
+<!-- ===== 底部批量操作 ===== -->
+<div class="batch-footer">
+  <div class="batch-info">共 <strong>12</strong> 位学生 · 待支付 <strong style="color:var(--c-accent);">3</strong> 笔</div>
+  <button class="btn btn-solid-blue btn-sm" onclick="showBatchPay()" style="background:#3F51B5;">
+    批量支付(3)
+  </button>
+</div>
+
+<!-- ===== 学生操作 Sheet ===== -->
+<div class="action-sheet" id="studentSheet" onclick="closeSheet('studentSheet')">
+  <div class="action-sheet-inner" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title" id="sheetStudentName">学生操作</div>
+      <div class="sheet-sub">选择要进行的操作</div>
+    </div>
+    <div class="sheet-body">
+      <div class="sheet-option" onclick="goEnrollFromSheet()">
+        <div class="sheet-option-icon" style="background:var(--c-primary-50);">📋</div>
+        <div><div class="sheet-option-name">代为报名</div><div class="sheet-option-desc">选择赛事，代学生提交报名信息</div></div>
+        <div class="sheet-option-arrow">›</div>
+      </div>
+      <div class="sheet-option" onclick="location.href='my-enroll.html'">
+        <div class="sheet-option-icon" style="background:#EEF0FF;">📊</div>
+        <div><div class="sheet-option-name">查看报名记录</div><div class="sheet-option-desc">报名进度、成绩、证书</div></div>
+        <div class="sheet-option-arrow">›</div>
+      </div>
+      <div class="sheet-option" onclick="location.href='my-score.html'">
+        <div class="sheet-option-icon" style="background:var(--c-gold-50);">🎯</div>
+        <div><div class="sheet-option-name">查看成绩</div><div class="sheet-option-desc">已发布的赛事成绩</div></div>
+        <div class="sheet-option-arrow">›</div>
+      </div>
+      <div class="sheet-option" onclick="confirmUnbindFromSheet()" style="background:var(--c-danger-50);">
+        <div class="sheet-option-icon" style="background:var(--c-danger-50);">🔓</div>
+        <div><div class="sheet-option-name" style="color:var(--c-danger);">解除绑定</div><div class="sheet-option-desc">解绑后学生需重新绑定</div></div>
+        <div class="sheet-option-arrow" style="color:var(--c-danger);">›</div>
+      </div>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn btn-ghost btn-md btn-block" onclick="closeSheet('studentSheet')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 手动绑定 Sheet ===== -->
+<div class="action-sheet" id="manualSheet" onclick="closeSheet('manualSheet')">
+  <div class="action-sheet-inner" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">手动绑定学生</div>
+      <div class="sheet-sub">输入学生手机号发起绑定邀请</div>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group">
+        <label class="form-label">学生手机号 <span class="required">*</span></label>
+        <input class="form-input" type="tel" placeholder="请输入学生手机号" maxlength="11">
+        <div class="form-hint">学生需在平台上已注册账号</div>
+      </div>
+      <div class="notice notice-info" style="margin-bottom:12px;">
+        <span class="notice-icon">ℹ️</span>
+        <div>发送绑定邀请后，学生需在个人中心确认接受。若学生已绑定其他老师，需先解绑。</div>
+      </div>
+      <button class="btn btn-primary btn-lg btn-block" onclick="sendBindInvite()" style="background:#3F51B5;">
+        发送绑定邀请
+      </button>
+    </div>
+    <div style="height:calc(env(safe-area-inset-bottom));"></div>
+  </div>
+</div>
+
+<script>
+let currentStudentName = '';
+
+function switchFilter(el) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function showStudentDetail(name) {
+  currentStudentName = name;
+  document.getElementById('sheetStudentName').textContent = name + ' 的操作';
+  document.getElementById('studentSheet').classList.add('show');
+}
+
+function goEnroll(name) {
+  showToast(`为 ${name} 选择赛事报名`);
+  setTimeout(() => location.href = 'contest-list.html', 800);
+}
+
+function goEnrollFromSheet() {
+  closeSheet('studentSheet');
+  setTimeout(() => location.href = 'contest-list.html', 300);
+}
+
+function confirmUnbind(name) {
+  if (confirm(`确认解绑学生「${name}」？\n解绑后该学生可重新绑定其他老师。`)) {
+    showToast(`已解绑 ${name}`);
+  }
+}
+
+function confirmUnbindFromSheet() {
+  closeSheet('studentSheet');
+  setTimeout(() => confirmUnbind(currentStudentName), 300);
+}
+
+function showManualBind() {
+  document.getElementById('manualSheet').classList.add('show');
+}
+
+function sendBindInvite() {
+  closeSheet('manualSheet');
+  setTimeout(() => showToast('✅ 绑定邀请已发送，等待学生确认'), 300);
+}
+
+function showBatchPay() {
+  showToast('批量支付功能：合计 3 笔 ¥280');
+}
+
+function closeSheet(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2200);
+}
+
+// 处理锚点跳转滚动
+if (location.hash === '#qrcode') {
+  setTimeout(() => document.getElementById('qrcode').scrollIntoView({ behavior: 'smooth' }), 300);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstEventPartnerMapper">
+    
+    <resultMap type="JstEventPartner" id="JstEventPartnerResult">
+        <result property="partnerId"    column="partner_id"    />
+        <result property="partnerName"    column="partner_name"    />
+        <result property="contactName"    column="contact_name"    />
+        <result property="contactMobile"    column="contact_mobile"    />
+        <result property="businessLicenseNo"    column="business_license_no"    />
+        <result property="qualificationJson"    column="qualification_json"    />
+        <result property="settlementInfoJson"    column="settlement_info_json"    />
+        <result property="invoiceInfoJson"    column="invoice_info_json"    />
+        <result property="contractFilesJson"    column="contract_files_json"    />
+        <result property="auditStatus"    column="audit_status"    />
+        <result property="auditTime"    column="audit_time"    />
+        <result property="auditRemark"    column="audit_remark"    />
+        <result property="accountStatus"    column="account_status"    />
+        <result property="coopStatus"    column="coop_status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstEventPartnerVo">
+        select partner_id, partner_name, contact_name, contact_mobile, business_license_no, qualification_json, settlement_info_json, invoice_info_json, contract_files_json, audit_status, audit_time, audit_remark, account_status, coop_status, create_by, create_time, update_by, update_time, remark, del_flag from jst_event_partner
+    </sql>
+
+    <select id="selectJstEventPartnerList" parameterType="JstEventPartner" resultMap="JstEventPartnerResult">
+        <include refid="selectJstEventPartnerVo"/>
+        <where>  
+            <if test="partnerName != null  and partnerName != ''"> and partner_name like concat('%', #{partnerName}, '%')</if>
+            <if test="contactName != null  and contactName != ''"> and contact_name like concat('%', #{contactName}, '%')</if>
+            <if test="contactMobile != null  and contactMobile != ''"> and contact_mobile = #{contactMobile}</if>
+            <if test="businessLicenseNo != null  and businessLicenseNo != ''"> and business_license_no = #{businessLicenseNo}</if>
+            <if test="qualificationJson != null  and qualificationJson != ''"> and qualification_json = #{qualificationJson}</if>
+            <if test="settlementInfoJson != null  and settlementInfoJson != ''"> and settlement_info_json = #{settlementInfoJson}</if>
+            <if test="invoiceInfoJson != null  and invoiceInfoJson != ''"> and invoice_info_json = #{invoiceInfoJson}</if>
+            <if test="contractFilesJson != null  and contractFilesJson != ''"> and contract_files_json = #{contractFilesJson}</if>
+            <if test="auditStatus != null  and auditStatus != ''"> and audit_status = #{auditStatus}</if>
+            <if test="auditTime != null "> and audit_time = #{auditTime}</if>
+            <if test="auditRemark != null  and auditRemark != ''"> and audit_remark = #{auditRemark}</if>
+            <if test="accountStatus != null "> and account_status = #{accountStatus}</if>
+            <if test="coopStatus != null  and coopStatus != ''"> and coop_status = #{coopStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstEventPartnerByPartnerId" parameterType="Long" resultMap="JstEventPartnerResult">
+        <include refid="selectJstEventPartnerVo"/>
+        where partner_id = #{partnerId}
+    </select>
+
+    <insert id="insertJstEventPartner" parameterType="JstEventPartner" useGeneratedKeys="true" keyProperty="partnerId">
+        insert into jst_event_partner
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="partnerName != null and partnerName != ''">partner_name,</if>
+            <if test="contactName != null and contactName != ''">contact_name,</if>
+            <if test="contactMobile != null and contactMobile != ''">contact_mobile,</if>
+            <if test="businessLicenseNo != null">business_license_no,</if>
+            <if test="qualificationJson != null">qualification_json,</if>
+            <if test="settlementInfoJson != null">settlement_info_json,</if>
+            <if test="invoiceInfoJson != null">invoice_info_json,</if>
+            <if test="contractFilesJson != null">contract_files_json,</if>
+            <if test="auditStatus != null and auditStatus != ''">audit_status,</if>
+            <if test="auditTime != null">audit_time,</if>
+            <if test="auditRemark != null">audit_remark,</if>
+            <if test="accountStatus != null">account_status,</if>
+            <if test="coopStatus != null and coopStatus != ''">coop_status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="partnerName != null and partnerName != ''">#{partnerName},</if>
+            <if test="contactName != null and contactName != ''">#{contactName},</if>
+            <if test="contactMobile != null and contactMobile != ''">#{contactMobile},</if>
+            <if test="businessLicenseNo != null">#{businessLicenseNo},</if>
+            <if test="qualificationJson != null">#{qualificationJson},</if>
+            <if test="settlementInfoJson != null">#{settlementInfoJson},</if>
+            <if test="invoiceInfoJson != null">#{invoiceInfoJson},</if>
+            <if test="contractFilesJson != null">#{contractFilesJson},</if>
+            <if test="auditStatus != null and auditStatus != ''">#{auditStatus},</if>
+            <if test="auditTime != null">#{auditTime},</if>
+            <if test="auditRemark != null">#{auditRemark},</if>
+            <if test="accountStatus != null">#{accountStatus},</if>
+            <if test="coopStatus != null and coopStatus != ''">#{coopStatus},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstEventPartner" parameterType="JstEventPartner">
+        update jst_event_partner
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="partnerName != null and partnerName != ''">partner_name = #{partnerName},</if>
+            <if test="contactName != null and contactName != ''">contact_name = #{contactName},</if>
+            <if test="contactMobile != null and contactMobile != ''">contact_mobile = #{contactMobile},</if>
+            <if test="businessLicenseNo != null">business_license_no = #{businessLicenseNo},</if>
+            <if test="qualificationJson != null">qualification_json = #{qualificationJson},</if>
+            <if test="settlementInfoJson != null">settlement_info_json = #{settlementInfoJson},</if>
+            <if test="invoiceInfoJson != null">invoice_info_json = #{invoiceInfoJson},</if>
+            <if test="contractFilesJson != null">contract_files_json = #{contractFilesJson},</if>
+            <if test="auditStatus != null and auditStatus != ''">audit_status = #{auditStatus},</if>
+            <if test="auditTime != null">audit_time = #{auditTime},</if>
+            <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
+            <if test="accountStatus != null">account_status = #{accountStatus},</if>
+            <if test="coopStatus != null and coopStatus != ''">coop_status = #{coopStatus},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where partner_id = #{partnerId}
+    </update>
+
+    <delete id="deleteJstEventPartnerByPartnerId" parameterType="Long">
+        delete from jst_event_partner where partner_id = #{partnerId}
+    </delete>
+
+    <delete id="deleteJstEventPartnerByPartnerIds" parameterType="String">
+        delete from jst_event_partner where partner_id in 
+        <foreach item="partnerId" collection="array" open="(" separator="," close=")">
+            #{partnerId}
+        </foreach>
+    </delete>
+</mapper>

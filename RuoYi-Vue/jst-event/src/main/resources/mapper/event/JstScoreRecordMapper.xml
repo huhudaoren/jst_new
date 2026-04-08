@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.JstScoreRecordMapper">
+    
+    <resultMap type="JstScoreRecord" id="JstScoreRecordResult">
+        <result property="scoreId"    column="score_id"    />
+        <result property="contestId"    column="contest_id"    />
+        <result property="enrollId"    column="enroll_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="participantId"    column="participant_id"    />
+        <result property="scoreValue"    column="score_value"    />
+        <result property="awardLevel"    column="award_level"    />
+        <result property="rankNo"    column="rank_no"    />
+        <result property="importBatchNo"    column="import_batch_no"    />
+        <result property="auditStatus"    column="audit_status"    />
+        <result property="publishStatus"    column="publish_status"    />
+        <result property="publishTime"    column="publish_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstScoreRecordVo">
+        select score_id, contest_id, enroll_id, user_id, participant_id, score_value, award_level, rank_no, import_batch_no, audit_status, publish_status, publish_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_score_record
+    </sql>
+
+    <select id="selectJstScoreRecordList" parameterType="JstScoreRecord" resultMap="JstScoreRecordResult">
+        <include refid="selectJstScoreRecordVo"/>
+        <where>  
+            <if test="contestId != null "> and contest_id = #{contestId}</if>
+            <if test="enrollId != null "> and enroll_id = #{enrollId}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="participantId != null "> and participant_id = #{participantId}</if>
+            <if test="scoreValue != null "> and score_value = #{scoreValue}</if>
+            <if test="awardLevel != null  and awardLevel != ''"> and award_level = #{awardLevel}</if>
+            <if test="rankNo != null "> and rank_no = #{rankNo}</if>
+            <if test="importBatchNo != null  and importBatchNo != ''"> and import_batch_no = #{importBatchNo}</if>
+            <if test="auditStatus != null  and auditStatus != ''"> and audit_status = #{auditStatus}</if>
+            <if test="publishStatus != null  and publishStatus != ''"> and publish_status = #{publishStatus}</if>
+            <if test="publishTime != null "> and publish_time = #{publishTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstScoreRecordByScoreId" parameterType="Long" resultMap="JstScoreRecordResult">
+        <include refid="selectJstScoreRecordVo"/>
+        where score_id = #{scoreId}
+    </select>
+
+    <insert id="insertJstScoreRecord" parameterType="JstScoreRecord" useGeneratedKeys="true" keyProperty="scoreId">
+        insert into jst_score_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="contestId != null">contest_id,</if>
+            <if test="enrollId != null">enroll_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="participantId != null">participant_id,</if>
+            <if test="scoreValue != null">score_value,</if>
+            <if test="awardLevel != null">award_level,</if>
+            <if test="rankNo != null">rank_no,</if>
+            <if test="importBatchNo != null">import_batch_no,</if>
+            <if test="auditStatus != null and auditStatus != ''">audit_status,</if>
+            <if test="publishStatus != null and publishStatus != ''">publish_status,</if>
+            <if test="publishTime != null">publish_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="contestId != null">#{contestId},</if>
+            <if test="enrollId != null">#{enrollId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="participantId != null">#{participantId},</if>
+            <if test="scoreValue != null">#{scoreValue},</if>
+            <if test="awardLevel != null">#{awardLevel},</if>
+            <if test="rankNo != null">#{rankNo},</if>
+            <if test="importBatchNo != null">#{importBatchNo},</if>
+            <if test="auditStatus != null and auditStatus != ''">#{auditStatus},</if>
+            <if test="publishStatus != null and publishStatus != ''">#{publishStatus},</if>
+            <if test="publishTime != null">#{publishTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstScoreRecord" parameterType="JstScoreRecord">
+        update jst_score_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="contestId != null">contest_id = #{contestId},</if>
+            <if test="enrollId != null">enroll_id = #{enrollId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="participantId != null">participant_id = #{participantId},</if>
+            <if test="scoreValue != null">score_value = #{scoreValue},</if>
+            <if test="awardLevel != null">award_level = #{awardLevel},</if>
+            <if test="rankNo != null">rank_no = #{rankNo},</if>
+            <if test="importBatchNo != null">import_batch_no = #{importBatchNo},</if>
+            <if test="auditStatus != null and auditStatus != ''">audit_status = #{auditStatus},</if>
+            <if test="publishStatus != null and publishStatus != ''">publish_status = #{publishStatus},</if>
+            <if test="publishTime != null">publish_time = #{publishTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where score_id = #{scoreId}
+    </update>
+
+    <delete id="deleteJstScoreRecordByScoreId" parameterType="Long">
+        delete from jst_score_record where score_id = #{scoreId}
+    </delete>
+
+    <delete id="deleteJstScoreRecordByScoreIds" parameterType="String">
+        delete from jst_score_record where score_id in 
+        <foreach item="scoreId" collection="array" open="(" separator="," close=")">
+            #{scoreId}
+        </foreach>
+    </delete>
+</mapper>

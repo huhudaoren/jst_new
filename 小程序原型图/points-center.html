@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>积分中心 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); padding-bottom: 24px; }
+
+/* ── Hero 等级卡 ── */
+.level-hero {
+  background: linear-gradient(150deg, #4A0072 0%, #7B1FA2 45%, #F5A623 130%);
+  padding: 20px var(--space-4) 0; position: relative; overflow: hidden;
+}
+.level-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%);
+}
+.level-hero::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 24px; background: var(--c-gray-50); border-radius: 24px 24px 0 0;
+}
+.lh-nav {
+  display: flex; align-items: center; position: relative; z-index: 1; margin-bottom: 16px;
+}
+.lh-back {
+  width: 36px; height: 36px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: white; cursor: pointer; margin-right: 12px;
+  touch-action: manipulation;
+}
+.lh-title { flex: 1; font-size: 17px; font-weight: 700; color: white; }
+.lh-detail { font-size: 13px; color: rgba(255,255,255,0.7); cursor: pointer; touch-action: manipulation; }
+
+.level-card {
+  position: relative; z-index: 1;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius-xl); padding: 18px; margin-bottom: 20px;
+}
+.lc-top { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.lc-badge {
+  width: 56px; height: 56px; border-radius: var(--radius-lg);
+  background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.35);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; flex-shrink: 0;
+}
+.lc-name { font-size: 20px; font-weight: 900; color: white; margin-bottom: 3px; }
+.lc-sub  { font-size: 12px; color: rgba(255,255,255,0.7); }
+.lc-progress-label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: rgba(255,255,255,0.75); margin-bottom: 7px;
+}
+.lc-bar { height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; }
+.lc-bar-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,213,79,0.9));
+  transition: width 0.8s ease;
+}
+.lc-next { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 6px; text-align: right; }
+
+/* 积分统计3格 */
+.pts-stats {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 0; background: rgba(0,0,0,0.15); border-radius: var(--radius-lg); overflow: hidden;
+}
+.pts-stat {
+  padding: 12px 8px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+.pts-stat:last-child { border-right: none; }
+.pts-stat-num { font-size: 20px; font-weight: 900; color: white; line-height: 1; }
+.pts-stat-num.gold { color: #FFD54F; }
+.pts-stat-label { font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+/* ── 快捷入口 ── */
+.quick-row {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 8px; margin: 12px var(--space-4) 0;
+}
+.quick-item {
+  background: var(--c-white); border-radius: var(--radius-md); box-shadow: var(--shadow-xs);
+  padding: 14px 8px; text-align: center; cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast);
+}
+.quick-item:active { background: var(--c-gray-50); }
+.quick-icon { font-size: 24px; margin-bottom: 6px; }
+.quick-label { font-size: 11px; font-weight: 700; color: var(--c-gray-700); }
+
+/* ── 权益区 ── */
+.rights-section {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  margin: 12px var(--space-4) 0; box-shadow: var(--shadow-xs); overflow: hidden;
+}
+.rs-header {
+  padding: 14px 16px; display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.rs-title { flex: 1; font-size: 14px; font-weight: 700; color: var(--c-gray-900); }
+.rs-label {
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  background: var(--c-gold-50); color: var(--c-gold); border-radius: var(--radius-full);
+}
+.rights-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 0; }
+.rights-cell {
+  padding: 14px 16px; border-right: 1px solid var(--c-gray-100);
+  border-bottom: 1px solid var(--c-gray-100);
+  cursor: pointer; touch-action: manipulation; transition: background var(--duration-fast);
+}
+.rights-cell:nth-child(2n) { border-right: none; }
+.rights-cell:nth-child(n+3) { border-bottom: none; }
+.rights-cell:active { background: var(--c-gray-50); }
+.rc-icon { font-size: 24px; margin-bottom: 8px; }
+.rc-name { font-size: 13px; font-weight: 700; color: var(--c-gray-900); margin-bottom: 2px; }
+.rc-status { font-size: 11px; }
+.rc-status.on  { color: var(--c-success); }
+.rc-status.off { color: var(--c-gray-300); }
+.rc-lock { font-size: 10px; color: var(--c-gray-300); margin-top: 2px; }
+
+/* ── 赚积分任务 ── */
+.task-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  margin: 12px var(--space-4) 0; box-shadow: var(--shadow-xs); overflow: hidden;
+}
+.task-header { padding: 14px 16px 10px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--c-gray-100); }
+.task-title { flex: 1; font-size: 14px; font-weight: 700; color: var(--c-gray-900); }
+.task-item {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  border-bottom: 1px solid var(--c-gray-100); cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast);
+}
+.task-item:last-child { border-bottom: none; }
+.task-item:active { background: var(--c-gray-50); }
+.task-icon {
+  width: 38px; height: 38px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+}
+.task-info { flex: 1; }
+.task-name  { font-size: 14px; font-weight: 600; color: var(--c-gray-900); }
+.task-desc  { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.task-reward {
+  font-size: 13px; font-weight: 700; color: #7C3AED; flex-shrink: 0;
+  padding: 4px 10px; background: #F3E8FF; border-radius: var(--radius-full);
+}
+.task-done {
+  font-size: 12px; font-weight: 700; color: var(--c-gray-300); flex-shrink: 0;
+  padding: 4px 10px; background: var(--c-gray-50); border-radius: var(--radius-full);
+}
+
+/* ── 兑换说明 ── */
+.info-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  margin: 12px var(--space-4) 0; padding: 16px; box-shadow: var(--shadow-xs);
+}
+.info-title { font-size: 14px; font-weight: 700; color: var(--c-gray-900); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px; }
+.info-title::before { content:''; width:3px; height:14px; background:#7C3AED; border-radius:2px; }
+.info-row { display: flex; justify-content: space-between; padding: 8px 0;
+  border-bottom: 1px solid var(--c-gray-100); font-size: 13px; }
+.info-row:last-child { border-bottom: none; }
+.info-key { color: var(--c-gray-500); }
+.info-val { color: var(--c-gray-900); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:#4A0072;">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<!-- ===== 等级 Hero ===== -->
+<div class="level-hero animate-in">
+  <div class="lh-nav">
+    <div class="lh-back" onclick="history.back()">←</div>
+    <div class="lh-title">积分中心</div>
+    <div class="lh-detail" onclick="location.href='points-detail.html'">明细 ›</div>
+  </div>
+
+  <div class="level-card">
+    <div class="lc-top">
+      <div class="lc-badge">🥈</div>
+      <div>
+        <div class="lc-name">白银学员</div>
+        <div class="lc-sub">当前等级 · 可解锁银级专属权益</div>
+      </div>
+    </div>
+    <div class="lc-progress-label">
+      <span>成长值 1,660</span>
+      <span>下一级：黄金学员 (2,000)</span>
+    </div>
+    <div class="lc-bar"><div class="lc-bar-fill" style="width:83%;"></div></div>
+    <div class="lc-next">距黄金还差 340 成长值</div>
+
+    <div class="pts-stats" style="margin-top:16px;">
+      <div class="pts-stat">
+        <div class="pts-stat-num gold">2,480</div>
+        <div class="pts-stat-label">可用积分</div>
+      </div>
+      <div class="pts-stat">
+        <div class="pts-stat-num">120</div>
+        <div class="pts-stat-label">冻结积分</div>
+      </div>
+      <div class="pts-stat">
+        <div class="pts-stat-num">5,340</div>
+        <div class="pts-stat-label">累计获取</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 快捷入口 -->
+<div class="quick-row animate-in animate-in-d1">
+  <div class="quick-item" onclick="location.href='points-mall.html'">
+    <div class="quick-icon">🛍️</div>
+    <div class="quick-label">积分商城</div>
+  </div>
+  <div class="quick-item" onclick="location.href='points-detail.html'">
+    <div class="quick-icon">📋</div>
+    <div class="quick-label">积分明细</div>
+  </div>
+  <div class="quick-item" onclick="location.href='points-order.html'">
+    <div class="quick-icon">📦</div>
+    <div class="quick-label">兑换订单</div>
+  </div>
+  <div class="quick-item" onclick="location.href='coupon-center.html'">
+    <div class="quick-icon">🎟️</div>
+    <div class="quick-label">优惠券</div>
+  </div>
+</div>
+
+<!-- 等级权益 -->
+<div class="rights-section animate-in animate-in-d2">
+  <div class="rs-header">
+    <div class="rs-title">🎁 当前等级权益</div>
+    <div class="rs-label">白银等级</div>
+  </div>
+  <div class="rights-grid">
+    <div class="rights-cell" onclick="location.href='rights-detail.html'">
+      <div class="rc-icon">💸</div>
+      <div class="rc-name">报名积分抵扣</div>
+      <div class="rc-status on">✓ 已开启 · 100积分=1元</div>
+    </div>
+    <div class="rights-cell" onclick="location.href='rights-detail.html'">
+      <div class="rc-icon">📚</div>
+      <div class="rc-name">专属课程</div>
+      <div class="rc-status on">✓ 白银专属课程 2 门</div>
+    </div>
+    <div class="rights-cell" onclick="location.href='rights-detail.html'" style="opacity:0.5;">
+      <div class="rc-icon">🏟️</div>
+      <div class="rc-name">场地减免</div>
+      <div class="rc-status off">🔒 黄金等级解锁</div>
+      <div class="rc-lock">升级到黄金还差 340 成长值</div>
+    </div>
+    <div class="rights-cell" onclick="location.href='rights-detail.html'" style="opacity:0.5;">
+      <div class="rc-icon">💼</div>
+      <div class="rc-name">客服特权</div>
+      <div class="rc-status off">🔒 铂金等级解锁</div>
+    </div>
+  </div>
+</div>
+
+<!-- 赚积分任务 -->
+<div class="task-card animate-in animate-in-d2">
+  <div class="task-header">
+    <div class="task-title">⚡ 赚积分任务</div>
+    <span style="font-size:12px;color:var(--c-gray-500);">今日已赚 80 积分</span>
+  </div>
+
+  <div class="task-item" onclick="showToast('签到成功！+10积分')">
+    <div class="task-icon" style="background:#FEF9EC;">📅</div>
+    <div class="task-info">
+      <div class="task-name">每日签到</div>
+      <div class="task-desc">连续签到有惊喜奖励</div>
+    </div>
+    <div class="task-done">已完成</div>
+  </div>
+
+  <div class="task-item" onclick="location.href='contest-list.html'">
+    <div class="task-icon" style="background:#EBF4FC;">🏆</div>
+    <div class="task-info">
+      <div class="task-name">报名参赛</div>
+      <div class="task-desc">每成功报名一场赛事可获积分</div>
+    </div>
+    <div class="task-reward">+100~500</div>
+  </div>
+
+  <div class="task-item" onclick="location.href='course-list.html'">
+    <div class="task-icon" style="background:#F3E8FF;">📚</div>
+    <div class="task-info">
+      <div class="task-name">购买课程</div>
+      <div class="task-desc">购买课程获取积分与成长值</div>
+    </div>
+    <div class="task-reward">+50起</div>
+  </div>
+
+  <div class="task-item" onclick="location.href='my-course.html'">
+    <div class="task-icon" style="background:#EAFAF1;">🤖</div>
+    <div class="task-info">
+      <div class="task-name">完成AI课堂学习</div>
+      <div class="task-desc">完成一门AI课程后获取积分</div>
+    </div>
+    <div class="task-reward">+80</div>
+  </div>
+
+  <div class="task-item">
+    <div class="task-icon" style="background:#FFF3EE;">🥇</div>
+    <div class="task-info">
+      <div class="task-name">获奖奖励</div>
+      <div class="task-desc">赛事获奖后自动发放额外积分</div>
+    </div>
+    <div class="task-reward">+200~1000</div>
+  </div>
+</div>
+
+<!-- 抵扣规则说明 -->
+<div class="info-card animate-in animate-in-d3">
+  <div class="info-title">积分规则说明</div>
+  <div class="info-row"><div class="info-key">积分兑换比例</div><div class="info-val">100 积分 = 1 元</div></div>
+  <div class="info-row"><div class="info-key">单笔报名上限</div><div class="info-val">不限，可全额抵扣</div></div>
+  <div class="info-row"><div class="info-key">积分过期规则</div><div class="info-val">永不过期</div></div>
+  <div class="info-row"><div class="info-key">退款回退</div><div class="info-val">订单退款后积分原路返回</div></div>
+  <div class="info-row"><div class="info-key">核销顺序</div><div class="info-val">优惠券 → 积分</div></div>
+</div>
+
+<script>
+function showToast(msg) {
+  const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2400);
+}
+</script>
+</body>
+</html>

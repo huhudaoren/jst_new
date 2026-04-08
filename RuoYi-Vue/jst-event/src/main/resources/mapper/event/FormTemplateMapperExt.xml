@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.FormTemplateMapperExt">
+
+    <resultMap id="FormTemplateListResult" type="com.ruoyi.jst.event.vo.FormTemplateListVO">
+        <id property="templateId" column="template_id"/>
+        <result property="templateName" column="template_name"/>
+        <result property="templateVersion" column="template_version"/>
+        <result property="ownerType" column="owner_type"/>
+        <result property="ownerId" column="owner_id"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="status" column="status"/>
+        <result property="effectiveTime" column="effective_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectFormTemplateList" resultMap="FormTemplateListResult">
+        select template_id, template_name, template_version, owner_type, owner_id,
+               audit_status, status, effective_time, create_time, update_time
+        from jst_enroll_form_template
+        <where>
+            del_flag = '0'
+            <if test="query != null and query.templateName != null and query.templateName != ''">
+                and template_name like concat('%', #{query.templateName}, '%')
+            </if>
+            <if test="query != null and query.ownerType != null and query.ownerType != ''">
+                and owner_type = #{query.ownerType}
+            </if>
+            <if test="query != null and query.ownerId != null">
+                and owner_id = #{query.ownerId}
+            </if>
+            <if test="query != null and query.auditStatus != null and query.auditStatus != ''">
+                and audit_status = #{query.auditStatus}
+            </if>
+            <if test="query != null and query.status != null">
+                and status = #{query.status}
+            </if>
+        </where>
+        order by update_time desc, template_id desc
+    </select>
+
+    <update id="updateAfterSave">
+        update jst_enroll_form_template
+        set template_name = #{template.templateName},
+            template_version = #{template.templateVersion},
+            schema_json = #{template.schemaJson},
+            audit_status = #{template.auditStatus},
+            effective_time = #{template.effectiveTime},
+            update_by = #{template.updateBy},
+            update_time = #{template.updateTime}
+        where template_id = #{template.templateId}
+          and audit_status = #{expectedAuditStatus}
+          and del_flag = '0'
+    </update>
+
+    <update id="updateAuditStatusByExpected">
+        update jst_enroll_form_template
+        set audit_status = #{targetAuditStatus},
+            effective_time = #{effectiveTime},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where template_id = #{templateId}
+          and audit_status = #{expectedAuditStatus}
+          and del_flag = '0'
+    </update>
+</mapper>

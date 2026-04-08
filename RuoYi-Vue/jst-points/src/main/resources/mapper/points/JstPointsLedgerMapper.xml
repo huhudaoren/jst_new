@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.points.mapper.JstPointsLedgerMapper">
+    
+    <resultMap type="JstPointsLedger" id="JstPointsLedgerResult">
+        <result property="ledgerId"    column="ledger_id"    />
+        <result property="accountId"    column="account_id"    />
+        <result property="ownerType"    column="owner_type"    />
+        <result property="ownerId"    column="owner_id"    />
+        <result property="changeType"    column="change_type"    />
+        <result property="sourceType"    column="source_type"    />
+        <result property="sourceRefId"    column="source_ref_id"    />
+        <result property="pointsChange"    column="points_change"    />
+        <result property="balanceAfter"    column="balance_after"    />
+        <result property="operatorId"    column="operator_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstPointsLedgerVo">
+        select ledger_id, account_id, owner_type, owner_id, change_type, source_type, source_ref_id, points_change, balance_after, operator_id, create_by, create_time, update_by, update_time, remark, del_flag from jst_points_ledger
+    </sql>
+
+    <select id="selectJstPointsLedgerList" parameterType="JstPointsLedger" resultMap="JstPointsLedgerResult">
+        <include refid="selectJstPointsLedgerVo"/>
+        <where>  
+            <if test="accountId != null "> and account_id = #{accountId}</if>
+            <if test="ownerType != null  and ownerType != ''"> and owner_type = #{ownerType}</if>
+            <if test="ownerId != null "> and owner_id = #{ownerId}</if>
+            <if test="changeType != null  and changeType != ''"> and change_type = #{changeType}</if>
+            <if test="sourceType != null  and sourceType != ''"> and source_type = #{sourceType}</if>
+            <if test="sourceRefId != null "> and source_ref_id = #{sourceRefId}</if>
+            <if test="pointsChange != null "> and points_change = #{pointsChange}</if>
+            <if test="balanceAfter != null "> and balance_after = #{balanceAfter}</if>
+            <if test="operatorId != null "> and operator_id = #{operatorId}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstPointsLedgerByLedgerId" parameterType="Long" resultMap="JstPointsLedgerResult">
+        <include refid="selectJstPointsLedgerVo"/>
+        where ledger_id = #{ledgerId}
+    </select>
+
+    <insert id="insertJstPointsLedger" parameterType="JstPointsLedger" useGeneratedKeys="true" keyProperty="ledgerId">
+        insert into jst_points_ledger
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="accountId != null">account_id,</if>
+            <if test="ownerType != null and ownerType != ''">owner_type,</if>
+            <if test="ownerId != null">owner_id,</if>
+            <if test="changeType != null and changeType != ''">change_type,</if>
+            <if test="sourceType != null and sourceType != ''">source_type,</if>
+            <if test="sourceRefId != null">source_ref_id,</if>
+            <if test="pointsChange != null">points_change,</if>
+            <if test="balanceAfter != null">balance_after,</if>
+            <if test="operatorId != null">operator_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="accountId != null">#{accountId},</if>
+            <if test="ownerType != null and ownerType != ''">#{ownerType},</if>
+            <if test="ownerId != null">#{ownerId},</if>
+            <if test="changeType != null and changeType != ''">#{changeType},</if>
+            <if test="sourceType != null and sourceType != ''">#{sourceType},</if>
+            <if test="sourceRefId != null">#{sourceRefId},</if>
+            <if test="pointsChange != null">#{pointsChange},</if>
+            <if test="balanceAfter != null">#{balanceAfter},</if>
+            <if test="operatorId != null">#{operatorId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstPointsLedger" parameterType="JstPointsLedger">
+        update jst_points_ledger
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="accountId != null">account_id = #{accountId},</if>
+            <if test="ownerType != null and ownerType != ''">owner_type = #{ownerType},</if>
+            <if test="ownerId != null">owner_id = #{ownerId},</if>
+            <if test="changeType != null and changeType != ''">change_type = #{changeType},</if>
+            <if test="sourceType != null and sourceType != ''">source_type = #{sourceType},</if>
+            <if test="sourceRefId != null">source_ref_id = #{sourceRefId},</if>
+            <if test="pointsChange != null">points_change = #{pointsChange},</if>
+            <if test="balanceAfter != null">balance_after = #{balanceAfter},</if>
+            <if test="operatorId != null">operator_id = #{operatorId},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where ledger_id = #{ledgerId}
+    </update>
+
+    <delete id="deleteJstPointsLedgerByLedgerId" parameterType="Long">
+        delete from jst_points_ledger where ledger_id = #{ledgerId}
+    </delete>
+
+    <delete id="deleteJstPointsLedgerByLedgerIds" parameterType="String">
+        delete from jst_points_ledger where ledger_id in 
+        <foreach item="ledgerId" collection="array" open="(" separator="," close=")">
+            #{ledgerId}
+        </foreach>
+    </delete>
+</mapper>

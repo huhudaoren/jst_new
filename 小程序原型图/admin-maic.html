@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI课程审核 · 竞赛通管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.admin-nav{background:linear-gradient(135deg,#4A0E8F,#7B1FA2);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.admin-nav .back-btn{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.admin-nav-title{font-size:17px;font-weight:700;color:white;flex:1;}
+
+/* AI课程卡片 */
+.maic-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:10px var(--space-4) 0;overflow:hidden;}
+.mc-header{display:flex;align-items:flex-start;gap:12px;padding:14px 16px 10px;}
+.mc-icon{width:48px;height:48px;border-radius:var(--radius-md);background:linear-gradient(135deg,#4A0E8F,#9C27B0);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.mc-info{flex:1;}
+.mc-title{font-size:15px;font-weight:700;color:var(--c-gray-900);}
+.mc-teacher{font-size:12px;color:var(--c-gray-500);margin-top:3px;}
+.mc-status{flex-shrink:0;}
+
+.mc-detail{padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:6px;}
+.mc-footer{padding:8px 16px 14px;display:flex;gap:8px;border-top:1px solid var(--c-gray-50);}
+.btn-online{flex:1;height:40px;background:var(--c-success);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;}
+.btn-offline{flex:1;height:40px;background:var(--c-white);color:var(--c-danger);border:1px solid var(--c-danger);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;}
+.btn-view{flex:1;height:40px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:var(--radius-sm);font-size:13px;font-weight:600;color:var(--c-gray-700);cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#4A0E8F;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="admin-nav animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="admin-nav-title">🤖 AI课程审核</div>
+</div>
+
+<div style="padding:12px 16px 4px;font-size:12px;font-weight:700;color:var(--c-gray-500);text-transform:uppercase;letter-spacing:0.5px;">待审核上架</div>
+
+<div class="maic-card animate-in animate-in-d1">
+  <div class="mc-header">
+    <div class="mc-icon">🎨</div>
+    <div class="mc-info">
+      <div class="mc-title">儿童水彩零基础入门：向日葵的色彩</div>
+      <div class="mc-teacher">👩‍🏫 李雅琴老师 · 广州市第一中学 · 2026-03-19 发布</div>
+    </div>
+    <span class="tag tag-warning tag-dot">待审核</span>
+  </div>
+  <div class="mc-detail">
+    <span class="tag tag-gray">绘画</span>
+    <span class="tag tag-gray">小学组</span>
+    <span class="tag tag-primary">AI生成</span>
+    <span class="tag tag-info">6个场景</span>
+    <span class="tag tag-gray">免费</span>
+  </div>
+  <div style="padding:0 16px 10px;font-size:13px;color:var(--c-gray-700);">课程内容：幻灯片×3 + 测验×2 + 互动演示×1，涵盖水彩基础技法、调色技巧、向日葵绘画步骤</div>
+  <div class="mc-footer">
+    <button class="btn-view" onclick="previewMaic()">预览课程</button>
+    <button class="btn-offline" onclick="offlineMaic()">下架</button>
+    <button class="btn-online" onclick="approveMaic()">✅ 上架发布</button>
+  </div>
+</div>
+
+<div style="padding:14px 16px 4px;font-size:12px;font-weight:700;color:var(--c-gray-500);text-transform:uppercase;letter-spacing:0.5px;">已上架</div>
+
+<div class="maic-card animate-in animate-in-d2">
+  <div class="mc-header">
+    <div class="mc-icon" style="background:linear-gradient(135deg,#0D47A1,#42A5F5);">🎵</div>
+    <div class="mc-info">
+      <div class="mc-title">钢琴乐理基础：五线谱认识与节拍</div>
+      <div class="mc-teacher">👨‍🏫 陈志远老师 · 深圳南山实验学校 · 已上架</div>
+    </div>
+    <span class="tag tag-success tag-dot">已上架</span>
+  </div>
+  <div class="mc-detail">
+    <span class="tag tag-gray">音乐</span>
+    <span class="tag tag-gray">全学段</span>
+    <span class="tag tag-primary">AI生成</span>
+    <span class="tag tag-info">8个场景</span>
+    <span class="tag tag-gray">免费</span>
+  </div>
+  <div class="mc-footer">
+    <button class="btn-view" onclick="previewMaic()">查看详情</button>
+    <button class="btn-offline" onclick="offlineMaic()">下架</button>
+  </div>
+</div>
+
+<script>
+function approveMaic(){const t=document.createElement('div');t.className='toast';t.textContent='✅ AI课程已上架，学生现在可以学习';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+function offlineMaic(){if(confirm('确认下架该AI课程？下架后学生无法访问。')){const t=document.createElement('div');t.className='toast';t.textContent='已下架该AI课程';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}}
+function previewMaic(){const t=document.createElement('div');t.className='toast';t.textContent='课程预览功能（对接OpenMAIC后可用）';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+</script>
+</body>
+</html>

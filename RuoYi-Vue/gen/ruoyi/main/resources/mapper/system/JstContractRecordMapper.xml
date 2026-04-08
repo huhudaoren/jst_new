@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstContractRecordMapper">
+    
+    <resultMap type="JstContractRecord" id="JstContractRecordResult">
+        <result property="contractId"    column="contract_id"    />
+        <result property="contractNo"    column="contract_no"    />
+        <result property="contractType"    column="contract_type"    />
+        <result property="targetType"    column="target_type"    />
+        <result property="targetId"    column="target_id"    />
+        <result property="templateId"    column="template_id"    />
+        <result property="fileUrl"    column="file_url"    />
+        <result property="status"    column="status"    />
+        <result property="effectiveTime"    column="effective_time"    />
+        <result property="signTime"    column="sign_time"    />
+        <result property="refSettlementId"    column="ref_settlement_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstContractRecordVo">
+        select contract_id, contract_no, contract_type, target_type, target_id, template_id, file_url, status, effective_time, sign_time, ref_settlement_id, create_by, create_time, update_by, update_time, remark, del_flag from jst_contract_record
+    </sql>
+
+    <select id="selectJstContractRecordList" parameterType="JstContractRecord" resultMap="JstContractRecordResult">
+        <include refid="selectJstContractRecordVo"/>
+        <where>  
+            <if test="contractNo != null  and contractNo != ''"> and contract_no = #{contractNo}</if>
+            <if test="contractType != null  and contractType != ''"> and contract_type = #{contractType}</if>
+            <if test="targetType != null  and targetType != ''"> and target_type = #{targetType}</if>
+            <if test="targetId != null "> and target_id = #{targetId}</if>
+            <if test="templateId != null "> and template_id = #{templateId}</if>
+            <if test="fileUrl != null  and fileUrl != ''"> and file_url = #{fileUrl}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="effectiveTime != null "> and effective_time = #{effectiveTime}</if>
+            <if test="signTime != null "> and sign_time = #{signTime}</if>
+            <if test="refSettlementId != null "> and ref_settlement_id = #{refSettlementId}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstContractRecordByContractId" parameterType="Long" resultMap="JstContractRecordResult">
+        <include refid="selectJstContractRecordVo"/>
+        where contract_id = #{contractId}
+    </select>
+
+    <insert id="insertJstContractRecord" parameterType="JstContractRecord" useGeneratedKeys="true" keyProperty="contractId">
+        insert into jst_contract_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="contractNo != null and contractNo != ''">contract_no,</if>
+            <if test="contractType != null and contractType != ''">contract_type,</if>
+            <if test="targetType != null and targetType != ''">target_type,</if>
+            <if test="targetId != null">target_id,</if>
+            <if test="templateId != null">template_id,</if>
+            <if test="fileUrl != null">file_url,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="effectiveTime != null">effective_time,</if>
+            <if test="signTime != null">sign_time,</if>
+            <if test="refSettlementId != null">ref_settlement_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="contractNo != null and contractNo != ''">#{contractNo},</if>
+            <if test="contractType != null and contractType != ''">#{contractType},</if>
+            <if test="targetType != null and targetType != ''">#{targetType},</if>
+            <if test="targetId != null">#{targetId},</if>
+            <if test="templateId != null">#{templateId},</if>
+            <if test="fileUrl != null">#{fileUrl},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="effectiveTime != null">#{effectiveTime},</if>
+            <if test="signTime != null">#{signTime},</if>
+            <if test="refSettlementId != null">#{refSettlementId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstContractRecord" parameterType="JstContractRecord">
+        update jst_contract_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="contractNo != null and contractNo != ''">contract_no = #{contractNo},</if>
+            <if test="contractType != null and contractType != ''">contract_type = #{contractType},</if>
+            <if test="targetType != null and targetType != ''">target_type = #{targetType},</if>
+            <if test="targetId != null">target_id = #{targetId},</if>
+            <if test="templateId != null">template_id = #{templateId},</if>
+            <if test="fileUrl != null">file_url = #{fileUrl},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="effectiveTime != null">effective_time = #{effectiveTime},</if>
+            <if test="signTime != null">sign_time = #{signTime},</if>
+            <if test="refSettlementId != null">ref_settlement_id = #{refSettlementId},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where contract_id = #{contractId}
+    </update>
+
+    <delete id="deleteJstContractRecordByContractId" parameterType="Long">
+        delete from jst_contract_record where contract_id = #{contractId}
+    </delete>
+
+    <delete id="deleteJstContractRecordByContractIds" parameterType="String">
+        delete from jst_contract_record where contract_id in 
+        <foreach item="contractId" collection="array" open="(" separator="," close=")">
+            #{contractId}
+        </foreach>
+    </delete>
+</mapper>

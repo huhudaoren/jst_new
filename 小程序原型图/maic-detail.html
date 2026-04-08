@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI课程详情 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:100px;}
+.detail-hero{background:linear-gradient(150deg,#2D1B69,#4A0E8F,#7B1FA2);padding:20px var(--space-4) 0;position:relative;overflow:hidden;}
+.detail-hero::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:24px;background:var(--c-gray-50);border-radius:24px 24px 0 0;}
+.dh-nav{display:flex;align-items:center;position:relative;z-index:1;margin-bottom:16px;}
+.dh-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;margin-right:12px;}
+.dh-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.dh-content{position:relative;z-index:1;padding-bottom:24px;}
+.dh-emoji{font-size:48px;margin-bottom:10px;}
+.dh-name{font-size:20px;font-weight:900;color:white;line-height:1.3;margin-bottom:8px;}
+.dh-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.dh-tag{padding:4px 12px;border-radius:var(--radius-full);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);font-size:11px;color:rgba(255,255,255,0.9);font-weight:600;}
+.dh-stats{display:flex;gap:20px;}
+.dhs{text-align:center;}
+.dhs-num{font-size:18px;font-weight:900;color:white;}
+.dhs-lbl{font-size:11px;color:rgba(255,255,255,0.6);}
+
+/* 场景列表 */
+.scene-list{margin:12px var(--space-4) 0;}
+.scene-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin-bottom:10px;overflow:hidden;cursor:pointer;touch-action:manipulation;transition:box-shadow var(--duration-fast);}
+.scene-card:active{box-shadow:var(--shadow-md);}
+.sc-row{display:flex;align-items:center;gap:12px;padding:14px 16px;}
+.sc-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;}
+.sc-info{flex:1;}
+.sc-type-name{font-size:14px;font-weight:700;color:var(--c-gray-900);}
+.sc-desc{font-size:12px;color:var(--c-gray-500);margin-top:2px;}
+.sc-icon{font-size:20px;flex-shrink:0;}
+.sc-arrow{font-size:16px;color:var(--c-gray-300);}
+
+/* 描述 */
+.info-section{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;padding:16px;}
+.is-title{font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.is-title::before{content:'';width:3px;height:14px;background:#7C3AED;border-radius:2px;}
+
+/* 底部操作栏 */
+.action-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:var(--c-white);border-top:1px solid var(--c-gray-100);padding:12px var(--space-4) calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:100;}
+.btn-stats{width:48px;height:50px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;flex-shrink:0;}
+.btn-edit{flex:1;height:50px;background:var(--c-white);color:#7C3AED;border:1.5px solid #7C3AED;border-radius:var(--radius-md);font-size:15px;font-weight:700;cursor:pointer;}
+.btn-publish-now{flex:2;height:50px;background:linear-gradient(135deg,#4A0E8F,#7B1FA2);color:white;border:none;border-radius:var(--radius-md);font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(74,14,143,0.35);}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#2D1B69;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="detail-hero animate-in">
+  <div class="dh-nav">
+    <div class="dh-back" onclick="history.back()">←</div>
+    <div class="dh-title">AI课程预览</div>
+    <span class="tag tag-success tag-dot" style="flex-shrink:0;">已生成</span>
+  </div>
+  <div class="dh-content">
+    <div class="dh-emoji">🎨</div>
+    <div class="dh-name">儿童水彩零基础：向日葵的色彩</div>
+    <div class="dh-tags">
+      <span class="dh-tag">🤖 AI生成</span>
+      <span class="dh-tag">🎨 绘画</span>
+      <span class="dh-tag">🧒 小学组</span>
+      <span class="dh-tag">⏱ 约45分钟</span>
+    </div>
+    <div class="dh-stats">
+      <div class="dhs"><div class="dhs-num">6</div><div class="dhs-lbl">课件场景</div></div>
+      <div class="dhs"><div class="dhs-num">4</div><div class="dhs-lbl">测验题目</div></div>
+      <div class="dhs"><div class="dhs-num">2</div><div class="dhs-lbl">互动白板</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- AI课件场景列表 -->
+<div style="padding:12px 16px 4px;font-size:13px;font-weight:700;color:var(--c-gray-500);text-transform:uppercase;letter-spacing:0.5px;">课件场景（可拖动排序）</div>
+<div class="scene-list animate-in animate-in-d1">
+
+  <div class="scene-card">
+    <div class="sc-row">
+      <div class="sc-num" style="background:#EEF0FF;color:#3F51B5;">1</div>
+      <div class="sc-info">
+        <div class="sc-type-name">📊 幻灯片：认识水彩颜料</div>
+        <div class="sc-desc">水彩颜料特性 · 工具介绍 · 5页内容</div>
+      </div>
+      <div class="sc-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="scene-card">
+    <div class="sc-row">
+      <div class="sc-num" style="background:#FEF9EC;color:var(--c-warning);">2</div>
+      <div class="sc-info">
+        <div class="sc-type-name">✅ 测验：工具认知小测</div>
+        <div class="sc-desc">4道单选题 · AI实时评分 · 讲解反馈</div>
+      </div>
+      <div class="sc-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="scene-card">
+    <div class="sc-row">
+      <div class="sc-num" style="background:#EEF0FF;color:#3F51B5;">3</div>
+      <div class="sc-info">
+        <div class="sc-type-name">📊 幻灯片：调色技巧讲解</div>
+        <div class="sc-desc">三原色混合 · 向日葵配色方案 · 4页</div>
+      </div>
+      <div class="sc-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="scene-card">
+    <div class="sc-row">
+      <div class="sc-num" style="background:#F3E8FF;color:#7C3AED;">4</div>
+      <div class="sc-info">
+        <div class="sc-type-name">🎨 AI白板：调色互动演示</div>
+        <div class="sc-desc">AI教师实时绘图讲解 · 学生可跟练</div>
+      </div>
+      <div class="sc-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="scene-card">
+    <div class="sc-row">
+      <div class="sc-num" style="background:#EEF0FF;color:#3F51B5;">5</div>
+      <div class="sc-info">
+        <div class="sc-type-name">📊 幻灯片：向日葵绘画步骤</div>
+        <div class="sc-desc">从构图到上色的完整步骤 · 6页</div>
+      </div>
+      <div class="sc-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="scene-card">
+    <div class="sc-row">
+      <div class="sc-num" style="background:#F3E8FF;color:#7C3AED;">6</div>
+      <div class="sc-info">
+        <div class="sc-type-name">🎨 AI白板：跟着画向日葵</div>
+        <div class="sc-desc">AI教师同步示范 · TTS语音讲解 · 互动答疑</div>
+      </div>
+      <div class="sc-arrow">›</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="info-section animate-in animate-in-d2">
+  <div class="is-title">发布设置</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div style="font-size:14px;color:var(--c-gray-900);">可见范围</div>
+    <div style="font-size:14px;font-weight:600;color:#7C3AED;">仅绑定学生 ›</div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div style="font-size:14px;color:var(--c-gray-900);">课程价格</div>
+    <div style="font-size:14px;font-weight:600;color:var(--c-success);">免费</div>
+  </div>
+  <div style="padding:10px 12px;background:#F3E8FF;border-radius:var(--radius-sm);font-size:12px;color:#7C3AED;margin-top:4px;">
+    💡 发布后管理员审核通过，绑定学生即可进入AI课堂学习
+  </div>
+</div>
+
+<div class="action-bar">
+  <div class="btn-stats" onclick="location.href='maic-stats.html'" title="学习统计">📊</div>
+  <button class="btn-edit">✏️ 编辑课件</button>
+  <button class="btn-publish-now" onclick="doPublish()">📢 提交发布</button>
+</div>
+
+<script>
+function doPublish(){const t=document.createElement('div');t.className='toast';t.textContent='已提交发布申请，等待管理员审核';document.body.appendChild(t);setTimeout(()=>{t.remove();history.back();},1800);}
+</script>
+</body>
+</html>

@@ -1,0 +1,1149 @@
+### =====================================================================
+### 竞赛通 API 测试文件 (IntelliJ HTTP Client 格式)
+### =====================================================================
+### 用法:
+###   1. IntelliJ IDEA 直接打开本文件
+###   2. 文件顶部点击「Examples」选环境(dev/prod)
+###   3. 每个 ### 块左侧有绿色三角,点击 Run 即可
+###   4. 上一个 ### 块的响应可被 {{变量名}} 引用 (注意 client.global.set)
+### =====================================================================
+
+### --- 环境变量 (顶部声明,所有请求复用) ---
+@baseUrl = http://127.0.0.1:8080
+@contentType = application/json
+
+### =====================================================================
+### 模块 A: jst-user 认证与资料 (5 接口)
+### =====================================================================
+
+### A1. Mock 登录测试用户 1001 (fixture: 测试_张妈妈)
+### 期望: 200, 返回 token + 用户信息, isNewUser=false
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{
+  "code": "MOCK_1001"
+}
+
+> {%
+client.global.set("auth_token", response.body.data.token);
+client.global.set("user_id", response.body.data.userInfo.userId);
+client.test("登录成功", function() {
+    client.assert(response.status === 200, "状态码应为 200");
+    client.assert(response.body.code === 200, "业务码应为 200");
+    client.assert(response.body.data.token !== null, "token 不能为空");
+    client.assert(response.body.data.userInfo.userId === 1001, "userId 应为 1001");
+});
+%}
+
+### A2. 用上一步 token 调 profile
+### 期望: 200, 返回完整用户资料(脱敏)
+GET {{baseUrl}}/jst/wx/user/profile
+Authorization: Bearer {{auth_token}}
+
+> {%
+client.test("获取资料成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.data.userId === 1001);
+    client.assert(response.body.data.mobileMasked.includes("****"), "手机号必须脱敏");
+});
+%}
+
+### A3. 更新昵称
+PUT {{baseUrl}}/jst/wx/user/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}
+
+{
+  "nickname": "测试_张妈妈_新昵称"
+}
+
+> {%
+client.test("更新成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### A4. 全新用户注册 (新 openid)
+### 期望: isNewUser=true, 自动创建 jst_user
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{
+  "code": "MOCK_99999"
+}
+
+> {%
+client.test("新用户注册", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.data.isNewUser === true, "应是新用户");
+    client.assert(response.body.data.userInfo.phoneBound === false, "新用户未绑手机");
+});
+%}
+
+### A5. 登出
+POST {{baseUrl}}/jst/wx/auth/logout
+Authorization: Bearer {{auth_token}}
+
+
+### =====================================================================
+### 模块 B: jst-user 临时档案认领 (4 接口)
+### 前置: 99-test-fixtures.sql 已导入,且重新登录获得新 token
+### =====================================================================
+
+### B0. 重新登录(因为 A5 已登出)
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{
+  "code": "MOCK_1001"
+}
+
+> {%
+client.global.set("auth_token", response.body.data.token);
+%}
+
+### B1. 查我的参赛档案 (应有 1 个: 张小红, fixture 3004)
+GET {{baseUrl}}/jst/wx/participant/my
+Authorization: Bearer {{auth_token}}
+
+> {%
+client.test("我的档案列表", function() {
+    client.assert(response.status === 200);
+    client.assert(Array.isArray(response.body.data), "应返回数组");
+    // fixture 中已认领的 3004 张小红
+    var found = response.body.data.find(p => p.participantId === 3004);
+    client.assert(found, "应包含 fixture 中的 3004 张小红");
+    client.assert(found.name === "测试_张小红");
+});
+%}
+
+### B2. 主动认领临时档案 3001 (张小明)
+### 期望: SM-14 跃迁 unclaimed → manual_claimed
+POST {{baseUrl}}/jst/wx/participant/claim?participantId=3001
+Authorization: Bearer {{auth_token}}
+
+> {%
+client.test("认领成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.data.participantId === 3001);
+    client.assert(response.body.data.userId === 1001);
+});
+%}
+
+### B3. 重复认领 3001 (应失败,状态机非法跃迁 manual_claimed → manual_claimed)
+POST {{baseUrl}}/jst/wx/participant/claim?participantId=3001
+Authorization: Bearer {{auth_token}}
+
+> {%
+client.test("重复认领应失败", function() {
+    // 业务异常: code != 200
+    client.assert(response.body.code !== 200, "重复认领应被拒绝");
+});
+%}
+
+### B4. 查档案详情
+GET {{baseUrl}}/jst/wx/participant/3001
+Authorization: Bearer {{auth_token}}
+
+> {%
+client.test("详情查询", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.data.participantId === 3001);
+});
+%}
+
+### B5. 跨用户越权测试 (3001 已被 1001 认领,新用户登录看 3001 应 403)
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{
+  "code": "MOCK_1002"
+}
+
+> {%
+client.global.set("other_token", response.body.data.token);
+%}
+
+### B6. 用 1002 的 token 看 3001 的详情 (应 403)
+GET {{baseUrl}}/jst/wx/participant/3001
+Authorization: Bearer {{other_token}}
+
+> {%
+client.test("越权防御", function() {
+    client.assert(response.body.code !== 200, "其他用户不应能看到");
+});
+%}
+
+
+### =====================================================================
+### 模块 C: admin 端临时档案 (后台管理员)
+### 前置: 用平台运营 admin 账号登录(若依默认 admin/admin123)
+### =====================================================================
+
+### C1. admin 登录(若依默认接口)
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("admin_token", response.body.token);
+%}
+
+### C2. 管理员手动认领临时档案 3002 (李大宝)
+### 期望: 成功
+POST {{baseUrl}}/jst/user/participant/claim/admin
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "participantId": 3002,
+  "userId": 1002,
+  "reason": "测试管理员手动认领"
+}
+
+> {%
+client.test("管理员认领", function() {
+    client.assert(response.status === 200);
+});
+%}
+
+### C3. 撤销认领
+POST {{baseUrl}}/jst/user/participant/claim/revoke?participantId=3002&reason=测试撤销
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("撤销成功", function() {
+    client.assert(response.status === 200);
+});
+%}
+
+
+### =====================================================================
+### 模块 D: 后续 feature 接口测试占位 (待 Backend Agents 实现)
+### 实现一个,在这里加一组 ###,跑通后才算完成 DoD
+### =====================================================================
+
+### F4-0. 重新登录测试用户 1001（绑定场景）
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{
+  "code": "MOCK_1001"
+}
+
+> {%
+client.global.set("auth_token", response.body.data.token);
+client.test("F4 登录成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F4-1. 查询我的绑定历史（初始应有 2001 的 active 绑定）
+GET {{baseUrl}}/jst/wx/user/binding
+Authorization: Bearer {{auth_token}}
+
+> {%
+client.test("F4-1 绑定列表成功", function() {
+    client.assert(response.status === 200);
+    client.assert(Array.isArray(response.body.data), "应返回绑定数组");
+    var active = response.body.data.find(item => item.status === "active");
+    client.assert(active, "应存在 active 绑定");
+    client.assert(active.channelId === 2001, "初始 active 绑定应为 channel 2001");
+});
+%}
+
+### F4-2. 切换绑定到 channel 2002
+POST {{baseUrl}}/jst/wx/user/binding/switch
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}
+
+{
+  "channelId": 2002
+}
+
+> {%
+client.global.set("f4_binding_id", response.body.data.bindingId);
+client.test("F4-2 切换绑定成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.channelId === 2002, "应切换到 channel 2002");
+    client.assert(response.body.data.status === "active", "新绑定应为 active");
+});
+%}
+
+### F4-3. 重复绑定同一渠道 2002（应失败）
+POST {{baseUrl}}/jst/wx/user/binding/switch
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}
+
+{
+  "channelId": 2002
+}
+
+> {%
+client.test("F4-3 重复绑定应失败", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code !== 200, "重复绑定同一渠道必须失败");
+});
+%}
+
+### F4-4. 管理后台查询绑定列表（筛 active）
+GET {{baseUrl}}/jst/user/binding/list?userId=1001&status=active
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("F4-4 管理后台绑定列表", function() {
+    client.assert(response.status === 200);
+    client.assert(Array.isArray(response.body.rows), "rows 应为数组");
+    client.assert(response.body.rows.length === 1, "active 绑定应只有 1 条");
+    client.assert(response.body.rows[0].channelId === 2002, "active 绑定应为 channel 2002");
+});
+%}
+
+### F4-5. 用户主动解绑当前绑定
+POST {{baseUrl}}/jst/wx/user/binding/unbind
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}
+
+{
+  "reason": "测试解绑"
+}
+
+> {%
+client.test("F4-5 主动解绑成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F4-6. 重新绑定到 channel 2001，供平台强制解绑测试
+POST {{baseUrl}}/jst/wx/user/binding/switch
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}
+
+{
+  "channelId": 2001
+}
+
+> {%
+client.global.set("f4_force_binding_id", response.body.data.bindingId);
+client.test("F4-6 重新绑定成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.channelId === 2001);
+});
+%}
+
+### F4-7. 平台强制解绑当前绑定
+POST {{baseUrl}}/jst/user/binding/{{f4_force_binding_id}}/force-unbind?reason=平台争议处理
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("F4-7 强制解绑成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F5-1. 公开提交赛事方入驻申请
+POST {{baseUrl}}/jst/public/organizer/partner/apply
+Content-Type: {{contentType}}
+
+{
+  "partnerName": "测试_艺术教育",
+  "contactName": "测试_王老板",
+  "contactMobile": "13800005555",
+  "businessLicenseNo": "91110000XXXXXXX"
+}
+
+> {%
+client.global.set("partner_apply_no", response.body.data.applyNo);
+client.global.set("partner_apply_id", response.body.data.applyId);
+client.test("F5-1 公开提交赛事方入驻申请", function() {
+    client.assert(response.status === 200, "状态码应为 200");
+    client.assert(response.body.code === 200, "业务码应为 200");
+    client.assert(response.body.data.applyId !== null, "applyId 不能为空");
+    client.assert(response.body.data.applyNo.startsWith("PA"), "applyNo 应以 PA 开头");
+});
+%}
+
+### F5-2. 公开查询申请状态
+GET {{baseUrl}}/jst/public/organizer/partner/apply/{{partner_apply_no}}/status
+
+> {%
+client.test("F5-2 公开查询申请状态", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.applyStatus === "pending", "新提交申请应为 pending");
+});
+%}
+
+### F5-3. 重复提交应失败
+POST {{baseUrl}}/jst/public/organizer/partner/apply
+Content-Type: {{contentType}}
+
+{
+  "partnerName": "测试_重复",
+  "contactName": "x",
+  "contactMobile": "13800005555"
+}
+
+> {%
+client.test("F5-3 重复提交应失败", function() {
+    client.assert(response.body.code === 60003, "应返回重复申请错误码 60003");
+});
+%}
+
+### F5-4. admin 审核通过创建账号
+POST {{baseUrl}}/jst/organizer/partner/apply/{{partner_apply_id}}/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "auditRemark": "材料齐全",
+  "username": "partner_test_001",
+  "email": "test@example.com"
+}
+
+> {%
+client.global.set("partner_id", response.body.data.partnerId);
+client.global.set("partner_user_id", response.body.data.userId);
+client.test("F5-4 审核通过创建账号", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.partnerId !== null, "partnerId 不能为空");
+    client.assert(response.body.data.userId !== null, "userId 不能为空");
+});
+%}
+
+### F5-5. 重复 approve 应失败
+POST {{baseUrl}}/jst/organizer/partner/apply/{{partner_apply_id}}/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "auditRemark": "重复提交",
+  "username": "partner_test_001",
+  "email": "test@example.com"
+}
+
+> {%
+client.test("F5-5 重复 approve 应失败", function() {
+    client.assert(response.body.code === 60002, "应返回非法状态跃迁错误码 60002");
+});
+%}
+
+### F6-0. 重新登录测试用户 1001（渠道认证场景）
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{
+  "code": "MOCK_1001"
+}
+
+> {%
+client.global.set("f6_auth_token", response.body.data.token);
+client.test("F6-0 登录成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data.roles), "roles 应为数组");
+    client.assert(response.body.data.roles.includes("jst_student"), "初始角色应包含 jst_student");
+});
+%}
+
+### F6-1. 提交渠道认证申请
+POST {{baseUrl}}/jst/wx/channel/auth/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{f6_auth_token}}
+
+{
+  "channelType": "teacher",
+  "applyName": "测试_张老师工作室",
+  "materialsJson": "[{\"type\":\"id_card\",\"url\":\"https://x.com/a.jpg\"}]"
+}
+
+> {%
+client.global.set("f6_apply_id", response.body.data.applyId);
+client.global.set("f6_apply_no", response.body.data.applyNo);
+client.test("F6-1 提交成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.applyId !== null, "applyId 不能为空");
+    client.assert(response.body.data.applyNo.startsWith("CA"), "applyNo 应以 CA 开头");
+});
+%}
+
+### F6-2. 重复提交应失败
+POST {{baseUrl}}/jst/wx/channel/auth/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{f6_auth_token}}
+
+{
+  "channelType": "teacher",
+  "applyName": "测试_张老师工作室",
+  "materialsJson": "[{\"type\":\"id_card\",\"url\":\"https://x.com/a.jpg\"}]"
+}
+
+> {%
+client.test("F6-2 重复提交应失败", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 60011, "应返回重复申请错误码 60011");
+});
+%}
+
+### F6-3. 查我的渠道认证申请历史
+GET {{baseUrl}}/jst/wx/channel/auth/apply/my
+Authorization: Bearer {{f6_auth_token}}
+
+> {%
+client.test("F6-3 查我的申请历史", function() {
+    client.assert(response.status === 200);
+    client.assert(Array.isArray(response.body.data), "应返回申请数组");
+    var f6ApplyId = Number(client.global.get("f6_apply_id"));
+    var found = response.body.data.find(item => item.applyId === f6ApplyId);
+    client.assert(found, "应包含 F6-1 提交的申请");
+});
+%}
+
+### F6-4. admin 审核通过
+POST {{baseUrl}}/jst/organizer/channel/apply/{{f6_apply_id}}/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "auditRemark": "通过",
+  "tags": "美术,书法"
+}
+
+> {%
+client.global.set("f6_channel_id", response.body.data.channelId);
+client.test("F6-4 admin 审核通过", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.channelId !== null, "channelId 不能为空");
+});
+%}
+
+### F6-5. 审核后重新登录，角色应包含 jst_channel
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{
+  "code": "MOCK_1001"
+}
+
+> {%
+client.test("F6-5 重新登录后角色已升级", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data.roles), "roles 应为数组");
+    client.assert(response.body.data.roles.includes("jst_channel"), "roles 应包含 jst_channel");
+    client.assert(response.body.data.userInfo.userType === "parent", "jst_user.user_type 不应被改成 channel");
+});
+%}
+
+### =====================================================================
+### 模块 F-NOTICE: jst-message 公告 + 首页 banner + 业务字典
+### =====================================================================
+
+### F-NOTICE-1. admin 创建公告草稿
+POST {{baseUrl}}/jst/message/notice/add
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "title": "测试_管理端新增公告",
+  "category": "platform",
+  "content": "<p>这是管理端新增后再发布的公告内容。</p>",
+  "coverImage": "https://fixture.example.com/notice/admin-add.png",
+  "topFlag": 0
+}
+
+> {%
+client.global.set("notice_admin_id", response.body.data);
+client.test("F-NOTICE-1 创建草稿成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data !== null, "noticeId 不能为空");
+});
+%}
+
+### F-NOTICE-2. admin 发布刚创建的公告
+POST {{baseUrl}}/jst/message/notice/{{notice_admin_id}}/publish
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("F-NOTICE-2 发布成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F-NOTICE-3. 小程序公告列表
+GET {{baseUrl}}/jst/wx/notice/list?pageNum=1&pageSize=10
+
+> {%
+client.test("F-NOTICE-3 公告列表成功", function() {
+    client.assert(response.status === 200);
+    client.assert(Array.isArray(response.body.rows), "rows 应为数组");
+    client.assert(response.body.rows.length >= 3, "fixture 公告至少应返回 3 条");
+    var found = response.body.rows.find(item => item.noticeId === 7001);
+    client.assert(found, "应包含 fixture 中的 7001");
+});
+%}
+
+### F-NOTICE-4. 小程序公告详情
+GET {{baseUrl}}/jst/wx/notice/7001
+
+> {%
+client.test("F-NOTICE-4 公告详情成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.noticeId === 7001);
+    client.assert(response.body.data.content !== null, "content 不能为空");
+});
+%}
+
+### F-NOTICE-5. 首页 banner 列表
+GET {{baseUrl}}/jst/wx/index/banner
+
+> {%
+client.test("F-NOTICE-5 banner 成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data), "data 应为数组");
+    client.assert(response.body.data.length >= 1, "应至少有 1 条 banner");
+    client.assert(response.body.data[0].type === "notice", "type 应为 notice");
+});
+%}
+
+### F-NOTICE-6. 业务字典 jst_contest_category
+GET {{baseUrl}}/jst/wx/dict/jst_contest_category
+
+> {%
+client.test("F-NOTICE-6 业务字典成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data), "data 应为数组");
+    client.assert(response.body.data.length === 8, "赛事分类应返回 8 项");
+});
+%}
+
+### F-NOTICE-7. 非白名单字典应被拦截
+GET {{baseUrl}}/jst/wx/dict/sys_user_sex
+
+> {%
+client.test("F-NOTICE-7 非白名单字典被拦截", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data), "data 应为数组");
+    client.assert(response.body.data.length === 0, "非 jst_* 字典应返回空数组");
+});
+%}
+
+### F-COURSE-0. admin 登录（课程场景）
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("course_admin_token", response.body.token);
+client.test("F-COURSE-0 admin 登录成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.token !== null, "admin token 不能为空");
+});
+%}
+
+### F-COURSE-1. admin 创建课程（默认 draft + off）
+POST {{baseUrl}}/jst/event/course/add
+Content-Type: {{contentType}}
+Authorization: Bearer {{course_admin_token}}
+
+{
+  "courseName": "测试_新建课程_F-COURSE",
+  "courseType": "normal",
+  "coverImage": "https://fixture.example.com/course-add.jpg",
+  "description": "这是 F-COURSE 创建的课程，用于提审与上架流程测试。",
+  "price": 159.00,
+  "pointsPrice": 15900,
+  "creatorType": "platform",
+  "creatorId": 1,
+  "visibleScope": "all",
+  "remark": "F-COURSE http test"
+}
+
+> {%
+client.global.set("f_course_id", response.body.data);
+client.test("F-COURSE-1 创建课程成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data !== null, "courseId 不能为空");
+});
+%}
+
+### F-COURSE-2. admin 提审课程
+POST {{baseUrl}}/jst/event/course/{{f_course_id}}/submit
+Authorization: Bearer {{course_admin_token}}
+
+> {%
+client.test("F-COURSE-2 提审成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F-COURSE-3. admin 审核通过课程
+POST {{baseUrl}}/jst/event/course/{{f_course_id}}/audit/approve
+Authorization: Bearer {{course_admin_token}}
+
+> {%
+client.test("F-COURSE-3 审核通过成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F-COURSE-4. admin 上架课程
+POST {{baseUrl}}/jst/event/course/{{f_course_id}}/on
+Authorization: Bearer {{course_admin_token}}
+
+> {%
+client.test("F-COURSE-4 上架成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F-COURSE-5. 小程序公开课程列表（fixture 应返回 2 条已上架课程）
+GET {{baseUrl}}/jst/wx/course/list?pageNum=1&pageSize=10
+
+> {%
+client.test("F-COURSE-5 公开列表成功", function() {
+    client.assert(response.status === 200);
+    client.assert(Array.isArray(response.body.rows), "rows 应为数组");
+    var normal = response.body.rows.find(item => item.courseId === 7201);
+    var aiMaic = response.body.rows.find(item => item.courseId === 7202);
+    client.assert(normal, "应包含 fixture normal 课程 7201");
+    client.assert(aiMaic, "应包含 fixture ai_maic 课程 7202");
+});
+%}
+
+### F-COURSE-6. 小程序公开课程详情
+GET {{baseUrl}}/jst/wx/course/7201
+
+> {%
+client.test("F-COURSE-6 公开详情成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.courseId === 7201);
+    client.assert(response.body.data.description !== null, "description 不能为空");
+});
+%}
+
+### F-COURSE-7. 小程序登录测试用户 1001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{
+  "code": "MOCK_1001"
+}
+
+> {%
+client.global.set("course_auth_token", response.body.data.token);
+client.test("F-COURSE-7 登录成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F-COURSE-8. 小程序我的课程列表
+GET {{baseUrl}}/jst/wx/course/my
+Authorization: Bearer {{course_auth_token}}
+
+> {%
+client.test("F-COURSE-8 我的课程成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data), "data 应为数组");
+    var myCourse = response.body.data.find(item => item.courseId === 7201);
+    client.assert(myCourse, "应包含 fixture 学习记录对应课程 7201");
+});
+%}
+
+### F-COURSE-9. 未审核通过课程不允许上架
+POST {{baseUrl}}/jst/event/course/7203/on
+Authorization: Bearer {{course_admin_token}}
+
+> {%
+client.test("F-COURSE-9 draft 课程禁止上架", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code !== 200, "未审核课程上架必须失败");
+});
+%}
+
+### F7-0. 赛事方A登录（fixture 用户 partner_f7_a / admin123）
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_a",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("f7_partner_a_token", response.body.token);
+client.test("F7-0 赛事方A登录成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.token, "赛事方A token 不能为空");
+});
+%}
+
+### F7-0B. 赛事方B登录（fixture 用户 partner_f7_b / admin123）
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_b",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("f7_partner_b_token", response.body.token);
+client.test("F7-0B 赛事方B登录成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.token, "赛事方B token 不能为空");
+});
+%}
+
+### F7-1 (admin/partner) 创建草稿
+POST {{baseUrl}}/jst/event/contest/add
+Content-Type: {{contentType}}
+Authorization: Bearer {{f7_partner_a_token}}
+
+{
+  "contestName": "测试_F7_新建赛事",
+  "category": "culture",
+  "groupLevels": "小学组,初中组",
+  "coverImage": "https://fixture.example.com/f7-created.jpg",
+  "description": "测试_F7_新建赛事详情说明",
+  "enrollStartTime": "2026-04-01 09:00:00",
+  "enrollEndTime": "2026-05-01 18:00:00",
+  "eventStartTime": "2026-05-10 09:00:00",
+  "eventEndTime": "2026-05-12 18:00:00",
+  "price": 88.00,
+  "supportChannelEnroll": 1,
+  "supportPointsDeduct": 1,
+  "supportAppointment": 0,
+  "certRuleJson": "{}",
+  "scoreRuleJson": "{}",
+  "formTemplateId": null,
+  "aftersaleDays": 7
+}
+
+> {%
+client.global.set("f7_contest_id", response.body.data.contestId);
+client.test("F7-1 创建草稿成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.contestId !== null, "contestId 不能为空");
+});
+%}
+
+### F7-2 (admin/partner) 提交审核
+POST {{baseUrl}}/jst/event/contest/{{f7_contest_id}}/submit
+Authorization: Bearer {{f7_partner_a_token}}
+
+> {%
+client.test("F7-2 提交审核成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F7-3A (admin) 审核通过
+POST {{baseUrl}}/jst/event/contest/{{f7_contest_id}}/audit/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "auditRemark": "测试_F7_审核通过"
+}
+
+> {%
+client.test("F7-3A 审核通过成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F7-3B (admin) 上线
+POST {{baseUrl}}/jst/event/contest/{{f7_contest_id}}/online
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("F7-3B 上线成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F7-4 (wx) 查列表 应能看到 online 的
+GET {{baseUrl}}/jst/wx/contest/list?category=culture
+
+> {%
+client.test("F7-4 在线列表成功", function() {
+    client.assert(response.status === 200);
+    client.assert(Array.isArray(response.body.rows), "rows 应为数组");
+    var contestId = Number(client.global.get("f7_contest_id"));
+    var found = response.body.rows.find(item => item.contestId === contestId);
+    client.assert(found, "应能查到新上线赛事");
+    client.assert(found.status === "enrolling", "上线且在报名期内应变为 enrolling");
+});
+%}
+
+### F7-5 (wx) 查详情
+GET {{baseUrl}}/jst/wx/contest/{{f7_contest_id}}
+
+> {%
+client.test("F7-5 在线详情成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.contestId === Number(client.global.get("f7_contest_id")));
+    client.assert(response.body.data.partnerName !== null, "partnerName 应返回");
+});
+%}
+
+### F7-6 (wx) 查热门（限 6 条）
+GET {{baseUrl}}/jst/wx/contest/hot?limit=6
+
+> {%
+client.test("F7-6 热门赛事成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data), "data 应为数组");
+    client.assert(response.body.data.length <= 6, "热门赛事条数不能超过 6");
+});
+%}
+
+### F7-7 (wx) 查分类（返回分类 + 计数）
+GET {{baseUrl}}/jst/wx/contest/categories
+
+> {%
+client.test("F7-7 分类统计成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data), "data 应为数组");
+    client.assert(response.body.data.length >= 1, "至少应返回 1 个分类");
+    var culture = response.body.data.find(item => item.code === "culture");
+    client.assert(culture, "应包含 culture 分类");
+    client.assert(culture.count >= 1, "culture 分类数量应至少为 1");
+});
+%}
+
+### F7-8 越权: 赛事方A 创建的赛事，赛事方B编辑应 403/拒绝
+PUT {{baseUrl}}/jst/event/contest/edit
+Content-Type: {{contentType}}
+Authorization: Bearer {{f7_partner_b_token}}
+
+{
+  "contestId": {{f7_contest_id}},
+  "contestName": "测试_F7_越权修改",
+  "category": "culture",
+  "groupLevels": "小学组,初中组",
+  "coverImage": "https://fixture.example.com/f7-created.jpg",
+  "description": "测试_F7_越权修改",
+  "enrollStartTime": "2026-04-01 09:00:00",
+  "enrollEndTime": "2026-05-01 18:00:00",
+  "eventStartTime": "2026-05-10 09:00:00",
+  "eventEndTime": "2026-05-12 18:00:00",
+  "price": 88.00,
+  "supportChannelEnroll": 1,
+  "supportPointsDeduct": 1,
+  "supportAppointment": 0,
+  "certRuleJson": "{}",
+  "scoreRuleJson": "{}",
+  "formTemplateId": null,
+  "aftersaleDays": 7
+}
+
+> {%
+client.test("F7-8 越权编辑应失败", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code !== 200, "赛事方B不应能编辑赛事方A的赛事");
+});
+%}
+
+### TODO F8: WxFormTemplateController - 动态表单模板拉取
+### TODO F9: WxEnrollController - 提交报名 + form_snapshot
+### TODO F10: WxScoreController - 我的成绩
+### TODO F11: WxCertController - 我的证书
+### TODO F12: WxCourseController - 课程播放凭证
+
+### F8-0. admin 重新登录（动态表单模板场景）
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("admin_token", response.body.token);
+client.test("F8-0 admin 登录成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.token !== null, "admin token 不能为空");
+});
+%}
+
+### F8-1. 创建草稿
+POST {{baseUrl}}/jst/event/form/template/save
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "templateName": "测试_F8_动态模板_v1",
+  "ownerType": "platform",
+  "schemaJson": {
+    "fields": [
+      { "key": "name", "type": "text", "label": "姓名", "required": true },
+      { "key": "gender", "type": "radio", "label": "性别", "required": true }
+    ]
+  }
+}
+
+> {%
+client.global.set("f8_template_id", response.body.data.templateId);
+client.test("F8-1 创建草稿成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.templateId !== null, "templateId 不能为空");
+});
+%}
+
+### F8-2. 修改模板（版本 +1）
+POST {{baseUrl}}/jst/event/form/template/save
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "templateId": {{f8_template_id}},
+  "templateName": "测试_F8_动态模板_v2",
+  "ownerType": "platform",
+  "schemaJson": {
+    "fields": [
+      { "key": "name", "type": "text", "label": "姓名", "required": true },
+      { "key": "gender", "type": "radio", "label": "性别", "required": true },
+      { "key": "school", "type": "text", "label": "学校", "required": false }
+    ]
+  }
+}
+
+> {%
+client.test("F8-2 修改模板成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F8-2b. 查询详情确认版本自增
+GET {{baseUrl}}/jst/event/form/template/{{f8_template_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("F8-2b 详情版本校验", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.templateVersion === 2, "模板版本应自增到 2");
+    client.assert(response.body.data.auditStatus === "draft", "编辑后应回到 draft");
+});
+%}
+
+### F8-3. 提交审核
+POST {{baseUrl}}/jst/event/form/template/{{f8_template_id}}/submit
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("F8-3 提交审核成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F8-4. admin 审核通过
+POST {{baseUrl}}/jst/event/form/template/{{f8_template_id}}/audit/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "auditRemark": "测试通过"
+}
+
+> {%
+client.test("F8-4 审核通过成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F8-5. (wx) contestId 取模板应返回 schema
+GET {{baseUrl}}/jst/wx/enroll/template?contestId=8802
+
+> {%
+client.test("F8-5 小程序取模板成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.templateId === 8801, "应返回 fixture 模板 8801");
+    client.assert(response.body.data.templateVersion === 1, "fixture 模板版本应为 1");
+    client.assert(Array.isArray(response.body.data.schemaJson.fields), "schemaJson.fields 应为数组");
+    client.assert(response.body.data.schemaJson.fields.length === 5, "应返回 5 个标准字段");
+});
+%}
+
+### F8-6. schema 字段类型非法应报错
+POST {{baseUrl}}/jst/event/form/template/save
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "templateName": "测试_F8_非法类型模板",
+  "ownerType": "platform",
+  "schemaJson": {
+    "fields": [
+      { "key": "illegalField", "type": "unknown_type", "label": "非法字段", "required": true }
+    ]
+  }
+}
+
+> {%
+client.test("F8-6 非法字段类型应失败", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 20011, "应返回动态表单模板无效错误码 20011");
+});
+%}
+
+### =====================================================================
+### 文件结尾。每次 backend 完成一个 feature, 必须在此追加 ### 测试块
+### 否则该 feature 不算完成 (违反 25 文档 §3.8 测试数据规约 + DoD)
+### =====================================================================

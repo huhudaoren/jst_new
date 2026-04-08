@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.organizer.mapper.EventPartnerWriteMapper">
+
+    <insert id="insertEventPartner" useGeneratedKeys="true" keyProperty="partner.partnerId">
+        insert into jst_event_partner(
+            partner_name,
+            contact_name,
+            contact_mobile,
+            business_license_no,
+            qualification_json,
+            settlement_info_json,
+            invoice_info_json,
+            contract_files_json,
+            audit_status,
+            audit_time,
+            audit_remark,
+            account_status,
+            coop_status,
+            create_by,
+            create_time,
+            del_flag
+        ) values (
+            #{partner.partnerName},
+            #{partner.contactName},
+            #{partner.contactMobile},
+            #{partner.businessLicenseNo},
+            #{partner.qualificationJson},
+            #{partner.settlementInfoJson},
+            #{partner.invoiceInfoJson},
+            #{partner.contractFilesJson},
+            #{partner.auditStatus},
+            #{partner.auditTime},
+            #{partner.auditRemark},
+            #{partner.accountStatus},
+            #{partner.coopStatus},
+            #{partner.createBy},
+            #{partner.createTime},
+            #{partner.delFlag}
+        )
+    </insert>
+
+    <update id="updatePartnerUserId">
+        update jst_event_partner
+        set user_id = #{userId},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where partner_id = #{partnerId}
+          and del_flag = '0'
+    </update>
+</mapper>

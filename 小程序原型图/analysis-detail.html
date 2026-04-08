@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>专题分析 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.a-nav{background:linear-gradient(135deg,#0C3D6B,#1058A0);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.a-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.a-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.topic-tabs{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);overflow-x:auto;}
+.tt{flex-shrink:0;padding:0 14px;height:44px;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:500;color:var(--c-gray-500);cursor:pointer;position:relative;white-space:nowrap;touch-action:manipulation;}
+.tt.active{color:var(--c-primary-600);font-weight:700;}
+.tt.active::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2.5px;background:var(--c-primary-600);border-radius:1px;}
+.data-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px 16px 0;}
+.dc-header{padding:14px 16px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--c-gray-100);}
+.dc-title{flex:1;font-size:14px;font-weight:700;color:var(--c-gray-900);}
+.dc-export{font-size:12px;color:var(--c-primary-600);font-weight:600;cursor:pointer;padding:4px 10px;border:1px solid var(--c-primary-200);border-radius:var(--radius-full);}
+.kpi-row{display:flex;gap:0;}
+.kpi-cell-sm{flex:1;padding:14px 8px;text-align:center;border-right:1px solid var(--c-gray-100);}
+.kpi-cell-sm:last-child{border-right:none;}
+.kcs-num{font-size:20px;font-weight:900;color:var(--c-primary-600);line-height:1;}
+.kcs-label{font-size:10px;color:var(--c-gray-500);margin-top:3px;}
+.kcs-trend{font-size:10px;margin-top:2px;}
+.kcs-trend.up{color:var(--c-success);}
+.kcs-trend.down{color:var(--c-danger);}
+/* 简单柱状图 */
+.bar-chart{padding:14px 16px;}
+.bc-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.bc-row:last-child{margin-bottom:0;}
+.bc-label{width:72px;font-size:12px;color:var(--c-gray-700);text-align:right;flex-shrink:0;}
+.bc-bar-wrap{flex:1;height:12px;background:var(--c-gray-50);border-radius:6px;overflow:hidden;}
+.bc-bar{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--c-primary-400),var(--c-primary-600));}
+.bc-val{width:48px;font-size:12px;font-weight:700;color:var(--c-gray-700);text-align:right;flex-shrink:0;}
+
+.list-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px 16px 0;}
+.lc-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--c-gray-100);cursor:pointer;touch-action:manipulation;}
+.lc-row:last-child{border-bottom:none;}
+.lc-row:active{background:var(--c-gray-50);}
+.lc-rank{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.lc-info{flex:1;}
+.lc-name{font-size:13px;font-weight:600;color:var(--c-gray-900);}
+.lc-sub{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+.lc-val{font-size:14px;font-weight:700;color:var(--c-primary-600);flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#0C3D6B;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="a-nav animate-in">
+  <div class="a-back" onclick="history.back()">←</div>
+  <div class="a-title">营销分析</div>
+</div>
+<div class="topic-tabs">
+  <div class="tt" onclick="switchTopic(this,'channel')">🔗 渠道</div>
+  <div class="tt" onclick="switchTopic(this,'contest')">🏆 赛事</div>
+  <div class="tt active" onclick="switchTopic(this,'marketing')">🎟️ 营销</div>
+  <div class="tt" onclick="switchTopic(this,'maic')">🤖 AI课程</div>
+  <div class="tt" onclick="switchTopic(this,'finance')">💰 财务</div>
+</div>
+
+<!-- KPI -->
+<div class="data-card animate-in animate-in-d1">
+  <div class="dc-header">
+    <div class="dc-title">营销核心指标（本月）</div>
+    <div class="dc-export" onclick="showToast('报表导出功能开发中')">⬇ 导出</div>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi-cell-sm"><div class="kcs-num">42%</div><div class="kcs-label">用券率</div><div class="kcs-trend up">↑ 14pp</div></div>
+    <div class="kpi-cell-sm"><div class="kcs-num">68%</div><div class="kcs-label">领券转化</div><div class="kcs-trend up">↑ 8pp</div></div>
+    <div class="kpi-cell-sm"><div class="kcs-num">¥860</div><div class="kcs-label">优惠总额</div><div class="kcs-trend up">↑ 23%</div></div>
+    <div class="kpi-cell-sm"><div class="kcs-num">2.4x</div><div class="kcs-label">ROI</div><div class="kcs-trend down">↓ 0.3x</div></div>
+  </div>
+</div>
+
+<!-- 券类型使用分布 -->
+<div class="data-card animate-in animate-in-d2">
+  <div class="dc-header"><div class="dc-title">优惠券使用分布</div></div>
+  <div class="bar-chart">
+    <div class="bc-row"><div class="bc-label">满减券</div><div class="bc-bar-wrap"><div class="bc-bar" style="width:76%;"></div></div><div class="bc-val">38张</div></div>
+    <div class="bc-row"><div class="bc-label">折扣券</div><div class="bc-bar-wrap"><div class="bc-bar" style="width:42%;background:linear-gradient(90deg,#7B1FA2,#AB47BC);"></div></div><div class="bc-val">21张</div></div>
+    <div class="bc-row"><div class="bc-label">直减券</div><div class="bc-bar-wrap"><div class="bc-bar" style="width:28%;background:linear-gradient(90deg,#F5A623,#FF8F00);"></div></div><div class="bc-val">14张</div></div>
+    <div class="bc-row"><div class="bc-label">活动专属</div><div class="bc-bar-wrap"><div class="bc-bar" style="width:16%;background:linear-gradient(90deg,#1B5E20,#66BB6A);"></div></div><div class="bc-val">8张</div></div>
+  </div>
+</div>
+
+<!-- 活动效果排行 -->
+<div class="list-card animate-in animate-in-d3">
+  <div class="dc-header" style="border-bottom:1px solid var(--c-gray-100);"><div class="dc-title">活动效果排行</div></div>
+  <div class="lc-row" onclick="showToast('查看活动详情')">
+    <div class="lc-rank" style="background:var(--c-gold);color:white;">1</div>
+    <div class="lc-info"><div class="lc-name">春季艺术大赛专题活动</div><div class="lc-sub">领券3.2k · 用券81% · 转化68%</div></div>
+    <div class="lc-val">ROI 3.1x</div>
+  </div>
+  <div class="lc-row" onclick="showToast('查看活动详情')">
+    <div class="lc-rank" style="background:var(--c-gray-300);color:white;">2</div>
+    <div class="lc-info"><div class="lc-name">元旦新年特惠</div><div class="lc-sub">领券1.8k · 用券63% · 转化52%</div></div>
+    <div class="lc-val">ROI 2.4x</div>
+  </div>
+  <div class="lc-row" onclick="showToast('查看活动详情')">
+    <div class="lc-rank" style="background:#cd7f32;color:white;">3</div>
+    <div class="lc-info"><div class="lc-name">暑期报名冲刺活动</div><div class="lc-sub">领券2.1k · 用券55% · 转化44%</div></div>
+    <div class="lc-val">ROI 2.0x</div>
+  </div>
+</div>
+
+<script>
+function switchTopic(el,topic){
+  document.querySelectorAll('.tt').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  document.querySelector('.a-title').textContent=el.textContent.trim().replace(/^[^\s]+\s/,'')+'分析';
+}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400);}
+</script>
+</body>
+</html>

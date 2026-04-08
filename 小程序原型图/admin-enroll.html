@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>报名审核 · 竞赛通管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.admin-nav{background:linear-gradient(135deg,#1A237E,#283593);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.admin-nav .back-btn{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.admin-nav-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.admin-nav-badge{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-full);padding:3px 10px;font-size:11px;color:rgba(255,255,255,0.7);}
+
+.search-bar{background:var(--c-white);padding:10px var(--space-4);border-bottom:1px solid var(--c-gray-100);}
+.search-bar input{width:100%;height:40px;border:1.5px solid var(--c-gray-100);border-radius:var(--radius-full);padding:0 16px;font-size:14px;outline:none;font-family:var(--font-body);}
+
+.filter-tabs{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);}
+.ft-item{flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--c-gray-500);cursor:pointer;position:relative;gap:3px;touch-action:manipulation;}
+.ft-item.active{color:#3F51B5;font-weight:700;}
+.ft-item.active::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:2.5px;background:#3F51B5;border-radius:1px;}
+.ft-count{min-width:16px;height:16px;padding:0 4px;background:var(--c-danger);color:white;font-size:10px;font-weight:700;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;}
+
+/* 审核项目卡片 */
+.enroll-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:10px var(--space-4) 0;overflow:hidden;cursor:pointer;touch-action:manipulation;transition:box-shadow var(--duration-fast);}
+.enroll-card:active{box-shadow:var(--shadow-md);}
+.ec-top{display:flex;align-items:flex-start;gap:12px;padding:14px 16px 10px;}
+.ec-contest-thumb{width:44px;height:44px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.ec-info{flex:1;min-width:0;}
+.ec-contest{font-size:12px;color:var(--c-gray-500);margin-bottom:3px;}
+.ec-name{font-size:15px;font-weight:700;color:var(--c-gray-900);}
+.ec-meta{font-size:12px;color:var(--c-gray-500);margin-top:3px;}
+.ec-status{flex-shrink:0;}
+
+.ec-tags{padding:0 16px 10px;display:flex;gap:6px;flex-wrap:wrap;}
+.ec-material-row{padding:0 16px 10px;display:flex;gap:8px;align-items:center;}
+.ec-material-icon{width:48px;height:38px;border-radius:var(--radius-sm);background:var(--c-gray-50);border:1px solid var(--c-gray-100);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.ec-material-info{font-size:12px;color:var(--c-gray-500);}
+
+.ec-footer{padding:8px 16px 12px;display:flex;gap:8px;border-top:1px solid var(--c-gray-50);}
+.btn-pass-sm{flex:1;height:38px;background:var(--c-success);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;}
+.btn-reject-sm{flex:1;height:38px;background:var(--c-white);color:var(--c-danger);border:1px solid var(--c-danger);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;}
+.btn-detail-sm{width:38px;height:38px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1A237E;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+
+<div class="admin-nav animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="admin-nav-title">报名材料审核</div>
+  <div class="admin-nav-badge">待审 12</div>
+</div>
+
+<div class="search-bar">
+  <input type="text" placeholder="🔍  搜索报名编号 / 学生姓名 / 赛事名称">
+</div>
+
+<div class="filter-tabs">
+  <div class="ft-item active" onclick="switchTab(this)">待审核 <span class="ft-count">12</span></div>
+  <div class="ft-item" onclick="switchTab(this)">全部</div>
+  <div class="ft-item" onclick="switchTab(this)">已通过</div>
+  <div class="ft-item" onclick="switchTab(this)">已驳回</div>
+</div>
+
+<!-- 卡片 1 -->
+<div class="enroll-card animate-in animate-in-d1" onclick="location.href='admin-enroll-detail.html'">
+  <div class="ec-top">
+    <div class="ec-contest-thumb" style="background:linear-gradient(135deg,#4A0E8F,#9C27B0);">🏆</div>
+    <div class="ec-info">
+      <div class="ec-contest">安徒生(国际)艺术奖</div>
+      <div class="ec-name">张小明</div>
+      <div class="ec-meta">报名号 #20251101-2588 · 2026-03-19 09:05</div>
+    </div>
+    <span class="tag tag-warning tag-dot">待审核</span>
+  </div>
+  <div class="ec-tags">
+    <span class="tag tag-gray">绘画类</span>
+    <span class="tag tag-gray">小学高年级组</span>
+    <span class="tag tag-gray">代报名</span>
+  </div>
+  <div class="ec-material-row">
+    <div class="ec-material-icon">🖼️</div>
+    <div class="ec-material-info">作品电子稿 1 份  ·  证件照 1 张  ·  等待审核</div>
+  </div>
+  <div class="ec-footer" onclick="event.stopPropagation()">
+    <button class="btn-pass-sm" onclick="passEnroll()">✅ 通过</button>
+    <button class="btn-reject-sm" onclick="rejectEnroll()">驳回</button>
+    <div class="btn-detail-sm" onclick="location.href='admin-enroll-detail.html'">›</div>
+  </div>
+</div>
+
+<!-- 卡片 2 -->
+<div class="enroll-card animate-in animate-in-d2" onclick="location.href='admin-enroll-detail.html'">
+  <div class="ec-top">
+    <div class="ec-contest-thumb" style="background:linear-gradient(135deg,#B71C1C,#E53935);">🏟️</div>
+    <div class="ec-info">
+      <div class="ec-contest">"鸟巢杯"文化艺术活动</div>
+      <div class="ec-name">王芳芳</div>
+      <div class="ec-meta">报名号 #20251101-2590 · 2026-03-19 08:48</div>
+    </div>
+    <span class="tag tag-warning tag-dot">待审核</span>
+  </div>
+  <div class="ec-tags">
+    <span class="tag tag-gray">舞蹈类</span>
+    <span class="tag tag-gray">初中组</span>
+  </div>
+  <div class="ec-material-row">
+    <div class="ec-material-icon">🎬</div>
+    <div class="ec-material-info">表演视频 1 段  ·  证件照 1 张  ·  文件较大，请仔细查看</div>
+  </div>
+  <div class="ec-footer" onclick="event.stopPropagation()">
+    <button class="btn-pass-sm" onclick="passEnroll()">✅ 通过</button>
+    <button class="btn-reject-sm" onclick="rejectEnroll()">驳回</button>
+    <div class="btn-detail-sm" onclick="location.href='admin-enroll-detail.html'">›</div>
+  </div>
+</div>
+
+<!-- 卡片 3（有问题） -->
+<div class="enroll-card animate-in animate-in-d3" onclick="location.href='admin-enroll-detail.html'">
+  <div class="ec-top">
+    <div class="ec-contest-thumb" style="background:linear-gradient(135deg,#1A237E,#3949AB);">🎭</div>
+    <div class="ec-info">
+      <div class="ec-contest">人民艺术全国展演活动</div>
+      <div class="ec-name">李好运</div>
+      <div class="ec-meta">报名号 #20251101-2591 · 2026-03-18 21:30</div>
+    </div>
+    <span class="tag tag-danger tag-dot">资料不全</span>
+  </div>
+  <div class="ec-tags">
+    <span class="tag tag-gray">书法类</span>
+    <span class="tag tag-gray">幼儿园组</span>
+  </div>
+  <div class="ec-material-row">
+    <div class="ec-material-icon">⚠️</div>
+    <div class="ec-material-info" style="color:var(--c-warning);">作品图片模糊，需要补充高清图</div>
+  </div>
+  <div class="ec-footer" onclick="event.stopPropagation()">
+    <button class="btn-pass-sm" onclick="passEnroll()">✅ 通过</button>
+    <button class="btn-reject-sm" onclick="rejectEnroll()">驳回补充</button>
+    <div class="btn-detail-sm" onclick="location.href='admin-enroll-detail.html'">›</div>
+  </div>
+</div>
+
+<script>
+function switchTab(el){document.querySelectorAll('.ft-item').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function passEnroll(){const t=document.createElement('div');t.className='toast';t.textContent='✅ 已通过，通知已发送';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+function rejectEnroll(){const t=document.createElement('div');t.className='toast';t.textContent='已驳回，请学生补充资料';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+</script>
+</body>
+</html>

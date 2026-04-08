@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>我的报名 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+
+.page-header { position: sticky; top: 44px; z-index: 40; }
+
+/* 状态 Tab */
+.status-tabs {
+  background: var(--c-white);
+  display: flex; overflow-x: auto;
+  border-bottom: 1px solid var(--c-gray-100);
+  position: sticky; top: 100px; z-index: 38;
+}
+.status-tabs::-webkit-scrollbar { display: none; }
+.status-tab {
+  padding: 11px 16px; font-size: 14px; font-weight: 500;
+  color: var(--c-gray-500); white-space: nowrap; cursor: pointer;
+  flex-shrink: 0; position: relative;
+  touch-action: manipulation;
+  transition: color var(--duration-fast) ease;
+}
+.status-tab.active { color: var(--c-primary-600); font-weight: 700; }
+.status-tab.active::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 16px; right: 16px;
+  height: 2px; background: var(--c-primary-600); border-radius: 1px;
+}
+.tab-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 16px; height: 16px;
+  background: var(--c-accent); color: white;
+  font-size: 10px; font-weight: 700;
+  border-radius: 8px; padding: 0 4px;
+  margin-left: 4px; vertical-align: middle;
+}
+
+/* 报名卡片 */
+.enroll-card {
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  margin: 12px var(--space-4) 0;
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+.ec-header {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.ec-thumb {
+  width: 48px; height: 48px; border-radius: var(--radius-sm);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.ec-info { flex: 1; min-width: 0; }
+.ec-name {
+  font-size: 15px; font-weight: 700; color: var(--c-gray-900);
+  line-height: 1.35; margin-bottom: 5px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.ec-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.ec-status { flex-shrink: 0; margin-top: 2px; }
+
+/* 进度条 */
+.ec-progress {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.progress-track {
+  height: 4px; background: var(--c-gray-100);
+  border-radius: 2px; overflow: hidden; margin-bottom: 8px;
+}
+.progress-fill {
+  height: 100%; border-radius: 2px;
+  transition: width 0.5s ease;
+}
+.progress-steps {
+  display: flex; justify-content: space-between;
+}
+.progress-step {
+  font-size: 11px; color: var(--c-gray-500); display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.progress-step.done { color: var(--c-success); }
+.progress-step.current { color: var(--c-primary-600); font-weight: 700; }
+.progress-step.danger { color: var(--c-danger); font-weight: 700; }
+
+/* 卡片内信息行 */
+.ec-info-rows { padding: 10px 16px; }
+.ec-row {
+  display: flex; justify-content: space-between;
+  font-size: 13px; padding: 5px 0;
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.ec-row:last-child { border-bottom: none; }
+.ec-row-key { color: var(--c-gray-500); }
+.ec-row-val { color: var(--c-gray-900); font-weight: 500; }
+.ec-row-val.accent { color: var(--c-accent); font-weight: 700; }
+.ec-row-val.success { color: var(--c-success); font-weight: 700; }
+
+/* 操作按钮行 */
+.ec-actions {
+  padding: 12px 16px;
+  display: flex; gap: 8px; justify-content: flex-end;
+  border-top: 1px solid var(--c-gray-100);
+}
+
+/* 审核驳回横幅 */
+.reject-banner {
+  background: var(--c-danger-50);
+  border-left: 3px solid var(--c-danger);
+  padding: 10px 16px;
+  font-size: 13px; color: var(--c-danger);
+  line-height: 1.5;
+}
+.reject-banner strong { font-weight: 700; display: block; margin-bottom: 2px; }
+
+/* 代报名标识 */
+.proxy-tag {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: var(--c-primary-50); color: var(--c-primary-600);
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: var(--radius-full);
+  border: 1px solid var(--c-primary-200);
+}
+</style>
+</head>
+<body class="has-tabbar">
+
+<div class="status-bar" style="background:var(--c-primary);">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<div class="page-header">
+  <div style="height:56px;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);display:flex;align-items:center;padding:0 16px;box-shadow:var(--shadow-xs);">
+    <div style="width:36px;height:36px;border-radius:8px;background:var(--c-gray-50);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;margin-right:12px;flex-shrink:0;touch-action:manipulation;" onclick="history.back()">←</div>
+    <div style="font-size:17px;font-weight:700;color:var(--c-gray-900);flex:1;">我的报名</div>
+    <div style="font-size:14px;color:var(--c-primary-600);font-weight:600;cursor:pointer;" onclick="location.href='my-score.html'">查询</div>
+  </div>
+</div>
+
+<div class="status-tabs animate-in">
+  <div class="status-tab active" onclick="switchTab(this)">全部 <span class="tab-count">3</span></div>
+  <div class="status-tab" onclick="switchTab(this)">审核中 <span class="tab-count">1</span></div>
+  <div class="status-tab" onclick="switchTab(this)">已报名</div>
+  <div class="status-tab" onclick="switchTab(this)">待支付 <span class="tab-count">1</span></div>
+  <div class="status-tab" onclick="switchTab(this)">已驳回</div>
+  <div class="status-tab" onclick="switchTab(this)">已关闭</div>
+</div>
+
+<!-- ===== 卡片1：审核驳回，需补资料 ===== -->
+<div class="enroll-card animate-in animate-in-d1">
+  <div class="ec-header">
+    <div class="ec-thumb" style="background:linear-gradient(135deg,#0C3D6B,#1A7CD9);">🔢</div>
+    <div class="ec-info">
+      <div class="ec-name">2025年安徒生(国际)艺术奖</div>
+      <div class="ec-tags">
+        <span class="tag tag-primary">数学</span>
+        <span class="tag tag-gray">高中组</span>
+        <span class="proxy-tag">👤 本人报名</span>
+      </div>
+    </div>
+    <div class="ec-status"><span class="tag tag-danger tag-dot">审核驳回</span></div>
+  </div>
+
+  <!-- 驳回原因 -->
+  <div class="reject-banner">
+    <strong>❌ 审核驳回原因</strong>
+    上传的本人照片不符合要求（需正面免冠照），请重新上传后提交。
+  </div>
+
+  <!-- 进度 -->
+  <div class="ec-progress">
+    <div class="progress-track">
+      <div class="progress-fill" style="width:50%;background:var(--c-danger);"></div>
+    </div>
+    <div class="progress-steps">
+      <div class="progress-step done">已提交</div>
+      <div class="progress-step done">已支付</div>
+      <div class="progress-step danger">已驳回</div>
+      <div class="progress-step">完成</div>
+    </div>
+  </div>
+
+  <div class="ec-info-rows">
+    <div class="ec-row"><span class="ec-row-key">报名编号</span><span class="ec-row-val">#20250901-1122</span></div>
+    <div class="ec-row"><span class="ec-row-key">报名费</span><span class="ec-row-val">¥180.00</span></div>
+    <div class="ec-row"><span class="ec-row-key">优惠券</span><span class="ec-row-val" style="color:var(--c-success);">-¥20.00（满80减20券）</span></div>
+    <div class="ec-row"><span class="ec-row-key">积分抵扣</span><span class="ec-row-val" style="color:var(--c-success);">-¥80.00（8000积分）</span></div>
+    <div class="ec-row"><span class="ec-row-key">实付金额</span><span class="ec-row-val accent">¥80.00 已支付</span></div>
+    <div class="ec-row"><span class="ec-row-key">比赛时间</span><span class="ec-row-val">2025-10-19 09:00</span></div>
+  </div>
+
+  <div class="ec-actions">
+    <button class="btn btn-ghost btn-sm" onclick="location.href='contest-detail.html'">详情</button>
+    <button class="btn btn-primary btn-sm" onclick="location.href='enroll.html'">重新提交资料</button>
+  </div>
+</div>
+
+<!-- ===== 卡片2：审核中 ===== -->
+<div class="enroll-card animate-in animate-in-d2">
+  <div class="ec-header">
+    <div class="ec-thumb" style="background:linear-gradient(135deg,#7B2D00,#FF7043);">🎤</div>
+    <div class="ec-info">
+      <div class="ec-name">第十届全国中小学生"鸟巢杯"文化艺术活动</div>
+      <div class="ec-tags">
+        <span class="tag tag-primary">英语</span>
+        <span class="tag tag-gray">高中组</span>
+        <span class="proxy-tag">📋 代报名</span>
+      </div>
+    </div>
+    <div class="ec-status"><span class="tag tag-warning tag-dot">审核中</span></div>
+  </div>
+
+  <div class="ec-progress">
+    <div class="progress-track">
+      <div class="progress-fill" style="width:70%;background:var(--c-warning);"></div>
+    </div>
+    <div class="progress-steps">
+      <div class="progress-step done">已提交</div>
+      <div class="progress-step done">已支付</div>
+      <div class="progress-step current">审核中</div>
+      <div class="progress-step">完成</div>
+    </div>
+  </div>
+
+  <div class="ec-info-rows">
+    <div class="ec-row"><span class="ec-row-key">报名编号</span><span class="ec-row-val">#20250915-3345</span></div>
+    <div class="ec-row"><span class="ec-row-key">代报人</span><span class="ec-row-val" style="color:var(--c-primary-600);">王老师（教师认证）</span></div>
+    <div class="ec-row"><span class="ec-row-key">支付方式</span><span class="ec-row-val">对公转账（待到账确认）</span></div>
+    <div class="ec-row"><span class="ec-row-key">比赛时间</span><span class="ec-row-val">2025-11-10 14:00</span></div>
+  </div>
+
+  <div class="ec-actions">
+    <button class="btn btn-ghost btn-sm" onclick="location.href='contest-detail.html'">详情</button>
+    <button class="btn btn-solid-blue btn-sm" onclick="location.href='notice-msg.html'">赛事通知</button>
+  </div>
+</div>
+
+<!-- ===== 卡片3：已报名（待支付） ===== -->
+<div class="enroll-card animate-in animate-in-d2">
+  <div class="ec-header">
+    <div class="ec-thumb" style="background:linear-gradient(135deg,#004D40,#26A69A);">🔬</div>
+    <div class="ec-info">
+      <div class="ec-name">全国青少年科技创新大赛2025</div>
+      <div class="ec-tags">
+        <span class="tag tag-primary">科技</span>
+        <span class="tag tag-gray">初中组</span>
+        <span class="proxy-tag">👤 本人报名</span>
+      </div>
+    </div>
+    <div class="ec-status"><span class="tag tag-warning tag-dot">待支付</span></div>
+  </div>
+
+  <div class="notice notice-warning" style="margin:0;border-radius:0;border:none;border-bottom:1px solid var(--c-gray-100);">
+    <span class="notice-icon">⏱️</span>
+    <div>订单将于 <strong>2025-09-20 23:59</strong> 自动关闭，请尽快完成支付。</div>
+  </div>
+
+  <div class="ec-progress">
+    <div class="progress-track">
+      <div class="progress-fill" style="width:25%;background:var(--c-primary-400);"></div>
+    </div>
+    <div class="progress-steps">
+      <div class="progress-step done">已提交</div>
+      <div class="progress-step current">待支付</div>
+      <div class="progress-step">审核</div>
+      <div class="progress-step">完成</div>
+    </div>
+  </div>
+
+  <div class="ec-info-rows">
+    <div class="ec-row"><span class="ec-row-key">报名编号</span><span class="ec-row-val">#20250918-6677</span></div>
+    <div class="ec-row"><span class="ec-row-key">待支付金额</span><span class="ec-row-val accent">¥120.00</span></div>
+    <div class="ec-row"><span class="ec-row-key">比赛时间</span><span class="ec-row-val">2025-10-25</span></div>
+  </div>
+
+  <div class="ec-actions">
+    <button class="btn btn-ghost btn-sm" onclick="confirmCancel()">取消</button>
+    <button class="btn btn-primary btn-sm" onclick="location.href='enroll.html'">立即支付 ¥120</button>
+  </div>
+</div>
+
+<!-- 空提示（其他 tab 无内容时显示） -->
+<div style="padding:40px 24px;text-align:center;display:none;" id="emptyState">
+  <div style="font-size:48px;margin-bottom:12px;opacity:0.6;">📋</div>
+  <div style="font-size:16px;font-weight:700;color:var(--c-gray-700);margin-bottom:8px;">暂无相关报名</div>
+  <div style="font-size:14px;color:var(--c-gray-500);margin-bottom:20px;">去参加一场赛事吧！</div>
+  <button class="btn btn-solid-blue btn-md" onclick="location.href='contest-list.html'">浏览赛事</button>
+</div>
+
+<div style="height:16px;"></div>
+
+<nav class="bottom-nav">
+  <div class="nav-tab" onclick="location.href='index.html'"><span class="nav-tab-icon">🏠</span><span class="nav-tab-label">首页</span></div>
+  <div class="nav-tab" onclick="location.href='contest-list.html'"><span class="nav-tab-icon">🏆</span><span class="nav-tab-label">赛事</span></div>
+  <div class="nav-tab" onclick="location.href='course-list.html'"><span class="nav-tab-icon">📚</span><span class="nav-tab-label">课程</span></div>
+  <div class="nav-tab" onclick="location.href='notice.html'"><span class="nav-tab-icon">📢</span><span class="nav-tab-label">公告</span></div>
+  <div class="nav-tab active"><span class="nav-tab-icon">👤</span><span class="nav-tab-label" style="color:var(--c-primary-600);">我的</span></div>
+</nav>
+
+<script>
+function switchTab(el) {
+  document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function confirmCancel() {
+  if (confirm('确认取消报名？\n取消后订单将关闭，报名费不予退还（免费赛事直接关闭）。')) {
+    showToast('已取消报名');
+  }
+}
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
+}
+</script>
+</body>
+</html>

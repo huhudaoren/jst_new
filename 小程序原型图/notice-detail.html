@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>公告详情 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+
+.page-header {
+  height: 56px; background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: center; padding: 0 var(--space-4);
+  position: sticky; top: 44px; z-index: 40; box-shadow: var(--shadow-xs);
+}
+.back-btn { width:36px;height:36px;border-radius:var(--radius-sm);background:var(--c-gray-50);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;margin-right:12px;flex-shrink:0;touch-action:manipulation; }
+.back-btn:active { background:var(--c-gray-100); }
+.header-title { font-size:17px;font-weight:700;color:var(--c-gray-900);flex:1; }
+.header-more { font-size:22px;color:var(--c-gray-700);cursor:pointer;touch-action:manipulation;padding:6px; }
+
+/* 文章容器 */
+.article-container {
+  background: var(--c-white);
+  margin: 12px var(--space-4);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+/* 文章头部 */
+.article-head { padding: 20px 20px 16px; border-bottom: 1px solid var(--c-gray-100); }
+.article-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.article-title {
+  font-size: 20px; font-weight: 900; color: var(--c-gray-900);
+  line-height: 1.4; letter-spacing: -0.3px; margin-bottom: 14px;
+}
+.article-meta {
+  display: flex; align-items: center; gap: 0;
+  flex-wrap: wrap; row-gap: 6px;
+}
+.article-meta-item {
+  font-size: 12px; color: var(--c-gray-500);
+  display: flex; align-items: center; gap: 4px;
+  padding-right: 14px; margin-right: 14px;
+  border-right: 1px solid var(--c-gray-100);
+}
+.article-meta-item:last-child { border-right: none; padding-right: 0; margin-right: 0; }
+
+/* 重要提示框 */
+.highlight-box {
+  background: var(--c-warning-50);
+  border-left: 4px solid var(--c-warning);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px 16px;
+  margin: 16px 0;
+}
+.highlight-box.info { background: var(--c-primary-50); border-left-color: var(--c-primary-400); }
+.highlight-box.success { background: var(--c-success-50); border-left-color: var(--c-success); }
+
+/* 正文内容 */
+.article-body {
+  padding: 18px 20px;
+  font-size: 15px; color: var(--c-gray-700);
+  line-height: 1.85;
+}
+.article-body p { margin-bottom: 14px; }
+.article-body p:last-child { margin-bottom: 0; }
+.article-body h3 {
+  font-size: 16px; font-weight: 700; color: var(--c-gray-900);
+  margin: 20px 0 10px; padding-left: 10px;
+  border-left: 3px solid var(--c-primary-600);
+}
+.article-body ul, .article-body ol { padding-left: 20px; margin-bottom: 14px; }
+.article-body li { margin-bottom: 8px; line-height: 1.7; }
+.article-body strong { color: var(--c-gray-900); font-weight: 700; }
+.article-body a { color: var(--c-primary-600); text-decoration: underline; }
+
+/* 信息表格 */
+.info-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px; margin: 12px 0;
+  border-radius: var(--radius-md); overflow: hidden;
+}
+.info-table th {
+  background: var(--c-primary-50); color: var(--c-primary-600);
+  font-weight: 700; font-size: 12px;
+  padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid var(--c-primary-200);
+}
+.info-table td {
+  padding: 10px 14px; color: var(--c-gray-700);
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.info-table tr:last-child td { border-bottom: none; }
+.info-table td:first-child { color: var(--c-gray-500); width: 80px; }
+
+/* 底部作者信息 */
+.article-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--c-gray-100);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.article-author { font-size: 13px; color: var(--c-gray-500); }
+.article-share-btns { display: flex; gap: 8px; }
+.share-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 12px; border-radius: var(--radius-full);
+  background: var(--c-gray-50); border: 1.5px solid var(--c-gray-100);
+  font-size: 12px; font-weight: 600; color: var(--c-gray-700);
+  cursor: pointer; touch-action: manipulation;
+  transition: all var(--duration-fast);
+}
+.share-btn:active { background: var(--c-gray-100); }
+
+/* 相关赛事推荐 */
+.related-section {
+  background: var(--c-white);
+  margin: 0 var(--space-4) 12px;
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-xs); overflow: hidden;
+}
+.related-header {
+  padding: 14px 16px 10px; border-bottom: 1px solid var(--c-gray-100);
+  font-size: 15px; font-weight: 700; color: var(--c-gray-900);
+  display: flex; align-items: center; gap: 6px;
+}
+.related-header::before {
+  content: ''; width: 3px; height: 15px;
+  background: var(--c-primary-600); border-radius: 2px; display: inline-block;
+}
+.related-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-bottom: 1px solid var(--c-gray-100);
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast);
+}
+.related-item:last-child { border-bottom: none; }
+.related-item:active { background: var(--c-gray-50); }
+.related-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--c-primary-400); flex-shrink: 0; }
+.related-title { flex: 1; font-size: 13px; font-weight: 500; color: var(--c-gray-900); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.related-time { font-size: 11px; color: var(--c-gray-300); flex-shrink: 0; }
+
+/* 底部固定操作栏 */
+.bottom-action {
+  position: sticky; bottom: 0;
+  background: rgba(255,255,255,.97);
+  border-top: 1px solid var(--c-gray-100);
+  padding: 12px var(--space-4);
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  display: flex; gap: 10px; align-items: center;
+  box-shadow: 0 -4px 20px rgba(12,61,107,.08);
+}
+
+/* 分享 Sheet */
+.share-sheet { position:fixed;inset:0;background:rgba(26,31,46,.55);z-index:200;display:none;align-items:flex-end;justify-content:center; }
+.share-sheet.show { display:flex; }
+.share-sheet-inner { background:var(--c-white);border-radius:var(--radius-xl) var(--radius-xl) 0 0;width:100%;max-width:390px;overflow:hidden;animation:sheet-up .3s var(--ease-out); }
+@keyframes sheet-up { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.share-handle { width:36px;height:4px;background:var(--c-gray-100);border-radius:2px;margin:12px auto 0; }
+.share-title { font-size:16px;font-weight:700;color:var(--c-gray-900);padding:14px 20px 12px;border-bottom:1px solid var(--c-gray-100); }
+.share-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:16px 20px; }
+.share-option { display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 8px;cursor:pointer;touch-action:manipulation;border-radius:var(--radius-md);transition:background var(--duration-fast); }
+.share-option:active { background:var(--c-gray-50); }
+.share-option-icon { width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:var(--shadow-xs); }
+.share-option-label { font-size:12px;color:var(--c-gray-700);font-weight:500; }
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:var(--c-primary);"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+
+<div class="page-header animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="header-title">公告详情</div>
+  <div class="header-more" onclick="showShare()">⋯</div>
+</div>
+
+<!-- 文章正文 -->
+<div class="article-container animate-in animate-in-d1">
+
+  <!-- 头部 -->
+  <div class="article-head">
+    <div class="article-tags">
+      <span class="tag tag-accent tag-lg">📌 置顶公告</span>
+      <span class="tag tag-primary">赛事通知</span>
+    </div>
+    <div class="article-title">安徒生(国际)艺术奖2025报名通知及注意事项</div>
+    <div class="article-meta">
+      <div class="article-meta-item">📅 2025-09-01</div>
+      <div class="article-meta-item">👁️ 12,483 阅读</div>
+      <div class="article-meta-item">🏛️ 竞赛通官方</div>
+    </div>
+  </div>
+
+  <!-- 正文 -->
+  <div class="article-body">
+    <p>各参赛学校及同学们：</p>
+    <p><strong>2025年安徒生(国际)艺术奖</strong>（CMOML）由安徒生国际艺术联合会主办，现就报名事宜通知如下，请仔细阅读。</p>
+
+    <div class="highlight-box">
+      ⚠️ <strong>重要提醒：</strong>报名截止时间为 <strong>2025年10月15日 23:59</strong>，过期不予受理，请提前完成报名缴费。
+    </div>
+
+    <h3>一、报名时间</h3>
+    <table class="info-table">
+      <thead><tr><th>事项</th><th>时间</th></tr></thead>
+      <tbody>
+        <tr><td>报名开始</td><td>2025年9月1日 00:00</td></tr>
+        <tr><td>报名截止</td><td><strong>2025年10月15日 23:59</strong></td></tr>
+        <tr><td>支付截止</td><td>与报名截止时间相同</td></tr>
+        <tr><td>准考证下载</td><td>2025年10月16日 起</td></tr>
+        <tr><td>正式比赛</td><td>2025年10月19日 09:00</td></tr>
+        <tr><td>成绩发布</td><td>2025年11月中旬（预计）</td></tr>
+      </tbody>
+    </table>
+
+    <h3>二、报名资格</h3>
+    <ul>
+      <li>全国在校高中学生（含高一、高二、高三年级）</li>
+      <li>每位学生本次赛事仅限报名一次</li>
+      <li>不限地区、不限学校性质（公办、民办均可）</li>
+    </ul>
+
+    <h3>三、报名费用</h3>
+    <p>报名费为 <strong>¥180.00 元/人</strong>，支持微信支付及对公转账两种方式。</p>
+    <div class="highlight-box info">
+      💡 已绑定老师/机构的学生，报名费由老师/机构统一支付，学生无需自行缴费。
+    </div>
+
+    <h3>四、所需材料</h3>
+    <ul>
+      <li>本人近期免冠照片（JPG格式，2MB以内）</li>
+      <li>学生证或在校证明（非必须，供核验使用）</li>
+    </ul>
+
+    <h3>五、注意事项</h3>
+    <ol>
+      <li>请如实填写个人信息，信息错误将影响成绩查询和证书发放，后果自负。</li>
+      <li>报名缴费后原则上不予退款，请确认参赛意愿后再报名。</li>
+      <li>若因不可抗力导致赛事取消，将全额退款至原支付账户。</li>
+      <li>作品截止时间为 <strong>2025年12月20日（截稿日期）</strong>，请提前 10 分钟进入考试系统。</li>
+      <li>获奖证书将于成绩发布后 30 个工作日内在平台开放下载（图片/PDF格式）。</li>
+    </ol>
+
+    <h3>六、奖项设置</h3>
+    <table class="info-table">
+      <thead><tr><th>奖项</th><th>比例</th><th>奖励</th></tr></thead>
+      <tbody>
+        <tr><td>🥇 一等奖</td><td>参赛人数5%</td><td>证书 + 奖牌 + CMO选拔资格</td></tr>
+        <tr><td>🥈 二等奖</td><td>参赛人数15%</td><td>证书 + 奖牌</td></tr>
+        <tr><td>🥉 三等奖</td><td>参赛人数30%</td><td>证书</td></tr>
+        <tr><td>优秀奖</td><td>参赛人数50%</td><td>电子证书</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box success">
+      ✅ 一等奖获得者有资格参加全国中学生数学奥林匹克（CMO）选拔考试，进一步冲击国际数学奥林匹克（IMO）。
+    </div>
+
+    <h3>七、联系方式</h3>
+    <ul>
+      <li>官方客服电话：<strong>400-888-0000</strong>（工作日 9:00-18:00）</li>
+      <li>在线客服：登录竞赛通，点击首页右下角「💬 在线客服」</li>
+      <li>邮件咨询：<strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="197a76776d7c6a6d59736a6d377c7d6c377a77">[email&#160;protected]</a></strong></li>
+    </ul>
+
+    <p style="color:var(--c-gray-500);font-size:13px;margin-top:24px;padding-top:16px;border-top:1px solid var(--c-gray-100);">
+      安徒生国际艺术联合会<br>竞赛通平台<br>2025年9月1日
+    </p>
+  </div>
+
+  <!-- 底部分享/收藏 -->
+  <div class="article-footer">
+    <div class="article-author">发布：竞赛通官方 · 2025-09-01</div>
+    <div class="article-share-btns">
+      <div class="share-btn" onclick="toggleFav(this)">⭐ 收藏</div>
+      <div class="share-btn" onclick="showShare()">📤 分享</div>
+    </div>
+  </div>
+</div>
+
+<!-- 相关公告 -->
+<div class="related-section animate-in animate-in-d2">
+  <div class="related-header">相关公告</div>
+  <div class="related-item" onclick="showToast('查看公告')">
+    <div class="related-dot"></div>
+    <div class="related-title">关于第十届"鸟巢杯"参赛规程调整调整的公告</div>
+    <div class="related-time">昨天</div>
+  </div>
+  <div class="related-item" onclick="showToast('查看公告')">
+    <div class="related-dot"></div>
+    <div class="related-title">平台系统升级维护通知（2025年10月8日）</div>
+    <div class="related-time">3天前</div>
+  </div>
+  <div class="related-item" onclick="showToast('查看公告')">
+    <div class="related-dot"></div>
+    <div class="related-title">关于竞赛证书下载新增PDF格式的说明</div>
+    <div class="related-time">10/01</div>
+  </div>
+  <div class="related-item" onclick="showToast('查看更多公告')">
+    <div class="related-dot" style="background:var(--c-gray-300);"></div>
+    <div class="related-title" style="color:var(--c-primary-600);font-weight:600;">查看全部公告 →</div>
+    <div class="related-time"></div>
+  </div>
+</div>
+
+<div style="height:8px;"></div>
+
+<!-- 底部操作 -->
+<div class="bottom-action animate-in animate-in-d2">
+  <button class="btn btn-solid-blue btn-md" style="flex:1;" onclick="location.href='contest-detail.html'">
+    查看相关赛事 →
+  </button>
+  <button class="btn btn-outline btn-md" onclick="showShare()">📤 分享</button>
+</div>
+
+<!-- 分享 Sheet -->
+<div class="share-sheet" id="shareSheet" onclick="closeShare()">
+  <div class="share-sheet-inner" onclick="event.stopPropagation()">
+    <div class="share-handle"></div>
+    <div class="share-title">分享至</div>
+    <div class="share-grid">
+      <div class="share-option" onclick="doShare('微信好友')">
+        <div class="share-option-icon" style="background:#EAFAF1;">💬</div>
+        <div class="share-option-label">微信好友</div>
+      </div>
+      <div class="share-option" onclick="doShare('朋友圈')">
+        <div class="share-option-icon" style="background:#EBF4FC;">🌐</div>
+        <div class="share-option-label">朋友圈</div>
+      </div>
+      <div class="share-option" onclick="doShare('复制链接')">
+        <div class="share-option-icon" style="background:var(--c-gray-100);">🔗</div>
+        <div class="share-option-label">复制链接</div>
+      </div>
+      <div class="share-option" onclick="doShare('更多')">
+        <div class="share-option-icon" style="background:var(--c-gray-100);">⋯</div>
+        <div class="share-option-label">更多</div>
+      </div>
+    </div>
+    <div style="padding:4px 20px 28px;">
+      <button class="btn btn-ghost btn-md btn-block" onclick="closeShare()">取消</button>
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+let faved = false;
+function toggleFav(btn) {
+  faved = !faved;
+  btn.textContent = faved ? '★ 已收藏' : '⭐ 收藏';
+  btn.style.color = faved ? 'var(--c-gold)' : '';
+  showToast(faved ? '✓ 已加入收藏' : '已取消收藏');
+}
+function showShare() { document.getElementById('shareSheet').classList.add('show'); }
+function closeShare() { document.getElementById('shareSheet').classList.remove('show'); }
+function doShare(channel) {
+  closeShare();
+  setTimeout(() => showToast(`✓ 已分享至${

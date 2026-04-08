@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.user.mapper.BindingMapperExt">
+
+    <resultMap id="BindingEntityMap" type="com.ruoyi.jst.user.domain.JstStudentChannelBinding">
+        <id column="binding_id" property="bindingId"/>
+        <result column="user_id" property="userId"/>
+        <result column="channel_id" property="channelId"/>
+        <result column="bind_time" property="bindTime"/>
+        <result column="unbind_time" property="unbindTime"/>
+        <result column="status" property="status"/>
+        <result column="unbind_reason" property="unbindReason"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="del_flag" property="delFlag"/>
+    </resultMap>
+
+    <resultMap id="BindingVoMap" type="com.ruoyi.jst.user.vo.BindingVO">
+        <id column="binding_id" property="bindingId"/>
+        <result column="channel_id" property="channelId"/>
+        <result column="channel_name" property="channelName"/>
+        <result column="channel_type" property="channelType"/>
+        <result column="bind_time" property="bindTime"/>
+        <result column="unbind_time" property="unbindTime"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <sql id="BindingBaseColumns">
+        b.binding_id, b.user_id, b.channel_id, b.bind_time, b.unbind_time, b.status,
+        b.unbind_reason, b.operator_id, b.create_by, b.create_time, b.update_by,
+        b.update_time, b.remark, b.del_flag
+    </sql>
+
+    <sql id="BindingVoColumns">
+        b.binding_id, b.channel_id, c.channel_name, c.channel_type,
+        b.bind_time, b.unbind_time, b.status
+    </sql>
+
+    <select id="selectMyBindingList" resultMap="BindingVoMap">
+        SELECT <include refid="BindingVoColumns"/>
+        FROM jst_student_channel_binding b
+        LEFT JOIN jst_channel c
+               ON c.channel_id = b.channel_id
+              AND c.del_flag = '0'
+        WHERE b.user_id = #{userId}
+          AND b.del_flag = '0'
+        ORDER BY b.bind_time DESC, b.binding_id DESC
+    </select>
+
+    <select id="selectBindingList" parameterType="com.ruoyi.jst.user.dto.BindingQueryReqDTO" resultMap="BindingVoMap">
+        SELECT <include refid="BindingVoColumns"/>
+        FROM jst_student_channel_binding b
+        LEFT JOIN jst_channel c
+               ON c.channel_id = b.channel_id
+              AND c.del_flag = '0'
+        WHERE b.del_flag = '0'
+        <if test="userId != null">
+            AND b.user_id = #{userId}
+        </if>
+        <if test="channelId != null">
+            AND b.channel_id = #{channelId}
+        </if>
+        <if test="status != null and status != ''">
+            AND b.status = #{status}
+        </if>
+        ORDER BY b.bind_time DESC, b.binding_id DESC
+    </select>
+
+    <select id="selectBindingVoById" resultMap="BindingVoMap">
+        SELECT <include refid="BindingVoColumns"/>
+        FROM jst_student_channel_binding b
+        LEFT JOIN jst_channel c
+               ON c.channel_id = b.channel_id
+              AND c.del_flag = '0'
+        WHERE b.binding_id = #{bindingId}
+          AND b.del_flag = '0'
+    </select>
+
+    <select id="selectActiveBindingByUserId" resultMap="BindingEntityMap">
+        SELECT <include refid="BindingBaseColumns"/>
+        FROM jst_student_channel_binding b
+        WHERE b.user_id = #{userId}
+          AND b.status = 'active'
+          AND b.del_flag = '0'
+        ORDER BY b.binding_id DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectBindingById" resultMap="BindingEntityMap">
+        SELECT <include refid="BindingBaseColumns"/>
+        FROM jst_student_channel_binding b
+        WHERE b.binding_id = #{bindingId}
+          AND b.del_flag = '0'
+    </select>
+
+    <select id="selectApprovedChannelById" resultType="com.ruoyi.jst.user.domain.JstChannel">
+        SELECT channel_id, user_id, channel_type, channel_name, contact_mobile,
+               auth_status, status, create_by, create_time, update_by, update_time,
+               remark, del_flag
+        FROM jst_channel
+        WHERE channel_id = #{channelId}
+          AND status = 1
+          AND auth_status = 'approved'
+          AND del_flag = '0'
+    </select>
+
+    <insert id="insertBinding" parameterType="com.ruoyi.jst.user.domain.JstStudentChannelBinding"
+            useGeneratedKeys="true" keyProperty="bindingId">
+        INSERT INTO jst_student_channel_binding (
+            user_id, channel_id, bind_time, status, operator_id,
+            create_by, create_time, update_by, update_time, remark, del_flag
+        ) VALUES (
+            #{userId}, #{channelId}, #{bindTime}, #{status}, #{operatorId,jdbcType=BIGINT},
+            #{createBy}, #{createTime}, #{updateBy}, #{updateTime}, #{remark,jdbcType=VARCHAR}, #{delFlag}
+        )
+    </insert>
+
+    <update id="updateBindingStatus">
+        UPDATE jst_student_channel_binding
+        SET status = #{newStatus},
+            unbind_time = NOW(),
+            unbind_reason = #{unbindReason,jdbcType=VARCHAR},
+            operator_id = #{operatorId,jdbcType=BIGINT},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE binding_id = #{bindingId}
+          AND status = #{expectedStatus}
+          AND del_flag = '0'
+    </update>
+
+    <update id="updateUserBoundChannelId">
+        UPDATE jst_user
+        SET bound_channel_id = #{boundChannelId,jdbcType=BIGINT},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND del_flag = '0'
+    </update>
+
+</mapper>

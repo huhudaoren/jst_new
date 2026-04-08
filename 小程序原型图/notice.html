@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>公告资讯 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+.sticky-top { position: sticky; top: 44px; z-index: 40; background: var(--c-white); box-shadow: var(--shadow-xs); }
+
+.notice-tabs { display: flex; overflow-x: auto; padding: 0 var(--space-4); border-bottom: 1px solid var(--c-gray-100); }
+.notice-tabs::-webkit-scrollbar { display: none; }
+.notice-tab {
+  padding: 11px 14px; font-size: 14px; font-weight: 500;
+  color: var(--c-gray-500); white-space: nowrap; cursor: pointer;
+  flex-shrink: 0; position: relative;
+  touch-action: manipulation; transition: color var(--duration-fast);
+}
+.notice-tab.active { color: var(--c-primary-600); font-weight: 700; }
+.notice-tab.active::after {
+  content: ''; position: absolute; bottom: 0; left: 14px; right: 14px;
+  height: 2px; background: var(--c-primary-600); border-radius: 1px;
+}
+
+/* 置顶公告 Banner */
+.top-notice-banner {
+  margin: 12px var(--space-4) 0;
+  background: linear-gradient(90deg, var(--c-accent-50), #FFF8EC);
+  border: 1px solid rgba(255,87,34,0.15);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; touch-action: manipulation;
+}
+.top-notice-icon { font-size: 20px; flex-shrink: 0; }
+.top-notice-text { flex: 1; font-size: 14px; font-weight: 600; color: var(--c-gray-900); line-height: 1.4; }
+.top-notice-badge {
+  background: var(--c-accent); color: white;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 6px; border-radius: 3px; flex-shrink: 0;
+}
+
+/* 公告列表 */
+.notice-list-wrap { padding: 8px var(--space-4) 0; }
+
+.notice-card {
+  background: var(--c-white); border-radius: var(--radius-md);
+  margin-bottom: 10px; overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  cursor: pointer; touch-action: manipulation;
+  transition: box-shadow var(--duration-fast);
+}
+.notice-card:active { box-shadow: none; background: var(--c-gray-50); }
+.nc-header {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 14px 14px 10px;
+}
+.nc-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--c-accent); flex-shrink: 0; margin-top: 5px;
+}
+.nc-dot.read { background: var(--c-gray-300); }
+.nc-content { flex: 1; min-width: 0; }
+.nc-title {
+  font-size: 14px; font-weight: 600; color: var(--c-gray-900);
+  line-height: 1.4; margin-bottom: 5px;
+}
+.nc-excerpt {
+  font-size: 13px; color: var(--c-gray-500); line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.nc-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 14px 12px;
+  border-top: 1px solid var(--c-gray-100);
+}
+.nc-meta { display: flex; gap: 8px; align-items: center; }
+.nc-time { font-size: 11px; color: var(--c-gray-500); }
+.nc-views { font-size: 11px; color: var(--c-gray-400); }
+.nc-arrow { font-size: 13px; color: var(--c-gray-300); }
+
+/* 详情弹层 */
+.notice-detail-overlay {
+  position: fixed; inset: 0; background: rgba(26,31,46,0.5);
+  z-index: 200; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.notice-detail-overlay.show { opacity: 1; pointer-events: all; }
+.notice-detail-sheet {
+  position: absolute; bottom: 0; left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 390px;
+  background: var(--c-white);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  max-height: 90vh; display: flex; flex-direction: column;
+  transition: transform 0.3s var(--ease-out);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.notice-detail-overlay.show .notice-detail-sheet { transform: translateX(-50%) translateY(0); }
+.nd-handle { width: 36px; height: 4px; background: var(--c-gray-100); border-radius: 2px; margin: 12px auto 0; flex-shrink: 0; }
+.nd-header { padding: 14px var(--space-5) 10px; border-bottom: 1px solid var(--c-gray-100); flex-shrink: 0; }
+.nd-title { font-size: 17px; font-weight: 800; color: var(--c-gray-900); line-height: 1.4; margin-bottom: 8px; }
+.nd-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.nd-time { font-size: 12px; color: var(--c-gray-500); }
+.nd-body { flex: 1; overflow-y: auto; padding: var(--space-5); }
+.nd-body p { font-size: 14px; color: var(--c-gray-700); line-height: 1.8; margin-bottom: 12px; }
+.nd-body h4 { font-size: 15px; font-weight: 700; color: var(--c-gray-900); margin: 16px 0 8px; }
+.nd-body ul { padding-left: 16px; }
+.nd-body ul li { font-size: 14px; color: var(--c-gray-700); line-height: 1.7; margin-bottom: 6px; }
+.nd-close {
+  position: absolute; top: 14px; right: var(--space-5);
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--c-gray-100);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; cursor: pointer;
+}
+</style>
+</head>
+<body class="has-tabbar">
+
+<div class="status-bar" style="background:var(--c-primary);">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<div class="sticky-top animate-in">
+  <div style="height:56px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--c-gray-100);">
+    <div style="font-size:20px;font-weight:900;color:var(--c-gray-900);flex:1;letter-spacing:-0.3px;">公告资讯</div>
+    <div style="font-size:20px;color:var(--c-gray-500);cursor:pointer;">🔍</div>
+  </div>
+  <div class="notice-tabs">
+    <div class="notice-tab active" onclick="switchTab(this)">全部</div>
+    <div class="notice-tab" onclick="switchTab(this)">平台公告</div>
+    <div class="notice-tab" onclick="switchTab(this)">赛事通知</div>
+    <div class="notice-tab" onclick="switchTab(this)">成绩发布</div>
+    <div class="notice-tab" onclick="switchTab(this)">证书通知</div>
+  </div>
+</div>
+
+<!-- 置顶公告 -->
+<div class="top-notice-banner animate-in animate-in-d1" onclick="openDetail(0)">
+  <div class="top-notice-icon">📌</div>
+  <div class="top-notice-text">安徒生(国际)艺术奖报名通知及注意事项（置顶）</div>
+  <div class="top-notice-badge">置顶</div>
+</div>
+
+<div class="notice-list-wrap">
+
+  <div class="notice-card animate-in animate-in-d1" onclick="openDetail(1)">
+    <div class="nc-header">
+      <div class="nc-dot"></div>
+      <div class="nc-content">
+        <div class="nc-title">"鸟巢杯"文化艺术活动参赛规程及评审说明</div>
+        <div class="nc-excerpt">根据组织委员会最新决定，本届大赛评审规则作出以下调整：初赛阶段增加在线朗读测试环节，评分权重由原40%调整为50%……</div>
+      </div>
+    </div>
+    <div class="nc-footer">
+      <div class="nc-meta">
+        <span class="tag tag-accent" style="font-size:10px;">赛事通知</span>
+        <span class="nc-time">今天 10:30</span>
+        <span class="nc-views">👁 1,203</span>
+      </div>
+      <div class="nc-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="notice-card animate-in animate-in-d2" onclick="openDetail(2)">
+    <div class="nc-header">
+      <div class="nc-dot"></div>
+      <div class="nc-content">
+        <div class="nc-title">【成绩发布】2024年全国中学生数学联赛成绩已公布</div>
+        <div class="nc-excerpt">2024年全国中学生数学联赛成绩已正式发布，请参赛学生在个人中心→我的成绩中查看，获奖证书将于3个工作日内可下载……</div>
+      </div>
+    </div>
+    <div class="nc-footer">
+      <div class="nc-meta">
+        <span class="tag tag-success" style="font-size:10px;">成绩发布</span>
+        <span class="nc-time">昨天 16:00</span>
+        <span class="nc-views">👁 8,891</span>
+      </div>
+      <div class="nc-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="notice-card animate-in animate-in-d2" onclick="openDetail(3)">
+    <div class="nc-header">
+      <div class="nc-dot read"></div>
+      <div class="nc-content">
+        <div class="nc-title" style="color:var(--c-gray-700);">平台系统升级维护通知（2025年10月8日）</div>
+        <div class="nc-excerpt">竞赛通平台将于2025年10月8日 00:00—06:00 进行系统升级维护，届时平台将暂停服务。维护期间无法进行报名、支付等操作……</div>
+      </div>
+    </div>
+    <div class="nc-footer">
+      <div class="nc-meta">
+        <span class="tag tag-gray" style="font-size:10px;">平台公告</span>
+        <span class="nc-time">3天前</span>
+        <span class="nc-views">👁 2,445</span>
+      </div>
+      <div class="nc-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="notice-card animate-in animate-in-d3" onclick="openDetail(4)">
+    <div class="nc-header">
+      <div class="nc-dot read"></div>
+      <div class="nc-content">
+        <div class="nc-title" style="color:var(--c-gray-700);">关于竞赛证书下载功能新增PDF格式的说明</div>
+        <div class="nc-excerpt">为满足用户需求，竞赛通平台证书下载功能现已支持PDF格式，用户可在个人中心→我的证书中选择JPG图片或PDF格式下载……</div>
+      </div>
+    </div>
+    <div class="nc-footer">
+      <div class="nc-meta">
+        <span class="tag tag-info" style="font-size:10px;">证书通知</span>
+        <span class="nc-time">10月1日</span>
+        <span class="nc-views">👁 5,672</span>
+      </div>
+      <div class="nc-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="notice-card animate-in animate-in-d3" onclick="openDetail(5)">
+    <div class="nc-header">
+      <div class="nc-dot read"></div>
+      <div class="nc-content">
+        <div class="nc-title" style="color:var(--c-gray-700);">2025年全国青少年科技创新大赛报名正式开启</div>
+        <div class="nc-excerpt">全国青少年科技创新大赛报名已于9月1日正式开启，本届大赛面向全国中小学生，参赛项目涵盖科学探究、科技发明、科学幻想画三类……</div>
+      </div>
+    </div>
+    <div class="nc-footer">
+      <div class="nc-meta">
+        <span class="tag tag-accent" style="font-size:10px;">赛事通知</span>
+        <span class="nc-time">09月01日</span>
+        <span class="nc-views">👁 12,330</span>
+      </div>
+      <div class="nc-arrow">›</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:16px;font-size:14px;color:var(--c-primary-600);font-weight:500;cursor:pointer;" onclick="showToast('加载更多公告')">加载更多 ↓</div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="nav-tab" onclick="location.href='index.html'"><span class="nav-tab-icon">🏠</span><span class="nav-tab-label">首页</span></div>
+  <div class="nav-tab" onclick="location.href='contest-list.html'"><span class="nav-tab-icon">🏆</span><span class="nav-tab-label">赛事</span></div>
+  <div class="nav-tab" onclick="location.href='course-list.html'"><span class="nav-tab-icon">📚</span><span class="nav-tab-label">课程</span></div>
+  <div class="nav-tab active"><span class="nav-tab-icon">📢</span><span class="nav-tab-label" style="color:var(--c-primary-600);">公告</span></div>
+  <div class="nav-tab" onclick="location.href='my.html'"><span class="nav-tab-icon">👤</span><span class="nav-tab-label">我的</span></div>
+</nav>
+
+<!-- 公告详情弹层 -->
+<div class="notice-detail-overlay" id="detailOverlay" onclick="closeDetail()">
+  <div class="notice-detail-sheet" onclick="event.stopPropagation()">
+    <div class="nd-handle"></div>
+    <div class="nd-close" onclick="closeDetail()">✕</div>
+    <div class="nd-header">
+      <div class="nd-title" id="detailTitle">公告标题</div>
+      <div class="nd-meta">
+        <span class="tag tag-accent" id="detailType" style="font-size:10px;">赛事通知</span>
+        <span class="nd-time" id="detailTime">2025-10-01</span>
+        <span class="nd-time" id="detailViews">👁 1,000</span>
+      </div>
+    </div>
+    <div class="nd-body" id="detailBody">
+      <p>公告内容加载中...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const noticeData = [
+  { title:'安徒生(国际)艺术奖报名通知及注意事项', type:'赛事通知', typeClass:'tag-accent', time:'今天 09:00', views:'👁 3,421',
+    body:`<p>2025年全国中学生数学联赛报名工作现已正式开启，请各参赛学生仔细阅读以下报名须知。</p><h4>报名时间</h4><p>2025年9月1日至2025年10月15日，逾期不予补报。</p><h4>报名注意事项</h4><ul><li>报名时请如实填写个人信息，信息错误将影响成绩查询和证书发放</li><li>缴费完成后方可确认报名，报名截止日期与缴费截止日期相同</li><li>每位学生仅可报名参加一次，不可重复报名</li><li>报名成功后请注意保存报名编号，用于后续成绩查询</li></ul><h4>费用说明</h4><p>报名费每人80元，支持微信支付。已绑定老师/机构的学生，由老师/机构统一完成支付（支持对公转账）。</p>` },
+  { title:'"鸟巢杯"文化艺术活动参赛规程及评审说明', type:'赛事通知', typeClass:'tag-accent', time:'今天 10:30', views:'👁 1,203',
+    body:`<p>根据组织委员会最新决定，本届大赛评审规则作出以下调整，请各参赛学生知悉。</p><h4>主要调整内容</h4><ul><li>初赛阶段增加在线朗读测试环节，评分权重由原40%调整为50%</li><li>即兴演讲时间由3分钟调整为5分钟</li><li>评委人数由3人增加为5人</li></ul><p>调整后的完整评审规则请在赛事详情页中查看。如有疑问请联系客服。</p>` },
+  { title:'【成绩发布】2024年全国中学生数学联赛成绩已公布', type:'成绩发布', typeClass:'tag-success', time:'昨天 16:00', views:'👁 8,891',
+    body:`<p>2024年全国中学生数学联赛成绩已正式发布，请参赛学生登录竞赛通平台，在个人中心→我的成绩中查看。</p><h4>成绩查询方式</h4><ul><li>方式一：登录账号后在"个人中心→我的成绩"直接查看</li><li>方式二：在首页"成绩查询"入口，输入手机号+证件号查询</li></ul><h4>证书发放</h4><p>获奖证书将于成绩公布后3个工作日内在平台发放，届时将推送消息通知。证书支持JPG/PNG和PDF两种格式下载。</p>` },
+];
+
+function openDetail(idx) {
+  // 第一条置顶公告跳转独立详情页，其余用内嵌 Sheet
+  if (idx === 0) { location.href = 'notice-detail.html'; return; }
+  const d = noticeData[idx] || noticeData[0];
+  document.getElementById('detailTitle').textContent = d.title;
+  document.getElementById('detailType').textContent = d.type;
+  document.getElementById('detailType').className = 'tag ' + d.typeClass;
+  document.getElementById('detailTime').textContent = d.time;
+  document.getElementById('detailViews').textContent = d.views;
+  document.getElementById('detailBody').innerHTML = d.body;
+  document.getElementById('detailOverlay').classList.add('show');
+}
+function closeDetail() { document.getElementById('detailOverlay').classList.remove('show'); }
+function switchTab(el) {
+  document.querySelectorAll('.notice-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
+}
+</script>
+</body>
+</html>

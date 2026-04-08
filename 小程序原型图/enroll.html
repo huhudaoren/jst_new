@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>赛事报名 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+/* ===== 报名流程页专属样式 ===== */
+
+body { background: var(--c-gray-50); padding-bottom: 0 !important; }
+
+/* 顶部导航 */
+.enroll-header {
+  height: 56px; background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: center;
+  padding: 0 var(--space-4);
+  position: sticky; top: 44px; z-index: 40;
+  box-shadow: var(--shadow-xs);
+}
+.enroll-back {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm); background: var(--c-gray-50);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; margin-right: 12px;
+  flex-shrink: 0; touch-action: manipulation;
+}
+.enroll-back:active { background: var(--c-gray-100); }
+.enroll-header-title {
+  font-size: 17px; font-weight: 700; color: var(--c-gray-900); flex: 1;
+}
+
+/* 步骤条 */
+.step-wrap {
+  background: var(--c-white);
+  padding: 16px var(--space-4);
+  border-bottom: 1px solid var(--c-gray-100);
+}
+
+/* 赛事概览条 */
+.contest-summary {
+  background: var(--c-primary-50);
+  border: 1px solid var(--c-primary-200);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+  margin: 14px var(--space-4) 0;
+}
+.cs-icon {
+  width: 40px; height: 40px; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-600) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.cs-info { flex: 1; min-width: 0; }
+.cs-name {
+  font-size: 14px; font-weight: 700; color: var(--c-primary-600);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cs-meta { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.cs-price {
+  font-size: 18px; font-weight: 900; color: var(--c-accent);
+  flex-shrink: 0;
+}
+
+/* 历史信息复用提示 */
+.history-tip {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--c-gold-50);
+  border: 1px solid rgba(245,166,35,0.25);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin: 12px var(--space-4) 0;
+}
+.history-tip-text { font-size: 13px; color: #7A5200; font-weight: 500; }
+.history-tip-btn {
+  font-size: 12px; font-weight: 700; color: var(--c-gold);
+  cursor: pointer; touch-action: manipulation;
+  flex-shrink: 0; margin-left: 8px;
+}
+
+/* 表单区域 */
+.form-section {
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  margin: 12px var(--space-4) 0;
+  padding: 0 16px;
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+.form-section-title {
+  font-size: 14px; font-weight: 700; color: var(--c-gray-900);
+  padding: 16px 0 12px;
+  border-bottom: 1px solid var(--c-gray-100);
+  margin-bottom: 4px;
+  display: flex; align-items: center; gap: 6px;
+}
+.form-section-title::before {
+  content: '';
+  display: inline-block; width: 3px; height: 14px;
+  background: var(--c-primary-600); border-radius: 2px;
+}
+.form-section .form-group:last-child { margin-bottom: 16px; }
+
+/* 照片上传区 */
+.photo-upload-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+.photo-slot {
+  width: 80px; height: 80px;
+  border: 2px dashed var(--c-gray-100);
+  border-radius: var(--radius-md);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  cursor: pointer; background: var(--c-gray-50);
+  touch-action: manipulation;
+  transition: all var(--duration-fast) ease;
+}
+.photo-slot:active { border-color: var(--c-primary-400); background: var(--c-primary-50); }
+.photo-slot.filled {
+  border-style: solid; border-color: var(--c-primary-200);
+  background: var(--c-primary-50);
+}
+.photo-slot-icon { font-size: 24px; }
+.photo-slot-label { font-size: 10px; color: var(--c-gray-500); margin-top: 4px; text-align: center; }
+
+/* 协议勾选 */
+.agreement-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 16px var(--space-4);
+}
+.agreement-box {
+  width: 20px; height: 20px; border-radius: 5px;
+  border: 2px solid var(--c-gray-300);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; cursor: pointer;
+  transition: all var(--duration-fast) ease;
+  margin-top: 1px;
+  touch-action: manipulation;
+}
+.agreement-box.checked {
+  background: var(--c-primary-600); border-color: var(--c-primary-600);
+}
+.agreement-box.checked::after { content: '✓'; font-size: 12px; color: white; font-weight: 700; }
+.agreement-text { font-size: 13px; color: var(--c-gray-700); line-height: 1.6; }
+.agreement-link { color: var(--c-primary-600); font-weight: 600; }
+
+/* ====== STEP 2: 确认订单 ====== */
+.order-confirm {
+  display: none;
+  padding: 0 var(--space-4);
+}
+
+/* 订单信息卡 */
+.order-card {
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden; margin-top: 12px;
+}
+.order-card-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--c-gray-100);
+  font-size: 15px; font-weight: 700; color: var(--c-gray-900);
+  display: flex; align-items: center; gap: 6px;
+}
+.order-card-header::before {
+  content: ''; display: inline-block; width: 3px; height: 14px;
+  background: var(--c-primary-600); border-radius: 2px;
+}
+.order-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 16px; border-bottom: 1px solid var(--c-gray-100);
+  font-size: 13px;
+}
+.order-row:last-child { border-bottom: none; }
+.order-row-key { color: var(--c-gray-500); }
+.order-row-val { color: var(--c-gray-900); font-weight: 500; }
+.order-row-val.price { color: var(--c-accent); font-size: 16px; font-weight: 800; }
+
+/* 支付方式选择 */
+.pay-method-group { padding: 0 var(--space-4); margin-top: 12px; }
+.pay-method-title {
+  font-size: 15px; font-weight: 700; color: var(--c-gray-900);
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.pay-method-title::before {
+  content: ''; display: inline-block; width: 3px; height: 14px;
+  background: var(--c-primary-600); border-radius: 2px;
+}
+.pay-option {
+  display: flex; align-items: center;
+  padding: 14px 16px;
+  background: var(--c-white);
+  border: 1.5px solid var(--c-gray-100);
+  border-radius: var(--radius-md);
+  cursor: pointer; margin-bottom: 8px;
+  transition: all var(--duration-fast) ease;
+  touch-action: manipulation;
+}
+.pay-option:active { background: var(--c-gray-50); }
+.pay-option.selected {
+  border-color: var(--c-primary-400);
+  background: var(--c-primary-50);
+}
+.pay-option-icon { font-size: 24px; margin-right: 12px; flex-shrink: 0; }
+.pay-option-info { flex: 1; }
+.pay-option-name { font-size: 15px; font-weight: 600; color: var(--c-gray-900); }
+.pay-option-desc { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.pay-radio {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--c-gray-300);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: border-color var(--duration-fast);
+}
+.pay-option.selected .pay-radio {
+  border-color: var(--c-primary-400);
+}
+.pay-option.selected .pay-radio::after {
+  content: ''; width: 10px; height: 10px;
+  border-radius: 50%; background: var(--c-primary-400);
+}
+
+/* 对公转账凭证上传区 */
+.transfer-upload {
+  display: none;
+  background: var(--c-white); border-radius: var(--radius-md);
+  padding: 14px 16px;
+  border: 1.5px solid var(--c-primary-200);
+  margin: 8px 0;
+}
+.transfer-upload.show { display: block; }
+.transfer-info {
+  background: var(--c-primary-50); border-radius: var(--radius-sm);
+  padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: var(--c-primary-600); line-height: 1.6;
+}
+.transfer-info strong { display: block; font-size: 13px; margin-bottom: 4px; }
+
+/* ====== STEP 3: 完成 ====== */
+.enroll-success {
+  display: none;
+  padding: 40px var(--space-4) 20px;
+  text-align: center;
+}
+.success-icon {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, var(--c-success) 0%, #52D68A 100%);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+  margin: 0 auto 20px;
+  box-shadow: 0 8px 24px rgba(39,174,96,0.3);
+  animation: pop-in 0.4s var(--ease-spring);
+}
+@keyframes pop-in {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.success-title { font-size: 22px; font-weight: 800; color: var(--c-gray-900); margin-bottom: 8px; }
+.success-subtitle { font-size: 14px; color: var(--c-gray-500); line-height: 1.6; margin-bottom: 28px; }
+
+/* 订单详情卡 */
+.success-detail-card {
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+  text-align: left; margin-bottom: 16px;
+}
+.sdc-row {
+  display: flex; justify-content: space-between;
+  padding: 8px 0; font-size: 13px;
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.sdc-row:last-child { border-bottom: none; }
+.sdc-key { color: var(--c-gray-500); }
+.sdc-val { color: var(--c-gray-900); font-weight: 600; }
+
+/* 下一步提示 */
+.next-steps {
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  padding: 16px;
+  text-align: left; margin-bottom: 16px;
+}
+.ns-title {
+  font-size: 14px; font-weight: 700; color: var(--c-gray-900);
+  margin-bottom: 12px;
+}
+.ns-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 10px;
+}
+.ns-item:last-child { margin-bottom: 0; }
+.ns-num {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--c-primary-600); color: white;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  margin-top: 1px;
+}
+.ns-text { font-size: 13px; color: var(--c-gray-700); line-height: 1.5; }
+
+/* 底部按钮区域 */
+.enroll-footer {
+  position: sticky; bottom: 0;
+  background: rgba(255,255,255,0.97);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--c-gray-100);
+  padding: 12px var(--space-4);
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  padding-bottom: calc(12px + constant(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(12,61,107,0.08);
+}
+
+/* 步骤页面切换 */
+.step-page { display: none; }
+.step-page.active { display: block; }
+
+/* 必填星号提示 */
+.required-hint {
+  font-size: 12px; color: var(--c-gray-500);
+  padding: 8px var(--space-4) 0;
+  display: flex; align-items: center; gap: 4px;
+}
+.required-hint::before { content: '*'; color: var(--c-accent); }
+</style>
+</head>
+<body>
+
+<!-- 状态栏 -->
+<div class="status-bar" style="background: var(--c-primary);">
+  <span class="time">9:41</span>
+  <span class="icons">📶 🔋</span>
+</div>
+
+<!-- ===== 顶部导航 ===== -->
+<div class="enroll-header">
+  <div class="enroll-back" id="backBtn" onclick="goBack()">←</div>
+  <div class="enroll-header-title" id="pageTitle">填写报名信息</div>
+</div>
+
+<!-- ===== 步骤条 ===== -->
+<div class="step-wrap animate-in">
+  <div class="step-bar">
+    <div class="step-item active" id="step1">
+      <div class="step-circle">1</div>
+      <div class="step-label">填写信息</div>
+    </div>
+    <div class="step-item" id="step2">
+      <div class="step-circle">2</div>
+      <div class="step-label">确认支付</div>
+    </div>
+    <div class="step-item" id="step3">
+      <div class="step-circle">3</div>
+      <div class="step-label">报名完成</div>
+    </div>
+  </div>
+</div>
+
+<!-- 赛事概览 -->
+<div class="contest-summary animate-in animate-in-d1">
+  <div class="cs-icon">🔢</div>
+  <div class="cs-info">
+    <div class="cs-name">安徒生(国际)艺术奖</div>
+    <div class="cs-meta">小学高年级组 · 线上 · 2025-10-19</div>
+  </div>
+  <div class="cs-price">¥80</div>
+</div>
+
+<!-- ============================================================
+     STEP 1: 填写信息
+     ============================================================ -->
+<div class="step-page active" id="page1">
+
+  <!-- 历史信息复用提示 -->
+  <div class="history-tip animate-in animate-in-d1">
+    <div class="history-tip-text">💡 检测到您有历史报名记录，可一键填充</div>
+    <div class="history-tip-btn" onclick="fillHistory()">一键填充</div>
+  </div>
+
+  <div class="required-hint animate-in animate-in-d1">带 * 为必填项</div>
+
+  <!-- 基本信息 -->
+  <div class="form-section animate-in animate-in-d2">
+    <div class="form-section-title">基本信息</div>
+
+    <div class="form-group">
+      <label class="form-label">真实姓名 <span class="required">*</span></label>
+      <input class="form-input" id="field-name" type="text" placeholder="请输入参赛者真实姓名">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">身份证号 <span class="required">*</span></label>
+      <input class="form-input" id="field-idcard" type="text" placeholder="请输入18位身份证号" maxlength="18">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">手机号 <span class="required">*</span></label>
+      <input class="form-input" id="field-phone" type="tel" placeholder="用于接收赛事通知" maxlength="11">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">性别 <span class="required">*</span></label>
+      <div class="radio-group" id="gender-group">
+        <div class="radio-item selected" onclick="selectRadio('gender-group', this)">
+          <div class="radio-dot"></div>
+          <div><div class="radio-label">男</div></div>
+        </div>
+        <div class="radio-item" onclick="selectRadio('gender-group', this)">
+          <div class="radio-dot"></div>
+          <div><div class="radio-label">女</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 学校信息 -->
+  <div class="form-section animate-in animate-in-d2">
+    <div class="form-section-title">学校信息</div>
+
+    <div class="form-group">
+      <label class="form-label">就读学校 <span class="required">*</span></label>
+      <input class="form-input" id="field-school" type="text" placeholder="请输入完整学校名称">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">所在年级 <span class="required">*</span></label>
+      <div class="form-select-wrap">
+        <select class="form-select" id="field-grade">
+          <option value="">请选择年级</option>
+          <option>高中一年级</option>
+          <option>高中二年级</option>
+          <option>高中三年级</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">所在省市 <span class="required">*</span></label>
+      <div style="display:flex;gap:8px;">
+        <div class="form-select-wrap" style="flex:1;">
+          <select class="form-select" id="field-province">
+            <option value="">选择省份</option>
+            <option>广东省</option>
+            <option>北京市</option>
+            <option>上海市</option>
+            <option>江苏省</option>
+            <option>浙江省</option>
+            <option>四川省</option>
+          </select>
+        </div>
+        <div class="form-select-wrap" style="flex:1;">
+          <select class="form-select" id="field-city">
+            <option value="">选择城市</option>
+            <option>广州市</option>
+            <option>深圳市</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 参赛类别 -->
+  <div class="form-section animate-in animate-in-d3">
+    <div class="form-section-title">参赛类别</div>
+
+    <div class="form-group">
+      <label class="form-label">参赛类别 <span class="required">*</span></label>
+      <div class="radio-group" id="group-select">
+        <div class="radio-item selected" onclick="selectRadio('group-select', this)">
+          <div class="radio-dot"></div>
+          <div>
+            <div class="radio-label">小学高年级组（统一组别）</div>
+            <div class="radio-desc">高一、高二、高三学生均可参加</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 资料上传 -->
+  <div class="form-section animate-in animate-in-d3">
+    <div class="form-section-title">上传资料</div>
+
+    <div class="form-group">
+      <label class="form-label">本人照片 <span class="required">*</span></label>
+      <div class="photo-upload-grid">
+        <div class="photo-slot" onclick="simulateUpload(this, '📷')">
+          <div class="photo-slot-icon">📷</div>
+          <div class="photo-slot-label">点击上传<br>本人照片</div>
+        </div>
+      </div>
+      <div class="form-hint">JPG / PNG 格式，2MB 以内，正面免冠照</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">身份证照片 <span class="optional">选填</span></label>
+      <div class="photo-upload-grid">
+        <div class="photo-slot" onclick="simulateUpload(this, '🪪')">
+          <div class="photo-slot-icon">📋</div>
+          <div class="photo-slot-label">正面</div>
+        </div>
+        <div class="photo-slot" onclick="simulateUpload(this, '🪪')">
+          <div class="photo-slot-icon">📋</div>
+          <div class="photo-slot-label">反面</div>
+        </div>
+      </div>
+      <div class="form-hint">用于身份核验，平台加密存储</div>
+    </div>
+  </div>
+
+  <!-- 备注 -->
+  <div class="form-section animate-in animate-in-d3" style="margin-bottom:0;">
+    <div class="form-section-title">补充信息</div>
+    <div class="form-group">
+      <label class="form-label">备注 <span class="optional">选填</span></label>
+      <textarea class="form-textarea" placeholder="如有特殊情况或补充说明，请在此填写（最多200字）" maxlength="200"></textarea>
+      <div class="form-hint" id="textarea-counter">0 / 200 字</div>
+    </div>
+  </div>
+
+  <!-- 协议勾选 -->
+  <div class="agreement-row animate-in animate-in-d4">
+    <div class="agreement-box checked" id="agreement" onclick="toggleAgreement()"></div>
+    <div class="agreement-text">
+      我已阅读并同意
+      <span class="agreement-link">《竞赛报名协议》</span>
+      和
+      <span class="agreement-link">《个人信息保护说明》</span>
+      ，确认填写信息真实有效。
+    </div>
+  </div>
+
+  <!-- 底部按钮 -->
+  <div class="enroll-footer animate-in animate-in-d4">
+    <button class="btn btn-primary btn-lg btn-block" onclick="goStep2()">
+      下一步：确认订单
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     STEP 2: 确认支付
+     ============================================================ -->
+<div class="step-page" id="page2">
+
+  <div class="order-confirm" style="display:block;">
+
+    <!-- 报名信息确认 -->
+    <div class="order-card animate-in animate-in-d1">
+      <div class="order-card-header">报名人信息</div>
+      <div class="order-row">
+        <div class="order-row-key">姓名</div>
+        <div class="order-row-val" id="confirm-name">—</div>
+      </div>
+      <div class="order-row">
+        <div class="order-row-key">身份证号</div>
+        <div class="order-row-val" id="confirm-idcard">—</div>
+      </div>
+      <div class="order-row">
+        <div class="order-row-key">手机号</div>
+        <div class="order-row-val" id="confirm-phone">—</div>
+      </div>
+      <div class="order-row">
+        <div class="order-row-key">学校</div>
+        <div class="order-row-val" id="confirm-school">—</div>
+      </div>
+      <div class="order-row">
+        <div class="order-row-key">年级</div>
+        <div class="order-row-val" id="confirm-grade">—</div>
+      </div>
+    </div>
+
+    <!-- 费用明细 -->
+    <div class="order-card animate-in animate-in-d1" style="margin-top:10px;">
+      <div class="order-card-header">费用明细</div>
+      <div class="order-row">
+        <div class="order-row-key">报名费</div>
+        <div class="order-row-val">¥80.00</div>
+      </div>
+      <div class="order-row">
+        <div class="order-row-key">平台服务费</div>
+        <div class="order-row-val">¥0.00</div>
+      </div>
+      <!-- V4.0 优惠券抵扣行 -->
+      <div class="order-row" id="couponRow" style="display:none;">
+        <div class="order-row-key">优惠券</div>
+        <div class="order-row-val" style="color:var(--c-success);" id="couponDiscount">-¥0.00</div>
+      </div>
+      <!-- V4.0 积分抵扣行 -->
+      <div class="order-row" id="pointsRow" style="display:none;">
+        <div class="order-row-key">积分抵扣</div>
+        <div class="order-row-val" style="color:var(--c-success);" id="pointsDiscount">-¥0.00</div>
+      </div>
+      <div class="order-row" style="padding-top:14px;padding-bottom:14px;">
+        <div class="order-row-key" style="font-weight:700;color:var(--c-gray-900);font-size:14px;">实付金额</div>
+        <div class="order-row-val price" id="finalPrice">¥80.00</div>
+      </div>
+    </div>
+
+    <!-- V4.0 优惠券选择区块 -->
+    <div class="pay-method-group animate-in animate-in-d2" style="margin-top:14px;">
+      <div class="pay-method-title">优惠与抵扣</div>
+
+      <!-- 优惠券 -->
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--c-gray-100);cursor:pointer;" onclick="openCouponSelect()">
+        <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:#FEF9EC;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🎟️</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;color:var(--c-gray-900);">优惠券</div>
+          <div style="font-size:12px;color:var(--c-gray-500);margin-top:1px;" id="couponHint">3 张可用，点击选择</div>
+        </div>
+        <div style="font-size:14px;color:var(--c-gray-300);" id="couponArrow">›</div>
+      </div>
+
+      <!-- 积分抵扣 -->
+      <div style="padding:14px 0;border-bottom:1px solid var(--c-gray-100);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:#F3E8FF;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">💎</div>
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:var(--c-gray-900);">积分抵扣</div>
+            <div style="font-size:12px;color:var(--c-gray-500);margin-top:1px;">可用 <strong style="color:#7C3AED;">2,480</strong> 积分（约 ¥24.80）· 100积分=1元</div>
+          </div>
+          <label style="position:relative;display:inline-flex;width:46px;height:26px;flex-shrink:0;cursor:pointer;">
+            <input type="checkbox" id="pointsToggle" onchange="togglePoints(this.checked)" style="opacity:0;width:0;height:0;position:absolute;">
+            <span id="pointsSlider" style="position:absolute;inset:0;border-radius:999px;background:var(--c-gray-100);transition:.2s;"></span>
+            <span id="pointsThumb" style="position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:white;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:.2s;"></span>
+          </label>
+        </div>
+        <div id="pointsDetail" style="display:none;margin-top:10px;padding:10px 12px;background:#F3E8FF;border-radius:var(--radius-sm);">
+          <div style="font-size:13px;color:#7C3AED;font-weight:600;">使用全部积分抵扣</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
+            <div style="font-size:12px;color:var(--c-gray-700);">抵扣积分：<strong id="usePointsNum">2,480</strong> 积分</div>
+            <div style="font-size:12px;color:var(--c-success);">节省 <strong id="usePointsAmt">¥24.80</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 零元报名提示 -->
+      <div id="zeroOrderNotice" style="display:none;margin-top:10px;">
+        <div class="notice notice-success">
+          <span class="notice-icon">🎉</span>
+          <div>使用优惠后应付金额为 <strong>¥0.00</strong>，将自动创建零元订单并进入审核流程，无需支付。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 支付方式 -->
+    <div class="pay-method-group animate-in animate-in-d2" style="margin-top:14px;" id="payMethodGroup">
+      <div class="pay-method-title">选择支付方式</div>
+
+      <div class="pay-option selected" id="pay-wechat" onclick="selectPay('wechat')">
+        <div class="pay-option-icon">💚</div>
+        <div class="pay-option-info">
+          <div class="pay-option-name">微信支付</div>
+          <div class="pay-option-desc">使用微信钱包或绑定银行卡支付</div>
+        </div>
+        <div class="pay-radio"></div>
+      </div>
+
+      <div class="pay-option" id="pay-transfer" onclick="selectPay('transfer')">
+        <div class="pay-option-icon">🏦</div>
+        <div class="pay-option-info">
+          <div class="pay-option-name">对公转账</div>
+          <div class="pay-option-desc">适用于机构/老师统一支付（含凭证上传）</div>
+        </div>
+        <div class="pay-radio"></div>
+      </div>
+
+      <!-- 对公转账详情（展开） -->
+      <div class="transfer-upload" id="transfer-detail">
+        <div class="transfer-info">
+          <strong>📋 对公转账汇款信息</strong>
+          开户行：招商银行广州天河支行<br>
+          账户名：广州竞赛通教育科技有限公司<br>
+          账号：8888 8888 8888 8888<br>
+          转账备注：<strong>报名编号 + 参赛者姓名</strong>（示例：20251001张三）
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">上传转账凭证 <span class="required">*</span></label>
+          <div class="upload-area" onclick="simulateUpload(this, '🧾')">
+            <div class="upload-area-icon">🧾</div>
+            <div class="upload-area-text">点击上传转账截图</div>
+            <div class="upload-area-hint">支持 JPG / PNG / PDF，10MB 以内</div>
+          </div>
+          <div class="form-hint">凭证提交后，财务人员将在1个工作日内审核到账状态</div>
+        </div>
+      </div>
+
+      <!-- 订单有效期提示 -->
+      <div class="notice notice-warning" style="margin-top:10px;">
+        <span class="notice-icon">⏱️</span>
+        <div>订单有效期 <strong>24小时</strong>，请在有效期内完成支付，超时订单自动关闭。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部支付按钮 -->
+  <div class="enroll-footer">
+    <div style="flex:1;">
+      <div style="font-size:11px;color:var(--c-gray-500);">实付金额</div>
+      <div style="font-size:22px;font-weight:900;color:var(--c-accent);line-height:1;" id="footerPrice">¥80.00</div>
+    </div>
+    <button class="btn btn-primary btn-lg" style="min-width:130px;" id="payBtn" onclick="goStep3()">
+      立即支付
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     STEP 3: 报名完成
+     ============================================================ -->
+<div class="step-page" id="page3">
+  <div class="enroll-success" style="display:block;">
+
+    <div class="success-icon">✓</div>
+    <div class="success-title">报名成功！</div>
+    <div class="success-subtitle">
+      您已成功报名<br>
+      <strong style="color:var(--c-gray-900);">安徒生(国际)艺术奖</strong><br>
+      赛事通知将通过短信和平台消息发送
+    </div>
+
+    <div class="success-detail-card">
+      <div class="sdc-row">
+        <div class="sdc-key">报名编号</div>
+        <div class="sdc-val" style="color:var(--c-primary-600);">#20251101-2588</div>
+      </div>
+      <div class="sdc-row">
+        <div class="sdc-key">参赛者</div>
+        <div class="sdc-val" id="success-name">—</div>
+      </div>
+      <div class="sdc-row">
+        <div class="sdc-key">赛事名称</div>
+        <div class="sdc-val">安徒生(国际)艺术奖</div>
+      </div>
+      <div class="sdc-row">
+        <div class="sdc-key">参赛类别</div>
+        <div class="sdc-val">小学高年级组</div>
+      </div>
+      <div class="sdc-row">
+        <div class="sdc-key">比赛时间</div>
+        <div class="sdc-val">2025年10月19日 09:00</div>
+      </div>
+      <div class="sdc-row">
+        <div class="sdc-key">支付状态</div>
+        <div class="sdc-val" style="color:var(--c-success);">✓ 支付成功 ¥80.00</div>
+      </div>
+      <div class="sdc-row">
+        <div class="sdc-key">审核状态</div>
+        <div class="sdc-val"><span class="tag tag-warning tag-dot">审核中</span></div>
+      </div>
+    </div>
+
+    <div class="next-steps">
+      <div class="ns-title">接下来需要做什么？</div>
+      <div class="ns-item">
+        <div class="ns-num">1</div>
+        <div class="ns-text">等待平台审核（1-3 个工作日），审核通过后收到通知</div>
+      </div>
+      <div class="ns-item">
+        <div class="ns-num">2</div>
+        <div class="ns-text">10月16日起，在「我的报名」中下载准考证</div>
+      </div>
+      <div class="ns-item">
+        <div class="ns-num">3</div>
+        <div class="ns-text">10月19日 09:00 准时参加线上考试</div>
+      </div>
+      <div class="ns-item">
+        <div class="ns-num">4</div>
+        <div class="ns-text">11月中旬成绩发布后，在「我的证书」下载获奖证书</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:32px;">
+      <button class="btn btn-primary btn-lg btn-block" onclick="location.href='my.html'">
+        查看我的报名
+      </button>
+      <button class="btn btn-ghost btn-md btn-block" onclick="location.href='index.html'">
+        返回首页
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentStep = 1;
+let payMethod = 'wechat';
+
+// 步骤跳转
+function setStep(n) {
+  currentStep = n;
+  // 更新步骤条
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('step' + i);
+    el.classList.remove('done', 'active');
+    if (i < n) el.classList.add('done');
+    if (i === n) el.classList.add('active');
+    // 更新 circle 内容
+    const circle = el.querySelector('.step-circle');
+    circle.textContent = i < n ? '✓' : i;
+  });
+  // 显示对应页面
+  [1,2,3].forEach(i => {
+    document.getElementById('page' + i).classList.toggle('active', i === n);
+  });
+  // 更新标题
+  const titles = ['', '填写报名信息', '确认订单 & 支付', '报名完成'];
+  document.getElementById('pageTitle').textContent = titles[n];
+  window.scrollTo(0, 0);
+}
+
+function goStep2() {
+  // 简单校验
+  const name = document.getElementById('field-name').value.trim();
+  const idcard = document.getElementById('field-idcard').value.trim();
+  const phone = document.getElementById('field-phone').value.trim();
+  if (!name) { alert('请填写真实姓名'); return; }
+  if (!idcard || idcard.length !== 18) { alert('请填写正确的18位身份证号'); return; }
+  if (!phone || phone.length !== 11) { alert('请填写正确的手机号'); return; }
+  const agreement = document.getElementById('agreement');
+  if (!agreement.classList.contains('checked')) { alert('请先同意报名协议'); return; }
+
+  // 填充确认信息
+  document.getElementById('confirm-name').textContent = name;
+  document.getElementById('confirm-idcard').textContent = idcard.replace(/(\d{6})\d{8}(\d{4})/, '$1********$2');
+  document.getElementById('confirm-phone').textContent = phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
+  document.getElementById('confirm-school').textContent = document.getElementById('field-school').value || '未填写';
+  document.getElementById('confirm-grade').textContent = document.getElementById('field-grade').value || '未选择';
+  document.getElementById('success-name').textContent = name;
+
+  setStep(2);
+}
+
+function goStep3() {
+  if (payMethod === 'transfer') {
+    // 对公转账场景：跳转到等待审核状态
+    document.querySelector('.success-title').textContent = '转账凭证已提交！';
+    document.querySelector('.success-subtitle').innerHTML = '等待财务审核到账（约1个工作日）<br>审核通过后报名正式完成';
+    document.querySelector('[data-val="pay"]').textContent = '⏳ 待审核';
+  }
+  setStep(3);
+}
+
+function goBack() {
+  if (currentStep > 1 && currentStep < 3) { setStep(currentStep - 1); }
+  else { history.back(); }
+}
+
+/* ── V4.0 积分与优惠券抵扣逻辑 ── */
+const BASE_PRICE = 80.00;
+let couponDiscount = 0;
+let pointsDiscount = 0;
+
+function openCouponSelect() {
+  // 实际跳转 coupon-select.html?from=enroll&amount=80
+  showToast('正在打开优惠券选择页…');
+  // 模拟选中一张券
+  setTimeout(() => {
+    couponDiscount = 20;
+    document.getElementById('couponRow').style.display = 'flex';
+    document.getElementById('couponDiscount').textContent = '-¥20.00';
+    document.getElementById('couponHint').innerHTML = '<span style="color:var(--c-success);font-weight:700;">已选：满80减20</span>';
+    document.getElementById('couponArrow').innerHTML = '<span style="font-size:12px;color:var(--c-danger);cursor:pointer;" onclick="clearCoupon(event)">取消</span>';
+    recalc();
+  }, 400);
+}
+function clearCoupon(e) {
+  e.stopPropagation();
+  couponDiscount = 0;
+  document.getElementById('couponRow').style.display = 'none';
+  document.getElementById('couponHint').textContent = '3 张可用，点击选择';
+  document.getElementById('couponArrow').innerHTML = '›';
+  recalc();
+}
+function togglePoints(checked) {
+  const slider = document.getElementById('pointsSlider');
+  const thumb  = document.getElementById('pointsThumb');
+  slider.style.background = checked ? '#7C3AED' : 'var(--c-gray-100)';
+  thumb.style.transform   = checked ? 'translateX(20px)' : 'translateX(0)';
+  document.getElementById('pointsDetail').style.display = checked ? 'block' : 'none';
+  pointsDiscount = checked ? Math.min(24.80, Math.max(0, BASE_PRICE - couponDiscount)) : 0;
+  const useAmt = pointsDiscount;
+  document.getElementById('usePointsNum').textContent = Math.round(useAmt * 100).toLocaleString();
+  document.getElementById('usePointsAmt').textContent = '¥' + useAmt.toFixed(2);
+  recalc();
+}
+function recalc() {
+  const final = Math.max(0, BASE_PRICE - couponDiscount - pointsDiscount);
+  const fmt = v => '¥' + v.toFixed(2);
+  if (pointsDiscount > 0) {
+    document.getElementById('pointsRow').style.display = 'flex';
+    document.getElementById('pointsDiscount').textContent = '-' + fmt(pointsDiscount);
+  } else {
+    document.getElementById('pointsRow').style.display = 'none';
+  }
+  document.getElementById('finalPrice').textContent = fmt(final);
+  document.getElementById('footerPrice').textContent = fmt(final);
+  const isZero = final === 0;
+  document.getElementById('zeroOrderNotice').style.display = isZero ? 'block' : 'none';
+  document.getElementById('payMethodGroup').style.display  = isZero ? 'none'  : 'block';
+  document.getElementById('payBtn').textContent = isZero ? '免费报名' : '立即支付';
+}
+
+// 支付方式选择
+function selectPay(type) {
+  payMethod = type;
+  document.getElementById('pay-wechat').classList.toggle('selected', type === 'wechat');
+  document.getElementById('pay-transfer').classList.toggle('selected', type === 'transfer');
+  document.getElementById('transfer-detail').classList.toggle('show', type === 'transfer');
+  document.getElementById('payBtn').textContent = type === 'wechat' ? '立即支付' : '提交凭证';
+}
+
+// Radio 选择
+function selectRadio(groupId, el) {
+  document.querySelectorAll('#' + groupId + ' .radio-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// 协议勾选
+function toggleAgreement() {
+  document.getElementById('agreement').classList.toggle('checked');
+}
+
+// 模拟上传
+function simulateUpload(el, emoji) {
+  el.innerHTML = `<div style="font-size:28px;">${emoji}</div><div class="photo-slot-label" style="color:var(--c-success);font-size:10px;">上传成功</div>`;
+  el.classList.add('filled');
+}
+
+// 历史信息一键填充
+function fillHistory() {
+  document.getElementById('field-name').value = '张小明';
+  document.getElementById('field-idcard').value = '440106200802021234';
+  document.getElementById('field-phone').value = '13800138001';
+  document.getElementById('field-school').value = '广州市第二中学';
+  document.getElementById('field-grade').value = '高中二年级';
+  document.getElementById('field-province').value = '广东省';
+  showToast('✓ 历史信息已填充，请核对后继续');
+}
+
+// textarea 字数统计
+document.querySelector('.form-textarea').addEventListener('input', function() {
+  document.getElementById('textarea-counter').textContent = this.value.length + ' / 200 字';
+});
+
+// Toast
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// 初始化
+setStep(1);
+</script>
+</body>
+</html>

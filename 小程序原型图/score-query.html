@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>成绩查询 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+.page-header { height:56px;background:var(--c-primary);display:flex;align-items:center;padding:0 var(--space-4);position:sticky;top:44px;z-index:40; }
+.back-btn { width:36px;height:36px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;margin-right:12px;flex-shrink:0;touch-action:manipulation; }
+.back-btn:active { background:rgba(255,255,255,.25); }
+.header-title { font-size:17px;font-weight:700;color:white;flex:1; }
+
+/* Hero */
+.query-hero { background:linear-gradient(150deg,var(--c-primary) 0%,var(--c-primary-600) 60%,#2871C9 100%);padding:24px var(--space-4) 32px;position:relative;overflow:hidden; }
+.query-hero::before { content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,.07) 0%,transparent 50%); }
+.query-hero::after { content:'';position:absolute;bottom:-1px;left:0;right:0;height:20px;background:var(--c-gray-50);border-radius:20px 20px 0 0; }
+.hero-icon { font-size:40px;margin-bottom:10px;position:relative;z-index:1; }
+.hero-title { font-size:22px;font-weight:900;color:white;letter-spacing:-.3px;margin-bottom:4px;position:relative;z-index:1; }
+.hero-sub { font-size:13px;color:rgba(255,255,255,.7);position:relative;z-index:1;line-height:1.5; }
+
+/* 查询卡 */
+.query-card { background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);margin:0 var(--space-4);padding:20px;margin-top:-1px; }
+.query-method-tabs { display:flex;gap:0;background:var(--c-gray-50);border-radius:var(--radius-sm);padding:3px;margin-bottom:16px; }
+.qm-tab { flex:1;height:34px;border-radius:var(--radius-xs);font-size:13px;font-weight:500;color:var(--c-gray-500);display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;transition:all var(--duration-fast); }
+.qm-tab.active { background:var(--c-white);color:var(--c-primary-600);font-weight:700;box-shadow:var(--shadow-xs); }
+
+/* 结果区 */
+.result-wrap { margin:14px var(--space-4) 0; }
+.result-card { background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:10px; }
+.result-header { padding:16px;border-bottom:1px solid var(--c-gray-100);display:flex;align-items:center;gap:12px; }
+.result-thumb { width:48px;height:48px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0; }
+.result-info { flex:1;min-width:0; }
+.result-contest-name { font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:3px;line-height:1.3; }
+.result-meta { font-size:12px;color:var(--c-gray-500); }
+.result-body { padding:14px 16px; }
+.result-score-row { display:flex;align-items:center;justify-content:space-between;margin-bottom:10px; }
+.result-award { display:flex;align-items:center;gap:8px; }
+.award-icon { font-size:28px; }
+.award-text { font-size:18px;font-weight:800;color:var(--c-gold); }
+.result-score-num { text-align:right; }
+.score-big { font-size:28px;font-weight:900;color:var(--c-primary-600);line-height:1; }
+.score-total { font-size:13px;color:var(--c-gray-500);margin-top:2px; }
+.result-divider { height:1px;background:var(--c-gray-100);margin:10px 0; }
+.result-details { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.detail-cell { background:var(--c-gray-50);border-radius:var(--radius-sm);padding:10px 12px; }
+.detail-label { font-size:11px;color:var(--c-gray-500);margin-bottom:3px; }
+.detail-value { font-size:13px;font-weight:700;color:var(--c-gray-900); }
+.result-no-data { text-align:center;padding:48px 20px; }
+.result-no-icon { font-size:48px;opacity:.5;margin-bottom:12px; }
+.result-no-title { font-size:16px;font-weight:700;color:var(--c-gray-700);margin-bottom:6px; }
+.result-no-desc { font-size:13px;color:var(--c-gray-500); }
+/* tip */
+.query-tip { background:var(--c-primary-50);border:1px solid var(--c-primary-200);border-radius:var(--radius-md);padding:12px 14px;margin:12px var(--space-4) 0;font-size:12px;color:var(--c-primary-600);line-height:1.6; }
+.logged-in-tip { background:var(--c-success-50);border:1px solid rgba(39,174,96,.2);border-radius:var(--radius-md);padding:12px 14px;margin:10px var(--space-4) 0;display:flex;align-items:center;gap:10px;cursor:pointer;touch-action:manipulation; }
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:var(--c-primary);"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="page-header animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="header-title">成绩公开查询</div>
+</div>
+
+<div class="query-hero animate-in">
+  <div class="hero-icon">🎯</div>
+  <div class="hero-title">成绩查询</div>
+  <div class="hero-sub">无需登录，输入手机号/证件号/报名编号即可查询</div>
+</div>
+
+<div class="query-card animate-in animate-in-d1">
+  <div class="query-method-tabs">
+    <div class="qm-tab active" id="tab1" onclick="switchTab(1)">手机号</div>
+    <div class="qm-tab" id="tab2" onclick="switchTab(2)">证件号</div>
+    <div class="qm-tab" id="tab3" onclick="switchTab(3)">报名编号</div>
+  </div>
+
+  <div class="form-group" style="margin-bottom:12px;">
+    <label class="form-label" id="inputLabel">手机号 <span class="required">*</span></label>
+    <input class="form-input" id="queryInput" type="tel" placeholder="请输入手机号">
+  </div>
+
+  <div class="form-group" style="margin-bottom:16px;">
+    <label class="form-label">选择赛事 <span class="optional">选填，不填则查询全部</span></label>
+    <div class="form-select-wrap">
+      <select class="form-select" id="contestSelect">
+        <option value="">全部赛事</option>
+        <option>安徒生(国际)艺术奖</option>
+        <option>第十届全国中小学"鸟巢杯"文化艺术活动</option>
+        <option>全国初中生物学联赛预选赛</option>
+        <option>全国青少年音乐素养大赛</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn btn-primary btn-lg btn-block" onclick="doQuery()">查询成绩</button>
+</div>
+
+<div class="query-tip animate-in animate-in-d1">
+  💡 如需查看完整历史成绩、证书下载，请<span style="font-weight:700;cursor:pointer;" onclick="location.href='login.html'">登录账号</span>后在「我的成绩」中查看
+</div>
+
+<div class="logged-in-tip animate-in animate-in-d1" onclick="location.href='my-score.html'">
+  <span style="font-size:20px;">🔐</span>
+  <div style="flex:1;">
+    <div style="font-size:13px;font-weight:700;color:var(--c-success);">已登录？查看我的全部成绩 →</div>
+    <div style="font-size:11px;color:var(--c-gray-500);margin-top:2px;">包含所有历史赛事成绩、奖项等级、证书下载</div>
+  </div>
+</div>
+
+<!-- 查询结果区 -->
+<div class="result-wrap" id="resultWrap" style="display:none;">
+  <div style="font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:10px;" id="resultTitle">查询结果</div>
+
+  <!-- 有结果 -->
+  <div id="resultHasData">
+    <div class="result-card animate-in">
+      <div class="result-header">
+        <div class="result-thumb" style="background:linear-gradient(135deg,var(--c-primary),var(--c-primary-600));">🔢</div>
+        <div class="result-info">
+          <div class="result-contest-name">安徒生(国际)艺术奖</div>
+          <div class="result-meta">高中组 · 2025-10-19 · 线上</div>
+        </div>
+        <span class="tag tag-success tag-dot">已发布</span>
+      </div>
+      <div class="result-body">
+        <div class="result-score-row">
+          <div class="result-award">
+            <span class="award-icon">🥇</span>
+            <span class="award-text">一等奖</span>
+          </div>
+          <div class="result-score-num">
+            <div class="score-big">148</div>
+            <div class="score-total">满分 150 分</div>
+          </div>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-details">
+          <div class="detail-cell"><div class="detail-label">全国排名</div><div class="detail-value">第 312 名</div></div>
+          <div class="detail-cell"><div class="detail-label">参赛人数</div><div class="detail-value">18,432 人</div></div>
+          <div class="detail-cell"><div class="detail-label">超越比例</div><div class="detail-value">98.3%</div></div>
+          <div class="detail-cell"><div class="detail-label">发布时间</div><div class="detail-value">2025-11-15</div></div>
+        </div>
+        <div style="margin-top:12px;">
+          <button class="btn btn-outline btn-sm btn-block" onclick="location.href='login.html'">登录查看证书 →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-card animate-in animate-in-d1">
+      <div class="result-header">
+        <div class="result-thumb" style="background:linear-gradient(135deg,#E65100,#FFAB40);">🔬</div>
+        <div class="result-info">
+          <div class="result-contest-name">全国初中生物学联赛预选赛</div>
+          <div class="result-meta">初中组 · 2025-09-15 · 线上</div>
+        </div>
+        <span class="tag tag-success tag-dot">已发布</span>
+      </div>
+      <div class="result-body">
+        <div class="result-score-row">
+          <div class="result-award">
+            <span class="award-icon">🥇</span>
+            <span class="award-text">一等奖</span>
+          </div>
+          <div class="result-score-num">
+            <div class="score-big">96</div>
+            <div class="score-total">满分 100 分</div>
+          </div>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-details">
+          <div class="detail-cell"><div class="detail-label">全省排名</div><div class="detail-value">第 8 名</div></div>
+          <div class="detail-cell"><div class="detail-label">发布时间</div><div class="detail-value">2025-10-08</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 无结果 -->
+  <div id="resultNoData" style="display:none;" class="result-card">
+    <div class="result-no-data">
+      <div class="result-no-icon">🔍</div>
+      <div class="result-no-title">未找到相关成绩</div>
+      <div class="result-no-desc">请确认手机号/证件号正确，或该赛事成绩尚未发布</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 热门赛事快速查询 -->
+<div style="background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;overflow:hidden;" class="animate-in animate-in-d2">
+  <div style="padding:14px 16px 10px;font-size:13px;font-weight:700;color:var(--c-gray-500);letter-spacing:.4px;border-bottom:1px solid var(--c-gray-100);">快速选择热门赛事</div>
+  <div style="display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--c-gray-100);cursor:pointer;touch-action:manipulation;" onclick="document.getElementById('contestSelect').value='安徒生(国际)艺术奖';showToast('已选择：安徒生(国际)艺术奖')">
+      <div style="width:34px;height:34px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--c-primary),var(--c-primary-600));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🔢</div>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--c-gray-900);">安徒生(国际)艺术奖</div><div style="font-size:11px;color:var(--c-gray-500);margin-top:2px;">成绩已发布 · 点击选中</div></div>
+      <span class="tag tag-success" style="font-size:10px;flex-shrink:0;">已发布</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--c-gray-100);cursor:pointer;touch-action:manipulation;" onclick="document.getElementById('contestSelect').value='第十届全国中小学"鸟巢杯"文化艺术活动';showToast('已选择：第十届全国中小学"鸟巢杯"文化艺术活动')">
+      <div style="width:34px;height:34px;border-radius:var(--radius-sm);background:linear-gradient(135deg,#880E4F,#F06292);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🎤</div>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--c-gray-900);">第十届全国中小学"鸟巢杯"文化艺术活动</div><div style="font-size:11px;color:var(--c-gray-500);margin-top:2px;">成绩已发布 · 点击选中</div></div>
+      <span class="tag tag-success" style="font-size:10px;flex-shrink:0;">已发布</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;touch-action:manipulation;" onclick="showToast('该赛事成绩尚未发布')">
+      <div style="width:34px;height:34px;border-radius:var(--radius-sm);background:linear-gradient(135deg,#4527A0,#7E57C2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">💻</div>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--c-gray-900);">全国青少年音乐素养大赛</div><div style="font-size:11px;color:var(--c-gray-500);margin-top:2px;">成绩暂未发布</div></div>
+      <span class="tag tag-warning" style="font-size:10px;flex-shrink:0;">待公布</span>
+    </div>
+  </div>
+</div>
+
+<div style="height:32px;"></div>
+<script>
+let currentTab = 1;
+function switchTab(n) {
+  currentTab = n;
+  [1,2,3].forEach(i => document.getElementById('tab'+i).classList.toggle('active', i===n));
+  const labels = ['手机号','证件号（身份证/学生证）','报名编号'];
+  const types  = ['tel','text','text'];
+  const placeholders = ['请输入注册手机号','请输入18位身份证号或学生证号','格式：#20251001-8831'];
+  const inp = document.getElementById('queryInput');
+  document.getElementById('inputLabel').innerHTML = labels[n-1] + ' <span class="required">*</span>';
+  inp.type = types[n-1]; inp.placeholder = placeholders[n-1]; inp.value = '';
+}
+let queried = false;
+function doQuery() {
+  const val = document.getElementById('queryInput').value.trim();
+  if(!val) { showToast('请输入查询内容'); return; }
+  // 模拟查询
+  showToast('🔍 查询中...');
+  setTimeout(() => {
+    document.getElementById('resultWrap').style.display = 'block';
+    const isFound = val.length >= 6; // 演示：长度>=6 视为有结果
+    document.getElementById('resultHasData').style.display = isFound ? 'block' : 'none';
+    document.getElementById('resultNoData').style.display  = isFound ? 'none'  : 'block';
+    const name = document.getElementById('contestSelect').value || '全部赛事';
+    document.getElementById('resultTitle').textContent = `查询结果（${name}）`;
+    document.getElementById('resultWrap').scrollIntoView({behavior:'smooth',block:'start'});
+  }, 800);
+}
+function showToast(msg) {
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2000);
+}
+</script>
+</body>
+</html>

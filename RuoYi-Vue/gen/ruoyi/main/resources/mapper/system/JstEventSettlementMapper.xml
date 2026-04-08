@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstEventSettlementMapper">
+    
+    <resultMap type="JstEventSettlement" id="JstEventSettlementResult">
+        <result property="eventSettlementId"    column="event_settlement_id"    />
+        <result property="settlementNo"    column="settlement_no"    />
+        <result property="partnerId"    column="partner_id"    />
+        <result property="contestId"    column="contest_id"    />
+        <result property="totalListAmount"    column="total_list_amount"    />
+        <result property="totalCouponAmount"    column="total_coupon_amount"    />
+        <result property="totalPointsAmount"    column="total_points_amount"    />
+        <result property="platformBearAmount"    column="platform_bear_amount"    />
+        <result property="totalNetPay"    column="total_net_pay"    />
+        <result property="totalRefund"    column="total_refund"    />
+        <result property="totalRebate"    column="total_rebate"    />
+        <result property="totalServiceFee"    column="total_service_fee"    />
+        <result property="contractDeduction"    column="contract_deduction"    />
+        <result property="finalAmount"    column="final_amount"    />
+        <result property="status"    column="status"    />
+        <result property="auditRemark"    column="audit_remark"    />
+        <result property="payVoucherUrl"    column="pay_voucher_url"    />
+        <result property="payTime"    column="pay_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstEventSettlementVo">
+        select event_settlement_id, settlement_no, partner_id, contest_id, total_list_amount, total_coupon_amount, total_points_amount, platform_bear_amount, total_net_pay, total_refund, total_rebate, total_service_fee, contract_deduction, final_amount, status, audit_remark, pay_voucher_url, pay_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_event_settlement
+    </sql>
+
+    <select id="selectJstEventSettlementList" parameterType="JstEventSettlement" resultMap="JstEventSettlementResult">
+        <include refid="selectJstEventSettlementVo"/>
+        <where>  
+            <if test="settlementNo != null  and settlementNo != ''"> and settlement_no = #{settlementNo}</if>
+            <if test="partnerId != null "> and partner_id = #{partnerId}</if>
+            <if test="contestId != null "> and contest_id = #{contestId}</if>
+            <if test="totalListAmount != null "> and total_list_amount = #{totalListAmount}</if>
+            <if test="totalCouponAmount != null "> and total_coupon_amount = #{totalCouponAmount}</if>
+            <if test="totalPointsAmount != null "> and total_points_amount = #{totalPointsAmount}</if>
+            <if test="platformBearAmount != null "> and platform_bear_amount = #{platformBearAmount}</if>
+            <if test="totalNetPay != null "> and total_net_pay = #{totalNetPay}</if>
+            <if test="totalRefund != null "> and total_refund = #{totalRefund}</if>
+            <if test="totalRebate != null "> and total_rebate = #{totalRebate}</if>
+            <if test="totalServiceFee != null "> and total_service_fee = #{totalServiceFee}</if>
+            <if test="contractDeduction != null "> and contract_deduction = #{contractDeduction}</if>
+            <if test="finalAmount != null "> and final_amount = #{finalAmount}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="auditRemark != null  and auditRemark != ''"> and audit_remark = #{auditRemark}</if>
+            <if test="payVoucherUrl != null  and payVoucherUrl != ''"> and pay_voucher_url = #{payVoucherUrl}</if>
+            <if test="payTime != null "> and pay_time = #{payTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstEventSettlementByEventSettlementId" parameterType="Long" resultMap="JstEventSettlementResult">
+        <include refid="selectJstEventSettlementVo"/>
+        where event_settlement_id = #{eventSettlementId}
+    </select>
+
+    <insert id="insertJstEventSettlement" parameterType="JstEventSettlement" useGeneratedKeys="true" keyProperty="eventSettlementId">
+        insert into jst_event_settlement
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="settlementNo != null and settlementNo != ''">settlement_no,</if>
+            <if test="partnerId != null">partner_id,</if>
+            <if test="contestId != null">contest_id,</if>
+            <if test="totalListAmount != null">total_list_amount,</if>
+            <if test="totalCouponAmount != null">total_coupon_amount,</if>
+            <if test="totalPointsAmount != null">total_points_amount,</if>
+            <if test="platformBearAmount != null">platform_bear_amount,</if>
+            <if test="totalNetPay != null">total_net_pay,</if>
+            <if test="totalRefund != null">total_refund,</if>
+            <if test="totalRebate != null">total_rebate,</if>
+            <if test="totalServiceFee != null">total_service_fee,</if>
+            <if test="contractDeduction != null">contract_deduction,</if>
+            <if test="finalAmount != null">final_amount,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="auditRemark != null">audit_remark,</if>
+            <if test="payVoucherUrl != null">pay_voucher_url,</if>
+            <if test="payTime != null">pay_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="settlementNo != null and settlementNo != ''">#{settlementNo},</if>
+            <if test="partnerId != null">#{partnerId},</if>
+            <if test="contestId != null">#{contestId},</if>
+            <if test="totalListAmount != null">#{totalListAmount},</if>
+            <if test="totalCouponAmount != null">#{totalCouponAmount},</if>
+            <if test="totalPointsAmount != null">#{totalPointsAmount},</if>
+            <if test="platformBearAmount != null">#{platformBearAmount},</if>
+            <if test="totalNetPay != null">#{totalNetPay},</if>
+            <if test="totalRefund != null">#{totalRefund},</if>
+            <if test="totalRebate != null">#{totalRebate},</if>
+            <if test="totalServiceFee != null">#{totalServiceFee},</if>
+            <if test="contractDeduction != null">#{contractDeduction},</if>
+            <if test="finalAmount != null">#{finalAmount},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="auditRemark != null">#{auditRemark},</if>
+            <if test="payVoucherUrl != null">#{payVoucherUrl},</if>
+            <if test="payTime != null">#{payTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstEventSettlement" parameterType="JstEventSettlement">
+        update jst_event_settlement
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="settlementNo != null and settlementNo != ''">settlement_no = #{settlementNo},</if>
+            <if test="partnerId != null">partner_id = #{partnerId},</if>
+            <if test="contestId != null">contest_id = #{contestId},</if>
+            <if test="totalListAmount != null">total_list_amount = #{totalListAmount},</if>
+            <if test="totalCouponAmount != null">total_coupon_amount = #{totalCouponAmount},</if>
+            <if test="totalPointsAmount != null">total_points_amount = #{totalPointsAmount},</if>
+            <if test="platformBearAmount != null">platform_bear_amount = #{platformBearAmount},</if>
+            <if test="totalNetPay != null">total_net_pay = #{totalNetPay},</if>
+            <if test="totalRefund != null">total_refund = #{totalRefund},</if>
+            <if test="totalRebate != null">total_rebate = #{totalRebate},</if>
+            <if test="totalServiceFee != null">total_service_fee = #{totalServiceFee},</if>
+            <if test="contractDeduction != null">contract_deduction = #{contractDeduction},</if>
+            <if test="finalAmount != null">final_amount = #{finalAmount},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
+            <if test="payVoucherUrl != null">pay_voucher_url = #{payVoucherUrl},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where event_settlement_id = #{eventSettlementId}
+    </update>
+
+    <delete id="deleteJstEventSettlementByEventSettlementId" parameterType="Long">
+        delete from jst_event_settlement where event_settlement_id = #{eventSettlementId}
+    </delete>
+
+    <delete id="deleteJstEventSettlementByEventSettlementIds" parameterType="String">
+        delete from jst_event_settlement where event_settlement_id in 
+        <foreach item="eventSettlementId" collection="array" open="(" separator="," close=")">
+            #{eventSettlementId}
+        </foreach>
+    </delete>
+</mapper>

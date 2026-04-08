@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>现场核销 · 竞赛通工作台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: #0D1B2A; min-height: 100vh; padding-bottom: 24px; }
+
+.scan-nav {
+  padding: 14px var(--space-4);
+  display: flex; align-items: center; gap: 12px;
+}
+.scan-back {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: white; cursor: pointer; touch-action: manipulation;
+}
+.scan-title { flex: 1; font-size: 17px; font-weight: 700; color: white; }
+.scan-mode-btn {
+  padding: 6px 14px; border-radius: var(--radius-full);
+  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+  font-size: 12px; font-weight: 700; color: white; cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* 核销类型选择 */
+.type-selector {
+  display: flex; gap: 8px; padding: 0 16px; margin-bottom: 16px;
+}
+.type-chip {
+  flex: 1; padding: 8px 4px; border-radius: var(--radius-md);
+  background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.12);
+  font-size: 12px; font-weight: 700; color: rgba(255,255,255,.6);
+  text-align: center; cursor: pointer; touch-action: manipulation;
+  transition: all var(--duration-fast);
+}
+.type-chip.active {
+  background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.4);
+  color: white;
+}
+.type-chip-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+/* 扫码区 */
+.scan-area {
+  margin: 0 16px 16px;
+  background: rgba(255,255,255,.04); border: 1.5px dashed rgba(255,255,255,.2);
+  border-radius: var(--radius-xl); padding: 24px 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+.scan-viewport {
+  width: 220px; height: 220px; border-radius: var(--radius-lg);
+  background: #000; position: relative; overflow: hidden;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.1);
+}
+/* 扫描动画线 */
+.scan-line {
+  position: absolute; left: 10%; right: 10%; height: 2px;
+  background: linear-gradient(90deg, transparent, #7B1FA2, transparent);
+  animation: scanMove 2s ease-in-out infinite;
+  box-shadow: 0 0 8px #7B1FA2;
+}
+@keyframes scanMove {
+  0%   { top: 10%; opacity: 1; }
+  50%  { top: 85%; opacity: 1; }
+  100% { top: 10%; opacity: 1; }
+}
+/* 四角取景框 */
+.scan-corner {
+  position: absolute; width: 24px; height: 24px;
+  border-color: white; border-style: solid; border-width: 0;
+}
+.scan-corner.tl { top: 12px; left: 12px; border-top-width: 3px; border-left-width: 3px; border-radius: 4px 0 0 0; }
+.scan-corner.tr { top: 12px; right: 12px; border-top-width: 3px; border-right-width: 3px; border-radius: 0 4px 0 0; }
+.scan-corner.bl { bottom: 12px; left: 12px; border-bottom-width: 3px; border-left-width: 3px; border-radius: 0 0 0 4px; }
+.scan-corner.br { bottom: 12px; right: 12px; border-bottom-width: 3px; border-right-width: 3px; border-radius: 0 0 4px 0; }
+
+/* 摄像头占位文字 */
+.scan-placeholder {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px;
+}
+.sp-icon { font-size: 40px; opacity: .5; }
+.sp-text { font-size: 12px; color: rgba(255,255,255,.4); text-align: center; }
+
+.scan-hint { font-size: 13px; color: rgba(255,255,255,.6); text-align: center; }
+.scan-manual-btn {
+  height: 42px; padding: 0 20px; border-radius: var(--radius-full);
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  font-size: 13px; font-weight: 700; color: rgba(255,255,255,.8);
+  cursor: pointer; touch-action: manipulation;
+}
+
+/* 手动输入核销码 */
+.manual-input-wrap {
+  margin: 0 16px 12px;
+  display: flex; gap: 8px;
+}
+.manual-input {
+  flex: 1; height: 50px; border: 1.5px solid rgba(255,255,255,.2);
+  border-radius: var(--radius-md); background: rgba(255,255,255,.06);
+  color: white; font-size: 16px; padding: 0 14px; outline: none;
+  font-family: var(--font-body); letter-spacing: 2px;
+}
+.manual-input::placeholder { color: rgba(255,255,255,.3); letter-spacing: 0; font-size: 14px; }
+.manual-input:focus { border-color: #7B1FA2; }
+.manual-check-btn {
+  height: 50px; padding: 0 20px; border-radius: var(--radius-md);
+  background: #7B1FA2; border: none; font-size: 14px; font-weight: 700;
+  color: white; cursor: pointer; touch-action: manipulation; flex-shrink: 0;
+}
+
+/* 核销结果 */
+.result-card {
+  margin: 0 16px 12px; border-radius: var(--radius-xl); padding: 18px;
+  display: none;
+}
+.result-card.success { background: linear-gradient(135deg, #1B5E20, #43A047); }
+.result-card.fail    { background: linear-gradient(135deg, #B71C1C, #E53935); }
+.result-card.warning { background: linear-gradient(135deg, #E65100, #FF6F00); }
+
+.rc-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.rc-icon-big { font-size: 40px; }
+.rc-result-title { font-size: 20px; font-weight: 900; color: white; }
+.rc-result-sub   { font-size: 13px; color: rgba(255,255,255,.8); margin-top: 3px; }
+.rc-detail {
+  background: rgba(255,255,255,.12); border-radius: var(--radius-md);
+  padding: 12px;
+}
+.rc-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+.rc-key { color: rgba(255,255,255,.7); }
+.rc-val { color: white; font-weight: 600; }
+.rc-action-row { display: flex; gap: 8px; margin-top: 12px; }
+.rc-btn {
+  flex: 1; height: 40px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 700; cursor: pointer; touch-action: manipulation;
+  border: none;
+}
+.rc-btn.primary { background: rgba(255,255,255,.25); color: white; }
+.rc-btn.secondary { background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); }
+
+/* 今日核销统计 */
+.stats-bar {
+  margin: 0 16px 12px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius-lg); padding: 12px 16px;
+  display: flex; gap: 0;
+}
+.sb-item { flex: 1; text-align: center; border-right: 1px solid rgba(255,255,255,.1); }
+.sb-item:last-child { border-right: none; }
+.sb-num   { font-size: 22px; font-weight: 900; color: white; line-height: 1; }
+.sb-label { font-size: 10px; color: rgba(255,255,255,.5); margin-top: 4px; }
+
+/* 最近核销记录 */
+.records-section {
+  margin: 0 16px; background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius-lg); overflow: hidden;
+}
+.rs-header {
+  padding: 10px 14px; display: flex; align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.rs-title { flex: 1; font-size: 13px; font-weight: 700; color: rgba(255,255,255,.75); }
+.rs-clear { font-size: 12px; color: rgba(255,255,255,.4); cursor: pointer; }
+.record-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.record-row:last-child { border-bottom: none; }
+.rr-type { font-size: 18px; flex-shrink: 0; }
+.rr-info { flex: 1; }
+.rr-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.85); }
+.rr-code { font-size: 11px; color: rgba(255,255,255,.4); margin-top: 2px; }
+.rr-time { font-size: 11px; color: rgba(255,255,255,.4); flex-shrink: 0; }
+.rr-status { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
+.rr-ok   { background: rgba(39,174,96,.25); color: #69F0AE; }
+.rr-fail { background: rgba(231,76,60,.25); color: #FF8A80; }
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:#0D1B2A;">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<div class="scan-nav animate-in">
+  <div class="scan-back" onclick="history.back()">←</div>
+  <div class="scan-title">现场核销</div>
+  <div class="scan-mode-btn" onclick="toggleMode()">手动输入</div>
+</div>
+
+<!-- 当前核销活动信息栏 -->
+<div style="margin:0 16px 10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-md);padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;touch-action:manipulation;" onclick="switchEvent()">
+  <div style="flex:1;">
+    <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:2px;">当前核销活动 / 场次</div>
+    <div id="currentEventName" style="font-size:14px;font-weight:700;color:white;">安徒生艺术奖·颁奖典礼</div>
+    <div id="currentSessionName" style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;">2026-04-10 · 晚场 19:00–21:30</div>
+  </div>
+  <div style="font-size:18px;color:rgba(255,255,255,.3);">⇄</div>
+</div>
+
+<!-- 切换活动 Sheet（默认隐藏）-->
+<div id="eventSheet" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;" onclick="closeEventSheet()">
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#1A1A2E;border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));" onclick="event.stopPropagation()">
+    <div style="text-align:center;font-size:13px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:16px;">切换核销场次</div>
+    <div class="event-option active" onclick="pickEvent(this,'安徒生艺术奖·颁奖典礼','2026-04-10 · 晚场 19:00–21:30')">
+      <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:white;">安徒生艺术奖·颁奖典礼</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;">2026-04-10 · 晚场 19:00–21:30</div></div>
+      <div id="eo-check-1" style="font-size:16px;color:#69F0AE;">✓</div>
+    </div>
+    <div class="event-option" onclick="pickEvent(this,'安徒生艺术奖·颁奖典礼','2026-04-11 · 上午场 09:00–12:00')">
+      <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:white;">安徒生艺术奖·颁奖典礼</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;">2026-04-11 · 上午场 09:00–12:00</div></div>
+      <div style="font-size:16px;color:transparent;">✓</div>
+    </div>
+    <div class="event-option" onclick="pickEvent(this,'鸟巢杯文化艺术·春季展','2026-04-12 · 下午场 14:00–17:00')">
+      <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:white;">鸟巢杯文化艺术·春季展</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;">2026-04-12 · 下午场 14:00–17:00</div></div>
+      <div style="font-size:16px;color:transparent;">✓</div>
+    </div>
+    <button onclick="closeEventSheet()" style="width:100%;height:46px;margin-top:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius-md);font-size:14px;font-weight:700;color:rgba(255,255,255,.7);cursor:pointer;">取消</button>
+  </div>
+</div>
+
+<!-- 核销类型选择 -->
+<div class="type-selector animate-in animate-in-d1">
+  <div class="type-chip active" onclick="selectType(this,'checkin')" id="type-checkin">
+    <span class="type-chip-icon">🚪</span>到场入场
+  </div>
+  <div class="type-chip" onclick="selectType(this,'gift')" id="type-gift">
+    <span class="type-chip-icon">🎁</span>礼品领取
+  </div>
+  <div class="type-chip" onclick="selectType(this,'award')" id="type-award">
+    <span class="type-chip-icon">🏆</span>颁奖典礼
+  </div>
+</div>
+
+<!-- 扫码区 -->
+<div class="scan-area animate-in animate-in-d2" id="scanArea">
+  <div class="scan-viewport">
+    <div class="scan-corner tl"></div>
+    <div class="scan-corner tr"></div>
+    <div class="scan-corner bl"></div>
+    <div class="scan-corner br"></div>
+    <div class="scan-line"></div>
+    <div class="scan-placeholder">
+      <div class="sp-icon">📷</div>
+      <div class="sp-text">摄像头权限实装后<br>自动激活扫码</div>
+    </div>
+  </div>
+  <div class="scan-hint">将用户二维码对准框内 · 自动识别</div>
+  <button class="scan-manual-btn" onclick="toggleMode()">✏️ 手动输入核销码</button>
+</div>
+
+<!-- 手动输入（默认隐藏）-->
+<div class="manual-input-wrap animate-in" id="manualArea" style="display:none;">
+  <input class="manual-input" id="codeInput" type="text" placeholder="输入核销码，如 JST-RES-2026-001-A" maxlength="30">
+  <button class="manual-check-btn" onclick="doCheck()">核销</button>
+</div>
+
+<!-- 核销结果（动态显示）-->
+<div class="result-card success animate-in" id="resultSuccess">
+  <div class="rc-top">
+    <div class="rc-icon-big">✅</div>
+    <div>
+      <div class="rc-result-title">核销成功</div>
+      <div class="rc-result-sub" id="resultTypeName">到场入场核销</div>
+    </div>
+  </div>
+  <div class="rc-detail">
+    <div class="rc-row"><div class="rc-key">预约人</div><div class="rc-val" id="resName">张小明</div></div>
+    <div class="rc-row"><div class="rc-key">联系方式</div><div class="rc-val">138****8001</div></div>
+    <div class="rc-row"><div class="rc-key">核销码</div><div class="rc-val" id="resCode">JST-RES-2026-001-A</div></div>
+    <div class="rc-row"><div class="rc-key">活动场次</div><div class="rc-val">晚场 19:00–21:30</div></div>
+    <div class="rc-row"><div class="rc-key">核销时间</div><div class="rc-val" id="resTime">—</div></div>
+  </div>
+  <div class="rc-action-row">
+    <button class="rc-btn primary" onclick="nextScan()">继续扫码</button>
+    <button class="rc-btn secondary" onclick="undoCheckin()">撤销此次核销</button>
+  </div>
+</div>
+
+<div class="result-card fail animate-in" id="resultFail">
+  <div class="rc-top">
+    <div class="rc-icon-big">❌</div>
+    <div>
+      <div class="rc-result-title">核销失败</div>
+      <div class="rc-result-sub" id="failReason">核销码不存在或已使用</div>
+    </div>
+  </div>
+  <div class="rc-detail">
+    <div class="rc-row"><div class="rc-key">扫描码</div><div class="rc-val" id="failCode">—</div></div>
+    <div class="rc-row"><div class="rc-key">失败原因</div><div class="rc-val" id="failDetail">核销码已被使用，请检查</div></div>
+  </div>
+  <div class="rc-action-row">
+    <button class="rc-btn primary" onclick="nextScan()">重新扫码</button>
+  </div>
+</div>
+
+<!-- 今日统计 -->
+<div class="stats-bar animate-in animate-in-d3">
+  <div class="sb-item">
+    <div class="sb-num" id="stat-total">24</div>
+    <div class="sb-label">今日核销</div>
+  </div>
+  <div class="sb-item">
+    <div class="sb-num" style="color:#69F0AE;" id="stat-checkin">18</div>
+    <div class="sb-label">入场核销</div>
+  </div>
+  <div class="sb-item">
+    <div class="sb-num" style="color:#FFD54F;" id="stat-gift">4</div>
+    <div class="sb-label">礼品核销</div>
+  </div>
+  <div class="sb-item">
+    <div class="sb-num" style="color:#CE93D8;" id="stat-award">2</div>
+    <div class="sb-label">颁奖核销</div>
+  </div>
+</div>
+
+<!-- 最近记录 -->
+<div class="records-section animate-in">
+  <div class="rs-header">
+    <div class="rs-title">最近核销记录</div>
+    <div class="rs-clear" onclick="showToast('记录已清空')">清空</div>
+  </div>
+  <div id="recordList">
+    <div class="record-row">
+      <div class="rr-type">🚪</div>
+      <div class="rr-info">
+        <div class="rr-name">张小明 · 到场入场</div>
+        <div class="rr-code">JST-RES-2026-001-A</div>
+      </div>
+      <div class="rr-time">18:55</div>
+      <div class="rr-status rr-ok">成功</div>
+    </div>
+    <div class="record-row">
+      <div class="rr-type">🏆</div>
+      <div class="rr-info">
+        <div class="rr-name">王芳芳 · 颁奖典礼</div>
+        <div class="rr-code">JST-RES-2026-002-C</div>
+      </div>
+      <div class="rr-time">18:52</div>
+      <div class="rr-status rr-ok">成功</div>
+    </div>
+    <div class="record-row">
+      <div class="rr-type">🎁</div>
+      <div class="rr-info">
+        <div class="rr-name">未知 · 礼品领取</div>
+        <div class="rr-code">JST-RES-INVALID-001</div>
+      </div>
+      <div class="rr-time">18:48</div>
+      <div class="rr-status rr-fail">已用过</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let isManual = false;
+let currentType = 'checkin';
+const typeNames = { checkin: '到场入场核销', gift: '礼品领取核销', award: '颁奖典礼核销' };
+const typeIcons = { checkin: '🚪', gift: '🎁', award: '🏆' };
+
+function selectType(el, type) {
+  document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentType = type;
+}
+
+function toggleMode() {
+  isManual = !isManual;
+  document.getElementById('scanArea').style.display   = isManual ? 'none' : 'flex';
+  document.getElementById('manualArea').style.display = isManual ? 'flex' : 'none';
+  document.querySelector('.scan-mode-btn').textContent = isManual ? '扫码模式' : '手动输入';
+  hideResults();
+}
+
+function doCheck() {
+  const code = document.getElementById('codeInput').value.trim();
+  if (!code) { showToast('请输入核销码'); return; }
+  simulateScan(code);
+}
+
+function simulateScan(code) {
+  hideResults();
+  // 模拟逻辑
+  const fakeUsed = ['JST-RES-INVALID-001', 'JST-RES-2026-001-C'];
+  const fakeNotFound = ['FAKE-123'];
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+
+  if (fakeUsed.includes(code)) {
+    document.getElementById('failCode').textContent = code;
+    document.getElementById('failReason').textContent = '核销码已使用';
+    document.getElementById('failDetail').textContent = '该码已于 18:55 完成核销，不可重复使用';
+    document.getElementById('resultFail').style.display = 'block';
+    addRecord('已用过', code, '未知', typeIcons[currentType], 'fail');
+  } else {
+    // 成功
+    document.getElementById('resultTypeName').textContent = typeNames[currentType];
+    document.getElementById('resCode').textContent = code;
+    document.getElementById('resTime').textContent = `${new Date().toLocaleDateString('zh')} ${timeStr}`;
+    document.getElementById('resultSuccess').style.display = 'block';
+    addRecord('成功', code, '张小明', typeIcons[currentType], 'ok');
+    // 更新统计
+    const total = document.getElementById('stat-total');
+    total.textContent = parseInt(total.textContent) + 1;
+    const statEl = document.getElementById(`stat-${currentType}`);
+    if(statEl) statEl.textContent = parseInt(statEl.textContent) + 1;
+  }
+  document.getElementById('codeInput').value = '';
+}
+
+function addRecord(status, code, name, icon, type) {
+  const list = document.getElementById('recordList');
+  const now = new Date();
+  const t = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const row = document.createElement('div');
+  row.className = 'record-row';
+  row.innerHTML = `
+    <div class="rr-type">${icon}</div>
+    <div class="rr-info">
+      <div class="rr-name">${name} · ${typeNames[currentType].replace('核销','')}</div>
+      <div class="rr-code">${code}</div>
+    </div>
+    <div class="rr-time">${t}</div>
+    <div class="rr-status rr-${type}">${status}</div>
+  `;
+  list.insertBefore(row, list.firstChild);
+}
+
+function hideResults() {
+  document.getElementById('resultSuccess').style.display = 'none';
+  document.getElementById('resultFail').style.display = 'none';
+}
+
+function nextScan() {
+  hideResults();
+  if (!isManual) {
+    // 扫码模式：模拟下一次扫到一个码
+    setTimeout(() => simulateScan('JST-RES-2026-001-A'), 800);
+  }
+}
+
+function undoCheckin() {
+  showToast('已撤销此次核销记录，请联系管理员确认');
+  hideResults();
+}
+
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2400);
+}
+function switchEvent(){document.getElementById('eventSheet').style.display='block';}
+function closeEventSheet(){document.getElementById('eventSheet').style.display='none';}
+function pickEvent(el,name,session){
+  document.querySelectorAll('.event-option').forEach(o=>{
+    o.classList.remove('active');
+    o.querySelector('div:last-child').style.color='transparent';
+  });
+  el.classList.add('active');
+  el.querySelector('div:last-child').style.color='#69F0AE';
+  document.getElementById('currentEventName').textContent=name;
+  document.getElementById('currentSessionName').textContent=session;
+  // 重置今日统计
+  ['total','checkin','gift','award'].forEach(k=>{
+    const el2=document.getElementById('stat-'+k);
+    if(el2)el2.textContent='0';
+  });
+  closeEventSheet();
+  showToast('已切换：'+name);
+}
+
+// 模拟：3秒后自动扫到一个码（演示用）
+setTimeout(() => {
+  if (!isManual) simulateScan('JST-RES-2026-003-A');
+}, 3000);
+</script>
+</body>
+</html>

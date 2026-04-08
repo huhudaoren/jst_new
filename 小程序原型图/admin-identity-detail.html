@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>认证审核详情 · 竞赛通管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); padding-bottom: 100px; }
+.admin-nav { background: linear-gradient(135deg,#1A237E,#283593); padding:14px var(--space-4); display:flex; align-items:center; gap:12px; }
+.admin-nav .back-btn { width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation; }
+.admin-nav-title { font-size:17px;font-weight:700;color:white;flex:1; }
+
+/* 申请人信息卡 */
+.info-card { background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:14px var(--space-4) 0;overflow:hidden; }
+.info-card-header { padding:16px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--c-gray-50); }
+.ic-avatar { width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#3F51B5,#5C6BC0);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0; }
+.ic-name { font-size:17px;font-weight:800;color:var(--c-gray-900); }
+.ic-meta { font-size:13px;color:var(--c-gray-500);margin-top:3px; }
+.ic-type-badge { padding:5px 12px;border-radius:var(--radius-full);background:#EEF0FF;color:#3F51B5;font-size:12px;font-weight:700;margin-left:auto; }
+
+.info-rows { padding:0; }
+.info-row { display:flex;padding:12px 16px;border-bottom:1px solid var(--c-gray-50); }
+.info-row:last-child { border-bottom:none; }
+.info-key { font-size:13px;color:var(--c-gray-500);width:88px;flex-shrink:0; }
+.info-val { font-size:14px;color:var(--c-gray-900);flex:1;font-weight:500; }
+.info-val.warn { color:var(--c-warning);font-weight:700; }
+
+/* 材料大图区 */
+.material-section { background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;padding:16px; }
+.mat-title { font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:12px;display:flex;align-items:center;gap:6px; }
+.mat-title::before { content:'';width:3px;height:14px;background:#3F51B5;border-radius:2px; }
+.mat-imgs { display:flex;gap:10px;flex-wrap:wrap; }
+.mat-img-wrap { flex:1;min-width:140px;max-width:calc(50% - 5px); }
+.mat-img-box {
+  width:100%;aspect-ratio:3/2;border-radius:var(--radius-md);
+  background:linear-gradient(135deg,#E8ECF4,#F4F6FA);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:1px solid var(--c-gray-100);position:relative;overflow:hidden;
+  cursor:pointer;touch-action:manipulation;
+}
+.mat-img-box:active { opacity:0.85; }
+.mat-img-emoji { font-size:36px;margin-bottom:6px; }
+.mat-img-label { font-size:11px;color:var(--c-gray-500);font-weight:600; }
+.mat-img-zoom { position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.45);color:white;font-size:12px;padding:3px 7px;border-radius:var(--radius-full); }
+
+/* 全屏图片弹层 */
+.img-overlay {
+  position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);
+  display:none;align-items:center;justify-content:center;flex-direction:column;
+}
+.img-overlay.show { display:flex; }
+.img-overlay-close {
+  position:absolute;top:20px;right:20px;width:40px;height:40px;
+  background:rgba(255,255,255,0.15);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:white;cursor:pointer;touch-action:manipulation;
+}
+.img-overlay-preview {
+  width:90%;max-width:320px;aspect-ratio:3/2;
+  background:linear-gradient(135deg,#1A237E,#3F51B5);
+  border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;
+  font-size:72px;
+}
+.img-overlay-label { font-size:14px;color:rgba(255,255,255,0.6);margin-top:12px; }
+.img-overlay-actions { display:flex;gap:12px;margin-top:20px; }
+.img-overlay-btn {
+  padding:10px 24px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,0.3);
+  color:white;font-size:14px;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.1);
+  touch-action:manipulation;
+}
+
+/* 固定底部操作栏 */
+.action-bar {
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:390px;
+  background:var(--c-white);border-top:1px solid var(--c-gray-100);
+  padding:12px var(--space-4) calc(12px + env(safe-area-inset-bottom));
+  display:flex;gap:10px;z-index:100;
+}
+.btn-hold {
+  width:48px;height:48px;border:1px solid var(--c-gray-100);border-radius:var(--radius-md);
+  background:var(--c-gray-50);display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;touch-action:manipulation;flex-shrink:0;
+}
+.btn-pass-lg {
+  flex:1;height:48px;background:var(--c-success);color:white;border:none;
+  border-radius:var(--radius-md);font-size:16px;font-weight:800;cursor:pointer;
+  touch-action:manipulation;transition:opacity var(--duration-fast);
+}
+.btn-pass-lg:active { opacity:0.8; }
+.btn-reject-lg {
+  flex:1;height:48px;background:var(--c-white);color:var(--c-danger);
+  border:1.5px solid var(--c-danger);border-radius:var(--radius-md);
+  font-size:16px;font-weight:700;cursor:pointer;touch-action:manipulation;
+}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1A237E;">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<div class="admin-nav animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="admin-nav-title">认证审核详情</div>
+</div>
+
+<!-- 申请人信息 -->
+<div class="info-card animate-in animate-in-d1">
+  <div class="info-card-header">
+    <div class="ic-avatar">👩‍🏫</div>
+    <div style="flex:1">
+      <div class="ic-name">李雅琴</div>
+      <div class="ic-meta">申请时间：2026-03-19 08:30</div>
+    </div>
+    <div class="ic-type-badge">老师</div>
+  </div>
+  <div class="info-rows">
+    <div class="info-row"><div class="info-key">联系手机</div><div class="info-val">138****5678</div></div>
+    <div class="info-row"><div class="info-key">任职学校</div><div class="info-val">广州市第一中学</div></div>
+    <div class="info-row"><div class="info-key">任教科目</div><div class="info-val">美术 · 书法</div></div>
+    <div class="info-row"><div class="info-key">申请说明</div><div class="info-val">从事中小学美术教学8年，曾指导多名学生参加全国书画大赛</div></div>
+    <div class="info-row"><div class="info-key">审核状态</div><div class="info-val warn">⏳ 待审核</div></div>
+  </div>
+</div>
+
+<!-- 认证材料 -->
+<div class="material-section animate-in animate-in-d2">
+  <div class="mat-title">认证材料（点击放大查看）</div>
+  <div class="mat-imgs">
+    <div class="mat-img-wrap">
+      <div class="mat-img-box" onclick="showImgOverlay('🪪','教师资格证')">
+        <div class="mat-img-emoji">🪪</div>
+        <div class="mat-img-label">教师资格证</div>
+        <div class="mat-img-zoom">🔍 放大</div>
+      </div>
+    </div>
+    <div class="mat-img-wrap">
+      <div class="mat-img-box" onclick="showImgOverlay('📄','学校工作证明')">
+        <div class="mat-img-emoji">📄</div>
+        <div class="mat-img-label">学校工作证明</div>
+        <div class="mat-img-zoom">🔍 放大</div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:10px;padding:10px 12px;background:var(--c-primary-50);border-radius:var(--radius-sm);font-size:12px;color:var(--c-info);">
+    💡 建议仔细核对证件有效期、姓名与申请人一致性、证件是否清晰
+  </div>
+</div>
+
+<!-- 历史记录 -->
+<div class="info-card animate-in animate-in-d3" style="margin-top:12px;">
+  <div style="padding:14px 16px;font-size:14px;font-weight:700;color:var(--c-gray-900);">历史认证记录</div>
+  <div class="info-row"><div class="info-key">首次申请</div><div class="info-val" style="color:var(--c-gray-500);">暂无历史记录</div></div>
+</div>
+
+<!-- 图片全屏弹层 -->
+<div class="img-overlay" id="imgOverlay" onclick="closeImgOverlay()">
+  <div class="img-overlay-close">✕</div>
+  <div class="img-overlay-preview" id="overlayEmoji">🪪</div>
+  <div class="img-overlay-label" id="overlayLabel">教师资格证</div>
+  <div class="img-overlay-actions" onclick="event.stopPropagation()">
+    <div class="img-overlay-btn" onclick="closeImgOverlay()">关闭</div>
+    <div class="img-overlay-btn">⬇ 下载留档</div>
+  </div>
+</div>
+
+<!-- 底部操作栏 -->
+<div class="action-bar">
+  <div class="btn-hold" title="暂缓">⏸</div>
+  <button class="btn-reject-lg" onclick="showRejectSheet()">驳 回</button>
+  <button class="btn-pass-lg" onclick="doPass()">✅ 通过认证</button>
+</div>
+
+<!-- 驳回 Sheet -->
+<div id="rejectSheet" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.5);" onclick="closeRejectSheet()">
+  <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:var(--c-white);border-radius:24px 24px 0 0;padding:8px var(--space-4) 40px;" onclick="event.stopPropagation()">
+    <div style="width:36px;height:4px;background:var(--c-gray-100);border-radius:2px;margin:10px auto 20px;"></div>
+    <div style="font-size:16px;font-weight:700;color:var(--c-gray-900);margin-bottom:14px;">选择驳回原因</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;" id="reasonBtns">
+      <div class="tag tag-gray" style="cursor:pointer;padding:8px 14px;" onclick="toggleReason(this)">材料不清晰</div>
+      <div class="tag tag-gray" style="cursor:pointer;padding:8px 14px;" onclick="toggleReason(this)">证件已过期</div>
+      <div class="tag tag-gray" style="cursor:pointer;padding:8px 14px;" onclick="toggleReason(this)">信息不匹配</div>
+      <div class="tag tag-gray" style="cursor:pointer;padding:8px 14px;" onclick="toggleReason(this)">非真实任职</div>
+      <div class="tag tag-gray" style="cursor:pointer;padding:8px 14px;" onclick="toggleReason(this)">材料缺失</div>
+    </div>
+    <textarea style="width:100%;height:80px;border:1.5px solid var(--c-gray-100);border-radius:var(--radius-md);padding:10px 14px;font-size:14px;font-family:var(--font-body);outline:none;resize:none;" placeholder="补充说明（可选）..."></textarea>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button onclick="closeRejectSheet()" style="flex:1;height:48px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:var(--radius-md);font-size:15px;font-weight:600;color:var(--c-gray-700);cursor:pointer;">取消</button>
+      <button onclick="doReject()" style="flex:2;height:48px;background:var(--c-danger);border:none;border-radius:var(--radius-md);font-size:15px;font-weight:700;color:white;cursor:pointer;">确认驳回并通知</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showImgOverlay(emoji, label) {
+  document.getElementById('overlayEmoji').textContent = emoji;
+  document.getElementById('overlayLabel').textContent = label;
+  document.getElementById('imgOverlay').classList.add('show');
+}
+function closeImgOverlay() { document.getElementById('imgOverlay').classList.remove('show'); }
+function showRejectSheet() { document.getElementById('rejectSheet').style.display = 'flex'; }
+function closeRejectSheet() { document.getElementById('rejectSheet').style.display = 'none'; }
+function toggleReason(el) { el.classList.toggle('tag-primary'); el.classList.toggle('tag-gray'); }
+function doPass() {
+  const t = document.createElement('div'); t.className='toast'; t.textContent='✅ 已通过认证，通知已发送';
+  document.body.appendChild(t); setTimeout(()=>{t.remove();history.back();},1500);
+}
+function doReject() {
+  closeRejectSheet();
+  const t = document.createElement('div'); t.className='toast'; t.textContent='已驳回，驳回原因已通知申请人';
+  document.body.appendChild(t); setTimeout(()=>{t.remove();history.back();},1500);
+}
+</script>
+</body>
+</html>

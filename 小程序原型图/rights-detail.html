@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>权益详情 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:90px;}
+.r-nav{background:linear-gradient(135deg,#1B5E20,#2E7D32);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.r-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.r-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.hero-card{margin:12px 16px 0;background:linear-gradient(135deg,#1B5E20,#43A047);border-radius:var(--radius-xl);padding:20px;box-shadow:var(--shadow-md);position:relative;overflow:hidden;}
+.hero-card::before{content:'';position:absolute;top:-20px;right:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.06);}
+.hc-icon{font-size:40px;margin-bottom:12px;}
+.hc-name{font-size:22px;font-weight:900;color:white;margin-bottom:4px;}
+.hc-source{font-size:13px;color:rgba(255,255,255,.7);}
+.hc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;}
+.hc-stat{background:rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:10px;text-align:center;}
+.hc-stat-num{font-size:20px;font-weight:900;color:white;line-height:1;}
+.hc-stat-label{font-size:10px;color:rgba(255,255,255,.65);margin-top:3px;}
+
+.info-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px 16px 0;}
+.ic-title{padding:14px 16px 10px;font-size:14px;font-weight:700;color:var(--c-gray-900);border-bottom:1px solid var(--c-gray-100);}
+.ic-row{display:flex;padding:12px 16px;border-bottom:1px solid var(--c-gray-100);}
+.ic-row:last-child{border-bottom:none;}
+.ic-key{font-size:13px;color:var(--c-gray-500);width:80px;flex-shrink:0;}
+.ic-val{font-size:13px;color:var(--c-gray-900);flex:1;font-weight:500;line-height:1.5;}
+
+.timeline-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px 16px 0;padding:14px 16px;}
+.tl-title{font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:14px;}
+.tl-item{display:flex;gap:12px;margin-bottom:12px;}
+.tl-item:last-child{margin-bottom:0;}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.tl-dot.done{background:var(--c-success);}
+.tl-dot.active{background:var(--c-warning);}
+.tl-dot.wait{background:var(--c-gray-200);}
+.tl-info{}
+.tl-event{font-size:13px;font-weight:600;color:var(--c-gray-900);}
+.tl-time{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+
+.cta-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:var(--c-white);border-top:1px solid var(--c-gray-100);padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:100;}
+.cta-btn{width:100%;height:52px;background:var(--c-success);color:white;border:none;border-radius:var(--radius-md);font-size:16px;font-weight:800;cursor:pointer;touch-action:manipulation;}
+.cta-btn:active{opacity:.9;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1B5E20;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="r-nav animate-in">
+  <div class="r-back" onclick="history.back()">←</div>
+  <div class="r-title">权益详情</div>
+</div>
+
+<div class="hero-card animate-in animate-in-d1">
+  <div class="hc-icon">🏟️</div>
+  <div class="hc-name">场地减免权益</div>
+  <div class="hc-source">黄金渠道方等级权益 · 2026-01-01 发放</div>
+  <div class="hc-stats">
+    <div class="hc-stat"><div class="hc-stat-num">2</div><div class="hc-stat-label">剩余次数</div></div>
+    <div class="hc-stat"><div class="hc-stat-num">¥500</div><div class="hc-stat-label">每次上限</div></div>
+    <div class="hc-stat"><div class="hc-stat-num">101</div><div class="hc-stat-label">剩余天数</div></div>
+  </div>
+</div>
+
+<div class="info-card animate-in animate-in-d2">
+  <div class="ic-title">权益说明</div>
+  <div class="ic-row"><div class="ic-key">适用角色</div><div class="ic-val">黄金及以上渠道方</div></div>
+  <div class="ic-row"><div class="ic-key">适用场景</div><div class="ic-val">竞赛通合作场地预订，使用时出示核销码</div></div>
+  <div class="ic-row"><div class="ic-key">核销方式</div><div class="ic-val">线下确认核销（需现场出示核销码）</div></div>
+  <div class="ic-row"><div class="ic-key">核销条件</div><div class="ic-val">预订成功后申请核销，每次减免不超过 ¥500</div></div>
+  <div class="ic-row"><div class="ic-key">有效期</div><div class="ic-val">2026-01-01 至 2026-06-30</div></div>
+  <div class="ic-row"><div class="ic-key">回退规则</div><div class="ic-val">已核销后如发生退订，权益回退到可用池，不超过原发放次数</div></div>
+  <div class="ic-row"><div class="ic-key">注意事项</div><div class="ic-val">· 不可与其他场地优惠叠加使用<br>· 剩余次数展示为实时数据<br>· 逾期未使用自动失效，不补发</div></div>
+</div>
+
+<div class="timeline-card animate-in animate-in-d3">
+  <div class="tl-title">历史核销记录</div>
+  <div class="tl-item">
+    <div class="tl-dot done"></div>
+    <div class="tl-info">
+      <div class="tl-event">核销成功 · 广州天河体育馆场地预订 · 减免 ¥300</div>
+      <div class="tl-time">2026-02-14 10:30 · 核销单 WO-2026-000</div>
+    </div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-dot active"></div>
+    <div class="tl-info">
+      <div class="tl-event">审核中 · 广州越秀区活动中心 · 申请减免 ¥400</div>
+      <div class="tl-time">2026-03-18 14:20 · 核销单 WO-2026-001</div>
+    </div>
+  </div>
+</div>
+
+<div class="cta-bar">
+  <button class="cta-btn" onclick="location.href='writeoff-apply.html'">✅ 发起核销申请</button>
+</div>
+</body>
+</html>

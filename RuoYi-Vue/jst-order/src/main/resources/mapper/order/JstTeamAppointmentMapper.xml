@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.order.mapper.JstTeamAppointmentMapper">
+    
+    <resultMap type="JstTeamAppointment" id="JstTeamAppointmentResult">
+        <result property="teamAppointmentId"    column="team_appointment_id"    />
+        <result property="teamNo"    column="team_no"    />
+        <result property="contestId"    column="contest_id"    />
+        <result property="channelId"    column="channel_id"    />
+        <result property="teamName"    column="team_name"    />
+        <result property="appointmentDate"    column="appointment_date"    />
+        <result property="sessionCode"    column="session_code"    />
+        <result property="totalPersons"    column="total_persons"    />
+        <result property="memberPersons"    column="member_persons"    />
+        <result property="extraPersons"    column="extra_persons"    />
+        <result property="extraListJson"    column="extra_list_json"    />
+        <result property="writeoffPersons"    column="writeoff_persons"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstTeamAppointmentVo">
+        select team_appointment_id, team_no, contest_id, channel_id, team_name, appointment_date, session_code, total_persons, member_persons, extra_persons, extra_list_json, writeoff_persons, status, create_by, create_time, update_by, update_time, remark, del_flag from jst_team_appointment
+    </sql>
+
+    <select id="selectJstTeamAppointmentList" parameterType="JstTeamAppointment" resultMap="JstTeamAppointmentResult">
+        <include refid="selectJstTeamAppointmentVo"/>
+        <where>  
+            <if test="teamNo != null  and teamNo != ''"> and team_no = #{teamNo}</if>
+            <if test="contestId != null "> and contest_id = #{contestId}</if>
+            <if test="channelId != null "> and channel_id = #{channelId}</if>
+            <if test="teamName != null  and teamName != ''"> and team_name like concat('%', #{teamName}, '%')</if>
+            <if test="appointmentDate != null "> and appointment_date = #{appointmentDate}</if>
+            <if test="sessionCode != null  and sessionCode != ''"> and session_code = #{sessionCode}</if>
+            <if test="totalPersons != null "> and total_persons = #{totalPersons}</if>
+            <if test="memberPersons != null "> and member_persons = #{memberPersons}</if>
+            <if test="extraPersons != null "> and extra_persons = #{extraPersons}</if>
+            <if test="extraListJson != null  and extraListJson != ''"> and extra_list_json = #{extraListJson}</if>
+            <if test="writeoffPersons != null "> and writeoff_persons = #{writeoffPersons}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstTeamAppointmentByTeamAppointmentId" parameterType="Long" resultMap="JstTeamAppointmentResult">
+        <include refid="selectJstTeamAppointmentVo"/>
+        where team_appointment_id = #{teamAppointmentId}
+    </select>
+
+    <insert id="insertJstTeamAppointment" parameterType="JstTeamAppointment" useGeneratedKeys="true" keyProperty="teamAppointmentId">
+        insert into jst_team_appointment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="teamNo != null and teamNo != ''">team_no,</if>
+            <if test="contestId != null">contest_id,</if>
+            <if test="channelId != null">channel_id,</if>
+            <if test="teamName != null and teamName != ''">team_name,</if>
+            <if test="appointmentDate != null">appointment_date,</if>
+            <if test="sessionCode != null">session_code,</if>
+            <if test="totalPersons != null">total_persons,</if>
+            <if test="memberPersons != null">member_persons,</if>
+            <if test="extraPersons != null">extra_persons,</if>
+            <if test="extraListJson != null">extra_list_json,</if>
+            <if test="writeoffPersons != null">writeoff_persons,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="teamNo != null and teamNo != ''">#{teamNo},</if>
+            <if test="contestId != null">#{contestId},</if>
+            <if test="channelId != null">#{channelId},</if>
+            <if test="teamName != null and teamName != ''">#{teamName},</if>
+            <if test="appointmentDate != null">#{appointmentDate},</if>
+            <if test="sessionCode != null">#{sessionCode},</if>
+            <if test="totalPersons != null">#{totalPersons},</if>
+            <if test="memberPersons != null">#{memberPersons},</if>
+            <if test="extraPersons != null">#{extraPersons},</if>
+            <if test="extraListJson != null">#{extraListJson},</if>
+            <if test="writeoffPersons != null">#{writeoffPersons},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstTeamAppointment" parameterType="JstTeamAppointment">
+        update jst_team_appointment
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="teamNo != null and teamNo != ''">team_no = #{teamNo},</if>
+            <if test="contestId != null">contest_id = #{contestId},</if>
+            <if test="channelId != null">channel_id = #{channelId},</if>
+            <if test="teamName != null and teamName != ''">team_name = #{teamName},</if>
+            <if test="appointmentDate != null">appointment_date = #{appointmentDate},</if>
+            <if test="sessionCode != null">session_code = #{sessionCode},</if>
+            <if test="totalPersons != null">total_persons = #{totalPersons},</if>
+            <if test="memberPersons != null">member_persons = #{memberPersons},</if>
+            <if test="extraPersons != null">extra_persons = #{extraPersons},</if>
+            <if test="extraListJson != null">extra_list_json = #{extraListJson},</if>
+            <if test="writeoffPersons != null">writeoff_persons = #{writeoffPersons},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where team_appointment_id = #{teamAppointmentId}
+    </update>
+
+    <delete id="deleteJstTeamAppointmentByTeamAppointmentId" parameterType="Long">
+        delete from jst_team_appointment where team_appointment_id = #{teamAppointmentId}
+    </delete>
+
+    <delete id="deleteJstTeamAppointmentByTeamAppointmentIds" parameterType="String">
+        delete from jst_team_appointment where team_appointment_id in 
+        <foreach item="teamAppointmentId" collection="array" open="(" separator="," close=")">
+            #{teamAppointmentId}
+        </foreach>
+    </delete>
+</mapper>

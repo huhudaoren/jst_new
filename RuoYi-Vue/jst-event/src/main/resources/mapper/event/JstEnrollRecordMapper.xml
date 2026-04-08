@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.JstEnrollRecordMapper">
+    
+    <resultMap type="JstEnrollRecord" id="JstEnrollRecordResult">
+        <result property="enrollId"    column="enroll_id"    />
+        <result property="enrollNo"    column="enroll_no"    />
+        <result property="contestId"    column="contest_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="participantId"    column="participant_id"    />
+        <result property="channelId"    column="channel_id"    />
+        <result property="enrollSource"    column="enroll_source"    />
+        <result property="templateId"    column="template_id"    />
+        <result property="templateVersion"    column="template_version"    />
+        <result property="formSnapshotJson"    column="form_snapshot_json"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="materialStatus"    column="material_status"    />
+        <result property="auditStatus"    column="audit_status"    />
+        <result property="auditRemark"    column="audit_remark"    />
+        <result property="supplementRemark"    column="supplement_remark"    />
+        <result property="submitTime"    column="submit_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstEnrollRecordVo">
+        select enroll_id, enroll_no, contest_id, user_id, participant_id, channel_id, enroll_source, template_id, template_version, form_snapshot_json, order_id, material_status, audit_status, audit_remark, supplement_remark, submit_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_enroll_record
+    </sql>
+
+    <select id="selectJstEnrollRecordList" parameterType="JstEnrollRecord" resultMap="JstEnrollRecordResult">
+        <include refid="selectJstEnrollRecordVo"/>
+        <where>  
+            <if test="enrollNo != null  and enrollNo != ''"> and enroll_no = #{enrollNo}</if>
+            <if test="contestId != null "> and contest_id = #{contestId}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="participantId != null "> and participant_id = #{participantId}</if>
+            <if test="channelId != null "> and channel_id = #{channelId}</if>
+            <if test="enrollSource != null  and enrollSource != ''"> and enroll_source = #{enrollSource}</if>
+            <if test="templateId != null "> and template_id = #{templateId}</if>
+            <if test="templateVersion != null "> and template_version = #{templateVersion}</if>
+            <if test="formSnapshotJson != null  and formSnapshotJson != ''"> and form_snapshot_json = #{formSnapshotJson}</if>
+            <if test="orderId != null "> and order_id = #{orderId}</if>
+            <if test="materialStatus != null  and materialStatus != ''"> and material_status = #{materialStatus}</if>
+            <if test="auditStatus != null  and auditStatus != ''"> and audit_status = #{auditStatus}</if>
+            <if test="auditRemark != null  and auditRemark != ''"> and audit_remark = #{auditRemark}</if>
+            <if test="submitTime != null "> and submit_time = #{submitTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstEnrollRecordByEnrollId" parameterType="Long" resultMap="JstEnrollRecordResult">
+        <include refid="selectJstEnrollRecordVo"/>
+        where enroll_id = #{enrollId}
+    </select>
+
+    <insert id="insertJstEnrollRecord" parameterType="JstEnrollRecord" useGeneratedKeys="true" keyProperty="enrollId">
+        insert into jst_enroll_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="enrollNo != null and enrollNo != ''">enroll_no,</if>
+            <if test="contestId != null">contest_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="participantId != null">participant_id,</if>
+            <if test="channelId != null">channel_id,</if>
+            <if test="enrollSource != null and enrollSource != ''">enroll_source,</if>
+            <if test="templateId != null">template_id,</if>
+            <if test="templateVersion != null">template_version,</if>
+            <if test="formSnapshotJson != null and formSnapshotJson != ''">form_snapshot_json,</if>
+            <if test="orderId != null">order_id,</if>
+            <if test="materialStatus != null and materialStatus != ''">material_status,</if>
+            <if test="auditStatus != null and auditStatus != ''">audit_status,</if>
+            <if test="auditRemark != null">audit_remark,</if>
+            <if test="supplementRemark != null">supplement_remark,</if>
+            <if test="submitTime != null">submit_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="enrollNo != null and enrollNo != ''">#{enrollNo},</if>
+            <if test="contestId != null">#{contestId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="participantId != null">#{participantId},</if>
+            <if test="channelId != null">#{channelId},</if>
+            <if test="enrollSource != null and enrollSource != ''">#{enrollSource},</if>
+            <if test="templateId != null">#{templateId},</if>
+            <if test="templateVersion != null">#{templateVersion},</if>
+            <if test="formSnapshotJson != null and formSnapshotJson != ''">#{formSnapshotJson},</if>
+            <if test="orderId != null">#{orderId},</if>
+            <if test="materialStatus != null and materialStatus != ''">#{materialStatus},</if>
+            <if test="auditStatus != null and auditStatus != ''">#{auditStatus},</if>
+            <if test="auditRemark != null">#{auditRemark},</if>
+            <if test="supplementRemark != null">#{supplementRemark},</if>
+            <if test="submitTime != null">#{submitTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstEnrollRecord" parameterType="JstEnrollRecord">
+        update jst_enroll_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="enrollNo != null and enrollNo != ''">enroll_no = #{enrollNo},</if>
+            <if test="contestId != null">contest_id = #{contestId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="participantId != null">participant_id = #{participantId},</if>
+            <if test="channelId != null">channel_id = #{channelId},</if>
+            <if test="enrollSource != null and enrollSource != ''">enroll_source = #{enrollSource},</if>
+            <if test="templateId != null">template_id = #{templateId},</if>
+            <if test="templateVersion != null">template_version = #{templateVersion},</if>
+            <if test="formSnapshotJson != null and formSnapshotJson != ''">form_snapshot_json = #{formSnapshotJson},</if>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="materialStatus != null and materialStatus != ''">material_status = #{materialStatus},</if>
+            <if test="auditStatus != null and auditStatus != ''">audit_status = #{auditStatus},</if>
+            <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
+            <if test="supplementRemark != null">supplement_remark = #{supplementRemark},</if>
+            <if test="submitTime != null">submit_time = #{submitTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where enroll_id = #{enrollId}
+    </update>
+
+    <delete id="deleteJstEnrollRecordByEnrollId" parameterType="Long">
+        delete from jst_enroll_record where enroll_id = #{enrollId}
+    </delete>
+
+    <delete id="deleteJstEnrollRecordByEnrollIds" parameterType="String">
+        delete from jst_enroll_record where enroll_id in 
+        <foreach item="enrollId" collection="array" open="(" separator="," close=")">
+            #{enrollId}
+        </foreach>
+    </delete>
+</mapper>

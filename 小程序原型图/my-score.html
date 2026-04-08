@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>我的成绩 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); padding-bottom: 20px !important; }
+
+/* 查询入口卡 */
+.query-card {
+  background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-600) 100%);
+  border-radius: var(--radius-lg); padding: 20px 16px;
+  margin: 14px 16px 0; position: relative; overflow: hidden;
+}
+.query-card::before {
+  content: '';
+  position: absolute; right: -20px; top: -20px;
+  width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+}
+.query-card-title { font-size: 15px; font-weight: 700; color: white; margin-bottom: 12px; }
+.query-row { display: flex; gap: 8px; }
+.query-input {
+  flex: 1; height: 44px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: var(--radius-md);
+  padding: 0 14px; font-size: 16px;
+  color: white; outline: none;
+  font-family: var(--font-body);
+  transition: background var(--duration-fast);
+}
+.query-input::placeholder { color: rgba(255,255,255,0.5); }
+.query-input:focus { background: rgba(255,255,255,0.22); }
+.query-btn {
+  height: 44px; padding: 0 16px;
+  background: white; color: var(--c-primary-600);
+  border: none; border-radius: var(--radius-md);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  flex-shrink: 0; touch-action: manipulation;
+  transition: opacity var(--duration-fast);
+}
+.query-btn:active { opacity: 0.85; }
+.query-tips {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;
+}
+.query-tip {
+  font-size: 11px; color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.1);
+  padding: 3px 8px; border-radius: var(--radius-full);
+}
+
+/* 成绩卡片 */
+.score-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); margin-bottom: 12px; overflow: hidden;
+  cursor: pointer; touch-action: manipulation;
+  transition: box-shadow var(--duration-fast);
+}
+.score-card:active { box-shadow: none; }
+.score-card-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.score-card-icon {
+  width: 44px; height: 44px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+  flex-shrink: 0;
+}
+.score-card-info { flex: 1; min-width: 0; }
+.score-card-name {
+  font-size: 15px; font-weight: 700; color: var(--c-gray-900);
+  line-height: 1.4; margin-bottom: 4px;
+}
+.score-card-meta { font-size: 12px; color: var(--c-gray-500); }
+
+/* 成绩展示区 */
+.score-display {
+  padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.score-main {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.score-label { font-size: 12px; color: var(--c-gray-500); }
+.score-value { font-size: 32px; font-weight: 900; color: var(--c-primary-600); line-height: 1; letter-spacing: -1px; }
+.score-value.pending { font-size: 18px; color: var(--c-gray-500); }
+.score-award {
+  text-align: right;
+}
+.award-badge {
+  display: inline-flex; flex-direction: column; align-items: center;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  gap: 3px;
+}
+.award-badge.gold { background: var(--c-gold-50); }
+.award-badge.silver { background: var(--c-gray-50); }
+.award-badge.bronze { background: #FFF5EE; }
+.award-badge.normal { background: var(--c-primary-50); }
+.award-badge.pending-bg { background: var(--c-gray-50); }
+.award-icon { font-size: 28px; }
+.award-text { font-size: 13px; font-weight: 800; color: var(--c-gray-900); }
+.award-text.gold-c { color: #9A6300; }
+.award-text.silver-c { color: var(--c-gray-700); }
+.award-text.bronze-c { color: #C97F3C; }
+
+/* 区域标题 */
+.section-title-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 20px 16px 12px;
+}
+.st-title { font-size: 17px; font-weight: 700; color: var(--c-gray-900); display: flex; align-items: center; gap: 6px; }
+.st-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background: var(--c-primary-600); border-radius: 2px; }
+
+/* 成绩详情弹层 */
+.sheet-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(26,31,46,0.55); backdrop-filter: blur(4px);
+  z-index: 200; align-items: flex-end;
+}
+.sheet-overlay.show { display: flex; }
+.sheet-body {
+  width: 100%; max-width: 390px; margin: 0 auto;
+  background: var(--c-white);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  max-height: 85vh; overflow-y: auto;
+  animation: sheet-up 0.3s var(--ease-out);
+}
+@keyframes sheet-up { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.sheet-handle { width: 36px; height: 4px; background: var(--c-gray-100); border-radius: 2px; margin: 12px auto 0; }
+.sheet-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 12px; border-bottom: 1px solid var(--c-gray-100);
+}
+.sheet-title { font-size: 17px; font-weight: 700; color: var(--c-gray-900); }
+.sheet-close { width: 30px; height: 30px; border-radius: 50%; background: var(--c-gray-100); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: var(--c-gray-700); touch-action: manipulation; }
+.detail-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 11px 16px; border-bottom: 1px solid var(--c-gray-100); font-size: 13px; }
+.detail-row:last-child { border-bottom: none; }
+.detail-key { color: var(--c-gray-500); flex-shrink: 0; width: 80px; }
+.detail-val { color: var(--c-gray-900); font-weight: 500; text-align: right; flex: 1; line-height: 1.5; }
+
+/* 成绩待公布状态 */
+.pending-banner {
+  background: var(--c-gray-50); border-radius: var(--radius-md);
+  padding: 16px; text-align: center;
+}
+.pending-icon { font-size: 36px; margin-bottom: 8px; }
+.pending-text { font-size: 14px; color: var(--c-gray-700); font-weight: 600; margin-bottom: 4px; }
+.pending-sub { font-size: 12px; color: var(--c-gray-500); }
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:var(--c-primary);">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<div class="page-header">
+  <div class="page-header-back" onclick="history.back()">←</div>
+  <div class="page-header-title">成绩查询</div>
+</div>
+
+<!-- 公开查询入口 -->
+<div class="query-card animate-in">
+  <div class="query-card-title">🔍 公开成绩查询</div>
+  <div class="query-row">
+    <input class="query-input" id="queryInput" type="text" placeholder="输入手机号 / 证件号 / 报名编号">
+    <button class="query-btn" onclick="doQuery()">查询</button>
+  </div>
+  <div class="query-tips">
+    <span class="query-tip">支持手机号查询</span>
+    <span class="query-tip">支持身份证号</span>
+    <span class="query-tip">支持报名编号</span>
+  </div>
+</div>
+
+<!-- 查询结果区（默认隐藏） -->
+<div id="query-result" style="display:none;padding:12px 16px 0;">
+  <div class="notice notice-success animate-in">
+    <span class="notice-icon">✅</span>
+    <div>查询到 <strong>1条</strong> 成绩记录</div>
+  </div>
+  <div class="score-card animate-in animate-in-d1" onclick="showDetail('score1')" style="margin-top:10px;">
+    <div class="score-card-header">
+      <div class="score-card-icon" style="background:linear-gradient(135deg,var(--c-primary),var(--c-primary-600));">🔢</div>
+      <div class="score-card-info">
+        <div class="score-card-name">安徒生(国际)艺术奖</div>
+        <div class="score-card-meta">绘画类 · 成绩发布：2025-11-10</div>
+      </div>
+      <span class="tag tag-success">已发布</span>
+    </div>
+    <div class="score-display">
+      <div class="score-main">
+        <div class="score-label">笔试总分</div>
+        <div class="score-value">128</div>
+        <div style="font-size:12px;color:var(--c-gray-500);margin-top:2px;">满分：150分</div>
+      </div>
+      <div class="score-award">
+        <div class="award-badge gold">
+          <div class="award-icon">🥇</div>
+          <div class="award-text gold-c">一等奖</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 分隔 -->
+<div style="height:8px;background:var(--c-gray-50);margin:16px 0 0;"></div>
+
+<!-- 我的全部成绩 -->
+<div class="section-title-bar animate-in animate-in-d1">
+  <div class="st-title">我的参赛成绩</div>
+  <span class="tag tag-gray">共3条</span>
+</div>
+
+<div style="padding:0 16px;">
+
+  <!-- 成绩1：已发布·一等奖 -->
+  <div class="score-card animate-in animate-in-d2" onclick="showDetail('score1')">
+    <div class="score-card-header">
+      <div class="score-card-icon" style="background:linear-gradient(135deg,var(--c-primary),var(--c-primary-600));">🔢</div>
+      <div class="score-card-info">
+        <div class="score-card-name">安徒生(国际)艺术奖</div>
+        <div class="score-card-meta">绘画类 · 成绩发布：2025-11-10 · 参赛编号 #8831</div>
+      </div>
+    </div>
+    <div class="score-display">
+      <div class="score-main">
+        <div class="score-label">笔试总分</div>
+        <div class="score-value">128</div>
+        <div style="font-size:12px;color:var(--c-gray-500);margin-top:2px;">全省排名：第 <strong style="color:var(--c-primary-600);">12</strong> 名</div>
+      </div>
+      <div class="score-award">
+        <div class="award-badge gold">
+          <div class="award-icon">🥇</div>
+          <div class="award-text gold-c">一等奖</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 16px 12px;border-top:1px solid var(--c-gray-100);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--c-success);">✓ 证书已生成，可下载</span>
+        <button class="btn btn-outline btn-sm btn-icon" onclick="event.stopPropagation();location.href='my-cert.html'">
+          查看证书
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 成绩2：已发布·三等奖 -->
+  <div class="score-card animate-in animate-in-d2" onclick="showDetail('score2')">
+    <div class="score-card-header">
+      <div class="score-card-icon" style="background:linear-gradient(135deg,#D84315,#FF7043);">🎤</div>
+      <div class="score-card-info">
+        <div class="score-card-name">第九届全国中小学生"鸟巢杯"文化艺术活动</div>
+        <div class="score-card-meta">全学段 · 成绩发布：2024-12-05</div>
+      </div>
+    </div>
+    <div class="score-display">
+      <div class="score-main">
+        <div class="score-label">综合评分</div>
+        <div class="score-value" style="color:var(--c-gray-700);">82</div>
+        <div style="font-size:12px;color:var(--c-gray-500);margin-top:2px;">满分：100分</div>
+      </div>
+      <div class="score-award">
+        <div class="award-badge bronze">
+          <div class="award-icon">🥉</div>
+          <div class="award-text bronze-c">三等奖</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 16px 12px;border-top:1px solid var(--c-gray-100);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--c-success);">✓ 证书已生成</span>
+        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();location.href='my-cert.html'">查看证书</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 成绩3：成绩待公布 -->
+  <div class="score-card animate-in animate-in-d3">
+    <div class="score-card-header">
+      <div class="score-card-icon" style="background:linear-gradient(135deg,#00695C,#26A69A);">🔬</div>
+      <div class="score-card-info">
+        <div class="score-card-name">初中生物学联赛全国预选赛</div>
+        <div class="score-card-meta">全学段 · 比赛时间：2025-10-12</div>
+      </div>
+    </div>
+    <div style="padding:14px 16px;">
+      <div class="pending-banner">
+        <div class="pending-icon">⏳</div>
+        <div class="pending-text">成绩待公布</div>
+        <div class="pending-sub">预计 2025年11月20日 发布成绩<br>发布后将推送消息通知</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 统计小结 -->
+  <div style="background:var(--c-white);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow-xs);margin-bottom:12px;" class="animate-in animate-in-d3">
+    <div style="font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:14px;display:flex;align-items:center;gap:6px;">
+      <span>📊</span> 参赛数据汇总
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+      <div style="text-align:center;padding:10px 4px;background:var(--c-primary-50);border-radius:var(--radius-md);">
+        <div style="font-size:20px;font-weight:900;color:var(--c-primary-600);">3</div>
+        <div style="font-size:11px;color:var(--c-gray-500);margin-top:2px;">参赛次数</div>
+      </div>
+      <div style="text-align:center;padding:10px 4px;background:var(--c-gold-50);border-radius:var(--radius-md);">
+        <div style="font-size:20px;font-weight:900;color:#9A6300;">1</div>
+        <div style="font-size:11px;color:var(--c-gray-500);margin-top:2px;">一等奖</div>
+      </div>
+      <div style="text-align:center;padding:10px 4px;background:#FFF5EE;border-radius:var(--radius-md);">
+        <div style="font-size:20px;font-weight:900;color:#C97F3C;">1</div>
+        <div style="font-size:11px;color:var(--c-gray-500);margin-top:2px;">三等奖</div>
+      </div>
+      <div style="text-align:center;padding:10px 4px;background:var(--c-success-50);border-radius:var(--radius-md);">
+        <div style="font-size:20px;font-weight:900;color:var(--c-success);">2</div>
+        <div style="font-size:11px;color:var(--c-gray-500);margin-top:2px;">获奖证书</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 详情弹层 -->
+<div class="sheet-overlay" id="detailSheet" onclick="closeSheet(event)">
+  <div class="sheet-body" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">成绩详情</div>
+      <div class="sheet-close" onclick="closeSheet()">✕</div>
+    </div>
+    <div id="sheetContent"></div>
+    <div style="padding:12px 16px 24px;">
+      <button class="btn btn-primary btn-md btn-block" onclick="location.href='my-cert.html'">查看 / 下载证书</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const scoreDetails = {
+  score1: [
+    ['赛事名称','安徒生(国际)艺术奖'],['参赛组别','绘画类'],
+    ['报名编号','#20250920-8831'],['参赛者','张小明'],
+    ['笔试总分','128分（满分150）'],['全省排名','第12名'],
+    ['全国排名','前5%'],['获奖等级','🥇 一等奖'],
+    ['成绩发布时间','2025-11-10 10:00'],['证书状态','✓ 可下载']
+  ],
+  score2: [
+    ['赛事名称','第九届全国中小学生"鸟巢杯"文化艺术活动'],['参赛组别','全学段'],
+    ['报名编号','#20241108-3392'],['参赛者','张小明'],
+    ['综合评分','82分（满分100）'],['获奖等级','🥉 三等奖'],
+    ['成绩发布时间','2024-12-05 09:00'],['证书状态','✓ 可下载']
+  ]
+};
+
+function showDetail(id) {
+  const rows = scoreDetails[id];
+  if (!rows) return;
+  let html = '';
+  rows.forEach(([k, v]) => {
+    html += `<div class="detail-row"><div class="detail-key">${k}</div><div class="detail-val">${v}</div></div>`;
+  });
+  document.getElementById('sheetContent').innerHTML = html;
+  document.getElementById('detailSheet').classList.add('show');
+}
+
+function closeSheet(e) {
+  if (!e || e.target === document.getElementById('detailSheet')) {
+    document.getElementById('detailSheet').classList.remove('show');
+  }
+}
+
+function doQuery() {
+  const val = document.getElementById('queryInput').value.trim();
+  if (!val) { showToast('请输入查询信息'); return; }
+  showToast('查询中...');
+  setTimeout(() => {
+    document.getElementById('query-result').style.display = 'block';
+    document.getElementById('query-result').scrollIntoView({ behavior: 'smooth' });
+  }, 800);
+}
+
+function showShare(contest, award) {
+  if(confirm('分享成绩：' + contest + ' ' + award + '\n确认分享到朋友圈？')) {
+    showToast('✓ 已生成成绩分享图，请保存至相册后分享');
+  }
+}
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2500);
+}
+</script>
+</body>
+</html>

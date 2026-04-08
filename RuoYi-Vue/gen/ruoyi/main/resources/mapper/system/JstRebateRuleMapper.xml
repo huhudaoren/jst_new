@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstRebateRuleMapper">
+    
+    <resultMap type="JstRebateRule" id="JstRebateRuleResult">
+        <result property="ruleId"    column="rule_id"    />
+        <result property="contestId"    column="contest_id"    />
+        <result property="channelId"    column="channel_id"    />
+        <result property="rebateMode"    column="rebate_mode"    />
+        <result property="rebateValue"    column="rebate_value"    />
+        <result property="serviceFeeMode"    column="service_fee_mode"    />
+        <result property="serviceFeeValue"    column="service_fee_value"    />
+        <result property="effectiveTime"    column="effective_time"    />
+        <result property="expireTime"    column="expire_time"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstRebateRuleVo">
+        select rule_id, contest_id, channel_id, rebate_mode, rebate_value, service_fee_mode, service_fee_value, effective_time, expire_time, status, create_by, create_time, update_by, update_time, remark, del_flag from jst_rebate_rule
+    </sql>
+
+    <select id="selectJstRebateRuleList" parameterType="JstRebateRule" resultMap="JstRebateRuleResult">
+        <include refid="selectJstRebateRuleVo"/>
+        <where>  
+            <if test="contestId != null "> and contest_id = #{contestId}</if>
+            <if test="channelId != null "> and channel_id = #{channelId}</if>
+            <if test="rebateMode != null  and rebateMode != ''"> and rebate_mode = #{rebateMode}</if>
+            <if test="rebateValue != null "> and rebate_value = #{rebateValue}</if>
+            <if test="serviceFeeMode != null  and serviceFeeMode != ''"> and service_fee_mode = #{serviceFeeMode}</if>
+            <if test="serviceFeeValue != null "> and service_fee_value = #{serviceFeeValue}</if>
+            <if test="effectiveTime != null "> and effective_time = #{effectiveTime}</if>
+            <if test="expireTime != null "> and expire_time = #{expireTime}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstRebateRuleByRuleId" parameterType="Long" resultMap="JstRebateRuleResult">
+        <include refid="selectJstRebateRuleVo"/>
+        where rule_id = #{ruleId}
+    </select>
+
+    <insert id="insertJstRebateRule" parameterType="JstRebateRule" useGeneratedKeys="true" keyProperty="ruleId">
+        insert into jst_rebate_rule
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="contestId != null">contest_id,</if>
+            <if test="channelId != null">channel_id,</if>
+            <if test="rebateMode != null and rebateMode != ''">rebate_mode,</if>
+            <if test="rebateValue != null">rebate_value,</if>
+            <if test="serviceFeeMode != null and serviceFeeMode != ''">service_fee_mode,</if>
+            <if test="serviceFeeValue != null">service_fee_value,</if>
+            <if test="effectiveTime != null">effective_time,</if>
+            <if test="expireTime != null">expire_time,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="contestId != null">#{contestId},</if>
+            <if test="channelId != null">#{channelId},</if>
+            <if test="rebateMode != null and rebateMode != ''">#{rebateMode},</if>
+            <if test="rebateValue != null">#{rebateValue},</if>
+            <if test="serviceFeeMode != null and serviceFeeMode != ''">#{serviceFeeMode},</if>
+            <if test="serviceFeeValue != null">#{serviceFeeValue},</if>
+            <if test="effectiveTime != null">#{effectiveTime},</if>
+            <if test="expireTime != null">#{expireTime},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstRebateRule" parameterType="JstRebateRule">
+        update jst_rebate_rule
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="contestId != null">contest_id = #{contestId},</if>
+            <if test="channelId != null">channel_id = #{channelId},</if>
+            <if test="rebateMode != null and rebateMode != ''">rebate_mode = #{rebateMode},</if>
+            <if test="rebateValue != null">rebate_value = #{rebateValue},</if>
+            <if test="serviceFeeMode != null and serviceFeeMode != ''">service_fee_mode = #{serviceFeeMode},</if>
+            <if test="serviceFeeValue != null">service_fee_value = #{serviceFeeValue},</if>
+            <if test="effectiveTime != null">effective_time = #{effectiveTime},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where rule_id = #{ruleId}
+    </update>
+
+    <delete id="deleteJstRebateRuleByRuleId" parameterType="Long">
+        delete from jst_rebate_rule where rule_id = #{ruleId}
+    </delete>
+
+    <delete id="deleteJstRebateRuleByRuleIds" parameterType="String">
+        delete from jst_rebate_rule where rule_id in 
+        <foreach item="ruleId" collection="array" open="(" separator="," close=")">
+            #{ruleId}
+        </foreach>
+    </delete>
+</mapper>

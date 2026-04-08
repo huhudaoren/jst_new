@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstEnrollFormTemplateMapper">
+    
+    <resultMap type="JstEnrollFormTemplate" id="JstEnrollFormTemplateResult">
+        <result property="templateId"    column="template_id"    />
+        <result property="templateName"    column="template_name"    />
+        <result property="templateVersion"    column="template_version"    />
+        <result property="ownerType"    column="owner_type"    />
+        <result property="ownerId"    column="owner_id"    />
+        <result property="schemaJson"    column="schema_json"    />
+        <result property="auditStatus"    column="audit_status"    />
+        <result property="status"    column="status"    />
+        <result property="effectiveTime"    column="effective_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstEnrollFormTemplateVo">
+        select template_id, template_name, template_version, owner_type, owner_id, schema_json, audit_status, status, effective_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_enroll_form_template
+    </sql>
+
+    <select id="selectJstEnrollFormTemplateList" parameterType="JstEnrollFormTemplate" resultMap="JstEnrollFormTemplateResult">
+        <include refid="selectJstEnrollFormTemplateVo"/>
+        <where>  
+            <if test="templateName != null  and templateName != ''"> and template_name like concat('%', #{templateName}, '%')</if>
+            <if test="templateVersion != null "> and template_version = #{templateVersion}</if>
+            <if test="ownerType != null  and ownerType != ''"> and owner_type = #{ownerType}</if>
+            <if test="ownerId != null "> and owner_id = #{ownerId}</if>
+            <if test="schemaJson != null  and schemaJson != ''"> and schema_json = #{schemaJson}</if>
+            <if test="auditStatus != null  and auditStatus != ''"> and audit_status = #{auditStatus}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="effectiveTime != null "> and effective_time = #{effectiveTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstEnrollFormTemplateByTemplateId" parameterType="Long" resultMap="JstEnrollFormTemplateResult">
+        <include refid="selectJstEnrollFormTemplateVo"/>
+        where template_id = #{templateId}
+    </select>
+
+    <insert id="insertJstEnrollFormTemplate" parameterType="JstEnrollFormTemplate" useGeneratedKeys="true" keyProperty="templateId">
+        insert into jst_enroll_form_template
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="templateName != null and templateName != ''">template_name,</if>
+            <if test="templateVersion != null">template_version,</if>
+            <if test="ownerType != null and ownerType != ''">owner_type,</if>
+            <if test="ownerId != null">owner_id,</if>
+            <if test="schemaJson != null and schemaJson != ''">schema_json,</if>
+            <if test="auditStatus != null and auditStatus != ''">audit_status,</if>
+            <if test="status != null">status,</if>
+            <if test="effectiveTime != null">effective_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="templateName != null and templateName != ''">#{templateName},</if>
+            <if test="templateVersion != null">#{templateVersion},</if>
+            <if test="ownerType != null and ownerType != ''">#{ownerType},</if>
+            <if test="ownerId != null">#{ownerId},</if>
+            <if test="schemaJson != null and schemaJson != ''">#{schemaJson},</if>
+            <if test="auditStatus != null and auditStatus != ''">#{auditStatus},</if>
+            <if test="status != null">#{status},</if>
+            <if test="effectiveTime != null">#{effectiveTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstEnrollFormTemplate" parameterType="JstEnrollFormTemplate">
+        update jst_enroll_form_template
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="templateName != null and templateName != ''">template_name = #{templateName},</if>
+            <if test="templateVersion != null">template_version = #{templateVersion},</if>
+            <if test="ownerType != null and ownerType != ''">owner_type = #{ownerType},</if>
+            <if test="ownerId != null">owner_id = #{ownerId},</if>
+            <if test="schemaJson != null and schemaJson != ''">schema_json = #{schemaJson},</if>
+            <if test="auditStatus != null and auditStatus != ''">audit_status = #{auditStatus},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="effectiveTime != null">effective_time = #{effectiveTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where template_id = #{templateId}
+    </update>
+
+    <delete id="deleteJstEnrollFormTemplateByTemplateId" parameterType="Long">
+        delete from jst_enroll_form_template where template_id = #{templateId}
+    </delete>
+
+    <delete id="deleteJstEnrollFormTemplateByTemplateIds" parameterType="String">
+        delete from jst_enroll_form_template where template_id in 
+        <foreach item="templateId" collection="array" open="(" separator="," close=")">
+            #{templateId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>赛事结算审核 · 竞赛通管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.admin-nav{background:linear-gradient(135deg,#1B5E20,#2E7D32);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.admin-nav .back-btn{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.admin-nav-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.filter-tabs{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);}
+.ft{flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--c-gray-500);cursor:pointer;position:relative;touch-action:manipulation;}
+.ft.active{color:var(--c-success);font-weight:700;}
+.ft.active::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:2.5px;background:var(--c-success);border-radius:1px;}
+
+.es-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:10px var(--space-4) 0;overflow:hidden;}
+.es-header{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid var(--c-gray-50);}
+.es-icon{width:44px;height:44px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.es-info{flex:1;}
+.es-partner{font-size:12px;color:var(--c-gray-500);}
+.es-contest{font-size:15px;font-weight:700;color:var(--c-gray-900);margin-top:2px;}
+.es-period{font-size:12px;color:var(--c-gray-500);margin-top:2px;}
+.es-amount{font-size:18px;font-weight:900;color:var(--c-success);flex-shrink:0;}
+
+.es-breakdown{padding:12px 16px;background:var(--c-gray-50);}
+.esb-title{font-size:12px;font-weight:700;color:var(--c-gray-500);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+.esb-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;}
+.esb-key{color:var(--c-gray-700);}
+.esb-val{font-weight:600;color:var(--c-gray-900);}
+.esb-val.minus{color:var(--c-danger);}
+.esb-val.total{color:var(--c-success);font-size:15px;font-weight:900;}
+.esb-divider{height:1px;background:var(--c-gray-100);margin:6px 0;}
+
+.es-footer{padding:8px 16px 12px;display:flex;gap:8px;border-top:1px solid var(--c-gray-50);}
+.btn-pass{flex:2;height:40px;background:var(--c-success);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;}
+.btn-paid{flex:2;height:40px;background:var(--c-gold);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;}
+.btn-reject{flex:1;height:40px;background:var(--c-white);color:var(--c-danger);border:1px solid var(--c-danger);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1B5E20;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="admin-nav animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="admin-nav-title">赛事结算审核</div>
+</div>
+<div class="filter-tabs">
+  <div class="ft active" onclick="switchFt(this)">待审核 <span style="background:var(--c-danger);color:white;font-size:9px;padding:1px 4px;border-radius:6px;margin-left:2px;">1</span></div>
+  <div class="ft" onclick="switchFt(this)">待打款</div>
+  <div class="ft" onclick="switchFt(this)">已打款</div>
+  <div class="ft" onclick="switchFt(this)">已驳回</div>
+  <div class="ft" onclick="switchFt(this)">全部</div>
+</div>
+
+<div class="es-card animate-in animate-in-d1">
+  <div class="es-header">
+    <div class="es-icon" style="background:linear-gradient(135deg,#4A0E8F,#9C27B0);">🏆</div>
+    <div class="es-info">
+      <div class="es-partner">北京艺术星文化传媒有限公司</div>
+      <div class="es-contest">安徒生(国际)艺术奖 · 2025赛季</div>
+      <div class="es-period">结算周期：2025-10-01 至 2026-03-15</div>
+    </div>
+    <div class="es-amount">¥18,240</div>
+  </div>
+  <div class="es-breakdown">
+    <div class="esb-title">结算明细</div>
+    <div class="esb-row"><div class="esb-key">净收入</div><div class="esb-val">¥24,000.00</div></div>
+    <div class="esb-row"><div class="esb-key">渠道返点</div><div class="esb-val minus">-¥3,200.00</div></div>
+    <div class="esb-row"><div class="esb-key">平台服务费（5%）</div><div class="esb-val minus">-¥1,200.00</div></div>
+    <div class="esb-row"><div class="esb-key">退款扣减</div><div class="esb-val minus">-¥1,360.00</div></div>
+    <div class="esb-row"><div class="esb-key">合同约定扣项</div><div class="esb-val minus">-¥0.00</div></div>
+    <div class="esb-divider"></div>
+    <div class="esb-row"><div class="esb-key" style="font-weight:700;color:var(--c-gray-900);">最终结算金额</div><div class="esb-val total">¥18,240.00</div></div>
+  </div>
+  <div style="padding:10px 16px;font-size:12px;color:var(--c-gray-500);">
+    发票状态：✅ 已开票 · 打款账户：中信银行 6250****1234 · 已校验合同条款
+  </div>
+  <div class="es-footer" onclick="event.stopPropagation()">
+    <button class="btn-reject" onclick="doReject()">驳回</button>
+    <button class="btn-pass" onclick="doPass()">✅ 审核通过</button>
+  </div>
+</div>
+
+<script>
+function switchFt(el){document.querySelectorAll('.ft').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function doPass(){const t=document.createElement('div');t.className='toast';t.textContent='✅ 已通过审核，财务安排打款 ¥18,240.00';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+function doReject(){const t=document.createElement('div');t.className='toast';t.textContent='已驳回，赛事方将收到通知';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+</script>
+</body>
+</html>

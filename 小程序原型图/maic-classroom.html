@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI互动课堂 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body {
+  background: #0F0A1E;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0 !important;
+  overflow-x: hidden;
+}
+
+/* ── 星空背景 ── */
+.stars {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 15% 12%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 72% 8%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 30% 45%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 30%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 72%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 8% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 65%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 90%, rgba(255,255,255,0.4) 0%, transparent 100%);
+}
+.nebula {
+  position: fixed;
+  width: 400px; height: 400px; border-radius: 50%;
+  pointer-events: none; z-index: 0;
+}
+.nebula-1 {
+  top: -120px; left: -80px;
+  background: radial-gradient(circle, rgba(74,14,143,0.25) 0%, transparent 70%);
+}
+.nebula-2 {
+  bottom: -100px; right: -60px;
+  background: radial-gradient(circle, rgba(26,35,126,0.22) 0%, transparent 70%);
+}
+
+/* ── 顶部返回 ── */
+.top-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px var(--space-4) 0;
+  position: relative; z-index: 10;
+}
+.top-back {
+  width: 36px; height: 36px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: rgba(255,255,255,0.8);
+  cursor: pointer; touch-action: manipulation;
+}
+.top-title {
+  font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.6);
+  flex: 1;
+}
+.top-badge {
+  padding: 4px 10px; border-radius: var(--radius-full);
+  background: rgba(124,58,237,0.25); border: 1px solid rgba(124,58,237,0.4);
+  font-size: 11px; color: #C4B5FD; font-weight: 600;
+}
+
+/* ── 课程信息区 ── */
+.course-info {
+  padding: 24px var(--space-4) 0;
+  position: relative; z-index: 10; text-align: center;
+}
+.ci-emoji {
+  font-size: 56px; margin-bottom: 14px;
+  display: block;
+  filter: drop-shadow(0 0 20px rgba(167,139,250,0.5));
+}
+.ci-title {
+  font-size: 20px; font-weight: 900; color: #FFFFFF;
+  line-height: 1.3; margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+.ci-meta {
+  font-size: 13px; color: rgba(255,255,255,0.45);
+  margin-bottom: 16px;
+}
+.ci-tags {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.ci-tag {
+  padding: 5px 12px; border-radius: var(--radius-full);
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 600;
+}
+
+/* ── 进度卡片 ── */
+.progress-glass {
+  margin: 0 var(--space-4);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(12px);
+  padding: 18px 20px;
+  position: relative; z-index: 10;
+  margin-bottom: 20px;
+}
+.pg-title {
+  font-size: 12px; color: rgba(255,255,255,0.45);
+  font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.pg-scenes {
+  display: flex; gap: 6px; margin-bottom: 12px;
+}
+.pg-scene {
+  flex: 1; height: 6px; border-radius: 3px;
+  background: rgba(255,255,255,0.12);
+  transition: background 0.4s ease;
+}
+.pg-scene.done     { background: #A78BFA; }
+.pg-scene.active   { background: linear-gradient(90deg,#7C3AED,#C084FC); animation: glow 1.5s infinite; }
+@keyframes glow {
+  0%,100% { opacity:1; } 50% { opacity:0.6; }
+}
+.pg-stats {
+  display: flex; gap: 0;
+}
+.pg-stat {
+  flex: 1; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+.pg-stat:last-child { border-right: none; }
+.pg-stat-num {
+  font-size: 18px; font-weight: 900; color: #FFFFFF;
+}
+.pg-stat-lbl {
+  font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 3px;
+}
+
+/* ── AI 智能体介绍区 ── */
+.agents-section {
+  margin: 0 var(--space-4) 20px;
+  position: relative; z-index: 10;
+}
+.agents-title {
+  font-size: 12px; color: rgba(255,255,255,0.4);
+  text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  margin-bottom: 10px;
+}
+.agents-row {
+  display: flex; gap: 8px;
+}
+.agent-card {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-md);
+  padding: 12px 10px;
+  text-align: center;
+}
+.agent-avatar {
+  font-size: 26px; margin-bottom: 6px;
+  display: block;
+}
+.agent-role {
+  font-size: 11px; color: rgba(255,255,255,0.7);
+  font-weight: 700; margin-bottom: 3px;
+}
+.agent-desc {
+  font-size: 10px; color: rgba(255,255,255,0.35);
+  line-height: 1.4;
+}
+
+/* ── 连接动画状态 ── */
+.connect-status {
+  margin: 0 var(--space-4) 16px;
+  position: relative; z-index: 10;
+}
+.cs-log {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: none;
+}
+.cs-log.show { display: block; }
+.cs-log-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: rgba(255,255,255,0.6);
+  padding: 4px 0;
+}
+.cs-log-item.done  { color: #86EFAC; }
+.cs-log-item.active{ color: #C4B5FD; }
+.cs-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.cs-dot.done   { background: #4ADE80; }
+.cs-dot.active { background: #A78BFA; animation: breathe 1.2s infinite; }
+.cs-dot.idle   { background: rgba(255,255,255,0.2); }
+@keyframes breathe {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%     { opacity:0.4; transform:scale(0.7); }
+}
+
+/* ── 主按钮 ── */
+.enter-btn {
+  margin: 0 var(--space-4) 16px;
+  position: relative; z-index: 10;
+}
+.btn-enter-maic {
+  width: 100%; height: 58px;
+  background: linear-gradient(135deg, #4A0E8F 0%, #7C3AED 50%, #9C27B0 100%);
+  border: none; border-radius: var(--radius-lg);
+  font-size: 18px; font-weight: 900; color: white;
+  cursor: pointer; touch-action: manipulation;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  letter-spacing: 0.3px;
+  box-shadow:
+    0 8px 30px rgba(124,58,237,0.45),
+    0 0 0 1px rgba(255,255,255,0.08);
+  transition: all var(--duration-fast);
+}
+.btn-enter-maic:active {
+  transform: scale(0.97);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.35);
+}
+.btn-enter-maic.loading {
+  background: linear-gradient(135deg, #2D1B69, #4A0E8F);
+  pointer-events: none;
+}
+.btn-enter-maic .btn-spinner {
+  width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white; border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: none;
+}
+.btn-enter-maic.loading .btn-spinner { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.btn-enter-maic .btn-icon { font-size: 22px; }
+.btn-enter-maic .btn-text { font-size: 17px; font-weight: 800; }
+.btn-enter-maic.loading .btn-icon { display: none; }
+
+/* ── 提示文字 ── */
+.enter-tips {
+  text-align: center; padding: 0 var(--space-4) 40px;
+  position: relative; z-index: 10;
+}
+.et-row {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 12px; color: rgba(255,255,255,0.25);
+  margin-bottom: 6px;
+}
+.et-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+}
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+
+<div class="status-bar" style="background:#0F0A1E;">
+  <span class="time" style="color:rgba(255,255,255,0.7);">9:41</span>
+  <span class="icons" style="color:rgba(255,255,255,0.4);">📶 🔋</span>
+</div>
+
+<!-- 顶部 -->
+<div class="top-bar animate-in">
+  <div class="top-back" onclick="history.back()">←</div>
+  <div class="top-title">AI 互动课堂</div>
+  <div class="top-badge">OpenMAIC</div>
+</div>
+
+<!-- 课程信息 -->
+<div class="course-info animate-in animate-in-d1">
+  <span class="ci-emoji">🎨</span>
+  <div class="ci-title">儿童水彩零基础：向日葵的色彩</div>
+  <div class="ci-meta">王建国老师定制 · AI生成课件 · 6个场景</div>
+  <div class="ci-tags">
+    <span class="ci-tag">🤖 AI多智能体</span>
+    <span class="ci-tag">🎨 绘画</span>
+    <span class="ci-tag">⏱ 约45分钟</span>
+    <span class="ci-tag">🆓 免费</span>
+  </div>
+</div>
+
+<!-- 学习进度 -->
+<div class="progress-glass animate-in animate-in-d2">
+  <div class="pg-title">你的学习进度</div>
+  <div class="pg-scenes">
+    <div class="pg-scene done"></div>
+    <div class="pg-scene done"></div>
+    <div class="pg-scene done"></div>
+    <div class="pg-scene done"></div>
+    <div class="pg-scene active"></div>
+    <div class="pg-scene"></div>
+  </div>
+  <div class="pg-stats">
+    <div class="pg-stat">
+      <div class="pg-stat-num">4/6</div>
+      <div class="pg-stat-lbl">已完成场景</div>
+    </div>
+    <div class="pg-stat">
+      <div class="pg-stat-num" style="color:#E9D5FF;">88</div>
+      <div class="pg-stat-lbl">测验平均分</div>
+    </div>
+    <div class="pg-stat">
+      <div class="pg-stat-num" style="color:#A7F3D0;">36分</div>
+      <div class="pg-stat-lbl">已学时长</div>
+    </div>
+  </div>
+</div>
+
+<!-- AI 智能体介绍 -->
+<div class="agents-section animate-in animate-in-d2">
+  <div class="agents-title">课堂 AI 阵容</div>
+  <div class="agents-row">
+    <div class="agent-card">
+      <span class="agent-avatar">👩‍🏫</span>
+      <div class="agent-role">AI 教师</div>
+      <div class="agent-desc">主讲内容<br>白板演示</div>
+    </div>
+    <div class="agent-card">
+      <span class="agent-avatar">🧑‍💼</span>
+      <div class="agent-role">AI 助教</div>
+      <div class="agent-desc">补充说明<br>答疑解惑</div>
+    </div>
+    <div class="agent-card">
+      <span class="agent-avatar">👦</span>
+      <div class="agent-role">AI 同学</div>
+      <div class="agent-desc">互动讨论<br>模拟提问</div>
+    </div>
+    <div class="agent-card">
+      <span class="agent-avatar">🎤</span>
+      <div class="agent-role">TTS 朗读</div>
+      <div class="agent-desc">语音讲解<br>情景播报</div>
+    </div>
+  </div>
+</div>
+
+<!-- 连接日志（点击按钮后显示）-->
+<div class="connect-status">
+  <div class="cs-log" id="connectLog">
+    <div class="cs-log-item" id="log1">
+      <div class="cs-dot idle" id="dot1"></div>
+      <span>验证学习权限...</span>
+    </div>
+    <div class="cs-log-item" id="log2">
+      <div class="cs-dot idle" id="dot2"></div>
+      <span>获取AI课堂访问凭证...</span>
+    </div>
+    <div class="cs-log-item" id="log3">
+      <div class="cs-dot idle" id="dot3"></div>
+      <span>连接 OpenMAIC 服务器...</span>
+    </div>
+    <div class="cs-log-item" id="log4">
+      <div class="cs-dot idle" id="dot4"></div>
+      <span>加载课件场景 5/6...</span>
+    </div>
+    <div class="cs-log-item" id="log5">
+      <div class="cs-dot idle" id="dot5"></div>
+      <span>初始化 AI 智能体阵容...</span>
+    </div>
+  </div>
+</div>
+
+<!-- 进入按钮 -->
+<div class="enter-btn">
+  <button class="btn-enter-maic" id="enterBtn" onclick="enterClassroom()">
+    <div class="btn-spinner"></div>
+    <span class="btn-icon">🚀</span>
+    <span class="btn-text">进入 AI 课堂</span>
+  </button>
+</div>
+
+<!-- 提示 -->
+<div class="enter-tips animate-in animate-in-d3">
+  <div class="et-row">
+    <div class="et-dot"></div>
+    <span>由 OpenMAIC (清华大学) 提供技术支持</span>
+    <div class="et-dot"></div>
+  </div>
+  <div class="et-row">
+    <div class="et-dot"></div>
+    <span>课堂结束后学习进度自动同步回竞赛通</span>
+    <div class="et-dot"></div>
+  </div>
+</div>
+
+<script>
+const steps = [
+  { id: 1, text: '验证学习权限...', doneText: '✓ 权限验证通过', delay: 0 },
+  { id: 2, text: '获取AI课堂访问凭证...', doneText: '✓ SSO Token 已签发', delay: 600 },
+  { id: 3, text: '连接 OpenMAIC 服务器...', doneText: '✓ 连接成功（延迟 28ms）', delay: 1300 },
+  { id: 4, text: '加载课件场景 5/6...', doneText: '✓ 场景已加载', delay: 2100 },
+  { id: 5, text: '初始化 AI 智能体阵容...', doneText: '✓ 4个AI智能体就绪', delay: 2900 },
+];
+
+function enterClassroom() {
+  const btn = document.getElementById('enterBtn');
+  btn.classList.add('loading');
+  btn.querySelector('.btn-text').textContent = '正在连接AI课堂...';
+
+  // 显示日志
+  document.getElementById('connectLog').classList.add('show');
+
+  steps.forEach((step, i) => {
+    // 激活当前步骤
+    setTimeout(() => {
+      const dot = document.getElementById('dot' + step.id);
+      const log = document.getElementById('log'  + step.id);
+      dot.className = 'cs-dot active';
+      log.className = 'cs-log-item active';
+    }, step.delay);
+
+    // 当前步骤完成
+    const doneDelay = step.delay + 450;
+    setTimeout(() => {
+      const dot = document.getElementById('dot' + step.id);
+      const log = document.getElementById('log'  + step.id);
+      dot.className = 'cs-dot done';
+      log.className = 'cs-log-item done';
+      log.querySelector('span').textContent = step.doneText;
+    }, doneDelay);
+  });
+
+  // 最后跳转（实际为 window.location.href = maicUrl + '?token=' + ssoToken）
+  setTimeout(() => {
+    btn.querySelector('.btn-text').textContent = '🎉 课堂已就绪，正在跳转...';
+    setTimeout(() => {
+      // 实际部署时替换为: window.location.href = maicClassroomUrl;
+      showToast('🤖 OpenMAIC AI课堂正在独立窗口加载…');
+    }, 600);
+  }, 3600);
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+    background:rgba(74,14,143,0.92);color:#fff;padding:12px 22px;border-radius:12px;
+    font-size:13px;font-weight:600;z-index:9999;border:1px solid rgba(167,139,250,0.4);
+    box-shadow:0 8px 24px rgba(0,0,0,0.5);white-space:nowrap;
+    animation:fadeUp 0.3s ease;`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+</script>
+</body>
+</html>

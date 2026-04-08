@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.order.mapper.PaymentRecordMapperExt">
+
+    <resultMap id="PaymentRecordResult" type="com.ruoyi.jst.order.domain.JstPaymentRecord">
+        <result property="paymentId" column="payment_id"/>
+        <result property="paymentNo" column="payment_no"/>
+        <result property="orderId" column="order_id"/>
+        <result property="payMethod" column="pay_method"/>
+        <result property="cashAmount" column="cash_amount"/>
+        <result property="pointsAmount" column="points_amount"/>
+        <result property="pointsUsed" column="points_used"/>
+        <result property="thirdPartyNo" column="third_party_no"/>
+        <result property="voucherUrl" column="voucher_url"/>
+        <result property="voucherAuditStatus" column="voucher_audit_status"/>
+        <result property="payStatus" column="pay_status"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <select id="selectLatestByOrderId" resultMap="PaymentRecordResult">
+        select *
+        from jst_payment_record
+        where order_id = #{orderId}
+          and del_flag = '0'
+        order by payment_id desc
+        limit 1
+    </select>
+</mapper>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.order.mapper.lookup.PointsLookupMapper">
+
+    <select id="selectPointsSnapshot" resultType="map">
+        select u.user_id as userId,
+               u.available_points as userAvailablePoints,
+               u.frozen_points as userFrozenPoints,
+               a.account_id as accountId,
+               a.available_points as accountAvailablePoints,
+               a.frozen_points as accountFrozenPoints,
+               a.version as version
+        from jst_user u
+        left join jst_points_account a
+               on a.owner_type = 'student'
+              and a.owner_id = u.user_id
+              and a.del_flag = '0'
+        where u.user_id = #{userId}
+          and u.del_flag = '0'
+        limit 1
+    </select>
+
+    <insert id="insertPointsAccount">
+        insert into jst_points_account (
+            owner_type, owner_id, available_points, frozen_points, total_earn, total_spend,
+            version, create_by, create_time, del_flag
+        ) values (
+            'student', #{userId}, #{availablePoints}, #{frozenPoints}, 0, 0,
+            0, #{createBy}, #{createTime}, '0'
+        )
+    </insert>
+
+    <update id="freezePointsAccount">
+        update jst_points_account
+        set available_points = available_points - #{points},
+            frozen_points = frozen_points + #{points},
+            version = version + 1,
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where account_id = #{accountId}
+          and version = #{version}
+          and available_points >= #{points}
+          and del_flag = '0'
+    </update>
+
+    <update id="spendPointsAccount">
+        update jst_points_account
+        set frozen_points = frozen_points - #{points},
+            total_spend = total_spend + #{points},
+            version = version + 1,
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where account_id = #{accountId}
+          and version = #{version}
+          and frozen_points >= #{points}
+          and del_flag = '0'
+    </update>
+
+    <update id="unfreezePointsAccount">
+        update jst_points_account
+        set available_points = available_points + #{points},
+            frozen_points = frozen_points - #{points},
+            version = version + 1,
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where account_id = #{accountId}
+          and version = #{version}
+          and frozen_points >= #{points}
+          and del_flag = '0'
+    </update>
+
+    <update id="freezeUserPoints">
+        update jst_user
+        set available_points = available_points - #{points},
+            frozen_points = frozen_points + #{points},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where user_id = #{userId}
+          and available_points = #{expectedAvailable}
+          and frozen_points = #{expectedFrozen}
+          and del_flag = '0'
+    </update>
+
+    <update id="spendUserPoints">
+        update jst_user
+        set frozen_points = frozen_points - #{points},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where user_id = #{userId}
+          and available_points = #{expectedAvailable}
+          and frozen_points = #{expectedFrozen}
+          and del_flag = '0'
+    </update>
+
+    <update id="unfreezeUserPoints">
+        update jst_user
+        set available_points = available_points + #{points},
+            frozen_points = frozen_points - #{points},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where user_id = #{userId}
+          and available_points = #{expectedAvailable}
+          and frozen_points = #{expectedFrozen}
+          and del_flag = '0'
+    </update>
+
+    <insert id="insertPointsLedger">
+        insert into jst_points_ledger (
+            account_id, owner_type, owner_id, change_type, source_type, source_ref_id,
+            points_change, balance_after, operator_id, create_by, create_time, del_flag, remark
+        ) values (
+            #{accountId}, #{ownerType}, #{ownerId}, #{changeType}, #{sourceType}, #{sourceRefId},
+            #{pointsChange}, #{balanceAfter}, #{operatorId}, #{createBy}, #{createTime}, '0', #{remark}
+        )
+    </insert>
+</mapper>

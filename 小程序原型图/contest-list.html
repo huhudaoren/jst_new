@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>赛事列表 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+
+/* 顶部搜索 + 筛选吸顶 */
+.list-sticky {
+  position: sticky; top: 44px; z-index: 40;
+  background: var(--c-white);
+  box-shadow: var(--shadow-xs);
+}
+.list-search-bar {
+  padding: 10px var(--space-4) 8px;
+  display: flex; gap: 10px; align-items: center;
+}
+.list-search-bar .search-bar { flex: 1; }
+.filter-btn {
+  width: 44px; height: 44px; border-radius: var(--radius-md);
+  background: var(--c-gray-50); border: 1.5px solid var(--c-gray-100);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; flex-shrink: 0;
+  touch-action: manipulation; position: relative;
+  transition: all var(--duration-fast) ease;
+}
+.filter-btn.active { background: var(--c-primary-50); border-color: var(--c-primary-400); }
+.filter-badge {
+  position: absolute; top: -4px; right: -4px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--c-accent); color: white;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* 分类 Tab 横滑 */
+.cat-tabs {
+  display: flex; overflow-x: auto; gap: 0;
+  padding: 0 var(--space-4) 0;
+  border-top: 1px solid var(--c-gray-100);
+}
+.cat-tabs::-webkit-scrollbar { display: none; }
+.cat-tab {
+  padding: 10px 14px; font-size: 14px; font-weight: 500;
+  color: var(--c-gray-500); cursor: pointer; white-space: nowrap;
+  position: relative; flex-shrink: 0;
+  touch-action: manipulation;
+  transition: color var(--duration-fast) ease;
+}
+.cat-tab.active { color: var(--c-primary-600); font-weight: 700; }
+.cat-tab.active::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 14px; right: 14px;
+  height: 2px; background: var(--c-primary-600); border-radius: 1px;
+}
+
+/* 状态筛选胶囊 */
+.filter-pills {
+  display: flex; gap: 6px; overflow-x: auto;
+  padding: 8px var(--space-4);
+  border-top: 1px solid var(--c-gray-100);
+}
+.filter-pills::-webkit-scrollbar { display: none; }
+.filter-pill {
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--c-gray-100);
+  font-size: 12px; font-weight: 500;
+  color: var(--c-gray-700); background: var(--c-white);
+  cursor: pointer; flex-shrink: 0; white-space: nowrap;
+  touch-action: manipulation;
+  transition: all var(--duration-fast) ease;
+}
+.filter-pill.active {
+  background: var(--c-primary-50);
+  border-color: var(--c-primary-400);
+  color: var(--c-primary-600); font-weight: 700;
+}
+.filter-pill:active { transform: scale(0.95); }
+
+/* 结果数量 + 排序 */
+.list-result-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px var(--space-4);
+}
+.result-count { font-size: 13px; color: var(--c-gray-500); }
+.result-count strong { color: var(--c-primary-600); }
+.sort-btn {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 13px; color: var(--c-gray-700); font-weight: 500;
+  cursor: pointer; touch-action: manipulation;
+}
+
+/* 赛事列表项 */
+.contest-item {
+  display: flex; gap: 12px;
+  padding: 14px var(--space-4);
+  background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.contest-item:active { background: var(--c-gray-50); }
+.ci-thumb {
+  width: 76px; height: 76px; border-radius: var(--radius-md);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 30px; position: relative; overflow: hidden;
+}
+.ci-thumb::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 70% 25%, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+.ci-body { flex: 1; min-width: 0; }
+.ci-title {
+  font-size: 14px; font-weight: 600; color: var(--c-gray-900);
+  line-height: 1.4; margin-bottom: 6px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.ci-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 7px; }
+.ci-footer { display: flex; justify-content: space-between; align-items: center; }
+.ci-price { font-size: 15px; font-weight: 700; color: var(--c-accent); }
+.ci-price.free { color: var(--c-success); }
+.ci-deadline { font-size: 11px; color: var(--c-gray-500); }
+
+/* 分类 section 标题 */
+.list-section-label {
+  padding: 14px var(--space-4) 8px;
+  font-size: 12px; font-weight: 700;
+  color: var(--c-gray-500); letter-spacing: 0.5px; text-transform: uppercase;
+  background: var(--c-gray-50);
+}
+
+/* 筛选弹层 */
+.filter-sheet-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,31,46,0.5);
+  z-index: 200; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.filter-sheet-overlay.show { opacity: 1; pointer-events: all; }
+.filter-sheet {
+  position: fixed; bottom: 0; left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 390px;
+  background: var(--c-white);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  z-index: 201;
+  transition: transform 0.3s var(--ease-out);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.filter-sheet-overlay.show .filter-sheet { transform: translateX(-50%) translateY(0); }
+.filter-handle {
+  width: 36px; height: 4px; background: var(--c-gray-100);
+  border-radius: 2px; margin: 12px auto 0;
+}
+.filter-sheet-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px var(--space-5) 10px;
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.filter-sheet-title { font-size: 16px; font-weight: 700; color: var(--c-gray-900); }
+.filter-reset { font-size: 14px; color: var(--c-gray-500); cursor: pointer; }
+.filter-group { padding: 16px var(--space-5) 0; }
+.filter-group-title { font-size: 13px; font-weight: 700; color: var(--c-gray-700); margin-bottom: 10px; }
+.filter-tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.filter-tag {
+  padding: 7px 14px; border-radius: var(--radius-full);
+  border: 1.5px solid var(--c-gray-100);
+  font-size: 13px; font-weight: 500; color: var(--c-gray-700);
+  cursor: pointer; touch-action: manipulation;
+  transition: all var(--duration-fast) ease;
+}
+.filter-tag.selected { background: var(--c-primary-50); border-color: var(--c-primary-400); color: var(--c-primary-600); font-weight: 700; }
+.filter-sheet-footer {
+  padding: 14px var(--space-5);
+  display: flex; gap: 10px;
+  border-top: 1px solid var(--c-gray-100); margin-top: 16px;
+}
+
+/* 空状态 */
+.list-empty {
+  padding: 60px 24px; text-align: center; display: none;
+}
+.list-empty-icon { font-size: 52px; margin-bottom: 14px; opacity: 0.6; }
+.list-empty-title { font-size: 16px; font-weight: 700; color: var(--c-gray-700); margin-bottom: 8px; }
+.list-empty-desc { font-size: 14px; color: var(--c-gray-500); }
+
+/* 加载更多 */
+.load-more {
+  text-align: center; padding: 16px;
+  font-size: 14px; color: var(--c-primary-600); font-weight: 500;
+  cursor: pointer; touch-action: manipulation;
+}
+.load-more.loading { color: var(--c-gray-300); pointer-events: none; }
+</style>
+</head>
+<body class="has-tabbar">
+
+<div class="status-bar" style="background:var(--c-primary);">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<!-- 吸顶区域 -->
+<div class="list-sticky animate-in">
+  <div class="list-search-bar">
+    <div class="search-bar" style="flex:1;">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="搜索赛事名称、学科..." readonly onclick="location.href='search.html'">
+    </div>
+    <div class="filter-btn" id="filterBtn" onclick="toggleFilter()">
+      🎛️
+      <div class="filter-badge" id="filterBadge" style="display:none;">2</div>
+    </div>
+  </div>
+
+  <!-- 分类 Tab -->
+  <div class="cat-tabs" id="catTabs">
+    <div class="cat-tab active" onclick="switchCat(this,'all')">全部</div>
+    <div class="cat-tab" onclick="switchCat(this,'art')">艺术</div>
+    <div class="cat-tab" onclick="switchCat(this,'music')">音乐</div>
+    <div class="cat-tab" onclick="switchCat(this,'dance')">舞蹈</div>
+    <div class="cat-tab" onclick="switchCat(this,'paint')">美术</div>
+    <div class="cat-tab" onclick="switchCat(this,'drama')">朗诵/戏剧</div>
+    <div class="cat-tab" onclick="switchCat(this,'culture')">文化</div>
+    <div class="cat-tab" onclick="switchCat(this,'science')">科技</div>
+    <div class="cat-tab" onclick="switchCat(this,'sport')">体育</div>
+  </div>
+
+  <!-- 状态筛选胶囊 -->
+  <div class="filter-pills">
+    <div class="filter-pill active" onclick="switchPill(this,'all')">全部</div>
+    <div class="filter-pill" onclick="switchPill(this,'enrolling')">报名中</div>
+    <div class="filter-pill" onclick="switchPill(this,'coming')">即将开始</div>
+    <div class="filter-pill" onclick="switchPill(this,'online')">线上赛事</div>
+    <div class="filter-pill" onclick="switchPill(this,'offline')">线下赛事</div>
+    <div class="filter-pill" onclick="switchPill(this,'free')">免费</div>
+    <div class="filter-pill" onclick="switchPill(this,'primary')">小学组</div>
+    <div class="filter-pill" onclick="switchPill(this,'junior')">初中组</div>
+    <div class="filter-pill" onclick="switchPill(this,'high')">高中组</div>
+  </div>
+</div>
+
+<!-- 结果栏 -->
+<div class="list-result-bar animate-in animate-in-d1">
+  <div class="result-count">共找到 <strong>42</strong> 个赛事</div>
+  <div class="sort-btn" onclick="toggleSort()">综合排序 ▾</div>
+</div>
+
+<!-- 赛事列表 -->
+<div id="contestList" class="animate-in animate-in-d1">
+
+  <!-- 置顶赛事 -->
+  <div class="list-section-label">🔥 热门推荐</div>
+
+  <div class="contest-item" onclick="location.href='contest-detail.html'">
+    <div class="ci-thumb" style="background:linear-gradient(135deg,#4A0E8F,#9C27B0);">🏆</div>
+    <div class="ci-body">
+      <div class="ci-title">安徒生(国际)艺术奖</div>
+      <div class="ci-tags">
+        <span class="tag tag-primary">艺术</span>
+        <span class="tag tag-gray">全学段</span>
+        <span class="tag tag-info">线上+线下</span>
+        <span class="tag tag-gold">⭐ 国际赛事</span>
+      </div>
+      <div class="ci-footer">
+        <span class="ci-price">¥180</span>
+        <span class="ci-deadline">截止 2025-12-20</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="contest-item" onclick="location.href='contest-detail.html'">
+    <div class="ci-thumb" style="background:linear-gradient(135deg,#B71C1C,#E53935);">🏟️</div>
+    <div class="ci-body">
+      <div class="ci-title">"鸟巢杯"文化艺术活动</div>
+      <div class="ci-tags">
+        <span class="tag tag-primary">艺术</span>
+        <span class="tag tag-gray">小学/初中</span>
+        <span class="tag tag-accent">报名中</span>
+      </div>
+      <div class="ci-footer">
+        <span class="ci-price">¥150</span>
+        <span class="ci-deadline">截止 2025-11-30</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="list-section-label">📋 最新上架</div>
+
+  <div class="contest-item" onclick="location.href='contest-detail.html'">
+    <div class="ci-thumb" style="background:linear-gradient(135deg,#1A237E,#3949AB);">🎭</div>
+    <div class="ci-body">
+      <div class="ci-title">人民艺术全国展演活动</div>
+      <div class="ci-tags">
+        <span class="tag tag-primary">艺术</span>
+        <span class="tag tag-gray">全学段</span>
+        <span class="tag tag-success tag-dot">报名中</span>
+      </div>
+      <div class="ci-footer">
+        <span class="ci-price free">免费</span>
+        <span class="ci-deadline">截止 2026-01-15</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="contest-item" onclick="location.href='contest-detail.html'">
+    <div class="ci-thumb" style="background:linear-gradient(135deg,#004D40,#00897B);">🎨</div>
+    <div class="ci-body">
+      <div class="ci-title">全国中小学生艺术展演活动2025</div>
+      <div class="ci-tags">
+        <span class="tag tag-primary">美术</span>
+        <span class="tag tag-gray">小学/初中</span>
+        <span class="tag tag-info">线下</span>
+      </div>
+      <div class="ci-footer">
+        <span class="ci-price">¥60</span>
+        <span class="ci-deadline">截止 2025-11-30</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="contest-item" onclick="location.href='contest-detail.html'">
+    <div class="ci-thumb" style="background:linear-gradient(135deg,#880E4F,#E91E63);">🎵</div>
+    <div class="ci-body">
+      <div class="ci-title">全国青少年音乐素养大赛2025</div>
+      <div class="ci-tags">
+        <span class="tag tag-primary">音乐</span>
+        <span class="tag tag-gray">小学/初中</span>
+        <span class="tag tag-accent">报名中</span>
+      </div>
+      <div class="ci-footer">
+        <span class="ci-price">¥80</span>
+        <span class="ci-deadline">截止 2025-12-01</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="contest-item" onclick="location.href='contest-detail.html'">
+    <div class="ci-thumb" style="background:linear-gradient(135deg,#F57F17,#FFB300);">💃</div>
+    <div class="ci-body">
+      <div class="ci-title">全国少儿舞蹈展演大赛2025</div>
+      <div class="ci-tags">
+        <span class="tag tag-primary">舞蹈</span>
+        <span class="tag tag-gray">小学组</span>
+        <span class="tag tag-info">线下</span>
+      </div>
+      <div class="ci-footer">
+        <span class="ci-price">¥100</span>
+        <span class="ci-deadline">截止 2025-11-15</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="contest-item" onclick="location.href='contest-detail.html'">
+    <div class="ci-thumb" style="background:linear-gradient(135deg,#37474F,#78909C);">🗣️</div>
+    <div class="ci-body">
+      <div class="ci-title">全国中小学生朗诵艺术节</div>
+      <div class="ci-tags">
+        <span class="tag tag-primary">朗诵</span>
+        <span class="tag tag-gray">小学/初中</span>
+        <span class="tag tag-info">线上</span>
+      </div>
+      <div class="ci-footer">
+        <span class="ci-price">¥50</span>
+        <span class="ci-deadline">截止 2025-12-10</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="contest-item" onclick="location.href='contest-detail.html'">
+    <div class="ci-thumb" style="background:linear-gradient(135deg,#33691E,#7CB342);">✏️</div>
+    <div class="ci-body">
+      <div class="ci-title">全国青少年书法大赛2025</div>
+      <div class="ci-tags">
+        <span class="tag tag-primary">美术</span>
+        <span class="tag tag-gray">小学/初中</span>
+        <span class="tag tag-info">线上</span>
+      </div>
+      <div class="ci-footer">
+        <span class="ci-price free">免费</span>
+        <span class="ci-deadline">截止 2025-11-20</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="contest-item" onclick="location.href='contest-detail.html'">
+    <div class="ci-thumb" style="background:linear-gradient(135deg,#004D40,#26A69A);">🎬</div>
+    <div class="ci-body">
+      <div class="ci-title">全国青少年科技创新大赛2025</div>
+      <div class="ci-tags">
+        <span class="tag tag-primary">科技</span>
+        <span class="tag tag-gray">初中组</span>
+        <span class="tag tag-info">线下</span>
+      </div>
+      <div class="ci-footer">
+        <span class="ci-price">¥120</span>
+        <span class="ci-deadline">截止 2025-09-30</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="load-more" id="loadMore" onclick="loadMoreItems()">加载更多 ↓</div>
+</div>
+
+<!-- 空状态（筛选无结果时显示） -->
+<div class="list-empty" id="listEmpty">
+  <div class="list-empty-icon">🔍</div>
+  <div class="list-empty-title">没有找到相关赛事</div>
+  <div class="list-empty-desc">试试换个关键词或调整筛选条件</div>
+</div>
+
+<!-- ===== 底部 Tab ===== -->
+<nav class="bottom-nav">
+  <div class="nav-tab" onclick="location.href='index.html'"><span class="nav-tab-icon">🏠</span><span class="nav-tab-label">首页</span></div>
+  <div class="nav-tab active" onclick="location.href='contest-list.html'"><span class="nav-tab-icon">🏆</span><span class="nav-tab-label" style="color:var(--c-primary-600);">赛事</span></div>
+  <div class="nav-tab" onclick="location.href='course-list.html'"><span class="nav-tab-icon">📚</span><span class="nav-tab-label">课程</span></div>
+  <div class="nav-tab" onclick="location.href='notice.html'"><span class="nav-tab-icon">📢</span><span class="nav-tab-label">公告</span></div>
+  <div class="nav-tab" onclick="location.href='my.html'"><span class="nav-tab-icon">👤</span><span class="nav-tab-label">我的</span></div>
+</nav>
+
+<!-- ===== 筛选弹层 ===== -->
+<div class="filter-sheet-overlay" id="filterOverlay" onclick="closeFilter()">
+  <div class="filter-sheet" onclick="event.stopPropagation()">
+    <div class="filter-handle"></div>
+    <div class="filter-sheet-header">
+      <div class="filter-sheet-title">筛选条件</div>
+      <div class="filter-reset" onclick="resetFilter()">重置</div>
+    </div>
+
+    <div style="overflow-y:auto;max-height:60vh;padding-bottom:8px;">
+      <div class="filter-group">
+        <div class="filter-group-title">学段 / 年级</div>
+        <div class="filter-tag-group">
+          <div class="filter-tag selected" onclick="toggleFilterTag(this)">不限</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">小学</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">初中</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">高中</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">大学</div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-title">比赛形式</div>
+        <div class="filter-tag-group">
+          <div class="filter-tag selected" onclick="toggleFilterTag(this)">不限</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">线上</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">线下</div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-title">报名状态</div>
+        <div class="filter-tag-group">
+          <div class="filter-tag selected" onclick="toggleFilterTag(this)">全部</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">报名中</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">即将开始</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">已截止</div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-title">费用</div>
+        <div class="filter-tag-group">
+          <div class="filter-tag selected" onclick="toggleFilterTag(this)">不限</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">免费</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">¥1–100</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">¥100–500</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">¥500以上</div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-title">地区</div>
+        <div class="filter-tag-group">
+          <div class="filter-tag selected" onclick="toggleFilterTag(this)">全国</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">广东</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">北京</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">上海</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">江苏</div>
+          <div class="filter-tag" onclick="toggleFilterTag(this)">浙江</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-sheet-footer">
+      <button class="btn btn-ghost btn-md" style="flex:1;" onclick="closeFilter()">取消</button>
+      <button class="btn btn-primary btn-md" style="flex:2;" onclick="applyFilter()">确认筛选</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchCat(el, cat) {
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function switchPill(el, type) {
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+function toggleFilter() {
+  document.getElementById('filterOverlay').classList.add('show');
+  document.getElementById('filterBtn').classList.add('active');
+}
+function closeFilter() {
+  document.getElementById('filterOverlay').classList.remove('show');
+  document.getElementById('filterBtn').classList.remove('active');
+}
+function applyFilter() {
+  const selected = document.querySelectorAll('.filter-tag.selected').length;
+  const badge = document.getElementById('filterBadge');
+  if (selected > 0) { badge.style.display = 'flex'; badge.textContent = selected; }
+  closeFilter();
+  showToast('筛选已应用');
+}
+function resetFilter() {
+  document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('selected'));
+  document.querySelector('.filter-tag').classList.add('selected');
+  document.getElementById('filterBadge').style.display = 'none';
+}
+function toggleFilterTag(el) {
+  el.classList.toggle('selected');
+}
+function toggleSort() { showToast('排序：综合排序 / 最新 / 价格'); }
+function loadMoreItems() {
+  const btn = document.getElementById('loadMore');
+  btn.classList.add('loading'); btn.textContent = '加载中...';
+  setTimeout(() => { btn.textContent = '已加载全部'; btn.style.color = 'var(--c-gray-300)'; btn.style.pointerEvents = 'none'; }, 1200);
+}
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
+}
+</script>
+</body>
+</html>

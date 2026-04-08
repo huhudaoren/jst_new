@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>赛事方登录 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:#0D1F0A;min-height:100vh;display:flex;flex-direction:column;padding-bottom:0;}
+.el-bg{position:fixed;inset:0;pointer-events:none;overflow:hidden;}
+.el-bg::before{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(27,94,32,.4) 0%,transparent 70%);}
+.el-bg::after{content:'';position:absolute;bottom:-60px;left:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(56,142,60,.25) 0%,transparent 70%);}
+.el-top{padding:16px var(--space-4) 0;position:relative;z-index:1;}
+.el-back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);font-size:18px;color:rgba(255,255,255,.7);cursor:pointer;touch-action:manipulation;}
+.el-logo{padding:28px var(--space-4) 20px;text-align:center;position:relative;z-index:1;}
+.el-logo-icon{width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#1B5E20,#43A047);display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto 14px;box-shadow:0 8px 24px rgba(27,94,32,.4);}
+.el-logo-name{font-size:22px;font-weight:900;color:white;letter-spacing:-0.5px;}
+.el-logo-sub{font-size:13px;color:rgba(255,255,255,.55);margin-top:4px;}
+.el-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(27,94,32,.35);border:1px solid rgba(56,142,60,.4);border-radius:var(--radius-full);padding:4px 12px;font-size:11px;font-weight:700;color:#81C784;margin-top:10px;}
+.el-form{flex:1;padding:8px var(--space-4) 0;position:relative;z-index:1;}
+.el-form-title{font-size:22px;font-weight:800;color:white;margin-bottom:5px;letter-spacing:-.3px;}
+.el-form-sub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:20px;}
+.dark-input-wrap{border:1.5px solid rgba(255,255,255,.12);border-radius:var(--radius-md);background:rgba(255,255,255,.06);display:flex;align-items:center;overflow:hidden;transition:border-color var(--duration-fast),box-shadow var(--duration-fast);margin-bottom:12px;}
+.dark-input-wrap:focus-within{border-color:rgba(56,142,60,.6);box-shadow:0 0 0 3px rgba(56,142,60,.15);}
+.dark-prefix{padding:0 14px;font-size:20px;flex-shrink:0;}
+.dark-input{flex:1;height:52px;background:transparent;border:none;outline:none;font-size:15px;color:white;font-family:var(--font-body);}
+.dark-input::placeholder{color:rgba(255,255,255,.3);}
+.captcha-row{display:flex;gap:10px;margin-bottom:20px;}
+.captcha-input-wrap{flex:1;border:1.5px solid rgba(255,255,255,.12);border-radius:var(--radius-md);background:rgba(255,255,255,.06);transition:border-color var(--duration-fast);}
+.captcha-input-wrap:focus-within{border-color:rgba(56,142,60,.6);}
+.captcha-input{width:100%;height:52px;background:transparent;border:none;outline:none;font-size:20px;font-weight:700;color:white;padding:0 14px;letter-spacing:6px;font-family:var(--font-body);}
+.captcha-box{width:110px;height:52px;border-radius:var(--radius-md);background:linear-gradient(135deg,#1B5E20,#43A047);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:white;letter-spacing:4px;cursor:pointer;flex-shrink:0;user-select:none;}
+.el-submit{width:100%;height:54px;background:linear-gradient(135deg,#1B5E20,#43A047);border:none;border-radius:var(--radius-md);font-size:17px;font-weight:800;color:white;cursor:pointer;touch-action:manipulation;box-shadow:0 6px 20px rgba(27,94,32,.4);}
+.el-submit:active{opacity:.9;}
+.el-footer{padding:16px var(--space-4) 32px;text-align:center;font-size:13px;color:rgba(255,255,255,.4);position:relative;z-index:1;}
+.el-footer a{color:#81C784;}
+</style>
+</head>
+<body>
+<div class="el-bg"></div>
+<div class="el-top"><div class="el-back" onclick="history.back()">←</div></div>
+<div class="el-logo">
+  <div class="el-logo-icon">🏟️</div>
+  <div class="el-logo-name">赛事方工作台</div>
+  <div class="el-logo-sub">竞赛通 · 赛事方专用入口</div>
+  <div><span class="el-badge">🔒 仅限已审核通过的赛事方</span></div>
+</div>
+<div class="el-form">
+  <div class="el-form-title">赛事方登录</div>
+  <div class="el-form-sub">使用平台分配的账号密码登录</div>
+  <div class="dark-input-wrap">
+    <div class="dark-prefix">🏢</div>
+    <input class="dark-input" type="text" placeholder="账号（平台分配）" value="artstar_bj">
+  </div>
+  <div class="dark-input-wrap">
+    <div class="dark-prefix">🔑</div>
+    <input class="dark-input" type="password" placeholder="密码" id="pwd" value="••••••••">
+    <div style="padding:0 14px;font-size:18px;cursor:pointer;color:rgba(255,255,255,.5);" onclick="togglePwd()">👁</div>
+  </div>
+  <div class="captcha-row">
+    <div class="captcha-input-wrap">
+      <input class="captcha-input" type="text" placeholder="验证码" maxlength="5">
+    </div>
+    <div class="captcha-box" onclick="refreshCaptcha(this)">K7M2P</div>
+  </div>
+  <button class="el-submit" onclick="doLogin()">登录工作台</button>
+</div>
+<div class="el-footer">
+  还没有账号？<a onclick="location.href='event-apply.html'">申请入驻</a> · 
+  <a onclick="showToast('请联系平台运营重置密码')">忘记密码</a>
+</div>
+<script>
+const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function refreshCaptcha(el){let s='';for(let i=0;i<5;i++)s+=chars[Math.floor(Math.random()*chars.length)];el.textContent=s;}
+function togglePwd(){const i=document.getElementById('pwd');i.type=i.type==='password'?'text':'password';}
+function doLogin(){showToast('登录成功，正在进入工作台…');setTimeout(()=>location.href='event-home.html',800);}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400);}
+</script>
+</body>
+</html>

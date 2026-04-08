@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>春季艺术大赛专题 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.hero-banner{position:relative;overflow:hidden;background:linear-gradient(150deg,#E65100 0%,#FF6F00 40%,#F5A623 100%);padding:20px var(--space-4);}
+.hero-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 30%,rgba(255,255,255,.1) 0%,transparent 55%);}
+.hb-nav{display:flex;align-items:center;gap:12px;position:relative;z-index:1;margin-bottom:16px;}
+.hb-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.hb-tag{background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.3);border-radius:var(--radius-full);padding:3px 12px;font-size:11px;font-weight:700;color:white;}
+.hb-title{font-size:26px;font-weight:900;color:white;line-height:1.2;margin-bottom:6px;position:relative;z-index:1;}
+.hb-sub{font-size:13px;color:rgba(255,255,255,.8);position:relative;z-index:1;margin-bottom:14px;}
+.countdown-row{display:flex;gap:8px;align-items:center;position:relative;z-index:1;}
+.cd-label{font-size:12px;color:rgba(255,255,255,.7);}
+.cd-block{background:rgba(0,0,0,.25);border-radius:var(--radius-xs);padding:4px 8px;font-size:16px;font-weight:900;color:white;}
+
+.coupon-grab{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);margin:12px 16px 0;overflow:hidden;}
+.cg-header{padding:14px 16px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--c-gray-100);}
+.cg-title{flex:1;font-size:14px;font-weight:700;color:var(--c-gray-900);}
+.coupon-grab-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--c-gray-100);}
+.coupon-grab-item:last-child{border-bottom:none;}
+.cgi-left{width:64px;height:48px;border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+.cgi-amount{font-size:20px;font-weight:900;color:white;line-height:1;}
+.cgi-unit{font-size:10px;color:rgba(255,255,255,.85);}
+.cgi-info{flex:1;}
+.cgi-name{font-size:13px;font-weight:700;color:var(--c-gray-900);}
+.cgi-rule{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+.cgi-btn{height:34px;padding:0 16px;border-radius:var(--radius-full);border:none;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;flex-shrink:0;}
+.btn-grab{background:var(--c-accent);color:white;}
+.btn-grabbed{background:var(--c-gray-50);color:var(--c-gray-400);}
+
+.contest-section{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px 16px 0;}
+.cs-header{padding:14px 16px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--c-gray-100);}
+.cs-title{flex:1;font-size:14px;font-weight:700;color:var(--c-gray-900);}
+.contest-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--c-gray-100);cursor:pointer;touch-action:manipulation;transition:background var(--duration-fast);}
+.contest-row:last-child{border-bottom:none;}
+.contest-row:active{background:var(--c-gray-50);}
+.cr-thumb{width:48px;height:48px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.cr-info{flex:1;}
+.cr-name{font-size:13px;font-weight:700;color:var(--c-gray-900);}
+.cr-meta{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+.cr-price{font-size:14px;font-weight:900;color:var(--c-accent);flex-shrink:0;}
+
+.rule-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px 16px 0;padding:16px;}
+.rule-title{font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:10px;}
+.rule-item{display:flex;gap:8px;font-size:13px;color:var(--c-gray-700);margin-bottom:8px;line-height:1.5;}
+.rule-item:last-child{margin-bottom:0;}
+.rule-num{width:20px;height:20px;border-radius:50%;background:var(--c-accent);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#E65100;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+
+<div class="hero-banner animate-in">
+  <div class="hb-nav">
+    <div class="hb-back" onclick="history.back()">←</div>
+    <div class="hb-tag">🎯 限时活动</div>
+  </div>
+  <div class="hb-title">春季艺术大赛<br>专题活动</div>
+  <div class="hb-sub">领券报名 · 最高直减 ¥50 · 多重优惠叠享</div>
+  <div class="countdown-row">
+    <div class="cd-label">距活动结束：</div>
+    <div class="cd-block" id="cd-d">12</div><div class="cd-label">天</div>
+    <div class="cd-block" id="cd-h">06</div><div class="cd-label">时</div>
+    <div class="cd-block" id="cd-m">30</div><div class="cd-label">分</div>
+  </div>
+</div>
+
+<!-- 领券区 -->
+<div class="coupon-grab animate-in animate-in-d1">
+  <div class="cg-header">
+    <div class="cg-title">🎟️ 活动专属券</div>
+    <span style="font-size:12px;color:var(--c-gray-500);">领取后 30 天内有效</span>
+  </div>
+  <div class="coupon-grab-item">
+    <div class="cgi-left" style="background:linear-gradient(135deg,var(--c-accent-600),var(--c-accent));">
+      <div class="cgi-amount">¥50</div>
+      <div class="cgi-unit">直减</div>
+    </div>
+    <div class="cgi-info">
+      <div class="cgi-name">春季报名直减券</div>
+      <div class="cgi-rule">无门槛 · 仅限本专题赛事</div>
+    </div>
+    <button class="cgi-btn btn-grab" onclick="grabCoupon(this,'50元直减券')">领取</button>
+  </div>
+  <div class="coupon-grab-item">
+    <div class="cgi-left" style="background:linear-gradient(135deg,#7B1FA2,#AB47BC);">
+      <div class="cgi-amount">9折</div>
+      <div class="cgi-unit">折扣</div>
+    </div>
+    <div class="cgi-info">
+      <div class="cgi-name">春季艺术折扣券</div>
+      <div class="cgi-rule">满 ¥100 可用 · 本专题任意赛事</div>
+    </div>
+    <button class="cgi-btn btn-grabbed" disabled>已领取</button>
+  </div>
+</div>
+
+<!-- 参与赛事 -->
+<div class="contest-section animate-in animate-in-d2">
+  <div class="cs-header">
+    <div class="cs-title">🏆 活动参与赛事</div>
+    <span style="font-size:12px;color:var(--c-gray-500);">共 3 场</span>
+  </div>
+  <div class="contest-row" onclick="location.href='contest-detail.html'">
+    <div class="cr-thumb" style="background:linear-gradient(135deg,#4A0E8F,#9C27B0);">🎨</div>
+    <div class="cr-info">
+      <div class="cr-name">安徒生(国际)艺术奖·春季赛</div>
+      <div class="cr-meta">2026-04-01 至 06-30 · 在线报名</div>
+    </div>
+    <div class="cr-price">¥180</div>
+  </div>
+  <div class="contest-row" onclick="location.href='contest-detail.html'">
+    <div class="cr-thumb" style="background:linear-gradient(135deg,#B71C1C,#E53935);">🏅</div>
+    <div class="cr-info">
+      <div class="cr-name">"鸟巢杯"文化艺术·春季展</div>
+      <div class="cr-meta">2026-03-20 至 05-31 · 线上+线下</div>
+    </div>
+    <div class="cr-price">¥150</div>
+  </div>
+  <div class="contest-row" onclick="location.href='contest-detail.html'">
+    <div class="cr-thumb" style="background:linear-gradient(135deg,#1A237E,#3949AB);">🎭</div>
+    <div class="cr-info">
+      <div class="cr-name">全国书法艺术展演·春季专场</div>
+      <div class="cr-meta">2026-04-10 至 07-10 · 在线报名</div>
+    </div>
+    <div class="cr-price">¥120</div>
+  </div>
+</div>
+
+<!-- 活动规则 -->
+<div class="rule-card animate-in animate-in-d3">
+  <div class="rule-title">📋 活动规则</div>
+  <div class="rule-item"><div class="rule-num">1</div><div>活动期间领取的直减券，仅限本专题活动赛事报名使用，不适用于其他赛事。</div></div>
+  <div class="rule-item"><div class="rule-num">2</div><div>每个账号每种类型优惠券限领 1 张，领取后 30 天内有效。</div></div>
+  <div class="rule-item"><div class="rule-num">3</div><div>优惠券与积分抵扣可叠加使用（优惠券优先核销）。</div></div>
+  <div class="rule-item"><div class="rule-num">4</div><div>订单全额退款后，优惠券按规则回退；部分退款不回退优惠券。</div></div>
+  <div class="rule-item"><div class="rule-num">5</div><div>竞赛通保留对本活动的最终解释权。</div></div>
+</div>
+
+<script>
+function grabCoupon(btn,name){
+  btn.textContent='已领取';btn.className='cgi-btn btn-grabbed';btn.disabled=true;
+  const t=document.createElement('div');t.className='toast';t.textContent='🎟️ '+name+'已领取，前往优惠券中心查看';
+  document.body.appendChild(t);setTimeout(()=>t.remove(),2400);
+}
+// 倒计时
+function updateCountdown(){
+  const end=new Date('2026-04-15T23:59:59');const now=new Date();
+  const diff=Math.max(0,end-now);
+  const d=Math.floor(diff/86400000);const h=Math.floor(diff%86400000/3600000);const m=Math.floor(diff%3600000/60000);
+  document.getElementById('cd-d').textContent=String(d).padStart(2,'0');
+  document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+  document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+}
+updateCountdown();setInterval(updateCountdown,60000);
+</script>
+</body>
+</html>

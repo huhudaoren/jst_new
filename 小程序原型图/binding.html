@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>绑定关系 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+.page-header { height:56px;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);display:flex;align-items:center;padding:0 var(--space-4);position:sticky;top:44px;z-index:40;box-shadow:var(--shadow-xs); }
+.back-btn { width:36px;height:36px;border-radius:var(--radius-sm);background:var(--c-gray-50);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;margin-right:12px;flex-shrink:0;touch-action:manipulation; }
+.back-btn:active { background:var(--c-gray-100); }
+.header-title { font-size:17px;font-weight:700;color:var(--c-gray-900);flex:1; }
+
+.content { padding:16px var(--space-4) 0; }
+
+/* 已绑定卡 */
+.bound-card {
+  background: linear-gradient(145deg,var(--c-primary) 0%,var(--c-primary-600) 100%);
+  border-radius:var(--radius-lg);padding:20px;
+  box-shadow:0 6px 20px rgba(12,61,107,.25);
+  position:relative;overflow:hidden;margin-bottom:12px;
+}
+.bound-card::before { content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.06); }
+.bound-label { font-size:11px;color:rgba(255,255,255,.65);letter-spacing:.8px;margin-bottom:10px;position:relative;z-index:1; }
+.bound-teacher-row { display:flex;align-items:center;gap:14px;position:relative;z-index:1; }
+.bound-avatar { width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#FFD54F,#FF8A65);display:flex;align-items:center;justify-content:center;font-size:24px;border:2.5px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.2);flex-shrink:0; }
+.bound-info { flex:1; }
+.bound-name { font-size:18px;font-weight:800;color:white;letter-spacing:-.3px; }
+.bound-school { font-size:12px;color:rgba(255,255,255,.7);margin-top:3px; }
+.bound-badges { display:flex;gap:6px;flex-wrap:wrap;margin-top:6px; }
+.bound-badge { display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.95);font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--radius-full); }
+.bound-time { font-size:11px;color:rgba(255,255,255,.5);margin-top:12px;position:relative;z-index:1; }
+
+/* 未绑定状态 */
+.unbound-card { background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);padding:32px 20px;text-align:center;margin-bottom:12px; }
+.unbound-icon { font-size:56px;opacity:.5;margin-bottom:16px; }
+.unbound-title { font-size:17px;font-weight:700;color:var(--c-gray-700);margin-bottom:8px; }
+.unbound-desc { font-size:13px;color:var(--c-gray-500);line-height:1.6;margin-bottom:20px; }
+
+/* 绑定方式 */
+.bind-methods { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px; }
+.bind-method { background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);padding:20px 14px;text-align:center;cursor:pointer;touch-action:manipulation;transition:all var(--duration-fast);border:2px solid transparent; }
+.bind-method:active { transform:scale(.97); }
+.bind-method.selected { border-color:var(--c-primary-400);background:var(--c-primary-50); }
+.bind-method-icon { font-size:36px;margin-bottom:10px; }
+.bind-method-name { font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:4px; }
+.bind-method-desc { font-size:11px;color:var(--c-gray-500);line-height:1.5; }
+
+/* 规则说明 */
+.rule-card { background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);padding:16px;margin-bottom:12px; }
+.rule-title { font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:12px;display:flex;align-items:center;gap:6px; }
+.rule-title::before { content:'';width:3px;height:14px;background:var(--c-primary-600);border-radius:2px;display:inline-block; }
+.rule-item { display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;font-size:13px;color:var(--c-gray-700);line-height:1.6; }
+.rule-item:last-child { margin-bottom:0; }
+.rule-icon { flex-shrink:0;font-size:14px;margin-top:1px; }
+
+/* 操作 Sheet */
+.action-sheet { position:fixed;inset:0;background:rgba(26,31,46,.55);z-index:200;display:none;align-items:flex-end;justify-content:center; }
+.action-sheet.show { display:flex; }
+.sheet-inner { background:var(--c-white);border-radius:var(--radius-xl) var(--radius-xl) 0 0;width:100%;max-width:390px;overflow:hidden;animation:sheet-up .3s var(--ease-out); }
+@keyframes sheet-up { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.sheet-handle { width:36px;height:4px;background:var(--c-gray-100);border-radius:2px;margin:12px auto 0; }
+.sheet-header { padding:14px 20px 12px;border-bottom:1px solid var(--c-gray-100); }
+.sheet-title { font-size:17px;font-weight:700;color:var(--c-gray-900); }
+.sheet-sub { font-size:12px;color:var(--c-gray-500);margin-top:3px; }
+.sheet-body { padding:16px 20px; }
+.sheet-footer { padding:8px 20px 28px; }
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:var(--c-primary);"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="page-header animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="header-title">绑定关系管理</div>
+</div>
+
+<div class="content" id="boundView">
+  <!-- 已绑定状态 -->
+  <div class="bound-card animate-in animate-in-d1">
+    <div class="bound-label">🔗 已绑定渠道方</div>
+    <div class="bound-teacher-row">
+      <div class="bound-avatar">👨‍🏫</div>
+      <div class="bound-info">
+        <div class="bound-name">王建国（渠道方）</div>
+        <div class="bound-school">广州市第二中学</div>
+        <div class="bound-badges">
+          <span class="bound-badge">✅ 渠道方</span>
+          <span class="bound-badge">📚 数学 · 物理</span>
+        </div>
+      </div>
+    </div>
+    <div class="bound-time">绑定时间：2025-09-15 · 绑定编号：BIND-20250915-0023</div>
+  </div>
+
+  <!-- 绑定说明 -->
+  <div style="background:var(--c-primary-50);border:1px solid var(--c-primary-200);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:12px;" class="animate-in animate-in-d1">
+    <div style="font-size:13px;color:var(--c-primary-600);font-weight:600;margin-bottom:6px;">💡 绑定后的效果</div>
+    <div style="font-size:12px;color:var(--c-gray-700);line-height:1.7;">您的报名订单将自动归属该渠道方，由其统一代报名和支付。<strong>历史订单归属以支付发生时的渠道方为准，即使您后续更换渠道方，历史订单不受影响。</strong></div>
+  </div>
+
+  <!-- 解绑操作 -->
+  <div style="background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);padding:16px;margin-bottom:12px;" class="animate-in animate-in-d2">
+    <div style="font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:10px;">绑定管理</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-outline btn-md" style="flex:1;" onclick="showScanSheet()">更换渠道方</button>
+      <button class="btn btn-danger btn-md" style="flex:1;" onclick="confirmUnbind()">解除绑定</button>
+    </div>
+    <div style="font-size:12px;color:var(--c-gray-500);margin-top:10px;line-height:1.6;">⚠️ 解绑后，新的报名将由您本人支付。历史订单记录保留不受影响。</div>
+  </div>
+
+  <!-- 规则说明 -->
+  <div class="rule-card animate-in animate-in-d2">
+    <div class="rule-title">绑定规则说明</div>
+    <div class="rule-item"><span class="rule-icon">🔒</span><span>每位学生<strong>只能绑定一个</strong>渠道方，如需更换需先解绑当前绑定关系</span></div>
+    <div class="rule-item"><span class="rule-icon">💳</span><span>绑定后的报名订单由渠道方统一支付，您无需单独缴费</span></div>
+    <div class="rule-item"><span class="rule-icon">📋</span><span>渠道方可为您代报名，报名信息需由您本人核对确认</span></div>
+    <div class="rule-item"><span class="rule-icon">🔓</span><span>解绑须联系平台客服处理；更换渠道方（扫新二维码）无需先解绑，系统自动替换</span></div>
+  </div>
+  <!-- 绑定历史记录 -->
+  <div style="background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin-bottom:12px;overflow:hidden;" class="animate-in animate-in-d3">
+    <div style="padding:14px 16px 10px;font-size:13px;font-weight:700;color:var(--c-gray-500);letter-spacing:.4px;border-bottom:1px solid var(--c-gray-100);">历史绑定记录</div>
+    <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--c-gray-100);">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#3F51B5,#5C6BC0);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;flex-shrink:0;">王</div>
+      <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--c-gray-900);">王建国（渠道方）</div><div style="font-size:12px;color:var(--c-gray-500);margin-top:2px;">当前绑定 · 2025-09-15 绑定</div></div>
+      <span class="tag tag-success tag-dot" style="flex-shrink:0;">当前</span>
+    </div>
+    <div style="padding:12px 16px;text-align:center;font-size:12px;color:var(--c-gray-500);">绑定关系自建立起完整保留，不受解绑影响</div>
+  </div>
+
+  <!-- 常见问题 -->
+  <div style="background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin-bottom:12px;overflow:hidden;" class="animate-in animate-in-d3">
+    <div style="padding:14px 16px 10px;font-size:13px;font-weight:700;color:var(--c-gray-500);letter-spacing:.4px;border-bottom:1px solid var(--c-gray-100);">常见问题</div>
+    <div style="padding:12px 16px;border-bottom:1px solid var(--c-gray-100);">
+      <div style="font-size:13px;font-weight:600;color:var(--c-gray-900);margin-bottom:4px;">解绑后历史报名记录会丢失吗？</div>
+      <div style="font-size:12px;color:var(--c-gray-500);line-height:1.6;">不会。解绑仅影响后续新报名的支付归属，历史报名记录和证书完整保留。</div>
+    </div>
+    <div style="padding:12px 16px;border-bottom:1px solid var(--c-gray-100);">
+      <div style="font-size:13px;font-weight:600;color:var(--c-gray-900);margin-bottom:4px;">我可以更换绑定渠道方吗？</div>
+      <div style="font-size:12px;color:var(--c-gray-500);line-height:1.6;">可以。扫描新渠道方二维码即可更换，<strong>历史订单归属不受影响</strong>，仍属于原渠道方。</div>
+    </div>
+    <div style="padding:12px 16px;">
+      <div style="font-size:13px;font-weight:600;color:var(--c-gray-900);margin-bottom:4px;">更换渠道方需要先解绑吗？</div>
+      <div style="font-size:12px;color:var(--c-gray-500);line-height:1.6;">不需要。直接扫描新渠道方的二维码，系统会自动将旧绑定标记为已替换，新绑定立即生效。</div>
+    </div>
+  </div>
+
+  <div style="height:20px;"></div>
+</div>
+
+<!-- 未绑定状态（默认隐藏） -->
+<div class="content" id="unboundView" style="display:none;">
+  <div class="unbound-card animate-in">
+    <div class="unbound-icon">🔗</div>
+    <div class="unbound-title">暂未绑定渠道方</div>
+    <div class="unbound-desc">绑定渠道方后，由其统一代报名和支付，享受渠道方专属报名服务。</div>
+    <button class="btn btn-primary btn-md" onclick="showScanSheet()">扫码绑定渠道方</button>
+  </div>
+
+  <div class="bind-methods animate-in animate-in-d1">
+    <div class="bind-method" onclick="showScanSheet()">
+      <div class="bind-method-icon">📷</div>
+      <div class="bind-method-name">扫码绑定</div>
+      <div class="bind-method-desc">扫描渠道方的专属绑定二维码</div>
+    </div>
+    <div class="bind-method" onclick="showCodeSheet()">
+      <div class="bind-method-icon">🔢</div>
+      <div class="bind-method-name">输入绑定码</div>
+      <div class="bind-method-desc">手动输入渠道方分享的绑定码</div>
+    </div>
+  </div>
+
+  <div class="rule-card animate-in animate-in-d2">
+    <div class="rule-title">绑定说明</div>
+    <div class="rule-item"><span class="rule-icon">✅</span><span>绑定后，老师可为您代报名赛事</span></div>
+    <div class="rule-item"><span class="rule-icon">💳</span><span>报名费由渠道方统一支付，支持对公转账</span></div>
+    <div class="rule-item"><span class="rule-icon">🔒</span><span>一个学生只能绑定一个渠道方</span></div>
+    <div class="rule-item"><span class="rule-icon">🔓</span><span>随时可以解绑，不影响历史报名记录</span></div>
+  </div>
+  <div style="height:20px;"></div>
+</div>
+
+<!-- 输入绑定码 Sheet -->
+<div class="action-sheet" id="codeSheet" onclick="closeSheet()">
+  <div class="sheet-inner" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">输入绑定码</div>
+      <div class="sheet-sub">老师的绑定码格式示例：WANG-2025-8832</div>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group">
+        <label class="form-label">绑定码 <span class="required">*</span></label>
+        <input class="form-input" id="bindCodeInput" type="text" placeholder="请输入老师提供的绑定码" style="letter-spacing:2px;font-weight:600;">
+      </div>
+      <div class="notice notice-info">
+        <span class="notice-icon">ℹ️</span>
+        <div>绑定码由您的老师在「老师工作台」中生成，请向老师索取。</div>
+      </div>
+    </div>
+    <div class="sheet-footer" style="display:flex;gap:10px;">
+      <button class="btn btn-ghost btn-md" style="flex:1;" onclick="closeSheet()">取消</button>
+      <button class="btn btn-primary btn-md" style="flex:2;" onclick="doBind()">确认绑定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 切换演示按钮（开发调试用） -->
+<div style="position:fixed;bottom:100px;left:16px;z-index:99;">
+  <button onclick="toggleView()" style="background:rgba(0,0,0,.5);color:white;border:none;border-radius:20px;padding:6px 14px;font-size:12px;cursor:pointer;">切换演示状态</button>
+</div>
+
+<script>
+let isBound = true;
+function toggleView() {
+  isBound = !isBound;
+  document.getElementById('boundView').style.display = isBound ? 'block' : 'none';
+  document.getElementById('unboundView').style.display = isBound ? 'none' : 'block';
+}
+function confirmUnbind() {
+  if(confirm('确认解除与王建国（渠道方）的绑定关系？\n\n解绑后，新的报名将由您本人支付，历史订单记录保留。')) {
+    showToast('已成功解绑');
+    setTimeout(() => toggleView(), 800);
+  }
+}
+function showScanSheet() { showToast('请使用微信扫一扫老师的绑定二维码'); }
+function showCodeSheet() { document.getElementById('codeSheet').classList.add('show'); }
+function closeSheet() { document.getElementById('codeSheet').classList.remove('show'); }
+function sendBindInvite() {
+  const inp = document.querySelector('#manualSheet input');
+  if(!inp || !inp.value.trim()) { showToast('请输入学生手机号'); return; }
+  closeSheet();
+  setTimeout(() => showToast('✓ 绑定邀请已发送，等待学生确认'), 300);
+}
+function doBind() {
+  const code = document.getElementById('bindCodeInput').value.trim();
+  if(!code) { showToast('请输入绑定码'); return; }
+  closeSheet();
+  setTimeout(() => { showToast('✅ 绑定成功！'); isBound=true; document.getElementById('boundView').style.display='block'; document.getElementById('unboundView').style.display='none'; }, 400);
+}
+function showToast(msg) {
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2200);
+}
+</script>
+</body>
+</html>

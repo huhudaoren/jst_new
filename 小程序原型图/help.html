@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>客服与帮助 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+.page-header { height:56px;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);display:flex;align-items:center;padding:0 var(--space-4);position:sticky;top:44px;z-index:40;box-shadow:var(--shadow-xs); }
+.back-btn { width:36px;height:36px;border-radius:var(--radius-sm);background:var(--c-gray-50);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;margin-right:12px;flex-shrink:0;touch-action:manipulation; }
+.back-btn:active { background:var(--c-gray-100); }
+.header-title { font-size:17px;font-weight:700;color:var(--c-gray-900);flex:1; }
+
+/* 搜索 */
+.search-wrap { padding:14px var(--space-4);background:var(--c-white);border-bottom:1px solid var(--c-gray-100); }
+
+/* 在线客服入口卡 */
+.cs-hero { background:linear-gradient(135deg,var(--c-primary) 0%,var(--c-primary-600) 100%);margin:14px var(--space-4) 0;border-radius:var(--radius-lg);padding:18px;display:flex;align-items:center;gap:14px;cursor:pointer;touch-action:manipulation;box-shadow:var(--shadow-md);position:relative;overflow:hidden; }
+.cs-hero::before { content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.06); }
+.cs-hero:active { opacity:.9; }
+.cs-icon { width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;border:1.5px solid rgba(255,255,255,.3); }
+.cs-info { flex:1;position:relative;z-index:1; }
+.cs-title { font-size:17px;font-weight:800;color:white;margin-bottom:3px; }
+.cs-sub { font-size:12px;color:rgba(255,255,255,.75); }
+.cs-online { display:inline-flex;align-items:center;gap:4px;background:rgba(39,174,96,.3);border:1px solid rgba(39,174,96,.5);color:rgba(255,255,255,.95);font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-full);margin-top:6px; }
+.cs-online::before { content:'';width:6px;height:6px;border-radius:50%;background:#27AE60; }
+
+/* 快捷联系方式 */
+.contact-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px var(--space-4) 0; }
+.contact-card { background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);padding:16px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;transition:all var(--duration-fast); }
+.contact-card:active { background:var(--c-gray-50);transform:scale(.97); }
+.contact-card-icon { font-size:32px; }
+.contact-card-name { font-size:13px;font-weight:700;color:var(--c-gray-900); }
+.contact-card-val { font-size:12px;color:var(--c-primary-600);font-weight:600; }
+
+/* FAQ */
+.faq-section { margin:14px var(--space-4) 0; }
+.section-title { font-size:16px;font-weight:700;color:var(--c-gray-900);margin-bottom:10px;display:flex;align-items:center;gap:6px; }
+.section-title::before { content:'';width:3px;height:16px;background:var(--c-primary-600);border-radius:2px;display:inline-block; }
+.faq-cats { display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;-webkit-overflow-scrolling:touch;padding-bottom:2px; }
+.faq-cats::-webkit-scrollbar { display:none; }
+.faq-cat { flex-shrink:0;height:30px;padding:0 14px;border:1.5px solid var(--c-gray-100);border-radius:var(--radius-full);background:var(--c-white);font-size:12px;font-weight:500;color:var(--c-gray-700);display:flex;align-items:center;cursor:pointer;touch-action:manipulation;white-space:nowrap;transition:all var(--duration-fast); }
+.faq-cat.active { border-color:var(--c-primary-400);background:var(--c-primary-50);color:var(--c-primary-600);font-weight:700; }
+.faq-card { background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);overflow:hidden;margin-bottom:10px; }
+.faq-item { border-bottom:1px solid var(--c-gray-100); }
+.faq-item:last-child { border-bottom:none; }
+.faq-q { display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;touch-action:manipulation;transition:background var(--duration-fast); }
+.faq-q:active { background:var(--c-gray-50); }
+.faq-q-text { font-size:14px;font-weight:600;color:var(--c-gray-900);flex:1;line-height:1.4;padding-right:8px; }
+.faq-icon { font-size:14px;color:var(--c-gray-400);flex-shrink:0;transition:transform var(--duration-fast); }
+.faq-item.open .faq-icon { transform:rotate(180deg); }
+.faq-a { font-size:13px;color:var(--c-gray-700);line-height:1.7;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;padding:0 16px; }
+.faq-item.open .faq-a { max-height:300px;padding-bottom:14px; }
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:var(--c-primary);"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="page-header animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="header-title">客服与帮助</div>
+</div>
+
+<div class="search-wrap animate-in animate-in-d1">
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="搜索常见问题..." oninput="filterFaq(this.value)">
+  </div>
+</div>
+
+<!-- 在线客服 -->
+<div class="cs-hero animate-in animate-in-d1" onclick="showToast('正在连接在线客服...')">
+  <div class="cs-icon">💬</div>
+  <div class="cs-info">
+    <div class="cs-title">在线客服</div>
+    <div class="cs-sub">平均响应时间 &lt; 3 分钟</div>
+    <span class="cs-online">在线服务中</span>
+  </div>
+  <span style="font-size:22px;color:rgba(255,255,255,.5);position:relative;z-index:1;">›</span>
+</div>
+
+<!-- 快捷联系 -->
+<div class="contact-grid animate-in animate-in-d2">
+  <div class="contact-card" onclick="showToast('拨打 400-888-0000')">
+    <div class="contact-card-icon">📞</div>
+    <div class="contact-card-name">电话客服</div>
+    <div class="contact-card-val">400-888-0000</div>
+    <div style="font-size:11px;color:var(--c-gray-500);">工作日 9:00-18:00</div>
+  </div>
+  <div class="contact-card" onclick="showToast('微信扫码联系客服')">
+    <div class="contact-card-icon">📱</div>
+    <div class="contact-card-name">微信客服</div>
+    <div class="contact-card-val">jst_service</div>
+    <div style="font-size:11px;color:var(--c-gray-500);">扫码添加好友</div>
+  </div>
+  <div class="contact-card" onclick="showToast('发送邮件至 service@jst.edu')">
+    <div class="contact-card-icon">📧</div>
+    <div class="contact-card-name">邮件客服</div>
+    <div class="contact-card-val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0c7f697e7a656f694c667f7822696879">[email&#160;protected]</a></div>
+    <div style="font-size:11px;color:var(--c-gray-500);">1个工作日回复</div>
+  </div>
+  <div class="contact-card" onclick="location.href='notice.html'">
+    <div class="contact-card-icon">📢</div>
+    <div class="contact-card-name">官方公告</div>
+    <div class="contact-card-val">查看最新通知</div>
+    <div style="font-size:11px;color:var(--c-gray-500);">公告与资讯</div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section animate-in animate-in-d2">
+  <div class="section-title">常见问题</div>
+  <div class="faq-cats">
+    <div class="faq-cat active" onclick="switchFaqCat(this,'all')">全部</div>
+    <div class="faq-cat" onclick="switchFaqCat(this,'enroll')">报名相关</div>
+    <div class="faq-cat" onclick="switchFaqCat(this,'pay')">支付相关</div>
+    <div class="faq-cat" onclick="switchFaqCat(this,'cert')">证书相关</div>
+    <div class="faq-cat" onclick="switchFaqCat(this,'bind')">绑定相关</div>
+    <div class="faq-cat" onclick="switchFaqCat(this,'account')">账号相关</div>
+  </div>
+
+  <div class="faq-card" id="faqList">
+    <div class="faq-item" data-cat="enroll">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">报名后能退款吗？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">报名成功并完成缴费后，原则上不支持退款。若因组织方原因导致赛事取消，将在 10 个工作日内全额退款至原支付账户。如有特殊情况，请联系在线客服处理。</div>
+    </div>
+    <div class="faq-item" data-cat="enroll">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">报名审核需要多久？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">一般情况下，审核时间为 1-3 个工作日。审核结果将通过短信和平台消息通知。若审核被驳回，可根据提示补充材料重新提交。</div>
+    </div>
+    <div class="faq-item" data-cat="enroll">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">一个学生可以参加多个赛事吗？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">可以，每位学生可根据自身情况报名参加多个赛事，每项赛事单独计费、单独报名、单独审核。</div>
+    </div>
+    <div class="faq-item" data-cat="pay">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">支持哪些支付方式？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">目前支持两种支付方式：① 微信支付（推荐，即时到账）；② 对公转账（适合机构/老师批量支付，需上传转账凭证并等待财务审核，约 1 个工作日确认）。</div>
+    </div>
+    <div class="faq-item" data-cat="pay">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">对公转账的汇款信息是什么？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">开户行：招商银行广州天河支行；账户名：广州竞赛通教育科技有限公司；账号：8888 8888 8888 8888。转账时请在备注中填写"报名编号+姓名"，并在平台上传转账截图。</div>
+    </div>
+    <div class="faq-item" data-cat="cert">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">证书支持哪些下载格式？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">证书支持两种格式下载：① JPG/PNG 图片格式（适合分享至朋友圈、微信好友）；② PDF 格式（适合正式存档和打印，清晰度更高）。两种格式均可在「个人中心→我的证书」中免费下载。</div>
+    </div>
+    <div class="faq-item" data-cat="cert">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">如何验证证书真伪？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">每张证书附有唯一防伪二维码，扫码即可跳转到竞赛通官方验真页面，实时查验证书的真实性。验真页面无需登录，可向任何第三方展示。</div>
+    </div>
+    <div class="faq-item" data-cat="bind">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">如何绑定老师/机构？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">有两种方式：① 扫描老师/机构的专属绑定二维码；② 在「个人中心→绑定关系」手动输入老师提供的绑定码。绑定后，老师可为您代报名并统一支付。</div>
+    </div>
+    <div class="faq-item" data-cat="bind">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">一个学生能绑定多个老师吗？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">不可以，每位学生只能绑定一个老师或机构（一对一关系）。如需更换，须先由学生本人或当前老师发起解绑，解绑后才能重新绑定新的老师/机构。</div>
+    </div>
+    <div class="faq-item" data-cat="account">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">如何更换绑定手机号？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">手机号是账号的唯一标识，目前不支持在线自助更换。如确有需要，请联系在线客服，提供本人信息进行身份核验后方可操作。</div>
+    </div>
+    <div class="faq-item" data-cat="account">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">老师/机构认证需要什么材料？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">老师认证：需上传教师资格证或在职工作证；机构认证：需上传营业执照（必须），教育机构建议同时上传办学许可证。审核周期为 1-3 个工作日。</div>
+    </div>
+    <div class="faq-item" data-cat="cert">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">证书下载失败怎么办？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">请先检查网络连接是否正常，再重试下载。若多次失败，请截图错误信息联系在线客服，我们将在 1 个工作日内处理并重新发放证书。</div>
+    </div>
+    <div class="faq-item" data-cat="pay">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">支付成功但未收到报名确认怎么办？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">支付成功后报名确认通常在 5 分钟内到达。若超过 30 分钟仍未收到，请在「我的报名」查看状态；若显示「待支付」，请截图支付凭证联系客服核实，我们将手动确认到账。</div>
+    </div>
+    <div class="faq-item" data-cat="enroll">
+      <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">报名信息填错了怎么修改？</div><div class="faq-icon">▾</div></div>
+      <div class="faq-a">报名提交前可随时修改。提交并支付后，若需修改关键信息（如姓名、证件号），需联系客服核实身份后方可操作。建议报名前仔细核对所有信息。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 服务承诺 -->
+<div style="background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;overflow:hidden;">
+  <div style="padding:14px 16px 10px;font-size:13px;font-weight:700;color:var(--c-gray-500);letter-spacing:.4px;border-bottom:1px solid var(--c-gray-100);">竞赛通服务承诺</div>
+  <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px;">
+    <div style="display:flex;align-items:flex-start;gap:10px;">
+      <span style="font-size:20px;flex-shrink:0;">⚡</span>
+      <div><div style="font-size:14px;font-weight:600;color:var(--c-gray-900);margin-bottom:2px;">在线客服 3分钟响应</div><div style="font-size:12px;color:var(--c-gray-500);">工作日 9:00-21:00，节假日 10:00-18:00</div></div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;">
+      <span style="font-size:20px;flex-shrink:0;">🔒</span>
+      <div><div style="font-size:14px;font-weight:600;color:var(--c-gray-900);margin-bottom:2px;">信息安全加密保护</div><div style="font-size:12px;color:var(--c-gray-500);">个人信息脱敏存储，不向第三方共享</div></div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;">
+      <span style="font-size:20px;flex-shrink:0;">✅</span>
+      <div><div style="font-size:14px;font-weight:600;color:var(--c-gray-900);margin-bottom:2px;">官方授权赛事保障</div><div style="font-size:12px;color:var(--c-gray-500);">平台所有赛事均已获主办方授权，资质可查</div></div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;">
+      <span style="font-size:20px;flex-shrink:0;">💯</span>
+      <div><div style="font-size:14px;font-weight:600;color:var(--c-gray-900);margin-bottom:2px;">证书防伪验真</div><div style="font-size:12px;color:var(--c-gray-500);">每张证书含唯一防伪二维码，扫码即可验真</div></div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;padding:20px var(--space-4) 32px;">
+  <div style="font-size:13px;color:var(--c-gray-500);margin-bottom:12px;">没找到答案？</div>
+  <button class="btn btn-primary btn-md" onclick="showToast('正在连接在线客服...')">💬 联系在线客服</button>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+function toggleFaq(q) { q.parentElement.classList.toggle('open'); }
+function switchFaqCat(el, cat) {
+  document.querySelectorAll('.faq-cat').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.style.display = (cat==='all' || item.dataset.cat===cat) ? 'block' : 'none';
+  });
+}
+function filterFaq(val) {
+  const q = val.toLowerCase();
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const text = item.querySelector('.faq-q-text').textContent.toLowerCase();
+    item.style.display = (!q || text.includes(q)

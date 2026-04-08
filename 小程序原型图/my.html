@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>个人中心 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+
+/* ── Hero ─────────────────── */
+.user-hero {
+  padding: 20px var(--space-4) 0;
+  position: relative; overflow: hidden;
+  transition: background 0.4s ease;
+}
+.user-hero.student-theme {
+  background: linear-gradient(150deg, var(--c-primary) 0%, var(--c-primary-600) 60%, #1A6BB5 100%);
+}
+.user-hero.channel-theme {
+  background: linear-gradient(150deg, #1A237E 0%, #283593 55%, #3949AB 100%);
+}
+.user-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 85% 25%, rgba(255,255,255,0.07) 0%, transparent 50%);
+}
+.user-hero::after {
+  content: ''; position: absolute;
+  bottom: -1px; left: 0; right: 0; height: 24px;
+  background: var(--c-gray-50); border-radius: 24px 24px 0 0;
+}
+.user-info-row {
+  display: flex; align-items: center; gap: 14px;
+  position: relative; z-index: 1; margin-bottom: 14px;
+}
+.user-avatar {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: linear-gradient(135deg,#FFD54F,#FF8A65);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 900; color: #fff;
+  flex-shrink: 0; border: 3px solid rgba(255,255,255,0.35);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.user-meta { flex: 1; }
+.user-name { font-size: 19px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+.user-phone { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 3px; }
+.user-id-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: var(--radius-full); margin-top: 6px;
+}
+.user-edit-btn {
+  padding: 7px 14px; border-radius: var(--radius-full);
+  background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+  color: white; font-size: 13px; font-weight: 500;
+  cursor: pointer; flex-shrink: 0; touch-action: manipulation;
+}
+.user-edit-btn:active { background: rgba(255,255,255,0.28); }
+
+/* ── 视角切换 Tab ─────────── */
+.view-tabs {
+  display: flex; background: rgba(255,255,255,0.12);
+  border-radius: var(--radius-full); padding: 3px;
+  position: relative; z-index: 1; margin-bottom: 20px;
+  width: fit-content;
+}
+.view-tab {
+  padding: 6px 20px; border-radius: var(--radius-full);
+  font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.65);
+  cursor: pointer; touch-action: manipulation;
+  transition: all var(--duration-fast) ease;
+  white-space: nowrap; display: flex; align-items: center; gap: 5px;
+}
+.view-tab.active {
+  background: white; color: var(--c-primary-600);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-weight: 700;
+}
+.user-hero.channel-theme .view-tab.active { color: #3F51B5; }
+.view-tab-badge {
+  min-width: 16px; height: 16px; border-radius: 8px;
+  background: var(--c-accent); color: white;
+  font-size: 10px; font-weight: 700; line-height: 16px; padding: 0 4px;
+}
+
+/* ── 统计格 ───────────────── */
+.user-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  background: var(--c-white); border-radius: var(--radius-lg);
+  margin: 12px var(--space-4) 0; box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.stat-cell {
+  padding: 14px 8px; text-align: center;
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast) ease;
+  border-right: 1px solid var(--c-gray-100);
+}
+.stat-cell:last-child { border-right: none; }
+.stat-cell:active { background: var(--c-gray-50); }
+.stat-num { font-size: 22px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+.stat-num.s-color { color: var(--c-primary-600); }
+.stat-num.c-color { color: #3F51B5; }
+.stat-label { font-size: 11px; color: var(--c-gray-500); font-weight: 500; }
+
+/* ── 积分等级卡（学生/渠道方通用）── */
+.points-level-card {
+  margin: 12px var(--space-4) 0;
+  border-radius: var(--radius-lg); overflow: hidden;
+  cursor: pointer; touch-action: manipulation;
+  box-shadow: var(--shadow-sm);
+}
+.points-level-card:active { opacity: 0.92; }
+.plc-bg {
+  background: linear-gradient(135deg, #7B1FA2 0%, #9C27B0 40%, #F5A623 100%);
+  padding: 16px;
+}
+.plc-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.plc-badge {
+  background: rgba(255,255,255,0.22); border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: var(--radius-md); padding: 6px 12px;
+  display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+}
+.plc-level-icon { font-size: 20px; }
+.plc-level-name { font-size: 14px; font-weight: 900; color: white; }
+.plc-info { flex: 1; }
+.plc-growth-label { font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 5px; }
+.plc-growth-bar {
+  height: 5px; background: rgba(255,255,255,0.25);
+  border-radius: 3px; overflow: hidden;
+}
+.plc-growth-fill {
+  height: 100%; border-radius: 3px;
+  background: rgba(255,255,255,0.9);
+  transition: width 0.8s ease;
+}
+.plc-growth-text { font-size: 10px; color: rgba(255,255,255,0.65); margin-top: 4px; }
+.plc-pts-row { display: flex; gap: 0; }
+.plc-pts-item { flex: 1; text-align: center; }
+.plc-pts-num { font-size: 18px; font-weight: 900; color: white; line-height: 1; }
+.plc-pts-num.gold { color: #FFD54F; }
+.plc-pts-label { font-size: 10px; color: rgba(255,255,255,0.65); margin-top: 3px; }
+.plc-actions {
+  background: rgba(0,0,0,0.15); display: flex;
+}
+.plc-action-btn {
+  flex: 1; padding: 9px 8px; text-align: center;
+  font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.85);
+  border-right: 1px solid rgba(255,255,255,0.12);
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast);
+}
+.plc-action-btn:last-child { border-right: none; }
+.plc-action-btn:active { background: rgba(255,255,255,0.1); }
+
+/* ── 返点横幅（渠道方专属）── */
+.rebate-banner {
+  margin: 10px var(--space-4) 0;
+  background: linear-gradient(135deg, #1A237E 0%, #283593 50%, #F5A623 140%);
+  border-radius: var(--radius-lg); padding: 16px;
+  cursor: pointer; touch-action: manipulation;
+  box-shadow: 0 4px 16px rgba(26,35,126,0.25);
+  position: relative; overflow: hidden;
+}
+.rebate-banner::before {
+  content: ''; position: absolute; top: -30px; right: -20px;
+  width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(245,166,35,0.12);
+}
+.rebate-banner:active { opacity: 0.92; }
+.rb-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; position: relative; z-index:1; }
+.rb-tag {
+  background: rgba(245,166,35,0.25); border: 1px solid rgba(245,166,35,0.5);
+  border-radius: var(--radius-full); padding: 3px 10px;
+  font-size: 11px; font-weight: 700; color: #FFD54F;
+}
+.rb-title { flex: 1; font-size: 15px; font-weight: 800; color: white; }
+.rb-arrow { font-size: 16px; color: rgba(255,255,255,0.5); position: relative; z-index:1; }
+.rb-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; position: relative; z-index:1; }
+.rb-stat { text-align: center; }
+.rb-stat-num { font-size: 18px; font-weight: 900; color: white; line-height: 1; }
+.rb-stat-num.gold { color: #FFD54F; }
+.rb-stat-label { font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+.rb-btn {
+  margin-top: 12px; position: relative; z-index:1;
+  background: rgba(245,166,35,0.22); border: 1.5px solid rgba(245,166,35,0.5);
+  border-radius: var(--radius-full); padding: 8px 20px;
+  font-size: 13px; font-weight: 700; color: #FFD54F;
+  display: inline-flex; align-items: center; gap: 5px;
+  cursor: pointer; touch-action: manipulation;
+}
+.rb-btn:active { background: rgba(245,166,35,0.35); }
+
+/* ── 绑定状态卡（学生）──── */
+.student-bind-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  margin: 12px var(--space-4) 0; box-shadow: var(--shadow-xs);
+  padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+  cursor: pointer; touch-action: manipulation;
+}
+.student-bind-card:active { background: var(--c-gray-50); }
+.bind-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-600));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.bind-info { flex: 1; }
+.bind-teacher-name { font-size: 14px; font-weight: 700; color: var(--c-gray-900); }
+.bind-detail { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.student-bind-empty {
+  background: linear-gradient(90deg, var(--c-primary-50), white);
+  border: 1px solid var(--c-primary-200); border-radius: var(--radius-lg);
+  margin: 12px var(--space-4) 0; padding: 12px 14px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; touch-action: manipulation;
+}
+.student-bind-empty:active { opacity: 0.8; }
+
+/* ── 渠道方认证状态区 ───── */
+.c-unverified {
+  background: linear-gradient(90deg, var(--c-primary-50), white);
+  border: 1px solid var(--c-primary-200); border-radius: var(--radius-md);
+  padding: 14px; display: flex; align-items: center; gap: 12px;
+  margin: 12px var(--space-4) 0; cursor: pointer; touch-action: manipulation;
+}
+.c-pending {
+  background: linear-gradient(90deg, var(--c-warning-50), white);
+  border: 1px solid rgba(243,156,18,.25); border-radius: var(--radius-md);
+  padding: 14px; display: flex; align-items: center; gap: 12px;
+  margin: 12px var(--space-4) 0;
+}
+.c-verified-banner {
+  background: linear-gradient(90deg, #EEF0FF, #F5F6FF);
+  border: 1px solid #C5CAE9; border-radius: var(--radius-md);
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+  margin: 12px var(--space-4) 0;
+}
+
+/* 渠道方工作台入口卡 */
+.channel-workbench {
+  background: linear-gradient(145deg,#1A237E 0%,#3949AB 100%);
+  border-radius: var(--radius-lg); margin: 10px var(--space-4) 0;
+  padding: 18px 16px; cursor: pointer; touch-action: manipulation;
+  position: relative; overflow: hidden;
+  box-shadow: 0 6px 20px rgba(26,35,126,.3);
+}
+.channel-workbench::before {
+  content: ''; position: absolute; top: -20px; right: -20px;
+  width: 100px; height: 100px; border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+}
+.channel-workbench:active { opacity: 0.9; }
+.cwb-row { display:flex; align-items:center; gap:14px; position:relative; z-index:1; }
+.cwb-icon {
+  width:48px; height:48px; border-radius:var(--radius-md);
+  background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.25);
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; flex-shrink:0;
+}
+.cwb-title { font-size:16px; font-weight:900; color:white; margin-bottom:3px; }
+.cwb-desc { font-size:12px; color:rgba(255,255,255,.7); }
+.cwb-stats {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:8px; margin-top:14px; position:relative; z-index:1;
+}
+.cwb-stat { background:rgba(255,255,255,.12); border-radius:var(--radius-sm); padding:8px; text-align:center; }
+.cwb-stat-num { font-size:18px; font-weight:900; color:white; line-height:1; }
+.cwb-stat-num.accent { color:var(--c-accent); }
+.cwb-stat-num.gold { color:#FFD54F; }
+.cwb-stat-label { font-size:10px; color:rgba(255,255,255,.65); margin-top:3px; }
+
+/* 渠道方快捷3格 */
+.c-quick-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:8px; margin:10px var(--space-4) 0;
+}
+.c-quick-btn {
+  background:var(--c-white); border-radius:var(--radius-md);
+  box-shadow:var(--shadow-xs); padding:12px 8px; text-align:center;
+  cursor:pointer; touch-action:manipulation;
+  transition:background var(--duration-fast); position:relative;
+}
+.c-quick-btn:active { background:var(--c-gray-50); }
+.c-quick-icon { font-size:22px; margin-bottom:6px; }
+.c-quick-label { font-size:12px; font-weight:600; color:var(--c-gray-700); }
+.c-quick-badge {
+  position:absolute; top:6px; right:6px;
+  width:16px; height:16px; border-radius:50%;
+  background:var(--c-accent); color:white;
+  font-size:10px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* ── 权益卡（渠道方）───── */
+.rights-card {
+  margin: 10px var(--space-4) 0;
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); overflow: hidden;
+}
+.rights-card-header {
+  padding: 12px 16px; display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.rights-card-title { font-size: 14px; font-weight: 700; color: var(--c-gray-900); flex: 1; }
+.rights-card-more { font-size: 13px; color: var(--c-primary-600); font-weight: 600; cursor: pointer; }
+.rights-items { display: flex; gap: 0; }
+.rights-item {
+  flex: 1; padding: 12px 8px; text-align: center;
+  border-right: 1px solid var(--c-gray-100);
+  cursor: pointer; touch-action: manipulation;
+}
+.rights-item:last-child { border-right: none; }
+.rights-item:active { background: var(--c-gray-50); }
+.rights-icon { font-size: 22px; margin-bottom: 6px; }
+.rights-name { font-size: 11px; font-weight: 700; color: var(--c-gray-700); }
+.rights-status { font-size: 10px; color: var(--c-success); margin-top: 2px; }
+.rights-status.locked { color: var(--c-gray-300); }
+
+/* ── 菜单卡 ─────────────── */
+.menu-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  margin: 12px var(--space-4) 0; box-shadow: var(--shadow-xs); overflow: hidden;
+}
+.menu-card-title {
+  padding: 14px 16px 10px; font-size: 13px; font-weight: 700;
+  color: var(--c-gray-500); letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.menu-item {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  border-bottom: 1px solid var(--c-gray-100);
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-item:active { background: var(--c-gray-50); }
+.menu-icon { width:36px; height:36px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.menu-text { flex: 1; }
+.menu-name { font-size:14px; font-weight:600; color:var(--c-gray-900); }
+.menu-desc { font-size:12px; color:var(--c-gray-500); margin-top:1px; }
+.menu-arrow { font-size:14px; color:var(--c-gray-300); flex-shrink:0; }
+.menu-badge {
+  min-width:18px; height:18px; border-radius:var(--radius-full);
+  background:var(--c-accent); color:white; font-size:10px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  padding:0 5px; margin-right:4px;
+}
+
+/* ── 退出按钮 ─────────── */
+.logout-btn {
+  margin:16px var(--space-4); background:var(--c-white); border:none;
+  border-radius:var(--radius-lg); padding:14px; width:calc(100% - 32px);
+  font-size:15px; font-weight:600; color:var(--c-danger);
+  cursor:pointer; touch-action:manipulation; box-shadow:var(--shadow-xs);
+}
+.logout-btn:active { opacity:0.7; }
+.tab-panel { transition:opacity 0.25s ease; }
+.tab-panel.hidden { display:none; }
+</style>
+</head>
+<body class="has-tabbar">
+
+<div class="status-bar" id="statusBar" style="background:var(--c-primary);">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<!-- ===== Hero ===== -->
+<div class="user-hero student-theme animate-in" id="userHero">
+  <div class="user-info-row">
+    <div class="user-avatar" id="userAvatar">张</div>
+    <div class="user-meta">
+      <div class="user-name" id="userName">张小明</div>
+      <div class="user-phone" id="userPhone">138****8001</div>
+      <div><span class="user-id-badge" id="userBadge">🎓 学生认证</span></div>
+    </div>
+    <div class="user-edit-btn" onclick="location.href='profile-edit.html'">编辑</div>
+  </div>
+  <div class="view-tabs">
+    <div class="view-tab active" id="tabStudent" onclick="switchView('student')">🎓 学生</div>
+    <div class="view-tab" id="tabChannel" onclick="switchView('channel')">
+      渠道方
+      <span class="view-tab-badge" id="channelBadge" style="display:none;">!</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================================================
+     学生视角
+================================================ -->
+<div id="panelStudent" class="tab-panel">
+
+  <!-- 统计格 -->
+  <div class="user-stats animate-in animate-in-d1">
+    <div class="stat-cell" onclick="location.href='my-enroll.html'">
+      <div class="stat-num s-color">3</div>
+      <div class="stat-label">报名记录</div>
+    </div>
+    <div class="stat-cell" onclick="location.href='my-score.html'">
+      <div class="stat-num s-color">6</div>
+      <div class="stat-label">我的成绩</div>
+    </div>
+    <div class="stat-cell" onclick="location.href='my-cert.html'">
+      <div class="stat-num s-color">4</div>
+      <div class="stat-label">我的证书</div>
+    </div>
+    <div class="stat-cell" onclick="location.href='my-course.html'">
+      <div class="stat-num s-color">2</div>
+      <div class="stat-label">我的课程</div>
+    </div>
+  </div>
+
+  <!-- ★ V4.0 新增：积分等级卡 -->
+  <div class="points-level-card animate-in animate-in-d1" onclick="location.href='points-center.html'">
+    <div class="plc-bg">
+      <div class="plc-top">
+        <div class="plc-badge">
+          <span class="plc-level-icon">🥈</span>
+          <span class="plc-level-name">白银学员</span>
+        </div>
+        <div class="plc-info">
+          <div class="plc-growth-label">成长值进度 · 距黄金还差 340</div>
+          <div class="plc-growth-bar"><div class="plc-growth-fill" style="width:62%;"></div></div>
+          <div class="plc-growth-text">1,660 / 2,000</div>
+        </div>
+      </div>
+      <div class="plc-pts-row">
+        <div class="plc-pts-item">
+          <div class="plc-pts-num gold">2,480</div>
+          <div class="plc-pts-label">可用积分</div>
+        </div>
+        <div class="plc-pts-item">
+          <div class="plc-pts-num">120</div>
+          <div class="plc-pts-label">冻结积分</div>
+        </div>
+        <div class="plc-pts-item">
+          <div class="plc-pts-num">5,340</div>
+          <div class="plc-pts-label">累计获取</div>
+        </div>
+      </div>
+    </div>
+    <div class="plc-actions">
+      <div class="plc-action-btn" onclick="event.stopPropagation();location.href='points-mall.html'">🛍️ 积分商城</div>
+      <div class="plc-action-btn" onclick="event.stopPropagation();location.href='points-detail.html'">📋 积分明细</div>
+      <div class="plc-action-btn" onclick="event.stopPropagation();location.href='coupon-center.html'">🎟️ 我的优惠券</div>
+      <div class="plc-action-btn" onclick="event.stopPropagation();location.href='rights-center.html'">🎁 我的权益</div>
+    </div>
+  </div>
+
+  <!-- 绑定渠道方状态卡 -->
+  <div class="student-bind-card animate-in animate-in-d1" id="studentBindCard" onclick="location.href='binding.html'">
+    <div class="bind-avatar">👨‍🏫</div>
+    <div class="bind-info">
+      <div class="bind-teacher-name">已绑定：王建国（渠道方）</div>
+      <div class="bind-detail">广州市第二中学 · 老师渠道方 · 由渠道方统一支付</div>
+    </div>
+    <span class="tag tag-success tag-dot" style="flex-shrink:0;">已绑定</span>
+  </div>
+  <div class="student-bind-empty animate-in animate-in-d1" id="studentBindEmpty" style="display:none;" onclick="location.href='binding.html'">
+    <div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--c-primary-50);border:1px solid var(--c-primary-200);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🔗</div>
+    <div style="flex:1;">
+      <div style="font-size:14px;font-weight:700;color:var(--c-primary-600);">绑定渠道方</div>
+      <div style="font-size:12px;color:var(--c-gray-500);margin-top:2px;">绑定后由渠道方统一代报名、统一支付</div>
+    </div>
+    <div style="font-size:13px;font-weight:700;color:var(--c-accent);background:var(--c-accent-50);padding:4px 10px;border-radius:var(--radius-full);flex-shrink:0;">去绑定 ›</div>
+  </div>
+
+  <!-- 我的服务 -->
+  <div class="menu-card animate-in animate-in-d2">
+    <div class="menu-card-title">我的服务</div>
+    <div class="menu-item" onclick="location.href='my-enroll.html'">
+      <div class="menu-icon" style="background:#EBF4FC;">📝</div>
+      <div class="menu-text"><div class="menu-name">我的报名</div><div class="menu-desc">查看报名进度与审核状态</div></div>
+      <div class="menu-badge">1</div><div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='my-order.html'">
+      <div class="menu-icon" style="background:#FFF3EE;">🧾</div>
+      <div class="menu-text"><div class="menu-name">我的订单</div><div class="menu-desc">赛事订单 & 课程订单</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='my-score.html'">
+      <div class="menu-icon" style="background:#FEF9EC;">🎯</div>
+      <div class="menu-text"><div class="menu-name">我的成绩</div><div class="menu-desc">6 条成绩记录</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='my-cert.html'">
+      <div class="menu-icon" style="background:#F5EEF8;">🏅</div>
+      <div class="menu-text"><div class="menu-name">我的证书</div><div class="menu-desc">查看、下载证书（图片/PDF）</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='my-course.html'">
+      <div class="menu-icon" style="background:#EAF4FC;">📚</div>
+      <div class="menu-text"><div class="menu-name">我的课程</div><div class="menu-desc">2 门课程学习中</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- 我的权益（★ V4.0 新增）-->
+  <div class="menu-card animate-in animate-in-d2">
+    <div class="menu-card-title">我的权益</div>
+    <div class="menu-item" onclick="location.href='points-center.html'">
+      <div class="menu-icon" style="background:#F3E8FF;">💎</div>
+      <div class="menu-text"><div class="menu-name">积分中心</div><div class="menu-desc">等级权益 · 可用积分 2,480</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='points-mall.html'">
+      <div class="menu-icon" style="background:#FFF3EE;">🛍️</div>
+      <div class="menu-text"><div class="menu-name">积分商城</div><div class="menu-desc">兑换实物与虚拟权益</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='coupon-center.html'">
+      <div class="menu-icon" style="background:#FEF9EC;">🎟️</div>
+      <div class="menu-text"><div class="menu-name">我的优惠券</div><div class="menu-desc">3 张可用</div></div>
+      <div class="menu-badge" style="background:var(--c-success);">3</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='rights-center.html'">
+      <div class="menu-icon" style="background:#EAFAF1;">🎁</div>
+      <div class="menu-text"><div class="menu-name">专属权益</div><div class="menu-desc">课程减免 · 客服特权</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='writeoff-record.html'">
+      <div class="menu-icon" style="background:#EBF4FC;">📋</div>
+      <div class="menu-text"><div class="menu-name">核销记录</div><div class="menu-desc">查看历史权益核销记录</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- 消息与互动 -->
+  <div class="menu-card animate-in animate-in-d2">
+    <div class="menu-card-title">消息与互动</div>
+    <div class="menu-item" onclick="location.href='my-message.html'">
+      <div class="menu-icon" style="background:#EAFAF1;">🔔</div>
+      <div class="menu-text"><div class="menu-name">我的消息</div><div class="menu-desc">订单/积分/权益/物流消息</div></div>
+      <div class="menu-badge">3</div><div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='binding.html'">
+      <div class="menu-icon" style="background:#FDEDEC;">🔗</div>
+      <div class="menu-text"><div class="menu-name">绑定关系</div><div class="menu-desc">管理与渠道方的绑定</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- 帮助与设置 -->
+  <div class="menu-card animate-in animate-in-d3">
+    <div class="menu-card-title">帮助与设置</div>
+    <div class="menu-item" onclick="location.href='profile-edit.html'">
+      <div class="menu-icon" style="background:var(--c-primary-50);">👤</div>
+      <div class="menu-text"><div class="menu-name">个人资料</div><div class="menu-desc">头像、昵称、学校、年级</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='help.html'">
+      <div class="menu-icon" style="background:#EBF4FC;">💬</div>
+      <div class="menu-text"><div class="menu-name">客服与帮助</div><div class="menu-desc">常见问题 & 在线咨询</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='settings.html'">
+      <div class="menu-icon" style="background:#F4F6FA;">🔒</div>
+      <div class="menu-text"><div class="menu-name">设置</div><div class="menu-desc">消息提醒 & 账号安全 & 地址管理</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="showAbout()">
+      <div class="menu-icon" style="background:#F5EEF8;">ℹ️</div>
+      <div class="menu-text"><div class="menu-name">关于竞赛通</div><div class="menu-desc">版本 v4.0.0</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+
+  <button class="logout-btn animate-in animate-in-d3" onclick="confirmLogout()">退出登录</button>
+  <div style="height:8px;"></div>
+</div><!-- /panelStudent -->
+
+
+<!-- ================================================
+     渠道方视角（★ V4.0 角色模型重构）
+================================================ -->
+<div id="panelChannel" class="tab-panel hidden">
+
+  <!-- 渠道方统计格 -->
+  <div class="user-stats animate-in animate-in-d1" id="channelStats">
+    <div class="stat-cell" onclick="location.href='channel-students.html'">
+      <div class="stat-num c-color" id="cStatStudents">12</div>
+      <div class="stat-label">绑定学生</div>
+    </div>
+    <div class="stat-cell" onclick="location.href='channel-orders.html'">
+      <div class="stat-num c-color" id="cStatEnroll">28</div>
+      <div class="stat-label">代报名总数</div>
+    </div>
+    <div class="stat-cell" onclick="location.href='channel-rebate.html'">
+      <div class="stat-num" style="color:var(--c-gold);" id="cStatRebate">¥680</div>
+      <div class="stat-label">待结算返点</div>
+    </div>
+    <div class="stat-cell" onclick="location.href='channel-settlement.html'">
+      <div class="stat-num c-color" id="cStatPaid" style="font-size:16px;">¥3.2k</div>
+      <div class="stat-label">累计返点</div>
+    </div>
+  </div>
+
+  <!-- ★ V4.0 新增：渠道方积分等级卡 -->
+  <div class="points-level-card animate-in animate-in-d1" onclick="location.href='points-center.html'">
+    <div class="plc-bg" style="background:linear-gradient(135deg,#1A237E 0%,#3949AB 50%,#F5A623 140%);">
+      <div class="plc-top">
+        <div class="plc-badge">
+          <span class="plc-level-icon">🥇</span>
+          <span class="plc-level-name">黄金渠道</span>
+        </div>
+        <div class="plc-info">
+          <div class="plc-growth-label">渠道成长值 · 距铂金还差 800</div>
+          <div class="plc-growth-bar"><div class="plc-growth-fill" style="width:78%;"></div></div>
+          <div class="plc-growth-text">3,900 / 5,000</div>
+        </div>
+      </div>
+      <div class="plc-pts-row">
+        <div class="plc-pts-item">
+          <div class="plc-pts-num gold">4,820</div>
+          <div class="plc-pts-label">可用积分</div>
+        </div>
+        <div class="plc-pts-item">
+          <div class="plc-pts-num">200</div>
+          <div class="plc-pts-label">冻结积分</div>
+        </div>
+        <div class="plc-pts-item">
+          <div class="plc-pts-num">12,360</div>
+          <div class="plc-pts-label">累计获取</div>
+        </div>
+      </div>
+    </div>
+    <div class="plc-actions">
+      <div class="plc-action-btn" onclick="event.stopPropagation();location.href='rights-center.html'">🎁 等级权益</div>
+      <div class="plc-action-btn" onclick="event.stopPropagation();location.href='points-detail.html'">📋 积分明细</div>
+      <div class="plc-action-btn" onclick="event.stopPropagation();location.href='writeoff-record.html'">✅ 核销记录</div>
+    </div>
+  </div>
+
+  <!-- ★ V4.0 新增：返点横幅 -->
+  <div class="rebate-banner animate-in animate-in-d1" onclick="location.href='channel-rebate.html'">
+    <div class="rb-top">
+      <div class="rb-tag">💰 返点中心</div>
+      <div class="rb-title">本月返点收益</div>
+      <div class="rb-arrow">›</div>
+    </div>
+    <div class="rb-stats">
+      <div class="rb-stat">
+        <div class="rb-stat-num gold">¥680</div>
+        <div class="rb-stat-label">可提现余额</div>
+      </div>
+      <div class="rb-stat">
+        <div class="rb-stat-num">¥220</div>
+        <div class="rb-stat-label">审核中</div>
+      </div>
+      <div class="rb-stat">
+        <div class="rb-stat-num">¥3,200</div>
+        <div class="rb-stat-label">累计已打款</div>
+      </div>
+    </div>
+    <div class="rb-btn" onclick="event.stopPropagation();location.href='channel-settlement.html'">
+      💸 申请提现
+    </div>
+  </div>
+
+  <!-- 渠道方认证状态区 -->
+  <!-- 未认证 -->
+  <div id="cBlockNone" class="c-unverified animate-in animate-in-d1" onclick="location.href='channel-identity.html'">
+    <div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--c-primary-50);border:1px solid var(--c-primary-200);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏫</div>
+    <div style="flex:1;">
+      <div style="font-size:14px;font-weight:700;color:var(--c-primary-600);">渠道方认证</div>
+      <div style="font-size:12px;color:var(--c-gray-500);margin-top:2px;">认证老师/机构/个人渠道方身份，开启返点与学生管理</div>
+    </div>
+    <div style="font-size:13px;font-weight:700;color:var(--c-accent);background:var(--c-accent-50);padding:4px 10px;border-radius:var(--radius-full);flex-shrink:0;">去认证 ›</div>
+  </div>
+  <!-- 审核中 -->
+  <div id="cBlockPending" class="c-pending animate-in animate-in-d1" style="display:none;">
+    <div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--c-warning-50);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">⏳</div>
+    <div style="flex:1;">
+      <div style="font-size:14px;font-weight:700;color:#8B5E06;">认证审核中</div>
+      <div style="font-size:12px;color:var(--c-gray-500);margin-top:2px;">预计 1-3 个工作日完成，请关注消息通知</div>
+    </div>
+    <span class="tag tag-warning">审核中</span>
+  </div>
+  <!-- 已认证 -->
+  <div id="cBlockVerified" style="display:none;">
+    <div class="c-verified-banner animate-in animate-in-d1">
+      <span style="font-size:20px;">✅</span>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;color:#3F51B5;">👨‍🏫 老师渠道方认证已通过</div>
+        <div style="font-size:11px;color:var(--c-gray-500);margin-top:1px;">广州市第二中学 · 数学 · 物理 · 认证于 2025-10-10</div>
+      </div>
+      <span style="font-size:12px;color:#3F51B5;font-weight:600;cursor:pointer;" onclick="location.href='channel-identity.html'">详情</span>
+    </div>
+
+    <!-- 渠道方工作台入口 -->
+    <div class="channel-workbench animate-in animate-in-d1" onclick="location.href='channel-home.html'">
+      <div class="cwb-row">
+        <div class="cwb-icon">🏫</div>
+        <div style="flex:1;">
+          <div class="cwb-title">进入渠道方工作台</div>
+          <div class="cwb-desc">管理学生 · 代报名 · 返点中心 · 数据分析</div>
+        </div>
+        <div style="font-size:22px;color:rgba(255,255,255,.5);position:relative;z-index:1;">›</div>
+      </div>
+      <div class="cwb-stats">
+        <div class="cwb-stat"><div class="cwb-stat-num">12</div><div class="cwb-stat-label">绑定学生</div></div>
+        <div class="cwb-stat"><div class="cwb-stat-num accent">3</div><div class="cwb-stat-label">待支付</div></div>
+        <div class="cwb-stat"><div class="cwb-stat-num gold">¥680</div><div class="cwb-stat-label">可提现</div></div>
+      </div>
+    </div>
+
+    <!-- 渠道方快捷3格 -->
+    <div class="c-quick-grid animate-in animate-in-d2">
+      <div class="c-quick-btn" onclick="location.href='channel-students.html'">
+        <div class="c-quick-icon">👨‍🎓</div>
+        <div class="c-quick-label">学生管理</div>
+      </div>
+      <div class="c-quick-btn" onclick="location.href='channel-rebate.html'">
+        <div class="c-quick-icon">💰</div>
+        <div class="c-quick-label">返点中心</div>
+        <div class="c-quick-badge">1</div>
+      </div>
+      <div class="c-quick-btn" onclick="location.href='channel-orders.html'">
+        <div class="c-quick-icon">🧾</div>
+        <div class="c-quick-label">订单管理</div>
+        <div class="c-quick-badge">3</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ★ V4.0 新增：权益区 -->
+  <div class="rights-card animate-in animate-in-d2">
+    <div class="rights-card-header">
+      <div class="rights-card-title">🎁 等级权益</div>
+      <div class="rights-card-more" onclick="location.href='rights-center.html'">全部权益 ›</div>
+    </div>
+    <div class="rights-items">
+      <div class="rights-item" onclick="location.href='rights-detail.html'">
+        <div class="rights-icon">🏟️</div>
+        <div class="rights-name">场地减免</div>
+        <div class="rights-status">可使用 2次</div>
+      </div>
+      <div class="rights-item" onclick="location.href='rights-detail.html'">
+        <div class="rights-icon">📚</div>
+        <div class="rights-name">专属课程</div>
+        <div class="rights-status">已解锁</div>
+      </div>
+      <div class="rights-item" onclick="location.href='rights-detail.html'">
+        <div class="rights-icon">💼</div>
+        <div class="rights-name">客服特权</div>
+        <div class="rights-status">已激活</div>
+      </div>
+      <div class="rights-item" onclick="location.href='writeoff-apply.html'">
+        <div class="rights-icon">✅</div>
+        <div class="rights-name">申请核销</div>
+        <div class="rights-status">去申请</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 渠道方功能菜单 -->
+  <div class="menu-card animate-in animate-in-d2">
+    <div class="menu-card-title">渠道功能</div>
+    <div class="menu-item" onclick="location.href='channel-students.html'">
+      <div class="menu-icon" style="background:#EEF0FF;">👨‍🎓</div>
+      <div class="menu-text"><div class="menu-name">学生管理</div><div class="menu-desc">查看绑定学生、代报名、解绑</div></div>
+      <div class="menu-badge" style="background:var(--c-primary-600);">12</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='contest-list.html'">
+      <div class="menu-icon" style="background:var(--c-primary-50);">📋</div>
+      <div class="menu-text"><div class="menu-name">代报名</div><div class="menu-desc">为绑定学生选择赛事报名</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='channel-orders.html'">
+      <div class="menu-icon" style="background:#FFF3EE;">🧾</div>
+      <div class="menu-text"><div class="menu-name">订单管理</div><div class="menu-desc">批量处理待支付报名订单</div></div>
+      <div class="menu-badge">3</div><div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='channel-rebate.html'">
+      <div class="menu-icon" style="background:var(--c-gold-50);">💰</div>
+      <div class="menu-text"><div class="menu-name">返点中心</div><div class="menu-desc">查看返点明细、申请提现</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='channel-data.html'">
+      <div class="menu-icon" style="background:#EAFAF1;">📊</div>
+      <div class="menu-text"><div class="menu-name">报名数据</div><div class="menu-desc">报名统计、学科分布、获奖数据</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='analysis-home.html'">
+      <div class="menu-icon" style="background:#EBF4FC;">📈</div>
+      <div class="menu-text"><div class="menu-name">经营分析</div><div class="menu-desc">收入、用券、返点、结算深度分析</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- 财务结算菜单（★ V4.0 新增）-->
+  <div class="menu-card animate-in animate-in-d2">
+    <div class="menu-card-title">财务结算</div>
+    <div class="menu-item" onclick="location.href='channel-settlement.html'">
+      <div class="menu-icon" style="background:var(--c-gold-50);">💸</div>
+      <div class="menu-text"><div class="menu-name">提现与结算单</div><div class="menu-desc">申请提现、查看结算进度</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='contract-center.html'">
+      <div class="menu-icon" style="background:#EEF0FF;">📄</div>
+      <div class="menu-text"><div class="menu-name">合同中心</div><div class="menu-desc">查看合作合同与签署状态</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='invoice-center.html'">
+      <div class="menu-icon" style="background:#EAFAF1;">🧾</div>
+      <div class="menu-text"><div class="menu-name">开票中心</div><div class="menu-desc">申请开票、查看发票状态</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- 消息与设置 -->
+  <div class="menu-card animate-in animate-in-d2">
+    <div class="menu-card-title">消息与设置</div>
+    <div class="menu-item" onclick="location.href='my-message.html'">
+      <div class="menu-icon" style="background:#EAFAF1;">🔔</div>
+      <div class="menu-text"><div class="menu-name">我的消息</div><div class="menu-desc">学生报名/支付/返点/结算消息</div></div>
+      <div class="menu-badge">2</div><div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='channel-identity.html'">
+      <div class="menu-icon" style="background:#EEF0FF;">⚙️</div>
+      <div class="menu-text"><div class="menu-name">认证信息</div><div class="menu-desc">查看或更新渠道方认证资料</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='help.html'">
+      <div class="menu-icon" style="background:#EBF4FC;">💬</div>
+      <div class="menu-text"><div class="menu-name">客服与帮助</div><div class="menu-desc">常见问题 & 在线咨询</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="location.href='settings.html'">
+      <div class="menu-icon" style="background:#F4F6FA;">🔒</div>
+      <div class="menu-text"><div class="menu-name">设置</div><div class="menu-desc">消息提醒 & 账号安全 & 收款账户</div></div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+
+  <button class="logout-btn animate-in animate-in-d3" onclick="confirmLogout()">退出登录</button>
+  <div style="height:8px;"></div>
+</div><!-- /panelChannel -->
+
+
+<!-- ===== 底部导航 ===== -->
+<nav class="bottom-nav">
+  <div class="nav-tab" onclick="location.href='index.html'"><span class="nav-tab-icon">🏠</span><span class="nav-tab-label">首页</span></div>
+  <div class="nav-tab" onclick="location.href='contest-list.html'"><span class="nav-tab-icon">🏆</span><span class="nav-tab-label">赛事</span></div>
+  <div class="nav-tab" onclick="location.href='course-list.html'"><span class="nav-tab-icon">📚</span><span class="nav-tab-label">课程</span></div>
+  <div class="nav-tab" onclick="location.href='notice.html'"><span class="nav-tab-icon">📢</span><span class="nav-tab-label">公告</span></div>
+  <div class="nav-tab active"><span class="nav-tab-icon">👤</span><span class="nav-tab-label" style="color:var(--c-primary-600);" id="myTabLabel">我的</span></div>
+</nav>
+
+<script>
+/* ── 用户配置（实际从接口获取）── */
+const USER = {
+  name: '张小明',
+  phone: '138****8001',
+  bound: true,
+  /* channel: 'none' | 'pending' | 'verified' */
+  channelState: 'verified',
+  channelName: '王建国',
+  channelType: 'teacher',    /* teacher | institution | personal */
+};
+
+let currentView = 'student';
+
+function switchView(view) {
+  currentView = view;
+  const isChannel = view === 'channel';
+
+  document.getElementById('tabStudent').classList.toggle('active', !isChannel);
+  document.getElementById('tabChannel').classList.toggle('active',  isChannel);
+  document.getElementById('panelStudent').classList.toggle('hidden',  isChannel);
+  document.getElementById('panelChannel').classList.toggle('hidden', !isChannel);
+
+  const hero = document.getElementById('userHero');
+  hero.classList.toggle('student-theme', !isChannel);
+  hero.classList.toggle('channel-theme',  isChannel);
+
+  document.getElementById('statusBar').style.background = isChannel ? '#1A237E' : 'var(--c-primary)';
+  document.getElementById('myTabLabel').style.color = isChannel ? '#3F51B5' : 'var(--c-primary-600)';
+
+  if (isChannel && USER.channelState === 'verified') {
+    document.getElementById('userAvatar').textContent = USER.channelType === 'institution' ? '🏢' : '👨‍🏫';
+    document.getElementById('userName').textContent   = USER.channelName;
+    document.getElementById('userBadge').textContent  = USER.channelType === 'institution' ? '🏢 机构渠道方' : USER.channelType === 'personal' ? '👤 个人渠道方' : '👨‍🏫 老师渠道方';
+  } else {
+    document.getElementById('userAvatar').textContent = USER.name.slice(0,1);
+    document.getElementById('userName').textContent   = USER.name;
+    document.getElementById('userBadge').innerHTML    = '🎓 学生认证';
+  }
+}
+
+function initChannelBlocks() {
+  const s = USER.channelState;
+  document.getElementById('cBlockNone').style.display     = s==='none'     ? 'flex'  : 'none';
+  document.getElementById('cBlockPending').style.display  = s==='pending'  ? 'flex'  : 'none';
+  document.getElementById('cBlockVerified').style.display = s==='verified' ? 'block' : 'none';
+  const badge = document.getElementById('channelBadge');
+  badge.style.display = (s==='none'||s==='pending') ? 'inline-flex' : 'none';
+  if (s !== 'verified') {
+    document.querySelectorAll('#channelStats .stat-num').forEach(el => {
+      el.style.color = 'var(--c-gray-300)'; el.textContent = '—';
+    });
+  }
+}
+
+function initStudentBind() {
+  document.getElementById('studentBindCard').style.display  = USER.bound ? 'flex' : 'none';
+  document.getElementById('studentBindEmpty').style.display = USER.bound ? 'none' : 'flex';
+}
+
+function showAbout() { showToast('竞赛通 v4.0.0 · 广州竞赛通教育科技有限公司'); }
+function confirmLogout() { if (confirm('确认退出登录？')) location.href = 'login.html'; }
+function showToast(msg) {
+  const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(), 2400);
+}
+
+initChannelBlocks();
+initStudentBind();
+
+if (new URLSearchParams(location.search).get('view') === 'channel') switchView('channel');
+</script>
+</body>
+</html>

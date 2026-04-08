@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstContestMapper">
+    
+    <resultMap type="JstContest" id="JstContestResult">
+        <result property="contestId"    column="contest_id"    />
+        <result property="contestName"    column="contest_name"    />
+        <result property="sourceType"    column="source_type"    />
+        <result property="partnerId"    column="partner_id"    />
+        <result property="category"    column="category"    />
+        <result property="groupLevels"    column="group_levels"    />
+        <result property="coverImage"    column="cover_image"    />
+        <result property="description"    column="description"    />
+        <result property="enrollStartTime"    column="enroll_start_time"    />
+        <result property="enrollEndTime"    column="enroll_end_time"    />
+        <result property="eventStartTime"    column="event_start_time"    />
+        <result property="eventEndTime"    column="event_end_time"    />
+        <result property="price"    column="price"    />
+        <result property="supportChannelEnroll"    column="support_channel_enroll"    />
+        <result property="supportPointsDeduct"    column="support_points_deduct"    />
+        <result property="supportAppointment"    column="support_appointment"    />
+        <result property="certRuleJson"    column="cert_rule_json"    />
+        <result property="scoreRuleJson"    column="score_rule_json"    />
+        <result property="formTemplateId"    column="form_template_id"    />
+        <result property="aftersaleDays"    column="aftersale_days"    />
+        <result property="auditStatus"    column="audit_status"    />
+        <result property="status"    column="status"    />
+        <result property="createdUserId"    column="created_user_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstContestVo">
+        select contest_id, contest_name, source_type, partner_id, category, group_levels, cover_image, description, enroll_start_time, enroll_end_time, event_start_time, event_end_time, price, support_channel_enroll, support_points_deduct, support_appointment, cert_rule_json, score_rule_json, form_template_id, aftersale_days, audit_status, status, created_user_id, create_by, create_time, update_by, update_time, remark, del_flag from jst_contest
+    </sql>
+
+    <select id="selectJstContestList" parameterType="JstContest" resultMap="JstContestResult">
+        <include refid="selectJstContestVo"/>
+        <where>  
+            <if test="contestName != null  and contestName != ''"> and contest_name like concat('%', #{contestName}, '%')</if>
+            <if test="sourceType != null  and sourceType != ''"> and source_type = #{sourceType}</if>
+            <if test="partnerId != null "> and partner_id = #{partnerId}</if>
+            <if test="category != null  and category != ''"> and category = #{category}</if>
+            <if test="groupLevels != null  and groupLevels != ''"> and group_levels = #{groupLevels}</if>
+            <if test="coverImage != null  and coverImage != ''"> and cover_image = #{coverImage}</if>
+            <if test="description != null  and description != ''"> and description = #{description}</if>
+            <if test="enrollStartTime != null "> and enroll_start_time = #{enrollStartTime}</if>
+            <if test="enrollEndTime != null "> and enroll_end_time = #{enrollEndTime}</if>
+            <if test="eventStartTime != null "> and event_start_time = #{eventStartTime}</if>
+            <if test="eventEndTime != null "> and event_end_time = #{eventEndTime}</if>
+            <if test="price != null "> and price = #{price}</if>
+            <if test="supportChannelEnroll != null "> and support_channel_enroll = #{supportChannelEnroll}</if>
+            <if test="supportPointsDeduct != null "> and support_points_deduct = #{supportPointsDeduct}</if>
+            <if test="supportAppointment != null "> and support_appointment = #{supportAppointment}</if>
+            <if test="certRuleJson != null  and certRuleJson != ''"> and cert_rule_json = #{certRuleJson}</if>
+            <if test="scoreRuleJson != null  and scoreRuleJson != ''"> and score_rule_json = #{scoreRuleJson}</if>
+            <if test="formTemplateId != null "> and form_template_id = #{formTemplateId}</if>
+            <if test="aftersaleDays != null "> and aftersale_days = #{aftersaleDays}</if>
+            <if test="auditStatus != null  and auditStatus != ''"> and audit_status = #{auditStatus}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="createdUserId != null "> and created_user_id = #{createdUserId}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstContestByContestId" parameterType="Long" resultMap="JstContestResult">
+        <include refid="selectJstContestVo"/>
+        where contest_id = #{contestId}
+    </select>
+
+    <insert id="insertJstContest" parameterType="JstContest" useGeneratedKeys="true" keyProperty="contestId">
+        insert into jst_contest
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="contestName != null and contestName != ''">contest_name,</if>
+            <if test="sourceType != null and sourceType != ''">source_type,</if>
+            <if test="partnerId != null">partner_id,</if>
+            <if test="category != null and category != ''">category,</if>
+            <if test="groupLevels != null">group_levels,</if>
+            <if test="coverImage != null">cover_image,</if>
+            <if test="description != null">description,</if>
+            <if test="enrollStartTime != null">enroll_start_time,</if>
+            <if test="enrollEndTime != null">enroll_end_time,</if>
+            <if test="eventStartTime != null">event_start_time,</if>
+            <if test="eventEndTime != null">event_end_time,</if>
+            <if test="price != null">price,</if>
+            <if test="supportChannelEnroll != null">support_channel_enroll,</if>
+            <if test="supportPointsDeduct != null">support_points_deduct,</if>
+            <if test="supportAppointment != null">support_appointment,</if>
+            <if test="certRuleJson != null">cert_rule_json,</if>
+            <if test="scoreRuleJson != null">score_rule_json,</if>
+            <if test="formTemplateId != null">form_template_id,</if>
+            <if test="aftersaleDays != null">aftersale_days,</if>
+            <if test="auditStatus != null and auditStatus != ''">audit_status,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="createdUserId != null">created_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="contestName != null and contestName != ''">#{contestName},</if>
+            <if test="sourceType != null and sourceType != ''">#{sourceType},</if>
+            <if test="partnerId != null">#{partnerId},</if>
+            <if test="category != null and category != ''">#{category},</if>
+            <if test="groupLevels != null">#{groupLevels},</if>
+            <if test="coverImage != null">#{coverImage},</if>
+            <if test="description != null">#{description},</if>
+            <if test="enrollStartTime != null">#{enrollStartTime},</if>
+            <if test="enrollEndTime != null">#{enrollEndTime},</if>
+            <if test="eventStartTime != null">#{eventStartTime},</if>
+            <if test="eventEndTime != null">#{eventEndTime},</if>
+            <if test="price != null">#{price},</if>
+            <if test="supportChannelEnroll != null">#{supportChannelEnroll},</if>
+            <if test="supportPointsDeduct != null">#{supportPointsDeduct},</if>
+            <if test="supportAppointment != null">#{supportAppointment},</if>
+            <if test="certRuleJson != null">#{certRuleJson},</if>
+            <if test="scoreRuleJson != null">#{scoreRuleJson},</if>
+            <if test="formTemplateId != null">#{formTemplateId},</if>
+            <if test="aftersaleDays != null">#{aftersaleDays},</if>
+            <if test="auditStatus != null and auditStatus != ''">#{auditStatus},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="createdUserId != null">#{createdUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstContest" parameterType="JstContest">
+        update jst_contest
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="contestName != null and contestName != ''">contest_name = #{contestName},</if>
+            <if test="sourceType != null and sourceType != ''">source_type = #{sourceType},</if>
+            <if test="partnerId != null">partner_id = #{partnerId},</if>
+            <if test="category != null and category != ''">category = #{category},</if>
+            <if test="groupLevels != null">group_levels = #{groupLevels},</if>
+            <if test="coverImage != null">cover_image = #{coverImage},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="enrollStartTime != null">enroll_start_time = #{enrollStartTime},</if>
+            <if test="enrollEndTime != null">enroll_end_time = #{enrollEndTime},</if>
+            <if test="eventStartTime != null">event_start_time = #{eventStartTime},</if>
+            <if test="eventEndTime != null">event_end_time = #{eventEndTime},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="supportChannelEnroll != null">support_channel_enroll = #{supportChannelEnroll},</if>
+            <if test="supportPointsDeduct != null">support_points_deduct = #{supportPointsDeduct},</if>
+            <if test="supportAppointment != null">support_appointment = #{supportAppointment},</if>
+            <if test="certRuleJson != null">cert_rule_json = #{certRuleJson},</if>
+            <if test="scoreRuleJson != null">score_rule_json = #{scoreRuleJson},</if>
+            <if test="formTemplateId != null">form_template_id = #{formTemplateId},</if>
+            <if test="aftersaleDays != null">aftersale_days = #{aftersaleDays},</if>
+            <if test="auditStatus != null and auditStatus != ''">audit_status = #{auditStatus},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="createdUserId != null">created_user_id = #{createdUserId},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where contest_id = #{contestId}
+    </update>
+
+    <delete id="deleteJstContestByContestId" parameterType="Long">
+        delete from jst_contest where contest_id = #{contestId}
+    </delete>
+
+    <delete id="deleteJstContestByContestIds" parameterType="String">
+        delete from jst_contest where contest_id in 
+        <foreach item="contestId" collection="array" open="(" separator="," close=")">
+            #{contestId}
+        </foreach>
+    </delete>
+</mapper>

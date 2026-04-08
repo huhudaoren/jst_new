@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>我的证书 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); padding-bottom: 20px !important; }
+
+/* 证书卡片 */
+.cert-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm); margin-bottom: 14px; overflow: hidden;
+  cursor: pointer; touch-action: manipulation;
+  transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal);
+}
+.cert-card:active { transform: scale(0.99); box-shadow: var(--shadow-xs); }
+
+/* 证书预览区 */
+.cert-preview {
+  height: 160px; position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.cert-bg-gold {
+  background: linear-gradient(135deg, #7C4F00 0%, #C8820A 40%, #F5C842 70%, #E8A800 100%);
+}
+.cert-bg-silver {
+  background: linear-gradient(135deg, #3A3A3A 0%, #6B6B6B 40%, #B0B0B0 70%, #888 100%);
+}
+.cert-bg-blue {
+  background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-400) 100%);
+}
+
+/* 仿真证书样式 */
+.cert-mock {
+  width: 280px; height: 130px;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 14px; position: relative; z-index: 1;
+}
+.cert-mock::before {
+  content: '';
+  position: absolute; inset: 4px;
+  border: 0.5px solid rgba(255,255,255,0.25);
+  border-radius: 7px;
+}
+.cert-mock-title {
+  font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.8);
+  letter-spacing: 1.5px; margin-bottom: 6px;
+}
+.cert-mock-name {
+  font-size: 18px; font-weight: 900; color: white;
+  letter-spacing: 2px; margin-bottom: 4px;
+}
+.cert-mock-contest {
+  font-size: 11px; color: rgba(255,255,255,0.75);
+  text-align: center; line-height: 1.5;
+  padding: 0 8px;
+}
+.cert-award-badge {
+  position: absolute; top: 10px; right: 12px;
+  font-size: 28px; opacity: 0.6;
+}
+
+/* 证书信息区 */
+.cert-info { padding: 14px 16px; border-bottom: 1px solid var(--c-gray-100); }
+.cert-name { font-size: 15px; font-weight: 700; color: var(--c-gray-900); margin-bottom: 8px; line-height: 1.4; }
+.cert-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.cert-no { font-size: 11px; color: var(--c-gray-500); }
+.cert-no span { color: var(--c-primary-600); font-weight: 600; }
+
+/* 操作区 */
+.cert-actions {
+  padding: 10px 16px;
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+
+/* 查看弹层 */
+.sheet-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(26,31,46,0.55); backdrop-filter: blur(4px);
+  z-index: 200; align-items: flex-end;
+}
+.sheet-overlay.show { display: flex; }
+.sheet-body {
+  width: 100%; max-width: 390px; margin: 0 auto;
+  background: var(--c-white);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  max-height: 92vh; overflow-y: auto;
+  animation: sheet-up 0.3s var(--ease-out);
+}
+@keyframes sheet-up { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.sheet-handle { width: 36px; height: 4px; background: var(--c-gray-100); border-radius: 2px; margin: 12px auto 0; }
+.sheet-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 12px; border-bottom: 1px solid var(--c-gray-100); }
+.sheet-title { font-size: 17px; font-weight: 700; color: var(--c-gray-900); }
+.sheet-close { width: 30px; height: 30px; border-radius: 50%; background: var(--c-gray-100); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; touch-action: manipulation; }
+
+/* 证书大图预览 */
+.cert-full-preview {
+  margin: 16px; border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.cert-full-img {
+  width: 100%; height: 220px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.cert-full-title { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); letter-spacing: 2px; margin-bottom: 10px; }
+.cert-full-main-title { font-size: 22px; font-weight: 900; color: white; text-align: center; margin-bottom: 10px; letter-spacing: 1px; }
+.cert-full-content { font-size: 13px; color: rgba(255,255,255,0.85); text-align: center; line-height: 1.8; }
+.cert-seal { position: absolute; right: 24px; bottom: 24px; font-size: 44px; opacity: 0.3; }
+.cert-border-deco {
+  position: absolute; inset: 6px;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 10px; pointer-events: none;
+}
+
+/* 下载选择 */
+.dl-options { display: flex; gap: 10px; padding: 14px 16px; }
+.dl-option {
+  flex: 1; border: 1.5px solid var(--c-gray-100);
+  border-radius: var(--radius-md); padding: 14px 12px;
+  text-align: center; cursor: pointer; touch-action: manipulation;
+  transition: all var(--duration-fast);
+}
+.dl-option:active { background: var(--c-gray-50); }
+.dl-option.selected { border-color: var(--c-primary-400); background: var(--c-primary-50); }
+.dl-icon { font-size: 28px; margin-bottom: 6px; }
+.dl-name { font-size: 14px; font-weight: 700; color: var(--c-gray-900); }
+.dl-desc { font-size: 11px; color: var(--c-gray-500); margin-top: 3px; }
+
+/* 验真二维码 */
+.qrcode-area {
+  margin: 16px; padding: 20px;
+  background: var(--c-gray-50);
+  border-radius: var(--radius-lg); text-align: center;
+}
+.qrcode-mock {
+  width: 120px; height: 120px; margin: 0 auto 12px;
+  background: var(--c-white);
+  border: 1px solid var(--c-gray-100);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 60px; box-shadow: var(--shadow-xs);
+  position: relative;
+}
+.qrcode-mock::before {
+  content: '';
+  position: absolute; inset: 6px;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px),
+              repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
+}
+.qrcode-label { font-size: 13px; font-weight: 600; color: var(--c-gray-700); margin-bottom: 4px; }
+.qrcode-sub { font-size: 12px; color: var(--c-gray-500); }
+
+/* 验真结果 */
+.verify-result {
+  margin: 0 16px 16px;
+  background: var(--c-success-50);
+  border: 1px solid rgba(39,174,96,0.2);
+  border-radius: var(--radius-md); padding: 16px;
+}
+.vr-title { font-size: 15px; font-weight: 700; color: var(--c-success); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.vr-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; }
+.vr-key { color: var(--c-gray-500); }
+.vr-val { color: var(--c-gray-900); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:var(--c-primary);">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<div class="page-header">
+  <div class="page-header-back" onclick="history.back()">←</div>
+  <div class="page-header-title">我的证书</div>
+</div>
+
+<div style="padding:14px 16px 0;">
+
+  <!-- 统计 -->
+  <div style="display:flex;gap:8px;margin-bottom:16px;" class="animate-in">
+    <div style="flex:1;background:var(--c-white);border-radius:var(--radius-md);padding:12px;text-align:center;box-shadow:var(--shadow-xs);">
+      <div style="font-size:22px;font-weight:900;color:var(--c-primary-600);">2</div>
+      <div style="font-size:12px;color:var(--c-gray-500);margin-top:3px;">证书数量</div>
+    </div>
+    <div style="flex:1;background:var(--c-white);border-radius:var(--radius-md);padding:12px;text-align:center;box-shadow:var(--shadow-xs);">
+      <div style="font-size:22px;font-weight:900;color:var(--c-gold);">1</div>
+      <div style="font-size:12px;color:var(--c-gray-500);margin-top:3px;">一等奖</div>
+    </div>
+    <div style="flex:1;background:var(--c-white);border-radius:var(--radius-md);padding:12px;text-align:center;box-shadow:var(--shadow-xs);">
+      <div style="font-size:22px;font-weight:900;color:var(--c-success);">✓</div>
+      <div style="font-size:12px;color:var(--c-gray-500);margin-top:3px;">均已验真</div>
+    </div>
+  </div>
+
+  <!-- 证书1：一等奖 -->
+  <div class="cert-card animate-in animate-in-d1" onclick="openCert('cert1')">
+    <div class="cert-preview cert-bg-gold">
+      <div class="cert-mock">
+        <div class="cert-mock-title">获 奖 证 书</div>
+        <div class="cert-mock-name">张小明</div>
+        <div class="cert-mock-contest">在安徒生(国际)艺术奖<br>荣获 一等奖</div>
+      </div>
+      <div class="cert-award-badge">🥇</div>
+    </div>
+    <div class="cert-info">
+      <div class="cert-name">安徒生(国际)艺术奖 · 获奖证书</div>
+      <div class="cert-meta">
+        <span class="tag tag-gold">🥇 一等奖</span>
+        <span class="tag tag-primary">数学</span>
+        <span class="tag tag-success">绘画类</span>
+      </div>
+      <div class="cert-no">证书编号：<span>JST-2025-ART-001-0088</span> · 发证：2025-11-10</div>
+    </div>
+    <div class="cert-actions">
+      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openVerify('cert1')">🔍 验真</button>
+      <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openDownload('cert1')">⬇ 下载</button>
+      <button class="btn btn-solid-blue btn-sm" onclick="event.stopPropagation();openCert('cert1')">查看</button>
+    </div>
+  </div>
+
+  <!-- 证书2：三等奖 -->
+  <div class="cert-card animate-in animate-in-d2" onclick="openCert('cert2')">
+    <div class="cert-preview cert-bg-blue">
+      <div class="cert-mock">
+        <div class="cert-mock-title">获 奖 证 书</div>
+        <div class="cert-mock-name">张小明</div>
+        <div class="cert-mock-contest">在第九届全国中小学生"鸟巢杯"文化艺术活动<br>荣获 三等奖</div>
+      </div>
+      <div class="cert-award-badge">🥉</div>
+    </div>
+    <div class="cert-info">
+      <div class="cert-name">第九届全国中小学生"鸟巢杯"文化艺术活动 · 获奖证书</div>
+      <div class="cert-meta">
+        <span class="tag tag-info">🥉 三等奖</span>
+        <span class="tag tag-primary">英语</span>
+        <span class="tag tag-gray">初中组</span>
+      </div>
+      <div class="cert-no">证书编号：<span>JST-2024-ENG-003-0234</span> · 发证：2024-12-05</div>
+    </div>
+    <div class="cert-actions">
+      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openVerify('cert2')">🔍 验真</button>
+      <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openDownload('cert2')">⬇ 下载</button>
+      <button class="btn btn-solid-blue btn-sm" onclick="event.stopPropagation();openCert('cert2')">查看</button>
+    </div>
+  </div>
+
+  <!-- 公开验真入口 -->
+  <div style="background:var(--c-white);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow-xs);margin-bottom:12px;" class="animate-in animate-in-d3">
+    <div style="font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:10px;">🔍 证书公开验真</div>
+    <div style="font-size:13px;color:var(--c-gray-500);margin-bottom:12px;line-height:1.6;">输入证书编号，验证证书真实性。适用于学校或单位查验证书。</div>
+    <div style="display:flex;gap:8px;">
+      <input class="form-input" style="flex:1;" type="text" placeholder="输入证书编号">
+      <button class="btn btn-solid-blue btn-md" style="flex-shrink:0;" onclick="location.href='cert-verify.html'">验真</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== 证书查看弹层 ===== -->
+<div class="sheet-overlay" id="certSheet" onclick="closeAll(event)">
+  <div class="sheet-body" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">证书查看</div>
+      <div class="sheet-close" onclick="closeAll()">✕</div>
+    </div>
+    <!-- 证书大图 -->
+    <div class="cert-full-preview">
+      <div class="cert-full-img cert-bg-gold" id="certFullBg">
+        <div class="cert-border-deco"></div>
+        <div class="cert-seal">🏛️</div>
+        <div class="cert-full-title">获 奖 证 书</div>
+        <div class="cert-full-main-title" id="certHolderName">张小明</div>
+        <div class="cert-full-content" id="certFullContent">
+          在 安徒生(国际)艺术奖 中<br>
+          荣获 <strong style="font-size:16px;">一等奖</strong>
+        </div>
+        <div style="color:rgba(255,255,255,0.6);font-size:11px;margin-top:12px;letter-spacing:1px;">安徒生国际艺术联合会 颁发</div>
+        <div style="color:rgba(255,255,255,0.5);font-size:10px;margin-top:4px;">2025年11月10日</div>
+      </div>
+    </div>
+    <!-- 证书信息 -->
+    <div style="padding:0 16px;">
+      <div style="display:flex;flex-direction:column;gap:0;" id="certDetailRows"></div>
+    </div>
+    <div style="padding:12px 16px 24px;display:flex;gap:8px;">
+      <button class="btn btn-outline btn-md" style="flex:1;" onclick="closeAll();setTimeout(()=>openDownload(currentCert),100)">⬇ 下载证书</button>
+      <button class="btn btn-ghost btn-md" style="flex:1;" onclick="closeAll();setTimeout(()=>openVerify(currentCert),100)">🔍 验真</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 下载格式选择弹层 ===== -->
+<div class="sheet-overlay" id="downloadSheet" onclick="closeAll(event)">
+  <div class="sheet-body" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">选择下载格式</div>
+      <div class="sheet-close" onclick="closeAll()">✕</div>
+    </div>
+    <div class="dl-options">
+      <div class="dl-option selected" id="dlImg" onclick="selectDl('img')">
+        <div class="dl-icon">🖼️</div>
+        <div class="dl-name">图片格式</div>
+        <div class="dl-desc">JPG / PNG<br>分享朋友圈</div>
+      </div>
+      <div class="dl-option" id="dlPdf" onclick="selectDl('pdf')">
+        <div class="dl-icon">📄</div>
+        <div class="dl-name">PDF 格式</div>
+        <div class="dl-desc">高清矢量<br>正式存档</div>
+      </div>
+    </div>
+    <div class="notice notice-info" style="margin:0 16px 14px;">
+      <span class="notice-icon">ℹ️</span>
+      <div>证书生成通常在 <strong>10秒内</strong>完成。图片格式适合分享，PDF格式适合打印存档。</div>
+    </div>
+    <div style="padding:0 16px 28px;">
+      <button class="btn btn-primary btn-lg btn-block" id="dlBtn" onclick="confirmDownload()">开始生成并下载</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 验真弹层 ===== -->
+<div class="sheet-overlay" id="verifySheet" onclick="closeAll(event)">
+  <div class="sheet-body" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">证书验真</div>
+      <div class="sheet-close" onclick="closeAll()">✕</div>
+    </div>
+    <div class="qrcode-area">
+      <div class="qrcode-mock">
+        <span style="position:relative;z-index:1;">📱</span>
+      </div>
+      <div class="qrcode-label">扫码验证证书真实性</div>
+      <div class="qrcode-sub">长按二维码保存，供第三方扫码核验</div>
+    </div>
+    <div class="verify-result">
+      <div class="vr-title">✅ 证书验真结果</div>
+      <div class="vr-row"><div class="vr-key">证书编号</div><div class="vr-val" id="vrNo">—</div></div>
+      <div class="vr-row"><div class="vr-key">持证人</div><div class="vr-val" id="vrName">—</div></div>
+      <div class="vr-row"><div class="vr-key">赛事名称</div><div class="vr-val" id="vrContest">—</div></div>
+      <div class="vr-row"><div class="vr-key">获奖等级</div><div class="vr-val" id="vrAward">—</div></div>
+      <div class="vr-row"><div class="vr-key">发证时间</div><div class="vr-val" id="vrDate">—</div></div>
+      <div class="vr-row"><div class="vr-key">验真状态</div><div class="vr-val" style="color:var(--c-success);">✓ 证书真实有效</div></div>
+    </div>
+    <div style="padding:0 16px 28px;">
+      <button class="btn btn-ghost btn-md btn-block" onclick="closeAll()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 空状态（筛选无结果时显示） -->
+<div id="certEmptyState" style="display:none;text-align:center;padding:48px 24px;">
+  <div style="font-size:56px;margin-bottom:16px;opacity:.6;">🏅</div>
+  <div style="font-size:17px;font-weight:700;color:var(--c-gray-700);margin-bottom:8px;">暂无相关证书</div>
+  <div style="font-size:14px;color:var(--c-gray-500);line-height:1.6;margin-bottom:24px;">该筛选条件下暂无证书<br>参赛获奖后证书将在此显示</div>
+  <button class="btn btn-solid-blue btn-md" onclick="location.href='contest-list.html'">浏览赛事</button>
+</div>
+
+<script>
+let currentCert = 'cert1';
+let dlFormat = 'img';
+
+const certData = {
+  cert1: {
+    bg: 'cert-bg-gold', award: '🥇 一等奖', name: '张小明',
+    content: '在 安徒生(国际)艺术奖 中<br>荣获 <strong style="font-size:16px;">一等奖</strong>',
+    orgDate: '安徒生国际艺术联合会 颁发 · 2025年11月10日',
+    rows: [['证书编号','JST-2025-ART-001-0088'],['持证人','张小明'],['赛事名称','安徒生(国际)艺术奖'],['获奖等级','🥇 一等奖'],['参赛组别','绘画类'],['颁发机构','安徒生国际艺术联合会'],['发证时间','2025年11月10日']],
+    verify: { no: 'JST-2025-ART-001-0088', name: '张**明', contest: '安徒生(国际)艺术奖', award: '一等奖', date: '2025年11月10日' }
+  },
+  cert2: {
+    bg: 'cert-bg-blue', award: '🥉 三等奖', name: '张小明',
+    content: '在 第九届全国中小学生"鸟巢杯"文化艺术活动 中<br>荣获 <strong style="font-size:16px;">三等奖</strong>',
+    orgDate: '中国英语教育学会 颁发 · 2024年12月05日',
+    rows: [['证书编号','JST-2024-ENG-003-0234'],['持证人','张小明'],['赛事名称','第九届全国中小学生"鸟巢杯"文化艺术活动'],['获奖等级','🥉 三等奖'],['参赛组别','初中组'],['颁发机构','中国英语教育学会'],['发证时间','2024年12月05日']],
+    verify: { no: 'JST-2024-ENG-003-0234', name: '张**明', contest: '第九届全国中小学生"鸟巢杯"文化艺术活动', award: '三等奖', date: '2024年12月05日' }
+  }
+};
+
+function openCert(id) {
+  currentCert = id;
+  const d = certData[id];
+  const bg = document.getElementById('certFullBg');
+  bg.className = 'cert-full-img ' + d.bg;
+  document.getElementById('certHolderName').textContent = d.name;
+  document.getElementById('certFullContent').innerHTML = d.content;
+  let html = '';
+  d.rows.forEach(([k,v]) => { html += `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--c-gray-100);font-size:13px;"><span style="color:var(--c-gray-500);">${k}</span><span style="font-weight:600;color:var(--c-gray-900);">${v}</span></div>`; });
+  document.getElementById('certDetailRows').innerHTML = html;
+  document.getElementById('certSheet').classList.add('show');
+}
+
+function openDownload(id) {
+  currentCert = id;
+  document.getElementById('downloadSheet').classList.add('show');
+}
+
+function openVerify(id) {
+  currentCert = id;
+  const v = certData[id].verify;
+  document.getElementById('vrNo').textContent = v.no;
+  document.getElementById('vrName').textContent = v.name;
+  document.getElementById('vrContest').textContent = v.contest;
+  document.getElementById('vrAward').textContent = v.award;
+  document.getElementById('vrDate').textContent = v.date;
+  document.getElementById('verifySheet').classList.add('show');
+}
+
+function closeAll(e) {
+  const sheets = ['certSheet','downloadSheet','verifySheet'];
+  sheets.forEach(id => {
+    const el = document.getElementById(id);
+    if (!e || e.target === el) el.classList.remove('show');
+  });
+}
+
+function selectDl(fmt) {
+  dlFormat = fmt;
+  document.getElementById('dlImg').classList.toggle('selected', fmt === 'img');
+  document.getElementById('dlPdf').classList.toggle('selected', fmt === 'pdf');
+  document.getElementById('dlBtn').textContent = fmt === 'img' ? '下载图片（JPG）' : '下载 PDF';
+}
+
+function confirmDownload() {
+  const btn = document.getElementById('dlBtn');
+  btn.textContent = '生成中...'; btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '✓ 已生成，点击保存';
+    btn.disabled = false;
+    showToast(`✓ 证书已生成（${dlFormat === 'img' ? 'JPG格式' : 'PDF格式'}），请保存到相册`);
+    setTimeout(() => closeAll(), 2000);
+  }, 1500);
+}
+
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
+}
+</script>
+</body>
+</html>

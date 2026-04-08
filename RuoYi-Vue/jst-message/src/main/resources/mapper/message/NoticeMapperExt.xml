@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.message.mapper.NoticeMapperExt">
+
+    <resultMap id="JstNoticeResult" type="com.ruoyi.jst.message.domain.JstNotice">
+        <result property="noticeId" column="notice_id"/>
+        <result property="title" column="title"/>
+        <result property="category" column="category"/>
+        <result property="content" column="content"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="topFlag" column="top_flag"/>
+        <result property="status" column="status"/>
+        <result property="publishTime" column="publish_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="BaseNoticeColumns">
+        notice_id, title, category, content, cover_image, top_flag, status,
+        publish_time, create_by, create_time, update_by, update_time, remark, del_flag
+    </sql>
+
+    <select id="selectAdminNoticeList" parameterType="com.ruoyi.jst.message.dto.NoticeQueryReqDTO" resultMap="JstNoticeResult">
+        SELECT <include refid="BaseNoticeColumns"/>
+        FROM jst_notice
+        <where>
+            del_flag = '0'
+            <if test="title != null and title != ''">
+                AND title LIKE CONCAT('%', #{title}, '%')
+            </if>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="topFlag != null">
+                AND top_flag = #{topFlag}
+            </if>
+        </where>
+        ORDER BY top_flag DESC, create_time DESC, notice_id DESC
+    </select>
+
+    <update id="updateEditableNotice" parameterType="com.ruoyi.jst.message.domain.JstNotice">
+        UPDATE jst_notice
+        SET title = #{title},
+            category = #{category},
+            content = #{content},
+            cover_image = #{coverImage},
+            top_flag = #{topFlag},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        WHERE notice_id = #{noticeId}
+          AND del_flag = '0'
+          AND status IN ('draft', 'offline')
+    </update>
+
+    <update id="updateNoticeStatus">
+        UPDATE jst_notice
+        SET status = #{newStatus},
+            publish_time = #{publishTime},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE notice_id = #{noticeId}
+          AND del_flag = '0'
+          AND status = #{expectedStatus}
+    </update>
+
+    <select id="selectPublishedNoticeList" resultMap="JstNoticeResult">
+        SELECT <include refid="BaseNoticeColumns"/>
+        FROM jst_notice
+        WHERE del_flag = '0'
+          AND status = 'published'
+          <if test="category != null and category != ''">
+              AND category = #{category}
+          </if>
+        ORDER BY top_flag DESC, publish_time DESC, notice_id DESC
+    </select>
+
+    <select id="selectPublishedNoticeById" resultMap="JstNoticeResult">
+        SELECT <include refid="BaseNoticeColumns"/>
+        FROM jst_notice
+        WHERE notice_id = #{noticeId}
+          AND del_flag = '0'
+          AND status = 'published'
+        LIMIT 1
+    </select>
+
+    <select id="selectTopBannerNotices" resultMap="JstNoticeResult">
+        SELECT <include refid="BaseNoticeColumns"/>
+        FROM jst_notice
+        WHERE del_flag = '0'
+          AND status = 'published'
+          AND top_flag = 1
+        ORDER BY publish_time DESC, notice_id DESC
+        LIMIT #{limit}
+    </select>
+</mapper>

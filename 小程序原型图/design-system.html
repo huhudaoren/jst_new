@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>竞赛通 · UI/UX 设计规范 v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   DESIGN SYSTEM DOC SHELL
+   ============================================================ */
+:root {
+  --doc-bg: #0E0F13;
+  --doc-surface: #16181F;
+  --doc-surface2: #1E2029;
+  --doc-border: rgba(255,255,255,0.07);
+  --doc-text: #E8EAF0;
+  --doc-muted: #7A7F94;
+  --doc-accent: #4F7FFF;
+
+  /* ===== DESIGN TOKENS — 竞赛通 ===== */
+  --c-primary:       #0C3D6B;
+  --c-primary-600:   #1058A0;
+  --c-primary-400:   #1A7CD9;
+  --c-primary-200:   #A8CDEE;
+  --c-primary-50:    #EBF4FC;
+
+  --c-accent:        #FF5722;
+  --c-accent-600:    #E64A19;
+  --c-accent-light:  #FF7043;
+  --c-accent-50:     #FFF3EE;
+
+  --c-gold:          #F5A623;
+  --c-gold-50:       #FFF8EC;
+
+  --c-success:       #27AE60;
+  --c-success-50:    #EAFAF1;
+  --c-warning:       #F39C12;
+  --c-warning-50:    #FEF9EC;
+  --c-danger:        #E74C3C;
+  --c-danger-50:     #FDEDEC;
+  --c-info:          #2980B9;
+  --c-info-50:       #EAF4FC;
+
+  --c-gray-900: #1A1F2E;
+  --c-gray-700: #3D4457;
+  --c-gray-500: #6B7490;
+  --c-gray-300: #B0B8CC;
+  --c-gray-100: #E8ECF4;
+  --c-gray-50:  #F4F6FA;
+  --c-white:    #FFFFFF;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  --shadow-xs: 0 1px 4px rgba(12,61,107,0.06);
+  --shadow-sm: 0 2px 10px rgba(12,61,107,0.09);
+  --shadow-md: 0 6px 24px rgba(12,61,107,0.13);
+  --shadow-lg: 0 12px 40px rgba(12,61,107,0.18);
+  --shadow-accent: 0 6px 20px rgba(255,87,34,0.30);
+
+  --font-body:    'Noto Sans SC', -apple-system, sans-serif;
+  --font-display: 'DM Serif Display', 'Noto Sans SC', serif;
+
+  --duration-fast:   150ms;
+  --duration-normal: 250ms;
+  --duration-slow:   400ms;
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--doc-bg);
+  color: var(--doc-text);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* ---- DOC LAYOUT ---- */
+.doc-sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 220px;
+  background: var(--doc-surface);
+  border-right: 1px solid var(--doc-border);
+  overflow-y: auto;
+  padding: 28px 0 40px;
+  z-index: 10;
+}
+
+.doc-logo {
+  padding: 0 20px 24px;
+  border-bottom: 1px solid var(--doc-border);
+  margin-bottom: 16px;
+}
+.doc-logo .brand { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+.doc-logo .version {
+  display: inline-block; margin-top: 6px;
+  font-size: 11px; color: var(--doc-accent);
+  background: rgba(79,127,255,0.15);
+  padding: 2px 8px; border-radius: var(--radius-full);
+  letter-spacing: 0.5px;
+}
+
+.nav-group { margin-bottom: 4px; }
+.nav-group-title {
+  font-size: 10px; font-weight: 700;
+  color: var(--doc-muted);
+  letter-spacing: 1.2px; text-transform: uppercase;
+  padding: 12px 20px 6px;
+}
+.nav-item {
+  display: block; padding: 8px 20px;
+  font-size: 13px; color: var(--doc-muted);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all 150ms ease;
+  cursor: pointer;
+}
+.nav-item:hover, .nav-item.active {
+  color: var(--doc-text);
+  background: rgba(255,255,255,0.04);
+  border-left-color: var(--doc-accent);
+}
+
+.doc-main {
+  margin-left: 220px;
+  padding: 48px 60px;
+  max-width: 1200px;
+}
+
+/* ---- SECTION ---- */
+.section {
+  margin-bottom: 72px;
+  scroll-margin-top: 48px;
+}
+.section-header {
+  display: flex; align-items: baseline; gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--doc-border);
+  margin-bottom: 36px;
+}
+.section-number {
+  font-size: 12px; font-weight: 700;
+  color: var(--doc-accent);
+  letter-spacing: 1px;
+}
+.section-title {
+  font-size: 26px; font-weight: 700;
+  color: var(--doc-text);
+  letter-spacing: -0.5px;
+}
+.section-subtitle {
+  font-size: 14px; color: var(--doc-muted);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+
+h3.subsection {
+  font-size: 16px; font-weight: 600;
+  color: var(--doc-text);
+  margin: 36px 0 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+h3.subsection::before {
+  content: '';
+  display: inline-block;
+  width: 3px; height: 16px;
+  background: var(--doc-accent);
+  border-radius: 2px;
+}
+
+/* ---- PREVIEW WRAPPER ---- */
+.preview-box {
+  background: var(--doc-surface);
+  border: 1px solid var(--doc-border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.preview-label {
+  padding: 10px 16px;
+  font-size: 11px; font-weight: 600;
+  color: var(--doc-muted);
+  letter-spacing: 0.8px; text-transform: uppercase;
+  border-bottom: 1px solid var(--doc-border);
+  background: rgba(255,255,255,0.02);
+}
+.preview-inner {
+  padding: 32px 24px;
+  background: var(--c-gray-50);
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start;
+}
+.preview-inner.dark-bg { background: #1A1F2E; }
+.preview-inner.white-bg { background: #fff; }
+
+/* ---- SPEC TABLE ---- */
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.spec-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 11px; font-weight: 700;
+  color: var(--doc-muted);
+  letter-spacing: 0.8px; text-transform: uppercase;
+  border-bottom: 1px solid var(--doc-border);
+}
+.spec-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--doc-text);
+  vertical-align: middle;
+}
+.spec-table tr:last-child td { border-bottom: none; }
+.spec-table code {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px; color: var(--doc-accent);
+  background: rgba(79,127,255,0.1);
+  padding: 2px 6px; border-radius: 4px;
+}
+
+/* ---- CODE BLOCK ---- */
+.code-block {
+  background: #0A0B0F;
+  border: 1px solid var(--doc-border);
+  border-radius: 8px;
+  padding: 20px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #ABB2BF;
+  overflow-x: auto;
+  line-height: 1.8;
+  margin-top: 16px;
+}
+.code-block .kw { color: #C678DD; }
+.code-block .val { color: #98C379; }
+.code-block .prop { color: #E06C75; }
+.code-block .comment { color: #5C6370; }
+
+/* ---- GRID ---- */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+/* ====================================================
+   ACTUAL COMPONENT STYLES (竞赛通 Design Tokens)
+   These are the real CSS used in all pages
+   ==================================================== */
+
+/* == COLORS == */
+.swatch-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.swatch {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.swatch-block {
+  width: 64px; height: 64px; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.swatch-label { font-size: 10px; color: var(--doc-muted); text-align: center; line-height: 1.4; }
+.swatch-hex { font-size: 10px; color: var(--doc-text); font-weight: 500; }
+
+/* == TYPOGRAPHY DEMO == */
+.typo-demo { background: white; border-radius: 12px; padding: 28px; }
+
+/* == BUTTON SYSTEM == */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-body);
+  font-weight: 500;
+  border: none; cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  white-space: nowrap;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.97); }
+
+/* Sizes */
+.btn-lg  { height: 52px; padding: 0 28px; font-size: 16px; border-radius: var(--radius-md); }
+.btn-md  { height: 44px; padding: 0 20px; font-size: 14px; border-radius: var(--radius-md); }
+.btn-sm  { height: 36px; padding: 0 16px; font-size: 13px; border-radius: var(--radius-sm); }
+.btn-xs  { height: 28px; padding: 0 12px; font-size: 12px; border-radius: var(--radius-xs); }
+
+/* full width */
+.btn-block { width: 100%; display: flex; }
+
+/* Variants */
+.btn-primary {
+  background: var(--c-accent);
+  color: white;
+  box-shadow: var(--shadow-accent);
+}
+.btn-primary:hover { background: var(--c-accent-light); transform: translateY(-1px); }
+
+.btn-solid-blue {
+  background: var(--c-primary-600);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+.btn-solid-blue:hover { background: var(--c-primary-400); transform: translateY(-1px); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--c-primary-600);
+  border: 1.5px solid var(--c-primary-600);
+}
+.btn-outline:hover { background: var(--c-primary-50); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--c-gray-700);
+  border: 1.5px solid var(--c-gray-100);
+}
+.btn-ghost:hover { background: var(--c-gray-50); border-color: var(--c-gray-300); }
+
+.btn-danger {
+  background: var(--c-danger);
+  color: white;
+}
+.btn-danger:hover { opacity: 0.9; }
+
+.btn-text {
+  background: transparent;
+  color: var(--c-primary-600);
+  padding-left: 0; padding-right: 0;
+  height: auto; font-size: 14px;
+}
+
+/* Disabled */
+.btn:disabled, .btn.disabled {
+  opacity: 0.4; cursor: not-allowed; pointer-events: none;
+  box-shadow: none; transform: none !important;
+}
+
+/* Icon in btn */
+.btn-icon { gap: 6px; }
+.btn-icon svg { width: 18px; height: 18px; }
+
+/* == TAGS / BADGES == */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  line-height: 1;
+  letter-spacing: 0.2px;
+}
+.tag-primary  { background: var(--c-primary-50);  color: var(--c-primary-600); }
+.tag-accent   { background: var(--c-accent-50);   color: var(--c-accent-600); }
+.tag-gold     { background: var(--c-gold-50);     color: #A0600A; }
+.tag-success  { background: var(--c-success-50);  color: var(--c-success); }
+.tag-warning  { background: var(--c-warning-50);  color: var(--c-warning); }
+.tag-danger   { background: var(--c-danger-50);   color: var(--c-danger); }
+.tag-info     { background: var(--c-info-50);     color: var(--c-info); }
+.tag-gray     { background: var(--c-gray-100);    color: var(--c-gray-700); }
+
+/* Large status tag */
+.tag-lg { font-size: 12px; padding: 5px 12px; }
+
+/* Tag with dot */
+.tag-dot::before {
+  content: '';
+  display: inline-block; width: 5px; height: 5px;
+  border-radius: 50%; background: currentColor;
+  flex-shrink: 0;
+}
+
+/* == CARDS == */
+.card {
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.card-padded { padding: var(--space-5); }
+
+/* Contest Card */
+.contest-card {
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow var(--duration-normal) var(--ease-out), transform var(--duration-normal) var(--ease-out);
+  cursor: pointer;
+}
+.contest-card:active { transform: scale(0.99); box-shadow: var(--shadow-xs); }
+.contest-card-thumb {
+  height: 120px;
+  background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-600) 100%);
+  position: relative;
+  display: flex; align-items: flex-end;
+  padding: 12px;
+  overflow: hidden;
+}
+.contest-card-thumb::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.contest-card-thumb.orange { background: linear-gradient(135deg, #D84315 0%, #FF7043 100%); }
+.contest-card-thumb.teal   { background: linear-gradient(135deg, #00695C 0%, #26A69A 100%); }
+.contest-card-thumb.purple { background: linear-gradient(135deg, #4527A0 0%, #7E57C2 100%); }
+.contest-card-thumb.gold   { background: linear-gradient(135deg, #E65100 0%, #FFB300 100%); }
+
+.contest-card-body { padding: 14px; }
+.contest-card-title {
+  font-size: 15px; font-weight: 600;
+  color: var(--c-gray-900);
+  line-height: 1.4;
+  margin-bottom: 8px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.contest-card-meta {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.contest-card-price {
+  font-size: 16px; font-weight: 700; color: var(--c-accent);
+}
+.contest-card-price span { font-size: 12px; font-weight: 400; color: var(--c-gray-500); }
+
+/* Course Card */
+.course-card {
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+.course-card:active { transform: scale(0.99); }
+.course-card-thumb {
+  height: 100px;
+  background: linear-gradient(135deg, #1565C0 0%, #42A5F5 100%);
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.course-card-body { padding: 12px; }
+.course-card-title {
+  font-size: 14px; font-weight: 600; color: var(--c-gray-900);
+  margin-bottom: 6px; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.course-card-info { display: flex; justify-content: space-between; align-items: center; }
+.course-price { font-size: 15px; font-weight: 700; color: var(--c-accent); }
+.course-free  { font-size: 15px; font-weight: 700; color: var(--c-success); }
+
+/* == QUICK-ENTRY GRID == */
+.quick-entry {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.quick-entry:active { transform: scale(0.93); }
+.quick-entry-icon {
+  width: 52px; height: 52px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  box-shadow: var(--shadow-xs);
+}
+.quick-entry-label {
+  font-size: 12px; color: var(--c-gray-700); font-weight: 500; text-align: center;
+}
+
+/* == FORM ELEMENTS == */
+.form-group { margin-bottom: var(--space-5); }
+.form-label {
+  display: block;
+  font-size: 13px; font-weight: 600;
+  color: var(--c-gray-700);
+  margin-bottom: 8px;
+  letter-spacing: 0.1px;
+}
+.form-label .required { color: var(--c-accent); margin-left: 2px; }
+.form-label .optional {
+  font-size: 11px; font-weight: 400;
+  color: var(--c-gray-300);
+  margin-left: 6px;
+}
+
+.form-input {
+  width: 100%;
+  height: 48px;
+  border: 1.5px solid var(--c-gray-100);
+  border-radius: var(--radius-md);
+  padding: 0 16px;
+  font-family: var(--font-body);
+  font-size: 15px; color: var(--c-gray-900);
+  background: var(--c-white);
+  outline: none;
+  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+  -webkit-appearance: none;
+}
+.form-input::placeholder { color: var(--c-gray-300); }
+.form-input:focus {
+  border-color: var(--c-primary-400);
+  box-shadow: 0 0 0 3px rgba(26,124,217,0.12);
+}
+.form-input.error {
+  border-color: var(--c-danger);
+  box-shadow: 0 0 0 3px rgba(231,76,60,0.10);
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 100px;
+  border: 1.5px solid var(--c-gray-100);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 15px; color: var(--c-gray-900);
+  background: var(--c-white);
+  outline: none; resize: none;
+  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+  line-height: 1.6;
+}
+.form-textarea:focus {
+  border-color: var(--c-primary-400);
+  box-shadow: 0 0 0 3px rgba(26,124,217,0.12);
+}
+
+.form-select-wrap { position: relative; }
+.form-select-wrap::after {
+  content: '▾';
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--c-gray-500); pointer-events: none; font-size: 13px;
+}
+.form-select {
+  width: 100%; height: 48px;
+  border: 1.5px solid var(--c-gray-100);
+  border-radius: var(--radius-md);
+  padding: 0 36px 0 16px;
+  font-family: var(--font-body);
+  font-size: 15px; color: var(--c-gray-900);
+  background: var(--c-white);
+  outline: none; appearance: none;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) ease;
+}
+.form-select:focus { border-color: var(--c-primary-400); }
+
+.form-hint  { font-size: 12px; color: var(--c-gray-500); margin-top: 6px; }
+.form-error { font-size: 12px; color: var(--c-danger); margin-top: 6px; }
+
+/* Upload area */
+.upload-area {
+  border: 2px dashed var(--c-gray-100);
+  border-radius: var(--radius-md);
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+  background: var(--c-gray-50);
+}
+.upload-area:hover { border-color: var(--c-primary-400); background: var(--c-primary-50); }
+.upload-area-icon { font-size: 32px; margin-bottom: 8px; }
+.upload-area-text { font-size: 13px; color: var(--c-gray-500); }
+.upload-area-hint { font-size: 11px; color: var(--c-gray-300); margin-top: 4px; }
+
+/* Radio / Checkbox */
+.radio-group, .check-group { display: flex; flex-direction: column; gap: 10px; }
+.radio-item, .check-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--c-gray-100);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+  background: var(--c-white);
+}
+.radio-item:hover, .check-item:hover { border-color: var(--c-primary-200); background: var(--c-primary-50); }
+.radio-item.selected, .check-item.selected {
+  border-color: var(--c-primary-400);
+  background: var(--c-primary-50);
+}
+.radio-dot {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--c-gray-300);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: border-color var(--duration-fast) ease;
+}
+.radio-item.selected .radio-dot {
+  border-color: var(--c-primary-400);
+}
+.radio-item.selected .radio-dot::after {
+  content: ''; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--c-primary-400);
+}
+.check-box {
+  width: 20px; height: 20px; border-radius: 5px;
+  border: 2px solid var(--c-gray-300);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all var(--duration-fast) ease;
+}
+.check-item.selected .check-box {
+  border-color: var(--c-primary-400); background: var(--c-primary-400);
+}
+.check-item.selected .check-box::after {
+  content: '✓'; font-size: 12px; color: white; font-weight: 700;
+}
+.radio-label, .check-label {
+  font-size: 14px; color: var(--c-gray-700); font-weight: 500; flex: 1;
+}
+.radio-desc, .check-desc {
+  font-size: 12px; color: var(--c-gray-500); margin-top: 2px;
+}
+
+/* == STATUS STEPS == */
+.step-bar {
+  display: flex; align-items: center;
+  padding: 0 var(--space-4);
+}
+.step-item {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  flex: 1;
+  position: relative;
+}
+.step-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 14px; left: 50%; width: 100%;
+  height: 2px;
+  background: var(--c-gray-100);
+}
+.step-item.done:not(:last-child)::after  { background: var(--c-primary-400); }
+.step-circle {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--c-gray-100);
+  background: var(--c-white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--c-gray-300);
+  position: relative; z-index: 1;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+.step-item.done .step-circle {
+  border-color: var(--c-primary-400); background: var(--c-primary-400);
+  color: white;
+}
+.step-item.active .step-circle {
+  border-color: var(--c-primary-400); background: var(--c-white);
+  color: var(--c-primary-400);
+  box-shadow: 0 0 0 4px rgba(26,124,217,0.15);
+}
+.step-label {
+  font-size: 11px; color: var(--c-gray-500); font-weight: 500;
+  white-space: nowrap;
+}
+.step-item.active .step-label { color: var(--c-primary-600); font-weight: 700; }
+
+/* == INFO ROWS (detail page) == */
+.info-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.info-row:last-child { border-bottom: none; }
+.info-row-key   { font-size: 13px; color: var(--c-gray-500); flex-shrink: 0; width: 80px; }
+.info-row-val   { font-size: 13px; color: var(--c-gray-900); text-align: right; flex: 1; line-height: 1.5; }
+.info-row-val.accent { color: var(--c-accent); font-weight: 600; }
+.info-row-val.primary { color: var(--c-primary-600); font-weight: 600; }
+
+/* == NOTICE BANNER == */
+.notice {
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; line-height: 1.6;
+}
+.notice-info    { background: var(--c-info-50);    color: var(--c-info);    border: 1px solid rgba(41,128,185,0.15); }
+.notice-warning { background: var(--c-warning-50); color: #8B5E06;          border: 1px solid rgba(243,156,18,0.15); }
+.notice-danger  { background: var(--c-danger-50);  color: var(--c-danger);  border: 1px solid rgba(231,76,60,0.15); }
+.notice-success { background: var(--c-success-50); color: var(--c-success); border: 1px solid rgba(39,174,96,0.15); }
+.notice-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.notice b { font-weight: 700; }
+
+/* == BOTTOM NAV == */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%; max-width: 390px;
+  height: 68px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--c-gray-100);
+  display: flex; align-items: stretch;
+  z-index: 50;
+  box-shadow: 0 -4px 20px rgba(12,61,107,0.08);
+}
+.nav-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px; cursor: pointer;
+  position: relative;
+  transition: all var(--duration-fast) ease;
+  padding-bottom: 6px;
+}
+.nav-tab-icon { font-size: 22px; line-height: 1; }
+.nav-tab-label { font-size: 10px; font-weight: 600; color: var(--c-gray-500); letter-spacing: 0.3px; }
+.nav-tab.active .nav-tab-label { color: var(--c-primary-600); }
+.nav-tab.active .nav-tab-icon { filter: none; }
+.nav-tab-dot {
+  position: absolute; top: 8px; right: calc(50% - 14px);
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--c-accent);
+  border: 1.5px solid white;
+}
+
+/* == PAGE HEADER == */
+.page-header {
+  height: 56px; background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: center;
+  padding: 0 var(--space-4);
+  position: sticky; top: 44px; z-index: 40;
+  box-shadow: var(--shadow-xs);
+}
+.page-header-back {
+  width: 36px; height: 36px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--c-gray-50); cursor: pointer;
+  margin-right: 12px; flex-shrink: 0;
+  font-size: 18px; color: var(--c-gray-700);
+  transition: background var(--duration-fast) ease;
+}
+.page-header-back:active { background: var(--c-gray-100); }
+.page-header-title {
+  font-size: 17px; font-weight: 700; color: var(--c-gray-900);
+  flex: 1; letter-spacing: -0.2px;
+}
+.page-header-action {
+  font-size: 14px; color: var(--c-primary-600); font-weight: 600; cursor: pointer;
+}
+
+/* == SEARCH BAR == */
+.search-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--c-gray-50);
+  border: 1.5px solid var(--c-gray-100);
+  border-radius: var(--radius-full);
+  height: 44px; padding: 0 16px;
+  transition: all var(--duration-fast) ease;
+}
+.search-bar:focus-within {
+  background: var(--c-white);
+  border-color: var(--c-primary-400);
+  box-shadow: 0 0 0 3px rgba(26,124,217,0.10);
+}
+.search-bar input {
+  flex: 1; border: none; background: transparent; outline: none;
+  font-family: var(--font-body); font-size: 14px; color: var(--c-gray-900);
+}
+.search-bar input::placeholder { color: var(--c-gray-300); }
+
+/* == SECTION HEADER (page internal) == */
+.list-section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: var(--space-4);
+}
+.list-section-title {
+  font-size: 17px; font-weight: 700; color: var(--c-gray-900);
+  letter-spacing: -0.2px;
+}
+.list-section-more { font-size: 13px; color: var(--c-primary-600); font-weight: 500; cursor: pointer; }
+
+/* == FIXED BOTTOM CTA == */
+.fixed-cta {
+  position: sticky; bottom: 0;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(8px);
+  padding: 12px var(--space-5) 24px;
+  border-top: 1px solid var(--c-gray-100);
+  box-shadow: 0 -4px 20px rgba(12,61,107,0.08);
+  margin-top: 8px;
+}
+
+/* == DIVIDER == */
+.divider {
+  height: 1px; background: var(--c-gray-100);
+  margin: var(--space-4) 0;
+}
+.section-divider {
+  height: 8px; background: var(--c-gray-50);
+  margin: var(--space-4) calc(-1 * var(--space-5));
+}
+
+/* == TOAST / SNACKBAR == */
+.toast {
+  position: fixed; bottom: 90px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26,31,46,0.92);
+  color: white; font-size: 13px; font-weight: 500;
+  padding: 10px 20px; border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  animation: toast-in 0.25s var(--ease-spring);
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+/* == MODAL == */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,31,46,0.55);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: flex-end;
+  z-index: 200;
+}
+.modal-sheet {
+  width: 100%; max-width: 390px; margin: 0 auto;
+  background: var(--c-white);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  overflow: hidden;
+  animation: sheet-up 0.3s var(--ease-out);
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.modal-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--c-gray-100); margin: 12px auto 0;
+}
+.modal-header {
+  padding: 16px var(--space-5) 12px;
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 17px; font-weight: 700; color: var(--c-gray-900); }
+.modal-close {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--c-gray-100);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer;
+  color: var(--c-gray-700);
+}
+.modal-body { padding: var(--space-5); }
+
+/* == EMPTY STATE == */
+.empty-state {
+  text-align: center; padding: 48px 24px;
+}
+.empty-state-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.7; }
+.empty-state-title { font-size: 17px; font-weight: 700; color: var(--c-gray-700); margin-bottom: 8px; }
+.empty-state-desc { font-size: 14px; color: var(--c-gray-500); line-height: 1.6; margin-bottom: 24px; }
+
+/* == LOADING SKELETON == */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--c-gray-100) 25%, var(--c-gray-50) 50%, var(--c-gray-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* == PAGE ENTER ANIMATION == */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: page-enter 0.35s var(--ease-out) both; }
+.animate-in-d1 { animation-delay: 0.05s; }
+.animate-in-d2 { animation-delay: 0.10s; }
+.animate-in-d3 { animation-delay: 0.15s; }
+.animate-in-d4 { animation-delay: 0.20s; }
+.animate-in-d5 { animation-delay: 0.25s; }
+.animate-in-d6 { animation-delay: 0.30s; }
+
+/* DOC specifics */
+.doc-chip {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: var(--radius-full);
+  background: rgba(79,127,255,0.15); color: var(--doc-accent);
+  letter-spacing: 0.4px;
+}
+.token-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--doc-border);
+}
+.token-row:last-child { border-bottom: none; }
+.token-name  { font-family: monospace; font-size: 12px; color: var(--doc-accent); width: 200px; flex-shrink: 0; }
+.token-value { font-family: monospace; font-size: 12px; color: #98C379; width: 140px; flex-shrink: 0; }
+.token-desc  { font-size: 12px; color: var(--doc-muted); }
+.token-demo  { margin-left: auto; }
+
+/* Page sim frame */
+.phone-frame {
+  width: 320px; flex-shrink: 0;
+  background: var(--c-gray-50);
+  border-radius: 24px;
+  overflow: hidden;
+  border: 3px solid #2A2D38;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  height: 580px; overflow-y: auto;
+}
+.phone-frame::-webkit-scrollbar { display: none; }
+
+.rule-pill {
+  display: inline-flex; align-items: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--doc-border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px; color: var(--doc-muted);
+  gap: 8px;
+}
+.rule-pill code { color: var(--doc-accent); font-family: monospace; }
+
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="doc-sidebar">
+  <div class="doc-logo">
+    <div class="brand">竞赛通</div>
+    <div class="version">Design System v1.0</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">基础</div>
+    <a class="nav-item active" onclick="scrollTo('intro')">简介 & 原则</a>
+    <a class="nav-item" onclick="scrollTo('viewport')">视口 & 布局</a>
+    <a class="nav-item" onclick="scrollTo('colors')">色彩系统</a>
+    <a class="nav-item" onclick="scrollTo('typography')">字体排版</a>
+    <a class="nav-item" onclick="scrollTo('spacing')">间距 & 圆角</a>
+    <a class="nav-item" onclick="scrollTo('motion')">动效规范</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">组件</div>
+    <a class="nav-item" onclick="scrollTo('buttons')">按钮</a>
+    <a class="nav-item" onclick="scrollTo('tags')">标签 & 徽标</a>
+    <a class="nav-item" onclick="scrollTo('cards')">卡片</a>
+    <a class="nav-item" onclick="scrollTo('forms')">表单元素</a>
+    <a class="nav-item" onclick="scrollTo('navigation')">导航栏</a>
+    <a class="nav-item" onclick="scrollTo('steps')">进度步骤</a>
+    <a class="nav-item" onclick="scrollTo('feedback')">反馈组件</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">规范</div>
+    <a class="nav-item" onclick="scrollTo('tokens')">Design Tokens</a>
+    <a class="nav-item" onclick="scrollTo('patterns')">交互规范</a>
+    <a class="nav-item" onclick="scrollTo('css')">CSS 引用</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="doc-main">
+
+  <!-- ===== 1. INTRO ===== -->
+  <section class="section" id="intro">
+    <div class="section-header">
+      <span class="section-number">01</span>
+      <div>
+        <div class="section-title">简介 & 设计原则</div>
+        <div class="section-subtitle">竞赛通 H5 端 UI/UX 设计规范，用于统一所有页面的视觉语言与交互模式。</div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:32px">
+      <div style="background:var(--doc-surface);border:1px solid var(--doc-border);border-radius:12px;padding:24px">
+        <div style="font-size:28px;margin-bottom:12px">🎯</div>
+        <div style="font-size:14px;font-weight:700;color:var(--doc-text);margin-bottom:8px">清晰高效</div>
+        <div style="font-size:12px;color:var(--doc-muted);line-height:1.6">以信息传达为第一优先级，降低用户认知负担，关键操作一步可达。</div>
+      </div>
+      <div style="background:var(--doc-surface);border:1px solid var(--doc-border);border-radius:12px;padding:24px">
+        <div style="font-size:28px;margin-bottom:12px">📱</div>
+        <div style="font-size:14px;font-weight:700;color:var(--doc-text);margin-bottom:8px">移动优先</div>
+        <div style="font-size:12px;color:var(--doc-muted);line-height:1.6">严格适配 375–430px 宽度，单手拇指可及区域放置核心操作，微信内置浏览器优先适配。</div>
+      </div>
+      <div style="background:var(--doc-surface);border:1px solid var(--doc-border);border-radius:12px;padding:24px">
+        <div style="font-size:28px;margin-bottom:12px">✨</div>
+        <div style="font-size:14px;font-weight:700;color:var(--doc-text);margin-bottom:8px">专业可信</div>
+        <div style="font-size:12px;color:var(--doc-muted);line-height:1.6">教育竞赛场景强调专业感与可信度，深蓝主色 + 橙色强调，传递权威与活力。</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">适用范围</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+      <span class="rule-pill">📱 手机端 H5 <code>375–430px</code></span>
+      <span class="rule-pill">🌐 微信内置浏览器优先</span>
+      <span class="rule-pill">⚡ 无 JS 框架依赖（纯 HTML+CSS+JS）</span>
+      <span class="rule-pill">🌙 暂不做暗色模式</span>
+    </div>
+
+    <h3 class="subsection">页面文件命名</h3>
+    <table class="spec-table">
+      <thead><tr><th>文件名</th><th>页面</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr><td><code>index.html</code></td><td>首页</td><td><span class="tag tag-warning">待开发</span></td></tr>
+        <tr><td><code>contest-list.html</code></td><td>赛事列表</td><td><span class="tag tag-warning">待开发</span></td></tr>
+        <tr><td><code>contest-detail.html</code></td><td>赛事详情</td><td><span class="tag tag-warning">待开发</span></td></tr>
+        <tr><td><code>enroll.html</code></td><td>报名流程</td><td><span class="tag tag-warning">待开发</span></td></tr>
+        <tr><td><code>course-list.html</code></td><td>课程列表</td><td><span class="tag tag-gray">规划中</span></td></tr>
+        <tr><td><code>course-detail.html</code></td><td>课程详情</td><td><span class="tag tag-gray">规划中</span></td></tr>
+        <tr><td><code>my.html</code></td><td>个人中心</td><td><span class="tag tag-gray">规划中</span></td></tr>
+        <tr><td><code>design-system.html</code></td><td>本设计规范</td><td><span class="tag tag-success">✓ 完成</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===== 2. VIEWPORT ===== -->
+  <section class="section" id="viewport">
+    <div class="section-header">
+      <span class="section-number">02</span>
+      <div>
+        <div class="section-title">视口 & 布局规范</div>
+        <div class="section-subtitle">所有页面共享的 HTML 骨架、视口设置与布局约束。</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">HTML 骨架（每页必须）</h3>
+    <div class="code-block"><span class="comment">&lt;!-- 每个 HTML 文件 head 必须包含 --&gt;</span>
+<span class="kw">&lt;meta</span> <span class="prop">charset</span>=<span class="val">"UTF-8"</span><span class="kw">&gt;</span>
+<span class="kw">&lt;meta</span> <span class="prop">name</span>=<span class="val">"viewport"</span> <span class="prop">content</span>=<span class="val">"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"</span><span class="kw">&gt;</span>
+<span class="kw">&lt;link</span> <span class="prop">rel</span>=<span class="val">"stylesheet"</span> <span class="prop">href</span>=<span class="val">"design-system.css"</span><span class="kw">&gt;</span>
+
+<span class="comment">&lt;!-- body 结构 --&gt;</span>
+<span class="kw">&lt;body&gt;</span>
+  <span class="kw">&lt;div</span> <span class="prop">class</span>=<span class="val">"status-bar"</span><span class="kw">&gt;</span>...<span class="kw">&lt;/div&gt;</span>     <span class="comment">&lt;!-- 模拟状态栏 44px --&gt;</span>
+  <span class="kw">&lt;div</span> <span class="prop">class</span>=<span class="val">"page-content"</span><span class="kw">&gt;</span>           <span class="comment">&lt;!-- 页面内容，pb=80px 给底部导航留空 --&gt;</span>
+    ...
+  <span class="kw">&lt;/div&gt;</span>
+  <span class="kw">&lt;nav</span> <span class="prop">class</span>=<span class="val">"bottom-nav"</span><span class="kw">&gt;</span>...<span class="kw">&lt;/nav&gt;</span>   <span class="comment">&lt;!-- 底部导航 68px --&gt;</span>
+<span class="kw">&lt;/body&gt;</span></div>
+
+    <h3 class="subsection">布局约束</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      <span class="rule-pill">Body <code>max-width: 390px</code> 居中</span>
+      <span class="rule-pill">页面内容 <code>padding: 0 16px</code></span>
+      <span class="rule-pill">底部安全区 <code>padding-bottom: 80px</code></span>
+      <span class="rule-pill">吸顶元素 <code>position: sticky; top: 44px</code></span>
+      <span class="rule-pill">全宽组件 <code>margin: 0 -16px</code></span>
+    </div>
+
+    <h3 class="subsection">区域分隔</h3>
+    <table class="spec-table">
+      <thead><tr><th>分隔类型</th><th>用途</th><th>CSS 类</th></tr></thead>
+      <tbody>
+        <tr><td>细线分隔</td><td>同区域内列表项之间</td><td><code>.divider</code> — 1px gray-100</td></tr>
+        <tr><td>灰块分隔</td><td>不同功能区之间（首页各 section）</td><td><code>.section-divider</code> — 8px gray-50</td></tr>
+        <tr><td>间距分隔</td><td>同区域内分组</td><td><code>margin-bottom: 24px</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===== 3. COLORS ===== -->
+  <section class="section" id="colors">
+    <div class="section-header">
+      <span class="section-number">03</span>
+      <div>
+        <div class="section-title">色彩系统</div>
+        <div class="section-subtitle">深蓝权威 × 暖橙活力。主色传递专业可信，强调色引导行动。</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">主色 Primary</h3>
+    <div class="preview-box">
+      <div class="preview-inner white-bg">
+        <div class="swatch-row">
+          <div class="swatch"><div class="swatch-block" style="background:#0C3D6B"></div><div class="swatch-label">Primary<br>900</div><div class="swatch-hex">#0C3D6B</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#1058A0"></div><div class="swatch-label">Primary<br>600</div><div class="swatch-hex">#1058A0</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#1A7CD9"></div><div class="swatch-label">Primary<br>400</div><div class="swatch-hex">#1A7CD9</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#A8CDEE"></div><div class="swatch-label">Primary<br>200</div><div class="swatch-hex">#A8CDEE</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#EBF4FC;border:1px solid #ddd"></div><div class="swatch-label">Primary<br>50</div><div class="swatch-hex">#EBF4FC</div></div>
+        </div>
+      </div>
+    </div>
+    <table class="spec-table">
+      <thead><tr><th>变量</th><th>色值</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>--c-primary</code></td><td>#0C3D6B</td><td>顶部 Header 背景渐变深色端、最高权重文字</td></tr>
+        <tr><td><code>--c-primary-600</code></td><td>#1058A0</td><td>主要蓝色按钮背景、导航激活色、链接色</td></tr>
+        <tr><td><code>--c-primary-400</code></td><td>#1A7CD9</td><td>表单聚焦框线、步骤条激活色</td></tr>
+        <tr><td><code>--c-primary-200</code></td><td>#A8CDEE</td><td>Hover 边框、浅色标签边框</td></tr>
+        <tr><td><code>--c-primary-50</code></td><td>#EBF4FC</td><td>标签背景、选中项背景、输入框聚焦背景</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="subsection">强调色 Accent</h3>
+    <div class="preview-box">
+      <div class="preview-inner white-bg">
+        <div class="swatch-row">
+          <div class="swatch"><div class="swatch-block" style="background:#E64A19"></div><div class="swatch-label">Accent<br>600</div><div class="swatch-hex">#E64A19</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#FF5722"></div><div class="swatch-label">Accent<br>500</div><div class="swatch-hex">#FF5722</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#FF7043"></div><div class="swatch-label">Accent<br>400</div><div class="swatch-hex">#FF7043</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#FFF3EE;border:1px solid #ddd"></div><div class="swatch-label">Accent<br>50</div><div class="swatch-hex">#FFF3EE</div></div>
+        </div>
+      </div>
+    </div>
+    <table class="spec-table">
+      <thead><tr><th>变量</th><th>色值</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>--c-accent</code></td><td>#FF5722</td><td>主 CTA 按钮、价格文字、报名按钮</td></tr>
+        <tr><td><code>--c-accent-600</code></td><td>#E64A19</td><td>Hover 状态、按下状态</td></tr>
+        <tr><td><code>--c-accent-light</code></td><td>#FF7043</td><td>次要强调、辅助标签</td></tr>
+        <tr><td><code>--c-accent-50</code></td><td>#FFF3EE</td><td>Accent 标签背景</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="subsection">功能色 Semantic</h3>
+    <div class="preview-box">
+      <div class="preview-inner white-bg">
+        <div class="swatch-row">
+          <div class="swatch"><div class="swatch-block" style="background:#27AE60"></div><div class="swatch-label">成功</div><div class="swatch-hex">#27AE60</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#F39C12"></div><div class="swatch-label">警告</div><div class="swatch-hex">#F39C12</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#E74C3C"></div><div class="swatch-label">危险</div><div class="swatch-hex">#E74C3C</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#2980B9"></div><div class="swatch-label">信息</div><div class="swatch-hex">#2980B9</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#F5A623"></div><div class="swatch-label">金色</div><div class="swatch-hex">#F5A623</div></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subsection">中性色 Gray</h3>
+    <div class="preview-box">
+      <div class="preview-inner white-bg">
+        <div class="swatch-row">
+          <div class="swatch"><div class="swatch-block" style="background:#1A1F2E"></div><div class="swatch-label">Gray 900</div><div class="swatch-hex">#1A1F2E</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#3D4457"></div><div class="swatch-label">Gray 700</div><div class="swatch-hex">#3D4457</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#6B7490"></div><div class="swatch-label">Gray 500</div><div class="swatch-hex">#6B7490</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#B0B8CC"></div><div class="swatch-label">Gray 300</div><div class="swatch-hex">#B0B8CC</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#E8ECF4;border:1px solid #ddd"></div><div class="swatch-label">Gray 100</div><div class="swatch-hex">#E8ECF4</div></div>
+          <div class="swatch"><div class="swatch-block" style="background:#F4F6FA;border:1px solid #ddd"></div><div class="swatch-label">Gray 50</div><div class="swatch-hex">#F4F6FA</div></div>
+        </div>
+      </div>
+    </div>
+    <table class="spec-table">
+      <thead><tr><th>变量</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>--c-gray-900</code></td><td>标题、正文重要内容</td></tr>
+        <tr><td><code>--c-gray-700</code></td><td>副标题、表单标签、图标</td></tr>
+        <tr><td><code>--c-gray-500</code></td><td>辅助说明、占位文字、时间</td></tr>
+        <tr><td><code>--c-gray-300</code></td><td>Placeholder、禁用态文字、分隔线</td></tr>
+        <tr><td><code>--c-gray-100</code></td><td>边框、分隔线</td></tr>
+        <tr><td><code>--c-gray-50</code></td><td>页面背景、区域分隔块</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===== 4. TYPOGRAPHY ===== -->
+  <section class="section" id="typography">
+    <div class="section-header">
+      <span class="section-number">04</span>
+      <div>
+        <div class="section-title">字体排版</div>
+        <div class="section-subtitle">字体层级清晰，正文舒适，标题有力，全程使用 Noto Sans SC。</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">字体规范</h3>
+    <div class="preview-box">
+      <div class="preview-inner white-bg" style="display:block;padding:28px 32px">
+        <div style="font-family:'Noto Sans SC',sans-serif;margin-bottom:32px">
+          <div style="font-size:11px;color:#9BA5B5;margin-bottom:16px;letter-spacing:0.8px">DISPLAY</div>
+          <div style="font-size:26px;font-weight:700;color:#1A1F2E;line-height:1.3;margin-bottom:6px">2025年全国中学生<br>数学联赛正式开启报名</div>
+          <div style="font-size:12px;color:#9BA5B5;font-family:monospace">26px / 700 / line-height 1.3</div>
+        </div>
+        <div style="font-family:'Noto Sans SC',sans-serif;margin-bottom:28px">
+          <div style="font-size:11px;color:#9BA5B5;margin-bottom:12px;letter-spacing:0.8px">H1 — PAGE TITLE</div>
+          <div style="font-size:20px;font-weight:700;color:#1A1F2E;line-height:1.35">全国中学生数学联赛</div>
+          <div style="font-size:12px;color:#9BA5B5;font-family:monospace;margin-top:4px">20px / 700</div>
+        </div>
+        <div style="font-family:'Noto Sans SC',sans-serif;margin-bottom:28px">
+          <div style="font-size:11px;color:#9BA5B5;margin-bottom:12px;letter-spacing:0.8px">H2 — SECTION TITLE</div>
+          <div style="font-size:17px;font-weight:700;color:#1A1F2E;line-height:1.4">赛事信息 / 报名须知</div>
+          <div style="font-size:12px;color:#9BA5B5;font-family:monospace;margin-top:4px">17px / 700</div>
+        </div>
+        <div style="font-family:'Noto Sans SC',sans-serif;margin-bottom:28px">
+          <div style="font-size:11px;color:#9BA5B5;margin-bottom:12px;letter-spacing:0.8px">BODY</div>
+          <div style="font-size:15px;font-weight:400;color:#1A1F2E;line-height:1.7">本赛事由中国数学会主办，面向全国高中学生，旨在发现和培养数学人才，推动中学数学教育发展。</div>
+          <div style="font-size:12px;color:#9BA5B5;font-family:monospace;margin-top:4px">15px / 400 / line-height 1.7</div>
+        </div>
+        <div style="font-family:'Noto Sans SC',sans-serif;margin-bottom:28px">
+          <div style="font-size:11px;color:#9BA5B5;margin-bottom:12px;letter-spacing:0.8px">BODY SMALL</div>
+          <div style="font-size:13px;font-weight:400;color:#6B7490;line-height:1.6">报名截止日期：2025年10月15日 · 主办单位：中国数学会</div>
+          <div style="font-size:12px;color:#9BA5B5;font-family:monospace;margin-top:4px">13px / 400 / gray-500</div>
+        </div>
+        <div style="font-family:'Noto Sans SC',sans-serif">
+          <div style="font-size:11px;color:#9BA5B5;margin-bottom:12px;letter-spacing:0.8px">CAPTION / LABEL</div>
+          <div style="font-size:11px;font-weight:600;color:#9BA5B5;letter-spacing:0.3px">报名状态 · 截止时间 · 所属学科</div>
+          <div style="font-size:12px;color:#9BA5B5;font-family:monospace;margin-top:4px">11px / 600 / gray-300</div>
+        </div>
+      </div>
+    </div>
+
+    <table class="spec-table" style="margin-top:16px">
+      <thead><tr><th>用途</th><th>Size</th><th>Weight</th><th>Color</th><th>Line-height</th></tr></thead>
+      <tbody>
+        <tr><td>页面主标题 (H1)</td><td>20px</td><td>700</td><td>gray-900</td><td>1.35</td></tr>
+        <tr><td>区块标题 (H2)</td><td>17px</td><td>700</td><td>gray-900</td><td>1.4</td></tr>
+        <tr><td>卡片标题 (H3)</td><td>15px</td><td>600</td><td>gray-900</td><td>1.4</td></tr>
+        <tr><td>正文</td><td>15px</td><td>400</td><td>gray-900</td><td>1.7</td></tr>
+        <tr><td>辅助文字</td><td>13px</td><td>400</td><td>gray-500</td><td>1.6</td></tr>
+        <tr><td>标签/说明</td><td>11–12px</td><td>500–600</td><td>gray-300/500</td><td>1.4</td></tr>
+        <tr><td>价格数字</td><td>18–22px</td><td>700</td><td>accent</td><td>1</td></tr>
+        <tr><td>按钮文字</td><td>14–16px</td><td>500</td><td>white/primary</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===== 5. SPACING ===== -->
+  <section class="section" id="spacing">
+    <div class="section-header">
+      <span class="section-number">05</span>
+      <div>
+        <div class="section-title">间距 & 圆角</div>
+        <div class="section-subtitle">4px 基础单位网格，圆角区分层级与功能。</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">间距 Scale</h3>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="token-row"><span class="token-name">--space-1</span><span class="token-value">4px</span><span class="token-desc">图标与文字间距、徽标内 padding</span></div>
+      <div class="token-row"><span class="token-name">--space-2</span><span class="token-value">8px</span><span class="token-desc">标签内 padding、行内元素间距</span></div>
+      <div class="token-row"><span class="token-name">--space-3</span><span class="token-value">12px</span><span class="token-desc">列表行 padding、卡片内次要间距</span></div>
+      <div class="token-row"><span class="token-name">--space-4</span><span class="token-value">16px</span><span class="token-desc">页面左右边距、卡片内基础 padding</span></div>
+      <div class="token-row"><span class="token-name">--space-5</span><span class="token-value">20px</span><span class="token-desc">卡片标准 padding、表单字段间距</span></div>
+      <div class="token-row"><span class="token-name">--space-6</span><span class="token-value">24px</span><span class="token-desc">区块间距、大卡片 padding</span></div>
+      <div class="token-row"><span class="token-name">--space-8</span><span class="token-value">32px</span><span class="token-desc">页面区域间距、section 间距</span></div>
+      <div class="token-row"><span class="token-name">--space-10</span><span class="token-value">40px</span><span class="token-desc">大区块 padding-top</span></div>
+    </div>
+
+    <h3 class="subsection">圆角 Radius</h3>
+    <div class="preview-box" style="margin-top:16px">
+      <div class="preview-inner white-bg" style="gap:20px;align-items:center">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="width:56px;height:56px;background:#1058A0;border-radius:4px"></div>
+          <div style="font-size:11px;color:#6B7490;text-align:center">xs<br>4px<br><span style="color:#9BA5B5">按钮 xs</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="width:56px;height:56px;background:#1058A0;border-radius:8px"></div>
+          <div style="font-size:11px;color:#6B7490;text-align:center">sm<br>8px<br><span style="color:#9BA5B5">小组件</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="width:56px;height:56px;background:#1058A0;border-radius:12px"></div>
+          <div style="font-size:11px;color:#6B7490;text-align:center">md<br>12px<br><span style="color:#9BA5B5">输入框</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="width:56px;height:56px;background:#1058A0;border-radius:16px"></div>
+          <div style="font-size:11px;color:#6B7490;text-align:center">lg<br>16px<br><span style="color:#9BA5B5">卡片</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="width:56px;height:56px;background:#1058A0;border-radius:24px"></div>
+          <div style="font-size:11px;color:#6B7490;text-align:center">xl<br>24px<br><span style="color:#9BA5B5">底部弹层</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="width:80px;height:36px;background:#1058A0;border-radius:999px"></div>
+          <div style="font-size:11px;color:#6B7490;text-align:center">full<br>999px<br><span style="color:#9BA5B5">标签/搜索栏</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subsection">阴影 Shadow</h3>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="token-row"><span class="token-name">--shadow-xs</span><span class="token-value" style="font-size:11px">0 1px 4px rgba(12,61,107,.06)</span><span class="token-desc">极轻，大列表条目 hover</span></div>
+      <div class="token-row"><span class="token-name">--shadow-sm</span><span class="token-value" style="font-size:11px">0 2px 10px rgba(12,61,107,.09)</span><span class="token-desc">卡片默认阴影</span></div>
+      <div class="token-row"><span class="token-name">--shadow-md</span><span class="token-value" style="font-size:11px">0 6px 24px rgba(12,61,107,.13)</span><span class="token-desc">悬浮元素、Dropdown</span></div>
+      <div class="token-row"><span class="token-name">--shadow-lg</span><span class="token-value" style="font-size:11px">0 12px 40px rgba(12,61,107,.18)</span><span class="token-desc">Modal、底部弹层</span></div>
+      <div class="token-row"><span class="token-name">--shadow-accent</span><span class="token-value" style="font-size:11px">0 6px 20px rgba(255,87,34,.30)</span><span class="token-desc">Accent 主按钮</span></div>
+    </div>
+  </section>
+
+  <!-- ===== 6. MOTION ===== -->
+  <section class="section" id="motion">
+    <div class="section-header">
+      <span class="section-number">06</span>
+      <div>
+        <div class="section-title">动效规范</div>
+        <div class="section-subtitle">克制、有目的的动效，提升感知流畅度而非装饰。</div>
+      </div>
+    </div>
+    <table class="spec-table">
+      <thead><tr><th>场景</th><th>时长</th><th>缓动</th><th>属性</th></tr></thead>
+      <tbody>
+        <tr><td>按钮点击</td><td>150ms</td><td>ease-out</td><td>scale(0.97), background-color</td></tr>
+        <tr><td>Hover 状态</td><td>150ms</td><td>ease</td><td>background, border-color, box-shadow</td></tr>
+        <tr><td>卡片悬浮</td><td>250ms</td><td>ease-out</td><td>transform translateY(-2px), box-shadow</td></tr>
+        <tr><td>页面进入</td><td>350ms</td><td>cubic-bezier(0.16,1,0.3,1)</td><td>opacity 0→1, translateY 12→0, stagger 50ms</td></tr>
+        <tr><td>底部弹层</td><td>300ms</td><td>cubic-bezier(0.16,1,0.3,1)</td><td>translateY 100%→0</td></tr>
+        <tr><td>Toast 出现</td><td>250ms</td><td>cubic-bezier(0.34,1.56,0.64,1)</td><td>opacity, translateY, scale</td></tr>
+        <tr><td>Tab 切换</td><td>200ms</td><td>ease</td><td>color, border-color</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px">
+      <span class="rule-pill">不允许闪烁、跳动、loop 装饰动效</span>
+      <span class="rule-pill">skeleton 骨架屏动效 shimmer 1.4s</span>
+      <span class="rule-pill">页面内容分批 stagger 进入，每项 delay +50ms</span>
+    </div>
+  </section>
+
+  <!-- ===== 7. BUTTONS ===== -->
+  <section class="section" id="buttons">
+    <div class="section-header">
+      <span class="section-number">07</span>
+      <div>
+        <div class="section-title">按钮</div>
+        <div class="section-subtitle">明确的视觉层级：Primary CTA > Solid Blue > Outline > Ghost > Text</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">按钮变体</h3>
+    <div class="preview-box">
+      <div class="preview-inner" style="gap:12px;flex-direction:column">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-primary btn-lg">立即报名</button>
+          <button class="btn btn-solid-blue btn-lg">查看详情</button>
+          <button class="btn btn-outline btn-lg">了解更多</button>
+          <button class="btn btn-ghost btn-lg">取 消</button>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-primary btn-md">立即报名</button>
+          <button class="btn btn-solid-blue btn-md">查看详情</button>
+          <button class="btn btn-outline btn-md">了解更多</button>
+          <button class="btn btn-ghost btn-md">取 消</button>
+          <button class="btn btn-danger btn-md">驳 回</button>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-primary btn-sm">报 名</button>
+          <button class="btn btn-solid-blue btn-sm">详 情</button>
+          <button class="btn btn-outline btn-sm">查看证书</button>
+          <button class="btn btn-ghost btn-sm">取 消</button>
+          <button class="btn btn-primary btn-sm disabled">已截止</button>
+        </div>
+        <div style="max-width:320px;width:100%;display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-primary btn-lg btn-block">立即报名（全宽）</button>
+          <button class="btn btn-outline btn-md btn-block">加入收藏</button>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-text">查看更多 →</button>
+          <span style="font-size:12px;color:#9BA5B5">btn-text: 无背景、无边框，仅文字</span>
+        </div>
+      </div>
+    </div>
+
+    <table class="spec-table" style="margin-top:16px">
+      <thead><tr><th>类名</th><th>语义</th><th>使用场景</th></tr></thead>
+      <tbody>
+        <tr><td><code>.btn-primary</code></td><td>🔴 最强 CTA</td><td>报名、立即购买、提交支付 — 每页最多 1 个</td></tr>
+        <tr><td><code>.btn-solid-blue</code></td><td>🔵 次级行动</td><td>查看详情、进入课程、确认操作</td></tr>
+        <tr><td><code>.btn-outline</code></td><td>蓝色线框</td><td>收藏、分享、次要操作</td></tr>
+        <tr><td><code>.btn-ghost</code></td><td>灰色线框</td><td>取消、返回、弱操作</td></tr>
+        <tr><td><code>.btn-danger</code></td><td>红色实心</td><td>删除、驳回、高危操作</td></tr>
+        <tr><td><code>.btn-text</code></td><td>无边框</td><td>查看更多、次级链接</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===== 8. TAGS ===== -->
+  <section class="section" id="tags">
+    <div class="section-header">
+      <span class="section-number">08</span>
+      <div>
+        <div class="section-title">标签 & 徽标</div>
+        <div class="section-subtitle">传递状态、学科、类型等分类信息。</div>
+      </div>
+    </div>
+
+    <div class="preview-box">
+      <div class="preview-inner white-bg" style="gap:10px;flex-wrap:wrap">
+        <span class="tag tag-primary">数学竞赛</span>
+        <span class="tag tag-primary">初中组</span>
+        <span class="tag tag-accent">报名中</span>
+        <span class="tag tag-gold">⭐ 热门</span>
+        <span class="tag tag-success tag-dot">已报名</span>
+        <span class="tag tag-warning tag-dot">待审核</span>
+        <span class="tag tag-danger tag-dot">审核驳回</span>
+        <span class="tag tag-info">线上竞赛</span>
+        <span class="tag tag-gray">全国</span>
+        <span class="tag tag-primary tag-lg">2025年度赛事</span>
+        <span class="tag tag-accent tag-lg">🔥 限时报名</span>
+      </div>
+    </div>
+
+    <table class="spec-table" style="margin-top:16px">
+      <thead><tr><th>类名</th><th>颜色</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>.tag-primary</code></td><td>蓝底蓝字</td><td>学科类型、年级段、赛事类型</td></tr>
+        <tr><td><code>.tag-accent</code></td><td>橙底橙字</td><td>报名中、热门、限时</td></tr>
+        <tr><td><code>.tag-gold</code></td><td>金底金字</td><td>推荐、热门、VIP</td></tr>
+        <tr><td><code>.tag-success</code></td><td>绿底绿字</td><td>已报名、审核通过、免费</td></tr>
+        <tr><td><code>.tag-warning</code></td><td>黄底黄字</td><td>待审核、即将截止、待支付</td></tr>
+        <tr><td><code>.tag-danger</code></td><td>红底红字</td><td>审核驳回、已截止、已关闭</td></tr>
+        <tr><td><code>.tag-info</code></td><td>蓝信息色</td><td>线上/线下、地区</td></tr>
+        <tr><td><code>.tag-gray</code></td><td>灰底灰字</td><td>默认状态、全部、其他</td></tr>
+        <tr><td>加 <code>.tag-dot</code></td><td>—</td><td>带圆点，用于状态类标签</td></tr>
+        <tr><td>加 <code>.tag-lg</code></td><td>—</td><td>较大尺寸，用于页面突出展示</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===== 9. CARDS ===== -->
+  <section class="section" id="cards">
+    <div class="section-header">
+      <span class="section-number">09</span>
+      <div>
+        <div class="section-title">卡片</div>
+        <div class="section-subtitle">赛事卡片与课程卡片是核心内容载体。</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">赛事卡片</h3>
+    <div class="preview-box">
+      <div class="preview-inner" style="gap:14px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px">
+        <div class="contest-card" style="width:200px;flex-shrink:0">
+          <div class="contest-card-thumb">
+            <span class="tag tag-accent" style="position:relative;z-index:1">报名中</span>
+          </div>
+          <div class="contest-card-body">
+            <div class="contest-card-title">2025年全国中学生数学联赛</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+              <span class="tag tag-primary">数学</span>
+              <span class="tag tag-gray">高中组</span>
+              <span class="tag tag-info">线上</span>
+            </div>
+            <div class="contest-card-meta">
+              <div class="contest-card-price">¥80 <span>/ 人</span></div>
+              <span class="tag tag-gray" style="font-size:10px">截止 10/15</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contest-card" style="width:200px;flex-shrink:0">
+          <div class="contest-card-thumb orange">
+            <span class="tag tag-gold" style="position:relative;z-index:1">⭐ 热门</span>
+          </div>
+          <div class="contest-card-body">
+            <div class="contest-card-title">第十届全国中小学生英语风采大赛</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+              <span class="tag tag-primary">英语</span>
+              <span class="tag tag-gray">小初高</span>
+            </div>
+            <div class="contest-card-meta">
+              <div class="contest-card-price">免费</div>
+              <span class="tag tag-success">报名中</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contest-card" style="width:200px;flex-shrink:0">
+          <div class="contest-card-thumb teal">
+            <span class="tag tag-gray" style="position:relative;z-index:1;opacity:0.8">已截止</span>
+          </div>
+          <div class="contest-card-body">
+            <div class="contest-card-title">全国青少年科技创新大赛</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+              <span class="tag tag-primary">科技</span>
+              <span class="tag tag-gray">初中组</span>
+            </div>
+            <div class="contest-card-meta">
+              <div class="contest-card-price">¥120 <span>/ 人</span></div>
+              <span class="tag tag-danger">已截止</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subsection">课程卡片</h3>
+    <div class="preview-box">
+      <div class="preview-inner" style="gap:14px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px">
+        <div class="course-card" style="width:180px;flex-shrink:0">
+          <div class="course-card-thumb">
+            <span style="font-size:32px;position:relative;z-index:1">🔢</span>
+          </div>
+          <div class="course-card-body">
+            <div class="course-card-title">竞赛数学精讲 · 高中组</div>
+            <div style="font-size:11px;color:#9BA5B5;margin-bottom:6px">主讲：王老师 · 共24讲</div>
+            <div class="course-card-info">
+              <span class="course-price">¥299</span>
+              <span class="tag tag-info">线上</span>
+            </div>
+          </div>
+        </div>
+        <div class="course-card" style="width:180px;flex-shrink:0">
+          <div class="course-card-thumb" style="background:linear-gradient(135deg,#1B5E20,#66BB6A)">
+            <span style="font-size:32px;position:relative;z-index:1">📐</span>
+          </div>
+          <div class="course-card-body">
+            <div class="course-card-title">数学联赛冲刺班（线下）</div>
+            <div style="font-size:11px;color:#9BA5B5;margin-bottom:6px">周末班 · 全程辅导</div>
+            <div class="course-card-info">
+              <span class="course-price">¥1800</span>
+              <span class="tag tag-accent">线下</span>
+            </div>
+          </div>
+        </div>
+        <div class="course-card" style="width:180px;flex-shrink:0">
+          <div class="course-card-thumb" style="background:linear-gradient(135deg,#880E4F,#E91E63)">
+            <span style="font-size:32px;position:relative;z-index:1">🎤</span>
+          </div>
+          <div class="course-card-body">
+            <div class="course-card-title">英语演讲基础入门课</div>
+            <div style="font-size:11px;color:#9BA5B5;margin-bottom:6px">张老师 · 共12讲</div>
+            <div class="course-card-info">
+              <span class="course-free">免费</span>
+              <span class="tag tag-success">线上</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subsection">通用卡片规范</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+      <span class="rule-pill">圆角 <code>border-radius: 16px</code></span>
+      <span class="rule-pill">默认阴影 <code>var(--shadow-sm)</code></span>
+      <span class="rule-pill">点击缩放 <code>scale(0.99)</code></span>
+      <span class="rule-pill">背景 <code>var(--c-white)</code></span>
+      <span class="rule-pill">标题最多 2 行截断</span>
+    </div>
+  </section>
+
+  <!-- ===== 10. FORMS ===== -->
+  <section class="section" id="forms">
+    <div class="section-header">
+      <span class="section-number">10</span>
+      <div>
+        <div class="section-title">表单元素</div>
+        <div class="section-subtitle">报名表单的核心组件，覆盖文本输入、选择、上传等场景。</div>
+      </div>
+    </div>
+
+    <div class="preview-box">
+      <div class="preview-inner white-bg" style="display:block;max-width:340px;margin:0 auto">
+
+        <div class="form-group">
+          <label class="form-label">姓名 <span class="required">*</span></label>
+          <input class="form-input" type="text" placeholder="请输入真实姓名" value="">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">手机号 <span class="required">*</span></label>
+          <input class="form-input" type="tel" placeholder="请输入手机号" value="138****5678">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">就读年级 <span class="required">*</span></label>
+          <div class="form-select-wrap">
+            <select class="form-select">
+              <option>请选择年级</option>
+              <option selected>高中一年级</option>
+              <option>高中二年级</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">参赛地区 <span class="required">*</span></label>
+          <input class="form-input error" type="text" placeholder="请输入所在省市" value="广东省">
+          <div class="form-error">⚠ 请选择具体的省份和城市</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">参赛宣言 <span class="optional">选填</span></label>
+          <textarea class="form-textarea" placeholder="写下你的参赛感想（最多200字）"></textarea>
+          <div class="form-hint">0 / 200 字</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">支付方式 <span class="required">*</span></label>
+          <div class="radio-group">
+            <div class="radio-item selected" onclick="selectRadio(this)">
+              <div class="radio-dot"></div>
+              <div><div class="radio-label">微信支付</div><div class="radio-desc">使用微信钱包或银行卡</div></div>
+            </div>
+            <div class="radio-item" onclick="selectRadio(this)">
+              <div class="radio-dot"></div>
+              <div><div class="radio-label">对公转账</div><div class="radio-desc">机构/老师统一支付</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">上传证件照</label>
+          <div class="upload-area">
+            <div class="upload-area-icon">📷</div>
+            <div class="upload-area-text">点击上传图片</div>
+            <div class="upload-area-hint">支持 JPG / PNG，不超过 10MB</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <table class="spec-table" style="margin-top:16px">
+      <thead><tr><th>组件</th><th>高度</th><th>圆角</th><th>字号</th></tr></thead>
+      <tbody>
+        <tr><td>文本输入框</td><td>48px</td><td>12px</td><td>15px</td></tr>
+        <tr><td>下拉选择框</td><td>48px</td><td>12px</td><td>15px</td></tr>
+        <tr><td>多行文本域</td><td>min 100px</td><td>12px</td><td>15px</td></tr>
+        <tr><td>单选/多选项</td><td>auto</td><td>12px</td><td>14px</td></tr>
+        <tr><td>上传区域</td><td>min 100px</td><td>12px</td><td>13px</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===== 11. NAVIGATION ===== -->
+  <section class="section" id="navigation">
+    <div class="section-header">
+      <span class="section-number">11</span>
+      <div>
+        <div class="section-title">导航栏</div>
+        <div class="section-subtitle">底部 Tab 导航 + 页面顶部导航的组合规范。</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">底部 Tab 导航</h3>
+    <div class="preview-box">
+      <div class="preview-inner white-bg" style="padding:0;display:block">
+        <div style="position:relative;height:68px;background:rgba(255,255,255,0.95);border-top:1px solid #E8ECF4;box-shadow:0 -4px 20px rgba(12,61,107,0.08);display:flex;align-items:stretch;max-width:390px">
+          <div class="nav-tab active" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding-bottom:6px">
+            <span style="font-size:22px">🏠</span>
+            <span style="font-size:10px;font-weight:600;color:#1058A0;letter-spacing:0.3px">首页</span>
+          </div>
+          <div class="nav-tab" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding-bottom:6px">
+            <span style="font-size:22px">🏆</span>
+            <span style="font-size:10px;font-weight:600;color:#9BA5B5;letter-spacing:0.3px">赛事</span>
+          </div>
+          <div class="nav-tab" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding-bottom:6px;position:relative">
+            <span style="font-size:22px">📚</span>
+            <span style="font-size:10px;font-weight:600;color:#9BA5B5;letter-spacing:0.3px">课程</span>
+            <div style="position:absolute;top:8px;right:calc(50% - 14px);width:6px;height:6px;border-radius:50%;background:#FF5722;border:1.5px solid white"></div>
+          </div>
+          <div class="nav-tab" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding-bottom:6px">
+            <span style="font-size:22px">📢</span>
+            <span style="font-size:10px;font-weight:600;color:#9BA5B5;letter-spacing:0.3px">公告</span>
+          </div>
+          <div class="nav-tab" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding-bottom:6px">
+            <span style="font-size:22px">👤</span>
+            <span style="font-size:10px;font-weight:600;color:#9BA5B5;letter-spacing:0.3px">我的</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subsection">页面顶部导航栏</h3>
+    <div class="preview-box">
+      <div class="preview-inner white-bg" style="padding:0;display:block">
+        <div style="height:56px;background:white;border-bottom:1px solid #E8ECF4;display:flex;align-items:center;padding:0 16px;box-shadow:0 2px 8px rgba(12,61,107,0.04)">
+          <div style="width:36px;height:36px;border-radius:8px;background:#F4F6FA;display:flex;align-items:center;justify-content:center;margin-right:12px;font-size:18px;color:#3D4457;flex-shrink:0">←</div>
+          <div style="font-size:17px;font-weight:700;color:#1A1F2E;flex:1">全国数学联赛</div>
+          <div style="font-size:14px;color:#1058A0;font-weight:600;cursor:pointer">分享</div>
+        </div>
+      </div>
+    </div>
+
+    <table class="spec-table" style="margin-top:16px">
+      <thead><tr><th>元素</th><th>规格</th></tr></thead>
+      <tbody>
+        <tr><td>底部 Tab 高度</td><td>68px，内含 6px bottom padding</td></tr>
+        <tr><td>Tab 图标</td><td>emoji 22px 或 SVG icon 24px</td></tr>
+        <tr><td>Tab 文字</td><td>10px / 600 / letter-spacing 0.3px</td></tr>
+        <tr><td>Tab 未读红点</td><td>6px 圆，#FF5722，白色 1.5px border</td></tr>
+        <tr><td>顶部导航高度</td><td>56px，sticky top:44px</td></tr>
+        <tr><td>返回按钮</td><td>36×36px，圆角 8px，灰底</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===== 12. STEPS ===== -->
+  <section class="section" id="steps">
+    <div class="section-header">
+      <span class="section-number">12</span>
+      <div>
+        <div class="section-title">进度步骤</div>
+        <div class="section-subtitle">报名流程、订单状态的可视化进度展示。</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">报名步骤条（3步）</h3>
+    <div class="preview-box">
+      <div class="preview-inner white-bg" style="display:block;padding:28px">
+        <div class="step-bar">
+          <div class="step-item done">
+            <div class="step-circle">✓</div>
+            <div class="step-label">填写信息</div>
+          </div>
+          <div class="step-item active">
+            <div class="step-circle">2</div>
+            <div class="step-label">确认支付</div>
+          </div>
+          <div class="step-item">
+            <div class="step-circle">3</div>
+            <div class="step-label">报名完成</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subsection">订单状态流转</h3>
+    <div class="preview-box">
+      <div class="preview-inner white-bg" style="display:block;padding:24px">
+        <div style="display:flex;gap:8px;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #E8ECF4">
+            <span class="tag tag-warning tag-dot">待支付</span>
+            <span style="font-size:13px;color:#9BA5B5">→ 完成支付后进入下一状态</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #E8ECF4">
+            <span class="tag tag-info tag-dot">待审核</span>
+            <span style="font-size:13px;color:#9BA5B5">→ 等待平台或组织方审核</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #E8ECF4">
+            <span class="tag tag-success tag-dot">已报名</span>
+            <span style="font-size:13px;color:#9BA5B5">→ 审核通过，报名完成</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #E8ECF4">
+            <span class="tag tag-danger tag-dot">审核驳回</span>
+            <span style="font-size:13px;color:#9BA5B5">→ 可重新补充资料提交</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0">
+            <span class="tag tag-gray tag-dot">已关闭</span>
+            <span style="font-size:13px;color:#9BA5B5">→ 超时未支付，订单自动关闭</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 13. FEEDBACK ===== -->
+  <section class="section" id="feedback">
+    <div class="section-header">
+      <span class="section-number">13</span>
+      <div>
+        <div class="section-title">反馈组件</div>
+        <div class="section-subtitle">通知横幅、Toast、空状态、骨架屏。</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">通知横幅 Notice</h3>
+    <div class="preview-box">
+      <div class="preview-inner white-bg" style="display:block;gap:12px;display:flex;flex-direction:column">
+        <div class="notice notice-info"><span class="notice-icon">ℹ️</span><div>报名成功！请在赛前 3 天查收参赛通知，确认参赛信息。</div></div>
+        <div class="notice notice-warning"><span class="notice-icon">⚠️</span><div><b>报名截止提醒：</b>距截止时间还剩 <b>3 天</b>，请尽快完成报名缴费。</div></div>
+        <div class="notice notice-danger"><span class="notice-icon">❌</span><div><b>资料审核驳回：</b>学校证明材料不符合要求，请重新上传。</div></div>
+        <div class="notice notice-success"><span class="notice-icon">✅</span><div>审核通过！你已成功报名，祝你取得好成绩！</div></div>
+      </div>
+    </div>
+
+    <h3 class="subsection">Toast 提示</h3>
+    <div class="preview-box">
+      <div class="preview-inner" style="justify-content:center;position:relative;height:80px">
+        <div class="toast" style="position:relative;bottom:auto;left:auto;transform:none;animation:none">报名信息已保存 ✓</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">空状态</h3>
+    <div class="preview-box">
+      <div class="preview-inner white-bg" style="justify-content:center">
+        <div class="empty-state" style="padding:32px 24px">
+          <div class="empty-state-icon">🏆</div>
+          <div class="empty-state-title">暂无报名记录</div>
+          <div class="empty-state-desc">你还没有参加过任何竞赛，<br>快去看看有哪些精彩赛事吧！</div>
+          <button class="btn btn-primary btn-md">浏览赛事</button>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subsection">骨架屏</h3>
+    <div class="preview-box">
+      <div class="preview-inner white-bg" style="flex-direction:column;gap:8px">
+        <div style="display:flex;gap:12px">
+          <div class="skeleton" style="width:80px;height:80px;border-radius:12px;flex-shrink:0"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-top:4px">
+            <div class="skeleton" style="height:16px;width:80%;border-radius:6px"></div>
+            <div class="skeleton" style="height:13px;width:60%;border-radius:6px"></div>
+            <div class="skeleton" style="height:13px;width:40%;border-radius:6px"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px">
+          <div class="skeleton" style="width:80px;height:80px;border-radius:12px;flex-shrink:0"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-top:4px">
+            <div class="skeleton" style="height:16px;width:70%;border-radius:6px"></div>
+            <div class="skeleton" style="height:13px;width:50%;border-radius:6px"></div>
+            <div class="skeleton" style="height:13px;width:35%;border-radius:6px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 14. TOKENS ===== -->
+  <section class="section" id="tokens">
+    <div class="section-header">
+      <span class="section-number">14</span>
+      <div>
+        <div class="section-title">Design Tokens 完整列表</div>
+        <div class="section-subtitle">所有页面必须通过 CSS 变量引用，禁止硬编码色值。</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">在每个 HTML 文件中引用</h3>
+    <div class="code-block"><span class="comment">/* 方式 1：复制 design-system.html 中 :root{} 的变量到各页 &lt;style&gt; */</span>
+<span class="comment">/* 方式 2：提取为独立 CSS 文件（推荐）*/</span>
+<span class="kw">&lt;link</span> <span class="prop">rel</span>=<span class="val">"stylesheet"</span> <span class="prop">href</span>=<span class="val">"design-system.css"</span><span class="kw">&gt;</span>
+
+<span class="comment">/* 使用示例 */</span>
+<span class="prop">.my-button</span> {
+  <span class="prop">background</span>: <span class="val">var(--c-accent)</span>;
+  <span class="prop">border-radius</span>: <span class="val">var(--radius-md)</span>;
+  <span class="prop">box-shadow</span>: <span class="val">var(--shadow-accent)</span>;
+  <span class="prop">transition</span>: <span class="val">all var(--duration-fast) var(--ease-out)</span>;
+}</div>
+  </section>
+
+  <!-- ===== 15. PATTERNS ===== -->
+  <section class="section" id="patterns">
+    <div class="section-header">
+      <span class="section-number">15</span>
+      <div>
+        <div class="section-title">交互规范</div>
+        <div class="section-subtitle">统一的交互模式，确保一致的用户体验。</div>
+      </div>
+    </div>
+
+    <table class="spec-table">
+      <thead><tr><th>场景</th><th>规范</th></tr></thead>
+      <tbody>
+        <tr><td>点击反馈</td><td>所有可点击元素必须有 :active 状态（scale 或 background 变化），响应时间 &lt;150ms</td></tr>
+        <tr><td>表单验证</td><td>失焦后验证，错误立即显示红框 + 错误文字；不在输入中途打断</td></tr>
+        <tr><td>加载状态</td><td>列表加载显示骨架屏；按钮提交中显示加载动画 + 禁用；不允许无反馈</td></tr>
+        <tr><td>空状态</td><td>每个列表页必须有专属空状态（图标+标题+描述+行动按钮）</td></tr>
+        <tr><td>错误处理</td><td>网络错误：Toast 提示 + 重试按钮；表单错误：字段内联错误</td></tr>
+        <tr><td>页面跳转</td><td>同级导航：底部 Tab 切换无动画；子级页面：从右侧滑入（CSS translateX）</td></tr>
+        <tr><td>未登录拦截</td><td>触发报名/支付操作时跳转登录页，登录后自动返回原操作</td></tr>
+        <tr><td>长文本截断</td><td>卡片标题最多 2 行（-webkit-line-clamp:2），超出用 ... 截断</td></tr>
+        <tr><td>价格显示</td><td>免费赛事显示"免费"（绿色）；付费显示"¥数字"（accent 色）</td></tr>
+        <tr><td>时间显示</td><td>今天/昨天用相对时间；超过7天用"MM月DD日"；超过1年用"YYYY年MM月DD日"</td></tr>
+        <tr><td>手机号脱敏</td><td>展示格式：138****5678（中间4位替换为*）</td></tr>
+        <tr><td>微信支付</td><td>触发后直接调起微信支付 sheet，不跳转外部页面</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===== 16. CSS REFERENCE ===== -->
+  <section class="section" id="css">
+    <div class="section-header">
+      <span class="section-number">16</span>
+      <div>
+        <div class="section-title">CSS 类名快速参考</div>
+        <div class="section-subtitle">复制即用的类名速查表。</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="gap:24px">
+      <div>
+        <h3 class="subsection">按钮</h3>
+        <div class="code-block" style="font-size:11px;line-height:2">
+.btn.btn-primary.btn-lg<br>
+.btn.btn-primary.btn-md<br>
+.btn.btn-primary.btn-sm<br>
+.btn.btn-solid-blue.btn-md<br>
+.btn.btn-outline.btn-md<br>
+.btn.btn-ghost.btn-md<br>
+.btn.btn-danger.btn-md<br>
+.btn.btn-text<br>
+.btn.btn-block  <span class="comment">/* 全宽 */</span><br>
+.btn.disabled   <span class="comment">/* 禁用 */</span>
+        </div>
+      </div>
+      <div>
+        <h3 class="subsection">标签</h3>
+        <div class="code-block" style="font-size:11px;line-height:2">
+.tag.tag-primary<br>
+.tag.tag-accent<br>
+.tag.tag-gold<br>
+.tag.tag-success<br>
+.tag.tag-warning<br>
+.tag.tag-danger<br>
+.tag.tag-info<br>
+.tag.tag-gray<br>
+.tag.tag-dot    <span class="comment">/* 加圆点 */</span><br>
+.tag.tag-lg     <span class="comment">/* 大号 */</span>
+        </div>
+      </div>
+      <div>
+        <h3 class="subsection">表单</h3>
+        <div class="code-block" style="font-size:11px;line-height:2">
+.form-group<br>
+.form-label / .required / .optional<br>
+.form-input<br>
+.form-input.error<br>
+.form-textarea<br>
+.form-select-wrap > .form-select<br>
+.form-hint<br>
+.form-error<br>
+.radio-group > .radio-item.selected<br>
+.check-group > .check-item.selected<br>
+.upload-area
+        </div>
+      </div>
+      <div>
+        <h3 class="subsection">布局 / 动效</h3>
+        <div class="code-block" style="font-size:11px;line-height:2">
+.card / .card-padded<br>
+.contest-card<br>
+.course-card<br>
+.page-header<br>
+.bottom-nav<br>
+.fixed-cta<br>
+.divider / .section-divider<br>
+.empty-state<br>
+.skeleton<br>
+.animate-in.animate-in-d1~d6<br>
+.notice-info/warning/danger/success
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subsection">页面模板代码（复制粘贴后修改）</h3>
+    <div class="code-block"><span class="comment">&lt;!-- 复制此骨架开始每个新页面 --&gt;</span>
+<span class="kw">&lt;!DOCTYPE html&gt;</span>
+<span class="kw">&lt;html</span> <span class="prop">lang</span>=<span class="val">"zh-CN"</span><span class="kw">&gt;</span>
+<span class="kw">&lt;head&gt;</span>
+  <span class="kw">&lt;meta</span> <span class="prop">charset</span>=<span class="val">"UTF-8"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;meta</span> <span class="prop">name</span>=<span class="val">"viewport"</span> <span class="prop">content</span>=<span class="val">"width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;title&gt;</span>页面标题 · 竞赛通<span class="kw">&lt;/title&gt;</span>
+  <span class="kw">&lt;link</span> <span class="prop">rel</span>=<span class="val">"preconnect"</span> <span class="prop">href</span>=<span class="val">"https://fonts.googleapis.com"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;link</span> <span class="prop">href</span>=<span class="val">"https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap"</span> <span class="prop">rel</span>=<span class="val">"stylesheet"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;style&gt;</span>
+    <span class="comment">/* 1. 粘贴 design-system.html 中 :root{} 全部 CSS 变量 */</span>
+    <span class="comment">/* 2. 粘贴公共组件 CSS（btn、tag、card、form、nav 等） */</span>
+    <span class="comment">/* 3. 写页面专属样式 */</span>
+  <span class="kw">&lt;/style&gt;</span>
+<span class="kw">&lt;/head&gt;</span>
+<span class="kw">&lt;body&gt;</span>
+  <span class="comment">&lt;!-- 状态栏 --&gt;</span>
+  <span class="kw">&lt;div</span> <span class="prop">class</span>=<span class="val">"status-bar"</span><span class="kw">&gt;</span>...<span class="kw">&lt;/div&gt;</span>
+
+  <span class="comment">&lt;!-- 页面主内容，pb-80 给底导留空 --&gt;</span>
+  <span class="kw">&lt;div</span> <span class="prop">class</span>=<span class="val">"page-content animate-in"</span> <span class="prop">style</span>=<span class="val">"padding-bottom:80px"</span><span class="kw">&gt;</span>
+    ...
+  <span class="kw">&lt;/div&gt;</span>
+
+  <span class="comment">&lt;!-- 底部导航 --&gt;</span>
+  <span class="kw">&lt;nav</span> <span class="prop">class</span>=<span class="val">"bottom-nav"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;div</span> <span class="prop">class</span>=<span class="val">"nav-tab active"</span> <span class="prop">onclick</span>=<span class="val">"location.href='index.html'"</span><span class="kw">&gt;</span>
+      <span class="kw">&lt;span</span> <span class="prop">class</span>=<span class="val">"nav-tab-icon"</span><span class="kw">&gt;</span>🏠<span class="kw">&lt;/span&gt;</span>
+      <span class="kw">&lt;span</span> <span class="prop">class</span>=<span class="val">"nav-tab-label"</span><span class="kw">&gt;</span>首页<span class="kw">&lt;/span&gt;</span>
+    <span class="kw">&lt;/div&gt;</span>
+    <span class="comment">&lt;!-- ... 其他 tab --&gt;</span>
+  <span class="kw">&lt;/nav&gt;</span>
+<span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span>
+    </div>
+  </section>
+
+</main>
+
+<script>
+function scrollTo(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function selectRadio(el) {
+  el.closest('.radio-group').querySelectorAll('.radio-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// Highlight nav on scroll
+const sections = document.querySelectorAll('.section');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      navItems.forEach(n => {
+        n.classList.toggle('active', n.getAttribute('onclick')?.includes(`'${id}'`));
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

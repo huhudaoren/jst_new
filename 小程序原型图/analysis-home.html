@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>经营分析 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.a-hero{background:linear-gradient(150deg,#0C3D6B 0%,#1058A0 50%,#1A7CD9 120%);padding:20px var(--space-4) 0;position:relative;overflow:hidden;}
+.a-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 25%,rgba(255,255,255,.07) 0%,transparent 50%);}
+.a-hero::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:24px;background:var(--c-gray-50);border-radius:24px 24px 0 0;}
+.ah-nav{display:flex;align-items:center;position:relative;z-index:1;margin-bottom:16px;}
+.ah-back{width:36px;height:36px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;margin-right:12px;touch-action:manipulation;}
+.ah-title{flex:1;font-size:17px;font-weight:700;color:white;}
+.ah-period{font-size:12px;color:rgba(255,255,255,.7);}
+.period-tabs{display:flex;gap:6px;position:relative;z-index:1;margin-bottom:20px;}
+.pt-chip{padding:5px 14px;border-radius:var(--radius-full);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:12px;font-weight:600;color:rgba(255,255,255,.75);cursor:pointer;touch-action:manipulation;transition:all var(--duration-fast);}
+.pt-chip.active{background:white;color:var(--c-primary-600);border-color:white;}
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;position:relative;z-index:1;margin-bottom:20px;}
+.kpi-cell{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius-md);padding:14px;}
+.kpi-label{font-size:11px;color:rgba(255,255,255,.65);margin-bottom:4px;}
+.kpi-num{font-size:22px;font-weight:900;color:white;line-height:1;}
+.kpi-trend{font-size:11px;margin-top:4px;}
+.kpi-trend.up{color:#69F0AE;}
+.kpi-trend.down{color:#FF8A80;}
+
+.topic-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 16px 0;}
+.topic-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);padding:16px;cursor:pointer;touch-action:manipulation;transition:all var(--duration-fast);}
+.topic-card:active{opacity:.88;}
+.tc-icon{font-size:28px;margin-bottom:10px;}
+.tc-name{font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:3px;}
+.tc-desc{font-size:11px;color:var(--c-gray-500);line-height:1.5;}
+.tc-arrow{font-size:18px;color:var(--c-gray-300);text-align:right;margin-top:6px;}
+
+.alert-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px 16px 0;overflow:hidden;}
+.alert-header{padding:14px 16px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--c-gray-100);}
+.alert-title{flex:1;font-size:14px;font-weight:700;color:var(--c-gray-900);}
+.alert-badge{padding:2px 10px;border-radius:var(--radius-full);background:var(--c-danger-50);color:var(--c-danger);font-size:11px;font-weight:700;}
+.alert-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--c-gray-100);cursor:pointer;touch-action:manipulation;transition:background var(--duration-fast);}
+.alert-item:last-child{border-bottom:none;}
+.alert-item:active{background:var(--c-gray-50);}
+.ai-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ai-info{flex:1;}
+.ai-title{font-size:13px;font-weight:600;color:var(--c-gray-900);}
+.ai-desc{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+.ai-level{font-size:11px;font-weight:700;flex-shrink:0;padding:3px 8px;border-radius:var(--radius-full);}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#0C3D6B;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+
+<div class="a-hero animate-in">
+  <div class="ah-nav">
+    <div class="ah-back" onclick="history.back()">←</div>
+    <div class="ah-title">经营分析总览</div>
+    <div class="ah-period">渠道方专属</div>
+  </div>
+  <div class="period-tabs">
+    <div class="pt-chip active" onclick="selectPeriod(this)">本月</div>
+    <div class="pt-chip" onclick="selectPeriod(this)">近3月</div>
+    <div class="pt-chip" onclick="selectPeriod(this)">近半年</div>
+    <div class="pt-chip" onclick="selectPeriod(this)">全年</div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-cell">
+      <div class="kpi-label">报名金额</div>
+      <div class="kpi-num">¥4,200</div>
+      <div class="kpi-trend up">↑ 18% vs 上月</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">用券金额</div>
+      <div class="kpi-num">¥860</div>
+      <div class="kpi-trend up">↑ 23% vs 上月</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">积分消耗</div>
+      <div class="kpi-num">4,800分</div>
+      <div class="kpi-trend down">↓ 5% vs 上月</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">返点支出</div>
+      <div class="kpi-num">¥680</div>
+      <div class="kpi-trend up">↑ 12% vs 上月</div>
+    </div>
+  </div>
+</div>
+
+<!-- 专题分析入口 -->
+<div class="topic-grid animate-in animate-in-d1">
+  <div class="topic-card" onclick="location.href='analysis-detail.html?topic=channel'">
+    <div class="tc-icon">🔗</div>
+    <div class="tc-name">渠道分析</div>
+    <div class="tc-desc">绑定学生来源、渠道转化率</div>
+    <div class="tc-arrow">›</div>
+  </div>
+  <div class="topic-card" onclick="location.href='analysis-detail.html?topic=contest'">
+    <div class="tc-icon">🏆</div>
+    <div class="tc-name">赛事分析</div>
+    <div class="tc-desc">报名趋势、赛事ROI</div>
+    <div class="tc-arrow">›</div>
+  </div>
+  <div class="topic-card" onclick="location.href='analysis-detail.html?topic=marketing'">
+    <div class="tc-icon">🎟️</div>
+    <div class="tc-name">营销分析</div>
+    <div class="tc-desc">用券率、活动转化率</div>
+    <div class="tc-arrow">›</div>
+  </div>
+  <div class="topic-card" onclick="location.href='analysis-detail.html?topic=finance'">
+    <div class="tc-icon">💰</div>
+    <div class="tc-name">财务分析</div>
+    <div class="tc-desc">返点收益、结算状态</div>
+    <div class="tc-arrow">›</div>
+  </div>
+</div>
+
+<!-- 异常预警 -->
+<div class="alert-card animate-in animate-in-d2">
+  <div class="alert-header">
+    <div class="alert-title">⚠️ 异常预警</div>
+    <div class="alert-badge">2 条待关注</div>
+  </div>
+  <div class="alert-item">
+    <div class="ai-dot" style="background:var(--c-warning);"></div>
+    <div class="ai-info">
+      <div class="ai-title">优惠券使用率异常</div>
+      <div class="ai-desc">本月用券率 42%，高于历史均值 28%，建议核查是否存在套券行为</div>
+    </div>
+    <div class="ai-level" style="background:var(--c-warning-50);color:var(--c-warning);">中风险</div>
+  </div>
+  <div class="alert-item">
+    <div class="ai-dot" style="background:var(--c-info);"></div>
+    <div class="ai-info">
+      <div class="ai-title">退款率环比上升</div>
+      <div class="ai-desc">本月退款率 8.3%，较上月增加 3.1 个百分点</div>
+    </div>
+    <div class="ai-level" style="background:var(--c-info-50);color:var(--c-info);">低风险</div>
+  </div>
+</div>
+
+<script>
+function selectPeriod(el){document.querySelectorAll('.pt-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
+</script>
+</body>
+</html>

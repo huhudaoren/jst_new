@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.ContestMapperExt">
+
+    <resultMap id="ContestEntityResult" type="com.ruoyi.jst.event.domain.JstContest">
+        <id property="contestId" column="contest_id"/>
+        <result property="contestName" column="contest_name"/>
+        <result property="sourceType" column="source_type"/>
+        <result property="partnerId" column="partner_id"/>
+        <result property="category" column="category"/>
+        <result property="groupLevels" column="group_levels"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="description" column="description"/>
+        <result property="enrollStartTime" column="enroll_start_time"/>
+        <result property="enrollEndTime" column="enroll_end_time"/>
+        <result property="eventStartTime" column="event_start_time"/>
+        <result property="eventEndTime" column="event_end_time"/>
+        <result property="price" column="price"/>
+        <result property="supportChannelEnroll" column="support_channel_enroll"/>
+        <result property="supportPointsDeduct" column="support_points_deduct"/>
+        <result property="supportAppointment" column="support_appointment"/>
+        <result property="certRuleJson" column="cert_rule_json"/>
+        <result property="scoreRuleJson" column="score_rule_json"/>
+        <result property="formTemplateId" column="form_template_id"/>
+        <result property="aftersaleDays" column="aftersale_days"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="status" column="status"/>
+        <result property="createdUserId" column="created_user_id"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="ContestColumns">
+        c.contest_id,
+        c.contest_name,
+        c.source_type,
+        c.partner_id,
+        c.category,
+        c.group_levels,
+        c.cover_image,
+        c.description,
+        c.enroll_start_time,
+        c.enroll_end_time,
+        c.event_start_time,
+        c.event_end_time,
+        c.price,
+        c.support_channel_enroll,
+        c.support_points_deduct,
+        c.support_appointment,
+        c.cert_rule_json,
+        c.score_rule_json,
+        c.form_template_id,
+        c.aftersale_days,
+        c.audit_status,
+        c.status,
+        c.created_user_id,
+        c.create_by,
+        c.create_time,
+        c.update_by,
+        c.update_time,
+        c.remark,
+        c.del_flag
+    </sql>
+
+    <sql id="WxCardColumns">
+        c.contest_id AS contestId,
+        c.contest_name AS contestName,
+        c.cover_image AS coverImage,
+        c.category AS category,
+        c.price AS price,
+        c.enroll_start_time AS enrollStartTime,
+        c.enroll_end_time AS enrollEndTime,
+        c.status AS status,
+        CASE
+            WHEN NOW() BETWEEN c.enroll_start_time AND c.enroll_end_time THEN 1
+            ELSE 0
+        END AS enrollOpen,
+        p.partner_name AS partnerName
+    </sql>
+
+    <select id="selectById" resultMap="ContestEntityResult">
+        select
+        <include refid="ContestColumns"/>
+        from jst_contest c
+        where c.contest_id = #{contestId}
+          and c.del_flag = '0'
+        limit 1
+    </select>
+
+    <insert id="insertContest" parameterType="com.ruoyi.jst.event.domain.JstContest" useGeneratedKeys="true" keyProperty="contest.contestId">
+        insert into jst_contest (
+            contest_name,
+            source_type,
+            partner_id,
+            category,
+            group_levels,
+            cover_image,
+            description,
+            enroll_start_time,
+            enroll_end_time,
+            event_start_time,
+            event_end_time,
+            price,
+            support_channel_enroll,
+            support_points_deduct,
+            support_appointment,
+            cert_rule_json,
+            score_rule_json,
+            form_template_id,
+            aftersale_days,
+            audit_status,
+            status,
+            created_user_id,
+            create_by,
+            create_time,
+            del_flag
+        ) values (
+            #{contest.contestName},
+            #{contest.sourceType},
+            #{contest.partnerId},
+            #{contest.category},
+            #{contest.groupLevels},
+            #{contest.coverImage},
+            #{contest.description},
+            #{contest.enrollStartTime},
+            #{contest.enrollEndTime},
+            #{contest.eventStartTime},
+            #{contest.eventEndTime},
+            #{contest.price},
+            #{contest.supportChannelEnroll},
+            #{contest.supportPointsDeduct},
+            #{contest.supportAppointment},
+            #{contest.certRuleJson},
+            #{contest.scoreRuleJson},
+            #{contest.formTemplateId},
+            #{contest.aftersaleDays},
+            #{contest.auditStatus},
+            #{contest.status},
+            #{contest.createdUserId},
+            #{contest.createBy},
+            #{contest.createTime},
+            #{contest.delFlag}
+        )
+    </insert>
+
+    <update id="updateContestForEdit">
+        update jst_contest
+        set contest_name = #{contest.contestName},
+            category = #{contest.category},
+            group_levels = #{contest.groupLevels},
+            cover_image = #{contest.coverImage},
+            description = #{contest.description},
+            enroll_start_time = #{contest.enrollStartTime},
+            enroll_end_time = #{contest.enrollEndTime},
+            event_start_time = #{contest.eventStartTime},
+            event_end_time = #{contest.eventEndTime},
+            price = #{contest.price},
+            support_channel_enroll = #{contest.supportChannelEnroll},
+            support_points_deduct = #{contest.supportPointsDeduct},
+            support_appointment = #{contest.supportAppointment},
+            cert_rule_json = #{contest.certRuleJson},
+            score_rule_json = #{contest.scoreRuleJson},
+            form_template_id = #{contest.formTemplateId},
+            aftersale_days = #{contest.aftersaleDays},
+            update_by = #{contest.updateBy},
+            update_time = #{contest.updateTime}
+        where contest_id = #{contest.contestId}
+          and audit_status = #{expectedAuditStatus}
+          and del_flag = '0'
+    </update>
+
+    <update id="updateAuditStatus">
+        update jst_contest
+        set audit_status = #{targetAuditStatus},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+            <if test="auditRemark != null">
+                , remark = #{auditRemark}
+            </if>
+        where contest_id = #{contestId}
+          and audit_status = #{expectedAuditStatus}
+          and del_flag = '0'
+    </update>
+
+    <update id="updateAuditAndBizStatus">
+        update jst_contest
+        set audit_status = #{targetAuditStatus},
+            status = #{targetBizStatus},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where contest_id = #{contestId}
+          and audit_status = #{expectedAuditStatus}
+          and status = #{expectedBizStatus}
+          and del_flag = '0'
+    </update>
+
+    <select id="selectAdminList" resultType="com.ruoyi.jst.event.vo.ContestListVO">
+        select
+        c.contest_id AS contestId,
+        c.contest_name AS contestName,
+        c.category AS category,
+        c.group_levels AS groupLevels,
+        c.cover_image AS coverImage,
+        c.price AS price,
+        c.enroll_start_time AS enrollStartTime,
+        c.enroll_end_time AS enrollEndTime,
+        c.audit_status AS auditStatus,
+        c.status AS status,
+        c.partner_id AS partnerId,
+        p.partner_name AS partnerName
+        from jst_contest c
+        left join jst_event_partner p on p.partner_id = c.partner_id and p.del_flag = '0'
+        <where>
+            c.del_flag = '0'
+            <if test="query != null and query.contestName != null and query.contestName != ''">
+                and c.contest_name like concat('%', #{query.contestName}, '%')
+            </if>
+            <if test="query != null and query.category != null and query.category != ''">
+                and c.category = #{query.category}
+            </if>
+            <if test="query != null and query.auditStatus != null and query.auditStatus != ''">
+                and c.audit_status = #{query.auditStatus}
+            </if>
+            <if test="query != null and query.status != null and query.status != ''">
+                and c.status = #{query.status}
+            </if>
+            <if test="query != null and query.partnerId != null">
+                and c.partner_id = #{query.partnerId}
+            </if>
+            <if test="query != null and query.beginCreateTime != null">
+                and c.create_time <![CDATA[ >= ]]> #{query.beginCreateTime}
+            </if>
+            <if test="query != null and query.endCreateTime != null">
+                and c.create_time <![CDATA[ <= ]]> #{query.endCreateTime}
+            </if>
+        </where>
+        order by c.create_time desc, c.contest_id desc
+    </select>
+
+    <select id="selectAdminDetail" resultType="com.ruoyi.jst.event.vo.ContestDetailVO">
+        select
+        c.contest_id AS contestId,
+        c.contest_name AS contestName,
+        c.source_type AS sourceType,
+        c.partner_id AS partnerId,
+        p.partner_name AS partnerName,
+        c.category AS category,
+        c.group_levels AS groupLevels,
+        c.cover_image AS coverImage,
+        c.description AS description,
+        c.enroll_start_time AS enrollStartTime,
+        c.enroll_end_time AS enrollEndTime,
+        c.event_start_time AS eventStartTime,
+        c.event_end_time AS eventEndTime,
+        c.price AS price,
+        c.support_channel_enroll AS supportChannelEnroll,
+        c.support_points_deduct AS supportPointsDeduct,
+        c.support_appointment AS supportAppointment,
+        c.cert_rule_json AS certRuleJson,
+        c.score_rule_json AS scoreRuleJson,
+        c.form_template_id AS formTemplateId,
+        c.aftersale_days AS aftersaleDays,
+        c.audit_status AS auditStatus,
+        c.status AS status,
+        c.created_user_id AS createdUserId
+        from jst_contest c
+        left join jst_event_partner p on p.partner_id = c.partner_id and p.del_flag = '0'
+        where c.contest_id = #{contestId}
+          and c.del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectWxList" resultType="com.ruoyi.jst.event.vo.WxContestCardVO">
+        select
+        <include refid="WxCardColumns"/>
+        from jst_contest c
+        left join jst_event_partner p on p.partner_id = c.partner_id and p.del_flag = '0'
+        <where>
+            c.del_flag = '0'
+            and c.audit_status = 'online'
+            <if test="query != null and query.category != null and query.category != ''">
+                and c.category = #{query.category}
+            </if>
+            <if test="query != null and query.groupLevel != null and query.groupLevel != ''">
+                and find_in_set(#{query.groupLevel}, c.group_levels)
+            </if>
+            <if test="query != null and query.keyword != null and query.keyword != ''">
+                and c.contest_name like concat('%', #{query.keyword}, '%')
+            </if>
+        </where>
+        order by c.enroll_start_time desc, c.contest_id desc
+    </select>
+
+    <select id="selectWxDetail" resultType="com.ruoyi.jst.event.vo.WxContestDetailVO">
+        select
+        c.contest_id AS contestId,
+        c.contest_name AS contestName,
+        c.cover_image AS coverImage,
+        c.category AS category,
+        c.group_levels AS groupLevels,
+        c.description AS description,
+        c.price AS price,
+        c.enroll_start_time AS enrollStartTime,
+        c.enroll_end_time AS enrollEndTime,
+        c.event_start_time AS eventStartTime,
+        c.event_end_time AS eventEndTime,
+        c.status AS status,
+        CASE
+            WHEN NOW() BETWEEN c.enroll_start_time AND c.enroll_end_time THEN 1
+            ELSE 0
+        END AS enrollOpen,
+        p.partner_name AS partnerName,
+        c.support_channel_enroll AS supportChannelEnroll,
+        c.support_points_deduct AS supportPointsDeduct,
+        c.support_appointment AS supportAppointment,
+        c.cert_rule_json AS certRuleJson,
+        c.score_rule_json AS scoreRuleJson,
+        c.aftersale_days AS aftersaleDays
+        from jst_contest c
+        left join jst_event_partner p on p.partner_id = c.partner_id and p.del_flag = '0'
+        where c.contest_id = #{contestId}
+          and c.del_flag = '0'
+          and c.audit_status = 'online'
+        limit 1
+    </select>
+
+    <select id="selectHotList" resultType="com.ruoyi.jst.event.vo.WxContestCardVO">
+        select
+        <include refid="WxCardColumns"/>
+        from jst_contest c
+        left join jst_event_partner p on p.partner_id = c.partner_id and p.del_flag = '0'
+        where c.del_flag = '0'
+          and c.audit_status = 'online'
+        order by c.create_time desc, c.contest_id desc
+        limit #{limit}
+    </select>
+
+    <select id="selectCategoryStats" resultType="com.ruoyi.jst.event.vo.CategoryStatVO">
+        select
+        d.dict_value AS code,
+        d.dict_label AS name,
+        ifnull(t.contest_count, 0) AS count
+        from sys_dict_data d
+        left join (
+            select category, count(1) AS contest_count
+            from jst_contest
+            where del_flag = '0'
+              and audit_status = 'online'
+            group by category
+        ) t on t.category = d.dict_value
+        where d.dict_type = 'jst_contest_category'
+          and d.status = '0'
+        order by d.dict_sort asc, d.dict_code asc
+    </select>
+
+</mapper>

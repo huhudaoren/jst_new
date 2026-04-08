@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstAppointmentWriteoffItemMapper">
+    
+    <resultMap type="JstAppointmentWriteoffItem" id="JstAppointmentWriteoffItemResult">
+        <result property="writeoffItemId"    column="writeoff_item_id"    />
+        <result property="appointmentId"    column="appointment_id"    />
+        <result property="teamAppointmentId"    column="team_appointment_id"    />
+        <result property="itemType"    column="item_type"    />
+        <result property="itemName"    column="item_name"    />
+        <result property="qrCode"    column="qr_code"    />
+        <result property="status"    column="status"    />
+        <result property="writeoffTime"    column="writeoff_time"    />
+        <result property="writeoffUserId"    column="writeoff_user_id"    />
+        <result property="writeoffTerminal"    column="writeoff_terminal"    />
+        <result property="writeoffQty"    column="writeoff_qty"    />
+        <result property="totalQty"    column="total_qty"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstAppointmentWriteoffItemVo">
+        select writeoff_item_id, appointment_id, team_appointment_id, item_type, item_name, qr_code, status, writeoff_time, writeoff_user_id, writeoff_terminal, writeoff_qty, total_qty, create_by, create_time, update_by, update_time, remark, del_flag from jst_appointment_writeoff_item
+    </sql>
+
+    <select id="selectJstAppointmentWriteoffItemList" parameterType="JstAppointmentWriteoffItem" resultMap="JstAppointmentWriteoffItemResult">
+        <include refid="selectJstAppointmentWriteoffItemVo"/>
+        <where>  
+            <if test="appointmentId != null "> and appointment_id = #{appointmentId}</if>
+            <if test="teamAppointmentId != null "> and team_appointment_id = #{teamAppointmentId}</if>
+            <if test="itemType != null  and itemType != ''"> and item_type = #{itemType}</if>
+            <if test="itemName != null  and itemName != ''"> and item_name like concat('%', #{itemName}, '%')</if>
+            <if test="qrCode != null  and qrCode != ''"> and qr_code = #{qrCode}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="writeoffTime != null "> and writeoff_time = #{writeoffTime}</if>
+            <if test="writeoffUserId != null "> and writeoff_user_id = #{writeoffUserId}</if>
+            <if test="writeoffTerminal != null  and writeoffTerminal != ''"> and writeoff_terminal = #{writeoffTerminal}</if>
+            <if test="writeoffQty != null "> and writeoff_qty = #{writeoffQty}</if>
+            <if test="totalQty != null "> and total_qty = #{totalQty}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstAppointmentWriteoffItemByWriteoffItemId" parameterType="Long" resultMap="JstAppointmentWriteoffItemResult">
+        <include refid="selectJstAppointmentWriteoffItemVo"/>
+        where writeoff_item_id = #{writeoffItemId}
+    </select>
+
+    <insert id="insertJstAppointmentWriteoffItem" parameterType="JstAppointmentWriteoffItem" useGeneratedKeys="true" keyProperty="writeoffItemId">
+        insert into jst_appointment_writeoff_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="appointmentId != null">appointment_id,</if>
+            <if test="teamAppointmentId != null">team_appointment_id,</if>
+            <if test="itemType != null and itemType != ''">item_type,</if>
+            <if test="itemName != null">item_name,</if>
+            <if test="qrCode != null and qrCode != ''">qr_code,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="writeoffTime != null">writeoff_time,</if>
+            <if test="writeoffUserId != null">writeoff_user_id,</if>
+            <if test="writeoffTerminal != null">writeoff_terminal,</if>
+            <if test="writeoffQty != null">writeoff_qty,</if>
+            <if test="totalQty != null">total_qty,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="appointmentId != null">#{appointmentId},</if>
+            <if test="teamAppointmentId != null">#{teamAppointmentId},</if>
+            <if test="itemType != null and itemType != ''">#{itemType},</if>
+            <if test="itemName != null">#{itemName},</if>
+            <if test="qrCode != null and qrCode != ''">#{qrCode},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="writeoffTime != null">#{writeoffTime},</if>
+            <if test="writeoffUserId != null">#{writeoffUserId},</if>
+            <if test="writeoffTerminal != null">#{writeoffTerminal},</if>
+            <if test="writeoffQty != null">#{writeoffQty},</if>
+            <if test="totalQty != null">#{totalQty},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstAppointmentWriteoffItem" parameterType="JstAppointmentWriteoffItem">
+        update jst_appointment_writeoff_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="appointmentId != null">appointment_id = #{appointmentId},</if>
+            <if test="teamAppointmentId != null">team_appointment_id = #{teamAppointmentId},</if>
+            <if test="itemType != null and itemType != ''">item_type = #{itemType},</if>
+            <if test="itemName != null">item_name = #{itemName},</if>
+            <if test="qrCode != null and qrCode != ''">qr_code = #{qrCode},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="writeoffTime != null">writeoff_time = #{writeoffTime},</if>
+            <if test="writeoffUserId != null">writeoff_user_id = #{writeoffUserId},</if>
+            <if test="writeoffTerminal != null">writeoff_terminal = #{writeoffTerminal},</if>
+            <if test="writeoffQty != null">writeoff_qty = #{writeoffQty},</if>
+            <if test="totalQty != null">total_qty = #{totalQty},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where writeoff_item_id = #{writeoffItemId}
+    </update>
+
+    <delete id="deleteJstAppointmentWriteoffItemByWriteoffItemId" parameterType="Long">
+        delete from jst_appointment_writeoff_item where writeoff_item_id = #{writeoffItemId}
+    </delete>
+
+    <delete id="deleteJstAppointmentWriteoffItemByWriteoffItemIds" parameterType="String">
+        delete from jst_appointment_writeoff_item where writeoff_item_id in 
+        <foreach item="writeoffItemId" collection="array" open="(" separator="," close=")">
+            #{writeoffItemId}
+        </foreach>
+    </delete>
+</mapper>

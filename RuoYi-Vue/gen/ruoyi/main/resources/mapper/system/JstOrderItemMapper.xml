@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstOrderItemMapper">
+    
+    <resultMap type="JstOrderItem" id="JstOrderItemResult">
+        <result property="itemId"    column="item_id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="skuType"    column="sku_type"    />
+        <result property="refId"    column="ref_id"    />
+        <result property="itemName"    column="item_name"    />
+        <result property="quantity"    column="quantity"    />
+        <result property="listAmount"    column="list_amount"    />
+        <result property="couponShare"    column="coupon_share"    />
+        <result property="pointsShare"    column="points_share"    />
+        <result property="netPayShare"    column="net_pay_share"    />
+        <result property="serviceFeeShare"    column="service_fee_share"    />
+        <result property="rebateShare"    column="rebate_share"    />
+        <result property="refundAmount"    column="refund_amount"    />
+        <result property="refundPoints"    column="refund_points"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstOrderItemVo">
+        select item_id, order_id, sku_type, ref_id, item_name, quantity, list_amount, coupon_share, points_share, net_pay_share, service_fee_share, rebate_share, refund_amount, refund_points, create_by, create_time, update_by, update_time, remark, del_flag from jst_order_item
+    </sql>
+
+    <select id="selectJstOrderItemList" parameterType="JstOrderItem" resultMap="JstOrderItemResult">
+        <include refid="selectJstOrderItemVo"/>
+        <where>  
+            <if test="orderId != null "> and order_id = #{orderId}</if>
+            <if test="skuType != null  and skuType != ''"> and sku_type = #{skuType}</if>
+            <if test="refId != null "> and ref_id = #{refId}</if>
+            <if test="itemName != null  and itemName != ''"> and item_name like concat('%', #{itemName}, '%')</if>
+            <if test="quantity != null "> and quantity = #{quantity}</if>
+            <if test="listAmount != null "> and list_amount = #{listAmount}</if>
+            <if test="couponShare != null "> and coupon_share = #{couponShare}</if>
+            <if test="pointsShare != null "> and points_share = #{pointsShare}</if>
+            <if test="netPayShare != null "> and net_pay_share = #{netPayShare}</if>
+            <if test="serviceFeeShare != null "> and service_fee_share = #{serviceFeeShare}</if>
+            <if test="rebateShare != null "> and rebate_share = #{rebateShare}</if>
+            <if test="refundAmount != null "> and refund_amount = #{refundAmount}</if>
+            <if test="refundPoints != null "> and refund_points = #{refundPoints}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstOrderItemByItemId" parameterType="Long" resultMap="JstOrderItemResult">
+        <include refid="selectJstOrderItemVo"/>
+        where item_id = #{itemId}
+    </select>
+
+    <insert id="insertJstOrderItem" parameterType="JstOrderItem" useGeneratedKeys="true" keyProperty="itemId">
+        insert into jst_order_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">order_id,</if>
+            <if test="skuType != null and skuType != ''">sku_type,</if>
+            <if test="refId != null">ref_id,</if>
+            <if test="itemName != null and itemName != ''">item_name,</if>
+            <if test="quantity != null">quantity,</if>
+            <if test="listAmount != null">list_amount,</if>
+            <if test="couponShare != null">coupon_share,</if>
+            <if test="pointsShare != null">points_share,</if>
+            <if test="netPayShare != null">net_pay_share,</if>
+            <if test="serviceFeeShare != null">service_fee_share,</if>
+            <if test="rebateShare != null">rebate_share,</if>
+            <if test="refundAmount != null">refund_amount,</if>
+            <if test="refundPoints != null">refund_points,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">#{orderId},</if>
+            <if test="skuType != null and skuType != ''">#{skuType},</if>
+            <if test="refId != null">#{refId},</if>
+            <if test="itemName != null and itemName != ''">#{itemName},</if>
+            <if test="quantity != null">#{quantity},</if>
+            <if test="listAmount != null">#{listAmount},</if>
+            <if test="couponShare != null">#{couponShare},</if>
+            <if test="pointsShare != null">#{pointsShare},</if>
+            <if test="netPayShare != null">#{netPayShare},</if>
+            <if test="serviceFeeShare != null">#{serviceFeeShare},</if>
+            <if test="rebateShare != null">#{rebateShare},</if>
+            <if test="refundAmount != null">#{refundAmount},</if>
+            <if test="refundPoints != null">#{refundPoints},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstOrderItem" parameterType="JstOrderItem">
+        update jst_order_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="skuType != null and skuType != ''">sku_type = #{skuType},</if>
+            <if test="refId != null">ref_id = #{refId},</if>
+            <if test="itemName != null and itemName != ''">item_name = #{itemName},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="listAmount != null">list_amount = #{listAmount},</if>
+            <if test="couponShare != null">coupon_share = #{couponShare},</if>
+            <if test="pointsShare != null">points_share = #{pointsShare},</if>
+            <if test="netPayShare != null">net_pay_share = #{netPayShare},</if>
+            <if test="serviceFeeShare != null">service_fee_share = #{serviceFeeShare},</if>
+            <if test="rebateShare != null">rebate_share = #{rebateShare},</if>
+            <if test="refundAmount != null">refund_amount = #{refundAmount},</if>
+            <if test="refundPoints != null">refund_points = #{refundPoints},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where item_id = #{itemId}
+    </update>
+
+    <delete id="deleteJstOrderItemByItemId" parameterType="Long">
+        delete from jst_order_item where item_id = #{itemId}
+    </delete>
+
+    <delete id="deleteJstOrderItemByItemIds" parameterType="String">
+        delete from jst_order_item where item_id in 
+        <foreach item="itemId" collection="array" open="(" separator="," close=")">
+            #{itemId}
+        </foreach>
+    </delete>
+</mapper>

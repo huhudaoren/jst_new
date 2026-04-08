@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>积分明细 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.p-nav{background:linear-gradient(135deg,#4A0072,#7B1FA2);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.p-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.p-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.tab-bar{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);}
+.tab-item{flex:1;height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:var(--c-gray-500);cursor:pointer;position:relative;touch-action:manipulation;}
+.tab-item.active{color:#7B1FA2;font-weight:700;}
+.tab-item.active::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2.5px;background:#7B1FA2;border-radius:1px;}
+.month-divider{padding:10px 16px 6px;font-size:12px;font-weight:700;color:var(--c-gray-500);letter-spacing:.5px;}
+.flow-item{background:var(--c-white);display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--c-gray-100);}
+.flow-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.flow-info{flex:1;}
+.flow-name{font-size:14px;font-weight:600;color:var(--c-gray-900);}
+.flow-meta{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+.flow-amt{font-size:16px;font-weight:900;flex-shrink:0;}
+.flow-amt.plus{color:#7B1FA2;}
+.flow-amt.minus{color:var(--c-danger);}
+.flow-amt.freeze{color:var(--c-gray-400);}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#4A0072;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="p-nav animate-in">
+  <div class="p-back" onclick="history.back()">←</div>
+  <div class="p-title">积分 / 成长值明细</div>
+</div>
+<div class="tab-bar">
+  <div class="tab-item active" onclick="switchTab(this,'pts')">积分流水</div>
+  <div class="tab-item" onclick="switchTab(this,'growth')">成长值流水</div>
+</div>
+
+<div id="tab-pts">
+  <div class="month-divider">2026年3月</div>
+  <div style="background:var(--c-white);overflow:hidden;border-radius:var(--radius-lg);margin:0 16px 10px;box-shadow:var(--shadow-xs);">
+    <div class="flow-item animate-in animate-in-d1">
+      <div class="flow-icon" style="background:#FEF9EC;">🏆</div>
+      <div class="flow-info"><div class="flow-name">报名获得积分</div><div class="flow-meta">安徒生(国际)艺术奖 · 2026-03-19 09:05</div><div class="flow-meta">订单 JST-2025-003291</div></div>
+      <div class="flow-amt plus">+180</div>
+    </div>
+    <div class="flow-item animate-in animate-in-d2">
+      <div class="flow-icon" style="background:#EAFAF1;">📅</div>
+      <div class="flow-info"><div class="flow-name">每日签到</div><div class="flow-meta">2026-03-19 08:00</div></div>
+      <div class="flow-amt plus">+10</div>
+    </div>
+    <div class="flow-item animate-in animate-in-d3">
+      <div class="flow-icon" style="background:#FDEDEC;">💸</div>
+      <div class="flow-info"><div class="flow-name">积分抵扣（报名）</div><div class="flow-meta">鸟巢杯 · 2026-03-15 · 抵扣¥20.00</div></div>
+      <div class="flow-amt minus">-2000</div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-icon" style="background:#F3E8FF;">🤖</div>
+      <div class="flow-info"><div class="flow-name">AI课堂学习完成</div><div class="flow-meta">儿童水彩零基础 · 2026-03-12</div></div>
+      <div class="flow-amt plus">+80</div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-icon" style="background:#EEF0FF;">🔒</div>
+      <div class="flow-info"><div class="flow-name">积分冻结（下单锁定）</div><div class="flow-meta">鸟巢杯报名下单 · 2026-03-14</div></div>
+      <div class="flow-amt freeze">冻结 2000</div>
+    </div>
+  </div>
+  <div class="month-divider">2026年2月</div>
+  <div style="background:var(--c-white);overflow:hidden;border-radius:var(--radius-lg);margin:0 16px;box-shadow:var(--shadow-xs);">
+    <div class="flow-item">
+      <div class="flow-icon" style="background:#FEF9EC;">🥇</div>
+      <div class="flow-info"><div class="flow-name">获奖奖励</div><div class="flow-meta">人民艺术展演 · 全国金奖 · 2026-02-28</div></div>
+      <div class="flow-amt plus">+500</div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-icon" style="background:#EAF4FC;">📚</div>
+      <div class="flow-info"><div class="flow-name">课程购买获积分</div><div class="flow-meta">竞赛数学精讲 · 2026-02-10</div></div>
+      <div class="flow-amt plus">+120</div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-growth" style="display:none;">
+  <div class="month-divider">2026年3月</div>
+  <div style="background:var(--c-white);overflow:hidden;border-radius:var(--radius-lg);margin:0 16px 10px;box-shadow:var(--shadow-xs);">
+    <div class="flow-item animate-in animate-in-d1">
+      <div class="flow-icon" style="background:#FEF9EC;">🏆</div>
+      <div class="flow-info"><div class="flow-name">报名获成长值</div><div class="flow-meta">安徒生艺术奖 · 2026-03-19</div></div>
+      <div class="flow-amt plus">+180</div>
+    </div>
+    <div class="flow-item animate-in animate-in-d2">
+      <div class="flow-icon" style="background:#F5EEF8;">🥈</div>
+      <div class="flow-info"><div class="flow-name">等级升级</div><div class="flow-meta">铜牌→白银 · 2026-03-01</div></div>
+      <div class="flow-amt" style="color:var(--c-gold);">升级</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(el,id){
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  document.getElementById('tab-pts').style.display=id==='pts'?'block':'none';
+  document.getElementById('tab-growth').style.display=id==='growth'?'block':'none';
+}
+</script>
+</body>
+</html>

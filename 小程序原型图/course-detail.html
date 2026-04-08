@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>课程详情 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important; }
+
+/* Hero */
+.course-hero {
+  height: 200px;
+  background: linear-gradient(150deg, #1565C0 0%, #1976D2 50%, #42A5F5 100%);
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.course-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 80% 30%, rgba(255,255,255,0.1) 0%, transparent 50%);
+}
+.course-hero::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 24px; background: var(--c-gray-50); border-radius: 24px 24px 0 0;
+}
+.course-hero-emoji { font-size: 80px; opacity: 0.9; position: relative; z-index: 1; }
+.course-hero-nav {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px;
+}
+.hero-back-btn, .hero-share-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: white; cursor: pointer; touch-action: manipulation;
+}
+
+/* 内容区 */
+.course-content { padding: 0 var(--space-4); }
+
+/* 课程标题卡 */
+.course-title-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  padding: 16px; box-shadow: var(--shadow-xs); margin-bottom: 12px;
+}
+.ct-title { font-size: 19px; font-weight: 800; color: var(--c-gray-900); line-height: 1.35; margin-bottom: 10px; letter-spacing: -0.3px; }
+.ct-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.ct-stats { display: flex; gap: 16px; }
+.ct-stat { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--c-gray-500); }
+
+/* 讲师卡 */
+.teacher-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  padding: 14px 16px; box-shadow: var(--shadow-xs);
+  display: flex; gap: 12px; align-items: center; margin-bottom: 12px;
+  cursor: pointer; touch-action: manipulation;
+}
+.teacher-avatar {
+  width: 50px; height: 50px; border-radius: 50%;
+  background: linear-gradient(135deg, #FFD54F, #FF8A65);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.8);
+  box-shadow: var(--shadow-xs);
+}
+.teacher-info { flex: 1; }
+.teacher-name { font-size: 15px; font-weight: 700; color: var(--c-gray-900); }
+.teacher-title { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.teacher-badge { display: flex; gap: 4px; margin-top: 6px; }
+
+/* 详情 Tab */
+.detail-tabs-bar {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  margin-bottom: 12px; box-shadow: var(--shadow-xs); overflow: hidden;
+}
+.dt-tabs {
+  display: flex; border-bottom: 1px solid var(--c-gray-100);
+}
+.dt-tab {
+  flex: 1; text-align: center;
+  padding: 12px; font-size: 14px; font-weight: 500;
+  color: var(--c-gray-500); cursor: pointer;
+  touch-action: manipulation; transition: color var(--duration-fast);
+  position: relative;
+}
+.dt-tab.active { color: var(--c-primary-600); font-weight: 700; }
+.dt-tab.active::after {
+  content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
+  height: 2px; background: var(--c-primary-600); border-radius: 1px;
+}
+.dt-panel { padding: 16px; display: none; }
+.dt-panel.active { display: block; }
+.dt-panel p { font-size: 14px; color: var(--c-gray-700); line-height: 1.8; margin-bottom: 10px; }
+.dt-panel h4 { font-size: 14px; font-weight: 700; color: var(--c-gray-900); margin: 14px 0 6px; }
+.dt-panel ul { padding-left: 16px; }
+.dt-panel ul li { font-size: 14px; color: var(--c-gray-700); line-height: 1.7; margin-bottom: 4px; }
+
+/* 章节列表 */
+.chapter-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--c-gray-100);
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast);
+}
+.chapter-item:last-child { border-bottom: none; }
+.chapter-item:active { background: var(--c-gray-50); }
+.chapter-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--c-primary-50); color: var(--c-primary-600);
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.chapter-num.done { background: var(--c-success); color: white; }
+.chapter-num.lock { background: var(--c-gray-100); color: var(--c-gray-300); }
+.chapter-info { flex: 1; }
+.chapter-title { font-size: 14px; font-weight: 500; color: var(--c-gray-900); margin-bottom: 2px; }
+.chapter-title.locked { color: var(--c-gray-400); }
+.chapter-meta { font-size: 12px; color: var(--c-gray-500); }
+.chapter-play { font-size: 16px; color: var(--c-primary-400); flex-shrink: 0; }
+.chapter-lock { font-size: 14px; color: var(--c-gray-300); flex-shrink: 0; }
+
+/* 底部购买区 */
+.buy-cta {
+  position: fixed; bottom: 0; left: 50%;
+  transform: translateX(-50%) translateZ(0);
+  width: 100%; max-width: 390px;
+  background: rgba(255,255,255,0.97);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--c-gray-100);
+  padding: 12px var(--space-4);
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 40;
+  box-shadow: 0 -4px 20px rgba(12,61,107,0.08);
+  display: flex; align-items: center; gap: 10px;
+}
+.buy-price-area { flex: 1; }
+.buy-price-label { font-size: 11px; color: var(--c-gray-500); }
+.buy-price { font-size: 24px; font-weight: 900; color: var(--c-accent); line-height: 1; }
+.buy-price.free { color: var(--c-success); }
+.buy-price-original { font-size: 13px; color: var(--c-gray-300); text-decoration: line-through; margin-left: 4px; }
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:#1565C0;">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<!-- Hero -->
+<div class="course-hero animate-in">
+  <div class="course-hero-nav">
+    <div class="hero-back-btn" onclick="history.back()">←</div>
+    <div class="hero-share-btn">⋮</div>
+  </div>
+  <div class="course-hero-emoji">🔢</div>
+</div>
+
+<div class="course-content">
+
+  <!-- 标题卡 -->
+  <div class="course-title-card animate-in animate-in-d1">
+    <div class="ct-title">竞赛数学精讲·高中联赛专项</div>
+    <div class="ct-tags">
+      <span class="tag tag-primary">数学</span>
+      <span class="tag tag-gray">高中组</span>
+      <span class="tag tag-info">线上录播</span>
+      <span class="tag tag-gold">⭐ 热销课程</span>
+    </div>
+    <div class="ct-stats">
+      <div class="ct-stat">📖 <span>24讲</span></div>
+      <div class="ct-stat">👥 <span>1,203人已学</span></div>
+      <div class="ct-stat">⭐ <span>4.9分</span></div>
+      <div class="ct-stat">🕐 <span>约36小时</span></div>
+    </div>
+  </div>
+
+  <!-- 讲师 -->
+  <div class="teacher-card animate-in animate-in-d1">
+    <div class="teacher-avatar">👨‍🏫</div>
+    <div class="teacher-info">
+      <div class="teacher-name">王志明 老师</div>
+      <div class="teacher-title">清华大学数学系硕士 · 15年竞赛辅导经验</div>
+      <div class="teacher-badge">
+        <span class="tag tag-primary">一等奖教练</span>
+        <span class="tag tag-success">实名认证</span>
+      </div>
+    </div>
+    <div style="font-size:14px;color:var(--c-gray-300);">›</div>
+  </div>
+
+  <!-- Tab 详情 -->
+  <div class="detail-tabs-bar animate-in animate-in-d2">
+    <div class="dt-tabs">
+      <div class="dt-tab active" onclick="switchDtTab(this, 'intro')">课程介绍</div>
+      <div class="dt-tab" onclick="switchDtTab(this, 'chapters')">课程目录 <span style="font-size:12px;color:var(--c-gray-400);">24</span></div>
+      <div class="dt-tab" onclick="switchDtTab(this, 'reviews')">学员评价</div>
+    </div>
+
+    <!-- 课程介绍 -->
+    <div class="dt-panel active" id="panel-intro">
+      <h4>课程亮点</h4>
+      <ul>
+        <li>系统梳理数学联赛全部考点，覆盖代数、几何、数论、组合四大模块</li>
+        <li>精选近10年联赛真题，逐题深度解析思路与技巧</li>
+        <li>附赠配套练习册PDF，可配合视频学习使用</li>
+        <li>课后每讲配套测试题，实时检验学习成果</li>
+      </ul>
+      <h4>适合人群</h4>
+      <p>全国在读高中生，有一定数学基础，希望系统备赛数学联赛的同学。建议提前学完高中数学必修内容。</p>
+      <h4>学习目标</h4>
+      <ul>
+        <li>掌握数学联赛核心考点与解题方法</li>
+        <li>提升联赛成绩，冲刺一等奖</li>
+        <li>为CMO（全国数学奥林匹克）打好基础</li>
+      </ul>
+    </div>
+
+    <!-- 章节目录 -->
+    <div class="dt-panel" id="panel-chapters">
+      <div style="font-size:13px;color:var(--c-gray-500);margin-bottom:12px;">已学 3/24 讲 · 进度 12.5%</div>
+      <div class="chapter-item" onclick="showToast('继续播放：代数基础')">
+        <div class="chapter-num done">✓</div>
+        <div class="chapter-info"><div class="chapter-title">01 代数基础·集合与逻辑</div><div class="chapter-meta">42分钟 · 已完成</div></div>
+        <div class="chapter-play">▶</div>
+      </div>
+      <div class="chapter-item" onclick="showToast('继续播放：函数专题')">
+        <div class="chapter-num done">✓</div>
+        <div class="chapter-info"><div class="chapter-title">02 函数专题·值域与最值</div><div class="chapter-meta">55分钟 · 已完成</div></div>
+        <div class="chapter-play">▶</div>
+      </div>
+      <div class="chapter-item" onclick="showToast('播放当前进度：数列')">
+        <div class="chapter-num" style="background:var(--c-accent);color:white;">▶</div>
+        <div class="chapter-info"><div class="chapter-title">03 数列专题·等差等比</div><div class="chapter-meta">61分钟 · 进行中 38%</div></div>
+        <div class="chapter-play">▶</div>
+      </div>
+      <div class="chapter-item" onclick="showToast('不等式专题')">
+        <div class="chapter-num lock">🔒</div>
+        <div class="chapter-info"><div class="chapter-title locked">04 不等式专题·均值定理</div><div class="chapter-meta">48分钟</div></div>
+        <div class="chapter-lock">🔒</div>
+      </div>
+      <div class="chapter-item" onclick="showToast('平面几何专题')">
+        <div class="chapter-num lock">🔒</div>
+        <div class="chapter-info"><div class="chapter-title locked">05 平面几何·三角形五心</div><div class="chapter-meta">72分钟</div></div>
+        <div class="chapter-lock">🔒</div>
+      </div>
+      <div style="text-align:center;padding:12px 0;font-size:14px;color:var(--c-primary-600);font-weight:500;cursor:pointer;" onclick="showToast('购买后解锁全部24讲')">
+        购买后解锁全部 24 讲 →
+      </div>
+    </div>
+
+    <!-- 学员评价 -->
+    <div class="dt-panel" id="panel-reviews">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:12px;background:var(--c-primary-50);border-radius:var(--radius-md);">
+        <div style="text-align:center;">
+          <div style="font-size:36px;font-weight:900;color:var(--c-primary-600);line-height:1;">4.9</div>
+          <div style="font-size:16px;color:var(--c-gold);">★★★★★</div>
+          <div style="font-size:11px;color:var(--c-gray-500);margin-top:4px;">1,203条评价</div>
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style="width:60px;font-size:11px;color:var(--c-gray-500);">5星</div><div style="flex:1;height:4px;background:var(--c-gray-100);border-radius:2px;overflow:hidden;"><div style="width:85%;height:100%;background:var(--c-gold);"></div></div><div style="width:28px;font-size:11px;color:var(--c-gray-500);text-align:right;">85%</div></div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style="width:60px;font-size:11px;color:var(--c-gray-500);">4星</div><div style="flex:1;height:4px;background:var(--c-gray-100);border-radius:2px;overflow:hidden;"><div style="width:12%;height:100%;background:var(--c-gold);"></div></div><div style="width:28px;font-size:11px;color:var(--c-gray-500);text-align:right;">12%</div></div>
+          <div style="display:flex;align-items:center;gap:6px;"><div style="width:60px;font-size:11px;color:var(--c-gray-500);">3星及以下</div><div style="flex:1;height:4px;background:var(--c-gray-100);border-radius:2px;overflow:hidden;"><div style="width:3%;height:100%;background:var(--c-gray-300);"></div></div><div style="width:28px;font-size:11px;color:var(--c-gray-500);text-align:right;">3%</div></div>
+        </div>
+      </div>
+      <div style="padding:12px 0;border-bottom:1px solid var(--c-gray-100);">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#FFD54F,#FF8A65);display:flex;align-items:center;justify-content:center;font-size:16px;">😊</div>
+          <div><div style="font-size:13px;font-weight:700;color:var(--c-gray-900);">李同学（高二）</div><div style="font-size:12px;color:var(--c-gold);">★★★★★</div></div>
+          <div style="margin-left:auto;font-size:11px;color:var(--c-gray-400);">2025-09-10</div>
+        </div>
+        <p style="font-size:13px;color:var(--c-gray-700);line-height:1.6;margin:0;">王老师讲解非常清晰，每道例题都有多种解法，学完数列专题后做题思路明显开阔了很多，强烈推荐！</p>
+      </div>
+      <div style="padding:12px 0;">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#A5D6A7,#42A5F5);display:flex;align-items:center;justify-content:center;font-size:16px;">😄</div>
+          <div><div style="font-size:13px;font-weight:700;color:var(--c-gray-900);">张同学（高三）</div><div style="font-size:12px;color:var(--c-gold);">★★★★★</div></div>
+          <div style="margin-left:auto;font-size:11px;color:var(--c-gray-400);">2025-08-28</div>
+        </div>
+        <p style="font-size:13px;color:var(--c-gray-700);line-height:1.6;margin:0;">跟着这个课备考，联赛拿了二等奖，比之前有很大进步。几何模块讲得特别好。</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 购买底部 -->
+<div class="buy-cta">
+  <div class="buy-price-area">
+    <div class="buy-price-label">课程价格</div>
+    <div style="display:flex;align-items:baseline;gap:4px;">
+      <div class="buy-price">¥299</div>
+      <div class="buy-price-original">¥499</div>
+    </div>
+  </div>
+  <button class="btn btn-ghost btn-md" style="min-width:88px;" onclick="showToast('已加入购物车')">加入购物车</button>
+  <button class="btn btn-primary btn-md" style="min-width:100px;" onclick="showToast('正在调起微信支付...')">立即购买</button>
+</div>
+
+<script>
+function switchDtTab(el, panel) {
+  document.querySelectorAll('.dt-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.dt-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + panel).classList.add('active');
+}
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
+}
+</script>
+</body>
+</html>

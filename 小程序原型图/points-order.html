@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>兑换订单 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.p-nav{background:linear-gradient(135deg,#4A0072,#7B1FA2);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.p-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.p-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.tab-bar{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);overflow-x:auto;}
+.tab-item{flex-shrink:0;padding:0 16px;height:44px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--c-gray-500);cursor:pointer;position:relative;white-space:nowrap;touch-action:manipulation;}
+.tab-item.active{color:#7B1FA2;font-weight:700;}
+.tab-item.active::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2.5px;background:#7B1FA2;border-radius:1px;}
+.order-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:10px 16px 0;overflow:hidden;}
+.oc-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--c-gray-100);}
+.oc-thumb{width:60px;height:60px;border-radius:var(--radius-md);object-fit:cover;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px;}
+.oc-info{flex:1;}
+.oc-name{font-size:14px;font-weight:700;color:var(--c-gray-900);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.oc-price{font-size:12px;color:var(--c-gray-500);margin-top:4px;}
+.oc-status{font-size:12px;font-weight:700;flex-shrink:0;}
+.oc-rows{padding:0;}
+.oc-row{display:flex;padding:9px 16px;border-bottom:1px solid var(--c-gray-50);}
+.oc-row:last-child{border-bottom:none;}
+.oc-key{font-size:12px;color:var(--c-gray-500);width:72px;flex-shrink:0;}
+.oc-val{font-size:13px;color:var(--c-gray-900);flex:1;}
+.oc-footer{padding:8px 16px 12px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--c-gray-100);}
+.oc-btn{height:36px;padding:0 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;}
+.btn-ghost-sm{background:var(--c-gray-50);border:1px solid var(--c-gray-100);color:var(--c-gray-700);}
+.btn-danger-sm{background:var(--c-danger-50);border:1px solid rgba(231,76,60,.2);color:var(--c-danger);}
+.btn-primary-sm{background:linear-gradient(135deg,#4A0072,#7B1FA2);border:none;color:white;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#4A0072;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="p-nav animate-in">
+  <div class="p-back" onclick="history.back()">←</div>
+  <div class="p-title">兑换订单</div>
+</div>
+<div class="tab-bar">
+  <div class="tab-item active" onclick="switchTab(this)">全部</div>
+  <div class="tab-item" onclick="switchTab(this)">待发货</div>
+  <div class="tab-item" onclick="switchTab(this)">已发货</div>
+  <div class="tab-item" onclick="switchTab(this)">已完成</div>
+  <div class="tab-item" onclick="switchTab(this)">售后中</div>
+</div>
+
+<!-- 实物订单：已发货 -->
+<div class="order-card animate-in animate-in-d1">
+  <div class="oc-header">
+    <div class="oc-thumb" style="background:linear-gradient(135deg,#EAFAF1,#A9DFBF);">🎒</div>
+    <div class="oc-info">
+      <div class="oc-name">竞赛通定制双肩背包</div>
+      <div class="oc-price">2,000积分 · 实物商品 · 下单时间 2026-03-15</div>
+    </div>
+    <div class="oc-status" style="color:var(--c-primary-600);">已发货</div>
+  </div>
+  <div class="oc-rows">
+    <div class="oc-row"><div class="oc-key">收货地址</div><div class="oc-val">张小明 138****8001 · 广州市天河区XX路XX号</div></div>
+    <div class="oc-row"><div class="oc-key">快递公司</div><div class="oc-val">顺丰速运</div></div>
+    <div class="oc-row"><div class="oc-key">物流单号</div><div class="oc-val" style="color:var(--c-primary-600);font-weight:600;">SF1234567890 <span style="font-size:11px;cursor:pointer;" onclick="showToast('物流单号已复制')">📋复制</span></div></div>
+    <div class="oc-row"><div class="oc-key">发货时间</div><div class="oc-val">2026-03-16 14:30</div></div>
+  </div>
+  <div style="padding:10px 16px;background:#EBF4FC;border-top:1px solid var(--c-gray-100);">
+    <div style="font-size:12px;color:var(--c-primary-600);font-weight:600;">📦 物流轨迹</div>
+    <div style="font-size:12px;color:var(--c-gray-700);margin-top:6px;line-height:1.8;">
+      2026-03-19 10:20 · 派件中，快递员：张师傅 138****0001<br>
+      2026-03-18 18:00 · 已到达广州转运中心<br>
+      2026-03-16 16:00 · 已揽收
+    </div>
+  </div>
+  <div class="oc-footer">
+    <button class="oc-btn btn-danger-sm" onclick="showToast('申请售后')">申请售后</button>
+    <button class="oc-btn btn-primary-sm" onclick="showToast('确认收货成功，积分消耗已记录')">确认收货</button>
+  </div>
+</div>
+
+<!-- 虚拟订单：已完成 -->
+<div class="order-card animate-in animate-in-d2">
+  <div class="oc-header">
+    <div class="oc-thumb" style="background:linear-gradient(135deg,#F3E8FF,#CE93D8);">📚</div>
+    <div class="oc-info">
+      <div class="oc-name">数学联赛精讲课（永久有效）· 虚拟课程权限</div>
+      <div class="oc-price">500积分 · 虚拟商品 · 下单 2026-03-10</div>
+    </div>
+    <div class="oc-status" style="color:var(--c-success);">已完成</div>
+  </div>
+  <div class="oc-rows">
+    <div class="oc-row"><div class="oc-key">兑换方式</div><div class="oc-val">纯积分兑换</div></div>
+    <div class="oc-row"><div class="oc-key">权限到账</div><div class="oc-val" style="color:var(--c-success);">✅ 已立即到账，可前往课程中心学习</div></div>
+  </div>
+  <div class="oc-footer">
+    <button class="oc-btn btn-ghost-sm" onclick="location.href='my-course.html'">去学习</button>
+  </div>
+</div>
+
+<!-- 售后中订单 -->
+<div class="order-card animate-in animate-in-d3">
+  <div class="oc-header">
+    <div class="oc-thumb" style="background:linear-gradient(135deg,#FFF3EE,#FFCC80);">🧢</div>
+    <div class="oc-info">
+      <div class="oc-name">竞赛通文化帽（限定版）</div>
+      <div class="oc-price">800积分 · 实物商品 · 下单 2026-02-20</div>
+    </div>
+    <div class="oc-status" style="color:var(--c-warning);">售后中</div>
+  </div>
+  <div class="oc-rows">
+    <div class="oc-row"><div class="oc-key">售后原因</div><div class="oc-val">商品破损，申请退货退款</div></div>
+    <div class="oc-row"><div class="oc-key">售后状态</div><div class="oc-val" style="color:var(--c-warning);">⏳ 平台审核中，预计1-3工作日处理</div></div>
+    <div class="oc-row"><div class="oc-key">退款方式</div><div class="oc-val">800积分原路退回</div></div>
+  </div>
+  <div class="oc-footer">
+    <button class="oc-btn btn-ghost-sm" onclick="showToast('售后申请处理中，请耐心等待')">查看进度</button>
+  </div>
+</div>
+
+<script>
+function switchTab(el){document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400);}
+</script>
+</body>
+</html>

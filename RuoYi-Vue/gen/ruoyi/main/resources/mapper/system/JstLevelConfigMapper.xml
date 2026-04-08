@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstLevelConfigMapper">
+    
+    <resultMap type="JstLevelConfig" id="JstLevelConfigResult">
+        <result property="levelId"    column="level_id"    />
+        <result property="levelCode"    column="level_code"    />
+        <result property="levelName"    column="level_name"    />
+        <result property="levelNo"    column="level_no"    />
+        <result property="growthThreshold"    column="growth_threshold"    />
+        <result property="icon"    column="icon"    />
+        <result property="applicableRole"    column="applicable_role"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstLevelConfigVo">
+        select level_id, level_code, level_name, level_no, growth_threshold, icon, applicable_role, status, create_by, create_time, update_by, update_time, remark, del_flag from jst_level_config
+    </sql>
+
+    <select id="selectJstLevelConfigList" parameterType="JstLevelConfig" resultMap="JstLevelConfigResult">
+        <include refid="selectJstLevelConfigVo"/>
+        <where>  
+            <if test="levelCode != null  and levelCode != ''"> and level_code = #{levelCode}</if>
+            <if test="levelName != null  and levelName != ''"> and level_name like concat('%', #{levelName}, '%')</if>
+            <if test="levelNo != null "> and level_no = #{levelNo}</if>
+            <if test="growthThreshold != null "> and growth_threshold = #{growthThreshold}</if>
+            <if test="icon != null  and icon != ''"> and icon = #{icon}</if>
+            <if test="applicableRole != null  and applicableRole != ''"> and applicable_role = #{applicableRole}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstLevelConfigByLevelId" parameterType="Long" resultMap="JstLevelConfigResult">
+        <include refid="selectJstLevelConfigVo"/>
+        where level_id = #{levelId}
+    </select>
+
+    <insert id="insertJstLevelConfig" parameterType="JstLevelConfig" useGeneratedKeys="true" keyProperty="levelId">
+        insert into jst_level_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="levelCode != null and levelCode != ''">level_code,</if>
+            <if test="levelName != null and levelName != ''">level_name,</if>
+            <if test="levelNo != null">level_no,</if>
+            <if test="growthThreshold != null">growth_threshold,</if>
+            <if test="icon != null">icon,</if>
+            <if test="applicableRole != null and applicableRole != ''">applicable_role,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="levelCode != null and levelCode != ''">#{levelCode},</if>
+            <if test="levelName != null and levelName != ''">#{levelName},</if>
+            <if test="levelNo != null">#{levelNo},</if>
+            <if test="growthThreshold != null">#{growthThreshold},</if>
+            <if test="icon != null">#{icon},</if>
+            <if test="applicableRole != null and applicableRole != ''">#{applicableRole},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstLevelConfig" parameterType="JstLevelConfig">
+        update jst_level_config
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="levelCode != null and levelCode != ''">level_code = #{levelCode},</if>
+            <if test="levelName != null and levelName != ''">level_name = #{levelName},</if>
+            <if test="levelNo != null">level_no = #{levelNo},</if>
+            <if test="growthThreshold != null">growth_threshold = #{growthThreshold},</if>
+            <if test="icon != null">icon = #{icon},</if>
+            <if test="applicableRole != null and applicableRole != ''">applicable_role = #{applicableRole},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where level_id = #{levelId}
+    </update>
+
+    <delete id="deleteJstLevelConfigByLevelId" parameterType="Long">
+        delete from jst_level_config where level_id = #{levelId}
+    </delete>
+
+    <delete id="deleteJstLevelConfigByLevelIds" parameterType="String">
+        delete from jst_level_config where level_id in 
+        <foreach item="levelId" collection="array" open="(" separator="," close=")">
+            #{levelId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>渠道提现审核 · 竞赛通管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.admin-nav{background:linear-gradient(135deg,#1A237E,#283593);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.admin-nav .back-btn{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.admin-nav-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.filter-tabs{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);}
+.ft{flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--c-gray-500);cursor:pointer;position:relative;touch-action:manipulation;}
+.ft.active{color:var(--c-gold);font-weight:700;}
+.ft.active::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:2.5px;background:var(--c-gold);border-radius:1px;}
+
+.withdraw-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:10px var(--space-4) 0;overflow:hidden;}
+.wc-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--c-gray-50);}
+.wc-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#3F51B5,#5C6BC0);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.wc-info{flex:1;}
+.wc-name{font-size:14px;font-weight:700;color:var(--c-gray-900);}
+.wc-meta{font-size:12px;color:var(--c-gray-500);margin-top:2px;}
+.wc-amount{font-size:20px;font-weight:900;color:var(--c-gold);}
+.wc-rows{padding:0;}
+.wc-row{display:flex;padding:9px 16px;border-bottom:1px solid var(--c-gray-50);}
+.wc-row:last-child{border-bottom:none;}
+.wc-key{font-size:12px;color:var(--c-gray-500);width:80px;flex-shrink:0;}
+.wc-val{font-size:13px;color:var(--c-gray-900);flex:1;font-weight:500;}
+.wc-footer{padding:8px 16px 12px;display:flex;gap:8px;border-top:1px solid var(--c-gray-50);}
+.btn-pass-sm{flex:2;height:40px;background:var(--c-success);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;}
+.btn-paid{flex:2;height:40px;background:var(--c-gold);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;}
+.btn-reject-sm{flex:1;height:40px;background:var(--c-white);color:var(--c-danger);border:1px solid var(--c-danger);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1A237E;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="admin-nav animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="admin-nav-title">渠道提现审核</div>
+</div>
+<div class="filter-tabs">
+  <div class="ft active" onclick="switchFt(this)">待审核 <span style="background:var(--c-danger);color:white;font-size:9px;padding:1px 4px;border-radius:6px;margin-left:2px;">4</span></div>
+  <div class="ft" onclick="switchFt(this)">待打款</div>
+  <div class="ft" onclick="switchFt(this)">已打款</div>
+  <div class="ft" onclick="switchFt(this)">已驳回</div>
+  <div class="ft" onclick="switchFt(this)">全部</div>
+</div>
+
+<div class="withdraw-card animate-in animate-in-d1">
+  <div class="wc-header">
+    <div class="wc-avatar">👨‍🏫</div>
+    <div class="wc-info">
+      <div class="wc-name">王建国（老师渠道方）</div>
+      <div class="wc-meta">结算单 #JS-2026-002 · 申请时间 2026-03-19 09:20</div>
+    </div>
+    <div class="wc-amount">¥680.00</div>
+  </div>
+  <div class="wc-rows">
+    <div class="wc-row"><div class="wc-key">收款账户</div><div class="wc-val">中国工商银行 6222****8888</div></div>
+    <div class="wc-row"><div class="wc-key">发票状态</div><div class="wc-val" style="color:var(--c-warning);">⏳ 待开票</div></div>
+    <div class="wc-row"><div class="wc-key">关联返点</div><div class="wc-val">安徒生艺术奖(2笔) + 鸟巢杯(3笔)</div></div>
+    <div class="wc-row"><div class="wc-key">负向台账</div><div class="wc-val" style="color:var(--c-success);">无（可正常结算）</div></div>
+  </div>
+  <div class="wc-footer" onclick="event.stopPropagation()">
+    <button class="btn-reject-sm" onclick="doReject()">驳回</button>
+    <button class="btn-pass-sm" onclick="doPass()">✅ 审核通过</button>
+  </div>
+</div>
+
+<div class="withdraw-card animate-in animate-in-d2">
+  <div class="wc-header">
+    <div class="wc-avatar" style="background:linear-gradient(135deg,#7B1FA2,#AB47BC);">🏢</div>
+    <div class="wc-info">
+      <div class="wc-name">广州艺起来文化教育（机构渠道方）</div>
+      <div class="wc-meta">结算单 #JS-2026-003 · 申请时间 2026-03-18 16:55</div>
+    </div>
+    <div class="wc-amount">¥2,340.00</div>
+  </div>
+  <div class="wc-rows">
+    <div class="wc-row"><div class="wc-key">收款账户</div><div class="wc-val">招商银行 6225****4321</div></div>
+    <div class="wc-row"><div class="wc-key">发票状态</div><div class="wc-val" style="color:var(--c-success);">✅ 已开票</div></div>
+    <div class="wc-row"><div class="wc-key">关联返点</div><div class="wc-val">安徒生艺术奖(8笔) + 人民艺术(5笔)</div></div>
+    <div class="wc-row"><div class="wc-key">负向台账</div><div class="wc-val" style="color:var(--c-danger);">-¥80.00（退款回退，已自动抵扣）</div></div>
+  </div>
+  <div class="wc-footer" onclick="event.stopPropagation()">
+    <button class="btn-reject-sm" onclick="doReject()">驳回</button>
+    <button class="btn-pass-sm" onclick="doPass()">✅ 审核通过</button>
+  </div>
+</div>
+
+<script>
+function switchFt(el){document.querySelectorAll('.ft').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function doPass(){const t=document.createElement('div');t.className='toast';t.textContent='✅ 已通过审核，财务可开始安排打款';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+function doReject(){const t=document.createElement('div');t.className='toast';t.textContent='已驳回，渠道方将收到驳回通知';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+</script>
+</body>
+</html>

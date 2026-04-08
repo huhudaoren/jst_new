@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.order.mapper.lookup.RebateRuleLookupMapper">
+
+    <select id="selectMatchedRule" resultType="map">
+        select rule_id as ruleId,
+               rebate_mode as rebateMode,
+               rebate_value as rebateValue,
+               service_fee_mode as serviceFeeMode,
+               service_fee_value as serviceFeeValue
+        from jst_rebate_rule
+        where contest_id = #{contestId}
+          and status = 1
+          and del_flag = '0'
+          and effective_time &lt;= #{now}
+          and (expire_time is null or expire_time &gt;= #{now})
+        <choose>
+            <when test="channelId != null">
+                and (channel_id = #{channelId} or channel_id is null)
+                order by case when channel_id = #{channelId} then 0 else 1 end, rule_id desc
+            </when>
+            <otherwise>
+                and channel_id is null
+                order by rule_id desc
+            </otherwise>
+        </choose>
+        limit 1
+    </select>
+</mapper>

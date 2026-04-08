@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstTeamAppointmentMemberMapper">
+    
+    <resultMap type="JstTeamAppointmentMember" id="JstTeamAppointmentMemberResult">
+        <result property="memberId"    column="member_id"    />
+        <result property="teamAppointmentId"    column="team_appointment_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="participantId"    column="participant_id"    />
+        <result property="memberNo"    column="member_no"    />
+        <result property="nameSnapshot"    column="name_snapshot"    />
+        <result property="mobileSnapshot"    column="mobile_snapshot"    />
+        <result property="subOrderId"    column="sub_order_id"    />
+        <result property="writeoffStatus"    column="writeoff_status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstTeamAppointmentMemberVo">
+        select member_id, team_appointment_id, user_id, participant_id, member_no, name_snapshot, mobile_snapshot, sub_order_id, writeoff_status, create_by, create_time, update_by, update_time, remark, del_flag from jst_team_appointment_member
+    </sql>
+
+    <select id="selectJstTeamAppointmentMemberList" parameterType="JstTeamAppointmentMember" resultMap="JstTeamAppointmentMemberResult">
+        <include refid="selectJstTeamAppointmentMemberVo"/>
+        <where>  
+            <if test="teamAppointmentId != null "> and team_appointment_id = #{teamAppointmentId}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="participantId != null "> and participant_id = #{participantId}</if>
+            <if test="memberNo != null  and memberNo != ''"> and member_no = #{memberNo}</if>
+            <if test="nameSnapshot != null  and nameSnapshot != ''"> and name_snapshot = #{nameSnapshot}</if>
+            <if test="mobileSnapshot != null  and mobileSnapshot != ''"> and mobile_snapshot = #{mobileSnapshot}</if>
+            <if test="subOrderId != null "> and sub_order_id = #{subOrderId}</if>
+            <if test="writeoffStatus != null  and writeoffStatus != ''"> and writeoff_status = #{writeoffStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstTeamAppointmentMemberByMemberId" parameterType="Long" resultMap="JstTeamAppointmentMemberResult">
+        <include refid="selectJstTeamAppointmentMemberVo"/>
+        where member_id = #{memberId}
+    </select>
+
+    <insert id="insertJstTeamAppointmentMember" parameterType="JstTeamAppointmentMember" useGeneratedKeys="true" keyProperty="memberId">
+        insert into jst_team_appointment_member
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="teamAppointmentId != null">team_appointment_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="participantId != null">participant_id,</if>
+            <if test="memberNo != null and memberNo != ''">member_no,</if>
+            <if test="nameSnapshot != null and nameSnapshot != ''">name_snapshot,</if>
+            <if test="mobileSnapshot != null">mobile_snapshot,</if>
+            <if test="subOrderId != null">sub_order_id,</if>
+            <if test="writeoffStatus != null and writeoffStatus != ''">writeoff_status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="teamAppointmentId != null">#{teamAppointmentId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="participantId != null">#{participantId},</if>
+            <if test="memberNo != null and memberNo != ''">#{memberNo},</if>
+            <if test="nameSnapshot != null and nameSnapshot != ''">#{nameSnapshot},</if>
+            <if test="mobileSnapshot != null">#{mobileSnapshot},</if>
+            <if test="subOrderId != null">#{subOrderId},</if>
+            <if test="writeoffStatus != null and writeoffStatus != ''">#{writeoffStatus},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstTeamAppointmentMember" parameterType="JstTeamAppointmentMember">
+        update jst_team_appointment_member
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="teamAppointmentId != null">team_appointment_id = #{teamAppointmentId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="participantId != null">participant_id = #{participantId},</if>
+            <if test="memberNo != null and memberNo != ''">member_no = #{memberNo},</if>
+            <if test="nameSnapshot != null and nameSnapshot != ''">name_snapshot = #{nameSnapshot},</if>
+            <if test="mobileSnapshot != null">mobile_snapshot = #{mobileSnapshot},</if>
+            <if test="subOrderId != null">sub_order_id = #{subOrderId},</if>
+            <if test="writeoffStatus != null and writeoffStatus != ''">writeoff_status = #{writeoffStatus},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where member_id = #{memberId}
+    </update>
+
+    <delete id="deleteJstTeamAppointmentMemberByMemberId" parameterType="Long">
+        delete from jst_team_appointment_member where member_id = #{memberId}
+    </delete>
+
+    <delete id="deleteJstTeamAppointmentMemberByMemberIds" parameterType="String">
+        delete from jst_team_appointment_member where member_id in 
+        <foreach item="memberId" collection="array" open="(" separator="," close=")">
+            #{memberId}
+        </foreach>
+    </delete>
+</mapper>

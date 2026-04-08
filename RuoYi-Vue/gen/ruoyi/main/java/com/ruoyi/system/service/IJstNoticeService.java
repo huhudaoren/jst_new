@@ -1,0 +1,61 @@
+package com.ruoyi.system.service;
+
+import java.util.List;
+import com.ruoyi.system.domain.JstNotice;
+
+/**
+ * 公告Service接口
+ * 
+ * @author ruoyi
+ * @date 2026-04-08
+ */
+public interface IJstNoticeService 
+{
+    /**
+     * 查询公告
+     * 
+     * @param noticeId 公告主键
+     * @return 公告
+     */
+    public JstNotice selectJstNoticeByNoticeId(Long noticeId);
+
+    /**
+     * 查询公告列表
+     * 
+     * @param jstNotice 公告
+     * @return 公告集合
+     */
+    public List<JstNotice> selectJstNoticeList(JstNotice jstNotice);
+
+    /**
+     * 新增公告
+     * 
+     * @param jstNotice 公告
+     * @return 结果
+     */
+    public int insertJstNotice(JstNotice jstNotice);
+
+    /**
+     * 修改公告
+     * 
+     * @param jstNotice 公告
+     * @return 结果
+     */
+    public int updateJstNotice(JstNotice jstNotice);
+
+    /**
+     * 批量删除公告
+     * 
+     * @param noticeIds 需要删除的公告主键集合
+     * @return 结果
+     */
+    public int deleteJstNoticeByNoticeIds(Long[] noticeIds);
+
+    /**
+     * 删除公告信息
+     * 
+     * @param noticeId 公告主键
+     * @return 结果
+     */
+    public int deleteJstNoticeByNoticeId(Long noticeId);
+}

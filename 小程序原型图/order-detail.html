@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>订单详情 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+
+.page-header {
+  height: 56px; background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: center; padding: 0 var(--space-4);
+  position: sticky; top: 44px; z-index: 40;
+  box-shadow: var(--shadow-xs);
+}
+.back-btn { width:36px;height:36px;border-radius:var(--radius-sm);background:var(--c-gray-50);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;margin-right:12px;flex-shrink:0;touch-action:manipulation; }
+.back-btn:active { background:var(--c-gray-100); }
+.header-title { font-size:17px;font-weight:700;color:var(--c-gray-900);flex:1; }
+
+/* 状态 Hero */
+.order-status-hero {
+  padding: 20px var(--space-4) 24px;
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center;
+}
+.order-status-hero.pending { background: linear-gradient(145deg,#E65100,#FF7043,#FF8A65); }
+.order-status-hero.paid    { background: linear-gradient(145deg,#155724,#1E8449,#27AE60); }
+.order-status-hero.review  { background: linear-gradient(145deg,#1A237E,#283593,#3949AB); }
+.order-status-hero::before { content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,.08) 0%,transparent 50%); }
+.order-status-hero::after  { content:'';position:absolute;bottom:-1px;left:0;right:0;height:20px;background:var(--c-gray-50);border-radius:20px 20px 0 0; }
+.status-icon { font-size:44px;margin-bottom:10px;position:relative;z-index:1; }
+.status-title { font-size:20px;font-weight:900;color:white;position:relative;z-index:1;margin-bottom:4px; }
+.status-amount { font-size:32px;font-weight:900;color:white;position:relative;z-index:1;letter-spacing:-1px; }
+.status-amount em { font-size:16px;font-style:normal; }
+.status-sub { font-size:13px;color:rgba(255,255,255,.75);position:relative;z-index:1;margin-top:4px; }
+
+/* 卡片通用 */
+.detail-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  margin: 12px var(--space-4) 0; box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+.card-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: center; gap: 8px;
+  font-size: 15px; font-weight: 700; color: var(--c-gray-900);
+}
+.card-header::before { content:'';width:3px;height:15px;background:var(--c-primary-600);border-radius:2px;display:inline-block;flex-shrink:0; }
+
+/* 信息行 */
+.info-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 11px 16px; border-bottom: 1px solid var(--c-gray-100);
+  font-size: 13px;
+}
+.info-row:last-child { border-bottom: none; }
+.info-key { color: var(--c-gray-500); flex-shrink: 0; margin-right: 12px; }
+.info-val { color: var(--c-gray-900); font-weight: 600; text-align: right; flex: 1; line-height: 1.5; }
+.info-val.accent { color: var(--c-accent); font-size: 15px; }
+.info-val.success { color: var(--c-success); }
+.info-val.primary { color: var(--c-primary-600); }
+
+/* 学生信息行 */
+.student-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-bottom: 1px solid var(--c-gray-100);
+}
+.student-row:last-of-type { border-bottom: none; }
+.stu-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700; color: white;
+  flex-shrink: 0;
+}
+.stu-info { flex: 1; min-width: 0; }
+.stu-name { font-size: 15px; font-weight: 700; color: var(--c-gray-900); }
+.stu-school { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.stu-detail-btn {
+  font-size: 12px; font-weight: 600; color: var(--c-primary-600);
+  background: var(--c-primary-50); border: 1px solid var(--c-primary-200);
+  padding: 5px 12px; border-radius: var(--radius-full);
+  cursor: pointer; touch-action: manipulation; flex-shrink: 0;
+  transition: background var(--duration-fast);
+}
+.stu-detail-btn:active { background: var(--c-primary-200); }
+
+/* 学生报名信息展开面板 */
+.stu-expand {
+  background: var(--c-gray-50); border-top: 1px solid var(--c-gray-100);
+  padding: 12px 16px 16px; display: none;
+}
+.stu-expand.open { display: block; }
+.stu-field { display: flex; margin-bottom: 8px; font-size: 13px; }
+.stu-field:last-child { margin-bottom: 0; }
+.stu-field-k { color: var(--c-gray-500); width: 80px; flex-shrink: 0; }
+.stu-field-v { color: var(--c-gray-900); font-weight: 500; }
+.stu-photo-preview {
+  width: 60px; height: 60px; border-radius: var(--radius-sm);
+  background: var(--c-gray-100); border: 1px solid var(--c-gray-200);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; cursor: pointer; margin-top: 8px;
+}
+
+/* 凭证区 */
+.voucher-area {
+  padding: 14px 16px;
+}
+.voucher-img {
+  width: 100%; aspect-ratio: 16/9;
+  background: linear-gradient(135deg,#EBF4FC,#E3F0FD);
+  border-radius: var(--radius-md);
+  border: 1.5px dashed var(--c-primary-200);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 8px; cursor: pointer; touch-action: manipulation;
+  transition: border-color var(--duration-fast);
+}
+.voucher-img:active { border-color: var(--c-primary-400); }
+.voucher-img.filled {
+  background: var(--c-primary-50);
+  border-style: solid; border-color: var(--c-primary-200);
+}
+.voucher-icon { font-size: 40px; }
+.voucher-label { font-size: 13px; font-weight: 600; color: var(--c-primary-600); }
+.voucher-sub { font-size: 11px; color: var(--c-gray-500); }
+
+/* 时间轴 */
+.timeline-wrap { padding: 14px 16px; }
+.tl-item { display: flex; gap: 12px; margin-bottom: 16px; }
+.tl-item:last-child { margin-bottom: 0; }
+.tl-left { display: flex; flex-direction: column; align-items: center; }
+.tl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+.tl-dot.done    { background: var(--c-success); }
+.tl-dot.active  { background: var(--c-primary-600); box-shadow: 0 0 0 3px var(--c-primary-50); }
+.tl-dot.pending { background: var(--c-gray-100); border: 2px solid var(--c-gray-200); }
+.tl-line { width: 1px; flex: 1; background: var(--c-gray-100); margin: 4px auto; }
+.tl-right { flex: 1; }
+.tl-title { font-size: 13px; font-weight: 600; color: var(--c-gray-900); }
+.tl-title.pending { color: var(--c-gray-400); }
+.tl-time  { font-size: 11px; color: var(--c-gray-400); margin-top: 3px; }
+
+/* 底部操作栏 */
+.action-footer {
+  position: sticky; bottom: 0;
+  background: rgba(255,255,255,.97);
+  border-top: 1px solid var(--c-gray-100);
+  padding: 12px var(--space-4);
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  display: flex; gap: 10px;
+  box-shadow: 0 -4px 20px rgba(12,61,107,.08);
+}
+
+/* 凭证大图弹层 */
+.voucher-overlay { position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:none;align-items:center;justify-content:center;padding:20px; }
+.voucher-overlay.show { display:flex; }
+.voucher-full { background:var(--c-white);border-radius:var(--radius-lg);overflow:hidden;width:100%;max-width:360px; }
+.voucher-full-head { padding:14px 16px;border-bottom:1px solid var(--c-gray-100);display:flex;justify-content:space-between;align-items:center; }
+.voucher-full-title { font-size:15px;font-weight:700;color:var(--c-gray-900); }
+.voucher-full-close { font-size:20px;color:var(--c-gray-400);cursor:pointer; }
+.voucher-full-img { width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#EBF4FC,#D6E8F9);display:flex;align-items:center;justify-content:center;font-size:80px; }
+.voucher-full-info { padding:14px 16px; }
+.voucher-full-row { display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--c-gray-100); }
+.voucher-full-row:last-child { border-bottom:none; }
+.voucher-full-key { color:var(--c-gray-500); }
+.voucher-full-val { color:var(--c-gray-900);font-weight:600; }
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:var(--c-primary);"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+
+<div class="page-header animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="header-title">订单详情</div>
+  <div style="font-size:13px;color:var(--c-gray-500);">ORD-20251001-003</div>
+</div>
+
+<!-- 状态 Hero — 对公转账待审核 -->
+<div class="order-status-hero review animate-in">
+  <div class="status-icon">🏦</div>
+  <div class="status-title">对公转账 · 待到账审核</div>
+  <div class="status-amount"><em>¥</em>120</div>
+  <div class="status-sub">凭证已上传，平台 1 个工作日内确认到账</div>
+</div>
+
+<!-- 赛事信息 -->
+<div class="detail-card animate-in animate-in-d1">
+  <div class="card-header">赛事信息</div>
+  <div class="info-row" onclick="location.href='contest-detail.html'" style="cursor:pointer;">
+    <div class="info-key">赛事名称</div>
+    <div class="info-val primary">全国青少年科技创新大赛 2025 <span style="font-size:12px;">›</span></div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">参赛组别</div>
+    <div class="info-val">初中组</div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">比赛时间</div>
+    <div class="info-val">2025-11-15 09:00</div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">比赛形式</div>
+    <div class="info-val">线下（广州赛区）</div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">报名编号</div>
+    <div class="info-val" style="font-family:monospace;font-size:12px;">#20251001-8831</div>
+  </div>
+</div>
+
+<!-- 学生报名信息 -->
+<div class="detail-card animate-in animate-in-d1">
+  <div class="card-header">学生报名信息 <span style="font-size:12px;font-weight:400;color:var(--c-gray-500);">(1人)</span></div>
+
+  <div class="student-row" id="stu1row">
+    <div class="stu-avatar" style="background:linear-gradient(135deg,#1B5E20,#66BB6A);">陈</div>
+    <div class="stu-info">
+      <div class="stu-name">陈美玲</div>
+      <div class="stu-school">广州外国语学校 · 初中三年级 · 137****5566</div>
+    </div>
+    <div class="stu-detail-btn" onclick="toggleStuDetail('stu1')">查看信息 ▾</div>
+  </div>
+
+  <!-- 展开的学生详情 -->
+  <div class="stu-expand" id="stu1detail">
+    <div class="stu-field"><div class="stu-field-k">真实姓名</div><div class="stu-field-v">陈美玲</div></div>
+    <div class="stu-field"><div class="stu-field-k">身份证号</div><div class="stu-field-v">440101******2846（已脱敏）</div></div>
+    <div class="stu-field"><div class="stu-field-k">手机号</div><div class="stu-field-v">137****5566</div></div>
+    <div class="stu-field"><div class="stu-field-k">就读学校</div><div class="stu-field-v">广州外国语学校</div></div>
+    <div class="stu-field"><div class="stu-field-k">年级</div><div class="stu-field-v">初中三年级</div></div>
+    <div class="stu-field"><div class="stu-field-k">参赛组别</div><div class="stu-field-v">初中组</div></div>
+    <div class="stu-field"><div class="stu-field-k">指导老师</div><div class="stu-field-v">王建国（本账号）</div></div>
+    <div class="stu-field">
+      <div class="stu-field-k">证件照</div>
+      <div class="stu-field-v">
+        <div class="stu-photo-preview" onclick="showToast('查看证件照大图')">🖼️</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px;">
+      <button class="btn btn-outline btn-sm" onclick="location.href='enroll.html'">修改报名信息</button>
+      <button class="btn btn-ghost btn-sm" onclick="location.href='my-enroll.html'">查看报名进度</button>
+    </div>
+  </div>
+</div>
+
+<!-- 支付信息 -->
+<div class="detail-card animate-in animate-in-d2">
+  <div class="card-header">支付信息</div>
+  <div class="info-row">
+    <div class="info-key">报名费</div>
+    <div class="info-val">¥180.00</div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">优惠券抵扣</div>
+    <div class="info-val success">-¥20.00（满80减20券）</div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">积分抵扣</div>
+    <div class="info-val success">-¥40.00（4000积分）</div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">净实付</div>
+    <div class="info-val accent">¥120.00</div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">支付方式</div>
+    <div class="info-val">🏦 对公转账</div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">归属渠道方</div>
+    <div class="info-val primary">👨‍🏫 王建国（老师渠道方）· 返点锁定依据</div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">收款账户</div>
+    <div class="info-val">广州竞赛通教育科技有限公司</div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">转账金额</div>
+    <div class="info-val">¥120.00</div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">转账时间</div>
+    <div class="info-val">2025-10-01 14:32</div>
+  </div>
+  <div class="info-row">
+    <div class="info-key">审核状态</div>
+    <div class="info-val"><span class="tag tag-info tag-dot">待到账审核</span></div>
+  </div>
+</div>
+
+<!-- 转账凭证 -->
+<div class="detail-card animate-in animate-in-d2">
+  <div class="card-header">转账凭证</div>
+  <div class="voucher-area">
+    <!-- 已上传凭证 -->
+    <div class="voucher-img filled" onclick="showVoucher()">
+      <div class="voucher-icon">🧾</div>
+      <div class="voucher-label">点击查看凭证大图</div>
+      <div class="voucher-sub">已上传 · 2025-10-01 14:35</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn btn-outline btn-sm" style="flex:1;" onclick="showVoucher()">🔍 查看大图</button>
+      <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="reuploadVoucher()">🔄 重新上传</button>
+    </div>
+    <div class="notice notice-info" style="margin-top:10px;">
+      <span class="notice-icon">ℹ️</span>
+      <div>平台将在 <strong>1 个工作日</strong>内核实转账，请保持手机畅通。审核结果将通过短信通知。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 订单进度时间轴 -->
+<div class="detail-card animate-in animate-in-d3">
+  <div class="card-header">订单进度</div>
+  <div class="timeline-wrap">
+    <div class="tl-item">
+      <div class="tl-left"><div class="tl-dot done"></div><div class="tl-line"></div></div>
+      <div class="tl-right"><div class="tl-title">提交报名</div><div class="tl-time">2025-10-01 14:20</div></div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-left"><div class="tl-dot done"></div><div class="tl-line"></div></div>
+      <div class="tl-right"><div class="tl-title">上传转账凭证</div><div class="tl-time">2025-10-01 14:35</div></div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-left"><div class="tl-dot active"></div><div class="tl-line"></div></div>
+      <div class="tl-right"><div class="tl-title">等待到账审核</div><div class="tl-time">预计 1 个工作日内</div></div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-left"><div class="tl-dot pending"></div><div class="tl-line"></div></div>
+      <div class="tl-right"><div class="tl-title pending">报名审核</div><div class="tl-time pending">待支付确认后</div></div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-left"><div class="tl-dot pending"></div></div>
+      <div class="tl-right"><div class="tl-title pending">报名成功</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 订单基本信息 -->
+<div class="detail-card animate-in animate-in-d3">
+  <div class="card-header">订单信息</div>
+  <div class="info-row"><div class="info-key">订单编号</div><div class="info-val" style="font-family:monospace;font-size:12px;">ORD-20251001-003</div></div>
+  <div class="info-row"><div class="info-key">创建时间</div><div class="info-val">2025-10-01 14:20</div></div>
+  <div class="info-row"><div class="info-key">代报名人</div><div class="info-val">王建国老师（本账号）</div></div>
+</div>
+
+<div style="height:8px;margin-top:12px;"></div>
+
+<!-- 底部操作 -->
+<div class="action-footer">
+  <button class="btn btn-ghost btn-md" style="flex:1;" onclick="showVoucher()">🔍 查看凭证</button>
+  <button class="btn btn-solid-blue btn-md" style="flex:2;" onclick="location.href='channel-orders.html'">返回订单列表</button>
+</div>
+
+<!-- 凭证大图弹层 -->
+<div class="voucher-overlay" id="voucherOverlay" onclick="closeVoucher()">
+  <div class="voucher-full" onclick="event.stopPropagation()">
+    <div class="voucher-full-head">
+      <div class="voucher-full-title">转账凭证</div>
+      <div class="voucher-full-close" onclick="closeVoucher()">✕</div>
+    </div>
+    <div class="voucher-full-img">🧾</div>
+    <div class="voucher-full-info">
+      <div class="voucher-full-row"><div class="voucher-full-key">上传时间</div><div class="voucher-full-val">2025-10-01 14:35</div></div>
+      <div class="voucher-full-row"><div class="voucher-full-key">转账金额</div><div class="voucher-full-val" style="color:var(--c-accent);">¥120.00</div></div>
+      <div class="voucher-full-row"><div class="voucher-full-key">审核状态</div><div class="voucher-full-val"><span class="tag tag-info tag-dot">待审核</span></div></div>
+      <div style="margin-top:10px;">
+        <button class="btn btn-ghost btn-sm btn-block" onclick="reuploadVoucher()">重新上传凭证</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleStuDetail(id) {
+  const el = document.getElementById(id + 'detail');
+  const btn = document.querySelector('#' + id + 'row .stu-detail-btn');
+  const open = el.classList.toggle('open');
+  btn.textContent = open ? '收起 ▴' : '查看信息 ▾';
+}
+function showVoucher()  { document.getElementById('voucherOverlay').classList.add('show'); }
+function closeVoucher() { document.getElementById('voucherOverlay').classList.remove('show'); }
+function reuploadVoucher() {
+  closeVoucher();
+  setTimeout(() => showToast('请选择新的转账凭证图片'), 300);
+}
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2200);
+}
+</script>
+</body>
+</html>

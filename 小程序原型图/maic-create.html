@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>创建AI课程 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:100px;}
+.t-nav{background:linear-gradient(135deg,#1A237E,#283593);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.t-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.t-title{font-size:17px;font-weight:700;color:white;flex:1;}
+
+/* AI 品牌色彩 */
+.ai-accent { color: #7C3AED; }
+.ai-bg     { background: linear-gradient(135deg, #4A0E8F, #7B1FA2); }
+
+/* 步骤进度 */
+.step-bar-custom{display:flex;align-items:center;padding:16px var(--space-4) 12px;}
+.step-item-c{display:flex;align-items:center;gap:6px;}
+.step-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;transition:all var(--duration-normal);}
+.step-dot.active{background:#7C3AED;color:white;box-shadow:0 0 0 3px rgba(124,58,237,0.2);}
+.step-dot.done{background:var(--c-success);color:white;}
+.step-dot.idle{background:var(--c-gray-100);color:var(--c-gray-500);}
+.step-label{font-size:12px;font-weight:600;}
+.step-label.active{color:#7C3AED;}
+.step-label.idle{color:var(--c-gray-400);}
+.step-line{flex:1;height:2px;background:var(--c-gray-100);margin:0 6px;}
+.step-line.done{background:var(--c-success);}
+
+/* Tab切换：文字输入 vs 文件上传 */
+.input-mode-tabs{display:flex;background:var(--c-gray-50);border-radius:var(--radius-lg);padding:4px;margin:0 var(--space-4) 0;}
+.imt-btn{flex:1;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:600;color:var(--c-gray-500);cursor:pointer;transition:all var(--duration-fast);touch-action:manipulation;}
+.imt-btn.active{background:var(--c-white);color:#7C3AED;box-shadow:var(--shadow-xs);}
+
+.form-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;padding:16px;}
+.form-label{font-size:13px;font-weight:700;color:var(--c-gray-700);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.form-label .required{color:var(--c-danger);}
+.form-input{width:100%;height:50px;border:1.5px solid var(--c-gray-100);border-radius:var(--radius-md);padding:0 14px;font-size:15px;color:var(--c-gray-900);outline:none;font-family:var(--font-body);background:var(--c-white);transition:border-color var(--duration-fast);}
+.form-input:focus{border-color:#7C3AED;box-shadow:0 0 0 3px rgba(124,58,237,0.1);}
+.form-textarea{width:100%;min-height:120px;border:1.5px solid var(--c-gray-100);border-radius:var(--radius-md);padding:12px 14px;font-size:14px;color:var(--c-gray-900);outline:none;font-family:var(--font-body);background:var(--c-white);resize:none;line-height:1.7;transition:border-color var(--duration-fast);}
+.form-textarea:focus{border-color:#7C3AED;}
+.form-group{margin-bottom:18px;}
+
+/* 文件上传区 */
+.upload-zone{border:2px dashed var(--c-gray-200);border-radius:var(--radius-lg);padding:32px 20px;text-align:center;background:var(--c-gray-50);cursor:pointer;transition:all var(--duration-fast);touch-action:manipulation;}
+.upload-zone:active{border-color:#7C3AED;background:#F3E8FF;}
+.upload-icon{font-size:36px;margin-bottom:10px;}
+.upload-text{font-size:14px;font-weight:600;color:var(--c-gray-700);}
+.upload-sub{font-size:12px;color:var(--c-gray-500);margin-top:5px;}
+.upload-formats{display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap;}
+
+/* 目标学段选择 */
+.stage-selector{display:flex;gap:8px;flex-wrap:wrap;}
+.stage-opt{padding:8px 16px;border-radius:var(--radius-full);border:1.5px solid var(--c-gray-100);background:var(--c-gray-50);font-size:13px;color:var(--c-gray-700);cursor:pointer;transition:all var(--duration-fast);touch-action:manipulation;}
+.stage-opt.active{background:#F3E8FF;border-color:#7C3AED;color:#7C3AED;font-weight:700;}
+
+/* 场景类型 */
+.scene-types{display:flex;gap:8px;flex-wrap:wrap;}
+.scene-type{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 14px;border-radius:var(--radius-md);border:1.5px solid var(--c-gray-100);background:var(--c-gray-50);cursor:pointer;transition:all var(--duration-fast);touch-action:manipulation;min-width:72px;}
+.scene-type.active{background:#F3E8FF;border-color:#7C3AED;}
+.scene-type-icon{font-size:22px;}
+.scene-type-label{font-size:11px;font-weight:600;color:var(--c-gray-600);}
+.scene-type.active .scene-type-label{color:#7C3AED;}
+
+/* 生成按钮 */
+.btn-gen{width:100%;height:54px;background:linear-gradient(135deg,#4A0E8F,#7B1FA2);color:white;border:none;border-radius:var(--radius-md);font-size:17px;font-weight:800;cursor:pointer;touch-action:manipulation;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:0.3px;box-shadow:0 6px 20px rgba(74,14,143,0.35);transition:all var(--duration-fast);}
+.btn-gen:active{transform:scale(0.98);box-shadow:0 3px 12px rgba(74,14,143,0.25);}
+.btn-gen.loading{opacity:0.8;pointer-events:none;}
+
+/* 生成中状态 */
+.generating-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;padding:24px;text-align:center;display:none;}
+.gen-spinner{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#4A0E8F,#9C27B0);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;animation:spin 2s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.gen-title{font-size:16px;font-weight:700;color:var(--c-gray-900);margin-bottom:6px;}
+.gen-desc{font-size:14px;color:var(--c-gray-500);}
+.gen-steps{margin-top:20px;text-align:left;}
+.gen-step{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--c-gray-50);}
+.gen-step:last-child{border-bottom:none;}
+.gen-step-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.gen-step-text{flex:1;font-size:13px;color:var(--c-gray-700);}
+.gen-progress{flex-shrink:0;font-size:12px;font-weight:700;}
+
+.action-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:var(--c-white);border-top:1px solid var(--c-gray-100);padding:12px var(--space-4) calc(12px + env(safe-area-inset-bottom));z-index:100;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1A237E;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="t-nav animate-in">
+  <div class="t-back" onclick="history.back()">←</div>
+  <div class="t-title">🤖 创建AI定制课程</div>
+</div>
+
+<!-- 步骤条 -->
+<div class="step-bar-custom animate-in animate-in-d1">
+  <div class="step-item-c">
+    <div class="step-dot active">1</div>
+    <div class="step-label active">填写内容</div>
+  </div>
+  <div class="step-line"></div>
+  <div class="step-item-c">
+    <div class="step-dot idle">2</div>
+    <div class="step-label idle">AI生成</div>
+  </div>
+  <div class="step-line"></div>
+  <div class="step-item-c">
+    <div class="step-dot idle">3</div>
+    <div class="step-label idle">预览发布</div>
+  </div>
+</div>
+
+<!-- 输入方式 Tab -->
+<div class="input-mode-tabs animate-in animate-in-d1">
+  <div class="imt-btn active" id="tabText" onclick="switchMode('text')">✏️ 输入主题</div>
+  <div class="imt-btn" id="tabFile" onclick="switchMode('file')">📄 上传材料</div>
+</div>
+
+<!-- === 文字输入模式 === -->
+<div id="modeText">
+<div class="form-card animate-in animate-in-d2">
+  <div class="form-group">
+    <div class="form-label">课程名称 <span class="required">*</span></div>
+    <input class="form-input" type="text" placeholder="如：儿童水彩零基础——向日葵画法" value="儿童水彩零基础：向日葵的色彩">
+  </div>
+  <div class="form-group">
+    <div class="form-label">课程主题/教学目标 <span class="required">*</span></div>
+    <textarea class="form-textarea" placeholder="详细描述课程的主题和教学目标，描述越详细，AI生成的课件质量越高...">
+帮助小学生学习水彩画基础技法，以向日葵为主题：
+1. 了解水彩颜料的特性与调色技巧
+2. 学习湿画法与干画法的区别
+3. 掌握向日葵的绘制步骤（花瓣、花心、茎叶）
+4. 培养对色彩的感知与创作兴趣</textarea>
+  </div>
+</div>
+</div>
+
+<!-- === 文件上传模式 === -->
+<div id="modeFile" style="display:none;">
+<div class="form-card animate-in animate-in-d2">
+  <div class="form-group">
+    <div class="form-label">课程名称 <span class="required">*</span></div>
+    <input class="form-input" type="text" placeholder="请输入课程名称">
+  </div>
+  <div class="form-group">
+    <div class="form-label">上传教学材料 <span class="required">*</span></div>
+    <div class="upload-zone" onclick="triggerUpload()">
+      <div class="upload-icon">📁</div>
+      <div class="upload-text">点击上传教学材料</div>
+      <div class="upload-sub">AI将自动提取内容生成课件</div>
+      <div class="upload-formats">
+        <span class="tag tag-gray">PDF</span>
+        <span class="tag tag-gray">Word</span>
+        <span class="tag tag-gray">PPT</span>
+        <span class="tag tag-gray">图片</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 配置区 -->
+<div class="form-card animate-in animate-in-d2">
+  <div class="form-group">
+    <div class="form-label">目标学段 <span class="required">*</span></div>
+    <div class="stage-selector">
+      <div class="stage-opt" onclick="toggleStage(this)">幼儿园</div>
+      <div class="stage-opt active" onclick="toggleStage(this)">小学低年级</div>
+      <div class="stage-opt active" onclick="toggleStage(this)">小学高年级</div>
+      <div class="stage-opt" onclick="toggleStage(this)">初中</div>
+      <div class="stage-opt" onclick="toggleStage(this)">高中</div>
+    </div>
+  </div>
+  <div class="form-group" style="margin-bottom:0;">
+    <div class="form-label">课件场景类型</div>
+    <div class="scene-types">
+      <div class="scene-type active" onclick="this.classList.toggle('active')">
+        <div class="scene-type-icon">📊</div>
+        <div class="scene-type-label">幻灯片</div>
+      </div>
+      <div class="scene-type active" onclick="this.classList.toggle('active')">
+        <div class="scene-type-icon">✅</div>
+        <div class="scene-type-label">测验</div>
+      </div>
+      <div class="scene-type active" onclick="this.classList.toggle('active')">
+        <div class="scene-type-icon">🎨</div>
+        <div class="scene-type-label">互动白板</div>
+      </div>
+      <div class="scene-type" onclick="this.classList.toggle('active')">
+        <div class="scene-type-icon">🔬</div>
+        <div class="scene-type-label">项目实践</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 生成中卡片（默认隐藏）-->
+<div class="generating-card" id="generatingCard">
+  <div class="gen-spinner">🤖</div>
+  <div class="gen-title">AI正在生成课件...</div>
+  <div class="gen-desc">通常需要30-60秒，请稍等</div>
+  <div class="gen-steps">
+    <div class="gen-step" id="step1">
+      <div class="gen-step-dot" style="background:var(--c-success);"></div>
+      <div class="gen-step-text">解析课程主题</div>
+      <div class="gen-progress" style="color:var(--c-success);">✅ 完成</div>
+    </div>
+    <div class="gen-step" id="step2">
+      <div class="gen-step-dot" style="background:#7C3AED;animation:breathe 1.2s infinite;"></div>
+      <div class="gen-step-text">生成课程大纲（3章节）</div>
+      <div class="gen-progress" style="color:#7C3AED;">进行中...</div>
+    </div>
+    <div class="gen-step" id="step3">
+      <div class="gen-step-dot" style="background:var(--c-gray-300);"></div>
+      <div class="gen-step-text">生成幻灯片内容</div>
+      <div class="gen-progress" style="color:var(--c-gray-400);">等待中</div>
+    </div>
+    <div class="gen-step" id="step4">
+      <div class="gen-step-dot" style="background:var(--c-gray-300);"></div>
+      <div class="gen-step-text">生成测验题目与答案</div>
+      <div class="gen-progress" style="color:var(--c-gray-400);">等待中</div>
+    </div>
+    <div class="gen-step" id="step5">
+      <div class="gen-step-dot" style="background:var(--c-gray-300);"></div>
+      <div class="gen-step-text">优化课件内容</div>
+      <div class="gen-progress" style="color:var(--c-gray-400);">等待中</div>
+    </div>
+  </div>
+</div>
+
+<div class="action-bar animate-in animate-in-d3">
+  <button class="btn-gen" id="genBtn" onclick="startGenerate()">
+    🤖 开始AI生成课件
+  </button>
+</div>
+
+<script>
+function switchMode(m){
+  document.getElementById('modeText').style.display = m==='text'?'block':'none';
+  document.getElementById('modeFile').style.display = m==='file'?'block':'none';
+  document.getElementById('tabText').classList.toggle('active', m==='text');
+  document.getElementById('tabFile').classList.toggle('active', m==='file');
+}
+function toggleStage(el){el.classList.toggle('active');}
+function triggerUpload(){const t=document.createElement('div');t.className='toast';t.textContent='文件选择功能（实际接OSS上传）';document.body.appendChild(t);setTimeout(()=>t.remove(),2000);}
+
+let genTimer = null;
+function startGenerate(){
+  const btn = document.getElementById('genBtn');
+  const genCard = document.getElementById('generatingCard');
+  btn.classList.add('loading');
+  btn.innerHTML='🤖 生成中，请稍候...';
+  genCard.style.display = 'block';
+  genCard.scrollIntoView({behavior:'smooth',block:'start'});
+
+  const steps = [
+    {id:'step2',delay:1200,text:'生成课程大纲（3章节）',done:true},
+    {id:'step3',delay:2800,text:'生成幻灯片内容（6页）',active:true},
+    {id:'step3',delay:4800,text:'生成幻灯片内容（6页）',done:true},
+    {id:'step4',delay:5200,text:'生成测验题目（4题）',active:true},
+    {id:'step4',delay:7000,text:'生成测验题目（4题）',done:true},
+    {id:'step5',delay:7400,text:'优化课件内容',active:true},
+    {id:'step5',delay:9000,text:'优化完成',done:true},
+  ];
+
+  steps.forEach(s=>{
+    setTimeout(()=>{
+      const el = document.getElementById(s.id);
+      const dot = el.querySelector('.gen-step-dot');
+      const prog = el.querySelector('.gen-progress');
+      const txt = el.querySelector('.gen-step-text');
+      txt.textContent = s.text;
+      if(s.done){dot.style.background='var(--c-success)';dot.style.animation='none';prog.style.color='var(--c-success)';prog.textContent='✅ 完成';}
+      if(s.active){dot.style.background='#7C3AED';dot.style.animation='breathe 1.2s infinite';prog.style.color='#7C3AED';prog.textContent='进行中...';}
+    },s.delay);
+  });
+
+  setTimeout(()=>{
+    location.href='maic-detail.html';
+  },9500);
+}
+</script>
+@keyframes breathe{0%,100%{opacity:1;}50%{opacity:0.4;}}
+</body>
+</html>

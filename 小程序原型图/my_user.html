@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>个人中心 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+
+/* 顶部用户卡 */
+.user-hero {
+  background: linear-gradient(150deg, var(--c-primary) 0%, var(--c-primary-600) 60%, #1A6BB5 100%);
+  padding: 20px var(--space-4) 0;
+  position: relative; overflow: hidden;
+}
+.user-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 85% 30%, rgba(255,255,255,0.07) 0%, transparent 50%);
+}
+.user-hero::after {
+  content: ''; position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 24px; background: var(--c-gray-50);
+  border-radius: 24px 24px 0 0;
+}
+.user-info-row {
+  display: flex; align-items: center; gap: 14px;
+  position: relative; z-index: 1; margin-bottom: 20px;
+}
+.user-avatar {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: linear-gradient(135deg,#FFD54F,#FF8A65);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; flex-shrink: 0;
+  border: 3px solid rgba(255,255,255,0.35);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.user-meta { flex: 1; }
+.user-name { font-size: 19px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+.user-phone { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 3px; }
+.user-id-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: var(--radius-full); margin-top: 6px;
+}
+.user-edit-btn {
+  padding: 7px 14px; border-radius: var(--radius-full);
+  background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+  color: white; font-size: 13px; font-weight: 500;
+  cursor: pointer; flex-shrink: 0; touch-action: manipulation;
+}
+
+/* 数据概览 */
+.user-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  margin: 12px var(--space-4) 0;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.stat-cell {
+  padding: 14px 8px; text-align: center;
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast) ease;
+  border-right: 1px solid var(--c-gray-100);
+}
+.stat-cell:last-child { border-right: none; }
+.stat-cell:active { background: var(--c-gray-50); }
+.stat-num {
+  font-size: 22px; font-weight: 900; color: var(--c-primary-600);
+  line-height: 1; margin-bottom: 4px;
+}
+.stat-label { font-size: 11px; color: var(--c-gray-500); font-weight: 500; }
+
+/* 功能入口列表 */
+.menu-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  margin: 12px var(--space-4) 0;
+  box-shadow: var(--shadow-xs); overflow: hidden;
+}
+.menu-card-title {
+  padding: 14px 16px 10px;
+  font-size: 13px; font-weight: 700; color: var(--c-gray-500);
+  letter-spacing: 0.4px; border-bottom: 1px solid var(--c-gray-100);
+}
+.menu-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--c-gray-100);
+  cursor: pointer; touch-action: manipulation;
+  transition: background var(--duration-fast) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-item:active { background: var(--c-gray-50); }
+.menu-icon {
+  width: 36px; height: 36px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.menu-text { flex: 1; }
+.menu-name { font-size: 14px; font-weight: 600; color: var(--c-gray-900); }
+.menu-desc { font-size: 12px; color: var(--c-gray-500); margin-top: 1px; }
+.menu-arrow { font-size: 14px; color: var(--c-gray-300); flex-shrink: 0; }
+.menu-badge {
+  min-width: 18px; height: 18px; border-radius: var(--radius-full);
+  background: var(--c-accent); color: white;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 5px; margin-right: 4px;
+}
+
+/* 认证状态卡 */
+.cert-card {
+  background: linear-gradient(90deg, var(--c-primary-50), var(--c-white));
+  border: 1px solid var(--c-primary-200);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+  margin: 12px var(--space-4) 0;
+  cursor: pointer; touch-action: manipulation;
+}
+.cert-icon { font-size: 24px; flex-shrink: 0; }
+.cert-info { flex: 1; }
+.cert-title { font-size: 14px; font-weight: 700; color: var(--c-primary-600); }
+.cert-desc { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.cert-arrow { font-size: 14px; color: var(--c-primary-400); }
+
+/* 退出登录 */
+.logout-btn {
+  margin: 16px var(--space-4);
+  background: var(--c-white);
+  border: none; border-radius: var(--radius-lg);
+  padding: 14px; width: calc(100% - 32px);
+  font-size: 15px; font-weight: 600; color: var(--c-danger);
+  cursor: pointer; touch-action: manipulation;
+  box-shadow: var(--shadow-xs);
+}
+.logout-btn:active { opacity: 0.7; }
+</style>
+</head>
+<body class="has-tabbar">
+
+<div class="status-bar" style="background:var(--c-primary);">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<!-- 用户 Hero -->
+<div class="user-hero animate-in">
+  <div class="user-info-row">
+    <div class="user-avatar">👦</div>
+    <div class="user-meta">
+      <div class="user-name">张小明</div>
+      <div class="user-phone">138****8001</div>
+      <div><span class="user-id-badge">🎓 学生认证</span></div>
+    </div>
+    <div class="user-edit-btn" onclick="showToast('编辑资料')">编辑</div>
+  </div>
+</div>
+
+<!-- 数据统计 -->
+<div class="user-stats animate-in animate-in-d1">
+  <div class="stat-cell" onclick="location.href='my-enroll.html'">
+    <div class="stat-num">3</div>
+    <div class="stat-label">报名记录</div>
+  </div>
+  <div class="stat-cell" onclick="location.href='my-score.html'">
+    <div class="stat-num">6</div>
+    <div class="stat-label">我的成绩</div>
+  </div>
+  <div class="stat-cell" onclick="location.href='my-cert.html'">
+    <div class="stat-num">4</div>
+    <div class="stat-label">我的证书</div>
+  </div>
+  <div class="stat-cell" onclick="location.href='my-course.html'">
+    <div class="stat-num">2</div>
+    <div class="stat-label">我的课程</div>
+  </div>
+</div>
+
+<!-- 认证入口 -->
+<div class="cert-card animate-in animate-in-d1" onclick="showToast('身份认证入口')">
+  <div class="cert-icon">🏫</div>
+  <div class="cert-info">
+    <div class="cert-title">老师 / 机构认证</div>
+    <div class="cert-desc">认证后可为学生代报名、统一支付</div>
+  </div>
+  <div class="cert-arrow">›</div>
+</div>
+
+<!-- 我的服务 -->
+<div class="menu-card animate-in animate-in-d2">
+  <div class="menu-card-title">我的服务</div>
+
+  <div class="menu-item" onclick="location.href='my-enroll.html'">
+    <div class="menu-icon" style="background:#EBF4FC;">📝</div>
+    <div class="menu-text">
+      <div class="menu-name">我的报名</div>
+      <div class="menu-desc">查看报名进度与审核状态</div>
+    </div>
+    <div class="menu-badge">1</div>
+    <div class="menu-arrow">›</div>
+  </div>
+
+  <div class="menu-item" onclick="location.href='my-order.html'">
+    <div class="menu-icon" style="background:#FFF3EE;">🧾</div>
+    <div class="menu-text">
+      <div class="menu-name">我的订单</div>
+      <div class="menu-desc">赛事订单 & 课程订单</div>
+    </div>
+    <div class="menu-arrow">›</div>
+  </div>
+
+  <div class="menu-item" onclick="location.href='my-score.html'">
+    <div class="menu-icon" style="background:#FEF9EC;">🎯</div>
+    <div class="menu-text">
+      <div class="menu-name">我的成绩</div>
+      <div class="menu-desc">6 条成绩记录</div>
+    </div>
+    <div class="menu-arrow">›</div>
+  </div>
+
+  <div class="menu-item" onclick="location.href='my-cert.html'">
+    <div class="menu-icon" style="background:#F5EEF8;">🏅</div>
+    <div class="menu-text">
+      <div class="menu-name">我的证书</div>
+      <div class="menu-desc">查看、下载证书（图片/PDF）</div>
+    </div>
+    <div class="menu-arrow">›</div>
+  </div>
+
+  <div class="menu-item" onclick="location.href='my-course.html'">
+    <div class="menu-icon" style="background:#EAF4FC;">📚</div>
+    <div class="menu-text">
+      <div class="menu-name">我的课程</div>
+      <div class="menu-desc">2 门课程学习中</div>
+    </div>
+    <div class="menu-arrow">›</div>
+  </div>
+</div>
+
+<!-- 消息与互动 -->
+<div class="menu-card animate-in animate-in-d2">
+  <div class="menu-card-title">消息与互动</div>
+
+  <div class="menu-item" onclick="showToast('消息通知')">
+    <div class="menu-icon" style="background:#EAFAF1;">🔔</div>
+    <div class="menu-text">
+      <div class="menu-name">消息通知</div>
+      <div class="menu-desc">报名/成绩/证书/系统消息</div>
+    </div>
+    <div class="menu-badge">3</div>
+    <div class="menu-arrow">›</div>
+  </div>
+
+  <div class="menu-item" onclick="showToast('绑定关系管理')">
+    <div class="menu-icon" style="background:#FDEDEC;">🔗</div>
+    <div class="menu-text">
+      <div class="menu-name">绑定关系</div>
+      <div class="menu-desc">管理与老师/机构的绑定</div>
+    </div>
+    <div class="menu-arrow">›</div>
+  </div>
+</div>
+
+<!-- 帮助与设置 -->
+<div class="menu-card animate-in animate-in-d3">
+  <div class="menu-card-title">帮助与设置</div>
+
+  <div class="menu-item" onclick="showToast('客服与帮助')">
+    <div class="menu-icon" style="background:#EBF4FC;">💬</div>
+    <div class="menu-text">
+      <div class="menu-name">客服与帮助</div>
+      <div class="menu-desc">常见问题 & 在线咨询</div>
+    </div>
+    <div class="menu-arrow">›</div>
+  </div>
+
+  <div class="menu-item" onclick="showToast('隐私设置')">
+    <div class="menu-icon" style="background:#F4F6FA;">🔒</div>
+    <div class="menu-text">
+      <div class="menu-name">隐私设置</div>
+      <div class="menu-desc">消息提醒 & 账号安全</div>
+    </div>
+    <div class="menu-arrow">›</div>
+  </div>
+
+  <div class="menu-item" onclick="showToast('关于竞赛通 v1.0.0')">
+    <div class="menu-icon" style="background:#F5EEF8;">ℹ️</div>
+    <div class="menu-text">
+      <div class="menu-name">关于竞赛通</div>
+      <div class="menu-desc">版本 v1.0.0</div>
+    </div>
+    <div class="menu-arrow">›</div>
+  </div>
+</div>
+
+<button class="logout-btn animate-in animate-in-d3" onclick="confirmLogout()">退出登录</button>
+
+<div style="height:8px;"></div>
+
+<nav class="bottom-nav">
+  <div class="nav-tab" onclick="location.href='index.html'"><span class="nav-tab-icon">🏠</span><span class="nav-tab-label">首页</span></div>
+  <div class="nav-tab" onclick="location.href='contest-list.html'"><span class="nav-tab-icon">🏆</span><span class="nav-tab-label">赛事</span></div>
+  <div class="nav-tab" onclick="location.href='course-list.html'"><span class="nav-tab-icon">📚</span><span class="nav-tab-label">课程</span></div>
+  <div class="nav-tab" onclick="location.href='notice.html'"><span class="nav-tab-icon">📢</span><span class="nav-tab-label">公告</span></div>
+  <div class="nav-tab active"><span class="nav-tab-icon">👤</span><span class="nav-tab-label" style="color:var(--c-primary-600);">我的</span></div>
+</nav>
+
+<script>
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
+}
+function confirmLogout() {
+  if (confirm('确认退出登录？')) location.href = 'login.html';
+}
+</script>
+</body>
+</html>

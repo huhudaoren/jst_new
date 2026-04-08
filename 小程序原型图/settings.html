@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>设置 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+.page-header { height:56px;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);display:flex;align-items:center;padding:0 var(--space-4);position:sticky;top:44px;z-index:40;box-shadow:var(--shadow-xs); }
+.back-btn { width:36px;height:36px;border-radius:var(--radius-sm);background:var(--c-gray-50);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;margin-right:12px;flex-shrink:0;touch-action:manipulation; }
+.back-btn:active { background:var(--c-gray-100); }
+.header-title { font-size:17px;font-weight:700;color:var(--c-gray-900);flex:1; }
+
+/* 设置分组 */
+.sg { background:var(--c-white);border-radius:var(--radius-lg);margin:12px var(--space-4) 0;box-shadow:var(--shadow-xs);overflow:hidden; }
+.sg-title { padding:14px 16px 10px;font-size:12px;font-weight:700;color:var(--c-gray-500);letter-spacing:.5px;border-bottom:1px solid var(--c-gray-100); }
+.sr { display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--c-gray-100); }
+.sr:last-child { border-bottom:none; }
+.sr.tap { cursor:pointer;touch-action:manipulation;transition:background var(--duration-fast); }
+.sr.tap:active { background:var(--c-gray-50); }
+.si { width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;margin-right:12px; }
+.sl { flex:1;min-width:0; }
+.sn { font-size:14px;font-weight:500;color:var(--c-gray-900); }
+.sd { font-size:12px;color:var(--c-gray-500);margin-top:2px; }
+.sv { font-size:13px;color:var(--c-gray-500);margin-right:6px;white-space:nowrap; }
+.sa { font-size:14px;color:var(--c-gray-300);flex-shrink:0; }
+
+/* Toggle */
+.tw { position:relative;width:44px;height:24px;flex-shrink:0; }
+.ti { position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;margin:0;z-index:1; }
+.tt { width:44px;height:24px;border-radius:12px;background:var(--c-gray-100);transition:background .2s;display:block; }
+.ti:checked + .tt { background:var(--c-primary-600); }
+.th2 { position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:white;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:transform .2s;pointer-events:none; }
+.ti:checked ~ .th2 { transform:translateX(20px); }
+
+/* Sheet */
+.sheet-overlay { position:fixed;inset:0;background:rgba(26,31,46,.55);z-index:200;display:none;align-items:flex-end;justify-content:center; }
+.sheet-overlay.show { display:flex; }
+.sheet-inner { background:var(--c-white);border-radius:var(--radius-xl) var(--radius-xl) 0 0;width:100%;max-width:390px;overflow:hidden;animation:sheet-up .3s var(--ease-out); }
+@keyframes sheet-up { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.sheet-handle { width:36px;height:4px;background:var(--c-gray-100);border-radius:2px;margin:12px auto 0; }
+.sheet-hd { padding:14px 20px;border-bottom:1px solid var(--c-gray-100); }
+.sheet-hd-title { font-size:16px;font-weight:700;color:var(--c-gray-900); }
+.sheet-hd-sub { font-size:12px;color:var(--c-gray-500);margin-top:3px; }
+.sheet-bd { padding:16px 20px; }
+.sheet-ft { padding:8px 20px 28px; }
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:var(--c-primary);"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="page-header animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="header-title">设置</div>
+</div>
+
+<!-- 消息提醒 -->
+<div class="sg animate-in animate-in-d1">
+  <div class="sg-title">消息提醒</div>
+  <div class="sr">
+    <div class="si" style="background:var(--c-primary-50);">🔔</div>
+    <div class="sl"><div class="sn">报名状态通知</div><div class="sd">报名成功、审核结果、状态变更</div></div>
+    <div class="tw"><input type="checkbox" class="ti" checked onchange="saveSetting('enroll_notify', this.checked)"><div class="tt"></div><div class="th2"></div></div>
+  </div>
+  <div class="sr">
+    <div class="si" style="background:var(--c-gold-50);">🎯</div>
+    <div class="sl"><div class="sn">成绩发布通知</div><div class="sd">成绩公布时第一时间推送</div></div>
+    <div class="tw"><input type="checkbox" class="ti" checked onchange="saveSetting('score_notify', this.checked)"><div class="tt"></div><div class="th2"></div></div>
+  </div>
+  <div class="sr">
+    <div class="si" style="background:#F5EEF8;">🏅</div>
+    <div class="sl"><div class="sn">证书可下载通知</div><div class="sd">证书生成后立即通知</div></div>
+    <div class="tw"><input type="checkbox" class="ti" checked onchange="saveSetting('cert_notify', this.checked)"><div class="tt"></div><div class="th2"></div></div>
+  </div>
+  <div class="sr">
+    <div class="si" style="background:#EAFAF1;">📚</div>
+    <div class="sl"><div class="sn">课程更新通知</div><div class="sd">购买课程有新内容时通知</div></div>
+    <div class="tw"><input type="checkbox" class="ti" checked onchange="saveSetting('course_notify', this.checked)"><div class="tt"></div><div class="th2"></div></div>
+  </div>
+  <div class="sr">
+    <div class="si" style="background:var(--c-warning-50);">⏰</div>
+    <div class="sl"><div class="sn">赛事时间提醒</div><div class="sd">比赛前 24 小时提前提醒</div></div>
+    <div class="tw"><input type="checkbox" class="ti" onchange="saveSetting('remind_notify', this.checked)"><div class="tt"></div><div class="th2"></div></div>
+  </div>
+  <div class="sr">
+    <div class="si" style="background:var(--c-info-50);">💳</div>
+    <div class="sl"><div class="sn">支付到账通知</div><div class="sd">对公转账审核结果通知</div></div>
+    <div class="tw"><input type="checkbox" class="ti" checked onchange="saveSetting('pay_notify', this.checked)"><div class="tt"></div><div class="th2"></div></div>
+  </div>
+  <div class="sr">
+    <div class="si" style="background:var(--c-gray-100);">📢</div>
+    <div class="sl"><div class="sn">系统公告推送</div><div class="sd">平台重要通知和公告</div></div>
+    <div class="tw"><input type="checkbox" class="ti" onchange="saveSetting('sys_notify', this.checked)"><div class="tt"></div><div class="th2"></div></div>
+  </div>
+</div>
+
+<!-- 隐私保护 -->
+<div class="sg animate-in animate-in-d1">
+  <div class="sg-title">隐私保护</div>
+  <div class="sr">
+    <div class="si" style="background:var(--c-primary-50);">🔒</div>
+    <div class="sl"><div class="sn">手机号脱敏展示</div><div class="sd">公开场合中间4位以 * 代替</div></div>
+    <div class="tw"><input type="checkbox" class="ti" checked><div class="tt"></div><div class="th2"></div></div>
+  </div>
+  <div class="sr">
+    <div class="si" style="background:var(--c-danger-50);">🙈</div>
+    <div class="sl"><div class="sn">成绩对外不可见</div><div class="sd">开启后他人无法通过公开查询看到你的成绩</div></div>
+    <div class="tw"><input type="checkbox" class="ti"><div class="tt"></div><div class="th2"></div></div>
+  </div>
+  <div class="sr tap" onclick="showToast('查看隐私保护政策')">
+    <div class="si" style="background:var(--c-gray-100);">📄</div>
+    <div class="sl"><div class="sn">隐私保护政策</div></div>
+    <div class="sa">›</div>
+  </div>
+  <div class="sr tap" onclick="showToast('查看用户服务协议')">
+    <div class="si" style="background:var(--c-gray-100);">📋</div>
+    <div class="sl"><div class="sn">用户服务协议</div></div>
+    <div class="sa">›</div>
+  </div>
+</div>
+
+<!-- 账号安全 -->
+<div class="sg animate-in animate-in-d2">
+  <div class="sg-title">账号安全</div>
+  <div class="sr tap" onclick="document.getElementById('phoneSheet').classList.add('show')">
+    <div class="si" style="background:var(--c-primary-50);">📱</div>
+    <div class="sl"><div class="sn">绑定手机号</div><div class="sd">当前：138****8001</div></div>
+    <div class="sv">变更</div><div class="sa">›</div>
+  </div>
+  <div class="sr tap" onclick="location.href='binding.html'">
+    <div class="si" style="background:var(--c-info-50);">🔗</div>
+    <div class="sl"><div class="sn">绑定关系管理</div><div class="sd">查看或解除与老师/机构的绑定</div></div>
+    <div class="sa">›</div>
+  </div>
+  <div class="sr tap" onclick="showToast('登录设备管理即将上线')">
+    <div class="si" style="background:var(--c-warning-50);">🔐</div>
+    <div class="sl"><div class="sn">登录设备管理</div><div class="sd">查看并管理已登录设备</div></div>
+    <div class="sa">›</div>
+  </div>
+</div>
+
+<!-- 通用 -->
+<div class="sg animate-in animate-in-d2">
+  <div class="sg-title">通用</div>
+  <div class="sr">
+    <div class="si" style="background:var(--c-gray-100);">🌐</div>
+    <div class="sl"><div class="sn">语言</div></div>
+    <div class="sv">简体中文</div><div class="sa">›</div>
+  </div>
+  <div class="sr tap" onclick="clearCache()">
+    <div class="si" style="background:var(--c-gray-100);">🗑️</div>
+    <div class="sl"><div class="sn">清除缓存</div><div class="sd" id="cacheSize">当前缓存：1.2 MB</div></div>
+    <div class="sv">清除</div><div class="sa">›</div>
+  </div>
+  <div class="sr tap" onclick="location.href='help.html'">
+    <div class="si" style="background:#EAFAF1;">💬</div>
+    <div class="sl"><div class="sn">客服与帮助</div><div class="sd">FAQ、在线客服、联系方式</div></div>
+    <div class="sa">›</div>
+  </div>
+  <div class="sr tap" onclick="showToast('当前已是最新版本 v1.0.0')">
+    <div class="si" style="background:var(--c-primary-50);">🔄</div>
+    <div class="sl"><div class="sn">检查更新</div><div class="sd">当前版本 v1.0.0</div></div>
+    <span class="tag tag-success" style="font-size:10px;flex-shrink:0;">最新</span>
+  </div>
+</div>
+
+<!-- 版本信息 -->
+<div style="background:var(--c-white);border-radius:var(--radius-lg);margin:12px var(--space-4) 0;box-shadow:var(--shadow-xs);padding:16px;display:flex;align-items:center;gap:12px;" class="animate-in animate-in-d3">
+  <div style="width:44px;height:44px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--c-primary),var(--c-primary-600));display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🏆</div>
+  <div>
+    <div style="font-size:14px;font-weight:700;color:var(--c-gray-900);">竞赛通</div>
+    <div style="font-size:12px;color:var(--c-gray-500);margin-top:2px;">v1.0.0 · 构建 20260318 · 已是最新版本</div>
+  </div>
+</div>
+
+<div style="margin:14px var(--space-4) 32px;" class="animate-in animate-in-d3">
+  <button class="btn btn-ghost btn-lg btn-block" style="color:var(--c-danger);border-color:rgba(231,76,60,.2);" onclick="confirmLogout()">退出登录</button>
+</div>
+
+<!-- 手机号变更 Sheet -->
+<div class="sheet-overlay" id="phoneSheet" onclick="document.getElementById('phoneSheet').classList.remove('show')">
+  <div class="sheet-inner" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <div class="sheet-hd-title">变更手机号</div>
+      <div class="sheet-hd-sub">需验证当前手机号后方可变更</div>
+    </div>
+    <div class="sheet-bd">
+      <div class="notice notice-warning" style="margin-bottom:14px;">
+        <span class="notice-icon">⚠️</span>
+        <div>手机号是您的登录账号，变更后需使用新号登录。如遇问题请联系客服 400-888-0000。</div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label class="form-label">当前手机号验证码 <span class="required">*</span></label>
+        <div style="display:flex;gap:8px;">
+          <input class="form-input" type="number" placeholder="输入验证码" style="flex:1;height:44px;">
+          <button class="btn btn-outline btn-sm" style="height:44px;flex-shrink:0;" id="sendOldBtn" onclick="sendOldCode()">获取验证码</button>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label class="form-label">新手机号 <span class="required">*</span></label>
+        <input class="form-input" type="tel" placeholder="请输入新手机号" maxlength="11">
+      </div>
+      <div class="form-group" style="margin-bottom:14px;">
+        <label class="form-label">新手机号验证码 <span class="required">*</span></label>
+        <div style="display:flex;gap:8px;">
+          <input class="form-input" type="number" placeholder="输入新手机验证码" style="flex:1;height:44px;">
+          <button class="btn btn-outline btn-sm" style="height:44px;flex-shrink:0;" onclick="showToast('请先填写新手机号')">获取验证码</button>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-lg btn-block" onclick="showToast('手机号变更成功')">确认变更</button>
+    </div>
+    <div style="height:calc(env(safe-area-inset-bottom));"></div>
+  </div>
+</div>
+
+<script>
+function saveSetting(key, val) {
+  showToast(val ? '✓ 已开启通知' : '✓ 已关闭通知');
+}
+function clearCache() {
+  document.getElementById('cacheSize').textContent = '缓存已清除';
+  showToast('✓ 缓存已清除（1.2 MB）');
+}
+let countdown = 0;
+function sendOldCode() {
+  if(countdown > 0) return;
+  countdown = 60;
+  const btn = document.getElementById('sendOldBtn');
+  showToast('验证码已发送至 138****8001');
+  const t = setInterval(() => {
+    btn.textContent = countdown + 's';
+    countdown--;
+    if(countdown < 0) { clearInterval(t); btn.textContent = '重新获取'; countdown = 0; }
+  }, 1000);
+}
+function confirmLogout() { if(confirm('确认退出登录？')) location.href = 'login.html'; }
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2200);
+}
+</script>
+</body>
+</html>

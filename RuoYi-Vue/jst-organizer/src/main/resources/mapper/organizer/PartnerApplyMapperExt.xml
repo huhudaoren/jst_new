@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.organizer.mapper.PartnerApplyMapperExt">
+
+    <resultMap id="PartnerApplyEntityResult" type="com.ruoyi.jst.organizer.domain.JstEventPartnerApply">
+        <id property="applyId" column="apply_id"/>
+        <result property="applyNo" column="apply_no"/>
+        <result property="partnerId" column="partner_id"/>
+        <result property="partnerName" column="partner_name"/>
+        <result property="contactName" column="contact_name"/>
+        <result property="contactMobile" column="contact_mobile"/>
+        <result property="businessLicenseNo" column="business_license_no"/>
+        <result property="qualificationJson" column="qualification_json"/>
+        <result property="settlementInfoJson" column="settlement_info_json"/>
+        <result property="invoiceInfoJson" column="invoice_info_json"/>
+        <result property="contractFilesJson" column="contract_files_json"/>
+        <result property="applyStatus" column="apply_status"/>
+        <result property="supplementRemark" column="supplement_remark"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="auditUserId" column="audit_user_id"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <resultMap id="PartnerApplyListResult" type="com.ruoyi.jst.organizer.vo.PartnerApplyListVO">
+        <id property="applyId" column="apply_id"/>
+        <result property="applyNo" column="apply_no"/>
+        <result property="partnerId" column="partner_id"/>
+        <result property="partnerName" column="partner_name"/>
+        <result property="contactName" column="contact_name"/>
+        <result property="contactMobile" column="contact_mobile"/>
+        <result property="applyStatus" column="apply_status"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="auditTime" column="audit_time"/>
+    </resultMap>
+
+    <sql id="PartnerApplyColumns">
+        apply_id, apply_no, partner_id, partner_name, contact_name, contact_mobile,
+        business_license_no, qualification_json, settlement_info_json, invoice_info_json,
+        contract_files_json, apply_status, supplement_remark, audit_remark, audit_user_id,
+        submit_time, audit_time, create_by, create_time, update_by, update_time, remark, del_flag
+    </sql>
+
+    <select id="selectByApplyId" resultMap="PartnerApplyEntityResult">
+        select <include refid="PartnerApplyColumns"/>
+        from jst_event_partner_apply
+        where apply_id = #{applyId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectByApplyNo" resultMap="PartnerApplyEntityResult">
+        select <include refid="PartnerApplyColumns"/>
+        from jst_event_partner_apply
+        where apply_no = #{applyNo}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="countDuplicateActiveByMobile" resultType="long">
+        select count(1)
+        from jst_event_partner_apply
+        where contact_mobile = #{contactMobile}
+          and apply_status in ('pending', 'approved')
+          and del_flag = '0'
+    </select>
+
+    <select id="selectPartnerApplyList"
+            parameterType="com.ruoyi.jst.organizer.dto.PartnerApplyQueryDTO"
+            resultMap="PartnerApplyListResult">
+        select apply_id, apply_no, partner_id, partner_name, contact_name, contact_mobile,
+               apply_status, submit_time, audit_time
+        from jst_event_partner_apply
+        <where>
+            del_flag = '0'
+            <if test="applyNo != null and applyNo != ''">
+                and apply_no = #{applyNo}
+            </if>
+            <if test="applyStatus != null and applyStatus != ''">
+                and apply_status = #{applyStatus}
+            </if>
+            <if test="partnerName != null and partnerName != ''">
+                and partner_name like concat('%', #{partnerName}, '%')
+            </if>
+            <if test="contactName != null and contactName != ''">
+                and contact_name like concat('%', #{contactName}, '%')
+            </if>
+            <if test="contactMobile != null and contactMobile != ''">
+                and contact_mobile = #{contactMobile}
+            </if>
+            <if test="submitTimeStart != null">
+                and submit_time <![CDATA[ >= ]]> #{submitTimeStart}
+            </if>
+            <if test="submitTimeEnd != null">
+                and submit_time <![CDATA[ <= ]]> #{submitTimeEnd}
+            </if>
+            <if test="auditTimeStart != null">
+                and audit_time <![CDATA[ >= ]]> #{auditTimeStart}
+            </if>
+            <if test="auditTimeEnd != null">
+                and audit_time <![CDATA[ <= ]]> #{auditTimeEnd}
+            </if>
+        </where>
+        order by create_time desc, apply_id desc
+    </select>
+
+    <update id="updateApplyStatusByExpectedStatus">
+        update jst_event_partner_apply
+        set apply_status = #{targetStatus},
+            audit_remark = #{auditRemark},
+            supplement_remark = #{supplementRemark},
+            audit_user_id = #{auditUserId},
+            audit_time = #{auditTime},
+            partner_id = #{partnerId},
+            update_by = #{updateBy},
+            update_time = now()
+        where apply_id = #{applyId}
+          and apply_status = #{expectedStatus}
+          and del_flag = '0'
+    </update>
+</mapper>

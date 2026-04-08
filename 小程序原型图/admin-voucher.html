@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>转账凭证审核 · 竞赛通管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.admin-nav{background:linear-gradient(135deg,#1A237E,#283593);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.admin-nav .back-btn{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.admin-nav-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.admin-nav-badge{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-full);padding:3px 10px;font-size:11px;color:rgba(255,255,255,0.7);}
+
+.filter-tabs{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);}
+.ft-item{flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--c-gray-500);cursor:pointer;position:relative;gap:3px;touch-action:manipulation;}
+.ft-item.active{color:#3F51B5;font-weight:700;}
+.ft-item.active::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:2.5px;background:#3F51B5;border-radius:1px;}
+.ft-count{min-width:16px;height:16px;padding:0 4px;background:var(--c-warning);color:white;font-size:10px;font-weight:700;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;}
+
+.voucher-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:10px var(--space-4) 0;overflow:hidden;}
+.vc-header{display:flex;align-items:center;gap:12px;padding:14px 16px 10px;}
+.vc-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#3F51B5,#5C6BC0);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.vc-info{flex:1;}
+.vc-name{font-size:14px;font-weight:700;color:var(--c-gray-900);}
+.vc-meta{font-size:12px;color:var(--c-gray-500);margin-top:2px;}
+.vc-amount{font-size:18px;font-weight:900;color:var(--c-accent);flex-shrink:0;}
+
+.vc-detail-row{display:flex;padding:8px 16px;border-bottom:1px solid var(--c-gray-50);}
+.vc-detail-row:last-child{border-bottom:none;}
+.vc-key{font-size:12px;color:var(--c-gray-500);width:76px;flex-shrink:0;}
+.vc-val{font-size:13px;color:var(--c-gray-900);flex:1;font-weight:500;}
+
+.vc-voucher-preview{margin:0 16px 12px;border-radius:var(--radius-md);background:linear-gradient(135deg,#E8ECF4,#F4F6FA);height:110px;display:flex;align-items:center;justify-content:center;font-size:48px;cursor:pointer;border:1px solid var(--c-gray-100);position:relative;touch-action:manipulation;}
+.vc-voucher-preview:active{opacity:0.85;}
+.vc-zoom-hint{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,0.45);color:white;font-size:11px;padding:3px 8px;border-radius:var(--radius-full);}
+
+.vc-footer{padding:8px 16px 12px;display:flex;gap:8px;border-top:1px solid var(--c-gray-50);}
+.btn-confirm{flex:2;height:40px;background:var(--c-success);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;}
+.btn-reject{flex:1;height:40px;background:var(--c-white);color:var(--c-danger);border:1px solid var(--c-danger);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1A237E;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="admin-nav animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="admin-nav-title">对公转账凭证审核</div>
+  <div class="admin-nav-badge">待审 5</div>
+</div>
+<div class="filter-tabs">
+  <div class="ft-item active" onclick="switchTab(this)">待审核 <span class="ft-count">5</span></div>
+  <div class="ft-item" onclick="switchTab(this)">已到账</div>
+  <div class="ft-item" onclick="switchTab(this)">已驳回</div>
+  <div class="ft-item" onclick="switchTab(this)">全部</div>
+</div>
+
+<div class="voucher-card animate-in animate-in-d1">
+  <div class="vc-header">
+    <div class="vc-avatar">👨‍🏫</div>
+    <div class="vc-info">
+      <div class="vc-name">王建国老师</div>
+      <div class="vc-meta">订单 JST-2025-003291 · 2026-03-19 09:10</div>
+    </div>
+    <div class="vc-amount">¥1,800</div>
+  </div>
+  <div class="vc-detail-row"><div class="vc-key">赛事</div><div class="vc-val">安徒生(国际)艺术奖 × 10名学生</div></div>
+  <div class="vc-detail-row"><div class="vc-key">转账时间</div><div class="vc-val">2026-03-19 09:08</div></div>
+  <div class="vc-detail-row"><div class="vc-key">转账银行</div><div class="vc-val">中国工商银行</div></div>
+  <div class="vc-detail-row"><div class="vc-key">备注</div><div class="vc-val">安徒生艺术奖报名费10人</div></div>
+  <div class="vc-voucher-preview" onclick="showVoucher()">
+    🧾
+    <div class="vc-zoom-hint">🔍 点击放大查看凭证</div>
+  </div>
+  <div class="vc-footer">
+    <button class="btn-reject" onclick="doReject()">驳回</button>
+    <button class="btn-confirm" onclick="doConfirm()">✅ 确认到账 ¥1,800</button>
+  </div>
+</div>
+
+<div class="voucher-card animate-in animate-in-d2">
+  <div class="vc-header">
+    <div class="vc-avatar" style="background:linear-gradient(135deg,#7B1FA2,#AB47BC);">🏢</div>
+    <div class="vc-info">
+      <div class="vc-name">广州艺起来文化教育机构</div>
+      <div class="vc-meta">订单 JST-2025-003288 · 2026-03-18 17:30</div>
+    </div>
+    <div class="vc-amount">¥4,500</div>
+  </div>
+  <div class="vc-detail-row"><div class="vc-key">赛事</div><div class="vc-val">"鸟巢杯"文化艺术活动 × 30名学生</div></div>
+  <div class="vc-detail-row"><div class="vc-key">转账时间</div><div class="vc-val">2026-03-18 17:25</div></div>
+  <div class="vc-detail-row"><div class="vc-key">金额核对</div><div class="vc-val" style="color:var(--c-warning);">⚠️ 凭证金额¥4,500，应付¥4,500，一致</div></div>
+  <div class="vc-voucher-preview" onclick="showVoucher()">
+    💳
+    <div class="vc-zoom-hint">🔍 点击放大查看凭证</div>
+  </div>
+  <div class="vc-footer">
+    <button class="btn-reject" onclick="doReject()">驳回</button>
+    <button class="btn-confirm" onclick="doConfirm()">✅ 确认到账 ¥4,500</button>
+  </div>
+</div>
+
+<!-- 全屏凭证预览 -->
+<div id="voucherOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.93);" onclick="closeVoucher()">
+  <div style="position:absolute;top:20px;right:20px;width:40px;height:40px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:white;cursor:pointer;">✕</div>
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:300px;">
+    <div style="background:linear-gradient(135deg,#1B5E20,#43A047);border-radius:var(--radius-lg);padding:24px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">🧾</div>
+      <div style="font-size:16px;font-weight:700;color:white;margin-bottom:6px;">银行电子回单</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.7);">转账金额：¥1,800.00</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;">交易时间：2026-03-19 09:08</div>
+      <div style="margin-top:16px;padding:8px 14px;background:rgba(255,255,255,0.15);border-radius:var(--radius-sm);font-size:12px;color:rgba(255,255,255,0.8);">中国工商银行 · 广州天河支行</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(el){document.querySelectorAll('.ft-item').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function showVoucher(){document.getElementById('voucherOverlay').style.display='block';}
+function closeVoucher(){document.getElementById('voucherOverlay').style.display='none';}
+function doConfirm(){const t=document.createElement('div');t.className='toast';t.textContent='✅ 已确认到账，报名继续审核';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+function doReject(){const t=document.createElement('div');t.className='toast';t.textContent='已驳回，请老师重新上传凭证';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.organizer.mapper.JstChannelAuthApplyMapper">
+    
+    <resultMap type="JstChannelAuthApply" id="JstChannelAuthApplyResult">
+        <result property="applyId"    column="apply_id"    />
+        <result property="applyNo"    column="apply_no"    />
+        <result property="userId"    column="user_id"    />
+        <result property="channelId"    column="channel_id"    />
+        <result property="channelType"    column="channel_type"    />
+        <result property="applyName"    column="apply_name"    />
+        <result property="materialsJson"    column="materials_json"    />
+        <result property="applyStatus"    column="apply_status"    />
+        <result property="auditRemark"    column="audit_remark"    />
+        <result property="auditUserId"    column="audit_user_id"    />
+        <result property="submitTime"    column="submit_time"    />
+        <result property="auditTime"    column="audit_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstChannelAuthApplyVo">
+        select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, materials_json, apply_status, audit_remark, audit_user_id, submit_time, audit_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_channel_auth_apply
+    </sql>
+
+    <select id="selectJstChannelAuthApplyList" parameterType="JstChannelAuthApply" resultMap="JstChannelAuthApplyResult">
+        <include refid="selectJstChannelAuthApplyVo"/>
+        <where>  
+            <if test="applyNo != null  and applyNo != ''"> and apply_no = #{applyNo}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="channelId != null "> and channel_id = #{channelId}</if>
+            <if test="channelType != null  and channelType != ''"> and channel_type = #{channelType}</if>
+            <if test="applyName != null  and applyName != ''"> and apply_name like concat('%', #{applyName}, '%')</if>
+            <if test="materialsJson != null  and materialsJson != ''"> and materials_json = #{materialsJson}</if>
+            <if test="applyStatus != null  and applyStatus != ''"> and apply_status = #{applyStatus}</if>
+            <if test="auditRemark != null  and auditRemark != ''"> and audit_remark = #{auditRemark}</if>
+            <if test="auditUserId != null "> and audit_user_id = #{auditUserId}</if>
+            <if test="submitTime != null "> and submit_time = #{submitTime}</if>
+            <if test="auditTime != null "> and audit_time = #{auditTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstChannelAuthApplyByApplyId" parameterType="Long" resultMap="JstChannelAuthApplyResult">
+        <include refid="selectJstChannelAuthApplyVo"/>
+        where apply_id = #{applyId}
+    </select>
+
+    <insert id="insertJstChannelAuthApply" parameterType="JstChannelAuthApply" useGeneratedKeys="true" keyProperty="applyId">
+        insert into jst_channel_auth_apply
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="applyNo != null and applyNo != ''">apply_no,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="channelId != null">channel_id,</if>
+            <if test="channelType != null and channelType != ''">channel_type,</if>
+            <if test="applyName != null and applyName != ''">apply_name,</if>
+            <if test="materialsJson != null">materials_json,</if>
+            <if test="applyStatus != null and applyStatus != ''">apply_status,</if>
+            <if test="auditRemark != null">audit_remark,</if>
+            <if test="auditUserId != null">audit_user_id,</if>
+            <if test="submitTime != null">submit_time,</if>
+            <if test="auditTime != null">audit_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="applyNo != null and applyNo != ''">#{applyNo},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="channelId != null">#{channelId},</if>
+            <if test="channelType != null and channelType != ''">#{channelType},</if>
+            <if test="applyName != null and applyName != ''">#{applyName},</if>
+            <if test="materialsJson != null">#{materialsJson},</if>
+            <if test="applyStatus != null and applyStatus != ''">#{applyStatus},</if>
+            <if test="auditRemark != null">#{auditRemark},</if>
+            <if test="auditUserId != null">#{auditUserId},</if>
+            <if test="submitTime != null">#{submitTime},</if>
+            <if test="auditTime != null">#{auditTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstChannelAuthApply" parameterType="JstChannelAuthApply">
+        update jst_channel_auth_apply
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="applyNo != null and applyNo != ''">apply_no = #{applyNo},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="channelId != null">channel_id = #{channelId},</if>
+            <if test="channelType != null and channelType != ''">channel_type = #{channelType},</if>
+            <if test="applyName != null and applyName != ''">apply_name = #{applyName},</if>
+            <if test="materialsJson != null">materials_json = #{materialsJson},</if>
+            <if test="applyStatus != null and applyStatus != ''">apply_status = #{applyStatus},</if>
+            <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
+            <if test="auditUserId != null">audit_user_id = #{auditUserId},</if>
+            <if test="submitTime != null">submit_time = #{submitTime},</if>
+            <if test="auditTime != null">audit_time = #{auditTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where apply_id = #{applyId}
+    </update>
+
+    <delete id="deleteJstChannelAuthApplyByApplyId" parameterType="Long">
+        delete from jst_channel_auth_apply where apply_id = #{applyId}
+    </delete>
+
+    <delete id="deleteJstChannelAuthApplyByApplyIds" parameterType="String">
+        delete from jst_channel_auth_apply where apply_id in 
+        <foreach item="applyId" collection="array" open="(" separator="," close=")">
+            #{applyId}
+        </foreach>
+    </delete>
+</mapper>

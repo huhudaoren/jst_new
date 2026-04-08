@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>证书验真 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); padding-bottom: 32px; }
+.page-header { height:56px;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);display:flex;align-items:center;padding:0 var(--space-4);position:sticky;top:44px;z-index:40;box-shadow:var(--shadow-xs); }
+.back-btn { width:36px;height:36px;border-radius:var(--radius-sm);background:var(--c-gray-50);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;margin-right:12px;flex-shrink:0;touch-action:manipulation; }
+.back-btn:active { background:var(--c-gray-100); }
+.header-title { font-size:17px;font-weight:700;color:var(--c-gray-900);flex:1; }
+
+/* 验真结果 Hero */
+.verify-hero {
+  margin:16px var(--space-4) 0;
+  border-radius:var(--radius-xl);
+  overflow:hidden;
+  box-shadow:var(--shadow-lg);
+}
+.verify-hero-top {
+  padding:28px 24px;
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;
+}
+.verify-icon { width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:14px;box-shadow:0 6px 20px rgba(0,0,0,.2); }
+.verify-status { font-size:22px;font-weight:900;color:white;margin-bottom:6px; }
+.verify-sub { font-size:14px;color:rgba(255,255,255,.8); }
+
+/* 证书内容展示 */
+.cert-display {
+  background:rgba(255,255,255,.12);
+  border-top:1px solid rgba(255,255,255,.15);
+  padding:20px 24px;
+}
+.cert-display-title { font-size:11px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:1px;margin-bottom:14px; }
+.cert-field { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px; }
+.cert-field:last-child { margin-bottom:0; }
+.cert-field-key { font-size:13px;color:rgba(255,255,255,.65); }
+.cert-field-val { font-size:13px;font-weight:700;color:white;text-align:right; }
+.cert-field-val.award { color:#FFD700; font-size:15px; }
+.cert-field-val.no { color:rgba(255,255,255,.8);font-size:12px;font-family:monospace;letter-spacing:.5px; }
+
+/* 详细验证信息 */
+.detail-card { background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;overflow:hidden; }
+.detail-header { padding:14px 16px 10px;border-bottom:1px solid var(--c-gray-100);display:flex;align-items:center;gap:8px; }
+.detail-header-icon { width:28px;height:28px;border-radius:var(--radius-sm);background:var(--c-success-50);display:flex;align-items:center;justify-content:center;font-size:15px; }
+.detail-header-title { font-size:15px;font-weight:700;color:var(--c-gray-900); }
+.detail-row { display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--c-gray-100); }
+.detail-row:last-child { border-bottom:none; }
+.detail-key { font-size:13px;color:var(--c-gray-500); }
+.detail-val { font-size:13px;color:var(--c-gray-900);font-weight:600;text-align:right;max-width:200px;line-height:1.4; }
+
+/* 防伪说明 */
+.security-card { background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;padding:16px; }
+.security-title { font-size:13px;font-weight:700;color:var(--c-gray-700);margin-bottom:12px;display:flex;align-items:center;gap:6px; }
+.security-title::before { content:'';width:3px;height:13px;background:var(--c-success);border-radius:2px;display:inline-block; }
+.security-item { display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:12px;color:var(--c-gray-700);line-height:1.6; }
+.security-item:last-child { margin-bottom:0; }
+
+/* 无效证书样式 */
+.verify-hero-invalid { background:linear-gradient(145deg,#7F1F1F,#C0392B); }
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#155724;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="page-header animate-in">
+  <div class="back-btn" onclick="location.href='index.html'">←</div>
+  <div class="header-title">证书验真结果</div>
+</div>
+
+<!-- 验真结果 Hero（有效） -->
+<div class="verify-hero animate-in animate-in-d1" id="validHero">
+  <div class="verify-hero-top" style="background:linear-gradient(145deg,#155724 0%,#1E8449 50%,#27AE60 100%);">
+    <div class="verify-icon" style="background:rgba(255,255,255,.2);">✅</div>
+    <div class="verify-status">证书验证通过</div>
+    <div class="verify-sub">该证书由竞赛通平台颁发，真实有效</div>
+  </div>
+  <div class="cert-display" style="background:linear-gradient(145deg,rgba(21,87,36,.9),rgba(30,132,73,.9));">
+    <div class="cert-display-title">证书摘要信息</div>
+    <div class="cert-field">
+      <span class="cert-field-key">获奖等级</span>
+      <span class="cert-field-val award">🥇 一等奖</span>
+    </div>
+    <div class="cert-field">
+      <span class="cert-field-key">获奖人</span>
+      <span class="cert-field-val">张***明</span>
+    </div>
+    <div class="cert-field">
+      <span class="cert-field-key">赛事名称</span>
+      <span class="cert-field-val">安徒生(国际)艺术奖</span>
+    </div>
+    <div class="cert-field">
+      <span class="cert-field-key">证书编号</span>
+      <span class="cert-field-val no">JST-2025-ART-00312</span>
+    </div>
+  </div>
+</div>
+
+<!-- 详细验证信息 -->
+<div class="detail-card animate-in animate-in-d2">
+  <div class="detail-header">
+    <div class="detail-header-icon">🔍</div>
+    <div class="detail-header-title">完整验证信息</div>
+  </div>
+  <div class="detail-row">
+    <div class="detail-key">证书编号</div>
+    <div class="detail-val" style="color:var(--c-primary-600);font-family:monospace;font-size:12px;">JST-2025-ART-00312</div>
+  </div>
+  <div class="detail-row">
+    <div class="detail-key">获奖人姓名</div>
+    <div class="detail-val">张***明（已脱敏）</div>
+  </div>
+  <div class="detail-row">
+    <div class="detail-key">赛事名称</div>
+    <div class="detail-val">安徒生(国际)艺术奖</div>
+  </div>
+  <div class="detail-row">
+    <div class="detail-key">参赛组别</div>
+    <div class="detail-val">绘画类</div>
+  </div>
+  <div class="detail-row">
+    <div class="detail-key">获奖等级</div>
+    <div class="detail-val" style="color:var(--c-gold);">🥇 一等奖</div>
+  </div>
+  <div class="detail-row">
+    <div class="detail-key">发证机构</div>
+    <div class="detail-val">安徒生国际艺术联合会</div>
+  </div>
+  <div class="detail-row">
+    <div class="detail-key">发证日期</div>
+    <div class="detail-val">2025年11月15日</div>
+  </div>
+  <div class="detail-row">
+    <div class="detail-key">验真时间</div>
+    <div class="detail-val" id="verifyTime">—</div>
+  </div>
+  <div class="detail-row">
+    <div class="detail-key">验真状态</div>
+    <div class="detail-val"><span class="tag tag-success tag-dot">真实有效</span></div>
+  </div>
+</div>
+
+<!-- 防伪说明 -->
+<div class="security-card animate-in animate-in-d2">
+  <div class="security-title">竞赛通证书防伪说明</div>
+  <div class="security-item"><span>🔒</span><span>每张证书附有唯一防伪二维码，扫码即可实时验证真伪</span></div>
+  <div class="security-item"><span>🔐</span><span>证书数据由竞赛通平台加密存储，无法伪造或篡改</span></div>
+  <div class="security-item"><span>📋</span><span>每次验证均有记录，多次验证不影响证书有效性</span></div>
+  <div class="security-item"><span>✅</span><span>本验证页面无需登录，公开可访问，可放心向第三方展示</span></div>
+</div>
+
+<!-- 手动查询入口 -->
+<div style="background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;padding:16px;" class="animate-in animate-in-d3">
+  <div style="font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:12px;">手动输入证书编号查询</div>
+  <div style="display:flex;gap:8px;">
+    <input class="form-input" id="certNoInput" type="text" placeholder="输入证书编号 JST-XXXX-XXXX" style="flex:1;height:44px;">
+    <button class="btn btn-solid-blue btn-md" onclick="manualVerify()" style="flex-shrink:0;">查询</button>
+  </div>
+</div>
+
+<div style="padding:20px var(--space-4);text-align:center;">
+  <button class="btn btn-ghost btn-md" onclick="location.href='index.html'">返回首页</button>
+</div>
+
+<script>
+document.getElementById('verifyTime').textContent = new Date().toLocaleString('zh-CN',{hour12:false}).replace(/\//g,'-');
+function manualVerify() {
+  const no = document.getElementById('certNoInput').value.trim();
+  if(!no) { showToast('请输入证书编号'); return; }
+  showToast('🔍 正在查询证书 ' + no + '...');
+}
+function showToast(msg) {
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2200);
+}
+</script>
+</body>
+</html>

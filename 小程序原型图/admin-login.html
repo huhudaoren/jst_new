@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>管理员登录 · 竞赛通</title>
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background:#0F172A; min-height:100vh; display:flex; flex-direction:column; padding-bottom:0 !important; }
+
+.admin-bg { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+.admin-bg .dot-grid { position:absolute; inset:0; background-image:radial-gradient(circle,rgba(255,255,255,0.04) 1px,transparent 1px); background-size:28px 28px; }
+.admin-bg::before { content:''; position:absolute; top:-120px; right:-120px; width:320px; height:320px; border-radius:50%; background:radial-gradient(circle,rgba(99,102,241,0.18) 0%,transparent 70%); }
+.admin-bg::after { content:''; position:absolute; bottom:-100px; left:-80px; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle,rgba(16,185,129,0.10) 0%,transparent 70%); }
+
+.status-bar { background:transparent !important; position:relative; z-index:1; }
+.status-bar .time, .status-bar .icons { color:rgba(255,255,255,0.45) !important; }
+
+.admin-badge { display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 16px; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.25); border-radius:20px; margin:12px auto 0; width:fit-content; position:relative; z-index:1; }
+.admin-badge-dot { width:7px; height:7px; border-radius:50%; background:#EF4444; animation:pulse-red 1.8s ease-in-out infinite; }
+@keyframes pulse-red { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.7);} }
+.admin-badge-text { font-size:12px; font-weight:700; color:#FCA5A5; letter-spacing:0.5px; }
+
+.admin-logo-wrap { padding:28px 20px 20px; text-align:center; position:relative; z-index:1; }
+.admin-logo-icon { width:76px; height:76px; border-radius:22px; background:linear-gradient(135deg,#4338CA,#6366F1); display:flex; align-items:center; justify-content:center; font-size:36px; margin:0 auto 14px; box-shadow:0 8px 32px rgba(99,102,241,0.4); }
+.admin-logo-name { font-size:26px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:4px; }
+.admin-logo-sub { font-size:13px; color:rgba(255,255,255,0.45); }
+
+.admin-divider { display:flex; align-items:center; gap:12px; margin:0 20px 20px; position:relative; z-index:1; }
+.admin-divider::before,.admin-divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.08); }
+.admin-divider-text { font-size:11px; color:rgba(255,255,255,0.3); font-weight:600; letter-spacing:1px; white-space:nowrap; }
+
+.admin-card { margin:0 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:24px 20px; backdrop-filter:blur(12px); position:relative; z-index:1; }
+
+.admin-field { margin-bottom:16px; }
+.admin-field-label { font-size:13px; font-weight:600; color:rgba(255,255,255,0.5); margin-bottom:8px; letter-spacing:0.3px; }
+.admin-input-wrap { position:relative; }
+.admin-input-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:16px; pointer-events:none; opacity:0.5; }
+.admin-input { width:100%; height:52px; background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.1); border-radius:12px; color:white; font-size:16px; font-family:inherit; padding:0 14px 0 44px; outline:none; box-sizing:border-box; transition:border-color 0.2s,box-shadow 0.2s; }
+.admin-input::placeholder { color:rgba(255,255,255,0.25); font-size:14px; }
+.admin-input:focus { border-color:#6366F1; box-shadow:0 0 0 3px rgba(99,102,241,0.18); background:rgba(99,102,241,0.08); }
+.admin-input.password-input { padding-right:48px; }
+.pwd-toggle { position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; padding:4px; touch-action:manipulation; }
+
+.captcha-row { display:flex; gap:10px; align-items:stretch; }
+.captcha-row .admin-input-wrap { flex:1; }
+.captcha-box { width:100px; height:52px; flex-shrink:0; background:linear-gradient(135deg,#1E293B,#334155); border:1.5px solid rgba(255,255,255,0.1); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; position:relative; }
+.captcha-code { font-size:22px; font-weight:900; letter-spacing:4px; color:white; font-family:monospace; transform:skewX(-6deg); user-select:none; }
+.captcha-hint { font-size:9px; color:rgba(255,255,255,0.3); margin-top:2px; }
+
+.admin-login-btn { width:100%; height:54px; border:none; border-radius:14px; background:linear-gradient(135deg,#4338CA,#6366F1); color:white; font-size:17px; font-weight:800; letter-spacing:0.5px; cursor:pointer; margin-top:8px; box-shadow:0 4px 20px rgba(99,102,241,0.4); transition:all 0.2s; touch-action:manipulation; }
+.admin-login-btn:active { transform:scale(0.98); }
+
+.error-msg { display:none; color:#FCA5A5; font-size:13px; margin-bottom:12px; text-align:center; padding:8px; background:rgba(239,68,68,0.1); border-radius:8px; border:1px solid rgba(239,68,68,0.2); }
+
+.security-tips { margin:14px 16px 0; position:relative; z-index:1; }
+.tip-item { display:flex; align-items:flex-start; gap:8px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+.tip-item:last-child { border-bottom:none; }
+.tip-icon { font-size:13px; flex-shrink:0; margin-top:1px; }
+.tip-text { font-size:12px; color:rgba(255,255,255,0.3); line-height:1.4; }
+
+.switch-entry { margin:12px 16px 4px; padding:12px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; position:relative; z-index:1; touch-action:manipulation; }
+.switch-entry-text { font-size:13px; color:rgba(255,255,255,0.35); }
+.switch-entry-link { font-size:13px; color:#818CF8; font-weight:600; }
+
+.admin-footer { text-align:center; padding:16px 20px 28px; position:relative; z-index:1; }
+.admin-footer a { font-size:12px; color:rgba(255,255,255,0.2); text-decoration:none; }
+.admin-footer-sep { margin:0 8px; color:rgba(255,255,255,0.12); }
+
+.loading-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.85); display:none; align-items:center; justify-content:center; z-index:500; flex-direction:column; gap:16px; }
+.loading-overlay.show { display:flex; }
+.spinner { width:44px; height:44px; border-radius:50%; border:3px solid rgba(99,102,241,0.2); border-top-color:#6366F1; animation:spin 0.8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-text { font-size:14px; color:rgba(255,255,255,0.5); }
+
+.toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:rgba(30,41,59,0.95); color:white; border-radius:8px; padding:10px 20px; font-size:14px; z-index:9999; border:1px solid rgba(255,255,255,0.1); animation:toast-in 0.3s ease; }
+@keyframes toast-in { from{opacity:0;transform:translateX(-50%) translateY(12px);} }
+</style>
+</head>
+<body>
+
+<div class="admin-bg"><div class="dot-grid"></div></div>
+
+<div class="status-bar">
+  <span class="time" style="color:rgba(255,255,255,0.5);">9:41</span>
+  <span class="icons" style="color:rgba(255,255,255,0.4);">📶 🔋</span>
+</div>
+
+<div class="admin-badge animate-in">
+  <div class="admin-badge-dot"></div>
+  <div class="admin-badge-text">管理员专属入口  ·  与用户端独立隔离</div>
+</div>
+
+<div class="admin-logo-wrap animate-in animate-in-d1">
+  <div class="admin-logo-icon">🛡️</div>
+  <div class="admin-logo-name">竞赛通管理端</div>
+  <div class="admin-logo-sub">仅限授权管理人员登录</div>
+</div>
+
+<div class="admin-divider animate-in animate-in-d1">
+  <div class="admin-divider-text">账号密码登录</div>
+</div>
+
+<div class="admin-card animate-in animate-in-d2">
+
+  <div class="admin-field">
+    <div class="admin-field-label">管理员账号</div>
+    <div class="admin-input-wrap">
+      <span class="admin-input-icon">👤</span>
+      <input class="admin-input" id="accountInput" type="text" placeholder="请输入管理员账号" autocomplete="username" oninput="clearError()">
+    </div>
+  </div>
+
+  <div class="admin-field">
+    <div class="admin-field-label">登录密码</div>
+    <div class="admin-input-wrap">
+      <span class="admin-input-icon">🔒</span>
+      <input class="admin-input password-input" id="pwdInput" type="password" placeholder="请输入登录密码" autocomplete="current-password" oninput="clearError()" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="pwd-toggle" id="pwdToggle" onclick="togglePwd()">👁</button>
+    </div>
+  </div>
+
+  <div class="admin-field">
+    <div class="admin-field-label">图形验证码</div>
+    <div class="captcha-row">
+      <div class="admin-input-wrap">
+        <span class="admin-input-icon">🔡</span>
+        <input class="admin-input" id="captchaInput" type="text" placeholder="输入右侧验证码" maxlength="4" autocomplete="off" oninput="clearError()" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="captcha-box" onclick="refreshCaptcha()" title="点击刷新">
+        <div class="captcha-code" id="captchaDisplay">K7P2</div>
+        <div class="captcha-hint">点击刷新</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <button class="admin-login-btn" id="loginBtn" onclick="doLogin()">安全登录</button>
+</div>
+
+<div class="security-tips animate-in animate-in-d3">
+  <div class="tip-item">
+    <span class="tip-icon">🔐</span>
+    <span class="tip-text">账号密码与用户端手机号账号完全隔离，互不影响</span>
+  </div>
+  <div class="tip-item">
+    <span class="tip-icon">⏱</span>
+    <span class="tip-text">30 分钟无操作将自动退出，保障数据安全</span>
+  </div>
+  <div class="tip-item">
+    <span class="tip-icon">📋</span>
+    <span class="tip-text">所有管理操作均记录到操作日志，可审计追溯</span>
+  </div>
+</div>
+
+<div class="switch-entry animate-in animate-in-d3" onclick="location.href='login.html'">
+  <span class="switch-entry-text">学生 / 老师账号登录？</span>
+  <span class="switch-entry-link">前往用户端 →</span>
+</div>
+
+<div class="admin-footer">
+  <a href="#">隐私政策</a><span class="admin-footer-sep">|</span>
+  <a href="#">使用条款</a><span class="admin-footer-sep">|</span>
+  <a href="help.html">联系支持</a>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">身份验证中...</div>
+</div>
+
+<script>
+const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+let currentCaptcha = '';
+
+function refreshCaptcha() {
+  let code = '';
+  for (let i = 0; i < 4; i++) code += CHARS[Math.floor(Math.random() * CHARS.length)];
+  currentCaptcha = code;
+  const el = document.getElementById('captchaDisplay');
+  el.textContent = code;
+  el.style.transform = 'skewX(' + ([-8,-5,-3,0,3,5,8][Math.floor(Math.random()*7)]) + 'deg)';
+  document.getElementById('captchaInput').value = '';
+}
+
+function togglePwd() {
+  const inp = document.getElementById('pwdInput');
+  const btn = document.getElementById('pwdToggle');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg; el.style.display = 'block';
+  refreshCaptcha();
+  document.getElementById('loginBtn').textContent = '安全登录';
+}
+function clearError() { document.getElementById('errorMsg').style.display = 'none'; }
+
+function doLogin() {
+  const account = document.getElementById('accountInput').value.trim();
+  const pwd     = document.getElementById('pwdInput').value;
+  const captcha = document.getElementById('captchaInput').value.trim().toUpperCase();
+  if (!account) { showError('请输入管理员账号'); return; }
+  if (!pwd)     { showError('请输入登录密码'); return; }
+  if (!captcha) { showError('请输入图形验证码'); return; }
+  if (captcha !== currentCaptcha) { showError('图形验证码错误，请重新输入'); return; }
+  document.getElementById('loginBtn').textContent = '验证中...';
+  document.getElementById('loadingOverlay').classList.add('show');
+  setTimeout(() => { location.href = 'admin.html'; }, 1600);
+}
+
+refreshCaptcha();
+</script>
+</body>
+</html>

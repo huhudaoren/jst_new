@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>赛事详情 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+/* ===== 赛事详情页专属样式 ===== */
+
+body { background: var(--c-gray-50); }
+
+/* 顶部 Hero */
+.detail-hero {
+  height: 220px;
+  background: linear-gradient(150deg, var(--c-primary) 0%, var(--c-primary-600) 60%, #1E6DB5 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex; align-items: flex-end;
+  padding: 20px;
+}
+.detail-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.05) 0%, transparent 45%);
+}
+.detail-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 24px;
+  background: var(--c-gray-50);
+  border-radius: 24px 24px 0 0;
+}
+.detail-hero-emoji {
+  position: absolute;
+  right: 28px; top: 50%; transform: translateY(-50%);
+  font-size: 72px; opacity: 0.2;
+  user-select: none;
+}
+.detail-hero-content { position: relative; z-index: 1; }
+.detail-hero-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.detail-hero-tag {
+  background: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.95);
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: var(--radius-full);
+  border: 1px solid rgba(255,255,255,0.25);
+}
+.detail-hero-title {
+  font-size: 20px; font-weight: 800; color: white;
+  line-height: 1.3; max-width: 240px;
+  letter-spacing: -0.3px;
+}
+
+/* 吸顶导航 */
+.detail-nav {
+  position: sticky; top: 44px; z-index: 40;
+  background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: center;
+  padding: 0;
+  box-shadow: var(--shadow-xs);
+}
+.detail-nav-back {
+  width: 44px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--c-gray-700);
+  cursor: pointer; flex-shrink: 0;
+  touch-action: manipulation;
+}
+.detail-nav-tabs {
+  display: flex; flex: 1; overflow-x: auto;
+}
+.detail-nav-tabs::-webkit-scrollbar { display: none; }
+.detail-tab {
+  padding: 0 14px; height: 48px;
+  display: flex; align-items: center;
+  font-size: 14px; font-weight: 500; color: var(--c-gray-500);
+  cursor: pointer; white-space: nowrap;
+  position: relative; flex-shrink: 0;
+  touch-action: manipulation;
+  transition: color var(--duration-fast) ease;
+}
+.detail-tab.active {
+  color: var(--c-primary-600); font-weight: 700;
+}
+.detail-tab.active::after {
+  content: '';
+  position: absolute; bottom: 0; left: 14px; right: 14px;
+  height: 2px; background: var(--c-primary-600);
+  border-radius: 1px;
+}
+.detail-nav-share {
+  width: 44px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--c-gray-700);
+  cursor: pointer; flex-shrink: 0;
+  touch-action: manipulation;
+}
+
+/* 核心信息卡 */
+.detail-card {
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.detail-card-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--c-gray-100);
+  display: flex; align-items: center; gap: 8px;
+}
+.detail-card-icon {
+  width: 28px; height: 28px;
+  background: var(--c-primary-50);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.detail-card-title {
+  font-size: 15px; font-weight: 700; color: var(--c-gray-900);
+}
+.detail-card-body { padding: 0 16px; }
+
+/* 信息行 */
+.info-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.info-row:last-child { border-bottom: none; }
+.info-row-key {
+  font-size: 13px; color: var(--c-gray-500);
+  flex-shrink: 0; width: 72px; padding-top: 1px;
+}
+.info-row-val {
+  font-size: 13px; color: var(--c-gray-900);
+  text-align: right; flex: 1; line-height: 1.5;
+  font-weight: 500;
+}
+.info-row-val.price { color: var(--c-accent); font-size: 16px; font-weight: 800; }
+.info-row-val.primary { color: var(--c-primary-600); }
+
+/* 时间倒计时 */
+.countdown-bar {
+  background: linear-gradient(90deg, var(--c-accent-50), var(--c-gold-50));
+  border: 1px solid rgba(255,87,34,0.12);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.countdown-label { font-size: 13px; color: var(--c-gray-700); font-weight: 500; }
+.countdown-nums { display: flex; align-items: center; gap: 4px; }
+.countdown-unit {
+  background: var(--c-accent);
+  color: white;
+  font-size: 16px; font-weight: 800;
+  width: 34px; height: 34px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-family: monospace; letter-spacing: -1px;
+}
+.countdown-sep { font-size: 16px; font-weight: 700; color: var(--c-accent); }
+
+/* 富文本内容区 */
+.rich-content {
+  font-size: 14px; color: var(--c-gray-700);
+  line-height: 1.8; padding: 14px 0;
+}
+.rich-content p { margin-bottom: 10px; }
+.rich-content h4 {
+  font-size: 14px; font-weight: 700; color: var(--c-gray-900);
+  margin: 14px 0 6px;
+}
+.rich-content ul { padding-left: 16px; }
+.rich-content ul li { margin-bottom: 6px; color: var(--c-gray-700); }
+
+/* 奖项表格 */
+.award-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px; margin: 12px 0;
+}
+.award-table th {
+  background: var(--c-primary-50);
+  color: var(--c-primary-600);
+  font-weight: 700; font-size: 12px;
+  padding: 10px 12px; text-align: center;
+  border-bottom: 1px solid var(--c-primary-200);
+}
+.award-table td {
+  padding: 10px 12px; text-align: center;
+  border-bottom: 1px solid var(--c-gray-100);
+  color: var(--c-gray-700);
+}
+.award-table tr:last-child td { border-bottom: none; }
+.award-gold { color: var(--c-gold); font-weight: 700; }
+.award-silver { color: var(--c-gray-500); font-weight: 700; }
+.award-bronze { color: #C97F3C; font-weight: 700; }
+
+/* 赛程时间轴 */
+.timeline { padding: 8px 0; }
+.tl-item {
+  display: flex; gap: 12px;
+  padding-bottom: 20px; position: relative;
+}
+.tl-item:last-child { padding-bottom: 0; }
+.tl-left { width: 24px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+.tl-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--c-primary-400);
+  border: 2px solid var(--c-primary-200);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.tl-dot.done { background: var(--c-success); border-color: rgba(39,174,96,0.3); }
+.tl-dot.active { background: var(--c-accent); border-color: rgba(255,87,34,0.3); box-shadow: 0 0 0 3px rgba(255,87,34,0.1); }
+.tl-line {
+  flex: 1; width: 1px;
+  background: var(--c-gray-100);
+  margin-top: 4px;
+}
+.tl-right { flex: 1; }
+.tl-title { font-size: 14px; font-weight: 600; color: var(--c-gray-900); margin-bottom: 2px; }
+.tl-date { font-size: 12px; color: var(--c-gray-500); }
+.tl-status { display: inline-block; margin-top: 4px; }
+
+/* FAQ 折叠 */
+.faq-item {
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.faq-item:last-child { border-bottom: none; }
+.faq-q {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0;
+  cursor: pointer; touch-action: manipulation;
+}
+.faq-q-text { font-size: 14px; font-weight: 600; color: var(--c-gray-900); flex: 1; line-height: 1.4; padding-right: 8px; }
+.faq-icon { font-size: 14px; color: var(--c-gray-500); flex-shrink: 0; transition: transform var(--duration-fast) ease; }
+.faq-item.open .faq-icon { transform: rotate(180deg); }
+.faq-a {
+  font-size: 13px; color: var(--c-gray-700); line-height: 1.7;
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding-bottom: 0;
+}
+.faq-item.open .faq-a { max-height: 200px; padding-bottom: 14px; }
+
+/* 主办方信息 */
+.organizer-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.organizer-card:last-child { border-bottom: none; }
+.organizer-avatar {
+  width: 44px; height: 44px; border-radius: var(--radius-md);
+  background: var(--c-primary-50);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.organizer-name { font-size: 14px; font-weight: 600; color: var(--c-gray-900); }
+.organizer-role { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+
+/* 联系方式 */
+.contact-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  background: var(--c-gray-50);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  cursor: pointer; touch-action: manipulation;
+}
+.contact-icon { font-size: 18px; flex-shrink: 0; }
+.contact-label { font-size: 13px; color: var(--c-gray-700); font-weight: 500; }
+.contact-val { font-size: 13px; color: var(--c-primary-600); font-weight: 600; margin-left: auto; }
+
+/* 底部报名区（非 sticky，用 fixed-cta 粘底） */
+.enroll-cta {
+  background: var(--c-white);
+  border-top: 1px solid var(--c-gray-100);
+  padding: 12px var(--space-4);
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  padding-bottom: calc(12px + constant(safe-area-inset-bottom));
+  position: fixed; bottom: 0; left: 50%;
+  transform: translateX(-50%) translateZ(0);
+  width: 100%; max-width: 390px;
+  z-index: 40;
+  box-shadow: 0 -4px 20px rgba(12,61,107,0.08);
+  display: flex; gap: 10px; align-items: center;
+}
+.enroll-price-area { flex: 1; }
+.enroll-price-label { font-size: 11px; color: var(--c-gray-500); }
+.enroll-price-num {
+  font-size: 22px; font-weight: 900; color: var(--c-accent);
+  line-height: 1;
+}
+.enroll-price-unit { font-size: 13px; font-weight: 400; color: var(--c-gray-500); }
+.enroll-btn { flex-shrink: 0; min-width: 120px; }
+
+/* page scroll padding for fixed bottom */
+body { padding-bottom: calc(76px + env(safe-area-inset-bottom)) !important; }
+</style>
+</head>
+<body>
+
+<!-- 状态栏 -->
+<div class="status-bar" style="background: var(--c-primary);">
+  <span class="time">9:41</span>
+  <span class="icons">📶 🔋</span>
+</div>
+
+<!-- ===== HERO ===== -->
+<div class="detail-hero animate-in">
+  <div class="detail-hero-emoji">🏆</div>
+  <div class="detail-hero-content">
+    <div class="detail-hero-tags">
+      <span class="detail-hero-tag">艺术</span>
+      <span class="detail-hero-tag">全学段</span>
+      <span class="detail-hero-tag">线上+线下</span>
+      <span class="detail-hero-tag">国际赛事</span>
+      <span class="detail-hero-tag" style="background:rgba(27,94,32,.25);border-color:rgba(27,94,32,.4);">🏢 平台自营</span>
+    </div>
+    <div class="detail-hero-title">安徒生(国际)艺术奖</div>
+  </div>
+</div>
+
+<!-- 吸顶导航 Tab -->
+<div class="detail-nav">
+  <div class="detail-nav-back" onclick="history.back()">←</div>
+  <div class="detail-nav-tabs">
+    <div class="detail-tab active" onclick="scrollSection('info')">基本信息</div>
+    <div class="detail-tab" onclick="scrollSection('intro')">赛事介绍</div>
+    <div class="detail-tab" onclick="scrollSection('schedule')">赛程</div>
+    <div class="detail-tab" onclick="scrollSection('award')">奖项</div>
+    <div class="detail-tab" onclick="scrollSection('faq')">常见问题</div>
+  </div>
+  <div class="detail-nav-share">⋮</div>
+</div>
+
+<!-- ===== 主内容 ===== -->
+<div style="padding: 16px var(--space-4) 0;">
+
+  <!-- 状态标签 -->
+  <div style="display:flex;gap:8px;margin-bottom:12px;" class="animate-in animate-in-d1">
+    <span class="tag tag-accent tag-lg">🔥 报名进行中</span>
+    <span class="tag tag-gold tag-lg">⭐ 国际赛事</span>
+    <span class="tag tag-primary tag-lg">🎨 文化艺术</span>
+  </div>
+
+  <!-- 倒计时 -->
+  <div class="countdown-bar animate-in animate-in-d1">
+    <div class="countdown-label">距报名截止还剩</div>
+    <div class="countdown-nums">
+      <div class="countdown-unit" id="cd-d">12</div>
+      <div class="countdown-sep">天</div>
+      <div class="countdown-unit" id="cd-h">08</div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-unit" id="cd-m">34</div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-unit" id="cd-s">22</div>
+    </div>
+  </div>
+
+  <!-- ===== 基本信息 ===== -->
+  <div class="detail-card animate-in animate-in-d2" id="info">
+    <div class="detail-card-header">
+      <div class="detail-card-icon">📋</div>
+      <div class="detail-card-title">基本信息</div>
+    </div>
+    <div class="detail-card-body">
+      <div class="info-row">
+        <div class="info-row-key">主办单位</div>
+        <div class="info-row-val primary">安徒生国际艺术联合会</div>
+      </div>
+      <div class="info-row">
+        <div class="info-row-key">承办单位</div>
+        <div class="info-row-val">中国文化艺术发展促进会</div>
+      </div>
+      <div class="info-row">
+        <div class="info-row-key">赛事级别</div>
+        <div class="info-row-val" style="color:var(--c-gold);font-weight:700;">🌍 国际级赛事</div>
+      </div>
+      <div class="info-row">
+        <div class="info-row-key">报名时间</div>
+        <div class="info-row-val">2025-10-01 至 2025-12-20</div>
+      </div>
+      <div class="info-row">
+        <div class="info-row-key">展演时间</div>
+        <div class="info-row-val">2026-03-01（初赛线上截稿）</div>
+      </div>
+      <div class="info-row">
+        <div class="info-row-key">比赛形式</div>
+        <div class="info-row-val">线上初赛 + 线下颁奖典礼</div>
+      </div>
+      <div class="info-row">
+        <div class="info-row-key">参赛对象</div>
+        <div class="info-row-val">幼儿园至高中全学段学生</div>
+      </div>
+      <div class="info-row">
+        <div class="info-row-key">参赛类别</div>
+        <div class="info-row-val">绘画 / 书法 / 摄影 / 手工 / 剪纸</div>
+      </div>
+      <div class="info-row">
+        <div class="info-row-key">报名费用</div>
+        <div class="info-row-val price">¥180 <span style="font-size:13px;font-weight:400;color:var(--c-gray-500);">/ 人</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主办方 -->
+  <div class="detail-card animate-in animate-in-d2">
+    <div class="detail-card-header">
+      <div class="detail-card-icon">🏛️</div>
+      <div class="detail-card-title">主办与承办方</div>
+    </div>
+    <div class="detail-card-body">
+      <div class="organizer-card">
+        <div class="organizer-avatar">🏛️</div>
+        <div>
+          <div class="organizer-name">安徒生国际艺术联合会</div>
+          <div class="organizer-role">主办单位</div>
+        </div>
+        <span class="tag tag-gold" style="margin-left:auto;">国际认证</span>
+      </div>
+      <div class="organizer-card">
+        <div class="organizer-avatar">🎓</div>
+        <div>
+          <div class="organizer-name">中国文化艺术发展促进会</div>
+          <div class="organizer-role">中国区承办单位</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 赛事介绍 ===== -->
+  <div class="detail-card animate-in animate-in-d3" id="intro">
+    <div class="detail-card-header">
+      <div class="detail-card-icon">📖</div>
+      <div class="detail-card-title">赛事介绍</div>
+    </div>
+    <div class="detail-card-body">
+      <div class="rich-content">
+        <p>安徒生(国际)艺术奖由安徒生国际艺术联合会主办，是面向全球青少年的国际性艺术赛事。赛事以"用艺术讲述世界"为主题，致力于发现和培养具有艺术潜力的青少年，为其提供与国际艺术界交流展示的舞台。</p>
+        <p>该奖项以童话大师安徒生命名，寓意艺术如童话般点亮心灵。中国赛区由中国文化艺术发展促进会承办，每年吸引全国数十万名学生参与。</p>
+        <h4>参赛组别</h4>
+        <ul>
+          <li>幼儿园组（3-6岁）</li>
+          <li>小学低年级组（1-3年级）</li>
+          <li>小学高年级组（4-6年级）</li>
+          <li>初中组（7-9年级）</li>
+          <li>高中组（10-12年级）</li>
+        </ul>
+        <h4>参赛类别</h4>
+        <ul>
+          <li>绘画类：国画、水彩、素描、油画、版画等</li>
+          <li>书法类：楷书、行书、隶书、草书等</li>
+          <li>摄影类：数码摄影、手机摄影</li>
+          <li>手工类：剪纸、陶艺、布艺、木工等</li>
+        </ul>
+        <h4>报名须知</h4>
+        <ul>
+          <li>每人最多可报名参加 2 个类别，费用独立计算</li>
+          <li>作品须为本人原创，发现抄袭或代创将取消参赛资格</li>
+          <li>线上初赛提交电子稿，决赛选手须邮寄原作</li>
+          <li>比赛结束后30个工作日内公布成绩，获奖者可在平台下载电子证书</li>
+        </ul>
+        <h4>所需资料</h4>
+        <ul>
+          <li>学生有效身份证或学生证（用于身份核验）</li>
+          <li>本人近期正面照片（JPG格式，2MB以内）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 赛程安排 ===== -->
+  <div class="detail-card animate-in animate-in-d3" id="schedule">
+    <div class="detail-card-header">
+      <div class="detail-card-icon">📅</div>
+      <div class="detail-card-title">赛程安排</div>
+    </div>
+    <div class="detail-card-body">
+      <div class="timeline">
+        <div class="tl-item done">
+          <div class="tl-marker done"></div>
+          <div class="tl-content">
+            <div class="tl-title">报名开始</div>
+            <div class="tl-date">2025-10-01</div>
+            <div class="tl-desc">线上提交报名信息及参赛作品说明</div>
+          </div>
+        </div>
+        <div class="tl-item active">
+          <div class="tl-marker active"></div>
+          <div class="tl-content">
+            <div class="tl-title">报名截止 · 作品提交</div>
+            <div class="tl-date">2025-12-20</div>
+            <div class="tl-desc">线上提交高清作品电子稿（JPG/PDF）</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-marker"></div>
+          <div class="tl-content">
+            <div class="tl-title">初赛评审</div>
+            <div class="tl-date">2026-01-01 至 2026-01-31</div>
+            <div class="tl-desc">专家评委在线评审，结果通过平台通知</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-marker"></div>
+          <div class="tl-content">
+            <div class="tl-title">决赛名单公布</div>
+            <div class="tl-date">2026-02-10</div>
+            <div class="tl-desc">进入决赛的学生需邮寄原作（7个工作日内）</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-marker"></div>
+          <div class="tl-content">
+            <div class="tl-title">颁奖典礼 · 成绩发布</div>
+            <div class="tl-date">2026-03-15（预计）</div>
+            <div class="tl-desc">线下颁奖典礼，证书及奖牌统一发放</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  id="award">
+    <div class="detail-card-header">
+      <div class="detail-card-icon">🏆</div>
+      <div class="detail-card-title">奖项设置</div>
+    </div>
+    <div class="detail-card-body" style="padding-bottom:14px;">
+      <table class="award-table">
+          <thead>
+            <tr>
+              <th>奖项等级</th>
+              <th>比例</th>
+              <th>奖励内容</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="award-gold">🥇 国际金奖</span></td>
+              <td>3%</td>
+              <td>国际金奖证书 + 奖牌 + 国际展览资格</td>
+            </tr>
+            <tr>
+              <td><span class="award-gold">🌟 国际银奖</span></td>
+              <td>7%</td>
+              <td>国际银奖证书 + 奖牌</td>
+            </tr>
+            <tr>
+              <td><span class="award-silver">🥈 全国金奖</span></td>
+              <td>10%</td>
+              <td>全国金奖证书 + 奖牌</td>
+            </tr>
+            <tr>
+              <td><span class="award-silver">🥈 全国银奖</span></td>
+              <td>15%</td>
+              <td>全国银奖证书</td>
+            </tr>
+            <tr>
+              <td><span class="award-bronze">🥉 全国铜奖</span></td>
+              <td>25%</td>
+              <td>全国铜奖证书</td>
+            </tr>
+            <tr>
+              <td>优秀奖</td>
+              <td>40%</td>
+              <td>优秀奖电子证书</td>
+            </tr>
+          </tbody>
+        </table>
+      <div class="notice notice-info" style="margin-top:10px;">
+        <span class="notice-icon">ℹ️</span>
+        <div>一等奖获得者有资格参加全国中学生数学奥林匹克（CMO）选拔考试。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 常见问题 ===== -->
+  <div class="detail-card animate-in animate-in-d4" id="faq">
+    <div class="detail-card-header">
+      <div class="detail-card-icon">❓</div>
+      <div class="detail-card-title">常见问题</div>
+    </div>
+    <div class="detail-card-body">
+      <div class="faq-item open">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <div class="faq-q-text">报名后可以退款吗？</div>
+          <div class="faq-icon">▾</div>
+        </div>
+        <div class="faq-a">报名成功并缴费后，原则上不支持退款。若因组织方原因导致赛事取消，将全额退款至原支付方式。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <div class="faq-q-text">一位学生可以参加多个赛事吗？</div>
+          <div class="faq-icon">▾</div>
+        </div>
+        <div class="faq-a">可以，每位学生可根据自身情况参加多个赛事，每项赛事单独计费、单独核验资格。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <div class="faq-q-text">老师代报名需要学生本人操作什么？</div>
+          <div class="faq-icon">▾</div>
+        </div>
+        <div class="faq-a">学生需要扫描老师/机构的绑定二维码，完成一对一绑定后，老师即可为学生代报名。支付由老师/机构统一完成，学生无需支付。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <div class="faq-q-text">证书如何下载？支持什么格式？</div>
+          <div class="faq-icon">▾</div>
+        </div>
+        <div class="faq-a">成绩发布后，在「个人中心 → 我的证书」中查看并下载。支持 JPG/PNG 图片格式（方便分享）和 PDF 格式（用于正式存档），两种格式均可选择。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 联系咨询 ===== -->
+  <div class="detail-card animate-in animate-in-d4">
+    <div class="detail-card-header">
+      <div class="detail-card-icon">📞</div>
+      <div class="detail-card-title">联系咨询</div>
+    </div>
+    <div class="detail-card-body" style="padding-bottom:14px;">
+      <div class="contact-item">
+        <div class="contact-icon">📞</div>
+        <div class="contact-label">官方客服电话</div>
+        <div class="contact-val">400-888-0000</div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">💬</div>
+        <div class="contact-label">在线客服（微信）</div>
+        <div class="contact-val">jst_service</div>
+      </div>
+      <div class="contact-item" style="margin-bottom:0;">
+        <div class="contact-icon">📧</div>
+        <div class="contact-label">邮件咨询</div>
+        <div class="contact-val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="eb8884859f8e989fab81989fc58e8f9e">[email&#160;protected]</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 相关推荐 -->
+  <div style="margin-top:4px;margin-bottom:16px;" class="animate-in animate-in-d5">
+    <div class="section-hd" style="margin-top:0;">
+      <div class="section-hd-title" style="font-size:15px;">相关推荐课程</div>
+    </div>
+    <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;">
+      <div class="course-card" style="min-width:150px;flex-shrink:0;">
+        <div class="course-card-thumb"><span style="font-size:28px;position:relative;z-index:1;">🔢</span></div>
+        <div class="course-card-body">
+          <div class="course-card-title">数学联赛备赛精讲</div>
+          <div class="course-card-info"><span class="course-price">¥299</span><span class="tag tag-info" style="font-size:10px;">线上</span></div>
+        </div>
+      </div>
+      <div class="course-card" style="min-width:150px;flex-shrink:0;">
+        <div class="course-card-thumb" style="background:linear-gradient(135deg,#4A148C,#9C27B0);"><span style="font-size:28px;position:relative;z-index:1;">📐</span></div>
+        <div class="course-card-body">
+          <div class="course-card-title">高中数学提优专项班</div>
+          <div class="course-card-info"><span class="course-price">¥199</span><span class="tag tag-info" style="font-size:10px;">线上</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main content -->
+
+<!-- ===== 底部报名按钮 ===== -->
+<div class="enroll-cta">
+  <div class="enroll-price-area">
+    <div class="enroll-price-label">报名费用</div>
+    <div class="enroll-price-num">¥80 <span class="enroll-price-unit">/ 人</span></div>
+  </div>
+  <button class="btn btn-primary btn-lg enroll-btn" onclick="location.href='enroll.html'">
+    立即报名
+  </button>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// Tab 导航点击滚动
+function scrollSection(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// FAQ 折叠
+function toggleFaq(q) {
+  const item = q.parentElement;
+  item.classList.toggle('open');
+}
+
+// 倒计时
+const deadline = new Date('2025-10-15T23:59:59');
+function updateCountdown() {
+  const now = new Date();
+  const diff = Math.max(0, deadline - now);
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  const fmt = n => String(n).padStart(2, '0');
+  document.getElementById('cd-d').textContent = fmt(d);
+  document.getElementById('cd-h').textContent = fmt(h);
+  document.getElementById('cd-m').textContent = fmt(m);
+  document.getElementById('cd-s').textContent = fmt(s);
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// 滚动联动 Tab 高亮
+const sections = ['info','intro','schedule','award','faq'];
+const tabs = document.querySelectorAll('.detail-tab');
+window.addEventListener('scroll', () => {
+  let current = 0;
+  sections.forEach((id, i) => {
+    const    const el = document.getElementById(sections[i]);
+    if (el && el.getBoundingClientRect().top < 120) current = i;
+  });
+  tabs.forEach((t, i) => t.classList.toggle('active', i === current));
+});
+</script>
+
+<!-- V4.0：线下颁奖典礼预约入口 -->
+<div style="background:linear-gradient(135deg,#4A0E8F,#7B1FA2);border-radius:20px;margin:12px 16px 0;padding:16px;cursor:pointer;touch-action:manipulation;box-shadow:0 6px 20px rgba(74,14,143,.25);" onclick="location.href='reserve.html'">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+    <div style="width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🎟️</div>
+    <div style="flex:1;">
+      <div style="font-size:16px;font-weight:900;color:white;margin-bottom:2px;">线下颁奖典礼 · 立即预约</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.7);">预约成功后获得专属多码 · 名额有限</div>
+    </div>
+    <div style="font-size:20px;color:rgba(255,255,255,.4);">›</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+    <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:8px;text-align:center;">
+      <div style="font-size:13px;font-weight:700;color:white;">3场次</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px;">可选场次</div>
+    </div>
+    <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:8px;text-align:center;">
+      <div style="font-size:13px;font-weight:700;color:#FFD54F;">38席</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px;">剩余名额</div>
+    </div>
+    <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:8px;text-align:center;">
+      <div style="font-size:13px;font-weight:700;color:white;">3码</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px;">到场+礼品+颁奖</div>
+    </div>
+  </div>
+</div>
+<div style="height:8px;"></div>
+
+
+</body>
+</html>

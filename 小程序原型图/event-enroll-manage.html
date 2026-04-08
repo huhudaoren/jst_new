@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>报名管理 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:90px;}
+.e-nav{background:linear-gradient(135deg,#1B5E20,#2E7D32);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.e-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.e-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.e-action{padding:6px 14px;border-radius:var(--radius-full);background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);font-size:12px;font-weight:700;color:white;cursor:pointer;touch-action:manipulation;}
+.tab-bar{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);overflow-x:auto;}
+.tab-item{flex-shrink:0;padding:0 16px;height:44px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--c-gray-500);cursor:pointer;position:relative;white-space:nowrap;touch-action:manipulation;}
+.tab-item.active{color:#2E7D32;font-weight:700;}
+.tab-item.active::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2.5px;background:#2E7D32;border-radius:1px;}
+.form-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px 16px 0;padding:16px;}
+.fc-title{font-size:14px;font-weight:700;color:var(--c-gray-900);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--c-gray-100);}
+.form-row{margin-bottom:14px;}
+.form-row label{display:block;font-size:12px;font-weight:700;color:var(--c-gray-600);margin-bottom:7px;}
+.form-row input,.form-row select,.form-row textarea{width:100%;border:1.5px solid var(--c-gray-100);border-radius:var(--radius-md);padding:12px 14px;font-size:15px;font-family:var(--font-body);color:var(--c-gray-900);background:var(--c-white);outline:none;}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--c-success);}
+.form-row textarea{min-height:72px;resize:none;line-height:1.6;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--c-gray-100);}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-label{font-size:14px;font-weight:600;color:var(--c-gray-900);}
+.toggle-desc{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+.switch{position:relative;display:inline-flex;width:46px;height:26px;flex-shrink:0;cursor:pointer;}
+.switch input{opacity:0;width:0;height:0;position:absolute;}
+.slider{position:absolute;inset:0;border-radius:999px;background:var(--c-gray-100);transition:.2s;}
+.slider::before{content:'';position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:white;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:.2s;}
+.switch input:checked + .slider{background:var(--c-success);}
+.switch input:checked + .slider::before{transform:translateX(20px);}
+.cta-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:var(--c-white);border-top:1px solid var(--c-gray-100);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:100;}
+.btn-draft{flex:1;height:50px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:var(--radius-md);font-size:15px;font-weight:700;color:var(--c-gray-700);cursor:pointer;}
+.btn-submit{flex:2;height:50px;background:linear-gradient(135deg,#1B5E20,#43A047);color:white;border:none;border-radius:var(--radius-md);font-size:15px;font-weight:800;cursor:pointer;}
+
+.search-bar-wrap{padding:12px 16px;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);}
+.enroll-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--c-gray-100);cursor:pointer;touch-action:manipulation;}
+.enroll-row:active{background:var(--c-gray-50);}
+.er-num{font-size:11px;font-weight:700;color:var(--c-gray-400);width:24px;flex-shrink:0;text-align:center;}
+.er-info{flex:1;}
+.er-name{font-size:14px;font-weight:700;color:var(--c-gray-900);}
+.er-meta{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+</style></head><body>
+<div class="status-bar" style="background:#1B5E20;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="e-nav animate-in"><div class="e-back" onclick="history.back()">←</div><div class="e-title">报名管理</div><div class="e-action" onclick="showToast('导出报名数据')">⬇ 导出</div></div>
+<div class="tab-bar"><div class="tab-item active" onclick="switchTab(this)">全部 (126)</div><div class="tab-item" onclick="switchTab(this)">待审核</div><div class="tab-item" onclick="switchTab(this)">已审核</div><div class="tab-item" onclick="switchTab(this)">已驳回</div></div>
+<div class="search-bar-wrap"><div class="search-bar"><span class="search-icon">🔍</span><input placeholder="搜索学生姓名 / 报名编号 / 渠道方"></div></div>
+<div style="background:var(--c-white);margin:10px 16px 0;border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);overflow:hidden;">
+  <!-- 统计摘要 -->
+  <div style="padding:12px 16px;background:var(--c-gray-50);border-bottom:1px solid var(--c-gray-100);display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+    <div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:var(--c-primary-600);">126</div><div style="font-size:10px;color:var(--c-gray-500);">报名总数</div></div>
+    <div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:var(--c-success);">124</div><div style="font-size:10px;color:var(--c-gray-500);">已审核</div></div>
+    <div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:var(--c-warning);">2</div><div style="font-size:10px;color:var(--c-gray-500);">待审核</div></div>
+    <div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:var(--c-accent);">¥22.7k</div><div style="font-size:10px;color:var(--c-gray-500);">总收入</div></div>
+  </div>
+  <div style="padding:10px 16px;font-size:12px;font-weight:700;color:var(--c-gray-500);border-bottom:1px solid var(--c-gray-100);">春季艺术大赛 · 共 126 名报名</div>
+  <div class="enroll-row animate-in animate-in-d1"><div class="er-num">1</div><div class="er-info"><div class="er-name">张小明</div><div class="er-meta">JST-2025-003291 · 绘画组 · 渠道方：王建国 · 已支付 ¥180</div></div><span class="tag tag-success tag-dot">已审核</span></div>
+  <div class="enroll-row animate-in animate-in-d2"><div class="er-num">2</div><div class="er-info"><div class="er-name">王芳芳</div><div class="er-meta">JST-2025-003290 · 书法组 · 自主报名 · 已支付 ¥180</div></div><span class="tag tag-success tag-dot">已审核</span></div>
+  <div class="enroll-row animate-in animate-in-d3"><div class="er-num">3</div><div class="er-info"><div class="er-name">李好运</div><div class="er-meta">JST-2025-003289 · 绘画组 · 渠道方：广州艺起来 · 审核中</div></div><span class="tag tag-warning tag-dot">待审核</span></div>
+  <div class="enroll-row"><div class="er-num">4</div><div class="er-info"><div class="er-name">陈雨晴</div><div class="er-meta">JST-2025-003288 · 摄影组 · 自主报名 · 已支付 ¥180</div></div><span class="tag tag-success tag-dot">已审核</span></div>
+  <div class="enroll-row" onclick="showToast('查看陈雨晴报名详情')"><div class="er-num">4</div><div class="er-info"><div class="er-name">陈雨晴</div><div class="er-meta">JST-2025-003288 · 摄影组 · 自主报名 · ¥180</div></div><span class="tag tag-success tag-dot">已审核</span></div>
+  <div class="enroll-row" onclick="showToast('查看刘晓晨报名详情')"><div class="er-num">5</div><div class="er-info"><div class="er-name">刘晓晨</div><div class="er-meta">JST-2025-003287 · 绘画组 · 渠道方：广州艺起来 · ¥180-¥20券=¥160</div></div><span class="tag tag-warning tag-dot">待审核</span></div>
+  <div style="padding:12px 16px;text-align:center;font-size:12px;color:var(--c-primary-600);cursor:pointer;" onclick="showToast('加载更多')">查看全部 126 条 ›</div>
+</div>
+<script>function switchTab(el){document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));el.classList.add('active');}function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400);}</script>
+</body></html>

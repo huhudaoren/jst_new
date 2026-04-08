@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>课程列表 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+
+/* 顶部 */
+.course-header {
+  background: linear-gradient(150deg, #1565C0 0%, #1E88E5 60%, #42A5F5 100%);
+  padding: 16px var(--space-4) 0;
+  position: relative; overflow: hidden;
+}
+.course-header::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 20px; background: var(--c-gray-50); border-radius: 20px 20px 0 0;
+}
+.course-header-title { font-size: 22px; font-weight: 900; color: white; letter-spacing: -0.5px; margin-bottom: 4px; position: relative; z-index: 1; }
+.course-header-sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 14px; position: relative; z-index: 1; }
+.course-header-search { position: relative; z-index: 1; margin-bottom: 20px; }
+.course-header-search .search-bar { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.25); }
+.course-header-search .search-bar input { color: white; }
+.course-header-search .search-bar input::placeholder { color: rgba(255,255,255,0.55); }
+.course-header-search .search-icon { color: rgba(255,255,255,0.6); }
+
+/* 类型 Tab */
+.type-tabs {
+  display: flex; background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+  position: sticky; top: 44px; z-index: 40;
+  box-shadow: var(--shadow-xs);
+}
+.type-tab {
+  flex: 1; text-align: center;
+  padding: 12px; font-size: 14px; font-weight: 500;
+  color: var(--c-gray-500); cursor: pointer; position: relative;
+  touch-action: manipulation; transition: color var(--duration-fast);
+}
+.type-tab.active { color: var(--c-primary-600); font-weight: 700; }
+.type-tab.active::after {
+  content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
+  height: 2px; background: var(--c-primary-600); border-radius: 1px;
+}
+
+/* 筛选行 */
+.course-filter-bar {
+  display: flex; gap: 6px; padding: 10px var(--space-4);
+  overflow-x: auto; background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.course-filter-bar::-webkit-scrollbar { display: none; }
+.cf-pill {
+  padding: 6px 12px; border-radius: var(--radius-full);
+  border: 1.5px solid var(--c-gray-100);
+  font-size: 12px; font-weight: 500; color: var(--c-gray-700);
+  white-space: nowrap; cursor: pointer; flex-shrink: 0;
+  touch-action: manipulation; transition: all var(--duration-fast);
+}
+.cf-pill.active { background: var(--c-primary-50); border-color: var(--c-primary-400); color: var(--c-primary-600); font-weight: 700; }
+.cf-pill:active { transform: scale(0.95); }
+
+/* 课程卡片（大卡片） */
+.course-big-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  margin: 0 var(--space-4) 12px; box-shadow: var(--shadow-sm);
+  overflow: hidden; cursor: pointer; touch-action: manipulation;
+  transition: box-shadow var(--duration-normal) var(--ease-out);
+}
+.course-big-card:active { box-shadow: var(--shadow-xs); }
+.cbc-thumb {
+  height: 140px; position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.cbc-thumb-emoji { font-size: 52px; position: relative; z-index: 1; }
+.cbc-play {
+  position: absolute; right: 12px; bottom: 12px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.cbc-body { padding: 14px; }
+.cbc-title { font-size: 15px; font-weight: 700; color: var(--c-gray-900); line-height: 1.4; margin-bottom: 6px; }
+.cbc-teacher { font-size: 12px; color: var(--c-gray-500); margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+.cbc-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
+.cbc-footer { display: flex; justify-content: space-between; align-items: center; }
+.cbc-price { font-size: 18px; font-weight: 900; color: var(--c-accent); }
+.cbc-price.free { color: var(--c-success); }
+.cbc-info { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--c-gray-500); }
+
+/* 线下课程预约卡 */
+.offline-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  margin: 0 var(--space-4) 12px; box-shadow: var(--shadow-sm);
+  overflow: hidden; cursor: pointer;
+}
+.oc-header {
+  padding: 14px 14px 10px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.oc-icon {
+  width: 56px; height: 56px; border-radius: var(--radius-md);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 26px;
+}
+.oc-info { flex: 1; }
+.oc-name { font-size: 15px; font-weight: 700; color: var(--c-gray-900); margin-bottom: 4px; line-height: 1.35; }
+.oc-school { font-size: 12px; color: var(--c-gray-500); }
+.oc-tags { margin-top: 6px; display: flex; gap: 4px; }
+.oc-footer {
+  padding: 10px 14px 14px;
+  border-top: 1px solid var(--c-gray-100);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.oc-price { font-size: 18px; font-weight: 900; color: var(--c-accent); }
+.oc-slots { font-size: 12px; color: var(--c-gray-500); }
+
+/* 区块标题 */
+.course-section-hd {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px var(--space-4) 8px;
+}
+.csh-title { font-size: 16px; font-weight: 700; color: var(--c-gray-900); display: flex; align-items: center; gap: 6px; }
+.csh-title::before { content: ''; display: inline-block; width: 3px; height: 14px; background: var(--c-primary-600); border-radius: 2px; }
+.csh-more { font-size: 13px; color: var(--c-primary-600); font-weight: 500; cursor: pointer; }
+</style>
+</head>
+<body class="has-tabbar">
+
+<div class="status-bar" style="background:#1565C0;">
+  <span class="time">9:41</span><span class="icons">📶 🔋</span>
+</div>
+
+<!-- 头部 -->
+<div class="course-header animate-in">
+  <div class="course-header-title">竞赛辅导课程</div>
+  <div class="course-header-sub">名师讲解 · 精准备赛</div>
+  <div class="course-header-search">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="搜索课程、讲师...">
+    </div>
+  </div>
+</div>
+
+<!-- 类型 Tab -->
+<div class="type-tabs animate-in animate-in-d1">
+  <div class="type-tab active" id="tab-online" onclick="switchType('online')">🖥️ 线上课程</div>
+  <div class="type-tab" id="tab-offline" onclick="switchType('offline')">🏫 线下课程</div>
+</div>
+
+<!-- 筛选 -->
+<div class="course-filter-bar animate-in animate-in-d1">
+  <div class="cf-pill active" onclick="switchPill(this)">全部</div>
+  <div class="cf-pill" onclick="switchPill(this)">数学</div>
+  <div class="cf-pill" onclick="switchPill(this)">英语</div>
+  <div class="cf-pill" onclick="switchPill(this)">信息学</div>
+  <div class="cf-pill" onclick="switchPill(this)">科技</div>
+  <div class="cf-pill" onclick="switchPill(this)">免费</div>
+  <div class="cf-pill" onclick="switchPill(this)">高中</div>
+  <div class="cf-pill" onclick="switchPill(this)">初中</div>
+</div>
+
+<!-- 线上课程列表 -->
+<div id="onlineList">
+  <div class="course-section-hd animate-in animate-in-d2">
+    <div class="csh-title">热门推荐</div>
+    <div class="csh-more">全部 ›</div>
+  </div>
+
+  <div class="course-big-card animate-in animate-in-d2" onclick="location.href='course-detail.html'">
+    <div class="cbc-thumb" style="background:linear-gradient(135deg,#1565C0,#42A5F5);">
+      <div class="cbc-thumb-emoji">🔢</div>
+      <div class="cbc-play">▶</div>
+    </div>
+    <div class="cbc-body">
+      <div class="cbc-title">竞赛数学精讲·高中联赛专项</div>
+      <div class="cbc-teacher">👨‍🏫 王志明老师 · 15年竞赛辅导经验</div>
+      <div class="cbc-tags">
+        <span class="tag tag-primary">数学</span>
+        <span class="tag tag-gray">高中组</span>
+        <span class="tag tag-info">录播</span>
+        <span class="tag tag-gold">⭐ 热销</span>
+      </div>
+      <div class="cbc-footer">
+        <div class="cbc-price">¥299</div>
+        <div class="cbc-info"><span>📖 24讲</span><span>👥 1,203人</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="course-big-card animate-in animate-in-d2" onclick="location.href='course-detail.html'">
+    <div class="cbc-thumb" style="background:linear-gradient(135deg,#880E4F,#E91E63);">
+      <div class="cbc-thumb-emoji">🎤</div>
+      <div class="cbc-play">▶</div>
+    </div>
+    <div class="cbc-body">
+      <div class="cbc-title">英语演讲基础入门·从零到比赛</div>
+      <div class="cbc-teacher">👩‍🏫 张梦琪老师 · 英语专业8级</div>
+      <div class="cbc-tags">
+        <span class="tag tag-primary">英语</span>
+        <span class="tag tag-gray">初高中</span>
+        <span class="tag tag-info">录播</span>
+        <span class="tag tag-success">免费</span>
+      </div>
+      <div class="cbc-footer">
+        <div class="cbc-price free">免费</div>
+        <div class="cbc-info"><span>📖 12讲</span><span>👥 4,567人</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="course-section-hd animate-in animate-in-d3">
+    <div class="csh-title">最新上架</div>
+    <div class="csh-more">全部 ›</div>
+  </div>
+
+  <div class="course-big-card animate-in animate-in-d3" onclick="location.href='course-detail.html'">
+    <div class="cbc-thumb" style="background:linear-gradient(135deg,#4A148C,#9C27B0);">
+      <div class="cbc-thumb-emoji">💻</div>
+      <div class="cbc-play">▶</div>
+    </div>
+    <div class="cbc-body">
+      <div class="cbc-title">NOI信息学竞赛 C++ 系统精讲</div>
+      <div class="cbc-teacher">👨‍💻 李承志老师 · ACM金牌选手</div>
+      <div class="cbc-tags">
+        <span class="tag tag-primary">信息学</span>
+        <span class="tag tag-gray">高中组</span>
+        <span class="tag tag-info">录播</span>
+      </div>
+      <div class="cbc-footer">
+        <div class="cbc-price">¥399</div>
+        <div class="cbc-info"><span>📖 36讲</span><span>👥 688人</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="course-big-card animate-in animate-in-d3" onclick="location.href='course-detail.html'">
+    <div class="cbc-thumb" style="background:linear-gradient(135deg,#1B5E20,#66BB6A);">
+      <div class="cbc-thumb-emoji">🔬</div>
+      <div class="cbc-play">▶</div>
+    </div>
+    <div class="cbc-body">
+      <div class="cbc-title">初中生物竞赛高分技巧精讲</div>
+      <div class="cbc-teacher">👩‍🔬 陈晓丽老师 · 清华大学生物系</div>
+      <div class="cbc-tags">
+        <span class="tag tag-primary">生物</span>
+        <span class="tag tag-gray">初中组</span>
+        <span class="tag tag-info">录播</span>
+      </div>
+      <div class="cbc-footer">
+        <div class="cbc-price">¥199</div>
+        <div class="cbc-info"><span>📖 18讲</span><span>👥 321人</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 线下课程列表（隐藏） -->
+<div id="offlineList" style="display:none;">
+  <div class="course-section-hd animate-in">
+    <div class="csh-title">线下班课</div>
+    <div class="csh-more">地图查看 ›</div>
+  </div>
+
+  <div class="offline-card animate-in animate-in-d1" onclick="location.href='course-detail.html'">
+    <div class="oc-header">
+      <div class="oc-icon" style="background:linear-gradient(135deg,#0C3D6B,#1A7CD9);">🏫</div>
+      <div class="oc-info">
+        <div class="oc-name">数学联赛冲刺精英班（周末）</div>
+        <div class="oc-school">📍 广州天河校区 · 天河北路XX号</div>
+        <div class="oc-tags">
+          <span class="tag tag-primary">数学</span>
+          <span class="tag tag-gray">高中组</span>
+          <span class="tag tag-accent">招生中</span>
+        </div>
+      </div>
+    </div>
+    <div class="oc-footer">
+      <div>
+        <div class="oc-price">¥1800</div>
+        <div style="font-size:11px;color:var(--c-gray-500);">每期20课时</div>
+      </div>
+      <button class="btn btn-solid-blue btn-sm" onclick="event.stopPropagation();showToast('预约试听已提交')">预约试听</button>
+    </div>
+  </div>
+
+  <div class="offline-card animate-in animate-in-d1" onclick="location.href='course-detail.html'">
+    <div class="oc-header">
+      <div class="oc-icon" style="background:linear-gradient(135deg,#880E4F,#E91E63);">🎙️</div>
+      <div class="oc-info">
+        <div class="oc-name">英语演讲能力提升集训营</div>
+        <div class="oc-school">📍 广州越秀校区 · 东风东路XX号</div>
+        <div class="oc-tags">
+          <span class="tag tag-primary">英语</span>
+          <span class="tag tag-gray">初高中</span>
+          <span class="tag tag-accent">招生中</span>
+        </div>
+      </div>
+    </div>
+    <div class="oc-footer">
+      <div>
+        <div class="oc-price">¥2200</div>
+        <div style="font-size:11px;color:var(--c-gray-500);">每期15课时</div>
+      </div>
+      <button class="btn btn-solid-blue btn-sm" onclick="event.stopPropagation();showToast('预约试听已提交')">预约试听</button>
+    </div>
+  </div>
+
+  <div class="offline-card animate-in animate-in-d2" onclick="location.href='course-detail.html'">
+    <div class="oc-header">
+      <div class="oc-icon" style="background:linear-gradient(135deg,#4A148C,#9C27B0);">💡</div>
+      <div class="oc-info">
+        <div class="oc-name">信息学竞赛基础启蒙班（少儿）</div>
+        <div class="oc-school">📍 广州番禺校区 · 市桥XX路</div>
+        <div class="oc-tags">
+          <span class="tag tag-primary">信息学</span>
+          <span class="tag tag-gray">小学初中</span>
+          <span class="tag tag-warning">即将开班</span>
+        </div>
+      </div>
+    </div>
+    <div class="oc-footer">
+      <div>
+        <div class="oc-price">¥980</div>
+        <div style="font-size:11px;color:var(--c-gray-500);">每期12课时</div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();showToast('预约试听已提交')">预约试听</button>
+    </div>
+  </div>
+</div>
+
+<div style="height:16px;"></div>
+
+<nav class="bottom-nav">
+  <div class="nav-tab" onclick="location.href='index.html'"><span class="nav-tab-icon">🏠</span><span class="nav-tab-label">首页</span></div>
+  <div class="nav-tab" onclick="location.href='contest-list.html'"><span class="nav-tab-icon">🏆</span><span class="nav-tab-label">赛事</span></div>
+  <div class="nav-tab active"><span class="nav-tab-icon">📚</span><span class="nav-tab-label" style="color:var(--c-primary-600);">课程</span></div>
+  <div class="nav-tab" onclick="location.href='notice.html'"><span class="nav-tab-icon">📢</span><span class="nav-tab-label">公告</span></div>
+  <div class="nav-tab" onclick="location.href='my.html'"><span class="nav-tab-icon">👤</span><span class="nav-tab-label">我的</span></div>
+</nav>
+
+<script>
+function switchType(type) {
+  document.getElementById('tab-online').classList.toggle('active', type === 'online');
+  document.getElementById('tab-offline').classList.toggle('active', type === 'offline');
+  document.getElementById('onlineList').style.display = type === 'online' ? 'block' : 'none';
+  document.getElementById('offlineList').style.display = type === 'offline' ? 'block' : 'none';
+}
+function switchPill(el) {
+  document.querySelectorAll('.cf-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
+}
+</script>
+</body>
+</html>

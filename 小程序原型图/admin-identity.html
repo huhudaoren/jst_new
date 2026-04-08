@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>渠道方渠道方认证审核 · 竞赛通管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); padding-bottom: 24px; }
+
+.admin-nav {
+  background: linear-gradient(135deg, #1A237E, #283593);
+  padding: 14px var(--space-4) 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.admin-nav .back-btn {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: white; cursor: pointer; flex-shrink: 0;
+  touch-action: manipulation;
+}
+.admin-nav-title { font-size: 17px; font-weight: 700; color: white; flex: 1; }
+.admin-nav-badge {
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius-full); padding: 3px 10px;
+  font-size: 11px; color: rgba(255,255,255,0.7);
+}
+
+/* 筛选 tab */
+.filter-tabs {
+  display: flex; background: var(--c-white);
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.ft-item {
+  flex: 1; height: 44px; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 500; color: var(--c-gray-500);
+  cursor: pointer; position: relative; gap: 4px;
+  touch-action: manipulation;
+}
+.ft-item.active { color: #3F51B5; font-weight: 700; }
+.ft-item.active::after {
+  content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
+  height: 2.5px; background: #3F51B5; border-radius: 1px;
+}
+.ft-count {
+  min-width: 16px; height: 16px; padding: 0 4px;
+  background: var(--c-danger); color: white;
+  font-size: 10px; font-weight: 700; border-radius: var(--radius-full);
+  display: flex; align-items: center; justify-content: center;
+}
+.ft-count.zero { background: var(--c-gray-300); }
+
+/* 审核卡片 */
+.audit-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); margin: 12px var(--space-4) 0;
+  overflow: hidden;
+  cursor: pointer; touch-action: manipulation;
+  transition: box-shadow var(--duration-fast);
+}
+.audit-card:active { box-shadow: var(--shadow-md); }
+
+.ac-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px 12px;
+}
+.ac-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, #3F51B5, #5C6BC0);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.ac-info { flex: 1; min-width: 0; }
+.ac-name { font-size: 15px; font-weight: 700; color: var(--c-gray-900); }
+.ac-meta { font-size: 12px; color: var(--c-gray-500); margin-top: 2px; }
+.ac-type-badge {
+  padding: 4px 10px; border-radius: var(--radius-full);
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.ac-type-badge.teacher { background: #EEF0FF; color: #3F51B5; }
+.ac-type-badge.org     { background: #F3E8FF; color: #7B1FA2; }
+
+/* 材料预览行 */
+.ac-materials {
+  padding: 0 16px 10px;
+  display: flex; gap: 8px;
+}
+.ac-material-thumb {
+  width: 72px; height: 56px; border-radius: var(--radius-sm);
+  background: var(--c-gray-100); overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; position: relative; flex-shrink: 0;
+  border: 1px solid var(--c-gray-100);
+}
+.ac-material-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(0,0,0,0.5); font-size: 10px; color: white;
+  text-align: center; padding: 2px 0;
+}
+
+/* 申请信息行 */
+.ac-info-rows {
+  padding: 0 16px 8px;
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.ac-info-tag {
+  padding: 4px 10px; background: var(--c-gray-50);
+  border-radius: var(--radius-full); border: 1px solid var(--c-gray-100);
+  font-size: 12px; color: var(--c-gray-700);
+}
+
+/* 底部操作栏 */
+.ac-footer {
+  padding: 10px 16px 14px;
+  display: flex; gap: 8px; border-top: 1px solid var(--c-gray-50);
+}
+.ac-footer .btn-pass {
+  flex: 1; height: 40px;
+  background: var(--c-success); color: white;
+  border: none; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity var(--duration-fast);
+}
+.ac-footer .btn-pass:active { opacity: 0.8; }
+.ac-footer .btn-reject {
+  flex: 1; height: 40px;
+  background: var(--c-danger-50); color: var(--c-danger);
+  border: 1px solid rgba(231,76,60,0.2); border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  touch-action: manipulation;
+}
+.ac-footer .btn-detail {
+  width: 40px; height: 40px;
+  background: var(--c-gray-50); border: 1px solid var(--c-gray-100);
+  border-radius: var(--radius-sm); font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; touch-action: manipulation;
+}
+
+/* 已审核卡片（灰色调）*/
+.audit-card.done { opacity: 0.65; }
+.ac-result-badge {
+  padding: 3px 10px; border-radius: var(--radius-full);
+  font-size: 11px; font-weight: 700;
+}
+.ac-result-badge.pass   { background: var(--c-success-50); color: var(--c-success); }
+.ac-result-badge.reject { background: var(--c-danger-50);  color: var(--c-danger);  }
+
+/* 驳回理由 Sheet */
+.reject-sheet-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 9000; opacity: 0; pointer-events: none;
+  transition: opacity var(--duration-normal);
+}
+.reject-sheet-overlay.show { opacity: 1; pointer-events: all; }
+.reject-sheet {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 390px;
+  background: var(--c-white); border-radius: 24px 24px 0 0;
+  padding: 8px var(--space-4) 40px; z-index: 9001;
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+.reject-sheet-overlay.show .reject-sheet { transform: translateX(-50%) translateY(0); }
+.rs-handle { width: 36px; height: 4px; background: var(--c-gray-100); border-radius: 2px; margin: 10px auto 20px; }
+.rs-title { font-size: 16px; font-weight: 700; color: var(--c-gray-900); margin-bottom: 14px; }
+.rs-reasons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.rs-reason {
+  padding: 7px 14px; border-radius: var(--radius-full);
+  background: var(--c-gray-50); border: 1.5px solid var(--c-gray-100);
+  font-size: 13px; color: var(--c-gray-700); cursor: pointer;
+  touch-action: manipulation; transition: all var(--duration-fast);
+}
+.rs-reason.selected { background: var(--c-danger-50); border-color: var(--c-danger); color: var(--c-danger); font-weight: 700; }
+.rs-other {
+  width: 100%; height: 80px; padding: 10px 14px;
+  border: 1.5px solid var(--c-gray-100); border-radius: var(--radius-md);
+  font-size: 14px; color: var(--c-gray-900); resize: none; outline: none;
+  font-family: var(--font-body);
+  transition: border-color var(--duration-fast);
+}
+.rs-other:focus { border-color: var(--c-primary-400); }
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:#1A237E;">
+  <span class="time">9:41</span>
+  <span class="icons">📶 🔋</span>
+</div>
+
+<!-- 顶部导航 -->
+<div class="admin-nav animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="admin-nav-title">渠道方认证审核</div>
+  <div class="admin-nav-badge">共 7 条</div>
+</div>
+
+<!-- 筛选 Tab -->
+<div class="filter-tabs">
+  <div class="ft-item active" onclick="switchTab(this,'pending')">待审核 <span class="ft-count">3</span></div>
+  <div class="ft-item" onclick="switchTab(this,'all')">全部</div>
+  <div class="ft-item" onclick="switchTab(this,'pass')">已通过 <span class="ft-count zero">4</span></div>
+  <div class="ft-item" onclick="switchTab(this,'reject')">已驳回 <span class="ft-count zero">0</span></div>
+</div>
+
+<div id="listContainer">
+
+<!-- ===== 待审核卡片 1 ===== -->
+<div class="audit-card animate-in animate-in-d1" onclick="location.href='admin-identity-detail.html'">
+  <div class="ac-header">
+    <div class="ac-avatar">👩‍🏫</div>
+    <div class="ac-info">
+      <div class="ac-name">李雅琴</div>
+      <div class="ac-meta">申请时间：2026-03-19 08:30  ·  手机：138****5678</div>
+    </div>
+    <div class="ac-type-badge teacher">老师</div>
+  </div>
+  <div class="ac-materials">
+    <div class="ac-material-thumb">
+      🪪
+      <div class="ac-material-label">教师资格证</div>
+    </div>
+    <div class="ac-material-thumb">
+      📄
+      <div class="ac-material-label">工作证明</div>
+    </div>
+  </div>
+  <div class="ac-info-rows">
+    <span class="ac-info-tag">🏫 广州市第一中学</span>
+    <span class="ac-info-tag">🎨 美术</span>
+    <span class="ac-info-tag">📅 申请3小时前</span>
+  </div>
+  <div class="ac-footer" onclick="event.stopPropagation()">
+    <button class="btn-pass" onclick="passAudit('li')">✅ 通过</button>
+    <button class="btn-reject" onclick="showReject('li')">驳回</button>
+    <div class="btn-detail" onclick="location.href='admin-identity-detail.html'">›</div>
+  </div>
+</div>
+
+<!-- ===== 待审核卡片 2 ===== -->
+<div class="audit-card animate-in animate-in-d2" onclick="location.href='admin-identity-detail.html'">
+  <div class="ac-header">
+    <div class="ac-avatar" style="background:linear-gradient(135deg,#7B1FA2,#AB47BC);">🏢</div>
+    <div class="ac-info">
+      <div class="ac-name">广州艺起来文化教育有限公司</div>
+      <div class="ac-meta">申请时间：2026-03-18 16:55  ·  联系：021****8899</div>
+    </div>
+    <div class="ac-type-badge org">机构</div>
+  </div>
+  <div class="ac-materials">
+    <div class="ac-material-thumb">📑<div class="ac-material-label">营业执照</div></div>
+    <div class="ac-material-thumb">📄<div class="ac-material-label">办学许可</div></div>
+  </div>
+  <div class="ac-info-rows">
+    <span class="ac-info-tag">📍 广州市天河区</span>
+    <span class="ac-info-tag">🎭 艺术教育</span>
+    <span class="ac-info-tag">📅 申请17小时前</span>
+  </div>
+  <div class="ac-footer" onclick="event.stopPropagation()">
+    <button class="btn-pass" onclick="passAudit('gz')">✅ 通过</button>
+    <button class="btn-reject" onclick="showReject('gz')">驳回</button>
+    <div class="btn-detail" onclick="location.href='admin-identity-detail.html'">›</div>
+  </div>
+</div>
+
+<!-- ===== 待审核卡片 3 ===== -->
+<div class="audit-card animate-in animate-in-d3" onclick="location.href='admin-identity-detail.html'">
+  <div class="ac-header">
+    <div class="ac-avatar" style="background:linear-gradient(135deg,#0D47A1,#42A5F5);">👨‍🏫</div>
+    <div class="ac-info">
+      <div class="ac-name">陈志远</div>
+      <div class="ac-meta">申请时间：2026-03-18 11:20  ·  手机：159****3344</div>
+    </div>
+    <div class="ac-type-badge teacher">老师</div>
+  </div>
+  <div class="ac-materials">
+    <div class="ac-material-thumb">🪪<div class="ac-material-label">教师资格证</div></div>
+  </div>
+  <div class="ac-info-rows">
+    <span class="ac-info-tag">🏫 深圳南山实验学校</span>
+    <span class="ac-info-tag">🎵 音乐</span>
+    <span class="ac-info-tag">⚠️ 材料仅1份</span>
+  </div>
+  <div class="ac-footer" onclick="event.stopPropagation()">
+    <button class="btn-pass" onclick="passAudit('chen')">✅ 通过</button>
+    <button class="btn-reject" onclick="showReject('chen')">驳回</button>
+    <div class="btn-detail" onclick="location.href='admin-identity-detail.html'">›</div>
+  </div>
+</div>
+
+<!-- ===== 已通过（灰色调）===== -->
+<div style="padding:16px 16px 6px;font-size:12px;font-weight:700;color:var(--c-gray-500);text-transform:uppercase;letter-spacing:0.5px;">
+  已通过
+</div>
+<div class="audit-card done animate-in">
+  <div class="ac-header">
+    <div class="ac-avatar" style="background:linear-gradient(135deg,#1B5E20,#66BB6A);">👨‍🏫</div>
+    <div class="ac-info">
+      <div class="ac-name">王建国</div>
+      <div class="ac-meta">通过时间：2026-03-19 09:12</div>
+    </div>
+    <div class="ac-result-badge pass">✅ 已通过</div>
+  </div>
+</div>
+
+</div><!-- /listContainer -->
+
+<!-- ===== 驳回理由 Sheet ===== -->
+<div class="reject-sheet-overlay" id="rejectOverlay" onclick="closeReject()">
+  <div class="reject-sheet" onclick="event.stopPropagation()">
+    <div class="rs-handle"></div>
+    <div class="rs-title">驳回原因（选填）</div>
+    <div class="rs-reasons">
+      <div class="rs-reason" onclick="toggleReason(this)">材料不清晰</div>
+      <div class="rs-reason" onclick="toggleReason(this)">信息不匹配</div>
+      <div class="rs-reason" onclick="toggleReason(this)">证件已过期</div>
+      <div class="rs-reason" onclick="toggleReason(this)">非真实任职单位</div>
+      <div class="rs-reason" onclick="toggleReason(this)">材料缺失</div>
+    </div>
+    <textarea class="rs-other" id="rejectOtherText" placeholder="其他原因（可选）..." rows="3"></textarea>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button onclick="closeReject()" style="flex:1;height:48px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:var(--radius-md);font-size:15px;font-weight:600;color:var(--c-gray-700);cursor:pointer;">取消</button>
+      <button onclick="confirmReject()" style="flex:2;height:48px;background:var(--c-danger);border:none;border-radius:var(--radius-md);font-size:15px;font-weight:700;color:white;cursor:pointer;">确认驳回</button>
+    </div>
+  </div>
+</div>
+
+<!-- 个人渠道方示例卡（V4.0新增类型）-->
+<div class="audit-card animate-in" style="margin-top:0;">
+  <div class="ac-header">
+    <div class="ac-avatar" style="background:linear-gradient(135deg,#1B5E20,#43A047);">👤</div>
+    <div class="ac-info">
+      <div class="ac-name">刘晓燕（个人渠道方）</div>
+      <div class="ac-meta">申请时间：2026-03-17 09:15 · 手机：13600000002</div>
+    </div>
+    <span class="tag tag-warning tag-dot">待审核</span>
+  </div>
+  <div class="ac-tags">
+    <span class="tag tag-gray">身份证✓</span>
+    <span class="tag tag-gray">个人说明✓</span>
+    <span class="tag" style="background:#EAFAF1;color:#1B5E20;">个人渠道方</span>
+  </div>
+  <div style="padding:0 16px 10px;font-size:12px;color:var(--c-gray-700);">独立招生个人，已通过微信实名认证，历史招生学生约 30 人</div>
+  <div class="ac-footer" onclick="event.stopPropagation()">
+    <div class="btn-hold">⏸</div>
+    <button class="btn-reject" onclick="doReject()">驳回</button>
+    <button class="btn-pass" onclick="doPass('刘晓燕个人渠道方')">✅ 通过认证</button>
+  </div>
+</div>
+
+<script>
+let currentAuditId = null;
+
+function switchTab(el, type) {
+  document.querySelectorAll('.ft-item').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function passAudit(id) {
+  showAdminToast('✅ 已通过认证申请');
+}
+
+function showReject(id) {
+  currentAuditId = id;
+  document.getElementById('rejectOverlay').classList.add('show');
+}
+function closeReject() {
+  document.getElementById('rejectOverlay').classList.remove('show');
+}
+function toggleReason(el) {
+  el.classList.toggle('selected');
+}
+function confirmReject() {
+  closeReject();
+  showAdminToast('已驳回，通知已发送给申请人');
+}
+
+function showAdminToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+</script>
+</body>
+</html>

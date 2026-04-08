@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>返点中心 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:100px;}
+.r-hero{background:linear-gradient(150deg,#1A237E 0%,#283593 50%,#F5A623 130%);padding:20px var(--space-4) 0;position:relative;overflow:hidden;}
+.r-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,0.07) 0%,transparent 50%);}
+.r-hero::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:24px;background:var(--c-gray-50);border-radius:24px 24px 0 0;}
+.r-nav{display:flex;align-items:center;position:relative;z-index:1;margin-bottom:16px;}
+.r-back{width:36px;height:36px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;margin-right:12px;touch-action:manipulation;}
+.r-title{flex:1;font-size:17px;font-weight:700;color:white;}
+.r-btn-sm{padding:6px 14px;border-radius:var(--radius-full);background:rgba(245,166,35,.25);border:1px solid rgba(245,166,35,.5);font-size:12px;font-weight:700;color:#FFD54F;cursor:pointer;touch-action:manipulation;}
+
+.r-kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;position:relative;z-index:1;margin-bottom:20px;}
+.r-kpi-cell{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius-md);padding:14px;}
+.r-kpi-num{font-size:22px;font-weight:900;color:white;line-height:1;margin-bottom:4px;}
+.r-kpi-num.gold{color:#FFD54F;}
+.r-kpi-label{font-size:11px;color:rgba(255,255,255,.6);}
+
+.filter-tabs{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);overflow-x:auto;}
+.ft{flex-shrink:0;padding:0 16px;height:44px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--c-gray-500);cursor:pointer;white-space:nowrap;position:relative;touch-action:manipulation;}
+.ft.active{color:#3F51B5;font-weight:700;}
+.ft.active::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2.5px;background:#3F51B5;border-radius:1px;}
+
+.rebate-item{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:10px var(--space-4) 0;padding:14px 16px;}
+.ri-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
+.ri-contest-icon{width:42px;height:42px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.ri-info{flex:1;}
+.ri-contest{font-size:13px;font-weight:700;color:var(--c-gray-900);}
+.ri-student{font-size:12px;color:var(--c-gray-500);margin-top:2px;}
+.ri-amount{font-size:18px;font-weight:900;color:var(--c-gold);flex-shrink:0;}
+.ri-rows{display:flex;flex-wrap:wrap;gap:6px;padding-top:10px;border-top:1px solid var(--c-gray-100);}
+.ri-row{font-size:11px;color:var(--c-gray-500);background:var(--c-gray-50);padding:3px 8px;border-radius:var(--radius-full);}
+
+.withdraw-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:var(--c-white);border-top:1px solid var(--c-gray-100);padding:12px var(--space-4) calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:100;}
+.wb-info{flex:1;}
+.wb-label{font-size:11px;color:var(--c-gray-500);}
+.wb-amount{font-size:20px;font-weight:900;color:var(--c-gold);}
+.wb-btn{flex:1;height:50px;background:linear-gradient(135deg,#1A237E,#3949AB);color:white;border:none;border-radius:var(--radius-md);font-size:15px;font-weight:800;cursor:pointer;touch-action:manipulation;}
+.wb-btn:active{opacity:.9;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1A237E;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+
+<div class="r-hero animate-in">
+  <div class="r-nav">
+    <div class="r-back" onclick="history.back()">←</div>
+    <div class="r-title">返点中心</div>
+    <div class="r-btn-sm" onclick="location.href='channel-settlement.html'">结算单</div>
+  </div>
+  <div class="r-kpi">
+    <div class="r-kpi-cell">
+      <div class="r-kpi-num gold">¥680.00</div>
+      <div class="r-kpi-label">可提现余额</div>
+    </div>
+    <div class="r-kpi-cell">
+      <div class="r-kpi-num">¥220.00</div>
+      <div class="r-kpi-label">审核中金额</div>
+    </div>
+    <div class="r-kpi-cell">
+      <div class="r-kpi-num">¥3,200.00</div>
+      <div class="r-kpi-label">累计已打款</div>
+    </div>
+    <div class="r-kpi-cell">
+      <div class="r-kpi-num" style="color:var(--c-danger);">¥0.00</div>
+      <div class="r-kpi-label">历史退款回退</div>
+    </div>
+  </div>
+</div>
+
+<div class="filter-tabs">
+  <div class="ft active" onclick="switchTab(this)">全部</div>
+  <div class="ft" onclick="switchTab(this)">待结算</div>
+  <div class="ft" onclick="switchTab(this)">可提现</div>
+  <div class="ft" onclick="switchTab(this)">审核中</div>
+  <div class="ft" onclick="switchTab(this)">已打款</div>
+  <div class="ft" onclick="switchTab(this)">已驳回</div>
+  <div class="ft" onclick="switchTab(this)">已回退</div>
+</div>
+
+<div class="rebate-item animate-in animate-in-d1">
+  <div class="ri-top">
+    <div class="ri-contest-icon" style="background:linear-gradient(135deg,#4A0E8F,#9C27B0);">🏆</div>
+    <div class="ri-info">
+      <div class="ri-contest">安徒生(国际)艺术奖</div>
+      <div class="ri-student">张小明 · 订单 JST-2025-003291</div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <span class="tag tag-success tag-dot">可提现</span>
+        <span style="font-size:11px;color:var(--c-gray-500);">赛事已结束</span>
+      </div>
+    </div>
+    <div class="ri-amount">¥180.00</div>
+  </div>
+  <div class="ri-rows">
+    <div class="ri-row">净实付 ¥180.00</div>
+    <div class="ri-row">平台服务费 ¥0</div>
+    <div class="ri-row">返点比例 10%</div>
+    <div class="ri-row">返点金额 ¥18.00</div>
+  </div>
+</div>
+
+<div class="rebate-item animate-in animate-in-d2">
+  <div class="ri-top">
+    <div class="ri-contest-icon" style="background:linear-gradient(135deg,#B71C1C,#E53935);">🏟️</div>
+    <div class="ri-info">
+      <div class="ri-contest">"鸟巢杯"文化艺术活动</div>
+      <div class="ri-student">王芳芳 · 订单 JST-2025-003244</div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <span class="tag tag-success tag-dot">可提现</span>
+      </div>
+    </div>
+    <div class="ri-amount">¥150.00</div>
+  </div>
+  <div class="ri-rows">
+    <div class="ri-row">净实付 ¥150.00</div>
+    <div class="ri-row">平台服务费 ¥0</div>
+    <div class="ri-row">固定金额返点 ¥15.00</div>
+  </div>
+</div>
+
+<div class="rebate-item animate-in animate-in-d3">
+  <div class="ri-top">
+    <div class="ri-contest-icon" style="background:linear-gradient(135deg,#1A237E,#3949AB);">🎭</div>
+    <div class="ri-info">
+      <div class="ri-contest">人民艺术全国展演活动</div>
+      <div class="ri-student">李好运 · 订单 JST-2025-003180</div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <span class="tag tag-warning tag-dot">待结算</span>
+        <span style="font-size:11px;color:var(--c-gray-500);">赛事结束后自动计提</span>
+      </div>
+    </div>
+    <div class="ri-amount" style="color:var(--c-gray-300);">¥—</div>
+  </div>
+  <div class="ri-rows">
+    <div class="ri-row">净实付 ¥0（积分全抵）</div>
+    <div class="ri-row">返点金额 ¥0</div>
+  </div>
+</div>
+
+<div class="withdraw-bar">
+  <div class="wb-info">
+    <div class="wb-label">可提现金额</div>
+    <div class="wb-amount">¥680.00</div>
+  </div>
+  <button class="wb-btn" onclick="location.href='channel-settlement.html'">💸 申请提现</button>
+</div>
+
+<script>
+function switchTab(el){document.querySelectorAll('.ft').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+</script>
+</body>
+</html>

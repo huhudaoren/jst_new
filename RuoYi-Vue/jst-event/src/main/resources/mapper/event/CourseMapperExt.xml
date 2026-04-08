@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.CourseMapperExt">
+
+    <resultMap id="CourseEntityMap" type="com.ruoyi.jst.event.domain.JstCourse">
+        <id property="courseId" column="course_id"/>
+        <result property="courseName" column="course_name"/>
+        <result property="courseType" column="course_type"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+        <result property="pointsPrice" column="points_price"/>
+        <result property="creatorType" column="creator_type"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="maicSourceId" column="maic_source_id"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="status" column="status"/>
+        <result property="visibleScope" column="visible_scope"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <resultMap id="CourseListVoMap" type="com.ruoyi.jst.event.vo.CourseListVO">
+        <id property="courseId" column="course_id"/>
+        <result property="courseName" column="course_name"/>
+        <result property="courseType" column="course_type"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="price" column="price"/>
+        <result property="pointsPrice" column="points_price"/>
+        <result property="creatorType" column="creator_type"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="CourseDetailVoMap" type="com.ruoyi.jst.event.vo.CourseDetailVO">
+        <id property="courseId" column="course_id"/>
+        <result property="courseName" column="course_name"/>
+        <result property="courseType" column="course_type"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+        <result property="pointsPrice" column="points_price"/>
+        <result property="creatorType" column="creator_type"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="maicSourceId" column="maic_source_id"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="status" column="status"/>
+        <result property="visibleScope" column="visible_scope"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="WxCourseCardVoMap" type="com.ruoyi.jst.event.vo.WxCourseCardVO">
+        <id property="courseId" column="course_id"/>
+        <result property="courseName" column="course_name"/>
+        <result property="courseType" column="course_type"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+        <result property="pointsPrice" column="points_price"/>
+    </resultMap>
+
+    <resultMap id="WxCourseDetailVoMap" type="com.ruoyi.jst.event.vo.WxCourseDetailVO">
+        <id property="courseId" column="course_id"/>
+        <result property="courseName" column="course_name"/>
+        <result property="courseType" column="course_type"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+        <result property="pointsPrice" column="points_price"/>
+    </resultMap>
+
+    <resultMap id="MyCourseVoMap" type="com.ruoyi.jst.event.vo.MyCourseVO">
+        <id property="courseId" column="course_id"/>
+        <result property="courseName" column="course_name"/>
+        <result property="courseType" column="course_type"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="progress" column="progress"/>
+        <result property="durationSeconds" column="duration_seconds"/>
+        <result property="completeStatus" column="complete_status"/>
+        <result property="completeTime" column="complete_time"/>
+    </resultMap>
+
+    <sql id="CourseColumns">
+        course_id, course_name, course_type, cover_image, description, price, points_price,
+        creator_type, creator_id, maic_source_id, audit_status, status, visible_scope,
+        create_by, create_time, update_by, update_time, remark, del_flag
+    </sql>
+
+    <insert id="insertCourse" parameterType="com.ruoyi.jst.event.domain.JstCourse"
+            useGeneratedKeys="true" keyProperty="courseId">
+        INSERT INTO jst_course (
+            course_name, course_type, cover_image, description, price, points_price,
+            creator_type, creator_id, maic_source_id, audit_status, status, visible_scope,
+            create_by, create_time, update_by, update_time, remark, del_flag
+        ) VALUES (
+            #{courseName}, #{courseType}, #{coverImage}, #{description}, #{price}, #{pointsPrice,jdbcType=BIGINT},
+            #{creatorType}, #{creatorId,jdbcType=BIGINT}, #{maicSourceId,jdbcType=VARCHAR}, #{auditStatus}, #{status},
+            #{visibleScope,jdbcType=VARCHAR}, #{createBy}, #{createTime}, #{updateBy}, #{updateTime},
+            #{remark,jdbcType=VARCHAR}, #{delFlag}
+        )
+    </insert>
+
+    <select id="selectCourseById" resultMap="CourseEntityMap">
+        SELECT <include refid="CourseColumns"/>
+        FROM jst_course
+        WHERE course_id = #{courseId}
+          AND del_flag = '0'
+    </select>
+
+    <update id="updateCourseBase" parameterType="com.ruoyi.jst.event.domain.JstCourse">
+        UPDATE jst_course
+        SET course_name = #{courseName},
+            course_type = #{courseType},
+            cover_image = #{coverImage},
+            description = #{description},
+            price = #{price},
+            points_price = #{pointsPrice,jdbcType=BIGINT},
+            creator_type = #{creatorType},
+            creator_id = #{creatorId,jdbcType=BIGINT},
+            maic_source_id = #{maicSourceId,jdbcType=VARCHAR},
+            visible_scope = #{visibleScope,jdbcType=VARCHAR},
+            remark = #{remark,jdbcType=VARCHAR},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        WHERE course_id = #{courseId}
+          AND del_flag = '0'
+    </update>
+
+    <update id="updateAuditStatus">
+        UPDATE jst_course
+        SET audit_status = #{targetAuditStatus},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE course_id = #{courseId}
+          AND audit_status = #{expectedAuditStatus}
+          AND del_flag = '0'
+    </update>
+
+    <update id="updateShelfStatus">
+        UPDATE jst_course
+        SET status = #{targetStatus},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE course_id = #{courseId}
+          AND status = #{expectedStatus}
+          AND del_flag = '0'
+    </update>
+
+    <select id="selectAdminList"
+            parameterType="com.ruoyi.jst.event.dto.CourseQueryReqDTO"
+            resultMap="CourseListVoMap">
+        SELECT course_id, course_name, course_type, cover_image, price, points_price,
+               creator_type, creator_id, audit_status, status, create_time, update_time
+        FROM jst_course
+        <where>
+            del_flag = '0'
+            <if test="courseName != null and courseName != ''">
+                AND course_name LIKE CONCAT('%', #{courseName}, '%')
+            </if>
+            <if test="courseType != null and courseType != ''">
+                AND course_type = #{courseType}
+            </if>
+            <if test="auditStatus != null and auditStatus != ''">
+                AND audit_status = #{auditStatus}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY create_time DESC, course_id DESC
+    </select>
+
+    <select id="selectAdminDetail" resultMap="CourseDetailVoMap">
+        SELECT course_id, course_name, course_type, cover_image, description, price, points_price,
+               creator_type, creator_id, maic_source_id, audit_status, status, visible_scope,
+               remark, create_time, update_time
+        FROM jst_course
+        WHERE course_id = #{courseId}
+          AND del_flag = '0'
+    </select>
+
+    <select id="selectWxList"
+            parameterType="com.ruoyi.jst.event.dto.WxCourseQueryDTO"
+            resultMap="WxCourseCardVoMap">
+        SELECT course_id, course_name, course_type, cover_image,
+               CASE
+                   WHEN description IS NULL THEN NULL
+                   WHEN CHAR_LENGTH(description) &gt; 60 THEN CONCAT(SUBSTRING(description, 1, 60), '...')
+                   ELSE description
+               END AS description,
+               price, points_price
+        FROM jst_course
+        <where>
+            del_flag = '0'
+            AND audit_status = 'approved'
+            AND status = 'on'
+            <if test="courseType != null and courseType != ''">
+                AND course_type = #{courseType}
+            </if>
+        </where>
+        ORDER BY update_time DESC, course_id DESC
+    </select>
+
+    <select id="selectWxDetail" resultMap="WxCourseDetailVoMap">
+        SELECT course_id, course_name, course_type, cover_image, description, price, points_price
+        FROM jst_course
+        WHERE course_id = #{courseId}
+          AND del_flag = '0'
+    </select>
+
+    <select id="selectMyCourseList" resultMap="MyCourseVoMap">
+        SELECT c.course_id, c.course_name, c.course_type, c.cover_image,
+               l.progress, l.duration_seconds, l.complete_status, l.complete_time
+        FROM jst_course_learn_record l
+        INNER JOIN jst_course c
+                ON c.course_id = l.course_id
+               AND c.del_flag = '0'
+        WHERE l.user_id = #{userId}
+          AND l.del_flag = '0'
+        ORDER BY l.update_time DESC, l.learn_id DESC
+    </select>
+
+</mapper>

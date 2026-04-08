@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>ruoyi</artifactId>
+        <groupId>com.ruoyi</groupId>
+        <version>3.9.2</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jst-user</artifactId>
+
+    <description>
+        竞赛通-用户与身份域
+        包含：用户主表 / 临时参赛档案(允许user_id NULL,防孤儿) / 认领映射 / 渠道方档案 / 学生-渠道绑定
+        关联表：jst_user, jst_participant, jst_participant_user_map, jst_channel, jst_student_channel_binding
+        关联状态机：SM-14 临时档案认领 / SM-15 学生-渠道绑定 / SM-3 渠道认证
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>jst-common</artifactId>
+        </dependency>
+
+        <!-- 登录服务 TokenService 在若依 framework 中,小程序登录需要 -->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-framework</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

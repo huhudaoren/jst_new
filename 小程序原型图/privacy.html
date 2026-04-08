@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>隐私设置 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.p-nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;gap:12px;padding:0 16px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 1px 0 var(--c-gray-100);}
+.p-back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--c-gray-50);border:none;border-radius:var(--radius-sm);font-size:18px;color:var(--c-gray-700);cursor:pointer;touch-action:manipulation;}
+.p-title{flex:1;text-align:center;font-size:16px;font-weight:800;color:var(--c-gray-900);}
+.group-card{margin:14px 16px 0;background:var(--c-white);border-radius:var(--radius-xl);box-shadow:var(--shadow-xs);overflow:hidden;}
+.group-title{padding:14px 16px 10px;font-size:13px;font-weight:700;color:var(--c-gray-500);border-bottom:1px solid var(--c-gray-100);}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--c-gray-100);}
+.setting-row:last-child{border-bottom:none;}
+.row-text{flex:1;}
+.row-title{font-size:14px;font-weight:700;color:var(--c-gray-900);}
+.row-desc{margin-top:3px;font-size:12px;color:var(--c-gray-500);line-height:1.5;}
+.switch{position:relative;display:inline-flex;width:46px;height:26px;flex-shrink:0;cursor:pointer;}
+.switch input{opacity:0;width:0;height:0;position:absolute;}
+.slider{position:absolute;inset:0;border-radius:999px;background:var(--c-gray-100);transition:.2s;}
+.slider::before{content:'';position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:white;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:.2s;}
+.switch input:checked + .slider{background:var(--c-primary-600);}
+.switch input:checked + .slider::before{transform:translateX(20px);}
+.setting-link{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--c-gray-100);cursor:pointer;touch-action:manipulation;transition:background var(--duration-fast);}
+.setting-link:last-child{border-bottom:none;}
+.setting-link:active{background:var(--c-gray-50);}
+.link-arr{font-size:14px;color:var(--c-gray-300);}
+.danger-card{margin:14px 16px 0;background:var(--c-white);border-radius:var(--radius-xl);box-shadow:var(--shadow-xs);overflow:hidden;}
+.danger-row{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;touch-action:manipulation;transition:background var(--duration-fast);}
+.danger-row:active{background:var(--c-gray-50);}
+.danger-name{flex:1;font-size:14px;font-weight:600;color:var(--c-danger);}
+</style>
+</head>
+<body>
+<div class="status-bar"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<nav class="p-nav animate-in">
+  <button class="p-back" onclick="history.back()">←</button>
+  <div class="p-title">隐私设置</div>
+  <div style="width:36px;"></div>
+</nav>
+
+<div class="group-card animate-in animate-in-d1">
+  <div class="group-title">个人信息保护</div>
+  <div class="setting-row">
+    <div class="row-text"><div class="row-title">手机号脱敏显示</div><div class="row-desc">在公开场景（排行榜、证书等）隐藏中间 4 位手机号</div></div>
+    <label class="switch"><input type="checkbox" checked onchange="save()"><span class="slider"></span></label>
+  </div>
+  <div class="setting-row">
+    <div class="row-text"><div class="row-title">成绩对外可见</div><div class="row-desc">关闭后，其他人通过公开查询页无法查询到您的成绩</div></div>
+    <label class="switch"><input type="checkbox" checked onchange="save()"><span class="slider"></span></label>
+  </div>
+  <div class="setting-row">
+    <div class="row-text"><div class="row-title">个人主页对外展示</div><div class="row-desc">开启后，渠道方可通过绑定码查看您的基本信息</div></div>
+    <label class="switch"><input type="checkbox" onchange="save()"><span class="slider"></span></label>
+  </div>
+</div>
+
+<div class="group-card animate-in animate-in-d2">
+  <div class="group-title">数据授权</div>
+  <div class="setting-link" onclick="showToast('查看数据授权协议')">
+    <div class="row-text"><div class="row-title">个性化推荐授权</div><div class="row-desc">授权竞赛通使用您的行为数据进行个性化内容推荐</div></div>
+    <div class="link-arr">›</div>
+  </div>
+  <div class="setting-link" onclick="showToast('查看第三方分享说明')">
+    <div class="row-text"><div class="row-title">第三方数据共享</div><div class="row-desc">查看我们向第三方合作方共享的数据类型与范围</div></div>
+    <div class="link-arr">›</div>
+  </div>
+  <div class="setting-link" onclick="showToast('下载我的数据')">
+    <div class="row-text"><div class="row-title">导出我的数据</div><div class="row-desc">下载账号内的个人信息、订单、积分记录等数据</div></div>
+    <div class="link-arr">›</div>
+  </div>
+</div>
+
+<div class="group-card animate-in animate-in-d2">
+  <div class="group-title">通知与消息</div>
+  <div class="setting-row">
+    <div class="row-text"><div class="row-title">系统推送通知</div><div class="row-desc">接收报名、成绩、积分等业务通知（微信模板消息）</div></div>
+    <label class="switch"><input type="checkbox" checked onchange="save()"><span class="slider"></span></label>
+  </div>
+  <div class="setting-row">
+    <div class="row-text"><div class="row-title">营销活动推送</div><div class="row-desc">接收优惠券、营销活动、专题推荐等消息</div></div>
+    <label class="switch"><input type="checkbox" onchange="save()"><span class="slider"></span></label>
+  </div>
+</div>
+
+<div class="danger-card animate-in animate-in-d3">
+  <div class="danger-row" onclick="confirmDelete()">
+    <div class="danger-name">申请注销账号</div>
+    <div class="link-arr" style="color:var(--c-danger);">›</div>
+  </div>
+</div>
+
+<div style="padding:12px 16px;font-size:12px;color:var(--c-gray-500);line-height:1.6;">
+  竞赛通严格遵守《网络安全法》《个人信息保护法》等相关法律法规，保护您的个人信息安全。
+  如有隐私相关问题，请联系 privacy@jst.edu.cn
+</div>
+
+<script>
+function save(){const t=document.createElement('div');t.className='toast';t.textContent='设置已保存';document.body.appendChild(t);setTimeout(()=>t.remove(),1500);}
+function confirmDelete(){if(confirm('注销账号后数据将永久删除且无法恢复，确认继续？'))showToast('注销申请已提交，3个工作日内处理');}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400);}
+</script>
+</body>
+</html>

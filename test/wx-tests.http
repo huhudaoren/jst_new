@@ -1,0 +1,785 @@
+### =====================================================================
+### 竞赛通 - 小程序端 (wx) + 公开接口 测试文件
+### =====================================================================
+### 用法: IntelliJ 打开本文件,顶部 ▶️ Run All Requests in File
+### 前置:
+###   1. 业务表已建,99-test-fixtures.sql 已导入
+###   2. ruoyi-admin 启动在 8080
+###   3. 96-grant-jst-partner-permissions.sql 已跑(影响部分跨视角验证)
+### 特点:
+###   - 所有数据来自 fixture 预置,不依赖 admin 临时创建
+###   - 仅测 wx 视角 + 公开页接口
+###   - admin 端测试在 admin-tests.http
+### =====================================================================
+
+@baseUrl = http://127.0.0.1:8080
+@contentType = application/json
+### =====================================================================
+### F9. 报名记录与表单快照 (jst-event / WxEnrollController)
+### 前置: fixture 中 8802 为 online+enrolling+formTemplateId=8801；8903 为补件中的报名记录
+### =====================================================================
+
+### F9-0. 重新登录 1001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("wx_token", response.body.data.token);
+%}
+
+### F9-1. 保存报名草稿
+POST {{baseUrl}}/jst/wx/enroll/draft
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "contestId": 8802,
+  "participantId": 3004,
+  "formData": {
+    "name": "测试_张小红",
+    "gender": "female",
+    "age": 9,
+    "school": "测试_第一小学"
+  },
+  "attachments": [
+    "https://fixture.example.com/wx/f9-draft-work.pdf"
+  ]
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("f9_draft_enroll_id", response.body.data.enrollId);
+}
+client.test("F9 草稿保存成功", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F9-2. 提交报名
+POST {{baseUrl}}/jst/wx/enroll/submit
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "enrollId": {{f9_draft_enroll_id}},
+  "contestId": 8802,
+  "participantId": 3004,
+  "formData": {
+    "name": "测试_张小红",
+    "gender": "female",
+    "age": 9,
+    "school": "测试_第一小学"
+  },
+  "attachments": [
+    "https://fixture.example.com/wx/f9-submit-work.pdf"
+  ]
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("f9_submit_enroll_id", response.body.data.enrollId);
+}
+client.test("F9 报名提交成功", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F9-3. 查看我提交的报名详情
+GET {{baseUrl}}/jst/wx/enroll/{{f9_submit_enroll_id}}
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("F9 报名详情返回快照", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.formSnapshotJson, "应返回 formSnapshotJson");
+});
+%}
+
+### F9-4. 提交补件 (fixture 8903)
+POST {{baseUrl}}/jst/wx/enroll/8903/supplement
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "formData": {
+    "name": "测试_张小红",
+    "gender": "female",
+    "age": 9,
+    "school": "测试_第一小学"
+  },
+  "attachments": [
+    "https://fixture.example.com/wx/f9-supplement-work-new.pdf"
+  ],
+  "supplementRemark": "已补充最新附件"
+}
+
+### F9-5. 重复 pending 报名应失败 (fixture 8901)
+POST {{baseUrl}}/jst/wx/enroll/submit
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "contestId": 8201,
+  "participantId": 3001,
+  "formData": {
+    "name": "测试_张小明",
+    "gender": "male",
+    "age": 8,
+    "school": "测试_第一小学"
+  },
+  "attachments": [
+    "https://fixture.example.com/wx/f9-duplicate.pdf"
+  ]
+}
+
+> {%
+client.test("F9 重复 pending 报名应失败", function() {
+    client.assert(response.body.code !== 200);
+});
+%}
+
+### =====================================================================
+### C2. 订单混合支付 (jst-order / WxOrderController + WxPayController)
+### 前置: fixture 中 8902/8904/8905/8906/8907/8908 为 approved；9801/9803 为可用券；1001 有 20000 积分
+### =====================================================================
+
+### C2-0. 重新登录 1001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("wx_token", response.body.data.token);
+%}
+
+### C2-1. 普通下单(无券无积分)
+POST {{baseUrl}}/jst/wx/order/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "enrollId": 8902,
+  "pointsToUse": 0,
+  "payMethod": "wechat"
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c2_order_normal_id", response.body.data.orderId);
+}
+client.test("C2 普通下单成功", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C2-2. 用券下单
+POST {{baseUrl}}/jst/wx/order/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "enrollId": 8904,
+  "couponId": 9803,
+  "pointsToUse": 0,
+  "payMethod": "wechat"
+}
+
+### C2-3. 零元订单(9900 积分全额抵扣)
+POST {{baseUrl}}/jst/wx/order/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "enrollId": 8905,
+  "pointsToUse": 9900,
+  "payMethod": "points"
+}
+
+> {%
+client.test("C2 零元订单成功", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.orderType === "zero_price");
+});
+%}
+
+### C2-4. 混合下单(券 + 积分)
+POST {{baseUrl}}/jst/wx/order/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "enrollId": 8906,
+  "couponId": 9801,
+  "pointsToUse": 3000,
+  "payMethod": "wechat"
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c2_order_mix_id", response.body.data.orderId);
+}
+client.test("C2 混合下单成功", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C2-5. mock 支付成功
+POST {{baseUrl}}/jst/wx/pay/mock-success?orderId={{c2_order_mix_id}}
+Authorization: Bearer {{wx_token}}
+
+### C2-6. 查看我的订单详情
+GET {{baseUrl}}/jst/wx/order/{{c2_order_mix_id}}
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("C2 订单详情查询成功", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C2-7. 重复创建同一 enroll 订单应失败
+POST {{baseUrl}}/jst/wx/order/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "enrollId": 8902,
+  "pointsToUse": 0,
+  "payMethod": "wechat"
+}
+
+> {%
+client.test("C2 重复下单应失败", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### C2-8. 未审核通过报名不允许下单
+POST {{baseUrl}}/jst/wx/order/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "enrollId": 8901,
+  "pointsToUse": 0,
+  "payMethod": "wechat"
+}
+
+> {%
+client.test("C2 未审核通过报名应失败", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### C2-9. 积分不足应失败
+POST {{baseUrl}}/jst/wx/order/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "enrollId": 8907,
+  "pointsToUse": 999999,
+  "payMethod": "wechat"
+}
+
+> {%
+client.test("C2 积分不足应失败", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### C2-10. 已使用优惠券应失败
+POST {{baseUrl}}/jst/wx/order/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "enrollId": 8907,
+  "couponId": 9802,
+  "pointsToUse": 0,
+  "payMethod": "wechat"
+}
+
+> {%
+client.test("C2 已使用优惠券应失败", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### C2-11. 创建待支付订单后取消
+POST {{baseUrl}}/jst/wx/order/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "enrollId": 8907,
+  "pointsToUse": 0,
+  "payMethod": "wechat"
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c2_order_cancel_id", response.body.data.orderId);
+}
+%}
+
+### C2-11.1 取消待支付订单
+POST {{baseUrl}}/jst/wx/order/{{c2_order_cancel_id}}/cancel
+Authorization: Bearer {{wx_token}}
+
+### C2-12. 已支付订单取消应失败
+POST {{baseUrl}}/jst/wx/order/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "enrollId": 8908,
+  "pointsToUse": 0,
+  "payMethod": "wechat"
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c2_order_paid_id", response.body.data.orderId);
+}
+%}
+
+### C2-12.1 先 mock 支付成功
+POST {{baseUrl}}/jst/wx/pay/mock-success?orderId={{c2_order_paid_id}}
+Authorization: Bearer {{wx_token}}
+
+### C2-12.2 再取消应失败
+POST {{baseUrl}}/jst/wx/order/{{c2_order_paid_id}}/cancel
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("C2 已支付订单取消应失败", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### C2-13. 重复 mock-success 应幂等成功
+POST {{baseUrl}}/jst/wx/pay/mock-success?orderId={{c2_order_paid_id}}
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("C2 重复 mock-success 幂等", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C2-14. 1002 拿别人的 enrollId 下单应失败
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1002" }
+
+> {%
+client.global.set("wx_other_token", response.body.data.token);
+%}
+
+### C2-14.1 1002 发起越权下单
+POST {{baseUrl}}/jst/wx/order/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_other_token}}
+
+{
+  "enrollId": 8907,
+  "pointsToUse": 0,
+  "payMethod": "wechat"
+}
+
+> {%
+client.test("C2 越权下单应失败", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### C2-15. 1002 查看别人的订单详情应失败
+GET {{baseUrl}}/jst/wx/order/{{c2_order_mix_id}}
+Authorization: Bearer {{wx_other_token}}
+
+> {%
+client.test("C2 越权看订单详情应失败", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### =====================================================================
+### A. 认证与资料 (jst-user / WxAuthController + WxUserController)
+### =====================================================================
+
+### A1. Mock 登录测试用户 1001 (fixture: 测试_张妈妈)
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("wx_token", response.body.data.token);
+client.test("登录成功", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.userInfo.userId === 1001);
+});
+%}
+
+### A2. 获取我的资料(脱敏)
+GET {{baseUrl}}/jst/wx/user/profile
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("资料返回脱敏字段", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.data.userId === 1001);
+    if (response.body.data.mobileMasked) {
+        client.assert(response.body.data.mobileMasked.includes("****"), "手机号必须脱敏");
+    }
+});
+%}
+
+### A3. 更新昵称(白名单字段)
+PUT {{baseUrl}}/jst/wx/user/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{ "nickname": "测试_张妈妈_新昵称" }
+
+### A4. 登出
+POST {{baseUrl}}/jst/wx/auth/logout
+Authorization: Bearer {{wx_token}}
+
+
+### =====================================================================
+### B. 临时档案 (jst-user / WxParticipantController)
+### 前置: A1 已重新登录拿到 wx_token
+### =====================================================================
+
+### B0. 重新登录(因为 A4 已登出)
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("wx_token", response.body.data.token);
+%}
+
+### B1. 我的参赛档案列表
+GET {{baseUrl}}/jst/wx/participant/my
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("应返回数组", function() {
+    client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### B2. 主动认领临时档案 3001 (张小明)
+POST {{baseUrl}}/jst/wx/participant/claim?participantId=3001
+Authorization: Bearer {{wx_token}}
+
+### B3. 查档案详情(3001 已认领)
+GET {{baseUrl}}/jst/wx/participant/3001
+Authorization: Bearer {{wx_token}}
+
+### B4. 越权: 用 1002 token 看 3001 详情应失败
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1002" }
+
+> {%
+client.global.set("other_token", response.body.data.token);
+%}
+
+### B5. 1002 看 3001 应 403/拒绝
+GET {{baseUrl}}/jst/wx/participant/3001
+Authorization: Bearer {{other_token}}
+
+> {%
+client.test("跨用户越权应被拒绝", function() {
+    client.assert(response.body.code !== 200);
+});
+%}
+
+
+### =====================================================================
+### C. 学生-渠道绑定 (jst-user / WxBindingController) - F4
+### =====================================================================
+
+### C0. 重新登录 1001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("wx_token", response.body.data.token);
+%}
+
+### C1. 我的绑定历史
+GET {{baseUrl}}/jst/wx/user/binding
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("绑定列表应为数组", function() {
+    client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### C2. 切换绑定到 channel 2002
+POST {{baseUrl}}/jst/wx/user/binding/switch
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{ "channelId": 2002 }
+
+### C3. 重复绑定同一渠道(应失败 BIND_CONFLICT)
+POST {{baseUrl}}/jst/wx/user/binding/switch
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{ "channelId": 2002 }
+
+> {%
+client.test("重复绑定应失败", function() {
+    client.assert(response.body.code !== 200);
+});
+%}
+
+### C4. 主动解绑
+POST {{baseUrl}}/jst/wx/user/binding/unbind
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{ "reason": "测试解绑" }
+
+
+### =====================================================================
+### D. 公开接口: 赛事方入驻申请 (无需登录)
+### =====================================================================
+
+### D1. 公开提交赛事方入驻申请 (用唯一手机号避免冲突)
+POST {{baseUrl}}/jst/public/organizer/partner/apply
+Content-Type: {{contentType}}
+
+{
+  "partnerName": "测试_艺术教育_wx",
+  "contactName": "测试_王老板",
+  "contactMobile": "13800006666",
+  "businessLicenseNo": "91110000WXT00001"
+}
+
+> {%
+if (response.body.code === 200) {
+    client.global.set("apply_no", response.body.data.applyNo);
+}
+%}
+
+### D2. 公开查询申请状态
+GET {{baseUrl}}/jst/public/organizer/partner/apply/{{apply_no}}/status
+
+
+### =====================================================================
+### E. 渠道认证申请 (jst-organizer / WxChannelAuthApplyController) - F6
+### 前置: 用 1003 用户(测试_王老师)登录,因为它本身就是 channel 类型
+### =====================================================================
+
+### E0. 重新登录 1001(普通学生,可申请成为 channel)
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("wx_token", response.body.data.token);
+%}
+
+### E1. 提交渠道认证申请 (用唯一名字避免与 fixture 冲突)
+POST {{baseUrl}}/jst/wx/channel/auth/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "channelType": "teacher",
+  "applyName": "测试_wx_新工作室",
+  "materialsJson": "[{\"type\":\"id_card\",\"url\":\"https://x.com/a.jpg\"}]"
+}
+
+### E2. 查我的渠道认证申请历史
+GET {{baseUrl}}/jst/wx/channel/auth/apply/my
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("应返回申请数组", function() {
+    client.assert(Array.isArray(response.body.data));
+});
+%}
+
+
+### =====================================================================
+### F. 公告 / 首页 banner / 字典 (jst-message / WxNoticeController) - F-NOTICE
+### 前置: fixture 中已有 published 公告 (7001-7003) + topFlag=1 banner
+### =====================================================================
+
+### F1. 公告列表(分页)
+GET {{baseUrl}}/jst/wx/notice/list?pageNum=1&pageSize=10
+
+> {%
+client.test("应返回分页公告", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F2. 公告详情(fixture 7001)
+GET {{baseUrl}}/jst/wx/notice/7001
+
+### F3. 首页 banner
+GET {{baseUrl}}/jst/wx/index/banner
+
+> {%
+client.test("banner 应返回数组", function() {
+    client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### F4. 业务字典 jst_contest_category
+GET {{baseUrl}}/jst/wx/dict/jst_contest_category
+
+> {%
+client.test("字典应返回 8 个分类", function() {
+    client.assert(Array.isArray(response.body.data));
+    client.assert(response.body.data.length >= 6, "至少应有 6 个分类");
+});
+%}
+
+### F5. 非白名单字典应被拦截
+GET {{baseUrl}}/jst/wx/dict/sys_user_sex
+
+> {%
+client.test("非 jst_ 前缀字典应被拒绝", function() {
+    client.assert(response.body.code !== 200 || (Array.isArray(response.body.data) && response.body.data.length === 0));
+});
+%}
+
+
+### =====================================================================
+### G. 课程 (jst-event / WxCourseController) - F-COURSE
+### 前置: fixture 中已有 2 条 approved+on 课程
+### =====================================================================
+
+### G1. 课程列表(普通课程)
+GET {{baseUrl}}/jst/wx/course/list?pageNum=1&pageSize=10
+
+> {%
+client.test("课程列表正常返回", function() {
+    client.assert(response.status === 200);
+    client.assert(response.body.code === 200);
+});
+%}
+
+### G2. 课程列表(AI 课程)
+GET {{baseUrl}}/jst/wx/course/list?courseType=ai_maic
+
+### G3. 课程详情 (fixture 7201)
+GET {{baseUrl}}/jst/wx/course/7201
+
+### G4. 重新登录 1001 然后查我的课程
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("wx_token", response.body.data.token);
+%}
+
+### G5. 我的课程
+GET {{baseUrl}}/jst/wx/course/my
+Authorization: Bearer {{wx_token}}
+
+
+### =====================================================================
+### H. 赛事 wx 端 (jst-event / WxContestController) - F7
+### 前置: fixture 中已有 online 赛事
+### =====================================================================
+
+### H1. 赛事列表(全部)
+GET {{baseUrl}}/jst/wx/contest/list?pageNum=1&pageSize=10
+
+> {%
+client.test("赛事列表正常返回", function() {
+    client.assert(response.status === 200);
+});
+%}
+
+### H2. 按分类筛选(culture)
+GET {{baseUrl}}/jst/wx/contest/list?category=culture
+
+### H3. 热门赛事
+GET {{baseUrl}}/jst/wx/contest/hot?limit=6
+
+### H4. 赛事分类列表
+GET {{baseUrl}}/jst/wx/contest/categories
+
+> {%
+client.test("分类列表正常返回", function() {
+    client.assert(Array.isArray(response.body.data));
+});
+%}
+
+
+### =====================================================================
+### I. 动态表单模板 (jst-event / WxFormTemplateController) - F8
+### 前置: fixture 中赛事 8802 已关联 approved 模板
+### =====================================================================
+
+### I1. 按 contestId 取报名表单(wx 端)
+GET {{baseUrl}}/jst/wx/enroll/template?contestId=8802
+
+> {%
+client.test("应返回 schema", function() {
+    if (response.body.code === 200 && response.body.data) {
+        client.assert(response.body.data.schemaJson, "应有 schemaJson");
+    }
+});
+%}
+
+### =====================================================================
+### 全部 wx + 公开接口测试结束 (~30 个测试块)
+### =====================================================================
+
+### =====================================================================
+### DEBT-1. 代码债清理验证补充
+### =====================================================================
+
+### DEBT-1-W1. F6 审核通过 1001 后重新登录，roles 应包含 jst_channel
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("wx_token", response.body.data.token);
+client.test("DEBT-1 wx login roles 应来自 sys_user_role", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data.roles));
+    client.assert(response.body.data.roles.includes("jst_channel"), "应有 jst_channel 角色");
+});
+%}
+
+### DEBT-1-W2. 补件后查看详情，supplementRemark 应落在独立字段
+GET {{baseUrl}}/jst/wx/enroll/8903
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("DEBT-1 supplementRemark 应单独返回", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.supplementRemark, "应返回 supplementRemark");
+});
+%}

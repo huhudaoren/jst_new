@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI课程管理 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:90px;}
+.t-hero{background:linear-gradient(150deg,#2D1B69,#4A0E8F,#7B1FA2);padding:16px var(--space-4) 0;position:relative;overflow:hidden;}
+.t-hero::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:22px;background:var(--c-gray-50);border-radius:22px 22px 0 0;}
+.t-nav{display:flex;align-items:center;position:relative;z-index:1;margin-bottom:16px;}
+.t-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;margin-right:12px;touch-action:manipulation;}
+.t-title-text{font-size:17px;font-weight:700;color:white;flex:1;}
+.hero-stats{display:flex;gap:0;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius-lg);margin-bottom:20px;position:relative;z-index:1;overflow:hidden;}
+.hs-cell{flex:1;padding:12px 8px;text-align:center;border-right:1px solid rgba(255,255,255,0.1);}
+.hs-cell:last-child{border-right:none;}
+.hs-num{font-size:20px;font-weight:900;color:white;}
+.hs-label{font-size:11px;color:rgba(255,255,255,0.6);margin-top:3px;}
+
+.filter-tabs{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);}
+.ft-item{flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--c-gray-500);cursor:pointer;position:relative;touch-action:manipulation;}
+.ft-item.active{color:#7C3AED;font-weight:700;}
+.ft-item.active::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2.5px;background:#7C3AED;border-radius:1px;}
+
+.maic-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:10px var(--space-4) 0;overflow:hidden;cursor:pointer;touch-action:manipulation;transition:box-shadow var(--duration-fast);}
+.maic-card:active{box-shadow:var(--shadow-md);}
+.mc-thumb{height:100px;background:linear-gradient(135deg,#4A0E8F,#9C27B0);display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;}
+.mc-status-badge{position:absolute;top:10px;right:10px;}
+.mc-body{padding:12px 14px;}
+.mc-title{font-size:15px;font-weight:700;color:var(--c-gray-900);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.mc-meta{font-size:12px;color:var(--c-gray-500);margin-bottom:8px;}
+.mc-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.mc-stats-row{display:flex;gap:0;background:var(--c-gray-50);border-radius:var(--radius-sm);overflow:hidden;}
+.mc-stat{flex:1;padding:8px;text-align:center;border-right:1px solid var(--c-gray-100);}
+.mc-stat:last-child{border-right:none;}
+.mc-stat-num{font-size:14px;font-weight:700;color:var(--c-gray-900);}
+.mc-stat-lbl{font-size:10px;color:var(--c-gray-500);}
+.mc-actions{display:flex;gap:7px;margin-top:10px;}
+.mc-btn{flex:1;height:36px;border-radius:var(--radius-sm);font-size:12px;font-weight:700;cursor:pointer;border:none;touch-action:manipulation;}
+.mc-btn-primary{background:linear-gradient(135deg,#4A0E8F,#7B1FA2);color:white;}
+.mc-btn-ghost{background:var(--c-gray-50);color:var(--c-gray-700);border:1px solid var(--c-gray-100) !important;}
+.mc-btn-warn{background:var(--c-warning-50);color:var(--c-warning);border:1px solid rgba(243,156,18,0.25) !important;}
+
+.fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:20px;width:56px;height:56px;background:linear-gradient(135deg,#4A0E8F,#7B1FA2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;color:white;box-shadow:0 6px 20px rgba(74,14,143,0.45);cursor:pointer;touch-action:manipulation;z-index:100;transition:transform var(--duration-fast);}
+.fab:active{transform:scale(0.92);}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#2D1B69;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="t-hero animate-in">
+  <div class="t-nav">
+    <div class="t-back" onclick="history.back()">←</div>
+    <div class="t-title-text">🤖 我的AI课程</div>
+  </div>
+  <div class="hero-stats">
+    <div class="hs-cell"><div class="hs-num">4</div><div class="hs-label">已创建</div></div>
+    <div class="hs-cell"><div class="hs-num">3</div><div class="hs-label">已发布</div></div>
+    <div class="hs-cell"><div class="hs-num" style="color:#F9A8D4;">28</div><div class="hs-label">学习人次</div></div>
+    <div class="hs-cell"><div class="hs-num" style="color:#86EFAC;">92%</div><div class="hs-label">完课率</div></div>
+  </div>
+</div>
+
+<div class="filter-tabs">
+  <div class="ft-item active" onclick="switchTab(this)">全部</div>
+  <div class="ft-item" onclick="switchTab(this)">已发布</div>
+  <div class="ft-item" onclick="switchTab(this)">待发布</div>
+  <div class="ft-item" onclick="switchTab(this)">草稿</div>
+</div>
+
+<!-- 课程卡片1：已发布 -->
+<div class="maic-card animate-in animate-in-d1" onclick="location.href='maic-detail.html'">
+  <div class="mc-thumb">
+    🎨
+    <div class="mc-status-badge"><span class="tag tag-success tag-dot">已发布</span></div>
+  </div>
+  <div class="mc-body">
+    <div class="mc-title">儿童水彩零基础：向日葵的色彩</div>
+    <div class="mc-meta">🤖 AI生成 · 6个场景 · 2026-03-19 发布</div>
+    <div class="mc-tags">
+      <span class="tag tag-gray tag-sm">绘画</span>
+      <span class="tag tag-gray tag-sm">小学组</span>
+      <span class="tag tag-primary tag-sm">免费</span>
+    </div>
+    <div class="mc-stats-row">
+      <div class="mc-stat"><div class="mc-stat-num">18</div><div class="mc-stat-lbl">学习人次</div></div>
+      <div class="mc-stat"><div class="mc-stat-num">94%</div><div class="mc-stat-lbl">完课率</div></div>
+      <div class="mc-stat"><div class="mc-stat-num">88</div><div class="mc-stat-lbl">测验均分</div></div>
+      <div class="mc-stat"><div class="mc-stat-num">4.9★</div><div class="mc-stat-lbl">好评率</div></div>
+    </div>
+    <div class="mc-actions" onclick="event.stopPropagation()">
+      <button class="mc-btn mc-btn-ghost" onclick="location.href='maic-stats.html'">📊 数据</button>
+      <button class="mc-btn mc-btn-ghost">✏️ 编辑</button>
+      <button class="mc-btn mc-btn-primary" onclick="location.href='maic-detail.html'">查看课程 ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- 课程卡片2：已发布（音乐）-->
+<div class="maic-card animate-in animate-in-d2" onclick="location.href='maic-detail.html'">
+  <div class="mc-thumb" style="background:linear-gradient(135deg,#0D47A1,#42A5F5);">
+    🎵
+    <div class="mc-status-badge"><span class="tag tag-success tag-dot">已发布</span></div>
+  </div>
+  <div class="mc-body">
+    <div class="mc-title">钢琴乐理基础：五线谱认识与节拍入门</div>
+    <div class="mc-meta">🤖 AI生成 · 8个场景 · 2026-03-15 发布</div>
+    <div class="mc-tags">
+      <span class="tag tag-gray tag-sm">音乐</span>
+      <span class="tag tag-gray tag-sm">全学段</span>
+      <span class="tag tag-primary tag-sm">免费</span>
+    </div>
+    <div class="mc-stats-row">
+      <div class="mc-stat"><div class="mc-stat-num">8</div><div class="mc-stat-lbl">学习人次</div></div>
+      <div class="mc-stat"><div class="mc-stat-num">88%</div><div class="mc-stat-lbl">完课率</div></div>
+      <div class="mc-stat"><div class="mc-stat-num">82</div><div class="mc-stat-lbl">测验均分</div></div>
+      <div class="mc-stat"><div class="mc-stat-num">4.7★</div><div class="mc-stat-lbl">好评率</div></div>
+    </div>
+    <div class="mc-actions" onclick="event.stopPropagation()">
+      <button class="mc-btn mc-btn-ghost" onclick="location.href='maic-stats.html'">📊 数据</button>
+      <button class="mc-btn mc-btn-ghost">✏️ 编辑</button>
+      <button class="mc-btn mc-btn-primary" onclick="location.href='maic-detail.html'">查看课程 ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- 课程卡片3：待审核 -->
+<div class="maic-card animate-in animate-in-d3" onclick="location.href='maic-detail.html'">
+  <div class="mc-thumb" style="background:linear-gradient(135deg,#7B1FA2,#CE93D8);">
+    ✏️
+    <div class="mc-status-badge"><span class="tag tag-warning tag-dot">待审核</span></div>
+  </div>
+  <div class="mc-body">
+    <div class="mc-title">书法入门：楷书基本笔画练习</div>
+    <div class="mc-meta">🤖 AI生成 · 5个场景 · 2026-03-19 提交审核</div>
+    <div class="mc-tags">
+      <span class="tag tag-gray tag-sm">书法</span>
+      <span class="tag tag-gray tag-sm">小学/初中</span>
+    </div>
+    <div class="mc-actions" onclick="event.stopPropagation()">
+      <button class="mc-btn mc-btn-warn">⏳ 等待管理员审核</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<div class="fab" onclick="location.href='maic-create.html'">✚</div>
+
+<script>
+function switchTab(el){document.querySelectorAll('.ft-item').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+</script>
+</body>
+</html>

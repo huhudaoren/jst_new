@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>赛事方审核 · 竞赛通管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.admin-nav{background:linear-gradient(135deg,#1A237E,#283593);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.admin-nav .back-btn{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.admin-nav-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.seg-tabs{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);}
+.seg-tab{flex:1;height:48px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--c-gray-500);cursor:pointer;position:relative;touch-action:manipulation;}
+.seg-tab.active{color:#1B5E20;font-weight:700;}
+.seg-tab.active::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:2.5px;background:#1B5E20;border-radius:1px;}
+.filter-tabs{display:flex;background:var(--c-gray-50);border-bottom:1px solid var(--c-gray-100);}
+.ft{flex:1;height:40px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--c-gray-500);cursor:pointer;touch-action:manipulation;position:relative;}
+.ft.active{color:#1B5E20;font-weight:700;}
+.ft.active::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:2px;background:#1B5E20;border-radius:1px;}
+.audit-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:10px var(--space-4) 0;overflow:hidden;cursor:pointer;touch-action:manipulation;}
+.ac-header{display:flex;align-items:center;gap:12px;padding:14px 16px 10px;}
+.ac-avatar{width:44px;height:44px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.ac-info{flex:1;}
+.ac-name{font-size:15px;font-weight:700;color:var(--c-gray-900);}
+.ac-meta{font-size:12px;color:var(--c-gray-500);margin-top:2px;}
+.ac-tags{padding:0 16px 10px;display:flex;gap:6px;flex-wrap:wrap;}
+.ac-footer{padding:8px 16px 12px;display:flex;gap:8px;border-top:1px solid var(--c-gray-50);}
+.btn-pass{flex:1;height:40px;background:var(--c-success);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;}
+.btn-reject{flex:1;height:40px;background:var(--c-white);color:var(--c-danger);border:1px solid var(--c-danger);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;}
+.btn-hold{width:40px;height:40px;background:var(--c-gray-50);border:1px solid var(--c-gray-100);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1A237E;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="admin-nav animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="admin-nav-title">赛事方审核</div>
+</div>
+
+<!-- 主 Tab -->
+<div class="seg-tabs">
+  <div class="seg-tab active" onclick="switchSeg(this,'apply')">🏢 入驻申请</div>
+  <div class="seg-tab" onclick="switchSeg(this,'contest')">🏆 赛事上线审核</div>
+</div>
+
+<!-- 子 Tab -->
+<div class="filter-tabs">
+  <div class="ft active" onclick="switchFt(this)">待审核 <span style="background:var(--c-danger);color:white;font-size:10px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:3px;">2</span></div>
+  <div class="ft" onclick="switchFt(this)">全部</div>
+  <div class="ft" onclick="switchFt(this)">已通过</div>
+  <div class="ft" onclick="switchFt(this)">已驳回</div>
+</div>
+
+<!-- 入驻申请审核卡 1 -->
+<div class="audit-card animate-in animate-in-d1">
+  <div class="ac-header">
+    <div class="ac-avatar" style="background:linear-gradient(135deg,#1B5E20,#66BB6A);">🏢</div>
+    <div class="ac-info">
+      <div class="ac-name">北京艺术星文化传媒有限公司</div>
+      <div class="ac-meta">申请时间：2026-03-18 14:20 · 联系人：李总 · 18811112222</div>
+    </div>
+    <span class="tag tag-warning tag-dot">待审核</span>
+  </div>
+  <div class="ac-tags">
+    <span class="tag tag-gray">营业执照✓</span>
+    <span class="tag tag-gray">赛事资质✓</span>
+    <span class="tag tag-gray">结算账户✓</span>
+    <span class="tag tag-primary">艺术类赛事</span>
+  </div>
+  <div style="padding:0 16px 10px;font-size:12px;color:var(--c-gray-700);">
+    主营艺术教育赛事，已举办 3 届全国美育大赛，参赛规模约 5,000 人次/届
+  </div>
+  <div class="ac-footer" onclick="event.stopPropagation()">
+    <div class="btn-hold">⏸</div>
+    <button class="btn-reject" onclick="doReject()">驳回</button>
+    <button class="btn-pass" onclick="doPass('北京艺术星文化传媒')">✅ 通过入驻</button>
+  </div>
+</div>
+
+<!-- 入驻申请审核卡 2 -->
+<div class="audit-card animate-in animate-in-d2">
+  <div class="ac-header">
+    <div class="ac-avatar" style="background:linear-gradient(135deg,#0D47A1,#42A5F5);">🎭</div>
+    <div class="ac-info">
+      <div class="ac-name">上海童星音乐教育科技集团</div>
+      <div class="ac-meta">申请时间：2026-03-17 10:05 · 联系人：张总 · 13900000001</div>
+    </div>
+    <span class="tag tag-warning tag-dot">待审核</span>
+  </div>
+  <div class="ac-tags">
+    <span class="tag tag-gray">营业执照✓</span>
+    <span class="tag tag-danger">赛事资质待补充</span>
+    <span class="tag tag-gray">结算账户✓</span>
+    <span class="tag tag-primary">音乐类赛事</span>
+  </div>
+  <div class="ac-footer" onclick="event.stopPropagation()">
+    <div class="btn-hold">⏸</div>
+    <button class="btn-reject" onclick="doReject()">驳回补材料</button>
+    <button class="btn-pass" onclick="doPass('上海童星音乐教育')">✅ 通过入驻</button>
+  </div>
+</div>
+
+<script>
+function switchSeg(el,type){document.querySelectorAll('.seg-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function switchFt(el){document.querySelectorAll('.ft').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function doPass(name){const t=document.createElement('div');t.className='toast';t.textContent='✅ 已通过入驻，系统正在创建工作台账号…';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+function doReject(){const t=document.createElement('div');t.className='toast';t.textContent='已驳回，请说明原因后确认';document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+</script>
+</body>
+</html>

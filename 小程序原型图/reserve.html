@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>活动预约 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); padding-bottom: 100px; }
+
+/* ── 顶部活动信息 Hero ── */
+.reserve-hero {
+  background: linear-gradient(150deg, #4A0E8F 0%, #7B1FA2 50%, #F5A623 130%);
+  padding: 20px var(--space-4) 0; position: relative; overflow: hidden;
+}
+.reserve-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(255,255,255,.08) 0%, transparent 50%);
+}
+.reserve-hero::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 24px; background: var(--c-gray-50); border-radius: 24px 24px 0 0;
+}
+.rh-nav {
+  display: flex; align-items: center; position: relative; z-index: 1; margin-bottom: 14px;
+}
+.rh-back {
+  width: 36px; height: 36px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: white; cursor: pointer; margin-right: 12px; touch-action: manipulation;
+}
+.rh-title { flex: 1; font-size: 17px; font-weight: 700; color: white; }
+.event-info-card {
+  position: relative; z-index: 1; margin-bottom: 20px;
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+  border-radius: var(--radius-lg); padding: 16px;
+}
+.eic-name { font-size: 18px; font-weight: 900; color: white; margin-bottom: 8px; }
+.eic-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.eic-tag {
+  padding: 3px 10px; border-radius: var(--radius-full);
+  background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.28);
+  font-size: 11px; font-weight: 600; color: rgba(255,255,255,.9);
+}
+.eic-meta { font-size: 13px; color: rgba(255,255,255,.7); line-height: 1.8; }
+
+/* ── 步骤条 ── */
+.steps-row {
+  display: flex; align-items: center; padding: 16px var(--space-4);
+  background: var(--c-white); border-bottom: 1px solid var(--c-gray-100);
+}
+.step-node { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; position: relative; }
+.step-node:not(:last-child)::after {
+  content: ''; position: absolute; top: 12px; left: 55%; right: -45%;
+  height: 2px; background: var(--c-gray-100);
+}
+.step-node.done::after, .step-node.active::after { background: #7B1FA2; }
+.step-circle {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid var(--c-gray-200); background: var(--c-white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--c-gray-400); z-index: 1;
+}
+.step-node.active .step-circle { border-color: #7B1FA2; color: #7B1FA2; box-shadow: 0 0 0 3px rgba(123,31,162,.12); }
+.step-node.done .step-circle  { border-color: #7B1FA2; background: #7B1FA2; color: white; }
+.step-label { font-size: 10px; color: var(--c-gray-500); }
+.step-node.active .step-label { color: #7B1FA2; font-weight: 700; }
+
+/* ── 选择区块 ── */
+.select-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); margin: 12px var(--space-4) 0; overflow: hidden;
+}
+.sc-header {
+  padding: 14px 16px 10px; font-size: 14px; font-weight: 700; color: var(--c-gray-900);
+  border-bottom: 1px solid var(--c-gray-100); display: flex; align-items: center; gap: 6px;
+}
+.sc-header::before { content:''; width:3px; height:14px; background:#7B1FA2; border-radius:2px; }
+
+/* ── 日历选择 ── */
+.calendar-wrap { padding: 16px; }
+.cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.cal-month { font-size: 16px; font-weight: 800; color: var(--c-gray-900); }
+.cal-arrow {
+  width: 32px; height: 32px; border-radius: var(--radius-sm);
+  background: var(--c-gray-50); border: 1px solid var(--c-gray-100);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer; touch-action: manipulation; color: var(--c-gray-600);
+}
+.cal-arrow:active { background: var(--c-gray-100); }
+.cal-week-row { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 6px; }
+.cal-week-label { text-align: center; font-size: 11px; font-weight: 700; color: var(--c-gray-400); padding: 4px 0; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+.cal-day {
+  aspect-ratio: 1; border-radius: var(--radius-sm); display: flex;
+  flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; touch-action: manipulation; position: relative;
+  transition: all var(--duration-fast);
+}
+.cal-day:active { transform: scale(0.92); }
+.cal-day-num { font-size: 14px; font-weight: 700; color: var(--c-gray-900); line-height: 1; }
+.cal-day.other-month .cal-day-num { color: var(--c-gray-300); }
+.cal-day.today .cal-day-num { color: #7B1FA2; }
+.cal-day.today::after { content:''; position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:#7B1FA2; }
+.cal-day.has-session { background: rgba(123,31,162,.06); }
+.cal-day.has-session .cal-day-num { color: #7B1FA2; }
+.cal-day.selected { background: #7B1FA2; border-radius: var(--radius-sm); }
+.cal-day.selected .cal-day-num { color: white; font-weight: 900; }
+.cal-day.disabled { opacity: .35; pointer-events: none; }
+.cal-day.full .cal-session-dot { background: var(--c-danger); }
+.cal-session-dot { width:5px;height:5px;border-radius:50%;background:#7B1FA2;margin-top:2px; }
+.cal-day.selected .cal-session-dot { background: rgba(255,255,255,.7); }
+.cal-legend { display: flex; gap: 14px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--c-gray-100); }
+.leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--c-gray-500); }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── 场次选择 ── */
+.session-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; padding: 14px 16px; }
+.session-card {
+  border: 1.5px solid var(--c-gray-100); border-radius: var(--radius-md);
+  padding: 14px 12px; cursor: pointer; touch-action: manipulation;
+  transition: all var(--duration-fast); position: relative;
+}
+.session-card:active { transform: scale(0.97); }
+.session-card.selected { border-color: #7B1FA2; background: rgba(123,31,162,.05); }
+.session-card.full { opacity: .5; pointer-events: none; }
+.sc-time { font-size: 15px; font-weight: 800; color: var(--c-gray-900); margin-bottom: 5px; }
+.sc-label { font-size: 12px; font-weight: 600; color: var(--c-gray-700); margin-bottom: 4px; }
+.sc-remain { font-size: 11px; color: var(--c-gray-500); }
+.sc-remain.urgent { color: var(--c-danger); }
+.sc-radio {
+  position: absolute; top: 10px; right: 10px; width: 18px; height: 18px;
+  border-radius: 50%; border: 1.5px solid var(--c-gray-300);
+  transition: all var(--duration-fast);
+}
+.session-card.selected .sc-radio { border-color: #7B1FA2; background: #7B1FA2; }
+.session-card.selected .sc-radio::after { content:'✓'; font-size:10px;color:white;font-weight:700;display:flex;align-items:center;justify-content:center;height:100%; }
+.session-full-badge {
+  position: absolute; top: 10px; right: 10px; background: var(--c-gray-100);
+  color: var(--c-gray-500); font-size: 10px; font-weight: 700;
+  padding: 2px 7px; border-radius: var(--radius-full);
+}
+
+/* ── 预约信息确认 ── */
+.confirm-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs); margin: 12px var(--space-4) 0;
+}
+.confirm-row {
+  display: flex; align-items: center; padding: 12px 16px;
+  border-bottom: 1px solid var(--c-gray-100);
+}
+.confirm-row:last-child { border-bottom: none; }
+.cr-key { font-size: 13px; color: var(--c-gray-500); width: 80px; flex-shrink: 0; }
+.cr-val { font-size: 14px; font-weight: 700; color: var(--c-gray-900); flex: 1; }
+.cr-val.purple { color: #7B1FA2; }
+
+/* ── 底部确认栏 ── */
+.reserve-bar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 390px; background: var(--c-white);
+  border-top: 1px solid var(--c-gray-100);
+  padding: 12px var(--space-4) calc(12px + env(safe-area-inset-bottom));
+  z-index: 100;
+}
+.reserve-btn {
+  width: 100%; height: 52px; background: linear-gradient(135deg, #4A0072, #7B1FA2);
+  color: white; border: none; border-radius: var(--radius-md);
+  font-size: 16px; font-weight: 800; cursor: pointer; touch-action: manipulation;
+}
+.reserve-btn:active { opacity: .9; }
+.reserve-btn:disabled { background: var(--c-gray-200); color: var(--c-gray-400); cursor: not-allowed; }
+
+/* ── 预热提示横幅 ── */
+.preheat-banner {
+  background: linear-gradient(90deg, #4A0072, #7B1FA2);
+  margin: 12px var(--space-4) 0; border-radius: var(--radius-lg);
+  padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+}
+.pb-icon { font-size: 28px; flex-shrink: 0; }
+.pb-info { flex: 1; }
+.pb-title { font-size: 15px; font-weight: 800; color: white; margin-bottom: 3px; }
+.pb-sub { font-size: 12px; color: rgba(255,255,255,.7); }
+.pb-cd { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
+.pb-cd-block {
+  background: rgba(0,0,0,.25); border-radius: 6px;
+  padding: 4px 8px; font-size: 16px; font-weight: 900; color: white;
+}
+.pb-cd-sep { font-size: 14px; color: rgba(255,255,255,.6); font-weight: 700; }
+
+/* ── 预热态（尚未开放预约）专属样式 ── */
+.preheat-only-banner {
+  margin: 12px var(--space-4) 0;
+  background: linear-gradient(135deg,#4A0E8F 0%,#7B1FA2 50%,#F5A623 120%);
+  border-radius: var(--radius-xl); padding: 20px;
+  box-shadow: 0 6px 24px rgba(74,14,143,.35);
+  position: relative; overflow: hidden;
+}
+.preheat-only-banner::before {
+  content:'';position:absolute;top:-20px;right:-20px;
+  width:120px;height:120px;border-radius:50%;
+  background:rgba(255,255,255,.06);
+}
+.pob-tag {
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);
+  border-radius:var(--radius-full);padding:4px 12px;
+  font-size:11px;font-weight:700;color:white;margin-bottom:10px;
+}
+.pob-title { font-size:20px;font-weight:900;color:white;margin-bottom:4px; }
+.pob-sub   { font-size:13px;color:rgba(255,255,255,.75);margin-bottom:14px; }
+.pob-cd-row { display:flex;align-items:center;gap:6px;margin-bottom:16px; }
+.pob-cd-block {
+  background:rgba(0,0,0,.25);border-radius:var(--radius-sm);
+  padding:8px 10px;font-size:22px;font-weight:900;color:white;min-width:44px;text-align:center;
+}
+.pob-cd-unit { font-size:12px;color:rgba(255,255,255,.65); }
+.pob-notify-btn {
+  width:100%;height:46px;
+  background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.3);
+  border-radius:var(--radius-md);font-size:15px;font-weight:700;color:white;
+  cursor:pointer;touch-action:manipulation;
+}
+.pob-open-date {
+  text-align:center;margin-top:10px;font-size:12px;color:rgba(255,255,255,.6);
+}
+/* 状态切换 Demo 按钮（开发演示用）*/
+.state-demo-bar {
+  margin: 10px 16px 0;
+  background: var(--c-white); border-radius: var(--radius-md);
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+  box-shadow: var(--shadow-xs);
+}
+.state-demo-label { font-size: 12px; color: var(--c-gray-500); flex: 1; }
+.state-demo-chips { display: flex; gap: 6px; }
+.sdc {
+  padding: 4px 12px; border-radius: var(--radius-full);
+  font-size: 12px; font-weight: 700; cursor: pointer; touch-action: manipulation;
+  border: 1.5px solid var(--c-gray-100); color: var(--c-gray-600);
+  background: var(--c-gray-50);
+}
+.sdc.active { border-color: #7B1FA2; color: #7B1FA2; background: #F3E8FF; }
+</style>
+</head>
+<body>
+
+<div class="status-bar" style="background:#4A0072;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+
+<!-- 活动信息 Hero -->
+<div class="reserve-hero animate-in">
+  <div class="rh-nav">
+    <div class="rh-back" onclick="history.back()">←</div>
+    <div class="rh-title">活动预约</div>
+  </div>
+  <div class="event-info-card">
+    <div class="eic-name">安徒生(国际)艺术奖·颁奖典礼</div>
+    <div class="eic-tags">
+      <span class="eic-tag">🏆 线下颁奖</span>
+      <span class="eic-tag">📍 广州天河体育馆</span>
+      <span class="eic-tag">🎟️ 需凭预约入场</span>
+    </div>
+    <div class="eic-meta">
+      📅 可选日期：2026-04-10 / 04-11 / 04-12<br>
+      ⏰ 场次：上午场 09:00 / 下午场 14:00 / 晚场 19:00
+    </div>
+  </div>
+</div>
+
+<!-- 演示模式切换（正式版不显示）-->
+<div class="state-demo-bar">
+  <div class="state-demo-label">🛠 演示：活动阶段切换</div>
+  <div class="state-demo-chips">
+    <div class="sdc" id="sdc-preheat" onclick="setActivityState('preheat')">预热中</div>
+    <div class="sdc active" id="sdc-open" onclick="setActivityState('open')">预约中</div>
+    <div class="sdc" id="sdc-closed" onclick="setActivityState('closed')">已截止</div>
+  </div>
+</div>
+
+<!-- ① 预热态：活动已发布但预约未开放 -->
+<div class="preheat-only-banner animate-in animate-in-d1" id="statePreheat" style="display:none;">
+  <div class="pob-tag">🔥 活动预热中</div>
+  <div class="pob-title">安徒生(国际)艺术奖·颁奖典礼</div>
+  <div class="pob-sub">活动已发布 · 预约通道即将开放 · 敬请期待</div>
+  <div class="pob-cd-row">
+    <div class="pob-cd-block" id="ph-d">03</div>
+    <div class="pob-cd-unit">天</div>
+    <div class="pob-cd-block" id="ph-h">08</div>
+    <div class="pob-cd-unit">时</div>
+    <div class="pob-cd-block" id="ph-m">22</div>
+    <div class="pob-cd-unit">分后开放预约</div>
+  </div>
+  <button class="pob-notify-btn" onclick="subscribeNotify()">🔔 开放时提醒我</button>
+  <div class="pob-open-date">预计开放预约时间：2026-04-01 10:00</div>
+</div>
+
+<!-- ② 可预约态：正在开放预约（含原倒计时横幅）-->
+<div class="preheat-banner animate-in animate-in-d1" id="stateOpen" style="display:block;">
+  <div class="pb-icon">🎟️</div>
+  <div class="pb-info">
+    <div class="pb-title">预约通道已开启！距颁奖典礼开幕</div>
+    <div class="pb-sub">抢先预约，确保入场资格 · 名额有限先到先得</div>
+    <div class="pb-cd">
+      <div class="pb-cd-block" id="cd-d">06</div><div class="pb-cd-sep">天</div>
+      <div class="pb-cd-block" id="cd-h">14</div><div class="pb-cd-sep">时</div>
+      <div class="pb-cd-block" id="cd-m">32</div><div class="pb-cd-sep">分</div>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 截止态：预约已关闭 -->
+<div class="animate-in animate-in-d1" id="stateClosed" style="display:none;margin:12px 16px 0;background:var(--c-gray-100);border-radius:var(--radius-lg);padding:16px;text-align:center;">
+  <div style="font-size:32px;margin-bottom:8px;">🔒</div>
+  <div style="font-size:16px;font-weight:700;color:var(--c-gray-600);">预约通道已关闭</div>
+  <div style="font-size:13px;color:var(--c-gray-500);margin-top:6px;">报名截止时间：2026-04-08 23:59<br>如有问题请联系赛事方客服</div>
+</div>
+
+<div id="reserveBody"><!-- 步骤条 -->
+<div class="steps-row animate-in animate-in-d1">
+  <div class="step-node active" id="step1">
+    <div class="step-circle">1</div>
+    <div class="step-label">选择日期</div>
+  </div>
+  <div class="step-node" id="step2">
+    <div class="step-circle">2</div>
+    <div class="step-label">选择场次</div>
+  </div>
+  <div class="step-node" id="step3">
+    <div class="step-circle">3</div>
+    <div class="step-label">确认信息</div>
+  </div>
+</div>
+
+<!-- Step 1：日历选择 -->
+<div class="select-card animate-in animate-in-d2" id="cardDate">
+  <div class="sc-header">选择日期</div>
+  <div class="calendar-wrap">
+    <div class="cal-nav">
+      <div class="cal-arrow" onclick="prevMonth()">‹</div>
+      <div class="cal-month" id="calMonthLabel">2026年 4月</div>
+      <div class="cal-arrow" onclick="nextMonth()">›</div>
+    </div>
+    <div class="cal-week-row">
+      <div class="cal-week-label">日</div><div class="cal-week-label">一</div>
+      <div class="cal-week-label">二</div><div class="cal-week-label">三</div>
+      <div class="cal-week-label">四</div><div class="cal-week-label">五</div>
+      <div class="cal-week-label">六</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#7B1FA2;"></div>有场次可选</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--c-danger);"></div>已约满</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--c-gray-200);"></div>不可选</div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2：场次选择（日期选后出现）-->
+<div class="select-card animate-in animate-in-d2" id="cardSession" style="display:none;">
+  <div class="sc-header" id="sessionTitle">选择场次 · 2026年4月10日（周五）</div>
+  <div class="session-grid">
+
+    <div class="session-card" id="sess-1" onclick="selectSession(this,'09:00-12:00','上午场','入场码+礼品码')">
+      <div class="sc-radio" id="radio-1"></div>
+      <div class="sc-time">09:00 – 12:00</div>
+      <div class="sc-label">🌅 上午场</div>
+      <div class="sc-remain">剩余 <strong style="color:#7B1FA2;">38</strong> 个名额</div>
+    </div>
+
+    <div class="session-card" id="sess-2" onclick="selectSession(this,'14:00-17:00','下午场','入场码+礼品码')">
+      <div class="sc-radio" id="radio-2"></div>
+      <div class="sc-time">14:00 – 17:00</div>
+      <div class="sc-label">☀️ 下午场</div>
+      <div class="sc-remain urgent">剩余 <strong style="color:var(--c-danger);">5</strong> 个名额！</div>
+    </div>
+
+    <div class="session-card" id="sess-3" onclick="selectSession(this,'19:00-21:30','晚场（颁奖）','入场码+礼品码+颁奖典礼码')">
+      <div class="sc-radio" id="radio-3"></div>
+      <div class="sc-time">19:00 – 21:30</div>
+      <div class="sc-label">🌙 晚场（含颁奖典礼）</div>
+      <div class="sc-remain">剩余 <strong style="color:#7B1FA2;">22</strong> 个名额</div>
+    </div>
+
+    <div class="session-card full">
+      <div class="session-full-badge">已约满</div>
+      <div class="sc-time" style="color:var(--c-gray-400);">09:00 – 12:00</div>
+      <div class="sc-label" style="color:var(--c-gray-400);">🌅 4月11日上午场</div>
+      <div class="sc-remain" style="color:var(--c-gray-400);">已约满</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Step 3：确认信息（场次选后出现）-->
+<div class="confirm-card animate-in" id="cardConfirm" style="display:none;">
+  <div class="sc-header" style="padding:14px 16px 10px;font-size:14px;font-weight:700;color:var(--c-gray-900);border-bottom:1px solid var(--c-gray-100);display:flex;align-items:center;gap:6px;">
+    <span style="display:inline-block;width:3px;height:14px;background:#7B1FA2;border-radius:2px;"></span>
+    确认预约信息
+  </div>
+  <div class="confirm-row"><div class="cr-key">预约人</div><div class="cr-val">张小明</div></div>
+  <div class="confirm-row"><div class="cr-key">联系电话</div><div class="cr-val">138****8001</div></div>
+  <div class="confirm-row"><div class="cr-key">活动名称</div><div class="cr-val">安徒生(国际)艺术奖·颁奖典礼</div></div>
+  <div class="confirm-row"><div class="cr-key">预约日期</div><div class="cr-val purple" id="confirmDate">—</div></div>
+  <div class="confirm-row"><div class="cr-key">场次</div><div class="cr-val purple" id="confirmSession">—</div></div>
+  <div class="confirm-row"><div class="cr-key">将获得核销码</div><div class="cr-val purple" id="confirmCodes">—</div></div>
+  <div class="confirm-row">
+    <div class="cr-key">温馨提示</div>
+    <div style="flex:1;font-size:12px;color:var(--c-gray-500);line-height:1.7;">
+      · 预约成功后将生成专属核销码，现场凭码入场<br>
+      · 每场核销码独立，不可互换使用<br>
+      · 请提前15分钟到场完成入场核销
+    </div>
+  </div>
+</div>
+
+<!-- 底部操作栏 -->
+<div class="reserve-bar">
+  <button class="reserve-btn" id="reserveBtn" disabled onclick="doReserve()">
+    请先选择日期和场次
+  </button>
+</div>
+
+</div><!-- /reserveBody -->
+<script>
+// ── 倒计时 ──────────────────────────────────────────
+function updateCountdown() {
+  const end = new Date('2026-04-10T09:00:00');
+  const now = new Date();
+  const diff = Math.max(0, end - now);
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor(diff % 86400000 / 3600000);
+  const m = Math.floor(diff % 3600000 / 60000);
+  const fmt = v => String(v).padStart(2,'0');
+  document.getElementById('cd-d').textContent = fmt(d);
+  document.getElementById('cd-h').textContent = fmt(h);
+  document.getElementById('cd-m').textContent = fmt(m);
+}
+updateCountdown(); setInterval(updateCountdown, 60000);
+
+// ── 日历 ──────────────────────────────────────────
+let currentYear = 2026, currentMonth = 3; // 0-indexed: 3 = April
+let selectedDate = null;
+let selectedSession = null;
+
+// 可选日期（有场次）
+const availableDates = {
+  '2026-4-10': 'available',
+  '2026-4-11': 'partial',   // 部分约满
+  '2026-4-12': 'available',
+};
+
+const weekDays = ['日','一','二','三','四','五','六'];
+const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+function renderCalendar() {
+  document.getElementById('calMonthLabel').textContent = `${currentYear}年 ${monthNames[currentMonth]}`; // monthNames 已含月字
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const today = new Date();
+
+  // 上月占位
+  const prevDays = new Date(currentYear, currentMonth, 0).getDate();
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = document.createElement('div');
+    d.className = 'cal-day other-month disabled';
+    d.innerHTML = `<div class="cal-day-num">${prevDays - i}</div>`;
+    grid.appendChild(d);
+  }
+
+  // 本月
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = document.createElement('div');
+    const dateKey = `${currentYear}-${currentMonth+1}-${day}`;
+    const isToday = today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === day;
+    const isPast = new Date(currentYear, currentMonth, day) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const status = availableDates[dateKey];
+
+    let cls = 'cal-day';
+    if (isToday) cls += ' today';
+    if (isPast && !isToday) cls += ' disabled';
+    if (status) cls += ' has-session';
+    if (selectedDate === dateKey) cls += ' selected';
+    if (!status && !isPast) cls += ' disabled';
+
+    d.className = cls;
+    d.innerHTML = `<div class="cal-day-num">${day}</div>${status ? '<div class="cal-session-dot"></div>' : ''}`;
+
+    if (status && !isPast) {
+      d.onclick = () => pickDate(dateKey, day);
+    }
+    grid.appendChild(d);
+  }
+}
+
+function pickDate(dateKey, day) {
+  selectedDate = dateKey;
+  selectedSession = null;
+  renderCalendar();
+
+  // 显示场次
+  const month = currentMonth + 1;
+  const dayNames = ['日','一','二','三','四','五','六'];
+  const dow = new Date(currentYear, currentMonth, day).getDay();
+  const dayP=String(day).padStart(2,'0');
+  const monthP=String(month).padStart(2,'0');
+  document.getElementById('sessionTitle').textContent = `选择场次 · ${currentYear}年${monthP}月${dayP}日（周${dayNames[dow]}）`;
+  document.getElementById('cardSession').style.display = 'block';
+  document.getElementById('cardConfirm').style.display = 'none';
+  const dayPad = String(day).padStart(2,'0');
+  const monthPad = String(month).padStart(2,'0');
+  document.getElementById('confirmDate').textContent = `${currentYear}年${monthPad}月${dayPad}日`;
+
+  // 重置场次选择
+  document.querySelectorAll('.session-card:not(.full)').forEach(c => c.classList.remove('selected'));
+
+  // 步骤更新
+  document.getElementById('step1').className = 'step-node done';
+  document.getElementById('step2').className = 'step-node active';
+  document.getElementById('step3').className = 'step-node';
+
+  updateBtn();
+  document.getElementById('cardSession').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function selectSession(el, time, label, codes) {
+  document.querySelectorAll('.session-card:not(.full)').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedSession = {time, label, codes};
+
+  document.getElementById('confirmSession').textContent = `${label} ${time}`;
+  document.getElementById('confirmCodes').textContent = codes;
+  document.getElementById('cardConfirm').style.display = 'block';
+
+  // 步骤更新
+  document.getElementById('step2').className = 'step-node done';
+  document.getElementById('step3').className = 'step-node active';
+
+  updateBtn();
+  setTimeout(() => document.getElementById('cardConfirm').scrollIntoView({behavior:'smooth', block:'nearest'}), 100);
+}
+
+function updateBtn() {
+  const btn = document.getElementById('reserveBtn');
+  if (selectedDate && selectedSession) {
+    btn.disabled = false;
+    btn.textContent = `确认预约 · ${selectedSession.label}`;
+  } else if (selectedDate) {
+    btn.disabled = true;
+    btn.textContent = '请选择场次';
+  } else {
+    btn.disabled = true;
+    btn.textContent = '请先选择日期和场次';
+  }
+}
+
+function prevMonth() {
+  if (currentMonth === 0) { currentMonth = 11; currentYear--; }
+  else currentMonth--;
+  renderCalendar();
+}
+
+function nextMonth() {
+  if (currentMonth === 11) { currentMonth = 0; currentYear++; }
+  else currentMonth++;
+  renderCalendar();
+}
+
+/* ── 活动阶段状态机 ── */
+const ACTIVITY_STATE_CONFIG = {
+  preheat: {
+    preheat: true, open: false, closed: false,
+    reserveBody: false   // 预热时不显示预约步骤
+  },
+  open: {
+    preheat: false, open: true, closed: false,
+    reserveBody: true
+  },
+  closed: {
+    preheat: false, open: false, closed: true,
+    reserveBody: false
+  }
+};
+
+function setActivityState(state) {
+  const cfg = ACTIVITY_STATE_CONFIG[state];
+  document.getElementById('statePreheat').style.display = cfg.preheat ? 'block' : 'none';
+  document.getElementById('stateOpen').style.display    = cfg.open    ? 'block' : 'none';
+  document.getElementById('stateClosed').style.display  = cfg.closed  ? 'block' : 'none';
+  document.getElementById('reserveBody').style.display  = cfg.reserveBody ? 'block' : 'none';
+  // Chip 激活
+  ['preheat','open','closed'].forEach(s => {
+    const el = document.getElementById('sdc-' + s);
+    if (el) el.classList.toggle('active', s === state);
+  });
+}
+
+function subscribeNotify() {
+  showToast('✅ 已订阅开放通知，预约开放时将第一时间推送');
+}
+
+function doReserve() {
+  showToast('预约成功！正在生成您的专属核销码…');
+  setTimeout(() => location.href = 'my-reserve.html', 1200);
+}
+
+function showToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2400);
+}
+
+renderCalendar();
+</script>
+</body>
+</html>

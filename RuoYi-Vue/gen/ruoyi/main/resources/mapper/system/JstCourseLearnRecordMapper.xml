@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JstCourseLearnRecordMapper">
+    
+    <resultMap type="JstCourseLearnRecord" id="JstCourseLearnRecordResult">
+        <result property="learnId"    column="learn_id"    />
+        <result property="courseId"    column="course_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="progress"    column="progress"    />
+        <result property="durationSeconds"    column="duration_seconds"    />
+        <result property="quizScore"    column="quiz_score"    />
+        <result property="completeStatus"    column="complete_status"    />
+        <result property="completeTime"    column="complete_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectJstCourseLearnRecordVo">
+        select learn_id, course_id, user_id, progress, duration_seconds, quiz_score, complete_status, complete_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_course_learn_record
+    </sql>
+
+    <select id="selectJstCourseLearnRecordList" parameterType="JstCourseLearnRecord" resultMap="JstCourseLearnRecordResult">
+        <include refid="selectJstCourseLearnRecordVo"/>
+        <where>  
+            <if test="courseId != null "> and course_id = #{courseId}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="progress != null "> and progress = #{progress}</if>
+            <if test="durationSeconds != null "> and duration_seconds = #{durationSeconds}</if>
+            <if test="quizScore != null "> and quiz_score = #{quizScore}</if>
+            <if test="completeStatus != null  and completeStatus != ''"> and complete_status = #{completeStatus}</if>
+            <if test="completeTime != null "> and complete_time = #{completeTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectJstCourseLearnRecordByLearnId" parameterType="Long" resultMap="JstCourseLearnRecordResult">
+        <include refid="selectJstCourseLearnRecordVo"/>
+        where learn_id = #{learnId}
+    </select>
+
+    <insert id="insertJstCourseLearnRecord" parameterType="JstCourseLearnRecord" useGeneratedKeys="true" keyProperty="learnId">
+        insert into jst_course_learn_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="courseId != null">course_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="progress != null">progress,</if>
+            <if test="durationSeconds != null">duration_seconds,</if>
+            <if test="quizScore != null">quiz_score,</if>
+            <if test="completeStatus != null and completeStatus != ''">complete_status,</if>
+            <if test="completeTime != null">complete_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="courseId != null">#{courseId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="progress != null">#{progress},</if>
+            <if test="durationSeconds != null">#{durationSeconds},</if>
+            <if test="quizScore != null">#{quizScore},</if>
+            <if test="completeStatus != null and completeStatus != ''">#{completeStatus},</if>
+            <if test="completeTime != null">#{completeTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJstCourseLearnRecord" parameterType="JstCourseLearnRecord">
+        update jst_course_learn_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="courseId != null">course_id = #{courseId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="progress != null">progress = #{progress},</if>
+            <if test="durationSeconds != null">duration_seconds = #{durationSeconds},</if>
+            <if test="quizScore != null">quiz_score = #{quizScore},</if>
+            <if test="completeStatus != null and completeStatus != ''">complete_status = #{completeStatus},</if>
+            <if test="completeTime != null">complete_time = #{completeTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where learn_id = #{learnId}
+    </update>
+
+    <delete id="deleteJstCourseLearnRecordByLearnId" parameterType="Long">
+        delete from jst_course_learn_record where learn_id = #{learnId}
+    </delete>
+
+    <delete id="deleteJstCourseLearnRecordByLearnIds" parameterType="String">
+        delete from jst_course_learn_record where learn_id in 
+        <foreach item="learnId" collection="array" open="(" separator="," close=")">
+            #{learnId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>选择优惠 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:100px;}
+.p-nav{background:var(--c-white);border-bottom:1px solid var(--c-gray-100);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.p-back{width:34px;height:34px;border-radius:var(--radius-sm);background:var(--c-gray-50);border:1px solid var(--c-gray-100);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--c-gray-700);cursor:pointer;touch-action:manipulation;}
+.p-title{font-size:17px;font-weight:700;color:var(--c-gray-900);flex:1;}
+
+/* 订单摘要 */
+.order-summary{background:var(--c-primary-50);border:1px solid var(--c-primary-200);border-radius:var(--radius-lg);margin:12px 16px 0;padding:14px 16px;}
+.os-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;}
+.os-row:last-child{margin-bottom:0;padding-top:8px;border-top:1px solid var(--c-primary-200);}
+.os-key{color:var(--c-gray-700);}
+.os-val{font-weight:700;color:var(--c-gray-900);}
+.os-val.final{font-size:18px;color:var(--c-accent);}
+
+/* 推荐标签 */
+.rec-label{padding:8px 16px 4px;font-size:12px;font-weight:700;color:var(--c-success);display:flex;align-items:center;gap:4px;}
+
+/* 优惠券选项 */
+.coupon-option{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:8px 16px 0;overflow:hidden;display:flex;cursor:pointer;touch-action:manipulation;border:2px solid transparent;transition:border-color var(--duration-fast);}
+.coupon-option.selected{border-color:var(--c-accent);}
+.coupon-option:active{opacity:.9;}
+.co-left{width:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 6px;flex-shrink:0;}
+.co-amount{font-size:24px;font-weight:900;color:white;line-height:1;}
+.co-unit{font-size:11px;color:rgba(255,255,255,.85);margin-top:3px;}
+.co-right{flex:1;padding:12px 14px 12px 18px;}
+.co-name{font-size:13px;font-weight:700;color:var(--c-gray-900);margin-bottom:3px;}
+.co-threshold{font-size:11px;color:var(--c-gray-500);}
+.co-benefit{font-size:12px;color:var(--c-success);font-weight:600;margin-top:4px;}
+.co-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--c-gray-300);display:flex;align-items:center;justify-content:center;margin:auto 12px;flex-shrink:0;transition:all var(--duration-fast);}
+.coupon-option.selected .co-radio{border-color:var(--c-accent);background:var(--c-accent);}
+.coupon-option.selected .co-radio::after{content:'✓';font-size:11px;color:white;font-weight:700;}
+
+.no-coupon{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:8px 16px 0;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;border:2px solid transparent;touch-action:manipulation;}
+.no-coupon.selected{border-color:var(--c-gray-300);}
+
+/* 底部确认栏 */
+.confirm-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:var(--c-white);border-top:1px solid var(--c-gray-100);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:100;align-items:center;}
+.cb-info{flex:1;}
+.cb-label{font-size:11px;color:var(--c-gray-500);}
+.cb-saving{font-size:13px;font-weight:700;color:var(--c-success);}
+.cb-confirm{flex:1;height:50px;background:var(--c-accent);color:white;border:none;border-radius:var(--radius-md);font-size:16px;font-weight:800;cursor:pointer;touch-action:manipulation;}
+</style>
+</head>
+<body>
+<div class="status-bar"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="p-nav animate-in">
+  <div class="p-back" onclick="history.back()">←</div>
+  <div class="p-title">选择优惠</div>
+</div>
+
+<!-- 订单摘要 -->
+<div class="order-summary animate-in animate-in-d1">
+  <div class="os-row"><div class="os-key">报名费用</div><div class="os-val">¥80.00</div></div>
+  <div class="os-row"><div class="os-key">优惠券抵扣</div><div class="os-val" style="color:var(--c-success);" id="discountAmt">-¥0.00</div></div>
+  <div class="os-row"><div class="os-key">实付金额</div><div class="os-val final" id="finalAmt">¥80.00</div></div>
+</div>
+
+<div class="rec-label animate-in animate-in-d1">⭐ 推荐最优券</div>
+
+<!-- 推荐：满减20 -->
+<div class="coupon-option selected animate-in animate-in-d1" id="opt1" onclick="selectCoupon(this,20,'满减¥20券（已为您自动选择最优）')">
+  <div class="co-left" style="background:linear-gradient(135deg,var(--c-accent-600),var(--c-accent));">
+    <div class="co-amount">¥20</div>
+    <div class="co-unit">满减</div>
+  </div>
+  <div class="co-right">
+    <div class="co-name">报名立减20元券</div>
+    <div class="co-threshold">满 ¥80 可用 · 全部赛事</div>
+    <div class="co-benefit">已满足使用条件，节省 ¥20.00</div>
+  </div>
+  <div class="co-radio"></div>
+</div>
+
+<!-- 其他可用券 -->
+<div style="padding:8px 16px 4px;font-size:12px;font-weight:700;color:var(--c-gray-500);">其他可用券</div>
+<div class="coupon-option animate-in animate-in-d2" id="opt2" onclick="selectCoupon(this,8,'九折券（节省约¥8）')">
+  <div class="co-left" style="background:linear-gradient(135deg,#7B1FA2,#AB47BC);">
+    <div class="co-amount">9折</div>
+    <div class="co-unit">折扣</div>
+  </div>
+  <div class="co-right">
+    <div class="co-name">艺术赛事九折券</div>
+    <div class="co-threshold">无最低金额限制</div>
+    <div class="co-benefit">当前订单可省约 ¥8.00</div>
+  </div>
+  <div class="co-radio"></div>
+</div>
+
+<div style="padding:8px 16px 4px;font-size:12px;font-weight:700;color:var(--c-gray-400);">不可用 (1张)</div>
+<div style="background:var(--c-white);border-radius:var(--radius-lg);margin:0 16px;padding:12px 16px;display:flex;align-items:center;gap:12px;opacity:.5;">
+  <div style="width:80px;background:var(--c-gray-200);border-radius:var(--radius-sm);padding:14px 6px;text-align:center;flex-shrink:0;">
+    <div style="font-size:20px;font-weight:900;color:var(--c-gray-400);">¥50</div>
+    <div style="font-size:10px;color:var(--c-gray-400);">直减</div>
+  </div>
+  <div style="flex:1;padding-left:6px;">
+    <div style="font-size:13px;font-weight:700;color:var(--c-gray-500);">春季活动直减券</div>
+    <div style="font-size:11px;color:var(--c-danger);margin-top:4px;">仅限春季艺术大赛专题活动，当前赛事不适用</div>
+  </div>
+</div>
+
+<!-- 不使用优惠券选项 -->
+<div class="no-coupon animate-in animate-in-d3" id="optNone" onclick="selectNone()">
+  <div style="font-size:14px;color:var(--c-gray-700);flex:1;">不使用优惠券</div>
+  <div class="co-radio" id="radioNone"></div>
+</div>
+
+<div class="confirm-bar">
+  <div class="cb-info">
+    <div class="cb-label">当前优惠</div>
+    <div class="cb-saving" id="savingLabel">已节省 ¥20.00（最优）</div>
+  </div>
+  <button class="cb-confirm" onclick="confirmSelect()">确认使用</button>
+</div>
+
+<script>
+let selected = 'opt1';
+function selectCoupon(el, discount, label) {
+  document.querySelectorAll('.coupon-option').forEach(o=>o.classList.remove('selected'));
+  document.getElementById('optNone').classList.remove('selected');
+  document.getElementById('radioNone').innerHTML='';
+  el.classList.add('selected');
+  selected=el.id;
+  document.getElementById('discountAmt').textContent='-¥'+discount.toFixed(2);
+  document.getElementById('finalAmt').textContent='¥'+(80-discount).toFixed(2);
+  document.getElementById('savingLabel').textContent='已节省 ¥'+discount.toFixed(2);
+}
+function selectNone(){
+  document.querySelectorAll('.coupon-option').forEach(o=>o.classList.remove('selected'));
+  document.getElementById('optNone').classList.add('selected');
+  document.getElementById('radioNone').innerHTML='<span style="font-size:11px;color:white;font-weight:700;">✓</span>';
+  document.getElementById('radioNone').style.cssText='width:20px;height:20px;border-radius:50%;background:var(--c-gray-400);display:flex;align-items:center;justify-content:center;margin:auto 0;flex-shrink:0;';
+  document.getElementById('discountAmt').textContent='-¥0.00';
+  document.getElementById('finalAmt').textContent='¥80.00';
+  document.getElementById('savingLabel').textContent='未使用优惠券';
+  selected='none';
+}
+function confirmSelect(){history.back();}
+// 初始化：选中第一张
+selectCoupon(document.getElementById('opt1'),20,'满减¥20（最优）');
+</script>
+</body>
+</html>

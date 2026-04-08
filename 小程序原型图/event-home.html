@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>赛事方工作台 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body{background:var(--c-gray-50);padding-bottom:24px;}
+.e-nav{background:linear-gradient(135deg,#1B5E20,#2E7D32);padding:14px var(--space-4);display:flex;align-items:center;gap:12px;}
+.e-back{width:34px;height:34px;border-radius:var(--radius-sm);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;touch-action:manipulation;}
+.e-title{font-size:17px;font-weight:700;color:white;flex:1;}
+.e-action{padding:6px 14px;border-radius:var(--radius-full);background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);font-size:12px;font-weight:700;color:white;cursor:pointer;touch-action:manipulation;}
+.tab-bar{display:flex;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);overflow-x:auto;}
+.tab-item{flex-shrink:0;padding:0 16px;height:44px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--c-gray-500);cursor:pointer;position:relative;white-space:nowrap;touch-action:manipulation;}
+.tab-item.active{color:#2E7D32;font-weight:700;}
+.tab-item.active::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2.5px;background:#2E7D32;border-radius:1px;}
+.list-card{background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:10px 16px 0;overflow:hidden;cursor:pointer;touch-action:manipulation;}
+.list-card:active{opacity:.92;}
+.lc-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--c-gray-100);}
+.lc-row:last-child{border-bottom:none;}
+.lc-icon{width:42px;height:42px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.lc-info{flex:1;}
+.lc-name{font-size:14px;font-weight:700;color:var(--c-gray-900);}
+.lc-meta{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+.lc-right{text-align:right;flex-shrink:0;}
+.lc-val{font-size:14px;font-weight:700;color:var(--c-primary-600);}
+.lc-sub{font-size:11px;color:var(--c-gray-500);margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:#1B5E20;"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+
+<div class="e-nav animate-in">
+  <div class="e-back" onclick="history.back()">←</div>
+  <div class="e-title">赛事方工作台</div>
+  <div class="e-action" onclick="showToast('账号：artstar_bj')">账号</div>
+</div>
+<!-- Hero -->
+<div style="background:linear-gradient(150deg,#1B5E20 0%,#2E7D32 50%,#66BB6A 130%);padding:20px 16px 0;position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,.07) 0%,transparent 50%);"></div>
+  <div style="position:relative;z-index:1;margin-bottom:6px;">
+    <div style="font-size:22px;font-weight:900;color:white;">北京艺术星文化传媒</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;">赛事方工作台 · 已认证</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;position:relative;z-index:1;margin-bottom:20px;">
+    <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:12px 6px;text-align:center;"><div style="font-size:20px;font-weight:900;color:white;line-height:1;">3</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:3px;">已上线赛事</div></div>
+    <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:12px 6px;text-align:center;"><div style="font-size:20px;font-weight:900;color:white;line-height:1;">286</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:3px;">报名人次</div></div>
+    <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:12px 6px;text-align:center;"><div style="font-size:20px;font-weight:900;color:#FFD54F;line-height:1;">12</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:3px;">待审核成绩</div></div>
+    <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:12px 6px;text-align:center;"><div style="font-size:20px;font-weight:900;color:#FFD54F;line-height:1;">¥18k</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:3px;">待结算</div></div>
+  </div>
+  <div style="position:absolute;bottom:-1px;left:0;right:0;height:24px;background:var(--c-gray-50);border-radius:24px 24px 0 0;"></div>
+</div>
+<!-- 快捷入口 -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 16px 0;">
+  <div style="background:var(--c-white);border-radius:12px;box-shadow:0 1px 4px rgba(12,61,107,.06);padding:12px 6px;text-align:center;cursor:pointer;" onclick="location.href='event-contest-list.html'"><div style="font-size:24px;margin-bottom:6px;">🏆</div><div style="font-size:11px;font-weight:700;color:var(--c-gray-700);">赛事管理</div></div>
+  <div style="background:var(--c-white);border-radius:12px;box-shadow:0 1px 4px rgba(12,61,107,.06);padding:12px 6px;text-align:center;cursor:pointer;" onclick="location.href='event-enroll-manage.html'"><div style="font-size:24px;margin-bottom:6px;">📝</div><div style="font-size:11px;font-weight:700;color:var(--c-gray-700);">报名管理</div></div>
+  <div style="background:var(--c-white);border-radius:12px;box-shadow:0 1px 4px rgba(12,61,107,.06);padding:12px 6px;text-align:center;cursor:pointer;" onclick="location.href='event-score-manage.html'"><div style="font-size:24px;margin-bottom:6px;">🎯</div><div style="font-size:11px;font-weight:700;color:var(--c-gray-700);">成绩证书</div></div>
+  <div style="background:var(--c-white);border-radius:12px;box-shadow:0 1px 4px rgba(12,61,107,.06);padding:12px 6px;text-align:center;cursor:pointer;" onclick="location.href='event-settlement.html'"><div style="font-size:24px;margin-bottom:6px;">💰</div><div style="font-size:11px;font-weight:700;color:var(--c-gray-700);">财务结算</div></div>
+</div>
+<!-- 最近赛事 -->
+<div style="background:var(--c-white);border-radius:16px;box-shadow:0 1px 4px rgba(12,61,107,.06);margin:12px 16px 0;overflow:hidden;">
+  <div style="padding:14px 16px 10px;font-size:14px;font-weight:700;color:var(--c-gray-900);border-bottom:1px solid var(--c-gray-100);">📋 最近赛事</div>
+  <div class="lc-row" onclick="location.href='event-contest-list.html'">
+    <div class="lc-icon" style="background:linear-gradient(135deg,#4A0E8F,#9C27B0);">🎨</div>
+    <div class="lc-info"><div class="lc-name">春季艺术大赛</div><div class="lc-meta">报名中 · 已报 126人</div></div>
+    <div class="lc-right"><span class="tag tag-success tag-dot">已上线</span></div>
+  </div>
+  <div class="lc-row" onclick="location.href='event-contest-list.html'">
+    <div class="lc-icon" style="background:linear-gradient(135deg,#0D47A1,#42A5F5);">🎵</div>
+    <div class="lc-info"><div class="lc-name">全国美育大赛·秋季赛</div><div class="lc-meta">草稿 · 待提交审核</div></div>
+    <div class="lc-right"><span class="tag tag-gray">草稿</span></div>
+  </div>
+</div>
+
+<script>
+function switchTab(el){document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400);}
+</script>
+</body>
+</html>

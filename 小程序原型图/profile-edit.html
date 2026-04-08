@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>编辑资料 · 竞赛通</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-system.css">
+<style>
+body { background: var(--c-gray-50); }
+.page-header { height:56px;background:var(--c-white);border-bottom:1px solid var(--c-gray-100);display:flex;align-items:center;padding:0 var(--space-4);position:sticky;top:44px;z-index:40;box-shadow:var(--shadow-xs); }
+.back-btn { width:36px;height:36px;border-radius:var(--radius-sm);background:var(--c-gray-50);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;margin-right:12px;flex-shrink:0;touch-action:manipulation; }
+.back-btn:active { background:var(--c-gray-100); }
+.header-title { font-size:17px;font-weight:700;color:var(--c-gray-900);flex:1; }
+.header-save { font-size:15px;font-weight:700;color:var(--c-primary-600);cursor:pointer;touch-action:manipulation; }
+
+/* 头像区 */
+.avatar-section { background:var(--c-white);padding:24px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;border-bottom:8px solid var(--c-gray-50); }
+.avatar-wrap { position:relative;cursor:pointer;touch-action:manipulation; }
+.avatar-img { width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#FFD54F,#FF8A65);display:flex;align-items:center;justify-content:center;font-size:38px;border:3px solid var(--c-gray-100);box-shadow:var(--shadow-sm); }
+.avatar-edit-btn { position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--c-primary-600);border:2.5px solid white;display:flex;align-items:center;justify-content:center;font-size:12px; }
+.avatar-label { font-size:13px;color:var(--c-primary-600);font-weight:500; }
+
+/* 表单 */
+.form-section { background:var(--c-white);margin-bottom:8px; }
+.form-section-title { padding:14px 16px 0;font-size:13px;font-weight:700;color:var(--c-gray-500);letter-spacing:.4px; }
+.field-row { display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--c-gray-100);cursor:pointer;touch-action:manipulation;transition:background var(--duration-fast); }
+.field-row:last-child { border-bottom:none; }
+.field-row:active { background:var(--c-gray-50); }
+.field-label { font-size:14px;color:var(--c-gray-700);width:80px;flex-shrink:0;font-weight:500; }
+.field-value { flex:1;font-size:14px;color:var(--c-gray-900); }
+.field-value.placeholder { color:var(--c-gray-300); }
+.field-arrow { font-size:14px;color:var(--c-gray-300);flex-shrink:0;margin-left:8px; }
+
+/* 学段选择 */
+.stage-grid { display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px 16px; }
+.stage-chip { padding:7px 16px;border-radius:var(--radius-full);border:1.5px solid var(--c-gray-100);background:var(--c-gray-50);font-size:13px;font-weight:500;color:var(--c-gray-700);cursor:pointer;touch-action:manipulation;transition:all var(--duration-fast); }
+.stage-chip.active { border-color:var(--c-primary-400);background:var(--c-primary-50);color:var(--c-primary-600);font-weight:700; }
+
+/* 底部 */
+.bottom-action { position:sticky;bottom:0;background:rgba(255,255,255,.97);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid var(--c-gray-100);padding:12px var(--space-4);padding-bottom:calc(12px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(12,61,107,.08); }
+
+/* Sheet */
+.input-sheet { position:fixed;inset:0;background:rgba(26,31,46,.55);z-index:200;display:none;align-items:flex-end;justify-content:center; }
+.input-sheet.show { display:flex; }
+.input-sheet-inner { background:var(--c-white);border-radius:var(--radius-xl) var(--radius-xl) 0 0;width:100%;max-width:390px;overflow:hidden;animation:sheet-up .3s var(--ease-out); }
+@keyframes sheet-up { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.sheet-handle { width:36px;height:4px;background:var(--c-gray-100);border-radius:2px;margin:12px auto 0; }
+.sheet-header { padding:14px 20px;border-bottom:1px solid var(--c-gray-100);display:flex;align-items:center;justify-content:space-between; }
+.sheet-title { font-size:16px;font-weight:700;color:var(--c-gray-900); }
+.sheet-confirm { font-size:15px;font-weight:700;color:var(--c-primary-600);cursor:pointer;touch-action:manipulation; }
+.sheet-body { padding:16px 20px; }
+.sheet-footer { padding:8px 20px 28px; }
+</style>
+</head>
+<body>
+<div class="status-bar" style="background:var(--c-primary);"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+<div class="page-header animate-in">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="header-title">编辑个人资料</div>
+  <div class="header-save" onclick="saveProfile()">保存</div>
+</div>
+
+<!-- 头像 -->
+<div class="avatar-section animate-in animate-in-d1">
+  <div class="avatar-wrap" onclick="showToast('点击选择头像图片')">
+    <div class="avatar-img">👦</div>
+    <div class="avatar-edit-btn">📷</div>
+  </div>
+  <div class="avatar-label">点击更换头像</div>
+</div>
+
+<!-- 基本信息 -->
+<div class="form-section animate-in animate-in-d1">
+  <div class="form-section-title">基本信息</div>
+  <div class="field-row" onclick="openEdit('nickname','昵称','张小明')">
+    <div class="field-label">昵 称</div>
+    <div class="field-value" id="val-nickname">张小明</div>
+    <div class="field-arrow">›</div>
+  </div>
+  <div class="field-row" onclick="openEdit('realname','真实姓名','张小明')">
+    <div class="field-label">真实姓名</div>
+    <div class="field-value" id="val-realname">张小明</div>
+    <div class="field-arrow">›</div>
+  </div>
+  <div class="field-row" onclick="showToast('手机号变更请联系客服')">
+    <div class="field-label">手机号</div>
+    <div class="field-value" style="color:var(--c-gray-500);">138****8001</div>
+    <span class="tag tag-gray" style="margin-left:auto;margin-right:8px;font-size:10px;">不可修改</span>
+    <div class="field-arrow" style="opacity:.4;">›</div>
+  </div>
+  <div class="field-row" onclick="openEdit('school','就读学校','广州市第三中学')">
+    <div class="field-label">就读学校</div>
+    <div class="field-value" id="val-school">广州市第三中学</div>
+    <div class="field-arrow">›</div>
+  </div>
+</div>
+
+<!-- 学段选择 -->
+<div class="form-section animate-in animate-in-d2">
+  <div class="form-section-title">所在学段</div>
+  <div class="stage-grid">
+    <div class="stage-chip" onclick="selectStage(this)">小学</div>
+    <div class="stage-chip" onclick="selectStage(this)">初中</div>
+    <div class="stage-chip active" onclick="selectStage(this)">高中</div>
+    <div class="stage-chip" onclick="selectStage(this)">大学</div>
+    <div class="stage-chip" onclick="selectStage(this)">其他</div>
+  </div>
+</div>
+
+<!-- 年级 -->
+<div class="form-section animate-in animate-in-d2">
+  <div class="form-section-title">年级信息</div>
+  <div class="field-row" onclick="openGradeSheet()">
+    <div class="field-label">当前年级</div>
+    <div class="field-value" id="val-grade">高中二年级</div>
+    <div class="field-arrow">›</div>
+  </div>
+</div>
+
+<!-- 联系信息 -->
+<div class="form-section animate-in animate-in-d2">
+  <div class="form-section-title">联系信息</div>
+  <div class="field-row" onclick="openEdit('email','邮箱','')">
+    <div class="field-label">邮 箱</div>
+    <div class="field-value placeholder" id="val-email">未填写（选填）</div>
+    <div class="field-arrow">›</div>
+  </div>
+  <div class="field-row" onclick="openEdit('wechat','微信号','')">
+    <div class="field-label">微信号</div>
+    <div class="field-value placeholder" id="val-wechat">未填写（选填）</div>
+    <div class="field-arrow">›</div>
+  </div>
+</div>
+
+
+<!-- 资料完整度提示 -->
+<div style="background:var(--c-primary-50);border:1px solid var(--c-primary-200);border-radius:var(--radius-md);margin:12px var(--space-4) 0;padding:12px 14px;" class="animate-in animate-in-d3">
+  <div style="font-size:13px;font-weight:700;color:var(--c-primary-600);margin-bottom:8px;">📋 资料完善提示</div>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+    <div style="flex:1;height:6px;background:var(--c-gray-100);border-radius:3px;overflow:hidden;"><div style="width:75%;height:100%;background:var(--c-primary-400);border-radius:3px;transition:width .6s var(--ease-out);"></div></div>
+    <span style="font-size:12px;font-weight:700;color:var(--c-primary-600);flex-shrink:0;">75%</span>
+  </div>
+  <div style="font-size:12px;color:var(--c-gray-700);line-height:1.6;">完善邮箱和微信号可提升报名时的信息复用效率，减少重复填写。</div>
+</div>
+
+<!-- 报名信息预览（展示历史报名信息将如何被复用） -->
+<div style="background:var(--c-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);margin:12px var(--space-4) 0;overflow:hidden;" class="animate-in animate-in-d3">
+  <div style="padding:14px 16px 10px;font-size:13px;font-weight:700;color:var(--c-gray-500);letter-spacing:.4px;border-bottom:1px solid var(--c-gray-100);">报名信息将自动复用</div>
+  <div style="padding:12px 16px;font-size:12px;color:var(--c-gray-700);line-height:1.7;">
+    填写并保存以下信息后，下次报名赛事时可一键自动填充，无需重复输入：
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
+      <span class="tag tag-primary">真实姓名</span>
+      <span class="tag tag-primary">手机号</span>
+      <span class="tag tag-primary">就读学校</span>
+      <span class="tag tag-primary">所在年级</span>
+      <span class="tag tag-gray">邮箱（选填）</span>
+    </div>
+  </div>
+</div>
+
+<div style="height:20px;"></div>
+<div class="bottom-action animate-in animate-in-d3">
+  <button class="btn btn-primary btn-lg btn-block" onclick="saveProfile()">保存修改</button>
+</div>
+
+<!-- 文字编辑 Sheet -->
+<div class="input-sheet" id="editSheet" onclick="closeEditSheet()">
+  <div class="input-sheet-inner" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title" id="editSheetTitle">编辑</div>
+      <div class="sheet-confirm" onclick="confirmEdit()">完成</div>
+    </div>
+    <div class="sheet-body">
+      <input class="form-input" id="editInput" type="text" placeholder="" style="font-size:16px;">
+    </div>
+    <div style="height:calc(env(safe-area-inset-bottom));"></div>
+  </div>
+</div>
+
+<!-- 年级选择 Sheet -->
+<div class="input-sheet" id="gradeSheet" onclick="document.getElementById('gradeSheet').classList.remove('show')">
+  <div class="input-sheet-inner" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><div class="sheet-title">选择年级</div></div>
+    <div class="sheet-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 20px;">
+      <div onclick="selectGrade('高中一年级')" class="stage-chip" style="text-align:center;">高中一年级</div>
+      <div onclick="selectGrade('高中二年级')" class="stage-chip active" style="text-align:center;">高中二年级</div>
+      <div onclick="selectGrade('高中三年级')" class="stage-chip" style="text-align:center;">高中三年级</div>
+      <div onclick="selectGrade('初中一年级')" class="stage-chip" style="text-align:center;">初中一年级</div>
+      <div onclick="selectGrade('初中二年级')" class="stage-chip" style="text-align:center;">初中二年级</div>
+      <div onclick="selectGrade('初中三年级')" class="stage-chip" style="text-align:center;">初中三年级</div>
+    </div>
+    <div style="padding:8px 20px 28px;"><button class="btn btn-ghost btn-md btn-block" onclick="document.getElementById('gradeSheet').classList.remove('show')">取消</button></div>
+  </div>
+</div>
+
+<script>
+let editField = '', editValueId = '';
+function openEdit(field, title, current) {
+  editField = field; editValueId = 'val-'+field;
+  document.getElementById('editSheetTitle').textContent = '编辑' + title;
+  document.getElementById('editInput').value = (current && !current.includes('未填写')) ? current : '';
+  document.getElementById('editInput').placeholder = '请输入' + title;
+  document.getElementById('editSheet').classList.add('show');
+  setTimeout(() => document.getElementById('editInput').focus(), 300);
+}
+function confirmEdit() {
+  const val = document.getElementById('editInput').value.trim();
+  if(editValueId) { const el = document.getElementById(editValueId); if(el) { el.textContent = val || '未填写（选填）'; el.className = 'field-value' + (val ? '' : ' placeholder'); } }
+  closeEditSheet();
+}
+function closeEditSheet() { document.getElementById('editSheet').classList.remove('show'); }
+function selectStage(el) { document.querySelectorAll('.stage-chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); }
+function openGradeSheet() { document.getElementById('gradeSheet').classList.add('show'); }
+function selectGrade(g) { document.getElementById('val-grade').textContent = g; document.getElementById('gradeSheet').classList.remove('show'); }
+function saveProfile() { showToast('✓ 资料保存成功'); setTimeout(() => history.back(), 1000); }
+function showToast(msg) { const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+</script>
+</body>
+</html>
