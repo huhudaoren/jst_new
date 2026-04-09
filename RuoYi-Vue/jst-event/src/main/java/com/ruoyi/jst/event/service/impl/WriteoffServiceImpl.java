@@ -52,14 +52,21 @@ public class WriteoffServiceImpl implements WriteoffService {
             throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
                     BizErrorCode.JST_COMMON_AUTH_DENIED.code());
         }
-        if (req == null || StringUtils.isBlank(req.getQrCode()) || !writeoffQrCodeGenerator.isValid(req.getQrCode())) {
+        if (req == null || StringUtils.isBlank(req.getQrCode())) {
             throw new ServiceException(BizErrorCode.JST_ORDER_WRITEOFF_QR_INVALID.message(),
                     BizErrorCode.JST_ORDER_WRITEOFF_QR_INVALID.code());
         }
-        Map<String, Object> preview = requireScanContext(req.getQrCode());
+        String qrPayload = req.getQrCode();
+        String qrToken = writeoffQrCodeGenerator.extractToken(qrPayload);
+        if (!writeoffQrCodeGenerator.isValidToken(qrToken)) {
+            throw new ServiceException(BizErrorCode.JST_ORDER_WRITEOFF_QR_INVALID.message(),
+                    BizErrorCode.JST_ORDER_WRITEOFF_QR_INVALID.code());
+        }
+        Map<String, Object> preview = requireScanContext(qrPayload);
         assertScannerScope(preview);
         Long itemId = longValue(preview.get("writeoffItemId"));
-        return jstLockTemplate.execute("lock:writeoff:item:" + itemId, 2, 3, () -> doScan(operatorUserId, req));
+        return jstLockTemplate.execute("lock:writeoff:item:" + itemId, 2, 3,
+                () -> doScan(operatorUserId, qrPayload, req));
     }
 
     @Override
@@ -68,8 +75,8 @@ public class WriteoffServiceImpl implements WriteoffService {
         return writeoffItemMapperExt.selectRecordList(partnerId, query);
     }
 
-    private WriteoffScanResVO doScan(Long operatorUserId, WriteoffScanDTO req) {
-        Map<String, Object> context = requireScanContext(req.getQrCode());
+    private WriteoffScanResVO doScan(Long operatorUserId, String qrPayload, WriteoffScanDTO req) {
+        Map<String, Object> context = requireScanContext(qrPayload);
         assertScannerScope(context);
         Date now = DateUtils.getNowDate();
         String operator = currentOperator();

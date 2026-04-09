@@ -1259,6 +1259,10 @@ client.test("C6-W6 my appointment list should include team appointment", functio
     client.assert(response.body.code === 200);
     client.assert(Array.isArray(response.body.data));
     client.assert(response.body.data.some(row => row.teamAppointmentId == client.global.get("c6_team_id")));
+    const partialWriteoffRow = response.body.data.find(row => row.appointmentId === 96751);
+    client.assert(partialWriteoffRow, "should include fixture partial_writeoff appointment");
+    client.assert(partialWriteoffRow.writeoffDoneCount === 1);
+    client.assert(partialWriteoffRow.writeoffTotalCount === 1);
 });
 %}
 
@@ -1272,6 +1276,75 @@ client.test("C6-W7 my appointment detail should expose qr items", function() {
     client.assert(Array.isArray(response.body.data.writeoffItems));
     client.assert(response.body.data.writeoffItems.length === 3);
     client.assert(response.body.data.writeoffItems.every(item => !!item.qrCode));
+});
+if (response.body.code === 200 && response.body.data && Array.isArray(response.body.data.writeoffItems)) {
+    const parseWriteoffToken = function(payload) {
+        if (typeof payload !== "string") {
+            return payload;
+        }
+        const match = payload.match(/[?&]t=([^&]+)/);
+        return match ? decodeURIComponent(match[1]) : payload;
+    };
+    const firstQr = response.body.data.writeoffItems[0].qrCode;
+    const secondQr = response.body.data.writeoffItems[1].qrCode;
+    const secondToken = parseWriteoffToken(secondQr);
+    client.global.set("c6_writeoff_qr_raw_a", parseWriteoffToken(firstQr));
+    client.global.set("c6_writeoff_qr_url_b", "http://127.0.0.1:8080/wx/writeoff?t=" + encodeURIComponent(secondToken));
+}
+%}
+
+### C6-W7.1 admin login for writeoff scan verification
+### Preconditions: 97-disable-captcha-dev.sql 已执行，admin/admin123 可登录
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "code": "",
+  "uuid": ""
+}
+
+> {%
+client.global.set("c6_admin_token", response.body.token);
+client.test("C6-W7.1 admin login should succeed", function() {
+    client.assert(!!response.body.token);
+});
+%}
+
+### C6-W7.2 writeoff scan should accept raw token payload
+POST {{baseUrl}}/jst/wx/writeoff/scan
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_admin_token}}
+
+{
+  "qrCode": "{{c6_writeoff_qr_raw_a}}",
+  "scanType": "http_client",
+  "terminal": "http_client"
+}
+
+> {%
+client.test("C6-W7.2 raw token scan should succeed", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.itemId != null);
+});
+%}
+
+### C6-W7.3 writeoff scan should accept URL payload with t parameter
+POST {{baseUrl}}/jst/wx/writeoff/scan
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_admin_token}}
+
+{
+  "qrCode": "{{c6_writeoff_qr_url_b}}",
+  "scanType": "http_client",
+  "terminal": "http_client"
+}
+
+> {%
+client.test("C6-W7.3 URL payload scan should succeed", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.itemId != null);
 });
 %}
 
@@ -2433,6 +2506,23 @@ client.test("MR-RT-W5 ����Ȩ���ٴκ���ʧ��", function() 
 %}
 
 ### MR-CM-W1. ��б�
+### MR-RT-W5.1. count mode writeoff should deduct 2
+POST {{baseUrl}}/jst/wx/rights/9873/apply-writeoff
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_marketing_token}}
+
+{
+  "writeoffCount": 2,
+  "remark": "FMR count mode apply"
+}
+
+> {%
+client.test("MR-RT-W5.1 count mode writeoff should deduct 2", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.remainQuota === 3);
+});
+%}
+
 GET {{baseUrl}}/jst/wx/campaign/list?pageNum=1&pageSize=10
 Authorization: Bearer {{wx_marketing_token}}
 

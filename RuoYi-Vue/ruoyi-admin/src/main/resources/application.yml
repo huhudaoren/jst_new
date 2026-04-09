@@ -189,6 +189,12 @@ jst:
     private-key-path: ${JST_WXPAY_PRIVKEY:}
     notify-url: ${JST_WXPAY_NOTIFY:https://api.jst.example.com/jst/pay/notify/wechat}
 
+  # 核销二维码 payload 配置
+  qrcode:
+    writeoff:
+      # 为空时保持纯签名字符串；非空时返回 {baseUrl}?t={token}
+      base-url: ""
+
   # 业务参数
   biz:
     # 售后宽限默认天数
