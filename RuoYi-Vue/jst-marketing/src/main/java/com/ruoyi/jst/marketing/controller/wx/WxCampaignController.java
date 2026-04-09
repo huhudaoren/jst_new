@@ -23,13 +23,13 @@ public class WxCampaignController extends BaseController {
     @Autowired
     private CampaignService campaignService;
 
-    @PreAuthorize("@ss.hasRole('jst_student') or @ss.hasPermi('jst:marketing:coupon:my')")
+    @PreAuthorize("@ss.hasRole('jst_student') or @ss.hasPermi('jst:marketing:campaign:list')")
     @GetMapping("/list")
     public AjaxResult list() {
         return AjaxResult.success(campaignService.selectList(currentUserId()));
     }
 
-    @PreAuthorize("@ss.hasRole('jst_student') or @ss.hasPermi('jst:marketing:coupon:my')")
+    @PreAuthorize("@ss.hasRole('jst_student') or @ss.hasPermi('jst:marketing:campaign:query')")
     @GetMapping("/{campaignId}")
     public AjaxResult detail(@PathVariable("campaignId") Long campaignId) {
         return AjaxResult.success(campaignService.getDetail(currentUserId(), campaignId));

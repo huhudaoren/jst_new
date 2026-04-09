@@ -19,6 +19,8 @@ public class AppointmentListVO {
     private Long teamAppointmentId;
     private String teamNo;
     private String teamName;
+    private Integer writeoffDoneCount;
+    private Integer writeoffTotalCount;
 
     public Long getAppointmentId() { return appointmentId; }
     public void setAppointmentId(Long appointmentId) { this.appointmentId = appointmentId; }
@@ -44,4 +46,8 @@ public class AppointmentListVO {
     public void setTeamNo(String teamNo) { this.teamNo = teamNo; }
     public String getTeamName() { return teamName; }
     public void setTeamName(String teamName) { this.teamName = teamName; }
+    public Integer getWriteoffDoneCount() { return writeoffDoneCount; }
+    public void setWriteoffDoneCount(Integer writeoffDoneCount) { this.writeoffDoneCount = writeoffDoneCount; }
+    public Integer getWriteoffTotalCount() { return writeoffTotalCount; }
+    public void setWriteoffTotalCount(Integer writeoffTotalCount) { this.writeoffTotalCount = writeoffTotalCount; }
 }

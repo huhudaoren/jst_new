@@ -70,7 +70,20 @@
                case when ar.appointment_type = 'team' then 1 else 0 end as teamAppointment,
                ar.team_appointment_id as teamAppointmentId,
                t.team_no as teamNo,
-               t.team_name as teamName
+               t.team_name as teamName,
+               (
+                   select count(1)
+                   from jst_appointment_writeoff_item awi
+                   where awi.appointment_id = ar.appointment_id
+                     and awi.del_flag = '0'
+               ) as writeoffTotalCount,
+               (
+                   select count(1)
+                   from jst_appointment_writeoff_item awi
+                   where awi.appointment_id = ar.appointment_id
+                     and awi.del_flag = '0'
+                     and awi.status = 'used'
+               ) as writeoffDoneCount
         from jst_appointment_record ar
         left join jst_contest c on c.contest_id = ar.contest_id and c.del_flag = '0'
         left join jst_team_appointment t on t.team_appointment_id = ar.team_appointment_id and t.del_flag = '0'

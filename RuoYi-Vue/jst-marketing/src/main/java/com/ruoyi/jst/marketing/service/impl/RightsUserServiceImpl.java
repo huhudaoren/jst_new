@@ -129,7 +129,7 @@ public class RightsUserServiceImpl implements RightsUserService {
             }
 
             String quotaMode = MarketingSupport.stringValue(row.get("quotaMode"));
-            BigDecimal writeoffAmount = resolveWriteoffAmount(quotaMode, req.getWriteoffAmount());
+            BigDecimal writeoffAmount = resolveWriteoffAmount(quotaMode, req);
             BigDecimal remainQuota = MarketingSupport.decimalValue(row.get("remainQuota"));
             JstUserRights userRights = jstUserRightsMapper.selectJstUserRightsByUserRightsId(userRightsId);
             if (userRights == null || "2".equals(userRights.getDelFlag())) {
@@ -238,12 +238,28 @@ public class RightsUserServiceImpl implements RightsUserService {
         return remainQuota == null ? ZERO : remainQuota.setScale(2, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal resolveWriteoffAmount(String quotaMode, BigDecimal requestAmount) {
-        if (requestAmount != null) {
+    private BigDecimal resolveWriteoffAmount(String quotaMode, RightsWriteoffApplyDTO req) {
+        if (QuotaMode.isCountLike(quotaMode)) {
+            Integer writeoffCount = req.getWriteoffCount();
+            if (writeoffCount == null) {
+                writeoffCount = 1;
+            }
+            return BigDecimal.valueOf(writeoffCount).setScale(2, RoundingMode.HALF_UP);
+        }
+        if (QuotaMode.AMOUNT.dbValue().equalsIgnoreCase(quotaMode)) {
+            BigDecimal requestAmount = req.getWriteoffAmount();
+            if (requestAmount == null) {
+                throw new ServiceException(BizErrorCode.JST_COMMON_PARAM_INVALID.message(),
+                        BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+            }
             return requestAmount.setScale(2, RoundingMode.HALF_UP);
         }
         if (QuotaMode.isUnlimited(quotaMode)) {
             return BigDecimal.ONE.setScale(2, RoundingMode.HALF_UP);
+        }
+        BigDecimal requestAmount = req.getWriteoffAmount();
+        if (requestAmount != null) {
+            return requestAmount.setScale(2, RoundingMode.HALF_UP);
         }
         return BigDecimal.ONE.setScale(2, RoundingMode.HALF_UP);
     }

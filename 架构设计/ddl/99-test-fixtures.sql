@@ -1689,11 +1689,11 @@ INSERT INTO jst_mall_goods (
 --         jst_rights_template / jst_user_rights
 -- User: 9001 (from points-center fixtures)
 -- =====================================================================
-DELETE FROM jst_rights_writeoff_record WHERE user_rights_id IN (9871, 9872);
-DELETE FROM jst_user_rights WHERE user_rights_id IN (9871, 9872) OR rights_template_id IN (9771, 9772);
+DELETE FROM jst_rights_writeoff_record WHERE user_rights_id IN (9871, 9872, 9873);
+DELETE FROM jst_user_rights WHERE user_rights_id IN (9871, 9872, 9873) OR rights_template_id IN (9771, 9772, 9773);
 DELETE FROM jst_user_coupon WHERE user_coupon_id IN (9861, 9862) OR coupon_template_id IN (9761, 9762, 9763);
 DELETE FROM jst_coupon_issue_batch WHERE batch_id BETWEEN 98650 AND 98699;
-DELETE FROM jst_rights_template WHERE rights_template_id IN (9771, 9772);
+DELETE FROM jst_rights_template WHERE rights_template_id IN (9771, 9772, 9773);
 DELETE FROM jst_coupon_template WHERE coupon_template_id IN (9761, 9762, 9763);
 
 INSERT INTO jst_coupon_template (
@@ -1743,6 +1743,10 @@ INSERT INTO jst_rights_template (
 (
     9772, '测试_FMR_线下活动权益', 'offline_activity', 'count', 1.00, 30,
     'scan', 'student', 1, 'fixture', NOW(), 'fixture', NOW(), 'F-MARKETING 扫码核销权益', '0'
+),
+(
+    9773, '测试_FMR_次数权益', 'offline_activity', 'count', 5.00, 30,
+    'self_apply', 'student', 1, 'fixture', NOW(), 'fixture', NOW(), 'F-MARKETING 次数模式核销权益', '0'
 );
 
 INSERT INTO jst_user_rights (
@@ -1758,6 +1762,11 @@ INSERT INTO jst_user_rights (
     9872, 9772, 'student', 9001, 'manual', 9772,
     1.00, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'available',
     'fixture', NOW(), 'fixture', NOW(), 'F-MARKETING 扫码核销权益', '0'
+),
+(
+    9873, 9773, 'student', 9001, 'manual', 9773,
+    5.00, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'available',
+    'fixture', NOW(), 'fixture', NOW(), 'F-MARKETING 次数模式核销权益', '0'
 );
 
 
