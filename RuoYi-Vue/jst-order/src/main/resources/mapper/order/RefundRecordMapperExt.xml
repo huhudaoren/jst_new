@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.order.mapper.RefundRecordMapperExt">
+
+    <resultMap id="RefundRecordResult" type="com.ruoyi.jst.order.domain.JstRefundRecord">
+        <result property="refundId" column="refund_id"/>
+        <result property="refundNo" column="refund_no"/>
+        <result property="orderId" column="order_id"/>
+        <result property="itemId" column="item_id"/>
+        <result property="refundType" column="refund_type"/>
+        <result property="applySource" column="apply_source"/>
+        <result property="reason" column="reason"/>
+        <result property="applyCash" column="apply_cash"/>
+        <result property="applyPoints" column="apply_points"/>
+        <result property="actualCash" column="actual_cash"/>
+        <result property="actualPoints" column="actual_points"/>
+        <result property="couponReturned" column="coupon_returned"/>
+        <result property="status" column="status"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="completeTime" column="complete_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="refundListColumns">
+        select rr.refund_id,
+               rr.refund_no,
+               rr.order_id,
+               om.order_no,
+               om.contest_id,
+               c.contest_name,
+               om.participant_id,
+               p.name as participant_name,
+               rr.refund_type,
+               rr.apply_source,
+               rr.apply_cash,
+               rr.apply_points,
+               rr.actual_cash,
+               rr.actual_points,
+               rr.coupon_returned,
+               rr.status,
+               rr.audit_remark,
+               om.order_status,
+               om.refund_status,
+               rr.create_time,
+               rr.complete_time
+        from jst_refund_record rr
+        inner join jst_order_main om on om.order_id = rr.order_id and om.del_flag = '0'
+        left join jst_contest c on c.contest_id = om.contest_id and c.del_flag = '0'
+        left join jst_participant p on p.participant_id = om.participant_id and p.del_flag = '0'
+    </sql>
+
+    <select id="countBlockingByOrderId" resultType="int">
+        select count(1)
+        from jst_refund_record
+        where order_id = #{orderId}
+          and status in ('pending', 'approved', 'refunding', 'completed')
+          and del_flag = '0'
+    </select>
+
+    <update id="updateStatusByExpected">
+        update jst_refund_record
+        set status = #{targetStatus},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+            <if test="auditRemark != null">
+                , audit_remark = #{auditRemark}
+            </if>
+            <if test="actualCash != null">
+                , actual_cash = #{actualCash}
+            </if>
+            <if test="actualPoints != null">
+                , actual_points = #{actualPoints}
+            </if>
+            <if test="couponReturned != null">
+                , coupon_returned = #{couponReturned}
+            </if>
+            <if test="operatorId != null">
+                , operator_id = #{operatorId}
+            </if>
+            <if test="completeTime != null">
+                , complete_time = #{completeTime}
+            </if>
+        where refund_id = #{refundId}
+          and status = #{expectedStatus}
+          and del_flag = '0'
+    </update>
+
+    <select id="selectByRefundNo" resultMap="RefundRecordResult">
+        select *
+        from jst_refund_record
+        where refund_no = #{refundNo}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectMyList" parameterType="com.ruoyi.jst.order.dto.RefundQueryReqDTO"
+            resultType="com.ruoyi.jst.order.vo.RefundListVO">
+        <include refid="refundListColumns"/>
+        where rr.del_flag = '0'
+          and om.user_id = #{userId}
+        <if test="refundNo != null and refundNo != ''">
+            and rr.refund_no = #{refundNo}
+        </if>
+        <if test="orderNo != null and orderNo != ''">
+            and om.order_no = #{orderNo}
+        </if>
+        <if test="status != null and status != ''">
+            and rr.status = #{status}
+        </if>
+        <if test="refundType != null and refundType != ''">
+            and rr.refund_type = #{refundType}
+        </if>
+        order by rr.create_time desc, rr.refund_id desc
+    </select>
+
+    <select id="selectAdminList" parameterType="com.ruoyi.jst.order.dto.RefundQueryReqDTO"
+            resultType="com.ruoyi.jst.order.vo.RefundListVO">
+        <include refid="refundListColumns"/>
+        where rr.del_flag = '0'
+        <if test="refundNo != null and refundNo != ''">
+            and rr.refund_no = #{refundNo}
+        </if>
+        <if test="orderNo != null and orderNo != ''">
+            and om.order_no = #{orderNo}
+        </if>
+        <if test="status != null and status != ''">
+            and rr.status = #{status}
+        </if>
+        <if test="refundType != null and refundType != ''">
+            and rr.refund_type = #{refundType}
+        </if>
+        <if test="applySource != null and applySource != ''">
+            and rr.apply_source = #{applySource}
+        </if>
+        <if test="orderId != null">
+            and rr.order_id = #{orderId}
+        </if>
+        <if test="contestId != null">
+            and om.contest_id = #{contestId}
+        </if>
+        <if test="userId != null">
+            and om.user_id = #{userId}
+        </if>
+        <if test="partnerId != null">
+            and om.partner_id = #{partnerId}
+        </if>
+        order by rr.create_time desc, rr.refund_id desc
+    </select>
+
+    <select id="selectDetail" resultType="com.ruoyi.jst.order.vo.RefundDetailVO">
+        select rr.refund_id,
+               rr.refund_no,
+               rr.order_id,
+               om.order_no,
+               om.contest_id,
+               c.contest_name,
+               om.participant_id,
+               p.name as participant_name,
+               oi.item_name,
+               rr.refund_type,
+               rr.apply_source,
+               rr.reason,
+               rr.apply_cash,
+               rr.apply_points,
+               rr.actual_cash,
+               rr.actual_points,
+               rr.coupon_returned,
+               rr.status,
+               rr.audit_remark,
+               om.order_status,
+               om.refund_status,
+               om.pay_method,
+               om.aftersale_deadline,
+               rr.create_time,
+               rr.complete_time
+        from jst_refund_record rr
+        inner join jst_order_main om on om.order_id = rr.order_id and om.del_flag = '0'
+        left join jst_order_item oi on oi.item_id = rr.item_id and oi.del_flag = '0'
+        left join jst_contest c on c.contest_id = om.contest_id and c.del_flag = '0'
+        left join jst_participant p on p.participant_id = om.participant_id and p.del_flag = '0'
+        where rr.refund_id = #{refundId}
+          and rr.del_flag = '0'
+        limit 1
+    </select>
+</mapper>

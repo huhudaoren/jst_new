@@ -5,6 +5,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.jst.common.exception.BizErrorCode;
 import com.ruoyi.jst.order.service.OrderService;
+import com.ruoyi.jst.order.service.RefundService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +31,9 @@ public class WxPayController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private RefundService refundService;
+
     @Value("${jst.wxpay.enabled:false}")
     private boolean wxPayEnabled;
 
@@ -49,5 +53,12 @@ public class WxPayController {
     public String notifyWechat(@RequestBody(required = false) String body,
                                @RequestHeader Map<String, String> headers) {
         return orderService.handleWechatNotify(body == null ? "{}" : body, headers);
+    }
+
+    @Anonymous
+    @PostMapping("/refund-notify/wechat")
+    public String notifyRefundWechat(@RequestBody(required = false) String body,
+                                     @RequestHeader Map<String, String> headers) {
+        return refundService.handleWechatRefundNotify(body == null ? "{}" : body, headers);
     }
 }

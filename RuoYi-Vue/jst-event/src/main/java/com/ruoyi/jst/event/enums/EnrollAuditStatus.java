@@ -8,23 +8,20 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 报名审核状态枚举。
- * <p>
- * 对应状态机 SM-6: pending -> approved|rejected|supplement, supplement -> pending。
- *
- * @author jst
- * @since 1.0.0
+ * Enrollment audit status for {@code jst_enroll_record.audit_status}.
  */
 public enum EnrollAuditStatus {
 
     PENDING("pending"),
     APPROVED("approved"),
     REJECTED("rejected"),
-    SUPPLEMENT("supplement");
+    SUPPLEMENT("supplement"),
+    CANCELLED("cancelled");
 
     private static final Map<EnrollAuditStatus, Set<EnrollAuditStatus>> ALLOWED = Map.of(
             PENDING, EnumSet.of(APPROVED, REJECTED, SUPPLEMENT),
-            SUPPLEMENT, EnumSet.of(PENDING)
+            SUPPLEMENT, EnumSet.of(PENDING),
+            APPROVED, EnumSet.of(CANCELLED)
     );
 
     private final String dbValue;
@@ -37,11 +34,6 @@ public enum EnrollAuditStatus {
         return dbValue;
     }
 
-    /**
-     * 校验状态迁移是否合法。
-     *
-     * @param target 目标状态
-     */
     public void assertCanTransitTo(EnrollAuditStatus target) {
         if (!ALLOWED.getOrDefault(this, EnumSet.noneOf(EnrollAuditStatus.class)).contains(target)) {
             throw new ServiceException("报名审核状态非法跃迁: " + this.dbValue + " -> " + target.dbValue,
@@ -49,12 +41,6 @@ public enum EnrollAuditStatus {
         }
     }
 
-    /**
-     * 按数据库值解析枚举。
-     *
-     * @param dbValue 数据库值
-     * @return 枚举
-     */
     public static EnrollAuditStatus fromDb(String dbValue) {
         for (EnrollAuditStatus value : values()) {
             if (value.dbValue.equals(dbValue)) {

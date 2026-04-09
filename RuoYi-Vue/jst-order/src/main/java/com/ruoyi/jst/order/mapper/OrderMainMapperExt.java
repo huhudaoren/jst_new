@@ -26,6 +26,14 @@ public interface OrderMainMapperExt {
                                @Param("updateBy") String updateBy,
                                @Param("updateTime") Date updateTime);
 
+    int updateRefundByExpected(@Param("orderId") Long orderId,
+                               @Param("expectedStatus") String expectedStatus,
+                               @Param("targetStatus") String targetStatus,
+                               @Param("expectedRefundStatus") String expectedRefundStatus,
+                               @Param("targetRefundStatus") String targetRefundStatus,
+                               @Param("updateBy") String updateBy,
+                               @Param("updateTime") Date updateTime);
+
     List<OrderListVO> selectWxList(OrderQueryReqDTO query);
 
     List<OrderListVO> selectAdminList(OrderQueryReqDTO query);

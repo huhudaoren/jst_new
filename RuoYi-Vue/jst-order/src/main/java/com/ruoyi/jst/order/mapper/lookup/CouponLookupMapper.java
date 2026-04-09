@@ -30,4 +30,10 @@ public interface CouponLookupMapper {
                   @Param("orderId") Long orderId,
                   @Param("updateBy") String updateBy,
                   @Param("updateTime") Date updateTime);
+
+    int returnCouponToUnused(@Param("userCouponId") Long userCouponId,
+                             @Param("orderId") Long orderId,
+                             @Param("validEnd") Date validEnd,
+                             @Param("updateBy") String updateBy,
+                             @Param("updateTime") Date updateTime);
 }

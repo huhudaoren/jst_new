@@ -24,4 +24,10 @@ public interface EnrollLookupMapper {
                    @Param("orderId") Long orderId,
                    @Param("updateBy") String updateBy,
                    @Param("updateTime") Date updateTime);
+
+    int cancelEnrollByOrderId(@Param("orderId") Long orderId,
+                              @Param("expectedAuditStatus") String expectedAuditStatus,
+                              @Param("targetAuditStatus") String targetAuditStatus,
+                              @Param("updateBy") String updateBy,
+                              @Param("updateTime") Date updateTime);
 }

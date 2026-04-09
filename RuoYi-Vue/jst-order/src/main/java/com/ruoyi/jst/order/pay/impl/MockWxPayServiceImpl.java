@@ -46,4 +46,33 @@ public class MockWxPayServiceImpl implements WxPayService {
         payload.setTransactionId(jsonObject.getString("transactionId"));
         return payload;
     }
+
+    @Override
+    public RefundResult refund(RefundRequest request) {
+        RefundResult result = new RefundResult();
+        result.setSuccess(true);
+        result.setThirdPartyRefundNo("MOCK_RF_" + request.getRefundNo());
+        return result;
+    }
+
+    @Override
+    public RefundNotifyPayload parseRefundNotify(String body, Map<String, String> headers) {
+        JSONObject jsonObject = JSON.parseObject(body);
+        if (jsonObject == null) {
+            throw new ServiceException(BizErrorCode.JST_ORDER_WX_REFUND_NOTIFY_INVALID.message(),
+                    BizErrorCode.JST_ORDER_WX_REFUND_NOTIFY_INVALID.code());
+        }
+        String refundNo = jsonObject.getString("refundNo");
+        if (refundNo == null) {
+            refundNo = jsonObject.getString("outRefundNo");
+        }
+        if (refundNo == null) {
+            throw new ServiceException(BizErrorCode.JST_ORDER_WX_REFUND_NOTIFY_INVALID.message(),
+                    BizErrorCode.JST_ORDER_WX_REFUND_NOTIFY_INVALID.code());
+        }
+        RefundNotifyPayload payload = new RefundNotifyPayload();
+        payload.setRefundNo(refundNo);
+        payload.setThirdPartyRefundNo(jsonObject.getString("refundId"));
+        return payload;
+    }
 }

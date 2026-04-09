@@ -71,6 +71,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           and del_flag = '0'
     </update>
 
+    <update id="refundPoints">
+        update jst_points_account
+        set available_points = available_points + #{points},
+            version = version + 1,
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where account_id = #{accountId}
+          and version = #{version}
+          and del_flag = '0'
+    </update>
+
     <update id="freezeUserPoints">
         update jst_user
         set available_points = available_points - #{points},
@@ -106,12 +117,33 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           and del_flag = '0'
     </update>
 
+    <update id="refundUserPoints">
+        update jst_user
+        set available_points = available_points + #{points},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where user_id = #{userId}
+          and available_points = #{expectedAvailable}
+          and frozen_points = #{expectedFrozen}
+          and del_flag = '0'
+    </update>
+
     <insert id="insertPointsLedger">
         insert into jst_points_ledger (
             account_id, owner_type, owner_id, change_type, source_type, source_ref_id,
             points_change, balance_after, operator_id, create_by, create_time, del_flag, remark
         ) values (
             #{accountId}, #{ownerType}, #{ownerId}, #{changeType}, #{sourceType}, #{sourceRefId},
+            #{pointsChange}, #{balanceAfter}, #{operatorId}, #{createBy}, #{createTime}, '0', #{remark}
+        )
+    </insert>
+
+    <insert id="insertRefundLedger">
+        insert into jst_points_ledger (
+            account_id, owner_type, owner_id, change_type, source_type, source_ref_id,
+            points_change, balance_after, operator_id, create_by, create_time, del_flag, remark
+        ) values (
+            #{accountId}, 'student', #{ownerId}, 'rollback', 'refund', #{sourceRefId},
             #{pointsChange}, #{balanceAfter}, #{operatorId}, #{createBy}, #{createTime}, '0', #{remark}
         )
     </insert>

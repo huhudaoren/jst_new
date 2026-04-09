@@ -60,4 +60,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           and status = 'locked'
           and del_flag = '0'
     </update>
+
+    <update id="returnCouponToUnused">
+        update jst_user_coupon
+        set status = 'unused',
+            order_id = null,
+            use_time = null,
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where user_coupon_id = #{userCouponId}
+          and order_id = #{orderId}
+          and status = 'used'
+          and valid_end = #{validEnd}
+          and del_flag = '0'
+    </update>
 </mapper>

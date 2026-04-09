@@ -39,6 +39,12 @@ public interface PointsLookupMapper {
                               @Param("updateBy") String updateBy,
                               @Param("updateTime") Date updateTime);
 
+    int refundPoints(@Param("accountId") Long accountId,
+                     @Param("version") Integer version,
+                     @Param("points") Long points,
+                     @Param("updateBy") String updateBy,
+                     @Param("updateTime") Date updateTime);
+
     int freezeUserPoints(@Param("userId") Long userId,
                          @Param("expectedAvailable") Long expectedAvailable,
                          @Param("expectedFrozen") Long expectedFrozen,
@@ -60,11 +66,28 @@ public interface PointsLookupMapper {
                            @Param("updateBy") String updateBy,
                            @Param("updateTime") Date updateTime);
 
+    int refundUserPoints(@Param("userId") Long userId,
+                         @Param("expectedAvailable") Long expectedAvailable,
+                         @Param("expectedFrozen") Long expectedFrozen,
+                         @Param("points") Long points,
+                         @Param("updateBy") String updateBy,
+                         @Param("updateTime") Date updateTime);
+
     int insertPointsLedger(@Param("accountId") Long accountId,
                            @Param("ownerType") String ownerType,
                            @Param("ownerId") Long ownerId,
                            @Param("changeType") String changeType,
                            @Param("sourceType") String sourceType,
+                           @Param("sourceRefId") Long sourceRefId,
+                           @Param("pointsChange") Long pointsChange,
+                           @Param("balanceAfter") Long balanceAfter,
+                           @Param("operatorId") Long operatorId,
+                           @Param("createBy") String createBy,
+                           @Param("createTime") Date createTime,
+                           @Param("remark") String remark);
+
+    int insertRefundLedger(@Param("accountId") Long accountId,
+                           @Param("ownerId") Long ownerId,
                            @Param("sourceRefId") Long sourceRefId,
                            @Param("pointsChange") Long pointsChange,
                            @Param("balanceAfter") Long balanceAfter,

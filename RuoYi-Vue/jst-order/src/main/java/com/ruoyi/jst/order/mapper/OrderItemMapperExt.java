@@ -14,4 +14,12 @@ import java.util.List;
 public interface OrderItemMapperExt {
 
     List<JstOrderItem> selectByOrderId(@Param("orderId") Long orderId);
+
+    int accumulateRefundByExpected(@Param("itemId") Long itemId,
+                                   @Param("expectedRefundAmount") java.math.BigDecimal expectedRefundAmount,
+                                   @Param("expectedRefundPoints") Long expectedRefundPoints,
+                                   @Param("refundAmount") java.math.BigDecimal refundAmount,
+                                   @Param("refundPoints") Long refundPoints,
+                                   @Param("updateBy") String updateBy,
+                                   @Param("updateTime") java.util.Date updateTime);
 }

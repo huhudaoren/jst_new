@@ -1,29 +1,7 @@
 package com.ruoyi.jst.common.exception;
 
 /**
- * 竞赛通业务错误码字典
- * <p>
- * 编码段约定（与 12-API边界与服务划分.md §4 异常码段一致）：
- * <ul>
- *   <li>1xxxx jst-user</li>
- *   <li>2xxxx jst-event</li>
- *   <li>3xxxx jst-order</li>
- *   <li>4xxxx jst-channel</li>
- *   <li>5xxxx jst-points</li>
- *   <li>6xxxx jst-organizer</li>
- *   <li>7xxxx jst-marketing</li>
- *   <li>8xxxx jst-message</li>
- *   <li>9xxxx jst-risk</li>
- *   <li>99xxx jst-finance</li>
- * </ul>
- * 使用示例：
- * <pre>
- *   throw new ServiceException("订单状态非法跃迁",
- *       BizErrorCode.JST_ORDER_ILLEGAL_TRANSIT.code());
- * </pre>
- *
- * @author jst
- * @since 1.0.0
+ * Business error codes shared across JST modules.
  */
 public enum BizErrorCode {
 
@@ -48,15 +26,14 @@ public enum BizErrorCode {
     JST_EVENT_FORM_TEMPLATE_ILLEGAL_TRANSIT(20012, "动态表单模板状态非法跃迁"),
     JST_EVENT_FORM_VALIDATION_FAIL(20013, "表单字段校验失败"),
     JST_EVENT_ENROLL_DUPLICATE(20020, "重复报名"),
-    JST_EVENT_PARTNER_NOT_AUTHED(20030, "赛事方未通过审核"),
-    JST_EVENT_COURSE_NOT_FOUND(20040, "课程不存在"),
-    JST_EVENT_COURSE_NOT_ON(20041, "课程未上架或未审核通过"),
-
     JST_EVENT_ENROLL_NOT_FOUND(20021, "报名记录不存在"),
     JST_EVENT_ENROLL_ILLEGAL_TRANSIT(20022, "报名记录状态非法跃迁"),
     JST_EVENT_ENROLL_NOT_OWN(20023, "无权访问该报名记录"),
     JST_EVENT_ENROLL_PARTICIPANT_NOT_OWN(20024, "参赛人不属于当前用户"),
     JST_EVENT_ENROLL_DUPLICATE_PENDING(20025, "当前存在待审核或待补件的报名记录"),
+    JST_EVENT_PARTNER_NOT_AUTHED(20030, "赛事方未通过审核"),
+    JST_EVENT_COURSE_NOT_FOUND(20040, "课程不存在"),
+    JST_EVENT_COURSE_NOT_ON(20041, "课程未上架或未审核通过"),
 
     // ========== jst-order (3xxxx) ==========
     JST_ORDER_NOT_FOUND(30001, "订单不存在"),
@@ -66,7 +43,7 @@ public enum BizErrorCode {
     JST_ORDER_ENROLL_NOT_APPROVED(30005, "报名记录未审核通过"),
     JST_ORDER_DUPLICATE_ORDER(30006, "当前报名已存在有效订单"),
     JST_ORDER_POINTS_NOT_SUPPORTED(30007, "当前赛事不支持积分抵扣"),
-    JST_ORDER_PAY_METHOD_INVALID(30008, "当前支付方式不匹配订单金额"),
+    JST_ORDER_PAY_METHOD_INVALID(30008, "当前支付方式与订单金额不匹配"),
     JST_ORDER_PAY_FAIL(30010, "支付失败"),
     JST_ORDER_REFUND_DENIED(30020, "当前订单不允许退款"),
     JST_ORDER_REFUND_OVER_LIMIT(30021, "退款金额超出可退余额"),
@@ -74,6 +51,12 @@ public enum BizErrorCode {
     JST_ORDER_TEAM_WRITEOFF_OVER(30031, "核销人数超过预约总数"),
     JST_ORDER_TEAM_ENDED(30032, "团队预约已结束，不可再核销"),
     JST_ORDER_WX_NOTIFY_INVALID(30040, "微信支付回调验签失败"),
+    JST_ORDER_REFUND_NOT_FOUND(30050, "退款单不存在"),
+    JST_ORDER_REFUND_ILLEGAL_TRANSIT(30051, "退款状态非法流转"),
+    JST_ORDER_REFUND_DUPLICATE(30052, "当前订单已存在有效退款单"),
+    JST_ORDER_NO_REFUND_FOR_ZERO_PRICE(30053, "零元订单不支持退款"),
+    JST_ORDER_WX_REFUND_NOTIFY_INVALID(30054, "微信退款回调验签失败"),
+    JST_ORDER_REFUND_EXECUTE_FAIL(30055, "退款执行失败"),
 
     // ========== jst-channel (4xxxx) ==========
     JST_CHANNEL_NOT_AUTHED(40001, "渠道方未认证"),
@@ -112,7 +95,7 @@ public enum BizErrorCode {
     JST_FINANCE_INVOICE_NOT_FOUND(99001, "发票不存在"),
     JST_FINANCE_PAY_RECORD_DUPLICATE(99002, "重复打款记录"),
 
-    // ========== 通用 (20000+) ==========
+    // ========== common ==========
     JST_COMMON_LOCK_TIMEOUT(99900, "操作过于频繁，请稍后再试"),
     JST_COMMON_PARAM_INVALID(99901, "参数校验失败"),
     JST_COMMON_AUTH_DENIED(99902, "无权访问该资源"),

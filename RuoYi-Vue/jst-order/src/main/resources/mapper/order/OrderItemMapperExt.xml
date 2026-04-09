@@ -34,4 +34,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           and del_flag = '0'
         order by item_id asc
     </select>
+
+    <update id="accumulateRefundByExpected">
+        update jst_order_item
+        set refund_amount = refund_amount + #{refundAmount},
+            refund_points = refund_points + #{refundPoints},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where item_id = #{itemId}
+          and refund_amount = #{expectedRefundAmount}
+          and refund_points = #{expectedRefundPoints}
+          and del_flag = '0'
+    </update>
 </mapper>

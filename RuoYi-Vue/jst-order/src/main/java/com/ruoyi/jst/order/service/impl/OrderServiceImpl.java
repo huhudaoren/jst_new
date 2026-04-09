@@ -15,8 +15,8 @@ import com.ruoyi.jst.order.domain.JstPaymentRecord;
 import com.ruoyi.jst.order.dto.CreateOrderReqDTO;
 import com.ruoyi.jst.order.dto.OrderQueryReqDTO;
 import com.ruoyi.jst.order.enums.OrderStatus;
+import com.ruoyi.jst.order.enums.OrderRefundStatus;
 import com.ruoyi.jst.order.enums.PayMethod;
-import com.ruoyi.jst.order.enums.RefundStatus;
 import com.ruoyi.jst.order.mapper.JstOrderItemMapper;
 import com.ruoyi.jst.order.mapper.JstOrderMainMapper;
 import com.ruoyi.jst.order.mapper.JstPaymentRecordMapper;
@@ -563,7 +563,7 @@ public class OrderServiceImpl implements OrderService {
         order.setPayInitiator("self");
         order.setPayInitiatorId(currentUserId());
         order.setOrderStatus(OrderStatus.CREATED.dbValue());
-        order.setRefundStatus(RefundStatus.NONE.dbValue());
+        order.setRefundStatus(OrderRefundStatus.NONE.dbValue());
         order.setAftersaleDeadline(calculateAftersaleDeadline(enroll));
         order.setCouponId(req.getCouponId());
         order.setAllowSelfRefund(1);

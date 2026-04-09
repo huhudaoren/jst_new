@@ -34,10 +34,10 @@ public enum OrderStatus {
     static {
         ALLOWED.put(CREATED, EnumSet.of(PENDING_PAY, COMPLETED, CANCELLED));
         ALLOWED.put(PENDING_PAY, EnumSet.of(PAID, CANCELLED));
-        ALLOWED.put(PAID, EnumSet.of(REVIEWING));
+        ALLOWED.put(PAID, EnumSet.of(REVIEWING, AFTERSALE));
         ALLOWED.put(REVIEWING, EnumSet.of(IN_SERVICE, CANCELLED));
         ALLOWED.put(IN_SERVICE, EnumSet.of(AFTERSALE, COMPLETED));
-        ALLOWED.put(AFTERSALE, EnumSet.of(IN_SERVICE));
+        ALLOWED.put(AFTERSALE, EnumSet.of(IN_SERVICE, CANCELLED));
         ALLOWED.put(COMPLETED, EnumSet.of(CLOSED));
         ALLOWED.put(CANCELLED, Collections.emptySet());
         ALLOWED.put(CLOSED, Collections.emptySet());
