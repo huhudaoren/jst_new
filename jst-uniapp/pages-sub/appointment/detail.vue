@@ -22,23 +22,19 @@
 
     <view v-if="writeoffItems.length" class="ad-qrwrap">
       <text class="ad-qrwrap__title">核销二维码 ({{ writeoffItems.length }})</text>
-      <!-- POLISH-B: 二维码渲染
-           目标: 每个 writeoffItem 用 canvas + uqrcode.make 生成真实二维码
-           当前: jst-uniapp 为 HBuilderX 项目, 无 package.json / 未安装 uqrcodejs
-                 暂保留字符串回落; 安装 uqrcodejs 后只需:
-                   1. import UQRCode from 'uqrcodejs'
-                   2. mounted/onReady 里遍历 writeoffItems, 对每个 canvas-id 执行
-                      const qr = new UQRCode(); qr.data = item.qrCode; qr.size = 250;
-                      qr.make(); qr.canvasContext = uni.createCanvasContext('qr_' + idx, this); qr.drawCanvas();
-                 在报告 §B 已阻塞说明 -->
-      <swiper class="ad-swiper" :indicator-dots="writeoffItems.length > 1" indicator-color="rgba(0,0,0,.3)" indicator-active-color="#F5A623">
+      <!-- D2-1b: 使用 vendor uqrcode 真实渲染, swiper @change 懒渲染避免未挂载 canvas -->
+      <swiper
+        class="ad-swiper"
+        :indicator-dots="writeoffItems.length > 1"
+        indicator-color="rgba(0,0,0,.3)"
+        indicator-active-color="#F5A623"
+        @change="onSwiperChange"
+      >
         <swiper-item v-for="(item, idx) in writeoffItems" :key="item.writeoffItemId || idx">
           <view class="ad-qr">
             <text class="ad-qr__name">{{ item.itemName || ('核销项 ' + (idx + 1)) }}</text>
             <view class="ad-qr__box">
-              <!-- canvas 占位, 等待 uqrcode 接入 -->
               <canvas :canvas-id="'qr_' + idx" class="ad-qr__canvas" />
-              <text class="ad-qr__payload">{{ item.qrCode || '--' }}</text>
             </view>
             <text :class="['ad-qr__status', 'ad-qr__status--' + item.status]">{{ writeoffStatusLabel(item.status) }}</text>
           </view>
@@ -54,13 +50,21 @@
 
 <script>
 import { getAppointmentDetail, cancelAppointment } from '@/api/appointment'
-import UQRCode from '@/utils/qrcode'
+import { makeQr } from '@/utils/qrcode-wrapper.js'
 
 const STATUS_LABEL = { booked: '待使用', in_progress: '使用中', completed: '已使用', cancelled: '已取消', pending_pay: '待支付' }
 const WO_LABEL = { unused: '未使用', used: '已核销', voided: '已作废' }
 
 export default {
-  data() { return { detail: {}, appointmentId: null, cancelling: false } },
+  data() {
+    return {
+      detail: {},
+      appointmentId: null,
+      cancelling: false,
+      // D2-1b: swiper 懒渲染已绘制索引集
+      renderedIdx: new Set()
+    }
+  },
   computed: {
     writeoffItems() { return (this.detail && this.detail.writeoffItems) || [] },
     canCancel() { return ['booked', 'pending_pay'].includes(this.detail.mainStatus) }
@@ -72,19 +76,23 @@ export default {
   methods: {
     async load() {
       try { this.detail = (await getAppointmentDetail(this.appointmentId)) || {} } catch (e) {}
-      // 数据就绪后渲染二维码 (等 DOM 挂载)
-      this.$nextTick(() => setTimeout(() => this.renderQrCodes(), 60))
+      // 数据切换 → 清空已渲索引 + 初次进入画 index 0 (等 swiper DOM 挂载)
+      this.renderedIdx = new Set()
+      this.$nextTick(() => setTimeout(() => this.renderAt(0), 80))
     },
-    // POLISH-BATCH2 A: 遍历 writeoffItems 对每个 canvas 渲染二维码
-    renderQrCodes() {
-      const items = this.writeoffItems
-      for (let i = 0; i < items.length; i++) {
-        const text = items[i].qrCode || ''
-        if (!text) continue
-        try {
-          UQRCode.make({ canvasId: 'qr_' + i, text, size: 360, context: this })
-        } catch (e) {}
-      }
+    // D2-1b: swiper @change 懒渲染, 避免非激活态 canvas 未挂载
+    onSwiperChange(e) {
+      const idx = (e && e.detail && e.detail.current) || 0
+      this.renderAt(idx)
+    },
+    async renderAt(idx) {
+      if (this.renderedIdx.has(idx)) return
+      const item = this.writeoffItems[idx]
+      if (!item || !item.qrCode) return
+      try {
+        await makeQr({ canvasId: 'qr_' + idx, text: item.qrCode, size: 360, context: this })
+        this.renderedIdx.add(idx)
+      } catch (e) {}
     },
     onCancel() {
       uni.showModal({
