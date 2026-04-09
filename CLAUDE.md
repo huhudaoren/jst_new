@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次会话时间：2026-04-09 16:00 UTC（阶段 C 后端 C1~C8 全部合并，批 3 派发中）
+> 会话恢复文件。上次会话时间：2026-04-09 21:30 UTC（阶段 C 全部收尾，批 4 合并，核心闭环 100% 可上线）
 
 ---
 
@@ -203,20 +203,26 @@ D:\coding\jst_v1\
 
 ## 六、已知问题与待办
 
-### 批 3 已全部合并（2026-04-09 17:00 UTC）
-- WX-C3 / F-CHANNEL-DASHBOARD / DEBT-2 全部 ✅
-- F-CD 12/12 + C5b 13/13 .http 全绿
-- 91 页原型文档 `小程序原型图/界面位置说明-V3.0.md`（81 页 V4.0 索引 + design token 速查）已并入参考
+### 批 4 已全部合并（2026-04-09 21:30 UTC）
+- C9 商城售后退款 ✅
+- F-POINTS-CENTER-BE 积分中心 5 接口 ✅
+- F-MARKETING-RIGHTS-BE 优惠券 + 权益 + 营销全套后端 ✅
+- WX-C4 积分权益营销前端 9 页 ✅（9 处字段假设待联调）
+- P-POLISH-BATCH1 前端遗留清理 ✅（A/C/D/E/G 完成，B uqrcode blocked，F address API skip）
+- 18 模块 mvn compile BUILD SUCCESS
+- **学生 + 渠道方用户端核心闭环 100% 可上线**
 
-### 待派发（候选批 4）
-1. **P-POLISH-WX-C3-修复** 小卡（scan 三类切换 / rebate 6tab / uqrcode / participant pick / address api / supportAppointment 字段）
-2. **C9 商城售后退款** 全流程（参考 C4 范式）
-3. **F-MARKETING** 优惠券中心 + 营销活动专题
-4. **F-RIGHTS** 权益中心 4 页
-5. **F-POINTS-CENTER** 积分中心/等级 Hero
-6. **F-PARTNER-WEB** 赛事方 H5 工作台（独立端 8 页，大工程）
-7. **F-ADMIN-H5** 独立 H5 管理员端（14 页，大工程）
-8. **POLISH Sprint** 按设计 Token 全面对齐 91 页原型
+### 阶段 C 收尾完成，阶段 D 候选
+1. **POLISH-BATCH2** 批 4 遗留：uqrcode 接入 / coupon select 调用方接入 enroll / WX-C4 9 字段联调 / H1~H3 3 条小 bug / my/index grid 分组折叠
+2. **DEBT-3** 23-基础数据权限点补齐 C5~C8/F-CD/F-MR/C9 + owner_type 清洗 + orphan 文件清理
+3. **F-USER-ADDRESS** 后端补齐地址 CRUD 接口（商城实物商品依赖）
+4. **F-PARTNER-WEB** 赛事方 H5 工作台（独立端 8 页，大工程）
+5. **F-ADMIN-H5** 独立 H5 管理员端（14 页，大工程）
+6. **F-ANALYSIS** 经营分析 2 页（依赖 F-CHANNEL-DASHBOARD 扩展）
+7. **F-CONTRACT-INVOICE** 合同开票 2 页
+8. **F-AI-MAIC** AI 课程 OpenMAIC 集成 5 页
+9. **POLISH-FULL** 按设计 Token 全面对齐 91 页原型
+10. 真实微信支付/打款/OSS/视频点播对接（当前 Mock）
 
 ### 阶段 C 后端已全部合并
 C1~C8 全部完成，mvn compile 18 模块 BUILD SUCCESS，C2/C4 端到端 .http 全绿。
