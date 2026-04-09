@@ -89,6 +89,36 @@
             "navigationBarTitleText": "\u6211\u7684\u8bfe\u7a0b",
             "navigationStyle": "custom"
           }
+        },
+        {
+          "path": "order-list",
+          "style": {
+            "navigationBarTitleText": "\u6211\u7684\u8ba2\u5355",
+            "navigationStyle": "custom",
+            "enablePullDownRefresh": true
+          }
+        },
+        {
+          "path": "order-detail",
+          "style": {
+            "navigationBarTitleText": "\u8ba2\u5355\u8be6\u60c5",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "refund-list",
+          "style": {
+            "navigationBarTitleText": "\u6211\u7684\u9000\u6b3e",
+            "navigationStyle": "custom",
+            "enablePullDownRefresh": true
+          }
+        },
+        {
+          "path": "refund-detail",
+          "style": {
+            "navigationBarTitleText": "\u9000\u6b3e\u8be6\u60c5",
+            "navigationStyle": "custom"
+          }
         }
       ]
     },

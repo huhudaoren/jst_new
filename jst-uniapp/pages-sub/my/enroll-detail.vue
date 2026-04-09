@@ -75,7 +75,7 @@
 
     <jst-empty
       v-else-if="!pageLoading"
-      icon="📄"
+      icon="📝"
       text="报名详情暂未返回。"
     />
 
@@ -88,6 +88,7 @@
 </template>
 
 <script>
+import { createOrder } from '@/api/order'
 import { getEnrollDetail, getEnrollTemplate } from '@/api/enroll'
 import JstEmpty from '@/components/jst-empty/jst-empty.vue'
 import JstFormRender from '@/components/jst-form-render/jst-form-render.vue'
@@ -154,7 +155,7 @@ export default {
         return { text: '补充材料', action: 'supplement' }
       }
       if (this.detail.auditStatus === 'approved') {
-        return { text: '前往支付', action: 'pay' }
+        return { text: '去支付', action: 'pay' }
       }
       return null
     }
@@ -240,7 +241,7 @@ export default {
       return { fields }
     },
 
-    handleAction() {
+    async handleAction() {
       if (!this.actionButton) {
         return
       }
@@ -252,10 +253,20 @@ export default {
         return
       }
 
-      uni.showToast({
-        title: 'C2 完成后开放支付链路',
-        icon: 'none'
-      })
+      uni.showLoading({ title: '创建订单中...' })
+      try {
+        const result = await createOrder({
+          enrollId: this.detail.enrollId,
+          pointsToUse: 0,
+          payMethod: 'wechat'
+        })
+        uni.hideLoading()
+        uni.navigateTo({
+          url: `/pages-sub/my/order-detail?orderId=${result.orderId}&enrollId=${this.detail.enrollId}`
+        })
+      } catch (error) {
+        uni.hideLoading()
+      }
     },
 
     handleBack() {

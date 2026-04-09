@@ -38,6 +38,8 @@
     <view class="my-page__section">
       <text class="my-page__section-title">我的服务</text>
       <view class="my-page__grid">
+        <view class="my-page__grid-item" @tap="navigateOrderList"><view class="my-page__grid-icon my-page__grid-icon--gold">单</view><text class="my-page__grid-text">我的订单</text></view>
+        <view class="my-page__grid-item" @tap="navigateRefundList"><view class="my-page__grid-icon my-page__grid-icon--purple">退</view><text class="my-page__grid-text">我的退款</text></view>
         <view class="my-page__grid-item" @tap="navigateMyEnroll"><view class="my-page__grid-icon my-page__grid-icon--teal">报</view><text class="my-page__grid-text">我的报名</text></view>
         <view class="my-page__grid-item" @tap="navigateBinding"><view class="my-page__grid-icon my-page__grid-icon--blue">绑</view><text class="my-page__grid-text">我的绑定</text></view>
         <view class="my-page__grid-item" @tap="navigateMyCourse"><view class="my-page__grid-icon my-page__grid-icon--green">课</view><text class="my-page__grid-text">我的课程</text></view>
@@ -76,6 +78,8 @@ export default {
     navigateProfileEdit() { uni.navigateTo({ url: '/pages-sub/my/profile-edit' }) },
     navigateParticipant() { uni.navigateTo({ url: '/pages-sub/my/participant' }) },
     navigateMyEnroll() { uni.navigateTo({ url: '/pages-sub/my/enroll' }) },
+    navigateOrderList() { uni.navigateTo({ url: '/pages-sub/my/order-list' }) },
+    navigateRefundList() { uni.navigateTo({ url: '/pages-sub/my/refund-list' }) },
     navigateBinding() { uni.navigateTo({ url: '/pages-sub/my/binding' }) },
     navigateMyCourse() { uni.navigateTo({ url: '/pages-sub/my/course' }) },
     navigateCourseTab() { uni.switchTab({ url: '/pages/course/list' }) },
