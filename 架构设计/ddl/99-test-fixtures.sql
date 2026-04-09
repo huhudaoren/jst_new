@@ -34,7 +34,7 @@ DELETE FROM jst_course WHERE create_by = 'fixture';
 DELETE FROM jst_enroll_form_template WHERE create_by = 'fixture';
 DELETE FROM jst_contest WHERE create_by = 'fixture';
 DELETE FROM jst_event_partner WHERE create_by = 'fixture';
-DELETE FROM sys_user_role WHERE user_id IN (9101, 9102, 9201);
+DELETE FROM sys_user_role WHERE user_id IN (9101, 9102, 9201, 9203);
 DELETE FROM sys_user WHERE create_by = 'fixture' AND user_id IN (9101, 9102);
 -- Step 1.1: 清理旧 fixture (避免 PK 冲突)
 DELETE FROM jst_participant_user_map WHERE create_by = 'fixture';
@@ -701,11 +701,16 @@ INSERT INTO jst_user (
 (
     9202, 'openid_test_9202', '13800009202', '测试_渠道C5B', '测试_渠道C5B',
     'channel', 1, NOW(), 'fixture', NOW()
+),
+(
+    9203, 'openid_test_9203', '13800009203', 'FCD_EMPTY_CHANNEL', 'FCD_EMPTY_CHANNEL',
+    'channel', 1, NOW(), 'fixture', NOW()
 );
 
 INSERT INTO sys_user_role (user_id, role_id)
 VALUES
-(9201, 102);
+(9201, 102),
+(9203, 102);
 
 INSERT INTO jst_channel (
     channel_id, user_id, channel_type, channel_name, contact_mobile, auth_status, status,
@@ -720,6 +725,34 @@ INSERT INTO jst_channel (
     9202, 9202, 'teacher', '测试_C5B渠道', '13800009202', 'approved', 1,
     '测试_C5B收款户', '622202009202', '测试银行',
     'fixture', NOW(), 'fixture', NOW(), '0'
+),
+(
+    9203, 9203, 'teacher', 'FCD Empty Channel', '13800009203', 'approved', 1,
+    'FCD Empty Bank', '622202009203', 'FCD Bank',
+    'fixture', NOW(), 'fixture', NOW(), '0'
+);
+
+-- F-CHANNEL-DASHBOARD fixtures: active students bound to channel 9201
+INSERT INTO jst_user (
+    user_id, openid, mobile, nickname, real_name, avatar, user_type, bound_channel_id, status, register_time, create_by, create_time
+) VALUES
+(
+    9211, 'openid_test_9211', '13800009211', 'FCD_STUDENT_A', 'FCD_STUDENT_A',
+    'https://fixture.example.com/avatar/9211.png', 'student', 9201, 1, NOW(), 'fixture', NOW()
+),
+(
+    9212, 'openid_test_9212', '13800009212', 'FCD_STUDENT_B', 'FCD_STUDENT_B',
+    'https://fixture.example.com/avatar/9212.png', 'student', 9201, 1, NOW(), 'fixture', NOW()
+);
+
+INSERT INTO jst_student_channel_binding (
+    binding_id, user_id, channel_id, bind_time, status, operator_id, create_by, create_time, update_by, update_time
+) VALUES
+(
+    5211, 9211, 9201, DATE_SUB(NOW(), INTERVAL 3 DAY), 'active', 9201, 'fixture', NOW(), 'fixture', NOW()
+),
+(
+    5212, 9212, 9201, DATE_SUB(NOW(), INTERVAL 35 DAY), 'active', 9201, 'fixture', NOW(), 'fixture', NOW()
 );
 
 INSERT INTO jst_order_main (
@@ -842,6 +875,62 @@ INSERT INTO jst_rebate_ledger (
     220.00, 220.00, 5.00, 215.00, 22.00,
     'positive', 'withdrawable', DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_ADD(NOW(), INTERVAL 15 DAY), NULL,
     'fixture', NOW(), 'fixture', NOW(), 'C5a other channel ledger', '0'
+);
+
+INSERT INTO jst_order_main (
+    order_id, order_no, order_type, business_type, user_id, participant_id, channel_id, contest_id, partner_id,
+    list_amount, coupon_amount, points_deduct_amount, points_used, platform_bear_amount, net_pay_amount, service_fee,
+    pay_method, pay_initiator, pay_initiator_id, pay_time, order_status, refund_status, aftersale_deadline, coupon_id,
+    allow_self_refund, create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    94421, 'OD_FCD_001', 'normal', 'enroll', 9211, 39211, NULL, 8201, 8101,
+    199.00, 0.00, 0.00, 0, 0.00, 199.00, 5.00,
+    'wechat', 'self', 9211, DATE_SUB(NOW(), INTERVAL 2 DAY), 'completed', 'none', DATE_ADD(NOW(), INTERVAL 5 DAY), NULL,
+    1, 'fixture', DATE_SUB(NOW(), INTERVAL 2 DAY), 'fixture', NOW(), 'FCD current month paid order A', '0'
+),
+(
+    94422, 'OD_FCD_002', 'normal', 'enroll', 9211, 39212, 9202, 8261, 8101,
+    299.00, 0.00, 0.00, 0, 0.00, 299.00, 5.00,
+    'wechat', 'self', 9211, DATE_SUB(NOW(), INTERVAL 1 DAY), 'paid', 'none', DATE_ADD(NOW(), INTERVAL 5 DAY), NULL,
+    1, 'fixture', DATE_SUB(NOW(), INTERVAL 1 DAY), 'fixture', NOW(), 'FCD bound-user order with non-9201 channel_id', '0'
+),
+(
+    94423, 'OD_FCD_003', 'normal', 'enroll', 9212, 39213, NULL, 8201, 8101,
+    159.00, 0.00, 0.00, 0, 0.00, 159.00, 5.00,
+    'wechat', 'self', 9212, DATE_SUB(NOW(), INTERVAL 34 DAY), 'completed', 'none', DATE_ADD(NOW(), INTERVAL 5 DAY), NULL,
+    1, 'fixture', DATE_SUB(NOW(), INTERVAL 34 DAY), 'fixture', NOW(), 'FCD previous month paid order', '0'
+),
+(
+    94424, 'OD_FCD_004', 'normal', 'enroll', 9212, 39214, 9202, 8201, 8101,
+    88.00, 0.00, 0.00, 0, 0.00, 88.00, 5.00,
+    'wechat', 'self', 9212, NULL, 'pending_pay', 'none', DATE_ADD(NOW(), INTERVAL 5 DAY), NULL,
+    1, 'fixture', DATE_SUB(NOW(), INTERVAL 1 DAY), 'fixture', NOW(), 'FCD current month pending order', '0'
+);
+
+INSERT INTO jst_rebate_ledger (
+    ledger_id, order_id, item_id, channel_id, contest_id, rule_id,
+    list_amount, net_pay_amount, service_fee, rebate_base, rebate_amount,
+    direction, status, accrual_time, event_end_time, settlement_id,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    94521, 94421, 94621, 9201, 8201, 9601,
+    199.00, 199.00, 5.00, 194.00, 19.90,
+    'positive', 'withdrawable', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_ADD(NOW(), INTERVAL 20 DAY), NULL,
+    'fixture', NOW(), 'fixture', NOW(), 'FCD current month rebate 1', '0'
+),
+(
+    94522, 94422, 94622, 9201, 8261, 9601,
+    299.00, 299.00, 5.00, 294.00, 29.90,
+    'positive', 'paid', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_ADD(NOW(), INTERVAL 20 DAY), NULL,
+    'fixture', NOW(), 'fixture', NOW(), 'FCD current month rebate 2', '0'
+),
+(
+    94523, 94423, 94623, 9201, 8201, 9601,
+    159.00, 159.00, 5.00, 154.00, 15.90,
+    'positive', 'withdrawable', DATE_SUB(NOW(), INTERVAL 33 DAY), DATE_ADD(NOW(), INTERVAL 20 DAY), NULL,
+    'fixture', NOW(), 'fixture', NOW(), 'FCD previous month rebate', '0'
 );
 
 -- =====================================================================

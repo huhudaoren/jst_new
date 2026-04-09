@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.lookup.UserChannelBindingLookupMapper">
+
+    <select id="countNewStudentByMonth" resultType="long">
+        select count(1)
+        from jst_student_channel_binding
+        where channel_id = #{channelId}
+          and status = 'active'
+          and del_flag = '0'
+          and bind_time <![CDATA[ >= ]]> #{startTime}
+          and bind_time <![CDATA[ < ]]> #{endTime}
+    </select>
+
+    <select id="selectStudentList" parameterType="com.ruoyi.jst.channel.dto.ChannelDashboardQueryDTO"
+            resultType="com.ruoyi.jst.channel.vo.DashboardStudentVO">
+        select b.user_id as userId,
+               u.nickname as nickname,
+               u.avatar as avatar,
+               b.bind_time as bindTime,
+               b.status as bindStatus,
+               coalesce(o.total_order_count, 0) as totalOrderCount,
+               coalesce(o.total_paid_amount, 0.00) as totalPaidAmount
+        from jst_student_channel_binding b
+                 left join jst_user u on u.user_id = b.user_id and u.del_flag = '0'
+                 left join (
+            select user_id,
+                   count(1) as total_order_count,
+                   coalesce(sum(case
+                                    when order_status in ('paid', 'reviewing', 'in_service', 'aftersale', 'completed')
+                                        then net_pay_amount
+                                    else 0
+                       end), 0.00) as total_paid_amount
+            from jst_order_main
+            where del_flag = '0'
+            group by user_id
+        ) o on o.user_id = b.user_id
+        where b.channel_id = #{channelId}
+          and b.del_flag = '0'
+        <choose>
+            <when test="bindStatus != null and bindStatus != ''">
+                and b.status = #{bindStatus}
+            </when>
+            <otherwise>
+                and b.status = 'active'
+            </otherwise>
+        </choose>
+        <if test="keyword != null and keyword != ''">
+            and (
+                cast(b.user_id as char) like concat('%', #{keyword}, '%')
+                    or ifnull(u.nickname, '') like concat('%', #{keyword}, '%')
+                    or ifnull(u.real_name, '') like concat('%', #{keyword}, '%')
+                    or ifnull(u.mobile, '') like concat('%', #{keyword}, '%')
+                )
+        </if>
+        order by b.bind_time desc, b.binding_id desc
+    </select>
+</mapper>

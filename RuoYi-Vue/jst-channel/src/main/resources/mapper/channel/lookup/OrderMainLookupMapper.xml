@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.lookup.OrderMainLookupMapper">
+
+    <sql id="ActiveBindingExists">
+        exists (
+            select 1
+            from jst_student_channel_binding b
+            where b.user_id = o.user_id
+              and b.channel_id = #{channelId}
+              and b.status = 'active'
+              and b.del_flag = '0'
+        )
+    </sql>
+
+    <select id="countOrdersByMonth" resultType="long">
+        select count(1)
+        from jst_order_main o
+        where o.del_flag = '0'
+          and <include refid="ActiveBindingExists"/>
+          and o.create_time <![CDATA[ >= ]]> #{startTime}
+          and o.create_time <![CDATA[ < ]]> #{endTime}
+    </select>
+
+    <select id="sumPaidAmountByMonth" resultType="java.math.BigDecimal">
+        select coalesce(sum(o.net_pay_amount), 0.00)
+        from jst_order_main o
+        where o.del_flag = '0'
+          and <include refid="ActiveBindingExists"/>
+          and o.order_status in ('paid', 'reviewing', 'in_service', 'aftersale', 'completed')
+          and o.pay_time is not null
+          and o.pay_time <![CDATA[ >= ]]> #{startTime}
+          and o.pay_time <![CDATA[ < ]]> #{endTime}
+    </select>
+
+    <select id="selectOrderList" parameterType="com.ruoyi.jst.channel.dto.ChannelDashboardQueryDTO"
+            resultType="com.ruoyi.jst.channel.vo.DashboardOrderVO">
+        select o.order_id as orderId,
+               o.order_no as orderNo,
+               o.user_id as userId,
+               coalesce(nullif(u.real_name, ''), u.nickname) as userName,
+               o.order_type as orderType,
+               o.net_pay_amount as payAmount,
+               o.order_status as status,
+               o.create_time as createTime
+        from jst_order_main o
+                 left join jst_user u on u.user_id = o.user_id and u.del_flag = '0'
+        where o.del_flag = '0'
+          and <include refid="ActiveBindingExists"/>
+        <if test="status != null and status != ''">
+            and o.order_status = #{status}
+        </if>
+        <if test="startTime != null">
+            and o.create_time <![CDATA[ >= ]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and o.create_time <![CDATA[ < ]]> #{endTime}
+        </if>
+        order by o.create_time desc, o.order_id desc
+    </select>
+
+    <select id="selectOrderTrend" resultType="map">
+        select date_format(o.create_time, '%Y-%m-%d') as statDate,
+               count(1) as orderCount,
+               coalesce(sum(case
+                                when o.order_status in ('paid', 'reviewing', 'in_service', 'aftersale', 'completed')
+                                    then o.net_pay_amount
+                                else 0
+                   end), 0.00) as orderAmount
+        from jst_order_main o
+        where o.del_flag = '0'
+          and <include refid="ActiveBindingExists"/>
+          and o.create_time <![CDATA[ >= ]]> #{startTime}
+          and o.create_time <![CDATA[ < ]]> #{endTime}
+        group by date_format(o.create_time, '%Y-%m-%d')
+        order by statDate asc
+    </select>
+
+    <select id="selectTopContests" resultType="map">
+        select o.contest_id as contestId,
+               c.contest_name as contestName,
+               count(1) as orderCount
+        from jst_order_main o
+                 left join jst_contest c on c.contest_id = o.contest_id and c.del_flag = '0'
+        where o.del_flag = '0'
+          and <include refid="ActiveBindingExists"/>
+          and o.create_time <![CDATA[ >= ]]> #{startTime}
+          and o.create_time <![CDATA[ < ]]> #{endTime}
+          and o.contest_id is not null
+        group by o.contest_id, c.contest_name
+        order by count(1) desc, o.contest_id asc
+        limit 5
+    </select>
+</mapper>

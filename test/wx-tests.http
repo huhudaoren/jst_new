@@ -1912,3 +1912,168 @@ client.test("C8-W12.1 exhausted stock should fail", function() {
   client.assert(response.body.code === 50011 || response.body.code !== 200);
 });
 %}
+
+### =====================================================================
+### F-CHANNEL-DASHBOARD (jst-channel / WxChannelDashboardController)
+### Preconditions: fixtures 9201/9203 + 9211/9212 + OD_FCD_001~004 already imported
+### =====================================================================
+
+### F-CD-0. login channel user 9201
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_9201" }
+
+> {%
+client.global.set("fcd_channel_token", response.body.data.token);
+client.test("F-CD-0 login channel success", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data.roles));
+    client.assert(response.body.data.roles.includes("jst_channel"));
+});
+%}
+
+### F-CD-1. monthly current month summary
+GET {{baseUrl}}/jst/wx/channel/dashboard/monthly
+Authorization: Bearer {{fcd_channel_token}}
+
+> {%
+client.test("F-CD-1 monthly summary should match fixtures", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.yearMonth === "2026-04");
+    client.assert(response.body.data.newStudentCount === 1);
+    client.assert(response.body.data.orderCount === 3);
+    client.assert(response.body.data.orderPaidAmount === 498 || response.body.data.orderPaidAmount === 498.00);
+    client.assert(response.body.data.rebateEstimatedAmount === 49.8 || response.body.data.rebateEstimatedAmount === 49.80);
+});
+%}
+
+### F-CD-2. monthly previous month summary
+GET {{baseUrl}}/jst/wx/channel/dashboard/monthly?yearMonth=2026-03
+Authorization: Bearer {{fcd_channel_token}}
+
+> {%
+client.test("F-CD-2 previous month summary should match fixtures", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.yearMonth === "2026-03");
+    client.assert(response.body.data.newStudentCount === 1);
+    client.assert(response.body.data.orderCount === 1);
+    client.assert(response.body.data.orderPaidAmount === 159 || response.body.data.orderPaidAmount === 159.00);
+    client.assert(response.body.data.rebateEstimatedAmount === 15.9 || response.body.data.rebateEstimatedAmount === 15.90);
+});
+%}
+
+### F-CD-3. students list with keyword filter
+GET {{baseUrl}}/jst/wx/channel/students?keyword=FCD_STUDENT_A&pageNum=1&pageSize=10
+Authorization: Bearer {{fcd_channel_token}}
+
+> {%
+client.test("F-CD-3 students list should return filtered row", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.rows));
+    client.assert(response.body.rows.length === 1);
+    client.assert(response.body.rows[0].userId === 9211);
+    client.assert(response.body.rows[0].totalOrderCount === 2);
+});
+%}
+
+### F-CD-4. orders filtered by status
+GET {{baseUrl}}/jst/wx/channel/orders?status=pending_pay&pageNum=1&pageSize=10
+Authorization: Bearer {{fcd_channel_token}}
+
+> {%
+client.test("F-CD-4 order status filter should hit pending row", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.rows));
+    client.assert(response.body.rows.length === 1);
+    client.assert(response.body.rows[0].orderNo === "OD_FCD_004");
+    client.assert(response.body.rows[0].status === "pending_pay");
+});
+%}
+
+### F-CD-5. orders filtered by date range
+GET {{baseUrl}}/jst/wx/channel/orders?startDate=2026-04-01&endDate=2026-04-30&pageNum=1&pageSize=10
+Authorization: Bearer {{fcd_channel_token}}
+
+> {%
+client.test("F-CD-5 order date range should only return current-month rows", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.rows));
+    client.assert(response.body.rows.length === 3);
+});
+%}
+
+### F-CD-6. stats last7d
+GET {{baseUrl}}/jst/wx/channel/dashboard/stats?period=last7d
+Authorization: Bearer {{fcd_channel_token}}
+
+> {%
+client.test("F-CD-6 last7d stats should return trend arrays", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.period === "last7d");
+    client.assert(Array.isArray(response.body.data.orderTrend));
+    client.assert(Array.isArray(response.body.data.rebateTrend));
+    client.assert(response.body.data.orderTrend.length === 7);
+    client.assert(response.body.data.rebateTrend.length === 7);
+    client.assert(Array.isArray(response.body.data.topContests));
+    client.assert(response.body.data.topContests.length >= 1);
+});
+%}
+
+### F-CD-6.1. stats last30d
+GET {{baseUrl}}/jst/wx/channel/dashboard/stats?period=last30d
+Authorization: Bearer {{fcd_channel_token}}
+
+> {%
+client.test("F-CD-6.1 last30d stats should return 30 points", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.period === "last30d");
+    client.assert(response.body.data.orderTrend.length === 30);
+    client.assert(response.body.data.rebateTrend.length === 30);
+});
+%}
+
+### F-CD-7. student role should be rejected
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("fcd_student_token", response.body.data.token);
+%}
+
+### F-CD-7.1. student calling channel dashboard
+GET {{baseUrl}}/jst/wx/channel/dashboard/monthly
+Authorization: Bearer {{fcd_student_token}}
+
+> {%
+client.test("F-CD-7.1 student should get 403", function() {
+    client.assert(response.status === 403 || response.body.code !== 200);
+});
+%}
+
+### F-CD-8. empty channel returns empty list
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_9203" }
+
+> {%
+client.global.set("fcd_empty_channel_token", response.body.data.token);
+client.test("F-CD-8 login empty channel success", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### F-CD-8.1. empty channel student list should be empty
+GET {{baseUrl}}/jst/wx/channel/students?pageNum=1&pageSize=10
+Authorization: Bearer {{fcd_empty_channel_token}}
+
+> {%
+client.test("F-CD-8.1 empty channel list should be empty", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.rows));
+    client.assert(response.body.rows.length === 0);
+});
+%}
