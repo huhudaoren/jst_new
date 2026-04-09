@@ -27,10 +27,22 @@
 
 <script>
 import { getWriteoffRecords } from '@/api/appointment'
+import { useUserStore } from '@/store/user'
 
 export default {
   data() { return { list: [], pageNum: 1, pageSize: 10, total: 0, loading: false, hasMore: true } },
-  onLoad() { this.load(true) },
+  onLoad() {
+    // POLISH-D 权限门: jst_partner / jst_platform_op
+    const store = useUserStore()
+    const roles = (store.userInfo && store.userInfo.roles) || []
+    const allowed = roles.includes('jst_partner') || roles.includes('jst_platform_op')
+    if (!allowed) {
+      uni.showToast({ title: '无查看权限', icon: 'none' })
+      setTimeout(() => uni.navigateBack(), 800)
+      return
+    }
+    this.load(true)
+  },
   onPullDownRefresh() { this.load(true).finally(() => uni.stopPullDownRefresh()) },
   onReachBottom() { if (this.hasMore && !this.loading) this.load(false) },
   methods: {

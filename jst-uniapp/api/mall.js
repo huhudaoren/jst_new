@@ -53,3 +53,26 @@ export function getMyExchanges(params) {
 export function getExchangeDetail(exchangeId) {
   return request({ url: `/jst/wx/mall/exchange/${exchangeId}`, method: 'GET' })
 }
+
+/* ---------------- 商城售后 (C9) ---------------- */
+
+/**
+ * 申请售后
+ * @param {Object} body { exchangeId, reason, refundType }
+ */
+export function applyAftersale(body) {
+  return request({ url: '/jst/wx/mall/aftersale/apply', method: 'POST', data: body })
+}
+
+/**
+ * 我的售后单列表
+ * @param {Object} params { status?, pageNum, pageSize }
+ */
+export function getMyAftersales(params) {
+  return request({ url: '/jst/wx/mall/aftersale/my', method: 'GET', data: params })
+}
+
+/** 售后单详情 */
+export function getAftersaleDetail(refundId) {
+  return request({ url: `/jst/wx/mall/aftersale/${refundId}`, method: 'GET' })
+}

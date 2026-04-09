@@ -44,6 +44,13 @@
         <view class="my-page__grid-item" @tap="navigateChannelStudents"><view class="my-page__grid-icon my-page__grid-icon--teal">👥</view><text class="my-page__grid-text">我的学生</text></view>
         <view class="my-page__grid-item" @tap="navigateChannelOrders"><view class="my-page__grid-icon my-page__grid-icon--orange">🧾</view><text class="my-page__grid-text">渠道订单</text></view>
         <view class="my-page__grid-item" @tap="navigateChannelData"><view class="my-page__grid-icon my-page__grid-icon--green">📊</view><text class="my-page__grid-text">渠道数据</text></view>
+      </view>
+    </view>
+
+    <!-- POLISH-D: 扫码核销入口独立区块, 条件为 jst_partner / jst_platform_op -->
+    <view v-if="isPartnerOrOp" class="my-page__section">
+      <text class="my-page__section-title">核销工作台</text>
+      <view class="my-page__grid">
         <view class="my-page__grid-item" @tap="navigateScan"><view class="my-page__grid-icon my-page__grid-icon--purple">📷</view><text class="my-page__grid-text">扫码核销</text></view>
         <view class="my-page__grid-item" @tap="navigateWriteoffRecord"><view class="my-page__grid-icon my-page__grid-icon--blue">📜</view><text class="my-page__grid-text">核销记录</text></view>
       </view>
@@ -61,6 +68,9 @@
         <view class="my-page__grid-item" @tap="navigateParticipant"><view class="my-page__grid-icon my-page__grid-icon--orange">📁</view><text class="my-page__grid-text">我的档案</text></view>
         <view class="my-page__grid-item" @tap="navigateAppointmentList"><view class="my-page__grid-icon my-page__grid-icon--teal">📅</view><text class="my-page__grid-text">我的预约</text></view>
         <view class="my-page__grid-item" @tap="navigateMall"><view class="my-page__grid-icon my-page__grid-icon--gold">🎁</view><text class="my-page__grid-text">积分商城</text></view>
+        <view class="my-page__grid-item" @tap="navigatePointsCenter"><view class="my-page__grid-icon my-page__grid-icon--purple">⭐</view><text class="my-page__grid-text">积分中心</text></view>
+        <view class="my-page__grid-item" @tap="navigateCouponCenter"><view class="my-page__grid-icon my-page__grid-icon--orange">🎫</view><text class="my-page__grid-text">我的优惠券</text></view>
+        <view class="my-page__grid-item" @tap="navigateRightsCenter"><view class="my-page__grid-icon my-page__grid-icon--green">🎖</view><text class="my-page__grid-text">我的权益</text></view>
       </view>
     </view>
 
@@ -86,6 +96,12 @@ export default {
       if (info.userType === 'channel') return true
       const roles = info.roles || []
       return Array.isArray(roles) && roles.includes('jst_channel')
+    },
+    // POLISH-D: 赛事方/平台运营权限, 用于扫码核销入口
+    isPartnerOrOp() {
+      const store = useUserStore()
+      const roles = (store.userInfo && store.userInfo.roles) || []
+      return Array.isArray(roles) && (roles.includes('jst_partner') || roles.includes('jst_platform_op'))
     }
   },
   onShow() { this.ensureLogin(); this.loadProfile() },
@@ -109,6 +125,9 @@ export default {
     navigateChannelData() { uni.navigateTo({ url: '/pages-sub/channel/data' }) },
     navigateAppointmentList() { uni.navigateTo({ url: '/pages-sub/appointment/my-list' }) },
     navigateMall() { uni.navigateTo({ url: '/pages-sub/mall/list' }) },
+    navigatePointsCenter() { uni.navigateTo({ url: '/pages-sub/points/center' }) },
+    navigateCouponCenter() { uni.navigateTo({ url: '/pages-sub/coupon/center' }) },
+    navigateRightsCenter() { uni.navigateTo({ url: '/pages-sub/rights/center' }) },
     navigateScan() { uni.navigateTo({ url: '/pages-sub/appointment/scan' }) },
     navigateWriteoffRecord() { uni.navigateTo({ url: '/pages-sub/appointment/writeoff-record' }) },
     navigateCourseTab() { uni.switchTab({ url: '/pages/course/list' }) },

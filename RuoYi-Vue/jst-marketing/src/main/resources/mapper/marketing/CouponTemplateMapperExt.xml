@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.marketing.mapper.CouponTemplateMapperExt">
+
+    <select id="selectAdminList" resultType="java.util.LinkedHashMap">
+        select coupon_template_id as couponTemplateId,
+               coupon_name as couponName,
+               coupon_type as couponType,
+               face_value as faceValue,
+               discount_rate as discountRate,
+               threshold_amount as thresholdAmount,
+               applicable_role as applicableRole,
+               applicable_contest_ids as applicableContestIds,
+               valid_days as validDays,
+               valid_start as validStart,
+               valid_end as validEnd,
+               stack_rule as stackRule,
+               status,
+               remark,
+               create_time as createTime,
+               update_time as updateTime
+        from jst_coupon_template
+        <where>
+            del_flag = '0'
+            <if test="couponName != null and couponName != ''">
+                and coupon_name like concat('%', #{couponName}, '%')
+            </if>
+            <if test="couponType != null and couponType != ''">
+                and coupon_type = #{couponType}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+        order by coupon_template_id desc
+    </select>
+
+    <select id="selectClaimableTemplates" resultType="java.util.LinkedHashMap">
+        select coupon_template_id as couponTemplateId,
+               coupon_name as couponName,
+               coupon_type as couponType,
+               face_value as faceValue,
+               discount_rate as discountRate,
+               threshold_amount as thresholdAmount,
+               applicable_role as applicableRole,
+               applicable_contest_ids as applicableContestIds,
+               valid_days as validDays,
+               valid_start as validStart,
+               valid_end as validEnd,
+               stack_rule as stackRule,
+               status
+        from jst_coupon_template
+        <where>
+            del_flag = '0'
+            and status = 1
+            and (applicable_role = #{applicableRole} or applicable_role = 'all' or applicable_role = 'both')
+            and (valid_start is null or valid_start <![CDATA[<=]]> #{now})
+            and (valid_end is null or valid_end <![CDATA[>=]]> #{now})
+            <if test="excludeTemplateIds != null and excludeTemplateIds.size() > 0">
+                and (stack_rule != 'once' or coupon_template_id not in
+                <foreach collection="excludeTemplateIds" item="templateId" open="(" separator="," close=")">
+                    #{templateId}
+                </foreach>
+                )
+            </if>
+        </where>
+        order by coupon_template_id desc
+    </select>
+
+    <select id="selectClaimableTemplatesByIds" resultType="java.util.LinkedHashMap">
+        select coupon_template_id as couponTemplateId,
+               coupon_name as couponName,
+               coupon_type as couponType,
+               face_value as faceValue,
+               discount_rate as discountRate,
+               threshold_amount as thresholdAmount,
+               applicable_role as applicableRole,
+               applicable_contest_ids as applicableContestIds,
+               valid_days as validDays,
+               valid_start as validStart,
+               valid_end as validEnd,
+               stack_rule as stackRule,
+               status
+        from jst_coupon_template
+        <where>
+            del_flag = '0'
+            and status = 1
+            and coupon_template_id in
+            <foreach collection="templateIds" item="templateId" open="(" separator="," close=")">
+                #{templateId}
+            </foreach>
+            and (applicable_role = #{applicableRole} or applicable_role = 'all' or applicable_role = 'both')
+            and (valid_start is null or valid_start <![CDATA[<=]]> #{now})
+            and (valid_end is null or valid_end <![CDATA[>=]]> #{now})
+            <if test="excludeTemplateIds != null and excludeTemplateIds.size() > 0">
+                and (stack_rule != 'once' or coupon_template_id not in
+                <foreach collection="excludeTemplateIds" item="excludeTemplateId" open="(" separator="," close=")">
+                    #{excludeTemplateId}
+                </foreach>
+                )
+            </if>
+        </where>
+        order by coupon_template_id desc
+    </select>
+
+    <update id="updateStatus">
+        update jst_coupon_template
+        set status = #{status},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where coupon_template_id = #{couponTemplateId}
+          and del_flag = '0'
+    </update>
+
+    <update id="markDeleted">
+        update jst_coupon_template
+        set del_flag = '2',
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where coupon_template_id = #{couponTemplateId}
+          and del_flag = '0'
+    </update>
+</mapper>

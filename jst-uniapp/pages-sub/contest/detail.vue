@@ -161,10 +161,10 @@ export default {
     enrollAction() {
       return getContestEnrollAction(this.detail || {})
     },
-    // 是否展示"我要预约"入口: 任一 appointment 相关字段为真即展示
+    // POLISH-G: 收敛为单一字段 supportAppointment (WxContestDetailVO/ContestDetailVO 已确认)
     showAppointmentEntry() {
-      const d = this.detail || {}
-      return !!(d.appointmentEnabled || d.supportAppointment || d.appointmentType || d.individualAppointmentEnabled)
+      const v = this.detail && this.detail.supportAppointment
+      return v === 1 || v === true || v === '1'
     },
     categoryIcon() {
       return getContestCategoryIcon(this.detail && this.detail.category)

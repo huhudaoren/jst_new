@@ -22,11 +22,22 @@
 
     <view v-if="writeoffItems.length" class="ad-qrwrap">
       <text class="ad-qrwrap__title">核销二维码 ({{ writeoffItems.length }})</text>
+      <!-- POLISH-B: 二维码渲染
+           目标: 每个 writeoffItem 用 canvas + uqrcode.make 生成真实二维码
+           当前: jst-uniapp 为 HBuilderX 项目, 无 package.json / 未安装 uqrcodejs
+                 暂保留字符串回落; 安装 uqrcodejs 后只需:
+                   1. import UQRCode from 'uqrcodejs'
+                   2. mounted/onReady 里遍历 writeoffItems, 对每个 canvas-id 执行
+                      const qr = new UQRCode(); qr.data = item.qrCode; qr.size = 250;
+                      qr.make(); qr.canvasContext = uni.createCanvasContext('qr_' + idx, this); qr.drawCanvas();
+                 在报告 §B 已阻塞说明 -->
       <swiper class="ad-swiper" :indicator-dots="writeoffItems.length > 1" indicator-color="rgba(0,0,0,.3)" indicator-active-color="#F5A623">
         <swiper-item v-for="(item, idx) in writeoffItems" :key="item.writeoffItemId || idx">
           <view class="ad-qr">
             <text class="ad-qr__name">{{ item.itemName || ('核销项 ' + (idx + 1)) }}</text>
             <view class="ad-qr__box">
+              <!-- canvas 占位, 等待 uqrcode 接入 -->
+              <canvas :canvas-id="'qr_' + idx" class="ad-qr__canvas" />
               <text class="ad-qr__payload">{{ item.qrCode || '--' }}</text>
             </view>
             <text :class="['ad-qr__status', 'ad-qr__status--' + item.status]">{{ writeoffStatusLabel(item.status) }}</text>
@@ -104,8 +115,9 @@ export default {
 .ad-swiper { height: 720rpx; }
 .ad-qr { display: flex; flex-direction: column; align-items: center; padding: 20rpx; }
 .ad-qr__name { font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.ad-qr__box { width: 500rpx; height: 500rpx; margin-top: 24rpx; background: #fff; border: 2rpx solid var(--jst-color-border); border-radius: var(--jst-radius-md); display: flex; align-items: center; justify-content: center; padding: 24rpx; box-sizing: border-box; }
-.ad-qr__payload { font-size: 22rpx; color: var(--jst-color-text-secondary); word-break: break-all; text-align: center; }
+.ad-qr__box { width: 500rpx; height: 500rpx; margin-top: 24rpx; background: #fff; border: 2rpx solid var(--jst-color-border); border-radius: var(--jst-radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24rpx; box-sizing: border-box; position: relative; }
+.ad-qr__canvas { width: 400rpx; height: 400rpx; }
+.ad-qr__payload { margin-top: 12rpx; font-size: 20rpx; color: var(--jst-color-text-tertiary); word-break: break-all; text-align: center; }
 .ad-qr__status { margin-top: 20rpx; padding: 6rpx 24rpx; border-radius: var(--jst-radius-full); font-size: 22rpx; background: var(--jst-color-warning-soft); color: var(--jst-color-warning); }
 .ad-qr__status--used { background: var(--jst-color-success-soft); color: var(--jst-color-success); }
 .ad-qr__status--voided { background: var(--jst-color-gray-soft); color: var(--jst-color-text-tertiary); }

@@ -80,8 +80,8 @@
 <script>
 import { getRebateSummary, getRebateLedgerList } from '@/api/channel'
 
+// POLISH-C: 6 tab, 移除"全部" (原型 channel-rebate.html 仅 6 状态)
 const STATUS_TABS = [
-  { value: '', label: '全部' },
   { value: 'pending', label: '待结算' },
   { value: 'withdrawable', label: '可提现' },
   { value: 'in_review', label: '审核中' },
@@ -104,7 +104,7 @@ export default {
     return {
       summary: { withdrawableAmount: '0.00', reviewingAmount: '0.00', paidAmount: '0.00', rolledBackAmount: '0.00' },
       statusTabs: STATUS_TABS,
-      activeStatus: '',
+      activeStatus: 'pending',
       list: [],
       pageNum: 1,
       pageSize: 10,

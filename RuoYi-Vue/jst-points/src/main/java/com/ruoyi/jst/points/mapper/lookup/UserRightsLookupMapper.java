@@ -28,4 +28,10 @@ public interface UserRightsLookupMapper {
                          @Param("createBy") String createBy,
                          @Param("createTime") Date createTime,
                          @Param("remark") String remark);
+
+    int countConsumedRightsByExchangeId(@Param("exchangeId") Long exchangeId);
+
+    int revokeRightsByExchangeId(@Param("exchangeId") Long exchangeId,
+                                 @Param("updateBy") String updateBy,
+                                 @Param("updateTime") Date updateTime);
 }

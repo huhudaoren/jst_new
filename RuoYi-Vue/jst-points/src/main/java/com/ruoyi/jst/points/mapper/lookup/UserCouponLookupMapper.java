@@ -28,4 +28,8 @@ public interface UserCouponLookupMapper {
                          @Param("remark") String remark);
 
     int countUsedCouponsByExchangeId(@Param("exchangeId") Long exchangeId);
+
+    int refundCouponsByExchangeId(@Param("exchangeId") Long exchangeId,
+                                  @Param("updateBy") String updateBy,
+                                  @Param("updateTime") Date updateTime);
 }

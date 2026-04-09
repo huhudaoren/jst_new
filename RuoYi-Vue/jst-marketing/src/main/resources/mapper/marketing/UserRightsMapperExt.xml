@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.marketing.mapper.UserRightsMapperExt">
+
+    <sql id="rightsDetailSelect">
+        select ur.user_rights_id as userRightsId,
+               ur.rights_template_id as rightsTemplateId,
+               ur.owner_type as ownerType,
+               ur.owner_id as ownerId,
+               ur.source_type as sourceType,
+               ur.source_ref_id as sourceRefId,
+               ur.remain_quota as remainQuota,
+               ur.valid_start as validStart,
+               ur.valid_end as validEnd,
+               case
+                   when ur.valid_end <![CDATA[<]]> #{now} and ur.status in ('available', 'approved', 'applying') then 'expired'
+                   when ur.status = 'revoked' then 'voided'
+                   else ur.status
+               end as status,
+               case
+                   when ur.valid_end <![CDATA[<]]> #{now} then 1
+                   else 0
+               end as expired,
+               ur.remark as remark,
+               rt.rights_name as rightsName,
+               rt.rights_type as rightsType,
+               rt.quota_mode as quotaMode,
+               rt.quota_value as quotaValue,
+               rt.writeoff_mode as writeoffMode
+        from jst_user_rights ur
+                 inner join jst_rights_template rt on ur.rights_template_id = rt.rights_template_id
+    </sql>
+
+    <select id="selectMyRights" resultType="java.util.LinkedHashMap">
+        <include refid="rightsDetailSelect"/>
+        <where>
+            ur.del_flag = '0'
+            and rt.del_flag = '0'
+            and ur.owner_type = #{ownerType}
+            and ur.owner_id = #{ownerId}
+            <if test="status != null and status != ''">
+                <choose>
+                    <when test="status == 'available'">
+                        and (
+                        case
+                            when ur.valid_end <![CDATA[<]]> #{now} and ur.status in ('available', 'approved', 'applying') then 'expired'
+                            when ur.status = 'revoked' then 'voided'
+                            else ur.status
+                        end
+                        ) in ('available', 'approved')
+                    </when>
+                    <when test="status == 'applying'">
+                        and (
+                        case
+                            when ur.valid_end <![CDATA[<]]> #{now} and ur.status in ('available', 'approved', 'applying') then 'expired'
+                            when ur.status = 'revoked' then 'voided'
+                            else ur.status
+                        end
+                        ) = 'applying'
+                    </when>
+                    <when test="status == 'used'">
+                        and (
+                        case
+                            when ur.valid_end <![CDATA[<]]> #{now} and ur.status in ('available', 'approved', 'applying') then 'expired'
+                            when ur.status = 'revoked' then 'voided'
+                            else ur.status
+                        end
+                        ) = 'used'
+                    </when>
+                    <when test="status == 'expired'">
+                        and (
+                        case
+                            when ur.valid_end <![CDATA[<]]> #{now} and ur.status in ('available', 'approved', 'applying') then 'expired'
+                            when ur.status = 'revoked' then 'voided'
+                            else ur.status
+                        end
+                        ) in ('expired', 'voided', 'rejected')
+                    </when>
+                </choose>
+            </if>
+        </where>
+        order by ur.valid_end asc, ur.user_rights_id desc
+    </select>
+
+    <select id="selectDetailOwned" resultType="java.util.LinkedHashMap">
+        <include refid="rightsDetailSelect"/>
+        where ur.del_flag = '0'
+          and rt.del_flag = '0'
+          and ur.user_rights_id = #{userRightsId}
+          and ur.owner_type = #{ownerType}
+          and ur.owner_id = #{ownerId}
+    </select>
+
+    <select id="selectDetailOwnedForUpdate" resultType="java.util.LinkedHashMap">
+        <include refid="rightsDetailSelect"/>
+        where ur.del_flag = '0'
+          and rt.del_flag = '0'
+          and ur.user_rights_id = #{userRightsId}
+          and ur.owner_type = #{ownerType}
+          and ur.owner_id = #{ownerId}
+        for update
+    </select>
+
+    <select id="selectWriteoffHistory" resultType="java.util.LinkedHashMap">
+        select record_id as recordId,
+               writeoff_no as writeoffNo,
+               use_amount as useAmount,
+               apply_remark as applyRemark,
+               status,
+               audit_remark as auditRemark,
+               writeoff_time as writeoffTime,
+               create_time as createTime
+        from jst_rights_writeoff_record
+        where user_rights_id = #{userRightsId}
+          and del_flag = '0'
+        order by create_time desc, record_id desc
+    </select>
+</mapper>

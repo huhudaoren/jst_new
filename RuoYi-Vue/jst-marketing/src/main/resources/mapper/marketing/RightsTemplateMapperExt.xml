@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.marketing.mapper.RightsTemplateMapperExt">
+
+    <select id="selectAdminList" resultType="java.util.LinkedHashMap">
+        select rights_template_id as rightsTemplateId,
+               rights_name as rightsName,
+               rights_type as rightsType,
+               quota_mode as quotaMode,
+               quota_value as quotaValue,
+               valid_days as validDays,
+               writeoff_mode as writeoffMode,
+               applicable_role as applicableRole,
+               status,
+               remark,
+               create_time as createTime,
+               update_time as updateTime
+        from jst_rights_template
+        <where>
+            del_flag = '0'
+            <if test="rightsName != null and rightsName != ''">
+                and rights_name like concat('%', #{rightsName}, '%')
+            </if>
+            <if test="rightsType != null and rightsType != ''">
+                and rights_type = #{rightsType}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+        order by rights_template_id desc
+    </select>
+
+    <update id="updateStatus">
+        update jst_rights_template
+        set status = #{status},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where rights_template_id = #{rightsTemplateId}
+          and del_flag = '0'
+    </update>
+
+    <update id="markDeleted">
+        update jst_rights_template
+        set del_flag = '2',
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where rights_template_id = #{rightsTemplateId}
+          and del_flag = '0'
+    </update>
+</mapper>

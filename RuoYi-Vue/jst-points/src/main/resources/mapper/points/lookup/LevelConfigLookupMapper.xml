@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.points.mapper.lookup.LevelConfigLookupMapper">
+
+    <select id="selectEnabledLevels" resultType="com.ruoyi.jst.points.vo.LevelVO">
+        select level_id as levelId,
+               level_code as levelCode,
+               level_name as levelName,
+               level_no as levelNo,
+               growth_threshold as growthThreshold,
+               icon,
+               applicable_role as applicableRole
+        from jst_level_config
+        where status = 1
+          and del_flag = '0'
+        <if test="role != null and role != '' and role != 'both'">
+            and applicable_role in (#{role}, 'both')
+        </if>
+        order by level_no asc, level_id asc
+    </select>
+</mapper>

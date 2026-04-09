@@ -2077,3 +2077,377 @@ client.test("F-CD-8.1 empty channel list should be empty", function() {
     client.assert(response.body.rows.length === 0);
 });
 %}
+
+### =====================================================================
+### C9 mall aftersale + F-POINTS-CENTER (jst-points / wx)
+### Preconditions: fixtures 99211~99214 + user 9001 imported
+### =====================================================================
+
+### C9-W0. login student 1001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("c9_student_token", response.body.data.token);
+client.test("C9-W0 login success", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C9-W1. virtual coupon unused apply should succeed
+POST {{baseUrl}}/jst/wx/mall/aftersale/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c9_student_token}}
+
+{
+  "exchangeId": 99211,
+  "reason": "æµ‹è¯•_C9_æœªä½¿ç”¨è™šæ‹Ÿåˆ¸ç”³è¯·é€€æ¬¾",
+  "refundType": "refund_only"
+}
+
+> {%
+client.test("C9-W1 virtual unused coupon aftersale apply should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.refundId);
+});
+if (response.body.code === 200) {
+  client.global.set("c9_refund_virtual_id", response.body.data.refundId);
+}
+%}
+
+### C9-W2. virtual coupon used should fail with 60031
+POST {{baseUrl}}/jst/wx/mall/aftersale/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c9_student_token}}
+
+{
+  "exchangeId": 99214,
+  "reason": "æµ‹è¯•_C9_å·²ä½¿ç”¨è™šæ‹Ÿåˆ¸ä¸å¯é€€æ¬¾",
+  "refundType": "refund_only"
+}
+
+> {%
+client.test("C9-W2 used coupon aftersale should fail", function() {
+  client.assert(response.body.code === 60031 || response.body.code !== 200);
+});
+%}
+
+### C9-W3. physical pending_ship refund_only apply
+POST {{baseUrl}}/jst/wx/mall/aftersale/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c9_student_token}}
+
+{
+  "exchangeId": 99212,
+  "reason": "æµ‹è¯•_C9_å¾…å‘è´§å®ç‰©é€€æ¬¾",
+  "refundType": "refund_only"
+}
+
+> {%
+client.test("C9-W3 pending_ship aftersale apply should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.refundId);
+});
+if (response.body.code === 200) {
+  client.global.set("c9_refund_pending_ship_id", response.body.data.refundId);
+}
+%}
+
+### C9-W4. shipped return_refund apply
+POST {{baseUrl}}/jst/wx/mall/aftersale/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c9_student_token}}
+
+{
+  "exchangeId": 99213,
+  "reason": "æµ‹è¯•_C9_å·²å‘è´§é€€è´§é€€æ¬¾",
+  "refundType": "return_refund"
+}
+
+> {%
+client.test("C9-W4 shipped aftersale apply should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.refundId);
+});
+if (response.body.code === 200) {
+  client.global.set("c9_refund_shipped_id", response.body.data.refundId);
+}
+%}
+
+### C9-W5. duplicate apply should be rejected
+POST {{baseUrl}}/jst/wx/mall/aftersale/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c9_student_token}}
+
+{
+  "exchangeId": 99212,
+  "reason": "æµ‹è¯•_C9_é‡å¤ç”³è¯·",
+  "refundType": "refund_only"
+}
+
+> {%
+client.test("C9-W5 duplicate aftersale apply should fail", function() {
+  client.assert(response.body.code === 60032 || response.body.code !== 200);
+});
+%}
+
+### C9-W6. my aftersale list applying
+GET {{baseUrl}}/jst/wx/mall/aftersale/my?status=applying&pageNum=1&pageSize=10
+Authorization: Bearer {{c9_student_token}}
+
+> {%
+client.test("C9-W6 my aftersale applying list should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.rows));
+});
+%}
+
+### C9-W7. my aftersale detail
+GET {{baseUrl}}/jst/wx/mall/aftersale/{{c9_refund_pending_ship_id}}
+Authorization: Bearer {{c9_student_token}}
+
+> {%
+client.test("C9-W7 my aftersale detail should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.exchangeId === 99212);
+});
+%}
+
+### F-PC-W0. login user 9001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_9001" }
+
+> {%
+client.global.set("fpc_user_token", response.body.data.token);
+client.test("F-PC-W0 login 9001 success", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### F-PC-W1. summary
+GET {{baseUrl}}/jst/wx/points/center/summary
+Authorization: Bearer {{fpc_user_token}}
+
+> {%
+client.test("F-PC-W1 summary should match fixtures", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.availablePoints === 1250);
+  client.assert(response.body.data.frozenPoints === 100);
+  client.assert(response.body.data.growthValue === 850);
+  client.assert(response.body.data.currentLevel.levelCode === "L2");
+  client.assert(response.body.data.nextLevel.levelCode === "L3");
+  client.assert(response.body.data.pointsToNextLevel === 1150);
+});
+%}
+
+### F-PC-W2. levels
+GET {{baseUrl}}/jst/wx/points/center/levels?role=student
+Authorization: Bearer {{fpc_user_token}}
+
+> {%
+client.test("F-PC-W2 levels should match fixtures", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+  client.assert(response.body.data.length >= 4);
+  client.assert(response.body.data[1].levelCode === "L2");
+  client.assert(response.body.data[1].unlocked === true);
+});
+%}
+
+### F-PC-W3. points ledger
+GET {{baseUrl}}/jst/wx/points/ledger?pageNum=1&pageSize=10
+Authorization: Bearer {{fpc_user_token}}
+
+> {%
+client.test("F-PC-W3 points ledger should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.rows));
+  client.assert(response.body.rows.length >= 2);
+});
+%}
+
+### F-PC-W4. growth ledger
+GET {{baseUrl}}/jst/wx/points/growth/ledger?pageNum=1&pageSize=10
+Authorization: Bearer {{fpc_user_token}}
+
+> {%
+client.test("F-PC-W4 growth ledger should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.rows));
+  client.assert(response.body.rows.length >= 2);
+});
+%}
+
+### F-PC-W5. tasks
+GET {{baseUrl}}/jst/wx/points/tasks
+Authorization: Bearer {{fpc_user_token}}
+
+> {%
+client.test("F-PC-W5 tasks should return 5 mock rows", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+  client.assert(response.body.data.length === 5);
+});
+%}
+
+### =====================================================================
+### F-MARKETING-RIGHTS-BE ÓÅ»İÈ¯ + È¨Òæ + ÓªÏú»î¶¯ (jst-marketing)
+### Ç°ÖÃ: ÒÑµ¼Èë 99-test-fixtures.sql ÖĞ F-MARKETING-RIGHTS-BE Êı¾İ
+### =====================================================================
+
+### FMR-0. ÖØĞÂµÇÂ¼ 9001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_9001" }
+
+> {%
+client.global.set("wx_marketing_token", response.body.data.token);
+%}
+
+### MR-CP-W1. claimable ÁĞ±í
+GET {{baseUrl}}/jst/wx/coupon/template/claimable
+Authorization: Bearer {{wx_marketing_token}}
+
+> {%
+client.test("MR-CP-W1 claimable ³É¹¦", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MR-CP-W2. Ñ§ÉúÖ÷¶¯ÁìÈ¯
+POST {{baseUrl}}/jst/wx/coupon/claim?templateId=9763
+Authorization: Bearer {{wx_marketing_token}}
+
+> {%
+client.test("MR-CP-W2 ÁìÈ¯³É¹¦", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MR-CP-W3. once ¹æÔòÖØ¸´ÁìÈ¡Ó¦ 60051
+POST {{baseUrl}}/jst/wx/coupon/claim?templateId=9763
+Authorization: Bearer {{wx_marketing_token}}
+
+> {%
+client.test("MR-CP-W3 ÖØ¸´ÁìÈ¯Ê§°Ü", function() {
+  client.assert(response.body.code === 60051);
+});
+%}
+
+### MR-CP-W4. ÎÒµÄÓÅ»İÈ¯ÁĞ±í
+GET {{baseUrl}}/jst/wx/coupon/my?status=unused&pageNum=1&pageSize=10
+Authorization: Bearer {{wx_marketing_token}}
+
+> {%
+client.test("MR-CP-W4 ÎÒµÄÓÅ»İÈ¯³É¹¦", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MR-CP-W5. ÏÂµ¥Ñ¡È¯Ô¤¼ÆËã
+POST {{baseUrl}}/jst/wx/coupon/select
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_marketing_token}}
+
+{
+  "orderAmount": 80,
+  "contestId": 8201,
+  "candidateCouponIds": [9861, 9862]
+}
+
+> {%
+client.test("MR-CP-W5 Ô¤¼ÆËã×î¼ÑÈ¯³É¹¦", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.bestCouponId === 9861);
+});
+%}
+
+### MR-RT-W1. ÎÒµÄÈ¨ÒæÁĞ±í
+GET {{baseUrl}}/jst/wx/rights/my?status=available&pageNum=1&pageSize=10
+Authorization: Bearer {{wx_marketing_token}}
+
+> {%
+client.test("MR-RT-W1 ÎÒµÄÈ¨Òæ³É¹¦", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MR-RT-W2. È¨ÒæÏêÇé
+GET {{baseUrl}}/jst/wx/rights/9871
+Authorization: Bearer {{wx_marketing_token}}
+
+> {%
+client.test("MR-RT-W2 È¨ÒæÏêÇé³É¹¦", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MR-RT-W3. self_apply ÉêÇëºËÏú³É¹¦
+POST {{baseUrl}}/jst/wx/rights/9871/apply-writeoff
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_marketing_token}}
+
+{
+  "remark": "FMR self apply"
+}
+
+> {%
+client.test("MR-RT-W3 ×ÔÖúºËÏú³É¹¦", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MR-RT-W4. scan ÀàĞÍÓ¦ 60063
+POST {{baseUrl}}/jst/wx/rights/9872/apply-writeoff
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_marketing_token}}
+
+{
+  "remark": "FMR scan should fail"
+}
+
+> {%
+client.test("MR-RT-W4 É¨ÂëĞÍÈ¨Òæ±»À¹½Ø", function() {
+  client.assert(response.body.code === 60063);
+});
+%}
+
+### MR-RT-W5. ÒÑ used ÔÙÉêÇëÓ¦ 60064
+POST {{baseUrl}}/jst/wx/rights/9871/apply-writeoff
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_marketing_token}}
+
+{
+  "remark": "FMR used again"
+}
+
+> {%
+client.test("MR-RT-W5 ÒÑÓÃÈ¨ÒæÔÙ´ÎºËÏúÊ§°Ü", function() {
+  client.assert(response.body.code === 60064);
+});
+%}
+
+### MR-CM-W1. »î¶¯ÁĞ±í
+GET {{baseUrl}}/jst/wx/campaign/list?pageNum=1&pageSize=10
+Authorization: Bearer {{wx_marketing_token}}
+
+> {%
+client.test("MR-CM-W1 »î¶¯ÁĞ±í³É¹¦", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MR-CM-W2. »î¶¯ÏêÇé + ¿ÉÁìÈ¯
+GET {{baseUrl}}/jst/wx/campaign/30001
+Authorization: Bearer {{wx_marketing_token}}
+
+> {%
+client.test("MR-CM-W2 »î¶¯ÏêÇé³É¹¦", function() {
+  client.assert(response.body.code === 200);
+});
+%}

@@ -9,8 +9,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                u.available_points as userAvailablePoints,
                u.frozen_points as userFrozenPoints,
                a.account_id as accountId,
+               a.available_points as accountAvailablePoints,
+               a.frozen_points as accountFrozenPoints,
                a.version as version,
-               a.owner_type as ownerType
+               a.owner_type as ownerType,
+               a.total_earn as totalEarn,
+               a.total_spend as totalSpend,
+               a.growth_value as growthValue,
+               a.current_level_id as currentLevelId
         from jst_user u
         left join jst_points_account a
                on a.account_id = (
@@ -47,6 +53,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where account_id = #{accountId}
           and version = #{version}
           and available_points >= #{points}
+          and del_flag = '0'
+    </update>
+
+    <update id="refundPointsAccount">
+        update jst_points_account
+        set available_points = available_points + #{points},
+            version = version + 1,
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where account_id = #{accountId}
+          and version = #{version}
           and del_flag = '0'
     </update>
 
@@ -111,6 +128,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           and del_flag = '0'
     </update>
 
+    <update id="refundUserPoints">
+        update jst_user
+        set available_points = available_points + #{points},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where user_id = #{userId}
+          and available_points = #{expectedAvailable}
+          and frozen_points = #{expectedFrozen}
+          and del_flag = '0'
+    </update>
+
     <insert id="insertPointsLedger">
         insert into jst_points_ledger (
             account_id, owner_type, owner_id, change_type, source_type, source_ref_id,
@@ -120,4 +148,36 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{pointsChange}, #{balanceAfter}, #{operatorId}, #{createBy}, #{createTime}, #{createBy}, #{createTime}, '0', #{remark}
         )
     </insert>
+
+    <insert id="insertRefundLedger">
+        insert into jst_points_ledger (
+            account_id, owner_type, owner_id, change_type, source_type, source_ref_id,
+            points_change, balance_after, operator_id, create_by, create_time, update_by, update_time, del_flag, remark
+        ) values (
+            #{accountId}, #{ownerType}, #{ownerId}, 'aftersale_refund', 'mall_aftersale', #{sourceRefId},
+            #{pointsChange}, #{balanceAfter}, #{operatorId}, #{createBy}, #{createTime}, #{createBy}, #{createTime}, '0', #{remark}
+        )
+    </insert>
+
+    <select id="selectMyPointsLedger" resultType="com.ruoyi.jst.points.vo.PointsLedgerVO">
+        select l.ledger_id as ledgerId,
+               l.change_type as changeType,
+               l.source_type as sourceType,
+               l.source_ref_id as sourceRefId,
+               l.points_change as pointsChange,
+               l.balance_after as balanceAfter,
+               l.remark,
+               l.create_time as createTime
+        from jst_points_ledger l
+        inner join jst_points_account a
+                on a.account_id = l.account_id
+               and a.del_flag = '0'
+        where l.del_flag = '0'
+          and a.owner_id = #{userId}
+          and a.owner_type in ('user', 'student')
+        <if test="changeType != null and changeType != ''">
+            and l.change_type = #{changeType}
+        </if>
+        order by l.create_time desc, l.ledger_id desc
+    </select>
 </mapper>

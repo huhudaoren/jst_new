@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.points.mapper.lookup.GrowthLedgerLookupMapper">
+
+    <select id="selectMyGrowthLedger" resultType="com.ruoyi.jst.points.vo.GrowthLedgerVO">
+        select g.ledger_id as ledgerId,
+               g.change_type as changeType,
+               g.source_type as sourceType,
+               g.source_ref_id as sourceRefId,
+               g.growth_change as growthChange,
+               g.balance_after as balanceAfter,
+               g.level_before as levelBefore,
+               g.level_after as levelAfter,
+               g.remark,
+               g.create_time as createTime
+        from jst_growth_ledger g
+        inner join jst_points_account a
+                on a.account_id = g.account_id
+               and a.del_flag = '0'
+        where g.del_flag = '0'
+          and a.owner_id = #{userId}
+          and a.owner_type in ('user', 'student')
+        order by g.create_time desc, g.ledger_id desc
+    </select>
+</mapper>

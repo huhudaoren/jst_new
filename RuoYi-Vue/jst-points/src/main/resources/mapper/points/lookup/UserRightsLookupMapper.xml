@@ -24,4 +24,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{remainQuota}, #{validStart}, #{validEnd}, #{status}, #{createBy}, #{createTime}, #{createBy}, #{createTime}, '0', #{remark}
         )
     </insert>
+
+    <select id="countConsumedRightsByExchangeId" resultType="int">
+        select count(1)
+        from jst_user_rights ur
+        left join jst_rights_template rt
+               on rt.rights_template_id = ur.rights_template_id
+              and rt.del_flag = '0'
+        where ur.source_ref_id = #{exchangeId}
+          and ur.del_flag = '0'
+          and (
+                ur.status = 'used'
+                or ur.remain_quota &lt; ifnull(rt.quota_value, ur.remain_quota)
+              )
+    </select>
+
+    <update id="revokeRightsByExchangeId">
+        update jst_user_rights
+        set remain_quota = 0,
+            status = 'revoked',
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where source_ref_id = #{exchangeId}
+          and status in ('available', 'locked')
+          and del_flag = '0'
+    </update>
 </mapper>

@@ -166,6 +166,35 @@
       ]
     },
     {
+      "root": "pages-sub/points",
+      "pages": [
+        { "path": "center", "style": { "navigationBarTitleText": "\u79ef\u5206\u4e2d\u5fc3", "navigationStyle": "custom" } },
+        { "path": "detail", "style": { "navigationBarTitleText": "\u79ef\u5206\u660e\u7ec6", "navigationStyle": "custom", "enablePullDownRefresh": true } }
+      ]
+    },
+    {
+      "root": "pages-sub/coupon",
+      "pages": [
+        { "path": "center", "style": { "navigationBarTitleText": "\u6211\u7684\u5361\u5238", "navigationStyle": "custom", "enablePullDownRefresh": true } },
+        { "path": "claimable", "style": { "navigationBarTitleText": "\u9886\u5238\u4e2d\u5fc3", "navigationStyle": "custom" } },
+        { "path": "select", "style": { "navigationBarTitleText": "\u9009\u62e9\u5238", "navigationStyle": "custom" } }
+      ]
+    },
+    {
+      "root": "pages-sub/rights",
+      "pages": [
+        { "path": "center", "style": { "navigationBarTitleText": "\u6211\u7684\u6743\u76ca", "navigationStyle": "custom", "enablePullDownRefresh": true } },
+        { "path": "detail", "style": { "navigationBarTitleText": "\u6743\u76ca\u8be6\u60c5", "navigationStyle": "custom" } },
+        { "path": "writeoff-apply", "style": { "navigationBarTitleText": "\u7533\u8bf7\u6838\u9500", "navigationStyle": "custom" } }
+      ]
+    },
+    {
+      "root": "pages-sub/marketing",
+      "pages": [
+        { "path": "campaign", "style": { "navigationBarTitleText": "\u6d3b\u52a8\u8be6\u60c5", "navigationStyle": "custom" } }
+      ]
+    },
+    {
       "root": "pages-sub/appointment",
       "pages": [
         { "path": "apply", "style": { "navigationBarTitleText": "\u9884\u7ea6\u62a5\u540d", "navigationStyle": "custom" } },

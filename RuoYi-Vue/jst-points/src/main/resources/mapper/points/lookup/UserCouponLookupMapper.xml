@@ -33,4 +33,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           and status = 'used'
           and del_flag = '0'
     </select>
+
+    <update id="refundCouponsByExchangeId">
+        update jst_user_coupon
+        set status = 'refunded',
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where order_id = #{exchangeId}
+          and status in ('unused', 'locked')
+          and del_flag = '0'
+    </update>
 </mapper>

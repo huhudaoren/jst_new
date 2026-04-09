@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.marketing.mapper.UserCouponMapperExt">
+
+    <select id="countAnyByUserAndTemplate" resultType="int">
+        select count(1)
+        from jst_user_coupon
+        where user_id = #{userId}
+          and coupon_template_id = #{couponTemplateId}
+          and del_flag = '0'
+    </select>
+
+    <select id="selectOwnedTemplateIds" resultType="long">
+        select distinct coupon_template_id
+        from jst_user_coupon
+        where user_id = #{userId}
+          and del_flag = '0'
+    </select>
+
+    <select id="selectMyCoupons" resultType="java.util.LinkedHashMap">
+        select uc.user_coupon_id as userCouponId,
+               uc.coupon_template_id as couponTemplateId,
+               ct.coupon_name as couponName,
+               ct.coupon_type as couponType,
+               ct.face_value as faceValue,
+               ct.discount_rate as discountRate,
+               ct.threshold_amount as thresholdAmount,
+               case
+                   when uc.valid_end <![CDATA[<]]> #{now} and uc.status in ('new', 'unused', 'locked') then 'expired'
+                   when uc.status = 'refunded' then 'expired'
+                   else uc.status
+               end as status,
+               case
+                   when uc.valid_end <![CDATA[<]]> #{now} then 1
+                   else 0
+               end as expired,
+               uc.valid_start as validStart,
+               uc.valid_end as validEnd,
+               uc.use_time as useTime
+        from jst_user_coupon uc
+                 left join jst_coupon_template ct on uc.coupon_template_id = ct.coupon_template_id
+        <where>
+            uc.del_flag = '0'
+            and uc.user_id = #{userId}
+            <if test="status != null and status != ''">
+                <choose>
+                    <when test="status == 'unused'">
+                        and uc.status in ('new', 'unused', 'locked')
+                        and uc.valid_end <![CDATA[>=]]> #{now}
+                    </when>
+                    <when test="status == 'used'">
+                        and uc.status = 'used'
+                    </when>
+                    <when test="status == 'expired'">
+                        and (uc.status in ('expired', 'voided', 'refunded')
+                             or (uc.status in ('new', 'unused', 'locked') and uc.valid_end <![CDATA[<]]> #{now}))
+                    </when>
+                </choose>
+            </if>
+        </where>
+        order by uc.valid_end asc, uc.user_coupon_id desc
+    </select>
+
+    <select id="selectSelectableCoupons" resultType="java.util.LinkedHashMap">
+        select uc.user_coupon_id as userCouponId,
+               uc.coupon_template_id as couponTemplateId,
+               uc.valid_start as validStart,
+               uc.valid_end as validEnd,
+               uc.status as couponStatus,
+               ct.coupon_name as couponName,
+               ct.coupon_type as couponType,
+               ct.face_value as faceValue,
+               ct.discount_rate as discountRate,
+               ct.threshold_amount as thresholdAmount,
+               ct.applicable_contest_ids as applicableContestIds
+        from jst_user_coupon uc
+                 inner join jst_coupon_template ct on uc.coupon_template_id = ct.coupon_template_id
+        <where>
+            uc.del_flag = '0'
+            and ct.del_flag = '0'
+            and uc.user_id = #{userId}
+            and uc.status in ('new', 'unused')
+            and uc.valid_end <![CDATA[>=]]> #{now}
+            <if test="candidateCouponIds != null and candidateCouponIds.size() > 0">
+                and uc.user_coupon_id in
+                <foreach collection="candidateCouponIds" item="couponId" open="(" separator="," close=")">
+                    #{couponId}
+                </foreach>
+            </if>
+        </where>
+        order by uc.valid_end asc, uc.user_coupon_id asc
+    </select>
+</mapper>

@@ -135,7 +135,15 @@ export default {
       detailVisible: false,
       detailLoading: false,
       currentParticipant: {},
-      detail: {}
+      detail: {},
+      // POLISH-E: pick 模式, 由外部页面 (如 appointment/apply) 通过 ?mode=pick 进入, 选中后回传
+      pickMode: false
+    }
+  },
+  onLoad(query) {
+    if (query && query.mode === 'pick') {
+      this.pickMode = true
+      uni.showToast({ title: '请选择参赛档案', icon: 'none' })
     }
   },
   onShow() {
@@ -209,6 +217,12 @@ export default {
     },
 
     async openDetail(item) {
+      // POLISH-E: pick 模式下, 点击卡片直接回传并返回, 不打开详情
+      if (this.pickMode) {
+        uni.setStorageSync('ap_picked_participant', { id: item.participantId, name: item.name })
+        uni.navigateBack()
+        return
+      }
       this.currentParticipant = item
       this.detail = {}
       this.detailVisible = true
