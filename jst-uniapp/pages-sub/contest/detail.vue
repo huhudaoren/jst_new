@@ -88,14 +88,21 @@
           <text class="contest-detail-page__cta-price">{{ priceText }}</text>
         </view>
 
-        <button
-          class="contest-detail-page__cta-button"
-          :class="{ 'contest-detail-page__cta-button--disabled': enrollAction.disabled }"
-          :disabled="enrollAction.disabled"
-          @tap="handleEnrollTap"
-        >
-          {{ enrollAction.text }}
-        </button>
+        <view class="contest-detail-page__cta-actions">
+          <button
+            v-if="showAppointmentEntry"
+            class="contest-detail-page__cta-secondary"
+            @tap="handleAppointmentTap"
+          >我要预约</button>
+          <button
+            class="contest-detail-page__cta-button"
+            :class="{ 'contest-detail-page__cta-button--disabled': enrollAction.disabled }"
+            :disabled="enrollAction.disabled"
+            @tap="handleEnrollTap"
+          >
+            {{ enrollAction.text }}
+          </button>
+        </view>
       </view>
     </template>
 
@@ -154,6 +161,11 @@ export default {
     enrollAction() {
       return getContestEnrollAction(this.detail || {})
     },
+    // 是否展示"我要预约"入口: 任一 appointment 相关字段为真即展示
+    showAppointmentEntry() {
+      const d = this.detail || {}
+      return !!(d.appointmentEnabled || d.supportAppointment || d.appointmentType || d.individualAppointmentEnabled)
+    },
     categoryIcon() {
       return getContestCategoryIcon(this.detail && this.detail.category)
     }
@@ -188,6 +200,12 @@ export default {
       }
 
       uni.switchTab({ url: '/pages/contest/list' })
+    },
+
+    handleAppointmentTap() {
+      uni.navigateTo({
+        url: `/pages-sub/appointment/apply?contestId=${this.contestId}&contestName=${encodeURIComponent((this.detail && this.detail.name) || '')}`
+      })
     },
 
     handleEnrollTap() {
@@ -414,5 +432,26 @@ export default {
 .contest-detail-page__cta-button--disabled {
   background: var(--jst-color-border);
   color: var(--jst-color-text-tertiary);
+}
+
+.contest-detail-page__cta-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.contest-detail-page__cta-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180rpx;
+  height: 88rpx;
+  padding: 0 24rpx;
+  border-radius: var(--jst-radius-full);
+  background: var(--jst-color-brand-soft);
+  color: var(--jst-color-brand);
+  font-size: 26rpx;
+  font-weight: 700;
+  border: none;
 }
 </style>

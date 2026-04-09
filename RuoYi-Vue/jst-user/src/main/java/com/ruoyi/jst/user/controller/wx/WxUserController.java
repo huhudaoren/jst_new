@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -84,8 +86,29 @@ public class WxUserController extends BaseController {
         if (req.containsKey("avatar"))         user.setAvatar((String) req.get("avatar"));
         if (req.containsKey("realName"))       user.setRealName((String) req.get("realName"));
         if (req.containsKey("gender"))         user.setGender((Integer) req.get("gender"));
+        if (req.containsKey("birthday")) {
+            Object raw = req.get("birthday");
+            if (raw == null || (raw instanceof String && ((String) raw).isEmpty())) {
+                user.setBirthday(null);
+            } else if (raw instanceof Date) {
+                user.setBirthday((Date) raw);
+            } else if (raw instanceof String) {
+                try {
+                    user.setBirthday(new SimpleDateFormat("yyyy-MM-dd").parse((String) raw));
+                } catch (Exception e) {
+                    throw new ServiceException("birthday 格式非法，应为 yyyy-MM-dd");
+                }
+            }
+        }
         if (req.containsKey("guardianName"))   user.setGuardianName((String) req.get("guardianName"));
-        if (req.containsKey("guardianMobile")) user.setGuardianMobile((String) req.get("guardianMobile"));
+        if (req.containsKey("guardianMobile")) {
+            Object gm = req.get("guardianMobile");
+            String val = gm == null ? null : String.valueOf(gm).trim();
+            if (val != null && !val.isEmpty() && !val.matches("^1[3-9]\\d{9}$")) {
+                throw new ServiceException("guardianMobile 格式非法");
+            }
+            user.setGuardianMobile(val == null || val.isEmpty() ? null : val);
+        }
         // 禁止从前端更新:status/risk_flag/user_type/current_level_id/points/openid/mobile
         jstUserService.updateJstUser(user);
         return AjaxResult.success();

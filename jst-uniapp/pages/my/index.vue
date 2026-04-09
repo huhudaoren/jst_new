@@ -44,6 +44,8 @@
         <view class="my-page__grid-item" @tap="navigateChannelStudents"><view class="my-page__grid-icon my-page__grid-icon--teal">👥</view><text class="my-page__grid-text">我的学生</text></view>
         <view class="my-page__grid-item" @tap="navigateChannelOrders"><view class="my-page__grid-icon my-page__grid-icon--orange">🧾</view><text class="my-page__grid-text">渠道订单</text></view>
         <view class="my-page__grid-item" @tap="navigateChannelData"><view class="my-page__grid-icon my-page__grid-icon--green">📊</view><text class="my-page__grid-text">渠道数据</text></view>
+        <view class="my-page__grid-item" @tap="navigateScan"><view class="my-page__grid-icon my-page__grid-icon--purple">📷</view><text class="my-page__grid-text">扫码核销</text></view>
+        <view class="my-page__grid-item" @tap="navigateWriteoffRecord"><view class="my-page__grid-icon my-page__grid-icon--blue">📜</view><text class="my-page__grid-text">核销记录</text></view>
       </view>
     </view>
 
@@ -57,13 +59,8 @@
         <view class="my-page__grid-item" @tap="navigateMyCourse"><view class="my-page__grid-icon my-page__grid-icon--green">课</view><text class="my-page__grid-text">我的课程</text></view>
         <view class="my-page__grid-item" @tap="navigateProfileEdit"><view class="my-page__grid-icon my-page__grid-icon--blue">👤</view><text class="my-page__grid-text">我的资料</text></view>
         <view class="my-page__grid-item" @tap="navigateParticipant"><view class="my-page__grid-icon my-page__grid-icon--orange">📁</view><text class="my-page__grid-text">我的档案</text></view>
-        <view class="my-page__grid-item" @tap="showComingSoon('我的报名')"><view class="my-page__grid-icon my-page__grid-icon--teal">📝</view><text class="my-page__grid-text">我的报名</text></view>
-        <view class="my-page__grid-item" @tap="showComingSoon('我的订单')"><view class="my-page__grid-icon my-page__grid-icon--gold">🛒</view><text class="my-page__grid-text">我的订单</text></view>
-        <view class="my-page__grid-item" @tap="showComingSoon('我的成绩')"><view class="my-page__grid-icon my-page__grid-icon--blue">🏅</view><text class="my-page__grid-text">我的成绩</text></view>
-        <view class="my-page__grid-item" @tap="showComingSoon('我的证书')"><view class="my-page__grid-icon my-page__grid-icon--purple">🎖</view><text class="my-page__grid-text">我的证书</text></view>
-        <view class="my-page__grid-item" @tap="navigateCourseTab"><view class="my-page__grid-icon my-page__grid-icon--green">📚</view><text class="my-page__grid-text">我的课程</text></view>
-        <view class="my-page__grid-item" @tap="showComingSoon('优惠券')"><view class="my-page__grid-icon my-page__grid-icon--orange">🎫</view><text class="my-page__grid-text">优惠券</text></view>
-        <view class="my-page__grid-item" @tap="showComingSoon('设置')"><view class="my-page__grid-icon my-page__grid-icon--gray">⚙</view><text class="my-page__grid-text">设置</text></view>
+        <view class="my-page__grid-item" @tap="navigateAppointmentList"><view class="my-page__grid-icon my-page__grid-icon--teal">📅</view><text class="my-page__grid-text">我的预约</text></view>
+        <view class="my-page__grid-item" @tap="navigateMall"><view class="my-page__grid-icon my-page__grid-icon--gold">🎁</view><text class="my-page__grid-text">积分商城</text></view>
       </view>
     </view>
 
@@ -110,9 +107,12 @@ export default {
     navigateChannelStudents() { uni.navigateTo({ url: '/pages-sub/channel/students' }) },
     navigateChannelOrders() { uni.navigateTo({ url: '/pages-sub/channel/orders' }) },
     navigateChannelData() { uni.navigateTo({ url: '/pages-sub/channel/data' }) },
+    navigateAppointmentList() { uni.navigateTo({ url: '/pages-sub/appointment/my-list' }) },
+    navigateMall() { uni.navigateTo({ url: '/pages-sub/mall/list' }) },
+    navigateScan() { uni.navigateTo({ url: '/pages-sub/appointment/scan' }) },
+    navigateWriteoffRecord() { uni.navigateTo({ url: '/pages-sub/appointment/writeoff-record' }) },
     navigateCourseTab() { uni.switchTab({ url: '/pages/course/list' }) },
     showTeacherComingSoon() { uni.showToast({ title: '后续开放', icon: 'none' }) },
-    showComingSoon(name) { uni.showToast({ title: name + '待开放', icon: 'none' }) },
     handleLogout() { uni.showModal({ title: '退出登录', content: '确认退出当前账号？', success: async (res) => { if (!res.confirm) return; const userStore = useUserStore(); await userStore.doLogout(); uni.reLaunch({ url: '/pages/login/login' }) } }) }
   }
 }

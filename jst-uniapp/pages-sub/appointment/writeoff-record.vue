@@ -1,0 +1,66 @@
+<!-- 中文注释: 核销记录 (赛事方/运营)
+     对应原型: 小程序原型图/writeoff-record.png
+     调用接口: GET /jst/wx/writeoff/records?pageNum=&pageSize= -->
+<template>
+  <view class="wr-page">
+    <view class="wr-list">
+      <view v-for="item in list" :key="item.writeoffItemId || item.id" class="wr-card">
+        <view class="wr-card__head">
+          <text class="wr-card__title">{{ item.itemName || item.contestName || '——' }}</text>
+          <text class="wr-card__time">{{ formatTime(item.writeoffTime || item.createTime) }}</text>
+        </view>
+        <view class="wr-card__row">
+          <text class="wr-card__k">预约人</text>
+          <text class="wr-card__v">{{ item.participantName || '--' }}</text>
+        </view>
+        <view class="wr-card__row">
+          <text class="wr-card__k">赛事</text>
+          <text class="wr-card__v">{{ item.contestName || '--' }}</text>
+        </view>
+      </view>
+      <view v-if="!list.length && !loading" class="wr-empty">暂无核销记录</view>
+      <view v-if="loading" class="wr-empty">加载中...</view>
+      <view v-if="!hasMore && list.length" class="wr-empty wr-empty--end">没有更多了</view>
+    </view>
+  </view>
+</template>
+
+<script>
+import { getWriteoffRecords } from '@/api/appointment'
+
+export default {
+  data() { return { list: [], pageNum: 1, pageSize: 10, total: 0, loading: false, hasMore: true } },
+  onLoad() { this.load(true) },
+  onPullDownRefresh() { this.load(true).finally(() => uni.stopPullDownRefresh()) },
+  onReachBottom() { if (this.hasMore && !this.loading) this.load(false) },
+  methods: {
+    async load(reset) {
+      if (reset) { this.pageNum = 1; this.list = []; this.hasMore = true }
+      if (!this.hasMore) return
+      this.loading = true
+      try {
+        const res = await getWriteoffRecords({ pageNum: this.pageNum, pageSize: this.pageSize })
+        const rows = (res && res.rows) || []
+        this.total = (res && res.total) || 0
+        this.list = reset ? rows : this.list.concat(rows)
+        this.hasMore = this.list.length < this.total
+        if (this.hasMore) this.pageNum += 1
+      } finally { this.loading = false }
+    },
+    formatTime(v) { if (!v) return '--'; return String(v).replace('T', ' ').slice(0, 16) }
+  }
+}
+</script>
+
+<style scoped lang="scss">
+.wr-page { min-height: 100vh; background: var(--jst-color-page-bg); padding: 16rpx 0 32rpx; }
+.wr-card { margin: 20rpx 32rpx 0; padding: 28rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); }
+.wr-card__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12rpx; }
+.wr-card__title { font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); flex: 1; min-width: 0; }
+.wr-card__time { font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.wr-card__row { display: flex; padding: 6rpx 0; font-size: 24rpx; }
+.wr-card__k { width: 140rpx; color: var(--jst-color-text-tertiary); }
+.wr-card__v { flex: 1; color: var(--jst-color-text); }
+.wr-empty { padding: 80rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.wr-empty--end { padding: 40rpx; }
+</style>

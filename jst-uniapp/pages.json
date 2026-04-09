@@ -166,6 +166,25 @@
       ]
     },
     {
+      "root": "pages-sub/appointment",
+      "pages": [
+        { "path": "apply", "style": { "navigationBarTitleText": "\u9884\u7ea6\u62a5\u540d", "navigationStyle": "custom" } },
+        { "path": "my-list", "style": { "navigationBarTitleText": "\u6211\u7684\u9884\u7ea6", "navigationStyle": "custom", "enablePullDownRefresh": true } },
+        { "path": "detail", "style": { "navigationBarTitleText": "\u9884\u7ea6\u8be6\u60c5", "navigationStyle": "custom" } },
+        { "path": "scan", "style": { "navigationBarTitleText": "\u626b\u7801\u6838\u9500", "navigationStyle": "custom" } },
+        { "path": "writeoff-record", "style": { "navigationBarTitleText": "\u6838\u9500\u8bb0\u5f55", "navigationStyle": "custom", "enablePullDownRefresh": true } }
+      ]
+    },
+    {
+      "root": "pages-sub/mall",
+      "pages": [
+        { "path": "list", "style": { "navigationBarTitleText": "\u79ef\u5206\u5546\u57ce", "navigationStyle": "custom" } },
+        { "path": "detail", "style": { "navigationBarTitleText": "\u5546\u54c1\u8be6\u60c5", "navigationStyle": "custom" } },
+        { "path": "exchange-list", "style": { "navigationBarTitleText": "\u6211\u7684\u5151\u6362", "navigationStyle": "custom", "enablePullDownRefresh": true } },
+        { "path": "exchange-detail", "style": { "navigationBarTitleText": "\u5151\u6362\u8be6\u60c5", "navigationStyle": "custom" } }
+      ]
+    },
+    {
       "root": "pages-sub/channel",
       "pages": [
         { "path": "home", "style": { "navigationBarTitleText": "\u6e20\u9053\u9996\u9875", "navigationStyle": "custom" } },

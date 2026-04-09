@@ -448,6 +448,57 @@ Authorization: Bearer {{wx_token}}
 
 { "nickname": "测试_张妈妈_新昵称" }
 
+### A3.1 更新生日(DEBT-2 白名单补齐)
+PUT {{baseUrl}}/jst/wx/user/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{ "birthday": "1988-05-20" }
+
+> {%
+client.test("A3.1 update birthday should succeed", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### A3.2 更新监护人手机号(DEBT-2 白名单补齐)
+PUT {{baseUrl}}/jst/wx/user/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{ "guardianMobile": "13800001234" }
+
+> {%
+client.test("A3.2 update guardianMobile should succeed", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### A3.3 再次获取资料验证回显(birthday + guardianMobileMasked)
+GET {{baseUrl}}/jst/wx/user/profile
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("A3.3 profile should echo back birthday and masked guardianMobile", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.birthday != null);
+    client.assert(response.body.data.guardianMobileMasked != null);
+});
+%}
+
+### A3.4 错误的 guardianMobile 格式应被拒绝
+PUT {{baseUrl}}/jst/wx/user/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{ "guardianMobile": "12345" }
+
+> {%
+client.test("A3.4 invalid guardianMobile should fail", function() {
+    client.assert(response.body.code !== 200);
+});
+%}
+
 ### A4. 登出
 POST {{baseUrl}}/jst/wx/auth/logout
 Authorization: Bearer {{wx_token}}
