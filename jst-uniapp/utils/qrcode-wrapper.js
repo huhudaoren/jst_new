@@ -3,7 +3,16 @@
  *
  * D2-1b: 真实 uqrcode 薄封装
  * 依赖 vendor 文件: jst-uniapp/static/lib/uqrcode.js (UMD IIFE)
+ *
+ * ⚠️ 微信小程序兼容补丁:
+ * uqrcodejs 的 UMD 头部 `(typeof window !== "undefined" ? window : global, ...)`
+ * 在微信 MP 沙箱里 window / global 都不存在，裸引用 `global` 会抛 ReferenceError。
+ * 这里先把 globalThis 别名成 global，让 IIFE 调用阶段的表达式能解析。
+ * H5 端 window 存在，不会走到 global 分支，shim 无副作用。
  */
+if (typeof globalThis !== 'undefined' && typeof globalThis.global === 'undefined') {
+  globalThis.global = globalThis
+}
 const UQRCode = require('@/static/lib/uqrcode.js')
 
 /**
