@@ -93,6 +93,12 @@ DELETE FROM jst_rebate_ledger WHERE order_id IN (9302, 9305);
 DELETE FROM jst_payment_record WHERE order_id IN (9301, 9302, 9304, 9305, 9306);
 DELETE FROM jst_order_item WHERE order_id IN (9301, 9302, 9303, 9304, 9305, 9306);
 DELETE FROM jst_order_main WHERE order_id IN (9301, 9302, 9303, 9304, 9305, 9306);
+-- C5b/FCD fixture id range collides with auto-increment zone; force clean
+DELETE FROM jst_rebate_ledger WHERE ledger_id BETWEEN 94500 AND 94599;
+DELETE FROM jst_rebate_settlement WHERE settlement_id BETWEEN 94600 AND 94699;
+DELETE FROM jst_order_item WHERE order_id BETWEEN 94410 AND 94499;
+DELETE FROM jst_order_main WHERE order_id BETWEEN 94410 AND 94499;
+DELETE FROM jst_rebate_rule WHERE rule_id BETWEEN 9601 AND 9699;
 DELETE FROM jst_enroll_record WHERE enroll_id IN (8911, 8912, 8913, 8914, 8915, 8916);
 DELETE FROM jst_user_coupon WHERE user_coupon_id IN (9805, 9807);
 DELETE FROM jst_appointment_writeoff_item WHERE writeoff_item_id BETWEEN 96800 AND 96999;
@@ -1011,25 +1017,25 @@ INSERT INTO jst_rebate_settlement (
     'fixture', NOW(), 'fixture', NOW(), NULL, '0'
 ),
 (
-    9105101, 'WD_FIXTURE_C5B_001', 9201, 50.00, 0.00, NULL,
+    9105101, 'WD_FIXTURE_C5B_001', 9201, 50.00, 0.00, 50.00,
     'none', NULL, '{"bankName":"测试银行","accountNo":"622202009201","accountName":"测试_C5A收款户"}', 'pending', NULL, NULL,
     DATE_SUB(NOW(), INTERVAL 4 HOUR), NULL,
     'fixture', NOW(), 'fixture', NOW(), NULL, '0'
 ),
 (
-    9105102, 'WD_FIXTURE_C5B_002', 9201, 100.00, 0.00, NULL,
+    9105102, 'WD_FIXTURE_C5B_002', 9201, 100.00, 0.00, 100.00,
     'none', NULL, '{"bankName":"测试银行","accountNo":"622202009201","accountName":"测试_C5A收款户"}', 'pending', NULL, NULL,
     DATE_SUB(NOW(), INTERVAL 3 HOUR), NULL,
     'fixture', NOW(), 'fixture', NOW(), NULL, '0'
 ),
 (
-    9105103, 'WD_FIXTURE_C5B_003', 9202, 50.00, 0.00, NULL,
+    9105103, 'WD_FIXTURE_C5B_003', 9202, 50.00, 0.00, 50.00,
     'none', NULL, '{"bankName":"测试银行","accountNo":"622202009202","accountName":"测试_C5B收款户"}', 'pending', NULL, NULL,
     DATE_SUB(NOW(), INTERVAL 2 HOUR), NULL,
     'fixture', NOW(), 'fixture', NOW(), NULL, '0'
 ),
 (
-    9105104, 'WD_FIXTURE_C5B_004', 9201, 40.00, 0.00, NULL,
+    9105104, 'WD_FIXTURE_C5B_004', 9201, 40.00, 0.00, 40.00,
     'none', NULL, '{"bankName":"测试银行","accountNo":"622202009201","accountName":"测试_C5A收款户"}', 'pending', NULL, NULL,
     DATE_SUB(NOW(), INTERVAL 1 HOUR), NULL,
     'fixture', NOW(), 'fixture', NOW(), NULL, '0'
