@@ -783,3 +783,103 @@ client.test("DEBT-1 supplementRemark 应单独返回", function() {
     client.assert(response.body.data.supplementRemark, "应返回 supplementRemark");
 });
 %}
+
+### =====================================================================
+### C4-W refund flow (jst-order / WxRefundController)
+### Preconditions: run fixtures so orders 9301-9304 exist
+### =====================================================================
+
+### C4-W1. login student 1001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("wx_token", response.body.data.token);
+%}
+
+### C4-W2. apply refund on order 9301 and store refund id
+POST {{baseUrl}}/jst/wx/order/9301/refund
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "refundType": "refund_only",
+  "reason": "C4 user cancel path"
+}
+
+> {%
+client.test("C4-W2 apply refund success", function() {
+    client.assert(response.body.code === 200);
+});
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("c4_cancel_refund_id", response.body.data.refundId);
+}
+%}
+
+### C4-W3. refund detail
+GET {{baseUrl}}/jst/wx/refund/{{c4_cancel_refund_id}}
+Authorization: Bearer {{wx_token}}
+
+### C4-W4. my refund list
+GET {{baseUrl}}/jst/wx/refund/my?pageNum=1&pageSize=10
+Authorization: Bearer {{wx_token}}
+
+### C4-W5. cancel pending refund
+POST {{baseUrl}}/jst/wx/refund/{{c4_cancel_refund_id}}/cancel
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("C4-W5 cancel refund success", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### C4-W6. expired aftersale order 9302 should be rejected for self refund
+POST {{baseUrl}}/jst/wx/order/9302/refund
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "refundType": "refund_only",
+  "reason": "C4 expired aftersale"
+}
+
+> {%
+client.test("C4-W6 expired aftersale should fail", function() {
+    client.assert(response.body.code !== 200);
+});
+%}
+
+### C4-W7. zero-price order 9303 should be rejected
+POST {{baseUrl}}/jst/wx/order/9303/refund
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "refundType": "refund_only",
+  "reason": "C4 zero price"
+}
+
+> {%
+client.test("C4-W7 zero-price refund should fail", function() {
+    client.assert(response.body.code !== 200);
+});
+%}
+
+### C4-W8. user 1001 cannot refund order 9304 owned by another user
+POST {{baseUrl}}/jst/wx/order/9304/refund
+Content-Type: {{contentType}}
+Authorization: Bearer {{wx_token}}
+
+{
+  "refundType": "refund_only",
+  "reason": "C4 ownership check"
+}
+
+> {%
+client.test("C4-W8 cross-user refund should fail", function() {
+    client.assert(response.body.code !== 200);
+});
+%}

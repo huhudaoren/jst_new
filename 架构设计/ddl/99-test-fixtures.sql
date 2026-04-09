@@ -10,6 +10,84 @@
 -- =====================================================================
 SET NAMES utf8mb4;
 
+
+
+-- TODO jst-event 报名场景测试数据 (待 jst-event feature 完成后追加)
+-- TODO jst-order 订单/退款场景测试数据
+-- TODO jst-channel 返点台账正向/负向场景
+-- TODO jst-points 积分账户余额/冻结场景
+-- TODO jst-order 团队预约部分核销场景
+
+-- =====================================================================
+-- 清理脚本 (用于重跑测试前清空)
+-- 手动执行: 仅删除 fixture 数据,不影响真实业务
+-- =====================================================================
+DELETE FROM jst_participant_user_map WHERE create_by = 'fixture';
+DELETE FROM jst_participant WHERE create_by = 'fixture';
+DELETE FROM jst_channel WHERE create_by = 'fixture';
+DELETE FROM jst_user WHERE create_by = 'fixture';
+DELETE FROM jst_event_partner_apply WHERE create_by = 'fixture';
+DELETE FROM jst_channel_auth_apply WHERE create_by = 'fixture';
+DELETE FROM jst_notice WHERE create_by = 'fixture';
+DELETE FROM jst_course_learn_record WHERE create_by = 'fixture';
+DELETE FROM jst_course WHERE create_by = 'fixture';
+DELETE FROM jst_enroll_form_template WHERE create_by = 'fixture';
+DELETE FROM jst_contest WHERE create_by = 'fixture';
+DELETE FROM jst_event_partner WHERE create_by = 'fixture';
+DELETE FROM sys_user_role WHERE user_id IN (9101, 9102);
+DELETE FROM sys_user WHERE create_by = 'fixture' AND user_id IN (9101, 9102);
+-- Step 1.1: 清理旧 fixture (避免 PK 冲突)
+DELETE FROM jst_participant_user_map WHERE create_by = 'fixture';
+DELETE FROM jst_participant WHERE create_by = 'fixture';
+DELETE FROM jst_student_channel_binding WHERE create_by = 'fixture';
+DELETE FROM jst_channel WHERE create_by = 'fixture';
+DELETE FROM jst_user WHERE create_by = 'fixture';
+-- 其他可能的 fixture 表(F-NOTICE/F-COURSE/F7/F8 新增的)
+DELETE FROM jst_notice WHERE create_by = 'fixture';
+DELETE FROM jst_course WHERE create_by = 'fixture';
+DELETE FROM jst_course_learn_record WHERE create_by = 'fixture';
+DELETE FROM jst_contest WHERE create_by = 'fixture';
+DELETE FROM jst_event_partner_apply WHERE create_by = 'fixture';
+DELETE FROM jst_event_partner WHERE create_by = 'fixture';
+DELETE FROM jst_channel_auth_apply WHERE create_by = 'fixture';
+DELETE FROM jst_enroll_form_template WHERE create_by = 'fixture';
+-- 1.1 清理所有 fixture 数据(按依赖顺序)
+DELETE FROM sys_user_role WHERE user_id IN (SELECT user_id FROM sys_user WHERE user_name LIKE
+                                                                               'partner_%' OR user_name LIKE 'wx_%');
+DELETE FROM sys_user WHERE user_name LIKE 'partner_%' OR user_name LIKE 'wx_%';
+DELETE FROM jst_participant_user_map WHERE create_by = 'fixture';
+DELETE FROM jst_participant WHERE create_by = 'fixture';
+DELETE FROM jst_student_channel_binding WHERE create_by = 'fixture';
+DELETE FROM jst_event_partner_apply WHERE create_by = 'fixture';
+DELETE FROM jst_event_partner WHERE create_by = 'fixture';
+DELETE FROM jst_channel_auth_apply WHERE create_by = 'fixture';
+DELETE FROM jst_channel WHERE create_by = 'fixture';
+DELETE FROM jst_user WHERE create_by = 'fixture' OR openid LIKE 'openid_test_%';
+DELETE FROM jst_notice WHERE create_by = 'fixture';
+DELETE FROM jst_course WHERE create_by = 'fixture';
+DELETE FROM jst_course_learn_record WHERE create_by = 'fixture';
+DELETE FROM jst_contest WHERE create_by = 'fixture';
+DELETE FROM jst_enroll_form_template WHERE create_by = 'fixture';
+-- C2 cleanup helper
+DELETE FROM jst_rebate_ledger WHERE create_by = 'fixture';
+DELETE FROM jst_payment_record WHERE create_by = 'fixture';
+DELETE FROM jst_order_item WHERE create_by = 'fixture';
+DELETE FROM jst_order_main WHERE create_by = 'fixture';
+DELETE FROM jst_order_item WHERE create_by = 'fixture';
+DELETE FROM jst_payment_record WHERE create_by = 'fixture';
+DELETE FROM jst_rebate_ledger WHERE create_by = 'fixture';
+DELETE FROM jst_enroll_record WHERE create_by = 'fixture';
+DELETE FROM jst_user_coupon WHERE create_by = 'fixture';
+DELETE FROM jst_coupon_template WHERE create_by = 'fixture';
+DELETE FROM jst_points_account WHERE create_by = 'fixture';
+DELETE FROM jst_points_ledger WHERE create_by = 'fixture';
+DELETE FROM jst_refund_record WHERE order_id IN (9301, 9302, 9303, 9304, 9305, 9306);
+DELETE FROM jst_rebate_ledger WHERE order_id IN (9302, 9305);
+DELETE FROM jst_payment_record WHERE order_id IN (9301, 9302, 9304, 9305, 9306);
+DELETE FROM jst_order_item WHERE order_id IN (9301, 9302, 9303, 9304, 9305, 9306);
+DELETE FROM jst_order_main WHERE order_id IN (9301, 9302, 9303, 9304, 9305, 9306);
+DELETE FROM jst_enroll_record WHERE enroll_id IN (8911, 8912, 8913, 8914, 8915, 8916);
+DELETE FROM jst_user_coupon WHERE user_coupon_id IN (9805, 9807);
 -- =====================================================================
 -- jst-user 模块测试数据 (含临时档案认领样板 feature)
 -- =====================================================================
@@ -265,63 +343,6 @@ INSERT INTO jst_contest (
     'online', 'enrolling', NULL, 'fixture', NOW(), 'fixture', NOW(), NULL, '0'
 );
 
--- TODO jst-event 报名场景测试数据 (待 jst-event feature 完成后追加)
--- TODO jst-order 订单/退款场景测试数据
--- TODO jst-channel 返点台账正向/负向场景
--- TODO jst-points 积分账户余额/冻结场景
--- TODO jst-order 团队预约部分核销场景
-
--- =====================================================================
--- 清理脚本 (用于重跑测试前清空)
--- 手动执行: 仅删除 fixture 数据,不影响真实业务
--- =====================================================================
--- DELETE FROM jst_participant_user_map WHERE create_by = 'fixture';
--- DELETE FROM jst_participant WHERE create_by = 'fixture';
--- DELETE FROM jst_channel WHERE create_by = 'fixture';
--- DELETE FROM jst_user WHERE create_by = 'fixture';
--- DELETE FROM jst_event_partner_apply WHERE create_by = 'fixture';
--- DELETE FROM jst_channel_auth_apply WHERE create_by = 'fixture';
--- DELETE FROM jst_notice WHERE create_by = 'fixture';
--- DELETE FROM jst_course_learn_record WHERE create_by = 'fixture';
--- DELETE FROM jst_course WHERE create_by = 'fixture';
--- DELETE FROM jst_enroll_form_template WHERE create_by = 'fixture';
--- DELETE FROM jst_contest WHERE create_by = 'fixture';
--- DELETE FROM jst_event_partner WHERE create_by = 'fixture';
--- DELETE FROM sys_user_role WHERE user_id IN (9101, 9102);
--- DELETE FROM sys_user WHERE create_by = 'fixture' AND user_id IN (9101, 9102);
--- -- Step 1.1: 清理旧 fixture (避免 PK 冲突)
--- DELETE FROM jst_participant_user_map WHERE create_by = 'fixture';
--- DELETE FROM jst_participant WHERE create_by = 'fixture';
--- DELETE FROM jst_student_channel_binding WHERE create_by = 'fixture';
--- DELETE FROM jst_channel WHERE create_by = 'fixture';
--- DELETE FROM jst_user WHERE create_by = 'fixture';
--- -- 其他可能的 fixture 表(F-NOTICE/F-COURSE/F7/F8 新增的)
--- DELETE FROM jst_notice WHERE create_by = 'fixture';
--- DELETE FROM jst_course WHERE create_by = 'fixture';
--- DELETE FROM jst_course_learn_record WHERE create_by = 'fixture';
--- DELETE FROM jst_contest WHERE create_by = 'fixture';
--- DELETE FROM jst_event_partner_apply WHERE create_by = 'fixture';
--- DELETE FROM jst_event_partner WHERE create_by = 'fixture';
--- DELETE FROM jst_channel_auth_apply WHERE create_by = 'fixture';
--- DELETE FROM jst_enroll_form_template WHERE create_by = 'fixture';
--- -- 1.1 清理所有 fixture 数据(按依赖顺序)
--- DELETE FROM sys_user_role WHERE user_id IN (SELECT user_id FROM sys_user WHERE user_name LIKE
---                                                                                'partner_%' OR user_name LIKE 'wx_%');
--- DELETE FROM sys_user WHERE user_name LIKE 'partner_%' OR user_name LIKE 'wx_%';
--- DELETE FROM jst_participant_user_map WHERE create_by = 'fixture';
--- DELETE FROM jst_participant WHERE create_by = 'fixture';
--- DELETE FROM jst_student_channel_binding WHERE create_by = 'fixture';
--- DELETE FROM jst_event_partner_apply WHERE create_by = 'fixture';
--- DELETE FROM jst_event_partner WHERE create_by = 'fixture';
--- DELETE FROM jst_channel_auth_apply WHERE create_by = 'fixture';
--- DELETE FROM jst_channel WHERE create_by = 'fixture';
--- DELETE FROM jst_user WHERE create_by = 'fixture' OR openid LIKE 'openid_test_%';
--- DELETE FROM jst_notice WHERE create_by = 'fixture';
--- DELETE FROM jst_course WHERE create_by = 'fixture';
--- DELETE FROM jst_course_learn_record WHERE create_by = 'fixture';
--- DELETE FROM jst_contest WHERE create_by = 'fixture';
--- DELETE FROM jst_enroll_form_template WHERE create_by = 'fixture';
-
 -- =====================================================================
 -- F9 jst-event 报名记录与表单快照测试数据
 -- 涉及表：jst_contest / jst_enroll_record
@@ -512,8 +533,143 @@ INSERT INTO jst_enroll_record (
     '审核通过', NOW(), 'fixture', NOW(), 'fixture', NOW(), 'C2 approved fixture paid', '0'
 );
 
--- C2 cleanup helper
--- DELETE FROM jst_rebate_ledger WHERE create_by = 'fixture';
--- DELETE FROM jst_payment_record WHERE create_by = 'fixture';
--- DELETE FROM jst_order_item WHERE create_by = 'fixture';
--- DELETE FROM jst_order_main WHERE create_by = 'fixture';
+
+-- =====================================================================
+-- C4 refund flow fixtures
+-- Covers: user apply/cancel, expired aftersale denial, zero-price denial,
+--         partner approve/reject, admin execute, special refund, rebate rollback.
+-- =====================================================================
+
+
+
+INSERT INTO jst_user_coupon (
+    user_coupon_id, coupon_template_id, user_id, issue_batch_no, issue_source, status,
+    valid_start, valid_end, order_id, use_time, create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    9805, 9701, 1001, 'C4BATCH005', 'manual', 'used',
+    DATE_SUB(NOW(), INTERVAL 30 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY), 9302, DATE_SUB(NOW(), INTERVAL 5 DAY),
+    'fixture', NOW(), 'fixture', NOW(), 'C4 expired used coupon', '0'
+),
+(
+    9807, 9701, 1001, 'C4BATCH007', 'manual', 'used',
+    DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_ADD(NOW(), INTERVAL 20 DAY), 9305, DATE_SUB(NOW(), INTERVAL 1 DAY),
+    'fixture', NOW(), 'fixture', NOW(), 'C4 valid used coupon', '0'
+);
+
+INSERT INTO jst_order_main (
+    order_id, order_no, order_type, business_type, user_id, participant_id, channel_id, contest_id, partner_id,
+    list_amount, coupon_amount, points_deduct_amount, points_used, platform_bear_amount, net_pay_amount, service_fee,
+    pay_method, pay_initiator, pay_initiator_id, pay_time, order_status, refund_status, aftersale_deadline, coupon_id,
+    allow_self_refund, create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    9301, 'OD_FIXTURE_9301', 'normal', 'enroll', 1001, 3001, 2001, 8201, 8101,
+    90.00, 0.00, 20.00, 2000, 0.00, 70.00, 5.00,
+    'points_cash_mix', 'self', 1001, DATE_SUB(NOW(), INTERVAL 2 DAY), 'paid', 'none', DATE_ADD(NOW(), INTERVAL 10 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C4 cancel fixture', '0'
+),
+(
+    9302, 'OD_FIXTURE_9302', 'normal', 'enroll', 1001, 3004, 2001, 8201, 8101,
+    90.00, 20.00, 0.00, 0, 20.00, 70.00, 5.00,
+    'bank_transfer', 'self', 1001, DATE_SUB(NOW(), INTERVAL 5 DAY), 'in_service', 'none', DATE_SUB(NOW(), INTERVAL 1 DAY), 9805,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C4 expired special fixture', '0'
+),
+(
+    9303, 'OD_FIXTURE_9303', 'zero_price', 'enroll', 1001, 3001, NULL, 8201, 8101,
+    0.00, 0.00, 0.00, 0, 0.00, 0.00, 0.00,
+    'points', 'self', 1001, DATE_SUB(NOW(), INTERVAL 1 DAY), 'paid', 'none', DATE_ADD(NOW(), INTERVAL 10 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C4 zero price fixture', '0'
+),
+(
+    9304, 'OD_FIXTURE_9304', 'normal', 'enroll', 1002, 3001, NULL, 8201, 8101,
+    60.00, 0.00, 0.00, 0, 0.00, 60.00, 5.00,
+    'wechat', 'self', 1002, DATE_SUB(NOW(), INTERVAL 1 DAY), 'paid', 'none', DATE_ADD(NOW(), INTERVAL 10 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C4 ownership fixture', '0'
+),
+(
+    9305, 'OD_FIXTURE_9305', 'normal', 'enroll', 1001, 3001, 2001, 8201, 8101,
+    120.00, 20.00, 20.00, 2000, 20.00, 80.00, 5.00,
+    'points_cash_mix', 'self', 1001, DATE_SUB(NOW(), INTERVAL 1 DAY), 'in_service', 'none', DATE_ADD(NOW(), INTERVAL 10 DAY), 9807,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C4 approve execute fixture', '0'
+),
+(
+    9306, 'OD_FIXTURE_9306', 'normal', 'enroll', 1001, 3004, 2001, 8201, 8101,
+    75.00, 0.00, 0.00, 0, 0.00, 75.00, 5.00,
+    'wechat', 'self', 1001, DATE_SUB(NOW(), INTERVAL 1 DAY), 'paid', 'none', DATE_ADD(NOW(), INTERVAL 10 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C4 reject fixture', '0'
+);
+
+INSERT INTO jst_order_item (
+    item_id, order_id, sku_type, ref_id, item_name, quantity, list_amount, coupon_share, points_share,
+    net_pay_share, service_fee_share, rebate_share, refund_amount, refund_points,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(9311, 9301, 'enroll', 8911, 'C4 item 9301', 1, 90.00, 0.00, 20.00, 70.00, 5.00, 0.00, 0.00, 0, 'fixture', NOW(), 'fixture', NOW(), 'C4 item cancel', '0'),
+(9312, 9302, 'enroll', 8912, 'C4 item 9302', 1, 90.00, 20.00, 0.00, 70.00, 5.00, 8.50, 0.00, 0, 'fixture', NOW(), 'fixture', NOW(), 'C4 item expired special', '0'),
+(9313, 9303, 'enroll', 8913, 'C4 item 9303', 1, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0, 'fixture', NOW(), 'fixture', NOW(), 'C4 item zero price', '0'),
+(9314, 9304, 'enroll', 8914, 'C4 item 9304', 1, 60.00, 0.00, 0.00, 60.00, 5.00, 0.00, 0.00, 0, 'fixture', NOW(), 'fixture', NOW(), 'C4 item ownership', '0'),
+(9315, 9305, 'enroll', 8915, 'C4 item 9305', 1, 120.00, 20.00, 20.00, 80.00, 5.00, 11.50, 0.00, 0, 'fixture', NOW(), 'fixture', NOW(), 'C4 item approve execute', '0'),
+(9316, 9306, 'enroll', 8916, 'C4 item 9306', 1, 75.00, 0.00, 0.00, 75.00, 5.00, 0.00, 0.00, 0, 'fixture', NOW(), 'fixture', NOW(), 'C4 item reject', '0');
+
+INSERT INTO jst_payment_record (
+    payment_id, payment_no, order_id, pay_method, cash_amount, points_amount, points_used,
+    third_party_no, pay_status, pay_time, operator_id,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(9321, 'PAY_FIXTURE_9321', 9301, 'points_cash_mix', 70.00, 20.00, 2000, 'WX_TX_9301', 'success', DATE_SUB(NOW(), INTERVAL 2 DAY), 1001, 'fixture', NOW(), 'fixture', NOW(), 'C4 payment cancel', '0'),
+(9322, 'PAY_FIXTURE_9322', 9302, 'bank_transfer', 70.00, 0.00, 0, 'BANK_TX_9302', 'success', DATE_SUB(NOW(), INTERVAL 5 DAY), 1, 'fixture', NOW(), 'fixture', NOW(), 'C4 payment expired special', '0'),
+(9324, 'PAY_FIXTURE_9324', 9304, 'wechat', 60.00, 0.00, 0, 'WX_TX_9304', 'success', DATE_SUB(NOW(), INTERVAL 1 DAY), 1002, 'fixture', NOW(), 'fixture', NOW(), 'C4 payment ownership', '0'),
+(9325, 'PAY_FIXTURE_9325', 9305, 'points_cash_mix', 80.00, 20.00, 2000, 'WX_TX_9305', 'success', DATE_SUB(NOW(), INTERVAL 1 DAY), 1001, 'fixture', NOW(), 'fixture', NOW(), 'C4 payment approve execute', '0'),
+(9326, 'PAY_FIXTURE_9326', 9306, 'wechat', 75.00, 0.00, 0, 'WX_TX_9306', 'success', DATE_SUB(NOW(), INTERVAL 1 DAY), 1001, 'fixture', NOW(), 'fixture', NOW(), 'C4 payment reject', '0');
+
+INSERT INTO jst_rebate_ledger (
+    ledger_id, order_id, item_id, channel_id, contest_id, rule_id,
+    list_amount, net_pay_amount, service_fee, rebate_base, rebate_amount,
+    direction, status, accrual_time, event_end_time,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(9332, 9302, 9312, 2001, 8201, 9601, 90.00, 70.00, 5.00, 85.00, 8.50, 'positive', 'withdrawable', DATE_SUB(NOW(), INTERVAL 4 DAY), DATE_ADD(NOW(), INTERVAL 10 DAY), 'fixture', NOW(), 'fixture', NOW(), 'C4 rebate rollback', '0'),
+(9335, 9305, 9315, 2001, 8201, 9601, 120.00, 80.00, 5.00, 115.00, 11.50, 'positive', 'paid', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_ADD(NOW(), INTERVAL 10 DAY), 'fixture', NOW(), 'fixture', NOW(), 'C4 rebate negative', '0');
+
+INSERT INTO jst_enroll_record (
+    enroll_id, enroll_no, contest_id, user_id, participant_id, channel_id, enroll_source,
+    template_id, template_version, form_snapshot_json, order_id, material_status, audit_status,
+    audit_remark, submit_time, create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    8911, 'EN_FIXTURE_8911', 8201, 1001, 3001, NULL, 'self',
+    8801, 1,
+    JSON_OBJECT('template_id', 8801, 'template_version', 1, 'formData', JSON_OBJECT('name', 'fixture_c4_9301', 'gender', 'male', 'age', 8, 'school', 'fixture_school'), 'attachments', JSON_ARRAY('https://fixture.example.com/c4/9301.pdf')),
+    9301, 'submitted', 'approved', 'fixture approved', NOW(), 'fixture', NOW(), 'fixture', NOW(), 'C4 enroll cancel', '0'
+),
+(
+    8912, 'EN_FIXTURE_8912', 8201, 1001, 3004, NULL, 'self',
+    8801, 1,
+    JSON_OBJECT('template_id', 8801, 'template_version', 1, 'formData', JSON_OBJECT('name', 'fixture_c4_9302', 'gender', 'female', 'age', 9, 'school', 'fixture_school'), 'attachments', JSON_ARRAY('https://fixture.example.com/c4/9302.pdf')),
+    9302, 'submitted', 'approved', 'fixture approved', NOW(), 'fixture', NOW(), 'fixture', NOW(), 'C4 enroll special', '0'
+),
+(
+    8913, 'EN_FIXTURE_8913', 8201, 1001, 3001, NULL, 'self',
+    8801, 1,
+    JSON_OBJECT('template_id', 8801, 'template_version', 1, 'formData', JSON_OBJECT('name', 'fixture_c4_9303', 'gender', 'male', 'age', 8, 'school', 'fixture_school'), 'attachments', JSON_ARRAY('https://fixture.example.com/c4/9303.pdf')),
+    9303, 'submitted', 'approved', 'fixture approved', NOW(), 'fixture', NOW(), 'fixture', NOW(), 'C4 enroll zero', '0'
+),
+(
+    8914, 'EN_FIXTURE_8914', 8201, 1002, 3001, NULL, 'self',
+    8801, 1,
+    JSON_OBJECT('template_id', 8801, 'template_version', 1, 'formData', JSON_OBJECT('name', 'fixture_c4_9304', 'gender', 'male', 'age', 8, 'school', 'fixture_school'), 'attachments', JSON_ARRAY('https://fixture.example.com/c4/9304.pdf')),
+    9304, 'submitted', 'approved', 'fixture approved', NOW(), 'fixture', NOW(), 'fixture', NOW(), 'C4 enroll ownership', '0'
+),
+(
+    8915, 'EN_FIXTURE_8915', 8201, 1001, 3001, NULL, 'self',
+    8801, 1,
+    JSON_OBJECT('template_id', 8801, 'template_version', 1, 'formData', JSON_OBJECT('name', 'fixture_c4_9305', 'gender', 'male', 'age', 8, 'school', 'fixture_school'), 'attachments', JSON_ARRAY('https://fixture.example.com/c4/9305.pdf')),
+    9305, 'submitted', 'approved', 'fixture approved', NOW(), 'fixture', NOW(), 'fixture', NOW(), 'C4 enroll approve execute', '0'
+),
+(
+    8916, 'EN_FIXTURE_8916', 8201, 1001, 3004, NULL, 'self',
+    8801, 1,
+    JSON_OBJECT('template_id', 8801, 'template_version', 1, 'formData', JSON_OBJECT('name', 'fixture_c4_9306', 'gender', 'female', 'age', 9, 'school', 'fixture_school'), 'attachments', JSON_ARRAY('https://fixture.example.com/c4/9306.pdf')),
+    9306, 'submitted', 'approved', 'fixture approved', NOW(), 'fixture', NOW(), 'fixture', NOW(), 'C4 enroll reject', '0'
+);

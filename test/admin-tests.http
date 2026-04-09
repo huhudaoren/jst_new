@@ -24,7 +24,7 @@ POST {{baseUrl}}/login
 Content-Type: {{contentType}}
 
 {
-  "username": "partner_f7_a",
+  "username": "admin",
   "password": "admin123",
   "code": "1",
   "uuid": ""
@@ -548,3 +548,160 @@ client.test("DEBT-1 partner approve 后应回填 partnerId", function() {
 %}
 
 ### DEBT-1-T1. 执行 F6-E2 后，到 wx-tests.http 的 DEBT-1-W1 验证 roles 已从 sys_user_role 读取
+
+### =====================================================================
+### C4-A refund flow (jst-order / RefundAdminController)
+### Preconditions: admin_token available, fixtures orders 9302/9305/9306 exist
+### =====================================================================
+
+### C4-A1. partner A login
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_a",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("c4_partner_token", response.body.token);
+%}
+
+### C4-A2. student login for creating review cases
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("c4_wx_token", response.body.data.token);
+%}
+
+### C4-A3. create refund request on order 9306 for reject path
+POST {{baseUrl}}/jst/wx/order/9306/refund
+Content-Type: {{contentType}}
+Authorization: Bearer {{c4_wx_token}}
+
+{
+  "refundType": "refund_only",
+  "reason": "C4 reject path"
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("c4_reject_refund_id", response.body.data.refundId);
+}
+%}
+
+### C4-A4. partner rejects refund request on 9306
+POST {{baseUrl}}/jst/order/refund/{{c4_reject_refund_id}}/reject
+Content-Type: {{contentType}}
+Authorization: Bearer {{c4_partner_token}}
+
+{
+  "auditRemark": "C4 partner reject"
+}
+
+> {%
+client.test("C4-A4 partner reject success", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### C4-A5. create refund request on order 9305 for approve/execute path
+POST {{baseUrl}}/jst/wx/order/9305/refund
+Content-Type: {{contentType}}
+Authorization: Bearer {{c4_wx_token}}
+
+{
+  "refundType": "refund_only",
+  "reason": "C4 approve execute path"
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("c4_approve_refund_id", response.body.data.refundId);
+}
+%}
+
+### C4-A6. partner refund list should include refunds under partner 8101
+GET {{baseUrl}}/jst/order/refund/list?pageNum=1&pageSize=10&orderId=9305
+Authorization: Bearer {{c4_partner_token}}
+
+> {%
+client.test("C4-A6 partner refund list success", function() {
+    client.assert(response.body.code === 200 || response.status === 200);
+});
+%}
+
+### C4-A7. partner approves refund request on 9305
+POST {{baseUrl}}/jst/order/refund/{{c4_approve_refund_id}}/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{c4_partner_token}}
+
+{
+  "auditRemark": "C4 partner approve"
+}
+
+> {%
+client.test("C4-A7 partner approve success", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### C4-A8. partner is not allowed to execute refund
+POST {{baseUrl}}/jst/order/refund/{{c4_approve_refund_id}}/execute
+Authorization: Bearer {{c4_partner_token}}
+
+> {%
+client.test("C4-A8 partner execute should fail", function() {
+    client.assert(response.body.code !== 200 || response.status === 403);
+});
+%}
+
+### C4-A9. admin executes approved refund on 9305
+POST {{baseUrl}}/jst/order/refund/{{c4_approve_refund_id}}/execute
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("C4-A9 admin execute success", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### C4-A10. admin starts special refund on expired order 9302
+POST {{baseUrl}}/jst/admin/order/9302/special-refund
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "auditRemark": "C4 special refund for expired order"
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("c4_special_refund_id", response.body.data.refundId);
+}
+%}
+
+### C4-A11. admin executes special refund on 9302
+POST {{baseUrl}}/jst/order/refund/{{c4_special_refund_id}}/execute
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("C4-A11 special refund execute success", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### C4-A12. duplicate execute on completed refund should be idempotent
+POST {{baseUrl}}/jst/order/refund/{{c4_special_refund_id}}/execute
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("C4-A12 duplicate execute remains safe", function() {
+    client.assert(response.body.code === 200);
+});
+%}

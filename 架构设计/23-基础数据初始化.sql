@@ -174,7 +174,7 @@ INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component,
 -- 这里只准备一级目录，避免重复维护。
 
 -- 角色（赛事方/渠道方/平台运营）
-INSERT INTO sys_role (role_id, role_name, role_key, role_sort, data_scope, menu_check_strict, dept_check_strict, status, del_flag, create_by, create_time, remark) VALUES
+INSERT INTO sys_role (role_id, role_name, role_key, role_sort, data_scope, menu_check_strictly, dept_check_strictly, status, del_flag, create_by, create_time, remark) VALUES
 (100, '平台运营',   'jst_platform_op', 10, '1', '1', '1', '0', '0', 'admin', NOW(), '看全部业务数据'),
 (101, '赛事方账号', 'jst_partner',     20, '1', '1', '1', '0', '0', 'admin', NOW(), '通过 @PartnerScope 限制只能看自己的赛事'),
 (102, '渠道方账号', 'jst_channel',     30, '1', '1', '1', '0', '0', 'admin', NOW(), '通过 @ChannelScope 限制只能看自己拉新的数据');
