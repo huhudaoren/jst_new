@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件，从 session 8e5e012b 提取。上次会话时间：2026-04-09 03:05 UTC
+> 会话恢复文件。上次会话时间：2026-04-09 16:00 UTC（阶段 C 后端 C1~C8 全部合并，批 3 派发中）
 
 ---
 
@@ -141,12 +141,18 @@ D:\coding\jst_v1\
 | **B - 基础前端** | P1 登录、P2 首页、P3 赛事、P4 课程、P5 公开页面集 | ✅ 完成 |
 | **C - 核心交易** | | |
 | C1 - F9 报名 | 报名记录 + 表单快照 | ✅ 完成 |
-| C2 - 订单混合支付 | 订单创建 + 积分冻结/消耗 + 优惠券锁定/使用 + Mock支付 | ✅ 完成 (待最终测试验证) |
-| C4 - 退款全流程 | 学生退款 + admin 特批 + 资金回退 + 返点联动 | ✅ 子Agent已完成报告，主Agent待review |
-| C5 - 渠道返点+提现 | | ⚪ 未开始 |
-| C6 - 团队预约+扫码核销 | | ⚪ 未开始 |
-| C7 - 个人预约 | | ⚪ 未开始 |
-| C8 - 商城兑换 | | ⚪ 未开始 |
+| C2 - 订单混合支付 | 订单创建 + 积分冻结/消耗 + 优惠券锁定/使用 + Mock支付 | ✅ 完成（.http 全绿） |
+| C4 - 退款全流程 | 学生退款 + admin 特批 + 资金回退 + 返点联动 | ✅ 完成（.http 全绿） |
+| C5a - 渠道提现申请 | 返点 summary + ledger + withdraw apply/cancel/list/detail | ✅ 完成 |
+| C5b - 渠道审核与打款 | admin 审核/驳回/打款 + 负向台账自动抵扣 + mock/real payout | ✅ 完成 |
+| C6 - 团队预约+扫码核销 | 团队预约 + 核销引擎 + HMAC QR | ✅ 完成 |
+| C7 - 个人预约 | 个人预约 apply/cancel/remaining，复用 C6 核销 | ✅ 完成 |
+| C8 - 积分商城兑换 | 商品 CRUD + 兑换下单 + 虚拟发券/权益 + 实物发货 (SM-18) | ✅ 完成 |
+| **WX-C1** - 订单与退款前端 | 小程序支付/订单/退款闭环 | ✅ 完成 |
+| **WX-C2** - 渠道方前端 | 返点中心 + 提现 + 渠道首页/骨架页 | ✅ 完成 |
+| **WX-C3** - 预约与商城前端 | 个人预约/二维码/扫码核销 + 积分商城 | 🟡 派发中 |
+| **F-CHANNEL-DASHBOARD** | 渠道工作台 4 接口（monthly/students/orders/stats） | 🟡 派发中 |
+| **DEBT-2** | my/index 占位清理 + profile 字段白名单 | 🟡 派发中 |
 | **P6 - 学生闭环前端** | 报名页、我的报名、我的绑定、教师认证 | ✅ 完成 |
 | **DEBT-1** | 代码债清理 | ✅ 完成 |
 | **POLISH** | 视觉对齐（对照 91 张 PNG 截图） | ⚪ 阶段 C 完成后统一做 |
@@ -197,15 +203,24 @@ D:\coding\jst_v1\
 
 ## 六、已知问题与待办
 
-### 紧急待办
-1. **C4 退款 review**：子 Agent 报告在 `subagent/tasks/任务报告/C4-退款全流程-回答.md`，主 Agent 需要 review + BUILD 验证
-2. **测试验证**：跑 `90-reset-fixtures.sql` → `wx-tests.http` → `admin-tests.http`，确认 C2 全绿
+### 当前派发中（等报告 review）
+1. **WX-C3** 预约/核销/商城前端（依赖 C6/C7/C8 ✅）
+2. **F-CHANNEL-DASHBOARD** 渠道工作台 4 接口
+3. **DEBT-2** my/index 占位清理 + profile 字段白名单
 
-### 后续任务（阶段 C 剩余）
-- C5 渠道返点+提现
-- C6 团队预约+扫码核销
-- C7 个人预约
-- C8 商城兑换
+### 阶段 C 后端已全部合并
+C1~C8 全部完成，mvn compile 18 模块 BUILD SUCCESS，C2/C4 端到端 .http 全绿。
+
+### 下一阶段候选
+- C9 商城售后退款（现金/积分/券回退，参考 C4 范式）
+- POLISH 阶段视觉对齐
+- 真实支付/打款对接（当前 Mock）
+
+### 技术债（持续）
+- 视觉对齐 polish sprint（对照 91 张 PNG，阶段 C 全部收尾后做）
+- Spring Boot 4.0+ 注意：`spring-boot-starter-aop` 已替换为 `spring-boot-starter-aspectj`
+- `orphan: test/temp_test_apply_patch.txt`（C4 报告中提到，非阻塞）
+- `jst_points_account.owner_type` 历史数据混 `user`/`student`，C8 已兼容读，长期需数据清洗
 
 ### 技术债
 - 视觉对齐 polish sprint（对照 91 张 PNG）
