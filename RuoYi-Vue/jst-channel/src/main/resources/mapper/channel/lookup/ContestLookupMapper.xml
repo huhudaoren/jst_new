@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.lookup.ContestLookupMapper">
+
+    <select id="selectContestNamesByIds" resultType="map">
+        select contest_id as contestId,
+               contest_name as contestName
+        from jst_contest
+        where contest_id in
+        <foreach collection="contestIds" item="contestId" open="(" separator="," close=")">
+            #{contestId}
+        </foreach>
+          and del_flag = '0'
+    </select>
+</mapper>

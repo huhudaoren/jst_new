@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.RebateSettlementMapperExt">
+
+    <resultMap id="SettlementResult" type="com.ruoyi.jst.channel.domain.JstRebateSettlement">
+        <result property="settlementId" column="settlement_id"/>
+        <result property="settlementNo" column="settlement_no"/>
+        <result property="channelId" column="channel_id"/>
+        <result property="applyAmount" column="apply_amount"/>
+        <result property="negativeOffsetAmount" column="negative_offset_amount"/>
+        <result property="actualPayAmount" column="actual_pay_amount"/>
+        <result property="invoiceStatus" column="invoice_status"/>
+        <result property="invoiceId" column="invoice_id"/>
+        <result property="bankAccountSnapshot" column="bank_account_snapshot"/>
+        <result property="status" column="status"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="payVoucherUrl" column="pay_voucher_url"/>
+        <result property="applyTime" column="apply_time"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <select id="selectBySettlementIdForUpdate" resultMap="SettlementResult">
+        select *
+        from jst_rebate_settlement
+        where settlement_id = #{settlementId}
+          and del_flag = '0'
+        limit 1
+        for update
+    </select>
+
+    <update id="updateStatusByExpected">
+        update jst_rebate_settlement
+        set status = #{targetStatus},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where settlement_id = #{settlementId}
+          and channel_id = #{channelId}
+          and status = #{expectedStatus}
+          and del_flag = '0'
+    </update>
+
+    <select id="selectMyList" parameterType="com.ruoyi.jst.channel.dto.WithdrawQueryReqDTO"
+            resultType="com.ruoyi.jst.channel.vo.WithdrawListVO">
+        select settlement_id,
+               settlement_no,
+               apply_amount,
+               negative_offset_amount,
+               actual_pay_amount,
+               status,
+               invoice_status,
+               apply_time,
+               update_time
+        from jst_rebate_settlement
+        where channel_id = #{channelId}
+          and del_flag = '0'
+        <if test="status != null and status != ''">
+            and status = #{status}
+        </if>
+        order by apply_time desc, settlement_id desc
+    </select>
+</mapper>

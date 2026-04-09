@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.RebateLedgerMapperExt">
+
+    <resultMap id="LedgerResult" type="com.ruoyi.jst.channel.domain.JstRebateLedger">
+        <result property="ledgerId" column="ledger_id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="itemId" column="item_id"/>
+        <result property="channelId" column="channel_id"/>
+        <result property="contestId" column="contest_id"/>
+        <result property="ruleId" column="rule_id"/>
+        <result property="listAmount" column="list_amount"/>
+        <result property="netPayAmount" column="net_pay_amount"/>
+        <result property="serviceFee" column="service_fee"/>
+        <result property="rebateBase" column="rebate_base"/>
+        <result property="rebateAmount" column="rebate_amount"/>
+        <result property="direction" column="direction"/>
+        <result property="status" column="status"/>
+        <result property="accrualTime" column="accrual_time"/>
+        <result property="eventEndTime" column="event_end_time"/>
+        <result property="settlementId" column="settlement_id"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <select id="selectSummaryByChannelId" resultType="map">
+        select coalesce(sum(case
+                                when status = 'withdrawable' and direction = 'positive' then rebate_amount
+                                else 0
+                            end), 0) as withdrawableAmount,
+               coalesce(sum(case
+                                when status = 'in_review' and direction = 'positive' then rebate_amount
+                                else 0
+                            end), 0) as reviewingAmount,
+               coalesce(sum(case
+                                when status = 'paid' and direction = 'positive' then rebate_amount
+                                else 0
+                            end), 0) as paidAmount,
+               coalesce(sum(case
+                                when status = 'rolled_back' then abs(rebate_amount)
+                                when status = 'negative' then abs(rebate_amount)
+                                else 0
+                            end), 0) as rolledBackAmount
+        from jst_rebate_ledger
+        where channel_id = #{channelId}
+          and del_flag = '0'
+    </select>
+
+    <select id="selectLedgerList" parameterType="com.ruoyi.jst.channel.dto.RebateLedgerQueryReqDTO"
+            resultType="com.ruoyi.jst.channel.vo.RebateLedgerListVO">
+        select rl.ledger_id,
+               rl.order_id,
+               om.order_no,
+               rl.contest_id,
+               rl.rebate_amount,
+               rl.direction,
+               rl.status,
+               rl.settlement_id,
+               rl.accrual_time,
+               rl.create_time
+        from jst_rebate_ledger rl
+                 left join jst_order_main om on om.order_id = rl.order_id and om.del_flag = '0'
+        where rl.channel_id = #{channelId}
+          and rl.del_flag = '0'
+        <if test="status != null and status != ''">
+            and rl.status = #{status}
+        </if>
+        order by rl.create_time desc, rl.ledger_id desc
+    </select>
+
+    <select id="selectByLedgerIdsForUpdate" resultMap="LedgerResult">
+        select *
+        from jst_rebate_ledger
+        where ledger_id in
+        <foreach collection="ledgerIds" item="ledgerId" open="(" separator="," close=")">
+            #{ledgerId}
+        </foreach>
+          and del_flag = '0'
+        order by ledger_id asc
+        for update
+    </select>
+
+    <update id="markInReview">
+        update jst_rebate_ledger
+        set status = 'in_review',
+            settlement_id = #{settlementId},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where channel_id = #{channelId}
+          and ledger_id in
+        <foreach collection="ledgerIds" item="ledgerId" open="(" separator="," close=")">
+            #{ledgerId}
+        </foreach>
+          and status = 'withdrawable'
+          and direction = 'positive'
+          and del_flag = '0'
+    </update>
+
+    <update id="restoreWithdrawableBySettlementId">
+        update jst_rebate_ledger
+        set status = 'withdrawable',
+            settlement_id = null,
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where channel_id = #{channelId}
+          and settlement_id = #{settlementId}
+          and status = 'in_review'
+          and direction = 'positive'
+          and del_flag = '0'
+    </update>
+
+    <select id="selectBySettlementId" resultType="com.ruoyi.jst.channel.vo.RebateLedgerListVO">
+        select rl.ledger_id,
+               rl.order_id,
+               om.order_no,
+               rl.contest_id,
+               rl.rebate_amount,
+               rl.direction,
+               rl.status,
+               rl.settlement_id,
+               rl.accrual_time,
+               rl.create_time
+        from jst_rebate_ledger rl
+                 left join jst_order_main om on om.order_id = rl.order_id and om.del_flag = '0'
+        where rl.settlement_id = #{settlementId}
+          and rl.del_flag = '0'
+        order by rl.ledger_id asc
+    </select>
+</mapper>
