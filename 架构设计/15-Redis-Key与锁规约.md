@@ -152,7 +152,7 @@ return jstLockTemplate.execute("lock:team_appt:" + teamId, 5, 10, () -> {
 | `lock:team_appt:{teamAppointmentId}` | 团队预约到场核销人数累加 / 团队状态推进 | wait 3s, lease 5s | `WriteoffService.scan` |
 | `lock:writeoff:item:{itemId}` | 单个核销子项互斥，防止同一码重复扫码 | wait 2s, lease 3s | `WriteoffService.scan` |
 | `lock:appointment:book:{contestId}:{sessionCode}` | 场次名额扣减 / 团队预约防重入 | wait 3s, lease 5s | `TeamAppointmentService.apply` |
-## C7 琛ュ厖鐧昏
-| 閿佸悕妯℃澘 | 浣跨敤鍦烘櫙 | 绛夊緟/鎸佹湁鏃堕暱 | 蹇呴』鍖呰９鐨勪笟鍔?|
+## C7 补充登记
+| 锁名模板 | 使用场景 | 等待/持有时长 | 必须包装的业务 |
 |---|---|---|---|
-| `lock:appointment:cancel:{appointmentId}` | 涓汉棰勭害鍙栨秷锛岄槻姝㈠悓涓€棰勭害骞跺彂鍥炴粴 | wait 2s, lease 5s | `AppointmentService.cancelIndividual` |
+| `lock:appointment:cancel:{appointmentId}` | 个人预约取消，防止同一预约并发回滚 | wait 2s, lease 5s | `AppointmentService.cancelIndividual` |
