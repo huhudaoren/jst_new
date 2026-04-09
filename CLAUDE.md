@@ -150,9 +150,9 @@ D:\coding\jst_v1\
 | C8 - 积分商城兑换 | 商品 CRUD + 兑换下单 + 虚拟发券/权益 + 实物发货 (SM-18) | ✅ 完成 |
 | **WX-C1** - 订单与退款前端 | 小程序支付/订单/退款闭环 | ✅ 完成 |
 | **WX-C2** - 渠道方前端 | 返点中心 + 提现 + 渠道首页/骨架页 | ✅ 完成 |
-| **WX-C3** - 预约与商城前端 | 个人预约/二维码/扫码核销 + 积分商城 | 🟡 派发中 |
-| **F-CHANNEL-DASHBOARD** | 渠道工作台 4 接口（monthly/students/orders/stats） | 🟡 派发中 |
-| **DEBT-2** | my/index 占位清理 + profile 字段白名单 | 🟡 派发中 |
+| **WX-C3** - 预约与商城前端 | 个人预约/二维码/扫码核销 + 积分商城 | ✅ 完成（遗留 6 条并入 POLISH） |
+| **F-CHANNEL-DASHBOARD** | 渠道工作台 4 接口（monthly/students/orders/stats） | ✅ 完成（F-CD 12/12 全绿） |
+| **DEBT-2** | my/index 占位清理 + profile 字段白名单 | ✅ 完成 |
 | **P6 - 学生闭环前端** | 报名页、我的报名、我的绑定、教师认证 | ✅ 完成 |
 | **DEBT-1** | 代码债清理 | ✅ 完成 |
 | **POLISH** | 视觉对齐（对照 91 张 PNG 截图） | ⚪ 阶段 C 完成后统一做 |
@@ -203,10 +203,20 @@ D:\coding\jst_v1\
 
 ## 六、已知问题与待办
 
-### 当前派发中（等报告 review）
-1. **WX-C3** 预约/核销/商城前端（依赖 C6/C7/C8 ✅）
-2. **F-CHANNEL-DASHBOARD** 渠道工作台 4 接口
-3. **DEBT-2** my/index 占位清理 + profile 字段白名单
+### 批 3 已全部合并（2026-04-09 17:00 UTC）
+- WX-C3 / F-CHANNEL-DASHBOARD / DEBT-2 全部 ✅
+- F-CD 12/12 + C5b 13/13 .http 全绿
+- 91 页原型文档 `小程序原型图/界面位置说明-V3.0.md`（81 页 V4.0 索引 + design token 速查）已并入参考
+
+### 待派发（候选批 4）
+1. **P-POLISH-WX-C3-修复** 小卡（scan 三类切换 / rebate 6tab / uqrcode / participant pick / address api / supportAppointment 字段）
+2. **C9 商城售后退款** 全流程（参考 C4 范式）
+3. **F-MARKETING** 优惠券中心 + 营销活动专题
+4. **F-RIGHTS** 权益中心 4 页
+5. **F-POINTS-CENTER** 积分中心/等级 Hero
+6. **F-PARTNER-WEB** 赛事方 H5 工作台（独立端 8 页，大工程）
+7. **F-ADMIN-H5** 独立 H5 管理员端（14 页，大工程）
+8. **POLISH Sprint** 按设计 Token 全面对齐 91 页原型
 
 ### 阶段 C 后端已全部合并
 C1~C8 全部完成，mvn compile 18 模块 BUILD SUCCESS，C2/C4 端到端 .http 全绿。
