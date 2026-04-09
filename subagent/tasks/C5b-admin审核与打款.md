@@ -21,6 +21,23 @@
 ## 阶段 / 模块
 阶段 C / **jst-channel** + **jst-finance**（写 `jst_payment_pay_record`）
 
+## ⚠️ 实测 Schema 校正（派发前主 Agent 补录）
+
+`jst_rebate_settlement` 实际字段与原任务卡描述有出入，以下为 **live DB 真实列**（C5a 已适配）：
+- 没有 `payee_account_json`，用 `bank_account_snapshot VARCHAR(255)`（C5a 存 JSON 字符串到这里）
+- 没有 `invoice_json`，用 `invoice_status VARCHAR(20)` + `invoice_id BIGINT`
+- 没有 `audit_time`/`execute_time`/`pay_tx_no`，用 `apply_time` / `pay_time` / `pay_voucher_url`
+- 驳回/审核备注写 `audit_remark VARCHAR(255)`
+- C5b `approve` 时更新 `pay_time` 留空、status=approved、audit_remark 写入
+- C5b `execute` 时写 `pay_time=NOW()`、`pay_voucher_url=mockPayoutResult`、status=paid
+
+`jst_payment_pay_record` 实际列：`pay_record_id` / `pay_no` / `business_type` / `business_id` / `target_type` / `target_id` / `amount` / `pay_account` / `pay_time` / `voucher_url` / `operator_id` + 审计列。**没有** `status` / `tx_no`，成功即写入（`pay_no` 充当流水号，`voucher_url` 存 mock 凭证 URL 或占位字符串）。
+
+`jst_rebate_ledger` 的 `settlement_id` 字段确认存在可写。
+
+## ⚠️ 前置准备（派发前主 Agent 已完成）
+- C5a 已合并，service 层 `requireCurrentChannelId()` + `PageUtils.startPage()` 模式已建立，C5b admin 侧控制器可直接照搬 `startPage()` + controller 模式（admin 端不依赖 current channel，无此坑）
+
 ## 必读上下文
 
 1. **C5a 任务卡 + C5a 实现**（本任务基于 C5a 的 settlement/ledger 数据）
