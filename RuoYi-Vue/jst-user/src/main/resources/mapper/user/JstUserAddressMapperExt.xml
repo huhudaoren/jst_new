@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.user.mapper.JstUserAddressMapperExt">
+
+    <resultMap id="UserAddressMap" type="com.ruoyi.jst.user.domain.JstUserAddress">
+        <id column="address_id" property="addressId"/>
+        <result column="user_id" property="userId"/>
+        <result column="receiver_name" property="receiverName"/>
+        <result column="receiver_mobile" property="receiverMobile"/>
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="district" property="district"/>
+        <result column="address_detail" property="addressDetail"/>
+        <result column="postal_code" property="postalCode"/>
+        <result column="is_default" property="isDefault"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="del_flag" property="delFlag"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        address_id, user_id, receiver_name, receiver_mobile, province, city, district,
+        address_detail, postal_code, is_default, create_by, create_time, update_by,
+        update_time, remark, del_flag
+    </sql>
+
+    <select id="selectListByUserId" resultMap="UserAddressMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM jst_user_address
+        WHERE user_id = #{userId}
+          AND del_flag = '0'
+        ORDER BY is_default DESC, update_time DESC, address_id DESC
+    </select>
+
+    <select id="selectByIdAndUserId" resultMap="UserAddressMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM jst_user_address
+        WHERE address_id = #{addressId}
+          AND user_id = #{userId}
+          AND del_flag = '0'
+        LIMIT 1
+    </select>
+
+    <insert id="insertAddress" parameterType="com.ruoyi.jst.user.domain.JstUserAddress"
+            useGeneratedKeys="true" keyProperty="addressId">
+        INSERT INTO jst_user_address (
+            user_id, receiver_name, receiver_mobile, province, city, district,
+            address_detail, postal_code, is_default, create_by, create_time,
+            update_by, update_time, remark, del_flag
+        ) VALUES (
+            #{userId}, #{receiverName}, #{receiverMobile}, #{province}, #{city}, #{district},
+            #{addressDetail}, #{postalCode,jdbcType=VARCHAR}, #{isDefault}, #{createBy}, #{createTime},
+            #{updateBy}, #{updateTime}, #{remark,jdbcType=VARCHAR}, #{delFlag}
+        )
+    </insert>
+
+    <update id="updateAddress" parameterType="com.ruoyi.jst.user.domain.JstUserAddress">
+        UPDATE jst_user_address
+        SET receiver_name = #{receiverName},
+            receiver_mobile = #{receiverMobile},
+            province = #{province},
+            city = #{city},
+            district = #{district},
+            address_detail = #{addressDetail},
+            postal_code = #{postalCode,jdbcType=VARCHAR},
+            is_default = #{isDefault},
+            update_by = #{updateBy},
+            update_time = #{updateTime},
+            remark = #{remark,jdbcType=VARCHAR}
+        WHERE address_id = #{addressId}
+          AND user_id = #{userId}
+          AND del_flag = '0'
+    </update>
+
+    <update id="softDeleteByIdAndUserId">
+        UPDATE jst_user_address
+        SET del_flag = '2',
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE address_id = #{addressId}
+          AND user_id = #{userId}
+          AND del_flag = '0'
+    </update>
+
+    <update id="clearDefaultByUserId">
+        UPDATE jst_user_address
+        SET is_default = 0,
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND del_flag = '0'
+          AND is_default = 1
+    </update>
+
+    <update id="setDefaultByIdAndUserId">
+        UPDATE jst_user_address
+        SET is_default = 1,
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE address_id = #{addressId}
+          AND user_id = #{userId}
+          AND del_flag = '0'
+    </update>
+
+</mapper>

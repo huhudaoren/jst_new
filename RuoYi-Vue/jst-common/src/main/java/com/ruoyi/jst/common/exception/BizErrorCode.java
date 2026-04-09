@@ -15,6 +15,7 @@ public enum BizErrorCode {
     JST_USER_CLAIM_ILLEGAL_TRANSIT(10020, "档案认领状态非法流转"),
     JST_USER_CLAIM_ALREADY_CLAIMED(10021, "档案已被认领"),
     JST_USER_PARTICIPANT_NOT_FOUND(10030, "参赛档案不存在"),
+    JST_USER_ADDRESS_NOT_FOUND(10031, "收货地址不存在"),
 
     // ========== jst-event (2xxxx) ==========
     JST_EVENT_CONTEST_NOT_FOUND(20001, "赛事不存在"),

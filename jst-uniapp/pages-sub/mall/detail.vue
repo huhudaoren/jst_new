@@ -30,8 +30,8 @@
       <view v-if="isPhysical" class="md-section">
         <text class="md-section__title">收货地址</text>
         <view class="md-address" @tap="pickAddress">
-          <block v-if="address.consignee">
-            <text class="md-address__name">{{ address.consignee }} · {{ address.phone }}</text>
+          <block v-if="displayReceiverName">
+            <text class="md-address__name">{{ displayReceiverName }} · {{ displayReceiverMobile }}</text>
             <text class="md-address__detail">{{ addressText }}</text>
           </block>
           <text v-else class="md-address__empty">请选择收货地址 ›</text>
@@ -75,6 +75,12 @@ export default {
       if (imgs.length) return imgs
       return this.goods.coverImage ? [this.goods.coverImage] : ['']
     },
+    displayReceiverName() {
+      return this.address.receiverName || this.address.consignee || ''
+    },
+    displayReceiverMobile() {
+      return this.address.receiverMobileMasked || this.address.phoneMasked || this.address.phone || this.address.mobile || ''
+    },
     hasCash() { return this.goods && this.goods.cashPrice && Number(this.goods.cashPrice) > 0 },
     isPhysical() { return this.goods && this.goods.goodsType === 'physical' },
     totalPoints() { return (Number(this.goods.pointsPrice || 0) * this.quantity) },
@@ -82,7 +88,7 @@ export default {
     stockInsufficient() { return this.goods && this.goods.stock != null && this.quantity > this.goods.stock },
     addressText() {
       const a = this.address || {}
-      return [a.province, a.city, a.district, a.detail].filter(Boolean).join(' ')
+      return [a.province, a.city, a.district, a.addressDetail || a.detailAddress || a.detail].filter(Boolean).join(' ')
     }
   },
   onLoad(query) {
@@ -90,9 +96,10 @@ export default {
     if (this.goodsId) this.load()
   },
   onShow() {
-    const picked = uni.getStorageSync('mall_picked_address')
+    const picked = uni.getStorageSync('ua_picked_address') || uni.getStorageSync('mall_picked_address')
     if (picked) {
       this.address = picked
+      uni.removeStorageSync('ua_picked_address')
       uni.removeStorageSync('mall_picked_address')
     }
   },
@@ -101,23 +108,10 @@ export default {
     inc() { if (this.goods.stock == null || this.quantity < this.goods.stock) this.quantity += 1 },
     dec() { if (this.quantity > 1) this.quantity -= 1 },
     pickAddress() {
-      // 暂用 uni.chooseAddress 兜底；真实项目应跳地址管理页
-      uni.chooseAddress({
-        success: (res) => {
-          this.address = {
-            consignee: res.userName,
-            phone: res.telNumber,
-            province: res.provinceName,
-            city: res.cityName,
-            district: res.countyName,
-            detail: res.detailInfo
-          }
-        },
-        fail: () => uni.showToast({ title: '请手动完善地址', icon: 'none' })
-      })
+      uni.navigateTo({ url: '/pages-sub/my/address-list?mode=pick' })
     },
     async onSubmit() {
-      if (this.isPhysical && !this.address.consignee) {
+      if (this.isPhysical && !this.displayReceiverName) {
         uni.showToast({ title: '请先选择收货地址', icon: 'none' })
         return
       }
@@ -126,7 +120,17 @@ export default {
         quantity: this.quantity,
         payMethod: this.hasCash ? 'mixed' : 'points'
       }
-      if (this.isPhysical) body.addressSnapshot = { ...this.address }
+      if (this.isPhysical) {
+        body.addressSnapshot = {
+          receiverName: this.address.receiverName || this.address.consignee,
+          mobile: this.address.receiverMobile || this.address.phone || this.address.mobile,
+          province: this.address.province,
+          city: this.address.city,
+          district: this.address.district,
+          detailAddress: this.address.addressDetail || this.address.detailAddress || this.address.detail,
+          postalCode: this.address.postalCode || ''
+        }
+      }
       this.submitting = true
       try {
         const res = await applyExchange(body)

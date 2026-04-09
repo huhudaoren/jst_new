@@ -84,6 +84,7 @@ DELETE FROM jst_rights_template WHERE create_by = 'fixture';
 DELETE FROM jst_coupon_template WHERE create_by = 'fixture';
 DELETE FROM jst_mall_exchange_order WHERE create_by = 'fixture';
 DELETE FROM jst_mall_goods WHERE create_by = 'fixture';
+DELETE FROM jst_user_address WHERE create_by = 'fixture';
 DELETE FROM jst_points_account WHERE create_by = 'fixture';
 DELETE FROM jst_points_ledger WHERE create_by = 'fixture';
 DELETE FROM jst_growth_ledger WHERE ledger_id BETWEEN 99281 AND 99289;
@@ -217,6 +218,13 @@ SET available_points = 1250,
     update_by = 'fixture',
     update_time = NOW()
 WHERE user_id = 9001;
+INSERT INTO jst_user_address (
+    address_id, user_id, receiver_name, receiver_mobile, province, city, district,
+    address_detail, postal_code, is_default, create_by, create_time, update_by, update_time, del_flag
+) VALUES (
+    99301, 9001, '测试_默认收货人', '13800009001', '北京市', '北京市', '朝阳区',
+    '测试_F-ADDR_默认地址 88 号', '100000', 1, 'fixture', NOW(), 'fixture', NOW(), '0'
+);
 
 INSERT INTO jst_level_config (
     level_id, level_code, level_name, level_no, growth_threshold, icon, applicable_role, status,
@@ -1751,4 +1759,6 @@ INSERT INTO jst_user_rights (
     1.00, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'available',
     'fixture', NOW(), 'fixture', NOW(), 'F-MARKETING 扫码核销权益', '0'
 );
+
+
 

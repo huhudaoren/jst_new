@@ -10,7 +10,7 @@ import java.util.Map;
  * Read-only contest lookup mapper for jst-marketing.
  */
 @Mapper
-public interface ContestLookupMapper {
+public interface MarketingContestLookupMapper {
 
     List<Map<String, Object>> selectContestNamesByIds(@Param("contestIds") List<Long> contestIds);
 }

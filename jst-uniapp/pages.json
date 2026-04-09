@@ -119,6 +119,20 @@
             "navigationBarTitleText": "\u9000\u6b3e\u8be6\u60c5",
             "navigationStyle": "custom"
           }
+        },
+        {
+          "path": "address-list",
+          "style": {
+            "navigationBarTitleText": "\u6536\u8d27\u5730\u5740",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "address-edit",
+          "style": {
+            "navigationBarTitleText": "\u7f16\u8f91\u5730\u5740",
+            "navigationStyle": "custom"
+          }
         }
       ]
     },

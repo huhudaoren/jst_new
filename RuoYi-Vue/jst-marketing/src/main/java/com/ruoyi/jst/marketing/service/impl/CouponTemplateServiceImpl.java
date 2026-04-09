@@ -16,7 +16,7 @@ import com.ruoyi.jst.marketing.mapper.JstCouponIssueBatchMapper;
 import com.ruoyi.jst.marketing.mapper.JstCouponTemplateMapper;
 import com.ruoyi.jst.marketing.mapper.JstUserCouponMapper;
 import com.ruoyi.jst.marketing.mapper.UserCouponMapperExt;
-import com.ruoyi.jst.marketing.mapper.lookup.ContestLookupMapper;
+import com.ruoyi.jst.marketing.mapper.lookup.MarketingContestLookupMapper;
 import com.ruoyi.jst.marketing.mapper.lookup.MarketingUserLookupMapper;
 import com.ruoyi.jst.marketing.service.CouponTemplateService;
 import com.ruoyi.jst.marketing.vo.ClaimableCouponVO;
@@ -61,7 +61,7 @@ public class CouponTemplateServiceImpl implements CouponTemplateService {
     private MarketingUserLookupMapper marketingUserLookupMapper;
 
     @Autowired
-    private ContestLookupMapper contestLookupMapper;
+    private MarketingContestLookupMapper contestLookupMapper;
 
     @Override
     public List<CouponTemplateVO> selectAdminList(String couponName, String couponType, Integer status) {
