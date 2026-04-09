@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.points.mapper.MallExchangeOrderMapperExt">
+
+    <sql id="ExchangeColumns">
+        e.exchange_id,
+        e.exchange_no,
+        e.user_id,
+        u.nickname,
+        e.goods_id,
+        g.goods_name,
+        g.goods_type,
+        g.cover_image,
+        e.quantity,
+        e.points_used,
+        e.cash_amount,
+        e.order_id,
+        e.address_snapshot_json as address_snapshot,
+        e.status,
+        e.logistics_company,
+        e.logistics_no,
+        e.ship_time,
+        e.complete_time,
+        e.aftersale_status,
+        e.create_time
+    </sql>
+
+    <select id="selectAdminList" parameterType="com.ruoyi.jst.points.dto.ExchangeQueryReqDTO"
+            resultType="com.ruoyi.jst.points.vo.ExchangeListVO">
+        select <include refid="ExchangeColumns"/>
+        from jst_mall_exchange_order e
+        left join jst_mall_goods g on g.goods_id = e.goods_id and g.del_flag = '0'
+        left join jst_user u on u.user_id = e.user_id and u.del_flag = '0'
+        where e.del_flag = '0'
+        <if test="exchangeNo != null and exchangeNo != ''">
+            and e.exchange_no = #{exchangeNo}
+        </if>
+        <if test="userId != null">
+            and e.user_id = #{userId}
+        </if>
+        <if test="goodsId != null">
+            and e.goods_id = #{goodsId}
+        </if>
+        <if test="status != null and status != ''">
+            and e.status = #{status}
+        </if>
+        order by e.create_time desc, e.exchange_id desc
+    </select>
+
+    <select id="selectWxList" resultType="com.ruoyi.jst.points.vo.ExchangeListVO">
+        select <include refid="ExchangeColumns"/>
+        from jst_mall_exchange_order e
+        left join jst_mall_goods g on g.goods_id = e.goods_id and g.del_flag = '0'
+        left join jst_user u on u.user_id = e.user_id and u.del_flag = '0'
+        where e.del_flag = '0'
+          and e.user_id = #{userId}
+        <if test="status != null and status != ''">
+            and e.status = #{status}
+        </if>
+        order by e.create_time desc, e.exchange_id desc
+    </select>
+
+    <select id="selectDetail" resultType="com.ruoyi.jst.points.vo.ExchangeDetailVO">
+        select <include refid="ExchangeColumns"/>
+        from jst_mall_exchange_order e
+        left join jst_mall_goods g on g.goods_id = e.goods_id and g.del_flag = '0'
+        left join jst_user u on u.user_id = e.user_id and u.del_flag = '0'
+        where e.exchange_id = #{exchangeId}
+          and e.del_flag = '0'
+        limit 1
+    </select>
+
+    <update id="updateStatusByExpected">
+        update jst_mall_exchange_order
+        set status = #{targetStatus},
+            <if test="orderId != null">order_id = #{orderId},</if>
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where exchange_id = #{exchangeId}
+          and status = #{expectedStatus}
+          and del_flag = '0'
+    </update>
+
+    <update id="shipByExpected">
+        update jst_mall_exchange_order
+        set status = #{targetStatus},
+            logistics_company = #{logisticsCompany},
+            logistics_no = #{logisticsNo},
+            ship_time = #{shipTime},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where exchange_id = #{exchangeId}
+          and status = #{expectedStatus}
+          and del_flag = '0'
+    </update>
+
+    <update id="completeByExpected">
+        update jst_mall_exchange_order
+        set status = #{targetStatus},
+            complete_time = #{completeTime},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where exchange_id = #{exchangeId}
+          and status = #{expectedStatus}
+          and del_flag = '0'
+    </update>
+</mapper>

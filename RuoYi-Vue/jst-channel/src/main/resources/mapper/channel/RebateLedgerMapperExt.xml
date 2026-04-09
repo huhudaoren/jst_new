@@ -115,6 +115,54 @@
           and del_flag = '0'
     </update>
 
+    <select id="selectUnboundNegativeByChannelId" resultMap="LedgerResult">
+        select *
+        from jst_rebate_ledger
+        where channel_id = #{channelId}
+          and direction = 'negative'
+          and settlement_id is null
+          and del_flag = '0'
+        order by create_time asc, ledger_id asc
+    </select>
+
+    <select id="selectUnboundNegativeByChannelIdForUpdate" resultMap="LedgerResult">
+        select *
+        from jst_rebate_ledger
+        where channel_id = #{channelId}
+          and direction = 'negative'
+          and settlement_id is null
+          and del_flag = '0'
+        order by create_time asc, ledger_id asc
+        for update
+    </select>
+
+    <update id="bindSettlementToNegativeLedgers">
+        update jst_rebate_ledger
+        set settlement_id = #{settlementId},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where channel_id = #{channelId}
+          and ledger_id in
+        <foreach collection="ledgerIds" item="ledgerId" open="(" separator="," close=")">
+            #{ledgerId}
+        </foreach>
+          and direction = 'negative'
+          and settlement_id is null
+          and del_flag = '0'
+    </update>
+
+    <update id="markPaidBySettlementId">
+        update jst_rebate_ledger
+        set status = 'paid',
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where channel_id = #{channelId}
+          and settlement_id = #{settlementId}
+          and status = 'in_review'
+          and direction = 'positive'
+          and del_flag = '0'
+    </update>
+
     <select id="selectBySettlementId" resultType="com.ruoyi.jst.channel.vo.RebateLedgerListVO">
         select rl.ledger_id,
                rl.order_id,

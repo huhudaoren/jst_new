@@ -25,6 +25,11 @@
             <groupId>com.ruoyi</groupId>
             <artifactId>jst-common</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>jst-order</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

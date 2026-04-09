@@ -33,5 +33,20 @@ public interface RebateLedgerMapperExt {
                                           @Param("updateBy") String updateBy,
                                           @Param("updateTime") Date updateTime);
 
+    List<JstRebateLedger> selectUnboundNegativeByChannelId(@Param("channelId") Long channelId);
+
+    List<JstRebateLedger> selectUnboundNegativeByChannelIdForUpdate(@Param("channelId") Long channelId);
+
+    int bindSettlementToNegativeLedgers(@Param("channelId") Long channelId,
+                                        @Param("settlementId") Long settlementId,
+                                        @Param("ledgerIds") List<Long> ledgerIds,
+                                        @Param("updateBy") String updateBy,
+                                        @Param("updateTime") Date updateTime);
+
+    int markPaidBySettlementId(@Param("channelId") Long channelId,
+                               @Param("settlementId") Long settlementId,
+                               @Param("updateBy") String updateBy,
+                               @Param("updateTime") Date updateTime);
+
     List<RebateLedgerListVO> selectBySettlementId(@Param("settlementId") Long settlementId);
 }

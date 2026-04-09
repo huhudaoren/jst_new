@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.points.mapper.lookup.UserCouponLookupMapper">
+
+    <select id="selectCouponTemplate" resultType="map">
+        select coupon_template_id as couponTemplateId,
+               valid_days as validDays,
+               valid_start as validStart,
+               valid_end as validEnd
+        from jst_coupon_template
+        where coupon_template_id = #{couponTemplateId}
+          and status = 1
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <insert id="insertUserCoupon">
+        insert into jst_user_coupon (
+            coupon_template_id, user_id, issue_batch_no, issue_source, status, valid_start, valid_end,
+            order_id, create_by, create_time, update_by, update_time, del_flag, remark
+        ) values (
+            #{couponTemplateId}, #{userId}, #{issueBatchNo}, #{issueSource}, #{status}, #{validStart}, #{validEnd},
+            #{orderId}, #{createBy}, #{createTime}, #{createBy}, #{createTime}, '0', #{remark}
+        )
+    </insert>
+
+    <select id="countUsedCouponsByExchangeId" resultType="int">
+        select count(1)
+        from jst_user_coupon
+        where order_id = #{exchangeId}
+          and status = 'used'
+          and del_flag = '0'
+    </select>
+</mapper>

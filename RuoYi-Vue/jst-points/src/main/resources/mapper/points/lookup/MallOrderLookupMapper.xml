@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.points.mapper.lookup.MallOrderLookupMapper">
+
+    <insert id="insertOrderMain" parameterType="com.ruoyi.jst.order.domain.JstOrderMain"
+            useGeneratedKeys="true" keyProperty="orderId">
+        insert into jst_order_main (
+            order_no, order_type, business_type, user_id, participant_id,
+            list_amount, coupon_amount, points_deduct_amount, points_used, platform_bear_amount,
+            net_pay_amount, service_fee, pay_method, pay_initiator, pay_initiator_id,
+            order_status, refund_status, allow_self_refund, create_by, create_time, update_by, update_time, del_flag
+        ) values (
+            #{orderNo}, #{orderType}, #{businessType}, #{userId}, #{participantId},
+            #{listAmount}, #{couponAmount}, #{pointsDeductAmount}, #{pointsUsed}, #{platformBearAmount},
+            #{netPayAmount}, #{serviceFee}, #{payMethod}, #{payInitiator}, #{payInitiatorId},
+            #{orderStatus}, #{refundStatus}, #{allowSelfRefund}, #{createBy}, #{createTime}, #{updateBy}, #{updateTime}, #{delFlag}
+        )
+    </insert>
+
+    <select id="selectOrderById" resultType="com.ruoyi.jst.order.domain.JstOrderMain">
+        select *
+        from jst_order_main
+        where order_id = #{orderId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <update id="updateOrderStatusByExpected">
+        update jst_order_main
+        set order_status = #{targetStatus},
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where order_id = #{orderId}
+          and order_status = #{expectedStatus}
+          and del_flag = '0'
+    </update>
+
+    <select id="selectLatestPayment" resultType="com.ruoyi.jst.order.domain.JstPaymentRecord">
+        select *
+        from jst_payment_record
+        where order_id = #{orderId}
+          and del_flag = '0'
+        order by payment_id desc
+        limit 1
+    </select>
+
+    <insert id="insertPaymentRecord" parameterType="com.ruoyi.jst.order.domain.JstPaymentRecord"
+            useGeneratedKeys="true" keyProperty="paymentId">
+        insert into jst_payment_record (
+            payment_no, order_id, pay_method, cash_amount, points_amount, points_used,
+            third_party_no, pay_status, pay_time, operator_id, create_by, create_time, update_by, update_time, del_flag
+        ) values (
+            #{paymentNo}, #{orderId}, #{payMethod}, #{cashAmount}, #{pointsAmount}, #{pointsUsed},
+            #{thirdPartyNo}, #{payStatus}, #{payTime}, #{operatorId}, #{createBy}, #{createTime}, #{updateBy}, #{updateTime}, #{delFlag}
+        )
+    </insert>
+</mapper>

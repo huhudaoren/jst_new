@@ -19,7 +19,7 @@ public enum BizErrorCode {
     // ========== jst-event (2xxxx) ==========
     JST_EVENT_CONTEST_NOT_FOUND(20001, "赛事不存在"),
     JST_EVENT_CONTEST_NOT_ENROLLING(20002, "赛事不在报名期"),
-    JST_EVENT_CONTEST_NOT_ONLINE(20003, "赛事未上线"),
+    JST_EVENT_CONTEST_NOT_ONLINE(20003, "赛事未上架"),
     JST_EVENT_CONTEST_ILLEGAL_TRANSIT(20004, "赛事状态非法跃迁"),
     JST_EVENT_FORM_TEMPLATE_NOT_FOUND(20010, "动态表单模板不存在"),
     JST_EVENT_FORM_TEMPLATE_INVALID(20011, "动态表单模板无效"),
@@ -69,6 +69,9 @@ public enum BizErrorCode {
     JST_ORDER_WRITEOFF_QR_INVALID(30080, "核销二维码无效"),
     JST_ORDER_WRITEOFF_ITEM_STATUS_INVALID(30081, "核销子项状态非法"),
     JST_ORDER_WRITEOFF_RECORD_NOT_FOUND(30082, "核销记录不存在"),
+    JST_ORDER_APPOINTMENT_REPEAT_NOT_ALLOWED(30091, "当前赛事不允许重复预约"),
+    JST_ORDER_APPOINTMENT_CAPACITY_FULL_V2(30092, "当前场次预约名额不足"),
+    JST_ORDER_APPOINTMENT_CANCEL_HAS_USED_ITEM(30093, "预约已存在已核销子项，不可取消"),
 
     // ========== jst-channel (4xxxx) ==========
     JST_CHANNEL_NOT_AUTHED(40001, "渠道方未认证"),
@@ -77,6 +80,8 @@ public enum BizErrorCode {
     JST_CHANNEL_WITHDRAW_AMOUNT_MISMATCH(40012, "提现金额与后端重算不一致"),
     JST_CHANNEL_WITHDRAW_STATUS_INVALID(40013, "提现单状态非法跃迁"),
     JST_CHANNEL_WITHDRAW_LOCK_TIMEOUT(40014, "提现申请处理中，请稍后重试"),
+    JST_CHANNEL_WITHDRAW_NEGATIVE_OVERFLOW(40015, "负向台账抵扣后金额小于 0"),
+    JST_CHANNEL_PAYOUT_FAILED(40016, "打款执行失败"),
     JST_CHANNEL_SETTLE_ILLEGAL_TRANSIT(40020, "提现单状态非法跃迁"),
 
     // ========== jst-points (5xxxx) ==========
@@ -84,6 +89,11 @@ public enum BizErrorCode {
     JST_POINTS_CONCURRENT_CONFLICT(50002, "积分账户并发冲突，请重试"),
     JST_MALL_GOODS_OFFLINE(50010, "商品已下架"),
     JST_MALL_STOCK_INSUFFICIENT(50011, "商品库存不足"),
+    JST_MALL_GOODS_NOT_FOUND(50012, "商品不存在"),
+    JST_MALL_EXCHANGE_STATUS_INVALID(50013, "兑换单状态非法跃迁"),
+    JST_MALL_CANCEL_NOT_ALLOWED(50014, "当前兑换单不允许取消"),
+    JST_MALL_EXCHANGE_NOT_FOUND(50015, "兑换单不存在"),
+    JST_MALL_ROLE_NOT_ALLOWED(50016, "当前角色不允许执行此操作"),
 
     // ========== jst-organizer (6xxxx) ==========
     JST_ORG_APPLY_NOT_FOUND(60001, "入驻申请不存在"),

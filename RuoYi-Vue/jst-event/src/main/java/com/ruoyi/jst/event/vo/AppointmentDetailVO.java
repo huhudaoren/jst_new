@@ -17,6 +17,8 @@ public class AppointmentDetailVO {
     private String sessionCode;
     private String mainStatus;
     private String appointmentType;
+    private Boolean individualAppointment;
+    private Boolean teamAppointment;
     private Long teamAppointmentId;
     private String teamNo;
     private String teamName;
@@ -41,6 +43,10 @@ public class AppointmentDetailVO {
     public void setMainStatus(String mainStatus) { this.mainStatus = mainStatus; }
     public String getAppointmentType() { return appointmentType; }
     public void setAppointmentType(String appointmentType) { this.appointmentType = appointmentType; }
+    public Boolean getIndividualAppointment() { return individualAppointment; }
+    public void setIndividualAppointment(Boolean individualAppointment) { this.individualAppointment = individualAppointment; }
+    public Boolean getTeamAppointment() { return teamAppointment; }
+    public void setTeamAppointment(Boolean teamAppointment) { this.teamAppointment = teamAppointment; }
     public Long getTeamAppointmentId() { return teamAppointmentId; }
     public void setTeamAppointmentId(Long teamAppointmentId) { this.teamAppointmentId = teamAppointmentId; }
     public String getTeamNo() { return teamNo; }

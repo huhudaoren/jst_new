@@ -53,10 +53,15 @@ jst:{domain}:{purpose}:{key1}[:{key2}]
 | `lock:order:create:{userId}` | 用户下单防重复提交 | wait 3s, lease 10s | OrderService.createMixedPay |
 | `lock:team_appt:{teamAppointmentId}` ⭐ | 团队预约扫码核销/状态推进 | wait 5s, lease 10s | AppointmentService.teamWriteoff、Job J03 |
 | `lock:bind:{userId}` | 学生-渠道绑定切换 | wait 3s, lease 5s | BindingService.switchChannel |
-| `lock:mall:goods:{goodsId}` | 商城兑换库存扣减 | wait 3s, lease 10s | MallExchangeService.exchange |
+| `lock:mall:goods:stock:{goodsId}` | 商城兑换库存扣减 | wait 3s, lease 5s | MallExchangeService.apply |
+| `lock:mall:exchange:{exchangeId}` | 兑换订单状态推进互斥 (C8) | wait 2s, lease 5s | MallExchangeService.mockPaySuccess/cancel/ship/complete |
+| `lock:points:freeze:{userId}` | 积分冻结/扣减/解冻互斥 (C8) | wait 3s, lease 5s | MallExchangeService.apply/mockPaySuccess/cancel |
 | `lock:rebate:settle:{channelId}` ⭐ | 渠道提现单审批（负向台账抵扣） | wait 10s, lease 30s | RebateSettlementService.approve |
 | `lock:channel:withdraw:apply:{channelId}` | 渠道方创建提现申请 | wait 3s, lease 10s | ChannelWithdrawService.apply |
 | `lock:channel:withdraw:cancel:{settlementId}` | 渠道方取消 pending 提现单 | wait 3s, lease 5s | ChannelWithdrawService.cancel |
+| `lock:channel:withdraw:audit:{settlementId}` | admin 审核提现单（approve / reject） | wait 3s, lease 10s | ChannelWithdrawAdminService.approve/reject |
+| `lock:channel:withdraw:execute:{settlementId}` | admin 执行提现打款互斥 | wait 3s, lease 15s | ChannelWithdrawAdminService.execute |
+| `lock:channel:withdraw:offset:{channelId}` | 同渠道多张提现单串行化负向抵扣 | wait 5s, lease 10s | ChannelWithdrawAdminService.approve |
 | `lock:event:settle:{partnerId}:{contestId}` | 赛事方结算单生成/审批 | wait 10s, lease 30s | EventSettlementService |
 | `lock:points:adjust:{ownerType}:{ownerId}` | 积分账户人工调整 | wait 3s, lease 5s | PointsAdjustService（与 version 乐观锁配合） |
 | `lock:claim:participant:{participantId}` | 临时档案认领 | wait 3s, lease 5s | ParticipantClaimService |
@@ -147,3 +152,7 @@ return jstLockTemplate.execute("lock:team_appt:" + teamId, 5, 10, () -> {
 | `lock:team_appt:{teamAppointmentId}` | 团队预约到场核销人数累加 / 团队状态推进 | wait 3s, lease 5s | `WriteoffService.scan` |
 | `lock:writeoff:item:{itemId}` | 单个核销子项互斥，防止同一码重复扫码 | wait 2s, lease 3s | `WriteoffService.scan` |
 | `lock:appointment:book:{contestId}:{sessionCode}` | 场次名额扣减 / 团队预约防重入 | wait 3s, lease 5s | `TeamAppointmentService.apply` |
+## C7 琛ュ厖鐧昏
+| 閿佸悕妯℃澘 | 浣跨敤鍦烘櫙 | 绛夊緟/鎸佹湁鏃堕暱 | 蹇呴』鍖呰９鐨勪笟鍔?|
+|---|---|---|---|
+| `lock:appointment:cancel:{appointmentId}` | 涓汉棰勭害鍙栨秷锛岄槻姝㈠悓涓€棰勭害骞跺彂鍥炴粴 | wait 2s, lease 5s | `AppointmentService.cancelIndividual` |

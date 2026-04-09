@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.points.mapper.MallGoodsMapperExt">
+
+    <resultMap id="MallGoodsResult" type="com.ruoyi.jst.points.domain.JstMallGoods">
+        <result property="goodsId" column="goods_id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="goodsType" column="goods_type"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="description" column="description"/>
+        <result property="pointsPrice" column="points_price"/>
+        <result property="cashPrice" column="cash_price"/>
+        <result property="stock" column="stock"/>
+        <result property="stockWarning" column="stock_warning"/>
+        <result property="roleLimit" column="role_limit"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="GoodsVoColumns">
+        g.goods_id,
+        g.goods_name,
+        g.goods_type,
+        g.cover_image,
+        g.description,
+        g.points_price,
+        g.cash_price,
+        g.stock,
+        g.stock_warning,
+        g.role_limit,
+        g.status,
+        cast(json_unquote(json_extract(g.remark, '$.couponTemplateId')) as unsigned) as coupon_template_id,
+        cast(json_unquote(json_extract(g.remark, '$.rightsTemplateId')) as unsigned) as rights_template_id,
+        json_unquote(json_extract(g.remark, '$.virtualTargetType')) as virtual_target_type,
+        g.create_time,
+        g.update_time
+    </sql>
+
+    <select id="selectAdminList" parameterType="com.ruoyi.jst.points.dto.GoodsQueryReqDTO"
+            resultType="com.ruoyi.jst.points.vo.GoodsListVO">
+        select <include refid="GoodsVoColumns"/>
+        from jst_mall_goods g
+        where g.del_flag = '0'
+        <if test="goodsName != null and goodsName != ''">
+            and g.goods_name like concat('%', #{goodsName}, '%')
+        </if>
+        <if test="goodsType != null and goodsType != ''">
+            and g.goods_type = #{goodsType}
+        </if>
+        <if test="status != null and status != ''">
+            and g.status = #{status}
+        </if>
+        <if test="roleLimit != null and roleLimit != ''">
+            and g.role_limit = #{roleLimit}
+        </if>
+        order by g.create_time desc, g.goods_id desc
+    </select>
+
+    <select id="selectWxList" parameterType="com.ruoyi.jst.points.dto.GoodsQueryReqDTO"
+            resultType="com.ruoyi.jst.points.vo.GoodsListVO">
+        select <include refid="GoodsVoColumns"/>
+        from jst_mall_goods g
+        where g.del_flag = '0'
+          and g.status = 'on'
+        <if test="goodsName != null and goodsName != ''">
+            and g.goods_name like concat('%', #{goodsName}, '%')
+        </if>
+        <if test="goodsType != null and goodsType != ''">
+            and g.goods_type = #{goodsType}
+        </if>
+        order by g.create_time desc, g.goods_id desc
+    </select>
+
+    <select id="selectDetail" resultType="com.ruoyi.jst.points.vo.GoodsDetailVO">
+        select <include refid="GoodsVoColumns"/>
+        from jst_mall_goods g
+        where g.goods_id = #{goodsId}
+          and g.del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectByIdForUpdate" resultMap="MallGoodsResult">
+        select *
+        from jst_mall_goods
+        where goods_id = #{goodsId}
+          and del_flag = '0'
+        limit 1
+        for update
+    </select>
+
+    <update id="updateStatus">
+        update jst_mall_goods
+        set status = #{targetStatus},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where goods_id = #{goodsId}
+          and status = #{expectedStatus}
+          and del_flag = '0'
+    </update>
+
+    <update id="softDelete">
+        update jst_mall_goods
+        set del_flag = '2',
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where goods_id = #{goodsId}
+          and del_flag = '0'
+    </update>
+
+    <update id="decreaseStock">
+        update jst_mall_goods
+        set stock = case when stock = -1 then -1 else stock - #{quantity} end,
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where goods_id = #{goodsId}
+          and del_flag = '0'
+          and (stock = -1 or stock >= #{quantity})
+    </update>
+
+    <update id="restoreStock">
+        update jst_mall_goods
+        set stock = case when stock = -1 then -1 else stock + #{quantity} end,
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where goods_id = #{goodsId}
+          and del_flag = '0'
+    </update>
+</mapper>

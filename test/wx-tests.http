@@ -1268,3 +1268,596 @@ client.test("C6-W9 invalid participant should fail", function() {
     client.assert(response.body.code === 30072 || response.body.code !== 200);
 });
 %}
+
+### =====================================================================
+### C7-W individual appointment (jst-event / WxAppointmentController)
+### Preconditions: fixtures contests 8271~8276 and appointment rows 96741/96751 already imported
+### =====================================================================
+
+### C7-W1. login student 1001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("c7_student_token", response.body.data.token);
+client.test("C7-W1 login success", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C7-W1.1. create free individual appointment
+POST {{baseUrl}}/jst/wx/appointment/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c7_student_token}}
+
+{
+  "contestId": 8271,
+  "sessionCode": "AM",
+  "appointmentDate": "2026-04-24",
+  "participantId": 3601
+}
+
+> {%
+client.test("C7-W1.1 free appointment should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.orderId == null);
+  client.assert(Array.isArray(response.body.data.qrCodes));
+  client.assert(response.body.data.qrCodes.length === 2);
+});
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c7_free_appt_id", response.body.data.appointmentId);
+  client.global.set("c7_free_qr_1", response.body.data.qrCodes[0]);
+}
+%}
+
+### C7-W2. create paid individual appointment and return orderId
+POST {{baseUrl}}/jst/wx/appointment/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c7_student_token}}
+
+{
+  "contestId": 8272,
+  "sessionCode": "PM",
+  "appointmentDate": "2026-04-24",
+  "participantId": 3601
+}
+
+> {%
+client.test("C7-W2 paid appointment should create order", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.orderId != null);
+});
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c7_paid_appt_id", response.body.data.appointmentId);
+  client.global.set("c7_paid_order_id", response.body.data.orderId);
+}
+%}
+
+### C7-W3. capacity full should fail with 30092
+POST {{baseUrl}}/jst/wx/appointment/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c7_student_token}}
+
+{
+  "contestId": 8274,
+  "sessionCode": "AM",
+  "appointmentDate": "2026-04-24",
+  "participantId": 3601
+}
+
+> {%
+client.test("C7-W3 capacity full should fail", function() {
+  client.assert(response.body.code === 30092 || response.body.code !== 200);
+});
+%}
+
+### C7-W4. repeat appointment should fail when allow_repeat=0
+POST {{baseUrl}}/jst/wx/appointment/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c7_student_token}}
+
+{
+  "contestId": 8271,
+  "sessionCode": "AM",
+  "appointmentDate": "2026-04-24",
+  "participantId": 3601
+}
+
+> {%
+client.test("C7-W4 repeat should fail", function() {
+  client.assert(response.body.code === 30091 || response.body.code !== 200);
+});
+%}
+
+### C7-W5. allow_repeat=1 should allow repeated booking
+POST {{baseUrl}}/jst/wx/appointment/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c7_student_token}}
+
+{
+  "contestId": 8273,
+  "sessionCode": "AM",
+  "appointmentDate": "2026-04-25",
+  "participantId": 3601
+}
+
+> {%
+client.test("C7-W5 first repeatable booking should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c7_repeat_appt_a", response.body.data.appointmentId);
+}
+%}
+
+### C7-W5.1. second booking on repeatable contest should also succeed
+POST {{baseUrl}}/jst/wx/appointment/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c7_student_token}}
+
+{
+  "contestId": 8273,
+  "sessionCode": "PM",
+  "appointmentDate": "2026-04-25",
+  "participantId": 3601
+}
+
+> {%
+client.test("C7-W5.1 second repeatable booking should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c7_repeat_appt_b", response.body.data.appointmentId);
+}
+%}
+
+### C7-W6. cancel booked appointment and void unused items
+POST {{baseUrl}}/jst/wx/appointment/{{c7_repeat_appt_a}}/cancel
+Authorization: Bearer {{c7_student_token}}
+
+> {%
+client.test("C7-W6 cancel should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C7-W6.1. detail after cancel should still be visible and marked individual
+GET {{baseUrl}}/jst/wx/appointment/{{c7_repeat_appt_a}}
+Authorization: Bearer {{c7_student_token}}
+
+> {%
+client.test("C7-W6.1 detail should show cancelled individual appointment", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.mainStatus === "cancelled");
+  client.assert(response.body.data.individualAppointment === true);
+});
+%}
+
+### C7-W7. cancel appointment with used item should fail with 30093
+POST {{baseUrl}}/jst/wx/appointment/96751/cancel
+Authorization: Bearer {{c7_student_token}}
+
+> {%
+client.test("C7-W7 used item cancel should fail", function() {
+  client.assert(response.body.code === 30093 || response.body.code !== 200);
+});
+%}
+
+### C7-W8. remaining quota query
+GET {{baseUrl}}/jst/wx/appointment/contest/8271/remaining?appointmentDate=2026-04-24&sessionCode=AM
+Authorization: Bearer {{c7_student_token}}
+
+> {%
+client.test("C7-W8 remaining should match fixture + created booking", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.appointmentCapacity === 3);
+  client.assert(response.body.data.bookedPersons === 1);
+  client.assert(response.body.data.remainingCapacity === 2);
+});
+%}
+
+### C7-W9. grab last seat: first student succeeds
+POST {{baseUrl}}/jst/wx/appointment/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c7_student_token}}
+
+{
+  "contestId": 8276,
+  "sessionCode": "AM",
+  "appointmentDate": "2026-04-26",
+  "participantId": 3601
+}
+
+> {%
+client.test("C7-W9 first grab should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C7-W9.1. login student 1002
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1002" }
+
+> {%
+client.global.set("c7_student_token_2", response.body.data.token);
+%}
+
+### C7-W9.2. second student should fail to grab the last seat
+POST {{baseUrl}}/jst/wx/appointment/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c7_student_token_2}}
+
+{
+  "contestId": 8276,
+  "sessionCode": "AM",
+  "appointmentDate": "2026-04-26",
+  "participantId": 3602
+}
+
+> {%
+client.test("C7-W9.2 second grab should fail", function() {
+  client.assert(response.body.code === 30092 || response.body.code !== 200);
+});
+%}
+
+### =====================================================================
+### C8-W mall exchange (jst-points / wx)
+### Preconditions: fixtures goods 99101~99104, coupon template 9701, rights template 9751 imported
+### =====================================================================
+
+### C8-W1. mall goods list should expose fixture goods
+GET {{baseUrl}}/jst/wx/mall/goods/list?pageNum=1&pageSize=10
+
+> {%
+client.test("C8-W1 mall goods list should succeed", function() {
+  client.assert(response.status === 200);
+  client.assert(Array.isArray(response.body.rows));
+  client.assert(response.body.rows.some(row => row.goodsId === 99101));
+});
+%}
+
+### C8-W2. mall goods detail should expose virtual target
+GET {{baseUrl}}/jst/wx/mall/goods/99101
+
+> {%
+client.test("C8-W2 mall goods detail should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.virtualTargetType === "coupon");
+});
+%}
+
+### C8-W3. login student user 1001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("c8_student_token", response.body.data.token);
+%}
+
+### C8-W4. exchange virtual coupon good by points only
+POST {{baseUrl}}/jst/wx/mall/exchange/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_student_token}}
+
+{
+  "goodsId": 99101,
+  "quantity": 1,
+  "payMethod": "points"
+}
+
+> {%
+client.test("C8-W4 coupon exchange should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.status === "completed");
+});
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c8_coupon_exchange_id", response.body.data.exchangeId);
+}
+%}
+
+### C8-W4.1. coupon exchange detail should be completed
+GET {{baseUrl}}/jst/wx/mall/exchange/{{c8_coupon_exchange_id}}
+Authorization: Bearer {{c8_student_token}}
+
+> {%
+client.test("C8-W4.1 coupon exchange detail should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.status === "completed");
+});
+%}
+
+### C8-W5. exchange virtual rights good by points only
+POST {{baseUrl}}/jst/wx/mall/exchange/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_student_token}}
+
+{
+  "goodsId": 99102,
+  "quantity": 1,
+  "payMethod": "points"
+}
+
+> {%
+client.test("C8-W5 rights exchange should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.status === "completed");
+});
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c8_rights_exchange_id", response.body.data.exchangeId);
+}
+%}
+
+### C8-W6. apply physical good with cash supplement
+POST {{baseUrl}}/jst/wx/mall/exchange/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_student_token}}
+
+{
+  "goodsId": 99103,
+  "quantity": 1,
+  "payMethod": "wechat",
+  "addressSnapshot": {
+    "receiverName": "测试_C8_收货人",
+    "mobile": "13800008888",
+    "province": "上海市",
+    "city": "上海市",
+    "district": "浦东新区",
+    "detailAddress": "测试路 88 号"
+  }
+}
+
+> {%
+client.test("C8-W6 physical apply should create pending_pay exchange", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.status === "pending_pay");
+  client.assert(response.body.data.orderId != null);
+});
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c8_physical_exchange_id", response.body.data.exchangeId);
+}
+%}
+
+### C8-W6.1. mock pay success for physical good
+POST {{baseUrl}}/jst/wx/mall/exchange/{{c8_physical_exchange_id}}/pay/mock-success
+Authorization: Bearer {{c8_student_token}}
+
+> {%
+client.test("C8-W6.1 physical mock pay should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C8-W6.2. paid physical exchange should become pending_ship and keep address snapshot
+GET {{baseUrl}}/jst/wx/mall/exchange/{{c8_physical_exchange_id}}
+Authorization: Bearer {{c8_student_token}}
+
+> {%
+client.test("C8-W6.2 physical exchange detail should show pending_ship", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.status === "pending_ship");
+  client.assert(response.body.data.addressSnapshot != null);
+});
+%}
+
+### C8-W7. login user 1002 for insufficient points case
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1002" }
+
+> {%
+client.global.set("c8_low_points_token", response.body.data.token);
+%}
+
+### C8-W7.1. insufficient points should fail
+POST {{baseUrl}}/jst/wx/mall/exchange/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_low_points_token}}
+
+{
+  "goodsId": 99102,
+  "quantity": 1,
+  "payMethod": "points"
+}
+
+> {%
+client.test("C8-W7.1 insufficient points should fail", function() {
+  client.assert(response.body.code === 50013 || response.body.code !== 200);
+});
+%}
+
+### C8-W8. login student 1001 again for stock tests
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("c8_student_token", response.body.data.token);
+%}
+
+### C8-W8.1. stock insufficient should fail when buying quantity 2 against stock 1
+POST {{baseUrl}}/jst/wx/mall/exchange/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_student_token}}
+
+{
+  "goodsId": 99104,
+  "quantity": 2,
+  "payMethod": "points",
+  "addressSnapshot": {
+    "receiverName": "测试_C8_库存用户",
+    "mobile": "13800007777",
+    "province": "北京市",
+    "city": "北京市",
+    "district": "海淀区",
+    "detailAddress": "库存路 1 号"
+  }
+}
+
+> {%
+client.test("C8-W8.1 stock insufficient should fail", function() {
+  client.assert(response.body.code === 50011 || response.body.code !== 200);
+});
+%}
+
+### C8-W9. login channel user 9201 for role mismatch case
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_9201" }
+
+> {%
+client.global.set("c8_channel_token", response.body.data.token);
+%}
+
+### C8-W9.1. channel user cannot exchange student-only good
+POST {{baseUrl}}/jst/wx/mall/exchange/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_channel_token}}
+
+{
+  "goodsId": 99103,
+  "quantity": 1,
+  "payMethod": "wechat",
+  "addressSnapshot": {
+    "receiverName": "测试_C8_渠道用户",
+    "mobile": "13800006666",
+    "province": "浙江省",
+    "city": "杭州市",
+    "district": "西湖区",
+    "detailAddress": "角色路 6 号"
+  }
+}
+
+> {%
+client.test("C8-W9.1 role mismatch should fail", function() {
+  client.assert(response.body.code === 50014 || response.body.code !== 200);
+});
+%}
+
+### C8-W10. login student 1001 for cancel flow
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("c8_student_token", response.body.data.token);
+%}
+
+### C8-W10.1. create pending_pay exchange for cancel
+POST {{baseUrl}}/jst/wx/mall/exchange/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_student_token}}
+
+{
+  "goodsId": 99103,
+  "quantity": 1,
+  "payMethod": "wechat",
+  "addressSnapshot": {
+    "receiverName": "测试_C8_待取消",
+    "mobile": "13800005555",
+    "province": "江苏省",
+    "city": "苏州市",
+    "district": "工业园区",
+    "detailAddress": "取消路 9 号"
+  }
+}
+
+> {%
+client.test("C8-W10.1 pending_pay exchange should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.status === "pending_pay");
+});
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c8_cancel_exchange_id", response.body.data.exchangeId);
+}
+%}
+
+### C8-W10.2. cancel pending_pay exchange should succeed
+POST {{baseUrl}}/jst/wx/mall/exchange/{{c8_cancel_exchange_id}}/cancel
+Authorization: Bearer {{c8_student_token}}
+
+> {%
+client.test("C8-W10.2 cancel pending_pay should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C8-W10.3. cancelled exchange detail should be closed
+GET {{baseUrl}}/jst/wx/mall/exchange/{{c8_cancel_exchange_id}}
+Authorization: Bearer {{c8_student_token}}
+
+> {%
+client.test("C8-W10.3 cancelled exchange detail should show closed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.status === "closed");
+});
+%}
+
+### C8-W11. paid exchange cannot be cancelled
+POST {{baseUrl}}/jst/wx/mall/exchange/{{c8_physical_exchange_id}}/cancel
+Authorization: Bearer {{c8_student_token}}
+
+> {%
+client.test("C8-W11 paid exchange cancel should fail", function() {
+  client.assert(response.body.code === 50016 || response.body.code !== 200);
+});
+%}
+
+### C8-W12. buy the last stock successfully
+POST {{baseUrl}}/jst/wx/mall/exchange/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_student_token}}
+
+{
+  "goodsId": 99104,
+  "quantity": 1,
+  "payMethod": "points",
+  "addressSnapshot": {
+    "receiverName": "测试_C8_最后库存",
+    "mobile": "13800004444",
+    "province": "广东省",
+    "city": "深圳市",
+    "district": "南山区",
+    "detailAddress": "并发路 1 号"
+  }
+}
+
+> {%
+client.test("C8-W12 first last-stock exchange should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C8-W12.1. second attempt on exhausted stock should fail
+POST {{baseUrl}}/jst/wx/mall/exchange/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_student_token}}
+
+{
+  "goodsId": 99104,
+  "quantity": 1,
+  "payMethod": "points",
+  "addressSnapshot": {
+    "receiverName": "测试_C8_最后库存二次",
+    "mobile": "13800003333",
+    "province": "广东省",
+    "city": "深圳市",
+    "district": "福田区",
+    "detailAddress": "并发路 2 号"
+  }
+}
+
+> {%
+client.test("C8-W12.1 exhausted stock should fail", function() {
+  client.assert(response.body.code === 50011 || response.body.code !== 200);
+});
+%}

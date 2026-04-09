@@ -166,6 +166,19 @@
       ]
     },
     {
+      "root": "pages-sub/channel",
+      "pages": [
+        { "path": "home", "style": { "navigationBarTitleText": "\u6e20\u9053\u9996\u9875", "navigationStyle": "custom" } },
+        { "path": "rebate", "style": { "navigationBarTitleText": "\u8fd4\u70b9\u4e2d\u5fc3", "navigationStyle": "custom", "enablePullDownRefresh": true } },
+        { "path": "withdraw-apply", "style": { "navigationBarTitleText": "\u7533\u8bf7\u63d0\u73b0", "navigationStyle": "custom" } },
+        { "path": "withdraw-list", "style": { "navigationBarTitleText": "\u6211\u7684\u63d0\u73b0", "navigationStyle": "custom", "enablePullDownRefresh": true } },
+        { "path": "withdraw-detail", "style": { "navigationBarTitleText": "\u63d0\u73b0\u8be6\u60c5", "navigationStyle": "custom" } },
+        { "path": "orders", "style": { "navigationBarTitleText": "\u6e20\u9053\u8ba2\u5355", "navigationStyle": "custom" } },
+        { "path": "students", "style": { "navigationBarTitleText": "\u6211\u7684\u5b66\u751f", "navigationStyle": "custom" } },
+        { "path": "data", "style": { "navigationBarTitleText": "\u6e20\u9053\u6570\u636e", "navigationStyle": "custom" } }
+      ]
+    },
+    {
       "root": "pages-sub/public",
       "pages": [
         {

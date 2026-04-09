@@ -17,6 +17,9 @@ public interface AppointmentRecordMapperExt {
 
     EventAppointmentRecord selectById(@Param("appointmentId") Long appointmentId);
 
+    EventAppointmentRecord selectMyRecord(@Param("userId") Long userId,
+                                          @Param("appointmentId") Long appointmentId);
+
     List<AppointmentListVO> selectMyList(@Param("userId") Long userId);
 
     AppointmentDetailVO selectMyDetail(@Param("userId") Long userId,
@@ -31,4 +34,8 @@ public interface AppointmentRecordMapperExt {
     int countAllItems(@Param("appointmentId") Long appointmentId);
 
     int countUsedItems(@Param("appointmentId") Long appointmentId);
+
+    int countBookedIndividuals(@Param("contestId") Long contestId,
+                               @Param("appointmentDate") Date appointmentDate,
+                               @Param("sessionCode") String sessionCode);
 }

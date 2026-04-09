@@ -31,6 +31,10 @@ public interface WriteoffItemMapperExt {
                    @Param("updateBy") String updateBy,
                    @Param("updateTime") Date updateTime);
 
+    int voidUnusedByAppointmentId(@Param("appointmentId") Long appointmentId,
+                                  @Param("updateBy") String updateBy,
+                                  @Param("updateTime") Date updateTime);
+
     List<AppointmentWriteoffItemVO> selectByAppointmentId(@Param("appointmentId") Long appointmentId);
 
     List<WriteoffRecordVO> selectRecordList(@Param("partnerId") Long partnerId,

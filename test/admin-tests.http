@@ -898,3 +898,393 @@ client.test("C6-A13 admin records list should include foreign contest scan", fun
     client.assert(response.body.rows.length >= 1);
 });
 %}
+
+### =====================================================================
+### C5b-A admin withdraw audit + payout (jst-channel / ChannelWithdrawAdminController)
+### Preconditions: fixtures 9105101~9105104 / 94510~94517 exist
+### =====================================================================
+
+### C5b-A1. admin login
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("c5b_admin_token", response.body.token);
+%}
+
+### C5b-A2. admin withdraw list
+GET {{baseUrl}}/jst/channel/withdraw/list?pageNum=1&pageSize=10
+Authorization: Bearer {{c5b_admin_token}}
+
+> {%
+client.test("C5b-A2 admin withdraw list success", function() {
+    client.assert(response.body.code === 200 || response.status === 200);
+    client.assert(Array.isArray(response.body.rows));
+});
+%}
+
+### C5b-A3. detail preview negative offset should be 30
+GET {{baseUrl}}/jst/channel/withdraw/9105102
+Authorization: Bearer {{c5b_admin_token}}
+
+> {%
+client.test("C5b-A3 preview negative offset should be 30", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.previewNegativeOffset.offsetAmount === 30 || response.body.data.previewNegativeOffset.offsetAmount === 30.00);
+    client.assert(response.body.data.previewNegativeOffset.actualPayAmount === 70 || response.body.data.previewNegativeOffset.actualPayAmount === 70.00);
+});
+%}
+
+### C5b-A4. approve pending settlement without negative offset
+POST {{baseUrl}}/jst/channel/withdraw/9105101/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{c5b_admin_token}}
+
+{
+  "auditRemark": "C5b approve no negative"
+}
+
+> {%
+client.test("C5b-A4 approve without negative success", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### C5b-A5. approve pending settlement with negative offset
+POST {{baseUrl}}/jst/channel/withdraw/9105102/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{c5b_admin_token}}
+
+{
+  "auditRemark": "C5b approve with offset"
+}
+
+> {%
+client.test("C5b-A5 approve with negative offset success", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### C5b-A6. approve overflow settlement should fail with 40015
+POST {{baseUrl}}/jst/channel/withdraw/9105103/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{c5b_admin_token}}
+
+{
+  "auditRemark": "C5b overflow approve should fail"
+}
+
+> {%
+client.test("C5b-A6 overflow approve should fail", function() {
+    client.assert(response.body.code === 40015 || response.body.code !== 200);
+});
+%}
+
+### C5b-A7. reject pending settlement
+POST {{baseUrl}}/jst/channel/withdraw/9105104/reject
+Content-Type: {{contentType}}
+Authorization: Bearer {{c5b_admin_token}}
+
+{
+  "auditRemark": "C5b reject pending"
+}
+
+> {%
+client.test("C5b-A7 reject pending success", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### C5b-A8. reject approved settlement should fail
+POST {{baseUrl}}/jst/channel/withdraw/9105101/reject
+Content-Type: {{contentType}}
+Authorization: Bearer {{c5b_admin_token}}
+
+{
+  "auditRemark": "C5b reject approved should fail"
+}
+
+> {%
+client.test("C5b-A8 reject approved should fail", function() {
+    client.assert(response.body.code === 40013 || response.body.code !== 200);
+});
+%}
+
+### C5b-A9. execute approved settlement
+POST {{baseUrl}}/jst/channel/withdraw/9105102/execute
+Authorization: Bearer {{c5b_admin_token}}
+
+> {%
+client.test("C5b-A9 execute approved settlement success", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### C5b-A10. duplicate execute should be idempotent
+POST {{baseUrl}}/jst/channel/withdraw/9105102/execute
+Authorization: Bearer {{c5b_admin_token}}
+
+> {%
+client.test("C5b-A10 duplicate execute remains safe", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### C5b-A11. execute pending settlement should fail
+POST {{baseUrl}}/jst/channel/withdraw/9105103/execute
+Authorization: Bearer {{c5b_admin_token}}
+
+> {%
+client.test("C5b-A11 execute pending should fail", function() {
+    client.assert(response.body.code === 40013 || response.body.code !== 200);
+});
+%}
+
+### C5b-A12. wx channel login for forbidden check
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_9201" }
+
+> {%
+client.global.set("c5b_channel_token", response.body.data.token);
+%}
+
+### C5b-A13. channel role should get 403 on admin endpoint
+GET {{baseUrl}}/jst/channel/withdraw/list?pageNum=1&pageSize=10
+Authorization: Bearer {{c5b_channel_token}}
+
+> {%
+client.test("C5b-A13 channel role should be forbidden", function() {
+    client.assert(response.status === 403 || response.body.code !== 200);
+});
+%}
+
+### =====================================================================
+### C8-A mall goods + exchange admin (jst-points / admin)
+### Preconditions: fixtures goods 99101~99104 imported, admin has mall permissions
+### =====================================================================
+
+### C8-A1. admin login
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("c8_admin_token", response.body.token);
+%}
+
+### C8-A2. create mall goods draft
+POST {{baseUrl}}/jst/points/mall/goods
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_admin_token}}
+
+{
+  "goodsName": "测试_C8_admin新建优惠券",
+  "goodsType": "virtual",
+  "coverImage": "https://fixture.example.com/mall/c8-admin-create.jpg",
+  "description": "C8 admin create goods",
+  "pointsPrice": 2600,
+  "cashPrice": 0.00,
+  "stock": -1,
+  "stockWarning": 0,
+  "roleLimit": "both",
+  "virtualTargetType": "coupon",
+  "couponTemplateId": 9701
+}
+
+> {%
+client.test("C8-A2 create mall goods should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c8_admin_goods_id", response.body.data);
+}
+%}
+
+### C8-A2.1. edit mall goods draft
+PUT {{baseUrl}}/jst/points/mall/goods
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_admin_token}}
+
+{
+  "goodsId": {{c8_admin_goods_id}},
+  "goodsName": "测试_C8_admin新建优惠券_v2",
+  "goodsType": "virtual",
+  "coverImage": "https://fixture.example.com/mall/c8-admin-create.jpg",
+  "description": "C8 admin edit goods",
+  "pointsPrice": 2800,
+  "cashPrice": 0.00,
+  "stock": -1,
+  "stockWarning": 0,
+  "roleLimit": "both",
+  "virtualTargetType": "coupon",
+  "couponTemplateId": 9701
+}
+
+> {%
+client.test("C8-A2.1 edit mall goods should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C8-A2.2. publish mall goods
+POST {{baseUrl}}/jst/points/mall/goods/{{c8_admin_goods_id}}/publish
+Authorization: Bearer {{c8_admin_token}}
+
+> {%
+client.test("C8-A2.2 publish mall goods should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C8-A2.3. list mall goods
+GET {{baseUrl}}/jst/points/mall/goods?pageNum=1&pageSize=10
+Authorization: Bearer {{c8_admin_token}}
+
+> {%
+client.test("C8-A2.3 mall goods list should succeed", function() {
+  client.assert(response.status === 200);
+  client.assert(Array.isArray(response.body.rows));
+});
+%}
+
+### C8-A2.4. offline mall goods
+POST {{baseUrl}}/jst/points/mall/goods/{{c8_admin_goods_id}}/offline
+Authorization: Bearer {{c8_admin_token}}
+
+> {%
+client.test("C8-A2.4 offline mall goods should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C8-A2.5. remove offline goods
+DELETE {{baseUrl}}/jst/points/mall/goods/{{c8_admin_goods_id}}
+Authorization: Bearer {{c8_admin_token}}
+
+> {%
+client.test("C8-A2.5 remove offline goods should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C8-A3. login student 1001 to create shipping order
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("c8_admin_student_token", response.body.data.token);
+%}
+
+### C8-A3.1. apply fixture physical good
+POST {{baseUrl}}/jst/wx/mall/exchange/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_admin_student_token}}
+
+{
+  "goodsId": 99103,
+  "quantity": 1,
+  "payMethod": "wechat",
+  "addressSnapshot": {
+    "receiverName": "测试_C8_admin发货",
+    "mobile": "13800002222",
+    "province": "上海市",
+    "city": "上海市",
+    "district": "闵行区",
+    "detailAddress": "后台发货路 66 号"
+  }
+}
+
+> {%
+client.test("C8-A3.1 create physical exchange should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("c8_admin_exchange_id", response.body.data.exchangeId);
+}
+%}
+
+### C8-A3.2. mock pay to move exchange into pending_ship
+POST {{baseUrl}}/jst/wx/mall/exchange/{{c8_admin_exchange_id}}/pay/mock-success
+Authorization: Bearer {{c8_admin_student_token}}
+
+> {%
+client.test("C8-A3.2 mock pay should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C8-A4. admin exchange order list should include pending_ship row
+GET {{baseUrl}}/jst/points/mall/exchange/list?pageNum=1&pageSize=10&goodsId=99103
+Authorization: Bearer {{c8_admin_token}}
+
+> {%
+client.test("C8-A4 exchange list should succeed", function() {
+  client.assert(response.status === 200);
+  client.assert(Array.isArray(response.body.rows));
+});
+%}
+
+### C8-A4.1. admin exchange detail
+GET {{baseUrl}}/jst/points/mall/exchange/{{c8_admin_exchange_id}}
+Authorization: Bearer {{c8_admin_token}}
+
+> {%
+client.test("C8-A4.1 exchange detail should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.status === "pending_ship");
+});
+%}
+
+### C8-A5. ship pending_ship exchange
+POST {{baseUrl}}/jst/points/mall/exchange/{{c8_admin_exchange_id}}/ship
+Content-Type: {{contentType}}
+Authorization: Bearer {{c8_admin_token}}
+
+{
+  "logisticsCompany": "顺丰速运",
+  "logisticsNo": "SF-C8-0001"
+}
+
+> {%
+client.test("C8-A5 ship exchange should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C8-A6. complete shipped exchange
+POST {{baseUrl}}/jst/points/mall/exchange/{{c8_admin_exchange_id}}/complete
+Authorization: Bearer {{c8_admin_token}}
+
+> {%
+client.test("C8-A6 complete exchange should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### C8-A6.1. detail should show completed
+GET {{baseUrl}}/jst/points/mall/exchange/{{c8_admin_exchange_id}}
+Authorization: Bearer {{c8_admin_token}}
+
+> {%
+client.test("C8-A6.1 exchange should be completed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.status === "completed");
+});
+%}

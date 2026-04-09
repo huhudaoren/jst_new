@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.lookup.PaymentPayRecordLookupMapper">
+
+    <insert id="insertPayRecord">
+        insert into jst_payment_pay_record (
+            pay_no, business_type, business_id, target_type, target_id,
+            amount, pay_account, pay_time, voucher_url, operator_id,
+            create_by, create_time, update_by, update_time, remark, del_flag
+        ) values (
+            #{payNo}, #{businessType}, #{businessId}, #{targetType}, #{targetId},
+            #{amount}, #{payAccount}, #{payTime}, #{voucherUrl}, #{operatorId},
+            #{createBy}, #{createTime}, #{updateBy}, #{updateTime}, #{remark}, '0'
+        )
+    </insert>
+</mapper>

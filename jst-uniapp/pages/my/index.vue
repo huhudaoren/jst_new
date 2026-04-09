@@ -35,6 +35,18 @@
       <view class="my-page__summary-item"><text class="my-page__summary-num">{{ profile.growthValue || 0 }}</text><text class="my-page__summary-label">成长值</text></view>
     </view>
 
+    <view v-if="isChannelUser" class="my-page__section">
+      <text class="my-page__section-title">渠道方工作台</text>
+      <view class="my-page__grid">
+        <view class="my-page__grid-item" @tap="navigateChannelHome"><view class="my-page__grid-icon my-page__grid-icon--blue">🏢</view><text class="my-page__grid-text">渠道首页</text></view>
+        <view class="my-page__grid-item" @tap="navigateChannelRebate"><view class="my-page__grid-icon my-page__grid-icon--gold">💰</view><text class="my-page__grid-text">返点中心</text></view>
+        <view class="my-page__grid-item" @tap="navigateChannelWithdrawList"><view class="my-page__grid-icon my-page__grid-icon--purple">📄</view><text class="my-page__grid-text">我的提现</text></view>
+        <view class="my-page__grid-item" @tap="navigateChannelStudents"><view class="my-page__grid-icon my-page__grid-icon--teal">👥</view><text class="my-page__grid-text">我的学生</text></view>
+        <view class="my-page__grid-item" @tap="navigateChannelOrders"><view class="my-page__grid-icon my-page__grid-icon--orange">🧾</view><text class="my-page__grid-text">渠道订单</text></view>
+        <view class="my-page__grid-item" @tap="navigateChannelData"><view class="my-page__grid-icon my-page__grid-icon--green">📊</view><text class="my-page__grid-text">渠道数据</text></view>
+      </view>
+    </view>
+
     <view class="my-page__section">
       <text class="my-page__section-title">我的服务</text>
       <view class="my-page__grid">
@@ -67,7 +79,17 @@ import JstLoading from '@/components/jst-loading/jst-loading.vue'
 export default {
   components: { JstLoading },
   data() {
-    return { pageLoading: false, profile: { nickname: '', avatar: '', mobileMasked: '', currentLevelId: 0, availablePoints: 0, totalPoints: 0, growthValue: 0 } }
+    return { pageLoading: false, profile: { nickname: '', avatar: '', mobileMasked: '', currentLevelId: 0, availablePoints: 0, totalPoints: 0, growthValue: 0, userType: '' } }
+  },
+  computed: {
+    // 渠道方视角: userInfo.userType === 'channel' 或 roles 包含 jst_channel
+    isChannelUser() {
+      const store = useUserStore()
+      const info = store.userInfo || {}
+      if (info.userType === 'channel') return true
+      const roles = info.roles || []
+      return Array.isArray(roles) && roles.includes('jst_channel')
+    }
   },
   onShow() { this.ensureLogin(); this.loadProfile() },
   methods: {
@@ -82,6 +104,12 @@ export default {
     navigateRefundList() { uni.navigateTo({ url: '/pages-sub/my/refund-list' }) },
     navigateBinding() { uni.navigateTo({ url: '/pages-sub/my/binding' }) },
     navigateMyCourse() { uni.navigateTo({ url: '/pages-sub/my/course' }) },
+    navigateChannelHome() { uni.navigateTo({ url: '/pages-sub/channel/home' }) },
+    navigateChannelRebate() { uni.navigateTo({ url: '/pages-sub/channel/rebate' }) },
+    navigateChannelWithdrawList() { uni.navigateTo({ url: '/pages-sub/channel/withdraw-list' }) },
+    navigateChannelStudents() { uni.navigateTo({ url: '/pages-sub/channel/students' }) },
+    navigateChannelOrders() { uni.navigateTo({ url: '/pages-sub/channel/orders' }) },
+    navigateChannelData() { uni.navigateTo({ url: '/pages-sub/channel/data' }) },
     navigateCourseTab() { uni.switchTab({ url: '/pages/course/list' }) },
     showTeacherComingSoon() { uni.showToast({ title: '后续开放', icon: 'none' }) },
     showComingSoon(name) { uni.showToast({ title: name + '待开放', icon: 'none' }) },

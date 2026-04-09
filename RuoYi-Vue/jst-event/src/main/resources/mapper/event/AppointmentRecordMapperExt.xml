@@ -48,6 +48,16 @@
         limit 1
     </select>
 
+    <select id="selectMyRecord" resultMap="AppointmentRecordResult">
+        select ar.*
+        from jst_appointment_record ar
+        left join jst_participant p on p.participant_id = ar.participant_id and p.del_flag = '0'
+        where ar.appointment_id = #{appointmentId}
+          and ar.del_flag = '0'
+          and (ar.user_id = #{userId} or p.user_id = #{userId} or p.claimed_user_id = #{userId})
+        limit 1
+    </select>
+
     <select id="selectMyList" resultType="com.ruoyi.jst.event.vo.AppointmentListVO">
         select ar.appointment_id as appointmentId,
                ar.contest_id as contestId,
@@ -56,6 +66,8 @@
                ar.session_code as sessionCode,
                ar.main_status as mainStatus,
                ar.appointment_type as appointmentType,
+               case when ar.appointment_type = 'individual' then 1 else 0 end as individualAppointment,
+               case when ar.appointment_type = 'team' then 1 else 0 end as teamAppointment,
                ar.team_appointment_id as teamAppointmentId,
                t.team_no as teamNo,
                t.team_name as teamName
@@ -78,6 +90,8 @@
                ar.session_code as sessionCode,
                ar.main_status as mainStatus,
                ar.appointment_type as appointmentType,
+               case when ar.appointment_type = 'individual' then 1 else 0 end as individualAppointment,
+               case when ar.appointment_type = 'team' then 1 else 0 end as teamAppointment,
                ar.team_appointment_id as teamAppointmentId,
                t.team_no as teamNo,
                t.team_name as teamName,
@@ -115,5 +129,16 @@
         where appointment_id = #{appointmentId}
           and del_flag = '0'
           and status = 'used'
+    </select>
+
+    <select id="countBookedIndividuals" resultType="int">
+        select count(1)
+        from jst_appointment_record
+        where contest_id = #{contestId}
+          and appointment_date = #{appointmentDate}
+          and session_code = #{sessionCode}
+          and appointment_type = 'individual'
+          and main_status in ('booked', 'partial_writeoff', 'fully_writeoff')
+          and del_flag = '0'
     </select>
 </mapper>

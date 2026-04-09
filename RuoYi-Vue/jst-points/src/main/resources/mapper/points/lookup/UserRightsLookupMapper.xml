@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.points.mapper.lookup.UserRightsLookupMapper">
+
+    <select id="selectRightsTemplate" resultType="map">
+        select rights_template_id as rightsTemplateId,
+               valid_days as validDays,
+               quota_value as quotaValue
+        from jst_rights_template
+        where rights_template_id = #{rightsTemplateId}
+          and status = 1
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <insert id="insertUserRights">
+        insert into jst_user_rights (
+            rights_template_id, owner_type, owner_id, source_type, source_ref_id,
+            remain_quota, valid_start, valid_end, status, create_by, create_time, update_by, update_time, del_flag, remark
+        ) values (
+            #{rightsTemplateId}, #{ownerType}, #{ownerId}, #{sourceType}, #{sourceRefId},
+            #{remainQuota}, #{validStart}, #{validEnd}, #{status}, #{createBy}, #{createTime}, #{createBy}, #{createTime}, '0', #{remark}
+        )
+    </insert>
+</mapper>

@@ -94,6 +94,16 @@
           and del_flag = '0'
     </update>
 
+    <update id="voidUnusedByAppointmentId">
+        update jst_appointment_writeoff_item
+        set status = 'voided',
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where appointment_id = #{appointmentId}
+          and status = 'unused'
+          and del_flag = '0'
+    </update>
+
     <select id="selectByAppointmentId" resultType="com.ruoyi.jst.event.vo.AppointmentWriteoffItemVO">
         select writeoff_item_id as writeoffItemId,
                item_type as itemType,
