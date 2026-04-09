@@ -85,6 +85,18 @@ public class JstContest extends BaseEntity
     @Excel(name = "是否支持线下预约：0否 1是")
     private Integer supportAppointment;
 
+    /** 预约容量 */
+    @Excel(name = "预约容量")
+    private Integer appointmentCapacity;
+
+    /** 核销子项配置JSON */
+    @Excel(name = "核销子项配置JSON")
+    private String writeoffConfig;
+
+    /** 是否允许重复预约：0否 1是 */
+    @Excel(name = "是否允许重复预约：0否 1是")
+    private Integer allowRepeatAppointment;
+
     /** 证书发放规则JSON */
     @Excel(name = "证书发放规则JSON")
     private String certRuleJson;
@@ -276,6 +288,36 @@ public class JstContest extends BaseEntity
         return supportAppointment;
     }
 
+    public void setAppointmentCapacity(Integer appointmentCapacity)
+    {
+        this.appointmentCapacity = appointmentCapacity;
+    }
+
+    public Integer getAppointmentCapacity()
+    {
+        return appointmentCapacity;
+    }
+
+    public void setWriteoffConfig(String writeoffConfig)
+    {
+        this.writeoffConfig = writeoffConfig;
+    }
+
+    public String getWriteoffConfig()
+    {
+        return writeoffConfig;
+    }
+
+    public void setAllowRepeatAppointment(Integer allowRepeatAppointment)
+    {
+        this.allowRepeatAppointment = allowRepeatAppointment;
+    }
+
+    public Integer getAllowRepeatAppointment()
+    {
+        return allowRepeatAppointment;
+    }
+
     public void setCertRuleJson(String certRuleJson) 
     {
         this.certRuleJson = certRuleJson;
@@ -375,6 +417,9 @@ public class JstContest extends BaseEntity
             .append("supportChannelEnroll", getSupportChannelEnroll())
             .append("supportPointsDeduct", getSupportPointsDeduct())
             .append("supportAppointment", getSupportAppointment())
+            .append("appointmentCapacity", getAppointmentCapacity())
+            .append("writeoffConfig", getWriteoffConfig())
+            .append("allowRepeatAppointment", getAllowRepeatAppointment())
             .append("certRuleJson", getCertRuleJson())
             .append("scoreRuleJson", getScoreRuleJson())
             .append("formTemplateId", getFormTemplateId())

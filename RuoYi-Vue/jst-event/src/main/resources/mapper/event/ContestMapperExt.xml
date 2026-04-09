@@ -21,6 +21,9 @@
         <result property="supportChannelEnroll" column="support_channel_enroll"/>
         <result property="supportPointsDeduct" column="support_points_deduct"/>
         <result property="supportAppointment" column="support_appointment"/>
+        <result property="appointmentCapacity" column="appointment_capacity"/>
+        <result property="writeoffConfig" column="writeoff_config"/>
+        <result property="allowRepeatAppointment" column="allow_repeat_appointment"/>
         <result property="certRuleJson" column="cert_rule_json"/>
         <result property="scoreRuleJson" column="score_rule_json"/>
         <result property="formTemplateId" column="form_template_id"/>
@@ -53,6 +56,9 @@
         c.support_channel_enroll,
         c.support_points_deduct,
         c.support_appointment,
+        c.appointment_capacity,
+        c.writeoff_config,
+        c.allow_repeat_appointment,
         c.cert_rule_json,
         c.score_rule_json,
         c.form_template_id,
@@ -110,6 +116,9 @@
             support_channel_enroll,
             support_points_deduct,
             support_appointment,
+            appointment_capacity,
+            writeoff_config,
+            allow_repeat_appointment,
             cert_rule_json,
             score_rule_json,
             form_template_id,
@@ -136,6 +145,9 @@
             #{contest.supportChannelEnroll},
             #{contest.supportPointsDeduct},
             #{contest.supportAppointment},
+            #{contest.appointmentCapacity},
+            #{contest.writeoffConfig},
+            #{contest.allowRepeatAppointment},
             #{contest.certRuleJson},
             #{contest.scoreRuleJson},
             #{contest.formTemplateId},
@@ -164,6 +176,9 @@
             support_channel_enroll = #{contest.supportChannelEnroll},
             support_points_deduct = #{contest.supportPointsDeduct},
             support_appointment = #{contest.supportAppointment},
+            appointment_capacity = #{contest.appointmentCapacity},
+            writeoff_config = #{contest.writeoffConfig},
+            allow_repeat_appointment = #{contest.allowRepeatAppointment},
             cert_rule_json = #{contest.certRuleJson},
             score_rule_json = #{contest.scoreRuleJson},
             form_template_id = #{contest.formTemplateId},
@@ -262,6 +277,9 @@
         c.support_channel_enroll AS supportChannelEnroll,
         c.support_points_deduct AS supportPointsDeduct,
         c.support_appointment AS supportAppointment,
+        c.appointment_capacity AS appointmentCapacity,
+        c.writeoff_config AS writeoffConfig,
+        c.allow_repeat_appointment AS allowRepeatAppointment,
         c.cert_rule_json AS certRuleJson,
         c.score_rule_json AS scoreRuleJson,
         c.form_template_id AS formTemplateId,
@@ -319,6 +337,9 @@
         c.support_channel_enroll AS supportChannelEnroll,
         c.support_points_deduct AS supportPointsDeduct,
         c.support_appointment AS supportAppointment,
+        c.appointment_capacity AS appointmentCapacity,
+        c.writeoff_config AS writeoffConfig,
+        c.allow_repeat_appointment AS allowRepeatAppointment,
         c.cert_rule_json AS certRuleJson,
         c.score_rule_json AS scoreRuleJson,
         c.aftersale_days AS aftersaleDays

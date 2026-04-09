@@ -705,3 +705,196 @@ client.test("C4-A12 duplicate execute remains safe", function() {
     client.assert(response.body.code === 200);
 });
 %}
+
+### =====================================================================
+### C6-A writeoff scan + records (jst-event / wx writeoff)
+### Preconditions: fixtures contest 8263/8264, team 96601, items 96801~96805/96821 exist
+### =====================================================================
+
+### C6-A1. partner A login
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_a",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("c6_partner_a_token", response.body.token);
+%}
+
+### C6-A2. partner A scans first arrival code happy path
+POST {{baseUrl}}/jst/wx/writeoff/scan
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_partner_a_token}}
+
+{
+  "qrCode": "c6scanqr000000000000000000000001.plKyFdbghzOOuKbWw3rk7T2NPaciNDTYvebj7vSKuBY",
+  "scanType": "partner_scan"
+}
+
+> {%
+client.test("C6-A2 first scan should succeed", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.itemType === "arrival");
+    client.assert(response.body.data.appointmentStatus === "fully_writeoff");
+    client.assert(response.body.data.teamStatus === "partial_writeoff");
+    client.assert(response.body.data.teamWriteoffPersons === 1);
+});
+%}
+
+### C6-A3. same qr scanned again should fail
+POST {{baseUrl}}/jst/wx/writeoff/scan
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_partner_a_token}}
+
+{
+  "qrCode": "c6scanqr000000000000000000000001.plKyFdbghzOOuKbWw3rk7T2NPaciNDTYvebj7vSKuBY",
+  "scanType": "partner_scan"
+}
+
+> {%
+client.test("C6-A3 duplicate scan should fail", function() {
+    client.assert(response.body.code === 30081 || response.body.code !== 200);
+});
+%}
+
+### C6-A4. invalid qr should fail
+POST {{baseUrl}}/jst/wx/writeoff/scan
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_partner_a_token}}
+
+{
+  "qrCode": "invalid-c6-qr",
+  "scanType": "partner_scan"
+}
+
+> {%
+client.test("C6-A4 invalid qr should fail", function() {
+    client.assert(response.body.code === 30080 || response.body.code !== 200);
+});
+%}
+
+### C6-A5. partner A scans partner B contest code should be rejected
+POST {{baseUrl}}/jst/wx/writeoff/scan
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_partner_a_token}}
+
+{
+  "qrCode": "c6unauthqr0000000000000000000001.v---NwkwMPnJHC_aHJzn6lmBScxQ-EVDwHpMlT32UQE",
+  "scanType": "partner_scan"
+}
+
+> {%
+client.test("C6-A5 cross-partner scan should be rejected", function() {
+    client.assert(response.status === 403 || response.body.code !== 200);
+});
+%}
+
+### C6-A6. admin login
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("c6_admin_token", response.body.token);
+%}
+
+### C6-A7. admin can scan the same foreign-partner code
+POST {{baseUrl}}/jst/wx/writeoff/scan
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_admin_token}}
+
+{
+  "qrCode": "c6unauthqr0000000000000000000001.v---NwkwMPnJHC_aHJzn6lmBScxQ-EVDwHpMlT32UQE",
+  "scanType": "admin_scan"
+}
+
+> {%
+client.test("C6-A7 admin scan should succeed", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.itemType === "arrival");
+});
+%}
+
+### C6-A8. partner A scans member 2 arrival code
+POST {{baseUrl}}/jst/wx/writeoff/scan
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_partner_a_token}}
+
+{
+  "qrCode": "c6scanqr000000000000000000000002.zTXd3knuzMrCVqnxlo0XOltp5S182w3D6zytAsOnmko",
+  "scanType": "partner_scan"
+}
+
+### C6-A9. partner A scans member 3 arrival code
+POST {{baseUrl}}/jst/wx/writeoff/scan
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_partner_a_token}}
+
+{
+  "qrCode": "c6scanqr000000000000000000000003.IOxd8Qx-95ZmlOtMwK6KI0bbV4Gi5HIyhP8xvjP0hf0",
+  "scanType": "partner_scan"
+}
+
+### C6-A10. partner A scans member 4 arrival code
+POST {{baseUrl}}/jst/wx/writeoff/scan
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_partner_a_token}}
+
+{
+  "qrCode": "c6scanqr000000000000000000000004.NGG5KxKelpKb80GJg-Jhs8AfRvVB4i5auj3Rl7uehOA",
+  "scanType": "partner_scan"
+}
+
+### C6-A11. final arrival scan should promote team to fully_writeoff
+POST {{baseUrl}}/jst/wx/writeoff/scan
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_partner_a_token}}
+
+{
+  "qrCode": "c6scanqr000000000000000000000005.po-T26f0H-AGPIVt74Poa5XxgsogBZ8PwzXkHFHdibw",
+  "scanType": "partner_scan"
+}
+
+> {%
+client.test("C6-A11 final scan should promote team fully_writeoff", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.teamStatus === "fully_writeoff");
+    client.assert(response.body.data.teamWriteoffPersons === 5);
+    client.assert(response.body.data.teamTotalPersons === 5);
+});
+%}
+
+### C6-A12. partner writeoff records list should show scanned team rows
+GET {{baseUrl}}/jst/wx/writeoff/records?contestId=8264&pageNum=1&pageSize=10
+Authorization: Bearer {{c6_partner_a_token}}
+
+> {%
+client.test("C6-A12 partner records list should return scanned rows", function() {
+    client.assert(response.body.code === 200 || response.status === 200);
+    client.assert(Array.isArray(response.body.rows));
+    client.assert(response.body.rows.length >= 5);
+});
+%}
+
+### C6-A13. admin writeoff records list should include foreign-partner scan
+GET {{baseUrl}}/jst/wx/writeoff/records?contestId=8263&pageNum=1&pageSize=10
+Authorization: Bearer {{c6_admin_token}}
+
+> {%
+client.test("C6-A13 admin records list should include foreign contest scan", function() {
+    client.assert(response.body.code === 200 || response.status === 200);
+    client.assert(Array.isArray(response.body.rows));
+    client.assert(response.body.rows.length >= 1);
+});
+%}

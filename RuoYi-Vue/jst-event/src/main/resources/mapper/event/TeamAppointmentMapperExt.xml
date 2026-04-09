@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.TeamAppointmentMapperExt">
+
+    <resultMap id="TeamResult" type="com.ruoyi.jst.event.domain.EventTeamAppointment">
+        <id property="teamAppointmentId" column="team_appointment_id"/>
+        <result property="teamNo" column="team_no"/>
+        <result property="contestId" column="contest_id"/>
+        <result property="channelId" column="channel_id"/>
+        <result property="teamName" column="team_name"/>
+        <result property="appointmentDate" column="appointment_date"/>
+        <result property="sessionCode" column="session_code"/>
+        <result property="totalPersons" column="total_persons"/>
+        <result property="memberPersons" column="member_persons"/>
+        <result property="extraPersons" column="extra_persons"/>
+        <result property="extraListJson" column="extra_list_json"/>
+        <result property="writeoffPersons" column="writeoff_persons"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <insert id="insertTeamAppointment" parameterType="com.ruoyi.jst.event.domain.EventTeamAppointment"
+            useGeneratedKeys="true" keyProperty="team.teamAppointmentId">
+        insert into jst_team_appointment (
+            team_no, contest_id, channel_id, team_name, appointment_date, session_code,
+            total_persons, member_persons, extra_persons, extra_list_json, writeoff_persons,
+            status, create_by, create_time, update_by, update_time, remark, del_flag
+        ) values (
+            #{team.teamNo}, #{team.contestId}, #{team.channelId}, #{team.teamName}, #{team.appointmentDate}, #{team.sessionCode},
+            #{team.totalPersons}, #{team.memberPersons}, #{team.extraPersons}, #{team.extraListJson}, #{team.writeoffPersons},
+            #{team.status}, #{team.createBy}, #{team.createTime}, #{team.updateBy}, #{team.updateTime}, #{team.remark}, #{team.delFlag}
+        )
+    </insert>
+
+    <insert id="insertTeamMember" parameterType="com.ruoyi.jst.event.domain.EventTeamAppointmentMember"
+            useGeneratedKeys="true" keyProperty="member.memberId">
+        insert into jst_team_appointment_member (
+            team_appointment_id, user_id, participant_id, member_no, name_snapshot, mobile_snapshot,
+            sub_order_id, writeoff_status, create_by, create_time, update_by, update_time, remark, del_flag
+        ) values (
+            #{member.teamAppointmentId}, #{member.userId}, #{member.participantId}, #{member.memberNo}, #{member.nameSnapshot},
+            #{member.mobileSnapshot}, #{member.subOrderId}, #{member.writeoffStatus}, #{member.createBy}, #{member.createTime},
+            #{member.updateBy}, #{member.updateTime}, #{member.remark}, #{member.delFlag}
+        )
+    </insert>
+
+    <select id="selectParticipantById" resultType="map">
+        select p.participant_id as participantId,
+               p.user_id as userId,
+               p.claimed_user_id as claimedUserId,
+               p.name as name,
+               p.guardian_mobile as guardianMobile
+        from jst_participant p
+        where p.participant_id = #{participantId}
+          and p.del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectParticipantByUserId" resultType="map">
+        select p.participant_id as participantId,
+               p.user_id as userId,
+               p.claimed_user_id as claimedUserId,
+               p.name as name,
+               p.guardian_mobile as guardianMobile
+        from jst_participant p
+        where p.del_flag = '0'
+          and (p.user_id = #{userId} or p.claimed_user_id = #{userId})
+        order by case when p.user_id = #{userId} then 0 else 1 end, p.participant_id asc
+        limit 1
+    </select>
+
+    <select id="countBookedPersons" resultType="int">
+        select ifnull(sum(t.total_persons), 0)
+        from jst_team_appointment t
+        where t.del_flag = '0'
+          and t.contest_id = #{contestId}
+          and t.appointment_date = #{appointmentDate}
+          and t.session_code = #{sessionCode}
+          and t.status in ('booked', 'partial_writeoff', 'fully_writeoff')
+    </select>
+
+    <select id="countDuplicateAppointment" resultType="int">
+        select count(1)
+        from jst_appointment_record ar
+        where ar.del_flag = '0'
+          and ar.contest_id = #{contestId}
+          and ar.participant_id = #{participantId}
+          and ar.main_status in ('booked', 'partial_writeoff', 'fully_writeoff', 'partial_writeoff_ended')
+    </select>
+
+    <select id="selectChannelList" resultType="com.ruoyi.jst.event.vo.TeamAppointmentListVO">
+        select t.team_appointment_id as teamAppointmentId,
+               t.team_no as teamNo,
+               t.team_name as teamName,
+               t.contest_id as contestId,
+               c.contest_name as contestName,
+               t.appointment_date as appointmentDate,
+               t.session_code as sessionCode,
+               t.total_persons as totalPersons,
+               t.writeoff_persons as writeoffPersons,
+               t.status as status
+        from jst_team_appointment t
+        left join jst_contest c on c.contest_id = t.contest_id and c.del_flag = '0'
+        where t.del_flag = '0'
+          and t.channel_id = #{channelId}
+        <if test="query != null and query.contestId != null">
+            and t.contest_id = #{query.contestId}
+        </if>
+        <if test="query != null and query.status != null and query.status != ''">
+            and t.status = #{query.status}
+        </if>
+        <if test="query != null and query.sessionCode != null and query.sessionCode != ''">
+            and t.session_code = #{query.sessionCode}
+        </if>
+        <if test="query != null and query.appointmentDate != null">
+            and t.appointment_date = #{query.appointmentDate}
+        </if>
+        order by t.create_time desc, t.team_appointment_id desc
+    </select>
+
+    <select id="selectChannelDetail" resultType="com.ruoyi.jst.event.vo.TeamAppointmentDetailVO">
+        select t.team_appointment_id as teamAppointmentId,
+               t.team_no as teamNo,
+               t.team_name as teamName,
+               t.contest_id as contestId,
+               c.contest_name as contestName,
+               t.appointment_date as appointmentDate,
+               t.session_code as sessionCode,
+               t.total_persons as totalPersons,
+               t.member_persons as memberPersons,
+               t.writeoff_persons as writeoffPersons,
+               t.status as status
+        from jst_team_appointment t
+        left join jst_contest c on c.contest_id = t.contest_id and c.del_flag = '0'
+        where t.team_appointment_id = #{teamAppointmentId}
+          and t.channel_id = #{channelId}
+          and t.del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectChannelMembers" resultType="com.ruoyi.jst.event.vo.TeamAppointmentMemberVO">
+        select ar.appointment_id as appointmentId,
+               m.participant_id as participantId,
+               m.user_id as userId,
+               m.member_no as memberNo,
+               m.name_snapshot as memberName,
+               m.mobile_snapshot as mobileSnapshot,
+               m.sub_order_id as subOrderId,
+               m.writeoff_status as writeoffStatus,
+               ar.main_status as appointmentStatus,
+               (select count(1) from jst_appointment_writeoff_item wi
+                 where wi.appointment_id = ar.appointment_id and wi.del_flag = '0' and wi.status = 'used') as usedItems,
+               (select count(1) from jst_appointment_writeoff_item wi
+                 where wi.appointment_id = ar.appointment_id and wi.del_flag = '0') as totalItems
+        from jst_team_appointment_member m
+        left join jst_appointment_record ar on ar.team_appointment_id = m.team_appointment_id
+                                            and ar.participant_id = m.participant_id
+                                            and ar.del_flag = '0'
+        where m.team_appointment_id = #{teamAppointmentId}
+          and m.del_flag = '0'
+        order by m.member_id asc
+    </select>
+
+    <select id="selectTeamById" resultMap="TeamResult">
+        select *
+        from jst_team_appointment
+        where team_appointment_id = #{teamAppointmentId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <update id="updateWriteoffProgress">
+        update jst_team_appointment
+        set status = #{targetStatus},
+            writeoff_persons = #{targetWriteoffPersons},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where team_appointment_id = #{teamAppointmentId}
+          and status = #{expectedStatus}
+          and writeoff_persons = #{expectedWriteoffPersons}
+          and del_flag = '0'
+    </update>
+
+    <update id="updateMemberWriteoffStatus">
+        update jst_team_appointment_member
+        set writeoff_status = #{targetStatus},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where team_appointment_id = #{teamAppointmentId}
+          and participant_id = #{participantId}
+          and writeoff_status = #{expectedStatus}
+          and del_flag = '0'
+    </update>
+</mapper>

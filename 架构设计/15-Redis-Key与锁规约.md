@@ -55,6 +55,8 @@ jst:{domain}:{purpose}:{key1}[:{key2}]
 | `lock:bind:{userId}` | 学生-渠道绑定切换 | wait 3s, lease 5s | BindingService.switchChannel |
 | `lock:mall:goods:{goodsId}` | 商城兑换库存扣减 | wait 3s, lease 10s | MallExchangeService.exchange |
 | `lock:rebate:settle:{channelId}` ⭐ | 渠道提现单审批（负向台账抵扣） | wait 10s, lease 30s | RebateSettlementService.approve |
+| `lock:channel:withdraw:apply:{channelId}` | 渠道方创建提现申请 | wait 3s, lease 10s | ChannelWithdrawService.apply |
+| `lock:channel:withdraw:cancel:{settlementId}` | 渠道方取消 pending 提现单 | wait 3s, lease 5s | ChannelWithdrawService.cancel |
 | `lock:event:settle:{partnerId}:{contestId}` | 赛事方结算单生成/审批 | wait 10s, lease 30s | EventSettlementService |
 | `lock:points:adjust:{ownerType}:{ownerId}` | 积分账户人工调整 | wait 3s, lease 5s | PointsAdjustService（与 version 乐观锁配合） |
 | `lock:claim:participant:{participantId}` | 临时档案认领 | wait 3s, lease 5s | ParticipantClaimService |
@@ -136,3 +138,12 @@ return jstLockTemplate.execute("lock:team_appt:" + teamId, 5, 10, () -> {
 - ❌ 不允许使用 `KEYS *` / `FLUSHDB` 类阻塞命令
 - ❌ 不允许把缓存当唯一数据源（必须有 DB 兜底）
 - ❌ 不允许跨业务模块共用 key（每个模块自管前缀的子段）
+# C6 补充登记
+
+> 本节为 C6 团队预约与扫码核销新增锁，若与正文历史描述冲突，以本节为准。
+
+| 锁名模板 | 使用场景 | 等待/持有时长 | 必须包裹的业务 |
+|---|---|---|---|
+| `lock:team_appt:{teamAppointmentId}` | 团队预约到场核销人数累加 / 团队状态推进 | wait 3s, lease 5s | `WriteoffService.scan` |
+| `lock:writeoff:item:{itemId}` | 单个核销子项互斥，防止同一码重复扫码 | wait 2s, lease 3s | `WriteoffService.scan` |
+| `lock:appointment:book:{contestId}:{sessionCode}` | 场次名额扣减 / 团队预约防重入 | wait 3s, lease 5s | `TeamAppointmentService.apply` |

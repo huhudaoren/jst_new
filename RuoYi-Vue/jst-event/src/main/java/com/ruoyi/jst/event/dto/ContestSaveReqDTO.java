@@ -69,6 +69,15 @@ public class ContestSaveReqDTO {
     @Max(value = 1, message = "是否支持线下预约取值非法")
     private Integer supportAppointment;
 
+    @Min(value = 0, message = "预约容量不能小于0")
+    private Integer appointmentCapacity;
+
+    private String writeoffConfig;
+
+    @Min(value = 0, message = "是否允许重复预约取值非法")
+    @Max(value = 1, message = "是否允许重复预约取值非法")
+    private Integer allowRepeatAppointment;
+
     private String certRuleJson;
 
     private String scoreRuleJson;
@@ -197,6 +206,30 @@ public class ContestSaveReqDTO {
 
     public void setSupportAppointment(Integer supportAppointment) {
         this.supportAppointment = supportAppointment;
+    }
+
+    public Integer getAppointmentCapacity() {
+        return appointmentCapacity;
+    }
+
+    public void setAppointmentCapacity(Integer appointmentCapacity) {
+        this.appointmentCapacity = appointmentCapacity;
+    }
+
+    public String getWriteoffConfig() {
+        return writeoffConfig;
+    }
+
+    public void setWriteoffConfig(String writeoffConfig) {
+        this.writeoffConfig = writeoffConfig;
+    }
+
+    public Integer getAllowRepeatAppointment() {
+        return allowRepeatAppointment;
+    }
+
+    public void setAllowRepeatAppointment(Integer allowRepeatAppointment) {
+        this.allowRepeatAppointment = allowRepeatAppointment;
     }
 
     public String getCertRuleJson() {

@@ -28,6 +28,9 @@ public class WxContestDetailVO {
     private Integer supportChannelEnroll;
     private Integer supportPointsDeduct;
     private Integer supportAppointment;
+    private Integer appointmentCapacity;
+    private String writeoffConfig;
+    private Integer allowRepeatAppointment;
     private String certRuleJson;
     private String scoreRuleJson;
     private Long aftersaleDays;
@@ -166,6 +169,30 @@ public class WxContestDetailVO {
 
     public void setSupportAppointment(Integer supportAppointment) {
         this.supportAppointment = supportAppointment;
+    }
+
+    public Integer getAppointmentCapacity() {
+        return appointmentCapacity;
+    }
+
+    public void setAppointmentCapacity(Integer appointmentCapacity) {
+        this.appointmentCapacity = appointmentCapacity;
+    }
+
+    public String getWriteoffConfig() {
+        return writeoffConfig;
+    }
+
+    public void setWriteoffConfig(String writeoffConfig) {
+        this.writeoffConfig = writeoffConfig;
+    }
+
+    public Integer getAllowRepeatAppointment() {
+        return allowRepeatAppointment;
+    }
+
+    public void setAllowRepeatAppointment(Integer allowRepeatAppointment) {
+        this.allowRepeatAppointment = allowRepeatAppointment;
     }
 
     public String getCertRuleJson() {

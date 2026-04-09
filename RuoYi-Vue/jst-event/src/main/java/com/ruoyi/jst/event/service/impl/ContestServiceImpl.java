@@ -90,6 +90,9 @@ public class ContestServiceImpl implements ContestService {
         contest.setSupportChannelEnroll(req.getSupportChannelEnroll());
         contest.setSupportPointsDeduct(req.getSupportPointsDeduct());
         contest.setSupportAppointment(req.getSupportAppointment());
+        contest.setAppointmentCapacity(req.getAppointmentCapacity());
+        contest.setWriteoffConfig(req.getWriteoffConfig());
+        contest.setAllowRepeatAppointment(req.getAllowRepeatAppointment());
         contest.setCertRuleJson(req.getCertRuleJson());
         contest.setScoreRuleJson(req.getScoreRuleJson());
         contest.setFormTemplateId(req.getFormTemplateId());

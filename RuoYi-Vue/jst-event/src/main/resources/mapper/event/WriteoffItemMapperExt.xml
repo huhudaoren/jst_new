@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.WriteoffItemMapperExt">
+
+    <resultMap id="WriteoffItemResult" type="com.ruoyi.jst.event.domain.EventAppointmentWriteoffItem">
+        <id property="writeoffItemId" column="writeoff_item_id"/>
+        <result property="appointmentId" column="appointment_id"/>
+        <result property="teamAppointmentId" column="team_appointment_id"/>
+        <result property="itemType" column="item_type"/>
+        <result property="itemName" column="item_name"/>
+        <result property="qrCode" column="qr_code"/>
+        <result property="status" column="status"/>
+        <result property="writeoffTime" column="writeoff_time"/>
+        <result property="writeoffUserId" column="writeoff_user_id"/>
+        <result property="writeoffTerminal" column="writeoff_terminal"/>
+        <result property="writeoffQty" column="writeoff_qty"/>
+        <result property="totalQty" column="total_qty"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <insert id="insertWriteoffItem" parameterType="com.ruoyi.jst.event.domain.EventAppointmentWriteoffItem"
+            useGeneratedKeys="true" keyProperty="item.writeoffItemId">
+        insert into jst_appointment_writeoff_item (
+            appointment_id, team_appointment_id, item_type, item_name, qr_code, status,
+            writeoff_time, writeoff_user_id, writeoff_terminal, writeoff_qty, total_qty,
+            create_by, create_time, update_by, update_time, remark, del_flag
+        ) values (
+            #{item.appointmentId}, #{item.teamAppointmentId}, #{item.itemType}, #{item.itemName}, #{item.qrCode},
+            #{item.status}, #{item.writeoffTime}, #{item.writeoffUserId}, #{item.writeoffTerminal},
+            #{item.writeoffQty}, #{item.totalQty}, #{item.createBy}, #{item.createTime}, #{item.updateBy},
+            #{item.updateTime}, #{item.remark}, #{item.delFlag}
+        )
+    </insert>
+
+    <select id="selectById" resultMap="WriteoffItemResult">
+        select *
+        from jst_appointment_writeoff_item
+        where writeoff_item_id = #{writeoffItemId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectScanContextByQrCode" resultType="map">
+        select wi.writeoff_item_id as writeoffItemId,
+               wi.appointment_id as appointmentId,
+               wi.team_appointment_id as teamAppointmentId,
+               wi.item_type as itemType,
+               wi.item_name as itemName,
+               wi.qr_code as qrCode,
+               wi.status as status,
+               wi.writeoff_qty as writeoffQty,
+               wi.total_qty as totalQty,
+               ar.participant_id as participantId,
+               ar.main_status as appointmentStatus,
+               ar.session_code as sessionCode,
+               ar.appointment_date as appointmentDate,
+               p.name as memberName,
+               t.team_name as teamName,
+               t.total_persons as teamTotalPersons,
+               t.writeoff_persons as teamWriteoffPersons,
+               t.status as teamStatus,
+               c.contest_id as contestId,
+               c.contest_name as contestName,
+               c.partner_id as partnerId
+        from jst_appointment_writeoff_item wi
+        left join jst_appointment_record ar on ar.appointment_id = wi.appointment_id and ar.del_flag = '0'
+        left join jst_participant p on p.participant_id = ar.participant_id and p.del_flag = '0'
+        left join jst_team_appointment t on t.team_appointment_id = wi.team_appointment_id and t.del_flag = '0'
+        left join jst_contest c on c.contest_id = ar.contest_id and c.del_flag = '0'
+        where wi.qr_code = #{qrCode}
+          and wi.del_flag = '0'
+        limit 1
+    </select>
+
+    <update id="updateUsed">
+        update jst_appointment_writeoff_item
+        set status = 'used',
+            writeoff_qty = #{targetWriteoffQty},
+            writeoff_time = #{writeoffTime},
+            writeoff_user_id = #{writeoffUserId},
+            writeoff_terminal = #{writeoffTerminal},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where writeoff_item_id = #{writeoffItemId}
+          and status = #{expectedStatus}
+          and writeoff_qty = #{expectedWriteoffQty}
+          and del_flag = '0'
+    </update>
+
+    <select id="selectByAppointmentId" resultType="com.ruoyi.jst.event.vo.AppointmentWriteoffItemVO">
+        select writeoff_item_id as writeoffItemId,
+               item_type as itemType,
+               item_name as itemName,
+               qr_code as qrCode,
+               status as status,
+               writeoff_time as writeoffTime
+        from jst_appointment_writeoff_item
+        where appointment_id = #{appointmentId}
+          and del_flag = '0'
+        order by writeoff_item_id asc
+    </select>
+
+    <select id="selectRecordList" resultType="com.ruoyi.jst.event.vo.WriteoffRecordVO">
+        select wi.writeoff_item_id as writeoffItemId,
+               c.contest_id as contestId,
+               c.contest_name as contestName,
+               t.team_name as teamName,
+               p.name as memberName,
+               wi.item_type as itemType,
+               wi.item_name as itemName,
+               wi.status as status,
+               ar.session_code as sessionCode,
+               ar.appointment_date as appointmentDate,
+               wi.writeoff_time as writeoffTime,
+               wi.writeoff_terminal as writeoffTerminal
+        from jst_appointment_writeoff_item wi
+        inner join jst_appointment_record ar on ar.appointment_id = wi.appointment_id and ar.del_flag = '0'
+        inner join jst_contest c on c.contest_id = ar.contest_id and c.del_flag = '0'
+        left join jst_team_appointment t on t.team_appointment_id = wi.team_appointment_id and t.del_flag = '0'
+        left join jst_participant p on p.participant_id = ar.participant_id and p.del_flag = '0'
+        where wi.del_flag = '0'
+          and wi.status = 'used'
+        <if test="partnerId != null">
+            and c.partner_id = #{partnerId}
+        </if>
+        <if test="query != null and query.contestId != null">
+            and c.contest_id = #{query.contestId}
+        </if>
+        <if test="query != null and query.beginDate != null">
+            and wi.writeoff_time <![CDATA[ >= ]]> #{query.beginDate}
+        </if>
+        <if test="query != null and query.endDate != null">
+            and wi.writeoff_time <![CDATA[ <= ]]> #{query.endDate}
+        </if>
+        order by wi.writeoff_time desc, wi.writeoff_item_id desc
+    </select>
+</mapper>

@@ -34,7 +34,7 @@ DELETE FROM jst_course WHERE create_by = 'fixture';
 DELETE FROM jst_enroll_form_template WHERE create_by = 'fixture';
 DELETE FROM jst_contest WHERE create_by = 'fixture';
 DELETE FROM jst_event_partner WHERE create_by = 'fixture';
-DELETE FROM sys_user_role WHERE user_id IN (9101, 9102);
+DELETE FROM sys_user_role WHERE user_id IN (9101, 9102, 9201);
 DELETE FROM sys_user WHERE create_by = 'fixture' AND user_id IN (9101, 9102);
 -- Step 1.1: 清理旧 fixture (避免 PK 冲突)
 DELETE FROM jst_participant_user_map WHERE create_by = 'fixture';
@@ -672,4 +672,388 @@ INSERT INTO jst_enroll_record (
     8801, 1,
     JSON_OBJECT('template_id', 8801, 'template_version', 1, 'formData', JSON_OBJECT('name', 'fixture_c4_9306', 'gender', 'female', 'age', 9, 'school', 'fixture_school'), 'attachments', JSON_ARRAY('https://fixture.example.com/c4/9306.pdf')),
     9306, 'submitted', 'approved', 'fixture approved', NOW(), 'fixture', NOW(), 'fixture', NOW(), 'C4 enroll reject', '0'
+);
+
+-- =====================================================================
+-- C5a channel withdraw apply fixtures
+-- Covers: channel-side summary, ledger list, apply, amount mismatch,
+--         cross-channel invalid ledger and cancel pending settlement.
+-- =====================================================================
+
+INSERT INTO jst_user (
+    user_id, openid, mobile, nickname, real_name, user_type, status, register_time, create_by, create_time
+) VALUES
+(
+    9201, 'openid_test_9201', '13800009201', '测试_渠道C5A', '测试_渠道C5A',
+    'channel', 1, NOW(), 'fixture', NOW()
+),
+(
+    9202, 'openid_test_9202', '13800009202', '测试_渠道C5B', '测试_渠道C5B',
+    'channel', 1, NOW(), 'fixture', NOW()
+);
+
+INSERT INTO sys_user_role (user_id, role_id)
+VALUES
+(9201, 102);
+
+INSERT INTO jst_channel (
+    channel_id, user_id, channel_type, channel_name, contact_mobile, auth_status, status,
+    bank_account_name, bank_account_no, bank_name, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+(
+    9201, 9201, 'teacher', '测试_C5A渠道', '13800009201', 'approved', 1,
+    '测试_C5A收款户', '622202009201', '测试银行',
+    'fixture', NOW(), 'fixture', NOW(), '0'
+),
+(
+    9202, 9202, 'teacher', '测试_C5B渠道', '13800009202', 'approved', 1,
+    '测试_C5B收款户', '622202009202', '测试银行',
+    'fixture', NOW(), 'fixture', NOW(), '0'
+);
+
+INSERT INTO jst_order_main (
+    order_id, order_no, order_type, business_type, user_id, participant_id, channel_id, contest_id, partner_id,
+    list_amount, coupon_amount, points_deduct_amount, points_used, platform_bear_amount, net_pay_amount, service_fee,
+    pay_method, pay_initiator, pay_initiator_id, pay_time, order_status, refund_status, aftersale_deadline, coupon_id,
+    allow_self_refund, create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    94401, 'OD_C5A_001', 'normal', 'enroll', 9201, 3001, 9201, 8201, 8101,
+    123.00, 0.00, 0.00, 0, 0.00, 123.00, 5.00,
+    'wechat', 'self', 9201, DATE_SUB(NOW(), INTERVAL 8 DAY), 'completed', 'none', DATE_ADD(NOW(), INTERVAL 3 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C5a order 1', '0'
+),
+(
+    94402, 'OD_C5A_002', 'normal', 'enroll', 9201, 3001, 9201, 8201, 8101,
+    200.00, 0.00, 0.00, 0, 0.00, 200.00, 5.00,
+    'wechat', 'self', 9201, DATE_SUB(NOW(), INTERVAL 8 DAY), 'completed', 'none', DATE_ADD(NOW(), INTERVAL 3 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C5a order 2', '0'
+),
+(
+    94403, 'OD_C5A_003', 'normal', 'enroll', 9201, 3001, 9201, 8201, 8101,
+    307.00, 0.00, 0.00, 0, 0.00, 307.00, 5.00,
+    'wechat', 'self', 9201, DATE_SUB(NOW(), INTERVAL 8 DAY), 'completed', 'none', DATE_ADD(NOW(), INTERVAL 3 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C5a order 3', '0'
+),
+(
+    94404, 'OD_C5A_004', 'normal', 'enroll', 9201, 3001, 9201, 8201, 8101,
+    150.00, 0.00, 0.00, 0, 0.00, 150.00, 5.00,
+    'wechat', 'self', 9201, DATE_SUB(NOW(), INTERVAL 7 DAY), 'completed', 'none', DATE_ADD(NOW(), INTERVAL 3 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C5a order 4', '0'
+),
+(
+    94405, 'OD_C5A_005', 'normal', 'enroll', 9201, 3001, 9201, 8201, 8101,
+    88.00, 0.00, 0.00, 0, 0.00, 88.00, 5.00,
+    'wechat', 'self', 9201, DATE_SUB(NOW(), INTERVAL 7 DAY), 'completed', 'none', DATE_ADD(NOW(), INTERVAL 3 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C5a order 5', '0'
+),
+(
+    94406, 'OD_C5A_006', 'normal', 'enroll', 9201, 3001, 9201, 8201, 8101,
+    660.00, 0.00, 0.00, 0, 0.00, 660.00, 5.00,
+    'wechat', 'self', 9201, DATE_SUB(NOW(), INTERVAL 10 DAY), 'completed', 'none', DATE_ADD(NOW(), INTERVAL 3 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C5a order 6', '0'
+),
+(
+    94407, 'OD_C5A_007', 'normal', 'enroll', 9201, 3001, 9201, 8201, 8101,
+    180.00, 0.00, 0.00, 0, 0.00, 180.00, 5.00,
+    'wechat', 'self', 9201, DATE_SUB(NOW(), INTERVAL 10 DAY), 'completed', 'none', DATE_ADD(NOW(), INTERVAL 3 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C5a order 7', '0'
+),
+(
+    94408, 'OD_C5A_008', 'normal', 'enroll', 9201, 3001, 9201, 8201, 8101,
+    95.00, 0.00, 0.00, 0, 0.00, 95.00, 5.00,
+    'wechat', 'self', 9201, DATE_SUB(NOW(), INTERVAL 10 DAY), 'completed', 'none', DATE_ADD(NOW(), INTERVAL 3 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C5a order 8', '0'
+),
+(
+    94409, 'OD_C5B_001', 'normal', 'enroll', 9202, 3001, 9202, 8201, 8101,
+    220.00, 0.00, 0.00, 0, 0.00, 220.00, 5.00,
+    'wechat', 'self', 9202, DATE_SUB(NOW(), INTERVAL 6 DAY), 'completed', 'none', DATE_ADD(NOW(), INTERVAL 3 DAY), NULL,
+    1, 'fixture', NOW(), 'fixture', NOW(), 'C5a other channel order', '0'
+);
+
+INSERT INTO jst_rebate_ledger (
+    ledger_id, order_id, item_id, channel_id, contest_id, rule_id,
+    list_amount, net_pay_amount, service_fee, rebate_base, rebate_amount,
+    direction, status, accrual_time, event_end_time, settlement_id,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    94501, 94401, 94601, 9201, 8201, 9601,
+    123.00, 123.00, 5.00, 118.00, 12.30,
+    'positive', 'withdrawable', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_ADD(NOW(), INTERVAL 15 DAY), NULL,
+    'fixture', NOW(), 'fixture', NOW(), 'C5a withdrawable 1', '0'
+),
+(
+    94502, 94402, 94602, 9201, 8201, 9601,
+    200.00, 200.00, 5.00, 195.00, 20.00,
+    'positive', 'withdrawable', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_ADD(NOW(), INTERVAL 15 DAY), NULL,
+    'fixture', NOW(), 'fixture', NOW(), 'C5a withdrawable 2', '0'
+),
+(
+    94503, 94403, 94603, 9201, 8201, 9601,
+    307.00, 307.00, 5.00, 302.00, 30.70,
+    'positive', 'withdrawable', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_ADD(NOW(), INTERVAL 15 DAY), NULL,
+    'fixture', NOW(), 'fixture', NOW(), 'C5a withdrawable 3', '0'
+),
+(
+    94504, 94404, 94604, 9201, 8201, 9601,
+    150.00, 150.00, 5.00, 145.00, 15.00,
+    'positive', 'withdrawable', DATE_SUB(NOW(), INTERVAL 4 DAY), DATE_ADD(NOW(), INTERVAL 15 DAY), NULL,
+    'fixture', NOW(), 'fixture', NOW(), 'C5a withdrawable 4', '0'
+),
+(
+    94505, 94405, 94605, 9201, 8201, 9601,
+    88.00, 88.00, 5.00, 83.00, 8.80,
+    'positive', 'withdrawable', DATE_SUB(NOW(), INTERVAL 4 DAY), DATE_ADD(NOW(), INTERVAL 15 DAY), NULL,
+    'fixture', NOW(), 'fixture', NOW(), 'C5a withdrawable 5', '0'
+),
+(
+    94506, 94406, 94606, 9201, 8201, 9601,
+    660.00, 660.00, 5.00, 655.00, 66.00,
+    'positive', 'paid', DATE_SUB(NOW(), INTERVAL 9 DAY), DATE_ADD(NOW(), INTERVAL 15 DAY), 9100001,
+    'fixture', NOW(), 'fixture', NOW(), 'C5a paid ledger', '0'
+),
+(
+    94507, 94407, 94607, 9201, 8201, 9601,
+    180.00, 180.00, 5.00, 175.00, 18.00,
+    'positive', 'rolled_back', DATE_SUB(NOW(), INTERVAL 9 DAY), DATE_ADD(NOW(), INTERVAL 15 DAY), NULL,
+    'fixture', NOW(), 'fixture', NOW(), 'C5a rolled back ledger', '0'
+),
+(
+    94508, 94408, 94608, 9201, 8201, 9601,
+    95.00, 95.00, 5.00, 90.00, -9.50,
+    'negative', 'negative', DATE_SUB(NOW(), INTERVAL 9 DAY), DATE_ADD(NOW(), INTERVAL 15 DAY), NULL,
+    'fixture', NOW(), 'fixture', NOW(), 'C5a negative ledger', '0'
+),
+(
+    94509, 94409, 94609, 9202, 8201, 9601,
+    220.00, 220.00, 5.00, 215.00, 22.00,
+    'positive', 'withdrawable', DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_ADD(NOW(), INTERVAL 15 DAY), NULL,
+    'fixture', NOW(), 'fixture', NOW(), 'C5a other channel ledger', '0'
+);
+
+-- =====================================================================
+-- C6 team appointment + writeoff fixtures
+-- Covers:
+--   1. 渠道方团队预约 happy path / 容量不足
+--   2. 学生查看我的预约与二维码明细
+--   3. 赛事方扫码核销 / 重复扫码 / 越权扫码 / 管理员扫码
+-- =====================================================================
+
+INSERT INTO jst_user (
+    user_id, openid, mobile, nickname, real_name, user_type, status, register_time, create_by, create_time
+) VALUES
+(
+    1005, 'openid_test_1005', '13800000005', '测试_赵妈妈', '测试_赵妈妈', 'parent', 1, NOW(), 'fixture', NOW()
+);
+
+INSERT INTO jst_contest (
+    contest_id, contest_name, source_type, partner_id, category, group_levels, cover_image, description,
+    enroll_start_time, enroll_end_time, event_start_time, event_end_time, price,
+    support_channel_enroll, support_points_deduct, support_appointment,
+    appointment_capacity, writeoff_config, allow_repeat_appointment,
+    cert_rule_json, score_rule_json, form_template_id, aftersale_days, audit_status, status,
+    created_user_id, create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    8261, '测试_C6_三子项预约赛事', 'partner', 8101, 'art', '小学组', 'https://fixture.example.com/c6-8261.jpg', '测试_C6_团队预约与三码核销',
+    '2026-04-01 09:00:00', '2026-05-31 18:00:00', '2026-04-20 09:00:00', '2026-04-25 18:00:00', 39.90,
+    1, 0, 1,
+    10,
+    JSON_ARRAY(
+        JSON_OBJECT('itemType', 'arrival', 'itemName', '到场核销'),
+        JSON_OBJECT('itemType', 'gift', 'itemName', '礼品核销'),
+        JSON_OBJECT('itemType', 'ceremony', 'itemName', '仪式核销')
+    ),
+    0,
+    '{}', '{}', NULL, 7, 'online', 'enrolling',
+    9101, 'fixture', NOW(), 'fixture', NOW(), 'C6 happy path contest', '0'
+),
+(
+    8262, '测试_C6_容量限制赛事', 'partner', 8101, 'art', '小学组', 'https://fixture.example.com/c6-8262.jpg', '测试_C6_容量不足',
+    '2026-04-01 09:00:00', '2026-05-31 18:00:00', '2026-04-20 09:00:00', '2026-04-25 18:00:00', 39.90,
+    1, 0, 1,
+    2,
+    JSON_ARRAY(
+        JSON_OBJECT('itemType', 'arrival', 'itemName', '到场核销')
+    ),
+    0,
+    '{}', '{}', NULL, 7, 'online', 'enrolling',
+    9101, 'fixture', NOW(), 'fixture', NOW(), 'C6 capacity full contest', '0'
+),
+(
+    8263, '测试_C6_越权扫码赛事', 'partner', 8102, 'music', '小学组', 'https://fixture.example.com/c6-8263.jpg', '测试_C6_跨赛事方扫码拦截',
+    '2026-04-01 09:00:00', '2026-05-31 18:00:00', '2026-04-20 09:00:00', '2026-04-25 18:00:00', 19.90,
+    1, 0, 1,
+    5,
+    JSON_ARRAY(
+        JSON_OBJECT('itemType', 'arrival', 'itemName', '到场核销')
+    ),
+    0,
+    '{}', '{}', NULL, 7, 'online', 'enrolling',
+    9102, 'fixture', NOW(), 'fixture', NOW(), 'C6 partner scope contest', '0'
+),
+(
+    8264, '测试_C6_扫码核销团队赛事', 'partner', 8101, 'dance', '小学组', 'https://fixture.example.com/c6-8264.jpg', '测试_C6_赛事方扫码核销',
+    '2026-04-01 09:00:00', '2026-05-31 18:00:00', '2026-04-20 09:00:00', '2026-04-25 18:00:00', 0.00,
+    1, 0, 1,
+    10,
+    JSON_ARRAY(
+        JSON_OBJECT('itemType', 'arrival', 'itemName', '到场核销')
+    ),
+    0,
+    '{}', '{}', NULL, 7, 'online', 'enrolling',
+    9101, 'fixture', NOW(), 'fixture', NOW(), 'C6 admin scan contest', '0'
+);
+
+INSERT INTO jst_participant (
+    participant_id, user_id, participant_type, name, gender, age,
+    guardian_name, guardian_mobile, school, created_by_channel_id,
+    claim_status, claimed_user_id, claimed_time, visible_scope, create_by, create_time
+) VALUES
+(
+    3601, 1001, 'registered_participant', '测试_C6_成员一', 1, 8,
+    '测试_张妈妈', '13800000001', '测试_第一小学', 9201,
+    'manual_claimed', 1001, NOW(), 'channel_only', 'fixture', NOW()
+),
+(
+    3602, 1002, 'registered_participant', '测试_C6_成员二', 2, 9,
+    '测试_李爸爸', '13800000002', '测试_第二小学', 9201,
+    'manual_claimed', 1002, NOW(), 'channel_only', 'fixture', NOW()
+),
+(
+    3603, 1005, 'registered_participant', '测试_C6_成员三', 1, 10,
+    '测试_赵妈妈', '13800000005', '测试_第三小学', 9201,
+    'manual_claimed', 1005, NOW(), 'channel_only', 'fixture', NOW()
+);
+
+INSERT INTO jst_participant (
+    participant_id, user_id, participant_type, name, gender, age,
+    guardian_name, guardian_mobile, school, created_by_channel_id,
+    claim_status, visible_scope, create_by, create_time
+) VALUES
+(
+    3604, NULL, 'temporary_participant', '测试_C6_成员四', 2, 7,
+    '测试_C6_监护人四', '13800003604', '测试_第四小学', 9201,
+    'unclaimed', 'channel_only', 'fixture', NOW()
+),
+(
+    3605, NULL, 'temporary_participant', '测试_C6_成员五', 1, 6,
+    '测试_C6_监护人五', '13800003605', '测试_第五小学', 9201,
+    'unclaimed', 'channel_only', 'fixture', NOW()
+);
+
+INSERT INTO jst_team_appointment (
+    team_appointment_id, team_no, contest_id, channel_id, team_name, appointment_date, session_code,
+    total_persons, member_persons, extra_persons, extra_list_json, writeoff_persons, status,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    96601, 'TA_FIXTURE_C6_001', 8264, 9201, '测试_C6_核销团队', '2026-04-22', 'AM',
+    5, 5, 0, NULL, 0, 'booked',
+    'fixture', NOW(), 'fixture', NOW(), 'C6 scan fixture team', '0'
+);
+
+INSERT INTO jst_team_appointment_member (
+    member_id, team_appointment_id, user_id, participant_id, member_no, name_snapshot, mobile_snapshot,
+    sub_order_id, writeoff_status, create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    96611, 96601, 1001, 3601, 'TM_FIXTURE_C6_001', '测试_C6_成员一', '13800000001',
+    NULL, 'unused', 'fixture', NOW(), 'fixture', NOW(), 'C6 member 1', '0'
+),
+(
+    96612, 96601, 1002, 3602, 'TM_FIXTURE_C6_002', '测试_C6_成员二', '13800000002',
+    NULL, 'unused', 'fixture', NOW(), 'fixture', NOW(), 'C6 member 2', '0'
+),
+(
+    96613, 96601, 1005, 3603, 'TM_FIXTURE_C6_003', '测试_C6_成员三', '13800000005',
+    NULL, 'unused', 'fixture', NOW(), 'fixture', NOW(), 'C6 member 3', '0'
+),
+(
+    96614, 96601, NULL, 3604, 'TM_FIXTURE_C6_004', '测试_C6_成员四', '13800003604',
+    NULL, 'unused', 'fixture', NOW(), 'fixture', NOW(), 'C6 member 4', '0'
+),
+(
+    96615, 96601, NULL, 3605, 'TM_FIXTURE_C6_005', '测试_C6_成员五', '13800003605',
+    NULL, 'unused', 'fixture', NOW(), 'fixture', NOW(), 'C6 member 5', '0'
+);
+
+INSERT INTO jst_appointment_record (
+    appointment_id, appointment_no, contest_id, user_id, participant_id, channel_id, appointment_type,
+    team_appointment_id, appointment_date, session_code, order_id, main_status, qr_code,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    96711, 'AP_FIXTURE_C6_001', 8264, 1001, 3601, 9201, 'team',
+    96601, '2026-04-22', 'AM', NULL, 'booked', 'team-record-c6-001',
+    'fixture', NOW(), 'fixture', NOW(), 'C6 appointment 1', '0'
+),
+(
+    96712, 'AP_FIXTURE_C6_002', 8264, 1002, 3602, 9201, 'team',
+    96601, '2026-04-22', 'AM', NULL, 'booked', 'team-record-c6-002',
+    'fixture', NOW(), 'fixture', NOW(), 'C6 appointment 2', '0'
+),
+(
+    96713, 'AP_FIXTURE_C6_003', 8264, 1005, 3603, 9201, 'team',
+    96601, '2026-04-22', 'AM', NULL, 'booked', 'team-record-c6-003',
+    'fixture', NOW(), 'fixture', NOW(), 'C6 appointment 3', '0'
+),
+(
+    96714, 'AP_FIXTURE_C6_004', 8264, NULL, 3604, 9201, 'team',
+    96601, '2026-04-22', 'AM', NULL, 'booked', 'team-record-c6-004',
+    'fixture', NOW(), 'fixture', NOW(), 'C6 appointment 4', '0'
+),
+(
+    96715, 'AP_FIXTURE_C6_005', 8264, NULL, 3605, 9201, 'team',
+    96601, '2026-04-22', 'AM', NULL, 'booked', 'team-record-c6-005',
+    'fixture', NOW(), 'fixture', NOW(), 'C6 appointment 5', '0'
+),
+(
+    96721, 'AP_FIXTURE_C6_021', 8263, 1002, 3602, 9201, 'individual',
+    NULL, '2026-04-23', 'PM', NULL, 'booked', 'ind-record-c6-021',
+    'fixture', NOW(), 'fixture', NOW(), 'C6 unauthorized partner scope', '0'
+);
+
+INSERT INTO jst_appointment_writeoff_item (
+    writeoff_item_id, appointment_id, team_appointment_id, item_type, item_name, qr_code, status,
+    writeoff_time, writeoff_user_id, writeoff_terminal, writeoff_qty, total_qty,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    96801, 96711, 96601, 'arrival', '到场核销',
+    'c6scanqr000000000000000000000001.plKyFdbghzOOuKbWw3rk7T2NPaciNDTYvebj7vSKuBY',
+    'unused', NULL, NULL, NULL, 0, 1,
+    'fixture', NOW(), 'fixture', NOW(), 'C6 scan code 1', '0'
+),
+(
+    96802, 96712, 96601, 'arrival', '到场核销',
+    'c6scanqr000000000000000000000002.zTXd3knuzMrCVqnxlo0XOltp5S182w3D6zytAsOnmko',
+    'unused', NULL, NULL, NULL, 0, 1,
+    'fixture', NOW(), 'fixture', NOW(), 'C6 scan code 2', '0'
+),
+(
+    96803, 96713, 96601, 'arrival', '到场核销',
+    'c6scanqr000000000000000000000003.IOxd8Qx-95ZmlOtMwK6KI0bbV4Gi5HIyhP8xvjP0hf0',
+    'unused', NULL, NULL, NULL, 0, 1,
+    'fixture', NOW(), 'fixture', NOW(), 'C6 scan code 3', '0'
+),
+(
+    96804, 96714, 96601, 'arrival', '到场核销',
+    'c6scanqr000000000000000000000004.NGG5KxKelpKb80GJg-Jhs8AfRvVB4i5auj3Rl7uehOA',
+    'unused', NULL, NULL, NULL, 0, 1,
+    'fixture', NOW(), 'fixture', NOW(), 'C6 scan code 4', '0'
+),
+(
+    96805, 96715, 96601, 'arrival', '到场核销',
+    'c6scanqr000000000000000000000005.po-T26f0H-AGPIVt74Poa5XxgsogBZ8PwzXkHFHdibw',
+    'unused', NULL, NULL, NULL, 0, 1,
+    'fixture', NOW(), 'fixture', NOW(), 'C6 scan code 5', '0'
+),
+(
+    96821, 96721, NULL, 'arrival', '到场核销',
+    'c6unauthqr0000000000000000000001.v---NwkwMPnJHC_aHJzn6lmBScxQ-EVDwHpMlT32UQE',
+    'unused', NULL, NULL, NULL, 0, 1,
+    'fixture', NOW(), 'fixture', NOW(), 'C6 unauthorized scan code', '0'
 );

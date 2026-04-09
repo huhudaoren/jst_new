@@ -883,3 +883,388 @@ client.test("C4-W8 cross-user refund should fail", function() {
     client.assert(response.body.code !== 200);
 });
 %}
+
+### =====================================================================
+### C5a-W channel withdraw apply (jst-channel / WxChannelWithdrawController)
+### Preconditions: fixtures channel 9201 + ledgers 94501-94509 already imported
+### =====================================================================
+
+### C5a-W1. login channel user 9201
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_9201" }
+
+> {%
+client.global.set("c5a_channel_token", response.body.data.token);
+client.test("C5a-W1 channel login success", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data.roles));
+    client.assert(response.body.data.roles.includes("jst_channel"));
+});
+%}
+
+### C5a-W2. rebate summary 4 KPI
+GET {{baseUrl}}/jst/wx/channel/rebate/summary
+Authorization: Bearer {{c5a_channel_token}}
+
+> {%
+client.test("C5a-W2 summary should match fixtures", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.withdrawableAmount === 86.8 || response.body.data.withdrawableAmount === 86.80);
+    client.assert(response.body.data.reviewingAmount === 0 || response.body.data.reviewingAmount === 0.00);
+    client.assert(response.body.data.paidAmount === 66 || response.body.data.paidAmount === 66.00);
+    client.assert(response.body.data.rolledBackAmount === 27.5 || response.body.data.rolledBackAmount === 27.50);
+});
+%}
+
+### C5a-W3. ledger list filtered by withdrawable
+GET {{baseUrl}}/jst/wx/channel/rebate/ledger/list?status=withdrawable&pageNum=1&pageSize=10
+Authorization: Bearer {{c5a_channel_token}}
+
+> {%
+client.test("C5a-W3 ledger list should return withdrawable rows", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.rows));
+    client.assert(response.body.rows.length >= 5);
+});
+%}
+
+### C5a-W4. happy path create withdrawal with 3 ledgers
+POST {{baseUrl}}/jst/wx/channel/withdraw/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c5a_channel_token}}
+
+{
+  "ledgerIds": [94501, 94502, 94503],
+  "expectedAmount": 63.00,
+  "payeeAccount": {
+    "bankName": "测试银行",
+    "accountNo": "622202009201",
+    "accountName": "测试_C5A收款户"
+  },
+  "invoiceInfo": {
+    "title": "测试_C5A开票抬头",
+    "taxNo": "TAX-C5A-001"
+  }
+}
+
+> {%
+client.test("C5a-W4 apply should succeed", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.actualAmount === 63 || response.body.data.actualAmount === 63.00);
+});
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("c5a_apply_id", response.body.data.settlementId);
+}
+%}
+
+### C5a-W4.1. my withdraw list should include pending settlement
+GET {{baseUrl}}/jst/wx/channel/withdraw/list?status=pending&pageNum=1&pageSize=10
+Authorization: Bearer {{c5a_channel_token}}
+
+> {%
+client.test("C5a-W4.1 my withdraw list should return rows", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.rows));
+});
+%}
+
+### C5a-W4.2. withdraw detail
+GET {{baseUrl}}/jst/wx/channel/withdraw/{{c5a_apply_id}}
+Authorization: Bearer {{c5a_channel_token}}
+
+> {%
+client.test("C5a-W4.2 withdraw detail should succeed", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data.ledgerItems));
+});
+%}
+
+### C5a-W5. amount mismatch should fail with 40012
+POST {{baseUrl}}/jst/wx/channel/withdraw/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c5a_channel_token}}
+
+{
+  "ledgerIds": [94504, 94505],
+  "expectedAmount": 99.99,
+  "payeeAccount": {
+    "bankName": "测试银行",
+    "accountNo": "622202009201",
+    "accountName": "测试_C5A收款户"
+  }
+}
+
+> {%
+client.test("C5a-W5 amount mismatch should fail", function() {
+    client.assert(response.body.code === 40012 || response.body.code !== 200);
+});
+%}
+
+### C5a-W6. cross-channel ledger should fail with 40011
+POST {{baseUrl}}/jst/wx/channel/withdraw/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c5a_channel_token}}
+
+{
+  "ledgerIds": [94504, 94509],
+  "expectedAmount": 37.00,
+  "payeeAccount": {
+    "bankName": "测试银行",
+    "accountNo": "622202009201",
+    "accountName": "测试_C5A收款户"
+  }
+}
+
+> {%
+client.test("C5a-W6 cross-channel ledger should fail", function() {
+    client.assert(response.body.code === 40011 || response.body.code !== 200);
+});
+%}
+
+### C5a-W7. already in_review ledger should fail with 40011
+POST {{baseUrl}}/jst/wx/channel/withdraw/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c5a_channel_token}}
+
+{
+  "ledgerIds": [94501],
+  "expectedAmount": 12.30,
+  "payeeAccount": {
+    "bankName": "测试银行",
+    "accountNo": "622202009201",
+    "accountName": "测试_C5A收款户"
+  }
+}
+
+> {%
+client.test("C5a-W7 in_review ledger should fail", function() {
+    client.assert(response.body.code === 40011 || response.body.code !== 200);
+});
+%}
+
+### C5a-W8. create another pending withdrawal then cancel
+POST {{baseUrl}}/jst/wx/channel/withdraw/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c5a_channel_token}}
+
+{
+  "ledgerIds": [94504, 94505],
+  "expectedAmount": 23.80,
+  "payeeAccount": {
+    "bankName": "测试银行",
+    "accountNo": "622202009201",
+    "accountName": "测试_C5A收款户"
+  }
+}
+
+> {%
+client.test("C5a-W8 create cancellable settlement", function() {
+    client.assert(response.body.code === 200);
+});
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("c5a_cancel_id", response.body.data.settlementId);
+}
+%}
+
+### C5a-W8.1. cancel pending withdrawal
+POST {{baseUrl}}/jst/wx/channel/withdraw/{{c5a_cancel_id}}/cancel
+Authorization: Bearer {{c5a_channel_token}}
+
+> {%
+client.test("C5a-W8.1 cancel should succeed", function() {
+    client.assert(response.body.code === 200);
+});
+%}
+
+### C5a-W9. cancel already closed settlement should fail with 40013
+POST {{baseUrl}}/jst/wx/channel/withdraw/{{c5a_cancel_id}}/cancel
+Authorization: Bearer {{c5a_channel_token}}
+
+> {%
+client.test("C5a-W9 cancel closed settlement should fail", function() {
+    client.assert(response.body.code === 40013 || response.body.code !== 200);
+});
+%}
+
+### C5a-W10. student role calling channel API should be rejected
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("c5a_student_token", response.body.data.token);
+%}
+
+### C5a-W10.1. student requests channel summary
+GET {{baseUrl}}/jst/wx/channel/rebate/summary
+Authorization: Bearer {{c5a_student_token}}
+
+> {%
+client.test("C5a-W10.1 student should be rejected", function() {
+    client.assert(response.status === 403 || response.body.code !== 200);
+});
+%}
+
+### =====================================================================
+### C6-W team appointment + my appointment (jst-event / wx)
+### Preconditions: fixtures contests 8261/8262 and participants 3601~3605 exist
+### =====================================================================
+
+### C6-W1. login channel user 9201
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_9201" }
+
+> {%
+client.global.set("c6_channel_token", response.body.data.token);
+client.test("C6-W1 channel login success", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data.roles));
+    client.assert(response.body.data.roles.includes("jst_channel"));
+});
+%}
+
+### C6-W2. apply team appointment happy path with 5 members
+POST {{baseUrl}}/jst/wx/team-appointment/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_channel_token}}
+
+{
+  "contestId": 8261,
+  "teamName": "测试_C6_五人团队",
+  "sessionCode": "AM",
+  "appointmentDate": "2026-04-22",
+  "members": [
+    { "participantId": 3601, "subOrderInput": { "payMethod": "wechat" } },
+    { "participantId": 3602, "subOrderInput": { "payMethod": "wechat" } },
+    { "participantId": 3603, "subOrderInput": { "payMethod": "wechat" } },
+    { "participantId": 3604, "subOrderInput": { "payMethod": "wechat" } },
+    { "participantId": 3605, "subOrderInput": { "payMethod": "wechat" } }
+  ]
+}
+
+> {%
+client.test("C6-W2 apply should succeed", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.memberCount === 5);
+    client.assert(Array.isArray(response.body.data.subOrderIds));
+    client.assert(response.body.data.subOrderIds.length === 5);
+});
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("c6_team_id", response.body.data.teamAppointmentId);
+}
+%}
+
+### C6-W3. channel list should include the team appointment
+GET {{baseUrl}}/jst/wx/team-appointment/list?contestId=8261&pageNum=1&pageSize=10
+Authorization: Bearer {{c6_channel_token}}
+
+> {%
+client.test("C6-W3 team list should include created row", function() {
+    client.assert(response.body.code === 200 || response.status === 200);
+    client.assert(Array.isArray(response.body.rows));
+    client.assert(response.body.rows.some(row => row.teamAppointmentId == client.global.get("c6_team_id")));
+});
+%}
+
+### C6-W4. team detail should include 5 members and writeoff progress
+GET {{baseUrl}}/jst/wx/team-appointment/{{c6_team_id}}
+Authorization: Bearer {{c6_channel_token}}
+
+> {%
+client.test("C6-W4 team detail should succeed", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data.members));
+    client.assert(response.body.data.members.length === 5);
+});
+if (response.body.code === 200 && response.body.data && Array.isArray(response.body.data.members)) {
+    const member = response.body.data.members.find(m => m.participantId === 3601);
+    if (member) {
+        client.global.set("c6_appt_1001", member.appointmentId);
+    }
+}
+%}
+
+### C6-W5. login student 1001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("c6_student_token", response.body.data.token);
+%}
+
+### C6-W6. my appointments should include the created team appointment
+GET {{baseUrl}}/jst/wx/appointment/my
+Authorization: Bearer {{c6_student_token}}
+
+> {%
+client.test("C6-W6 my appointment list should include team appointment", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data));
+    client.assert(response.body.data.some(row => row.teamAppointmentId == client.global.get("c6_team_id")));
+});
+%}
+
+### C6-W7. my appointment detail should expose 3 writeoff qr items
+GET {{baseUrl}}/jst/wx/appointment/{{c6_appt_1001}}
+Authorization: Bearer {{c6_student_token}}
+
+> {%
+client.test("C6-W7 my appointment detail should expose qr items", function() {
+    client.assert(response.body.code === 200);
+    client.assert(Array.isArray(response.body.data.writeoffItems));
+    client.assert(response.body.data.writeoffItems.length === 3);
+    client.assert(response.body.data.writeoffItems.every(item => !!item.qrCode));
+});
+%}
+
+### C6-W8. capacity full should fail
+POST {{baseUrl}}/jst/wx/team-appointment/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_channel_token}}
+
+{
+  "contestId": 8262,
+  "teamName": "测试_C6_容量不足",
+  "sessionCode": "AM",
+  "appointmentDate": "2026-04-22",
+  "members": [
+    { "participantId": 3601, "subOrderInput": { "payMethod": "wechat" } },
+    { "participantId": 3602, "subOrderInput": { "payMethod": "wechat" } },
+    { "participantId": 3603, "subOrderInput": { "payMethod": "wechat" } }
+  ]
+}
+
+> {%
+client.test("C6-W8 capacity full should fail", function() {
+    client.assert(response.body.code === 30071 || response.body.code !== 200);
+});
+%}
+
+### C6-W9. invalid participant should fail and roll back
+POST {{baseUrl}}/jst/wx/team-appointment/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{c6_channel_token}}
+
+{
+  "contestId": 8261,
+  "teamName": "测试_C6_非法成员回滚",
+  "sessionCode": "PM",
+  "appointmentDate": "2026-04-23",
+  "members": [
+    { "participantId": 3601, "subOrderInput": { "payMethod": "wechat" } },
+    { "participantId": 999999, "subOrderInput": { "payMethod": "wechat" } }
+  ]
+}
+
+> {%
+client.test("C6-W9 invalid participant should fail", function() {
+    client.assert(response.body.code === 30072 || response.body.code !== 200);
+});
+%}
