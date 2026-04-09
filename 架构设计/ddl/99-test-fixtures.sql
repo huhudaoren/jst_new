@@ -96,6 +96,7 @@ DELETE FROM jst_order_main WHERE order_id IN (9301, 9302, 9303, 9304, 9305, 9306
 -- C5b/FCD fixture id range collides with auto-increment zone; force clean
 DELETE FROM jst_rebate_ledger WHERE ledger_id BETWEEN 94500 AND 94599;
 DELETE FROM jst_rebate_settlement WHERE settlement_id BETWEEN 94600 AND 94699;
+DELETE FROM jst_rebate_settlement WHERE settlement_id IN (9100001, 9105101, 9105102, 9105103, 9105104);
 DELETE FROM jst_order_item WHERE order_id BETWEEN 94410 AND 94499;
 DELETE FROM jst_order_main WHERE order_id BETWEEN 94410 AND 94499;
 DELETE FROM jst_rebate_rule WHERE rule_id BETWEEN 9601 AND 9699;
