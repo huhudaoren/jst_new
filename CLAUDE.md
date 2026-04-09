@@ -261,7 +261,7 @@ C1~C8 全部完成，mvn compile 18 模块 BUILD SUCCESS，C2/C4 端到端 .http
 | 10-jst-finance.sql | 财务 |
 | 23-基础数据初始化.sql | 字典、权限等基础数据 |
 | 90-reset-fixtures.sql | 测试 fixture 重置 |
-| 95~98-migration-*.sql | 迁移脚本 |
+| 95~98-migration-*.sql | 迁移脚本（含 `97-migration-baseline-roles.sql` 基线角色补齐） |
 | 99-test-fixtures.sql | 测试数据 |
 
 ---
