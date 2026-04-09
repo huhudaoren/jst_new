@@ -54,6 +54,7 @@
 
 <script>
 import { getAppointmentDetail, cancelAppointment } from '@/api/appointment'
+import UQRCode from '@/utils/qrcode'
 
 const STATUS_LABEL = { booked: '待使用', in_progress: '使用中', completed: '已使用', cancelled: '已取消', pending_pay: '待支付' }
 const WO_LABEL = { unused: '未使用', used: '已核销', voided: '已作废' }
@@ -71,6 +72,19 @@ export default {
   methods: {
     async load() {
       try { this.detail = (await getAppointmentDetail(this.appointmentId)) || {} } catch (e) {}
+      // 数据就绪后渲染二维码 (等 DOM 挂载)
+      this.$nextTick(() => setTimeout(() => this.renderQrCodes(), 60))
+    },
+    // POLISH-BATCH2 A: 遍历 writeoffItems 对每个 canvas 渲染二维码
+    renderQrCodes() {
+      const items = this.writeoffItems
+      for (let i = 0; i < items.length; i++) {
+        const text = items[i].qrCode || ''
+        if (!text) continue
+        try {
+          UQRCode.make({ canvasId: 'qr_' + i, text, size: 360, context: this })
+        } catch (e) {}
+      }
     },
     onCancel() {
       uni.showModal({

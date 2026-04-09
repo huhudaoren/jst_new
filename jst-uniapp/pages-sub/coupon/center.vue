@@ -21,7 +21,7 @@
     <view class="cc-list">
       <view
         v-for="item in list"
-        :key="item.couponId"
+        :key="item.userCouponId"
         :class="['cc-card', 'cc-card--' + (item.couponType || 'full_reduction'), (item.status !== 'unused') && 'cc-card--disabled']"
       >
         <view class="cc-card__left">
@@ -29,11 +29,10 @@
             <text v-if="item.couponType === 'discount'">{{ item.discountRate || '--' }}<text class="cc-card__unit">折</text></text>
             <text v-else>¥<text class="cc-card__big">{{ item.faceValue || 0 }}</text></text>
           </text>
-          <text class="cc-card__threshold">{{ item.thresholdText || ('满' + (item.thresholdAmount || 0) + '可用') }}</text>
+          <text class="cc-card__threshold">满{{ item.thresholdAmount || 0 }}可用</text>
         </view>
         <view class="cc-card__right">
           <text class="cc-card__name">{{ item.couponName || '--' }}</text>
-          <text class="cc-card__range">{{ item.scopeText || '全场通用' }}</text>
           <text class="cc-card__valid">有效期 {{ formatDate(item.validStart) }} ~ {{ formatDate(item.validEnd) }}</text>
           <button v-if="item.status === 'unused'" class="cc-card__btn" @tap="goUse(item)">去使用</button>
           <text v-else class="cc-card__status">{{ statusLabel(item.status) }}</text>

@@ -8,24 +8,15 @@
       <text class="wa-hero__name">{{ detail.rightsName || '--' }}</text>
       <text class="wa-hero__remain">
         剩余
-        <text v-if="detail.remainingAmount != null">¥{{ detail.remainingAmount }}</text>
-        <text v-else-if="detail.remainingCount != null">{{ detail.remainingCount }} 次</text>
-        <text v-else>--</text>
+        <text v-if="detail.quotaMode === 'amount'">¥{{ detail.remainQuota != null ? detail.remainQuota : '--' }}</text>
+        <text v-else>{{ detail.remainQuota != null ? detail.remainQuota : '--' }} 次</text>
       </text>
     </view>
 
     <view class="wa-section">
-      <view v-if="useAmountMode" class="wa-field">
-        <text class="wa-field__label">本次核销金额</text>
-        <input class="wa-field__input" type="digit" v-model="form.writeoffAmount" placeholder="请输入金额" />
-      </view>
-      <view v-else class="wa-field">
-        <text class="wa-field__label">本次核销次数</text>
-        <view class="wa-stepper">
-          <view class="wa-stepper__btn" @tap="dec">-</view>
-          <text class="wa-stepper__val">{{ form.writeoffCount }}</text>
-          <view class="wa-stepper__btn" @tap="inc">+</view>
-        </view>
+      <view class="wa-field">
+        <text class="wa-field__label">{{ detail.quotaMode === 'amount' ? '本次核销金额' : '本次核销次数' }}</text>
+        <input class="wa-field__input" type="digit" v-model="form.writeoffAmount" :placeholder="detail.quotaMode === 'amount' ? '请输入金额' : '请输入次数'" />
       </view>
 
       <view class="wa-field wa-field--textarea">
@@ -36,7 +27,7 @@
 
     <view class="wa-tip">
       <text class="wa-tip__title">核销说明</text>
-      <text class="wa-tip__text">{{ detail.writeoffRule || detail.description || '提交后由平台审核并完成核销，请确保场景属实。' }}</text>
+      <text class="wa-tip__text">{{ detail.remark || '提交后由平台审核并完成核销，请确保场景属实。' }}</text>
     </view>
 
     <view class="wa-footer">
@@ -55,30 +46,23 @@ export default {
     return {
       userRightsId: null,
       detail: {},
-      form: { writeoffAmount: '', writeoffCount: 1, remark: '' },
+      form: { writeoffAmount: '', remark: '' },
       submitting: false
     }
   },
   computed: {
-    useAmountMode() { return this.detail && this.detail.remainingAmount != null },
     canSubmit() {
-      if (this.useAmountMode) {
-        const n = Number(this.form.writeoffAmount || 0)
-        return n > 0 && n <= Number(this.detail.remainingAmount || 0)
-      }
-      return this.form.writeoffCount > 0 && this.form.writeoffCount <= Number(this.detail.remainingCount || 0)
+      const n = Number(this.form.writeoffAmount || 0)
+      return n > 0 && n <= Number(this.detail.remainQuota || 0)
     }
   },
   onLoad(query) { this.userRightsId = query && query.id; if (this.userRightsId) this.load() },
   methods: {
     async load() { try { this.detail = (await getRightsDetail(this.userRightsId)) || {} } catch (e) {} },
-    inc() { if (this.form.writeoffCount < Number(this.detail.remainingCount || 0)) this.form.writeoffCount += 1 },
-    dec() { if (this.form.writeoffCount > 1) this.form.writeoffCount -= 1 },
     async onSubmit() {
       if (!this.canSubmit) return
-      const body = { remark: this.form.remark }
-      if (this.useAmountMode) body.writeoffAmount = Number(this.form.writeoffAmount)
-      else body.writeoffCount = this.form.writeoffCount
+      // 后端 RightsWriteoffApplyDTO 仅接受 writeoffAmount + remark, 次数模式也复用同字段由后端按 quotaMode 解释
+      const body = { writeoffAmount: Number(this.form.writeoffAmount), remark: this.form.remark }
       this.submitting = true
       try {
         await applyRightsWriteoff(this.userRightsId, body)

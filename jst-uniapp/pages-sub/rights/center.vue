@@ -25,11 +25,10 @@
           <text :class="['rc-card__status', 'rc-card__status--' + item.status]">{{ statusLabel(item.status) }}</text>
         </view>
         <view class="rc-card__meta">
-          <text v-if="item.remainingAmount != null" class="rc-card__m">剩余额度 ¥{{ item.remainingAmount }}</text>
-          <text v-if="item.remainingCount != null" class="rc-card__m">剩余次数 {{ item.remainingCount }}</text>
+          <text class="rc-card__m">{{ quotaText(item) }}</text>
           <text class="rc-card__m">有效期至 {{ formatDate(item.validEnd) }}</text>
         </view>
-        <button v-if="item.status === 'available'" class="rc-card__btn" @tap.stop="goApply(item.userRightsId)">立即使用</button>
+        <button v-if="item.status === 'available' && !item.expired" class="rc-card__btn" @tap.stop="goApply(item.userRightsId)">立即使用</button>
       </view>
       <view v-if="!list.length && !loading" class="rc-empty">暂无权益</view>
       <view v-if="loading" class="rc-empty">加载中...</view>
@@ -72,6 +71,14 @@ export default {
     onChange(v) { if (this.activeStatus === v) return; this.activeStatus = v; this.load(true) },
     goDetail(id) { uni.navigateTo({ url: '/pages-sub/rights/detail?id=' + id }) },
     goApply(id) { uni.navigateTo({ url: '/pages-sub/rights/writeoff-apply?id=' + id }) },
+    // MyRightsVO: quotaMode('amount'|'count') + quotaValue + remainQuota
+    quotaText(item) {
+      const mode = item && item.quotaMode
+      const remain = item && item.remainQuota != null ? item.remainQuota : '--'
+      const total = item && item.quotaValue != null ? item.quotaValue : '--'
+      if (mode === 'amount') return `剩余额度 ¥${remain} / 总 ¥${total}`
+      return `剩余次数 ${remain} / 总 ${total}`
+    },
     formatDate(v) { if (!v) return '--'; return String(v).slice(0, 10) },
     statusLabel(s) { return STATUS_LABEL[s] || s || '--' }
   }

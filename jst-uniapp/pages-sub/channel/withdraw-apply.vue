@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import { getRebateLedgerList, applyWithdraw } from '@/api/channel'
+import { getRebateLedgerList, applyWithdraw, getRebateSummary } from '@/api/channel'
 
 export default {
   data() {
@@ -90,12 +90,14 @@ export default {
       preselectIds: [], // 上个页面传入的预选
       showInvoice: false,
       submitting: false,
+      // POLISH-BATCH2 E: 顶部 "可提现余额" 直接从 /rebate/summary 取, 而非前端 ledger 求和
+      summaryWithdrawable: '0.00',
       form: { bankName: '', accountNo: '', accountName: '', invoiceTitle: '', invoiceTaxNo: '' }
     }
   },
   computed: {
     totalWithdrawable() {
-      return this.ledgerList.reduce((s, i) => s + Number(i.rebateAmount || 0), 0).toFixed(2)
+      return this.summaryWithdrawable
     },
     selectedItems() {
       return this.ledgerList.filter((i) => this.selectedSet[i.ledgerId])
@@ -114,9 +116,16 @@ export default {
     if (query && query.ledgerIds) {
       try { this.preselectIds = JSON.parse(decodeURIComponent(query.ledgerIds)) } catch (e) { this.preselectIds = [] }
     }
+    this.loadSummary()
     this.loadLedger()
   },
   methods: {
+    async loadSummary() {
+      try {
+        const s = await getRebateSummary()
+        this.summaryWithdrawable = (s && s.withdrawableAmount) || '0.00'
+      } catch (e) {}
+    },
     async loadLedger() {
       try {
         // 分页给大点, 一次捞完 withdrawable, 不分页以简化勾选

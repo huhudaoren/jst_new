@@ -9,9 +9,10 @@ export function getClaimableCoupons() {
   return request({ url: '/jst/wx/coupon/template/claimable', method: 'GET' })
 }
 
-/** 领券 */
+/** 领券 (后端 @RequestParam, 前端经 data 传 querystring) */
 export function claimCoupon(templateId) {
-  return request({ url: '/jst/wx/coupon/claim', method: 'POST', data: { templateId } })
+  // request.js 的 POST 走 body, 这里手工拼在 URL 上
+  return request({ url: `/jst/wx/coupon/claim?templateId=${templateId}`, method: 'POST' })
 }
 
 /**

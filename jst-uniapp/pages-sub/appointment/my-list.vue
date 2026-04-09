@@ -24,11 +24,9 @@
           <text :class="['al-card__status', 'al-card__status--' + item.mainStatus]">{{ statusLabel(item.mainStatus) }}</text>
         </view>
         <view class="al-card__row"><text class="al-card__k">日期</text><text class="al-card__v">{{ formatDate(item.appointmentDate) }} · {{ item.sessionCode || '--' }}</text></view>
-        <view class="al-card__row"><text class="al-card__k">参赛者</text><text class="al-card__v">{{ item.participantName || '--' }}</text></view>
-        <view class="al-card__row" v-if="item.writeoffProgress">
-          <text class="al-card__k">核销进度</text>
-          <text class="al-card__v">{{ item.writeoffProgress }}</text>
-        </view>
+        <view v-if="item.participantName" class="al-card__row"><text class="al-card__k">参赛者</text><text class="al-card__v">{{ item.participantName }}</text></view>
+        <!-- POLISH-BATCH2 F: writeoffProgress 后端 AppointmentListVO 未提供, 暂隐藏核销进度行, 待后端补 writeoffDoneCount/writeoffTotalCount 字段 -->
+        <view v-if="item.teamName" class="al-card__row"><text class="al-card__k">团队</text><text class="al-card__v">{{ item.teamName }}</text></view>
       </view>
       <view v-if="!filteredList.length && !loading" class="al-empty">暂无预约记录</view>
       <view v-if="loading" class="al-empty">加载中...</view>

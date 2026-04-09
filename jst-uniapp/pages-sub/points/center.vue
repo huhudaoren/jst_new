@@ -4,7 +4,7 @@
 <template>
   <view class="pc-page">
     <view class="pc-hero">
-      <view class="pc-hero__badge">Lv.{{ summary.currentLevel && summary.currentLevel.levelId || 0 }}</view>
+      <view class="pc-hero__badge">Lv.{{ (summary.currentLevel && (summary.currentLevel.levelNo || summary.currentLevel.levelId)) || 0 }}</view>
       <text class="pc-hero__name">{{ (summary.currentLevel && summary.currentLevel.levelName) || '普通学员' }}</text>
       <view class="pc-hero__bar">
         <view class="pc-hero__bar-fill" :style="{ width: progressPercent + '%' }"></view>
@@ -32,23 +32,23 @@
       <text class="pc-section__title">等级权益</text>
       <view v-for="lv in levels" :key="lv.levelId" :class="['pc-level', isCurrentLevel(lv) && 'pc-level--active', isLocked(lv) && 'pc-level--locked']">
         <view class="pc-level__head">
-          <text class="pc-level__name">Lv.{{ lv.levelId }} · {{ lv.levelName }}</text>
+          <text class="pc-level__name">{{ lv.icon || '' }} Lv.{{ lv.levelNo || lv.levelId }} · {{ lv.levelName }}</text>
           <text v-if="isCurrentLevel(lv)" class="pc-level__tag">当前</text>
           <text v-else-if="isLocked(lv)" class="pc-level__tag pc-level__tag--locked">还差 {{ lockedGap(lv) }} 成长值</text>
         </view>
-        <text class="pc-level__desc">{{ lv.description || lv.benefitText || '-' }}</text>
+        <text class="pc-level__desc">成长值门槛 {{ lv.growthThreshold || 0 }}</text>
       </view>
     </view>
 
     <view class="pc-section">
       <text class="pc-section__title">赚积分任务</text>
-      <view v-for="t in tasks" :key="t.taskId || t.code" class="pc-task">
+      <view v-for="t in tasks" :key="t.taskCode" class="pc-task">
         <text class="pc-task__icon">{{ t.icon || '✨' }}</text>
         <view class="pc-task__body">
-          <text class="pc-task__name">{{ t.name || t.title }}</text>
-          <text class="pc-task__desc">{{ t.description || '' }}</text>
+          <text class="pc-task__name">{{ t.taskName }}</text>
+          <text class="pc-task__desc">{{ t.taskDesc || '' }}</text>
         </view>
-        <text class="pc-task__reward">+{{ t.pointsReward || t.reward || 0 }}</text>
+        <text class="pc-task__reward">{{ t.finished ? '已完成' : (t.rewardText || '') }}</text>
       </view>
       <view v-if="!tasks.length" class="pc-empty">暂无任务</view>
     </view>
@@ -64,9 +64,9 @@ export default {
     progressPercent() {
       const s = this.summary || {}
       const gv = Number(s.growthValue || 0)
-      const next = s.nextLevel && Number(s.nextLevel.growthValueRequired || 0)
+      const next = s.nextLevel && Number(s.nextLevel.growthThreshold || 0)
       if (!next) return 100
-      const cur = s.currentLevel && Number(s.currentLevel.growthValueRequired || 0)
+      const cur = (s.currentLevel && Number(s.currentLevel.growthThreshold || 0)) || 0
       const total = next - cur
       const done = gv - cur
       if (total <= 0) return 100
@@ -92,12 +92,14 @@ export default {
       return this.summary.currentLevel && Number(this.summary.currentLevel.levelId) === Number(lv.levelId)
     },
     isLocked(lv) {
-      const cur = this.summary.currentLevel && Number(this.summary.currentLevel.levelId)
-      return cur != null && Number(lv.levelId) > cur
+      if (lv && lv.unlocked === false) return true
+      const cur = this.summary.currentLevel && Number(this.summary.currentLevel.levelNo || this.summary.currentLevel.levelId)
+      const lvNo = Number(lv.levelNo || lv.levelId)
+      return cur != null && lvNo > cur
     },
     lockedGap(lv) {
       const gv = Number(this.summary.growthValue || 0)
-      const need = Number(lv.growthValueRequired || 0)
+      const need = Number(lv.growthThreshold || 0)
       return Math.max(0, need - gv)
     }
   }

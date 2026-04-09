@@ -7,14 +7,20 @@
       <text class="rd-hero__name">{{ detail.rightsName || '--' }}</text>
       <text :class="['rd-hero__status', 'rd-hero__status--' + detail.status]">{{ statusLabel(detail.status) }}</text>
       <view class="rd-hero__meta">
-        <view class="rd-hero__cell"><text class="rd-hero__num">{{ detail.remainingAmount != null ? ('¥' + detail.remainingAmount) : (detail.remainingCount != null ? detail.remainingCount : '--') }}</text><text class="rd-hero__lbl">{{ detail.remainingAmount != null ? '剩余额度' : '剩余次数' }}</text></view>
-        <view class="rd-hero__cell"><text class="rd-hero__num">{{ detail.usedCount || 0 }}</text><text class="rd-hero__lbl">已核销次数</text></view>
+        <view class="rd-hero__cell">
+          <text class="rd-hero__num">{{ detail.quotaMode === 'amount' ? ('¥' + (detail.remainQuota != null ? detail.remainQuota : '--')) : (detail.remainQuota != null ? detail.remainQuota : '--') }}</text>
+          <text class="rd-hero__lbl">{{ detail.quotaMode === 'amount' ? '剩余额度' : '剩余次数' }}</text>
+        </view>
+        <view class="rd-hero__cell">
+          <text class="rd-hero__num">{{ detail.quotaMode === 'amount' ? ('¥' + (detail.quotaValue != null ? detail.quotaValue : '--')) : (detail.quotaValue != null ? detail.quotaValue : '--') }}</text>
+          <text class="rd-hero__lbl">总额度</text>
+        </view>
       </view>
     </view>
 
     <view class="rd-section">
       <text class="rd-section__title">核销规则</text>
-      <text class="rd-section__desc">{{ detail.writeoffRule || detail.description || '按平台发放时约定的权益规则使用。' }}</text>
+      <text class="rd-section__desc">{{ detail.remark || ('核销模式: ' + (detail.writeoffMode || '--')) }}</text>
     </view>
 
     <view class="rd-section">
@@ -30,8 +36,8 @@
         <view v-for="h in detail.writeoffHistory" :key="h.recordId" class="rd-timeline__item rd-timeline__item--done">
           <view class="rd-timeline__dot"></view>
           <view class="rd-timeline__body">
-            <text class="rd-timeline__title">{{ h.remark || '核销' }}</text>
-            <text class="rd-timeline__sub">{{ h.writeoffAmount != null ? ('¥' + h.writeoffAmount) : ('x ' + (h.writeoffCount || 1)) }} · {{ formatTime(h.createTime) }}</text>
+            <text class="rd-timeline__title">{{ h.applyRemark || ('核销单 ' + (h.writeoffNo || '')) }}</text>
+            <text class="rd-timeline__sub">¥{{ h.useAmount != null ? h.useAmount : '0' }} · {{ h.status || '' }} · {{ formatTime(h.writeoffTime || h.createTime) }}</text>
           </view>
         </view>
       </view>

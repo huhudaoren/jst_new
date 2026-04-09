@@ -56,6 +56,7 @@
       </view>
     </view>
 
+    <!-- POLISH-BATCH2 G: 我的服务分"常用 6 项 + 更多折叠" -->
     <view class="my-page__section">
       <text class="my-page__section-title">我的服务</text>
       <view class="my-page__grid">
@@ -65,12 +66,20 @@
         <view class="my-page__grid-item" @tap="navigateBinding"><view class="my-page__grid-icon my-page__grid-icon--blue">绑</view><text class="my-page__grid-text">我的绑定</text></view>
         <view class="my-page__grid-item" @tap="navigateMyCourse"><view class="my-page__grid-icon my-page__grid-icon--green">课</view><text class="my-page__grid-text">我的课程</text></view>
         <view class="my-page__grid-item" @tap="navigateProfileEdit"><view class="my-page__grid-icon my-page__grid-icon--blue">👤</view><text class="my-page__grid-text">我的资料</text></view>
+      </view>
+
+      <view v-if="moreExpanded" class="my-page__grid my-page__grid--more">
         <view class="my-page__grid-item" @tap="navigateParticipant"><view class="my-page__grid-icon my-page__grid-icon--orange">📁</view><text class="my-page__grid-text">我的档案</text></view>
+        <view class="my-page__grid-item" @tap="navigateAddressList"><view class="my-page__grid-icon my-page__grid-icon--gray">址</view><text class="my-page__grid-text">收货地址</text></view>
         <view class="my-page__grid-item" @tap="navigateAppointmentList"><view class="my-page__grid-icon my-page__grid-icon--teal">📅</view><text class="my-page__grid-text">我的预约</text></view>
         <view class="my-page__grid-item" @tap="navigateMall"><view class="my-page__grid-icon my-page__grid-icon--gold">🎁</view><text class="my-page__grid-text">积分商城</text></view>
         <view class="my-page__grid-item" @tap="navigatePointsCenter"><view class="my-page__grid-icon my-page__grid-icon--purple">⭐</view><text class="my-page__grid-text">积分中心</text></view>
         <view class="my-page__grid-item" @tap="navigateCouponCenter"><view class="my-page__grid-icon my-page__grid-icon--orange">🎫</view><text class="my-page__grid-text">我的优惠券</text></view>
         <view class="my-page__grid-item" @tap="navigateRightsCenter"><view class="my-page__grid-icon my-page__grid-icon--green">🎖</view><text class="my-page__grid-text">我的权益</text></view>
+      </view>
+
+      <view class="my-page__more-toggle" @tap="moreExpanded = !moreExpanded">
+        <text>{{ moreExpanded ? '收起' : '更多' }} {{ moreExpanded ? '▲' : '▼' }}</text>
       </view>
     </view>
 
@@ -86,7 +95,7 @@ import JstLoading from '@/components/jst-loading/jst-loading.vue'
 export default {
   components: { JstLoading },
   data() {
-    return { pageLoading: false, profile: { nickname: '', avatar: '', mobileMasked: '', currentLevelId: 0, availablePoints: 0, totalPoints: 0, growthValue: 0, userType: '' } }
+    return { pageLoading: false, moreExpanded: false, profile: { nickname: '', avatar: '', mobileMasked: '', currentLevelId: 0, availablePoints: 0, totalPoints: 0, growthValue: 0, userType: '' } }
   },
   computed: {
     // 渠道方视角: userInfo.userType === 'channel' 或 roles 包含 jst_channel
@@ -116,6 +125,7 @@ export default {
     navigateOrderList() { uni.navigateTo({ url: '/pages-sub/my/order-list' }) },
     navigateRefundList() { uni.navigateTo({ url: '/pages-sub/my/refund-list' }) },
     navigateBinding() { uni.navigateTo({ url: '/pages-sub/my/binding' }) },
+    navigateAddressList() { uni.navigateTo({ url: '/pages-sub/my/address-list' }) },
     navigateMyCourse() { uni.navigateTo({ url: '/pages-sub/my/course' }) },
     navigateChannelHome() { uni.navigateTo({ url: '/pages-sub/channel/home' }) },
     navigateChannelRebate() { uni.navigateTo({ url: '/pages-sub/channel/rebate' }) },
@@ -163,6 +173,8 @@ export default {
 .my-page__section { margin: 24rpx 32rpx 0; }
 .my-page__section-title { display: block; margin-bottom: 16rpx; font-size: 26rpx; font-weight: 700; color: var(--jst-color-text); }
 .my-page__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16rpx; }
+.my-page__grid--more { margin-top: 16rpx; }
+.my-page__more-toggle { margin-top: 16rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-brand); }
 .my-page__grid-item { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28rpx 12rpx; border-radius: var(--jst-radius-lg); background: var(--jst-color-card-bg); box-shadow: var(--jst-shadow-card); }
 .my-page__grid-icon { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 20rpx; font-size: 30rpx; }
 .my-page__grid-icon--blue { background: var(--jst-color-brand-soft); }

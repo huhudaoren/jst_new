@@ -15,12 +15,12 @@
     <view class="pd-list">
       <view v-for="(item, idx) in list" :key="item.ledgerId || idx" class="pd-card">
         <view class="pd-card__main">
-          <text class="pd-card__name">{{ item.sourceAction || item.action || item.description || '积分变动' }}</text>
+          <text class="pd-card__name">{{ item.remark || item.sourceType || '变动' }}</text>
           <text class="pd-card__time">{{ formatTime(item.createTime) }}</text>
         </view>
         <view class="pd-card__amount">
-          <text :class="['pd-card__num', Number(item.changeAmount || 0) >= 0 ? 'pd-card__num--pos' : 'pd-card__num--neg']">
-            {{ Number(item.changeAmount || 0) >= 0 ? '+' : '' }}{{ item.changeAmount || 0 }}
+          <text :class="['pd-card__num', changeValue(item) >= 0 ? 'pd-card__num--pos' : 'pd-card__num--neg']">
+            {{ changeValue(item) >= 0 ? '+' : '' }}{{ changeValue(item) }}
           </text>
           <text class="pd-card__balance">余额 {{ item.balanceAfter != null ? item.balanceAfter : '--' }}</text>
         </view>
@@ -61,6 +61,11 @@ export default {
       } finally { this.loading = false }
     },
     onChangeTab(v) { if (this.activeTab === v) return; this.activeTab = v; this.load(true) },
+    // 积分流水字段 pointsChange / 成长值流水字段 growthChange, 二者都可能为 null
+    changeValue(item) {
+      const raw = this.activeTab === 'points' ? item.pointsChange : item.growthChange
+      return Number(raw || 0)
+    },
     formatTime(v) { if (!v) return '--'; return String(v).replace('T', ' ').slice(0, 16) }
   }
 }

@@ -9,7 +9,7 @@
     </view>
 
     <view class="cl-list">
-      <view v-for="item in list" :key="item.templateId" class="cl-card">
+      <view v-for="item in list" :key="item.couponTemplateId" class="cl-card">
         <view class="cl-card__left">
           <text class="cl-card__big">
             <text v-if="item.couponType === 'discount'">{{ item.discountRate }}<text class="cl-card__unit">折</text></text>
@@ -19,7 +19,7 @@
         </view>
         <view class="cl-card__right">
           <text class="cl-card__name">{{ item.couponName || '--' }}</text>
-          <text class="cl-card__range">{{ item.scopeText || '全场通用' }}</text>
+          <text class="cl-card__range">{{ scopeLabel(item) }}</text>
           <text class="cl-card__valid">有效期 {{ item.validDays || '--' }} 天</text>
           <button class="cl-card__btn" @tap="onClaim(item)" :disabled="item._claiming || item._claimed">
             {{ item._claimed ? '已领取' : (item._claiming ? '领取中...' : '立即领取') }}
@@ -50,13 +50,17 @@ export default {
       item._claiming = true
       this.list = [...this.list]
       try {
-        await claimCoupon(item.templateId)
+        await claimCoupon(item.couponTemplateId)
         item._claimed = true
         uni.showToast({ title: '领取成功', icon: 'success' })
       } catch (e) {} finally {
         item._claiming = false
         this.list = [...this.list]
       }
+    },
+    scopeLabel(item) {
+      if (item.applicableContestIds && item.applicableContestIds.length) return `指定 ${item.applicableContestIds.length} 个赛事`
+      return '全场通用'
     }
   }
 }

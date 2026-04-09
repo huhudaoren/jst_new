@@ -13,19 +13,19 @@
       <view
         v-for="item in candidates"
         :key="item.couponId"
-        :class="['cs-card', selectedId === item.couponId && 'cs-card--active', !item.usable && 'cs-card--disabled']"
-        @tap="onSelect(item)"
+        :class="['cs-card', selectedId === item.couponId && 'cs-card--active', !item.applicable && 'cs-card--disabled']"
+        @tap="item.applicable && onSelect(item)"
       >
         <view class="cs-card__left">
           <text class="cs-card__big">
-            <text v-if="item.couponType === 'discount'">{{ item.discountRate }}折</text>
-            <text v-else>¥{{ item.faceValue || 0 }}</text>
+            <text v-if="item.discountAmount != null">-¥{{ Number(item.discountAmount).toFixed(2) }}</text>
+            <text v-else>优惠</text>
           </text>
         </view>
         <view class="cs-card__body">
           <text class="cs-card__name">{{ item.couponName || '--' }}</text>
           <text class="cs-card__info">实付 ¥{{ item.netPayAmount != null ? Number(item.netPayAmount).toFixed(2) : '--' }}</text>
-          <text v-if="!item.usable && item.unusableReason" class="cs-card__reason">{{ item.unusableReason }}</text>
+          <text v-if="!item.applicable && item.reason" class="cs-card__reason">{{ item.reason }}</text>
         </view>
         <view class="cs-card__check">
           <text v-if="selectedId === item.couponId">✓</text>
@@ -75,15 +75,22 @@ export default {
         const body = { orderAmount: this.orderAmount }
         if (this.contestId) body.contestId = this.contestId
         if (this.goodsId) body.goodsId = this.goodsId
+        // 后端返回 CouponSelectResVO: { bestCouponId, bestDiscount, netPayAmount, alternatives[] }
         const res = await selectCoupon(body)
-        this.candidates = (res && (res.candidates || res.rows || res)) || []
-        const recommended = res && res.recommendedCouponId
-        if (recommended != null) this.selectedId = recommended
+        this.candidates = (res && res.alternatives) || []
+        if (res && res.bestCouponId != null) this.selectedId = res.bestCouponId
       } finally { this.loading = false }
     },
     onSelect(item) { this.selectedId = item ? item.couponId : null },
     onConfirm() {
       uni.setStorageSync('cs_selected_coupon_id', this.selectedId)
+      // 同步 netPayAmount 以便调用页展示
+      const picked = this.candidates.find((i) => i.couponId === this.selectedId)
+      if (picked && picked.netPayAmount != null) {
+        uni.setStorageSync('cs_selected_coupon_net', String(picked.netPayAmount))
+      } else {
+        uni.removeStorageSync('cs_selected_coupon_net')
+      }
       uni.navigateBack()
     }
   }

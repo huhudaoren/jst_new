@@ -29,7 +29,8 @@
         class="ml-card"
         @tap="goDetail(item.goodsId)"
       >
-        <image class="ml-card__img" :src="item.coverImage || defaultCover" mode="aspectFill" />
+        <image v-if="item.coverImage" class="ml-card__img" :src="item.coverImage" mode="aspectFill" />
+        <view v-else class="ml-card__img ml-card__img--placeholder"><text>暂无图片</text></view>
         <view class="ml-card__body">
           <text class="ml-card__name">{{ item.goodsName || '--' }}</text>
           <view class="ml-card__price">
@@ -69,8 +70,7 @@ export default {
       pageSize: 10,
       total: 0,
       loading: false,
-      hasMore: true,
-      defaultCover: ''
+      hasMore: true
     }
   },
   computed: {
@@ -126,6 +126,7 @@ export default {
 .ml-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24rpx; padding: 24rpx 24rpx 48rpx; }
 .ml-card { background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); overflow: hidden; }
 .ml-card__img { width: 100%; height: 320rpx; background: var(--jst-color-page-bg); }
+.ml-card__img--placeholder { display: flex; align-items: center; justify-content: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
 .ml-card__body { padding: 20rpx 24rpx; }
 .ml-card__name { display: block; font-size: 26rpx; font-weight: 700; color: var(--jst-color-text); min-height: 68rpx; }
 .ml-card__price { display: flex; align-items: baseline; gap: 12rpx; margin-top: 10rpx; }

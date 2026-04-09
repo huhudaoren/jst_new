@@ -13,7 +13,7 @@
 
     <view class="cg-section">
       <text class="cg-section__title">可领优惠券</text>
-      <view v-for="item in (campaign.coupons || [])" :key="item.templateId" class="cg-card">
+      <view v-for="item in (campaign.linkedCoupons || [])" :key="item.couponTemplateId" class="cg-card">
         <view class="cg-card__left">
           <text class="cg-card__big">
             <text v-if="item.couponType === 'discount'">{{ item.discountRate }}折</text>
@@ -23,13 +23,13 @@
         </view>
         <view class="cg-card__body">
           <text class="cg-card__name">{{ item.couponName || '--' }}</text>
-          <text class="cg-card__range">{{ item.scopeText || '活动专享' }}</text>
+          <text class="cg-card__range">活动专享 · 有效期 {{ item.validDays || '--' }} 天</text>
         </view>
         <button class="cg-card__btn" @tap="onClaim(item)" :disabled="item._claiming || item._claimed">
           {{ item._claimed ? '已领' : (item._claiming ? '...' : '领取') }}
         </button>
       </view>
-      <view v-if="!(campaign.coupons || []).length" class="cg-empty">暂无券</view>
+      <view v-if="!(campaign.linkedCoupons || []).length" class="cg-empty">暂无券</view>
     </view>
 
     <view class="cg-section">
@@ -69,7 +69,7 @@ export default {
       item._claiming = true
       this.campaign = { ...this.campaign }
       try {
-        await claimCoupon(item.templateId)
+        await claimCoupon(item.couponTemplateId)
         item._claimed = true
         uni.showToast({ title: '领取成功', icon: 'success' })
       } catch (e) {} finally {

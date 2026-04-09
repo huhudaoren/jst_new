@@ -79,6 +79,17 @@
       text="报名详情暂未返回。"
     />
 
+    <!-- POLISH-BATCH2 B: 优惠券选择 (仅已通过待支付时可见) -->
+    <view v-if="actionButton && actionButton.action === 'pay'" class="enroll-detail-page__card">
+      <text class="enroll-detail-page__card-title">优惠券</text>
+      <view class="enroll-detail-page__info-row" @tap="goPickCoupon">
+        <text class="enroll-detail-page__info-key">选择优惠券</text>
+        <text class="enroll-detail-page__info-value">
+          {{ selectedCouponId ? ('已选 #' + selectedCouponId + (couponNetPay != null ? (' · 实付 ¥' + couponNetPay) : '')) : '不使用 ›' }}
+        </text>
+      </view>
+    </view>
+
     <view v-if="actionButton" class="enroll-detail-page__bottom">
       <button class="enroll-detail-page__bottom-btn" @tap="handleAction">
         {{ actionButton.text }}
@@ -109,7 +120,10 @@ export default {
       detail: {},
       templateInfo: null,
       displayFormValue: {},
-      attachments: []
+      attachments: [],
+      // POLISH-BATCH2 B: 优惠券选择 (通过 coupon/select 页 storage 回传)
+      selectedCouponId: null,
+      couponNetPay: null
     }
   },
   computed: {
@@ -164,7 +178,25 @@ export default {
     this.enrollId = query.id || ''
     this.fetchDetail()
   },
+  onShow() {
+    // POLISH-BATCH2 B: 从 coupon/select 页回传优惠券
+    const picked = uni.getStorageSync('cs_selected_coupon_id')
+    if (picked !== undefined && picked !== '') {
+      this.selectedCouponId = picked || null
+      const net = uni.getStorageSync('cs_selected_coupon_net')
+      if (net != null && net !== '') this.couponNetPay = net
+      uni.removeStorageSync('cs_selected_coupon_id')
+      uni.removeStorageSync('cs_selected_coupon_net')
+    }
+  },
   methods: {
+    // POLISH-BATCH2 B: 跳转选券页, 金额暂用 0 兜底 (enroll-detail 未暴露 price 字段, 后端可据 contestId 兜算)
+    goPickCoupon() {
+      const contestId = this.detail && this.detail.contestId
+      uni.navigateTo({
+        url: `/pages-sub/coupon/select?contestId=${contestId || ''}&orderAmount=0`
+      })
+    },
     async fetchDetail() {
       if (!this.enrollId) {
         return
@@ -258,7 +290,8 @@ export default {
         const result = await createOrder({
           enrollId: this.detail.enrollId,
           pointsToUse: 0,
-          payMethod: 'wechat'
+          payMethod: 'wechat',
+          couponId: this.selectedCouponId || undefined
         })
         uni.hideLoading()
         uni.navigateTo({
