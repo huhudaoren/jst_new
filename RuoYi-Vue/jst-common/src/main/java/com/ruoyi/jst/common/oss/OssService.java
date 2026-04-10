@@ -90,6 +90,7 @@ public class OssService {
         if (contentType == null || !allowedMime.contains(contentType)) {
             throw new ServiceException("不支持的文件类型: " + contentType);
         }
+        ensureClientInitialized();
         String objectKey = buildObjectKey(bizDir, file.getOriginalFilename());
         try (InputStream in = file.getInputStream()) {
             ObjectMetadata meta = new ObjectMetadata();
@@ -111,11 +112,18 @@ public class OssService {
      */
     public String signUrl(String objectKey, long expireSec) {
         if (objectKey == null || objectKey.isEmpty()) return null;
+        ensureClientInitialized();
         Date expire = new Date(System.currentTimeMillis() + expireSec * 1000);
         GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(props.getBucket(), objectKey);
         req.setExpiration(expire);
         URL url = ossClient.generatePresignedUrl(req);
         return url.toString();
+    }
+
+    private void ensureClientInitialized() {
+        if (ossClient == null) {
+            throw new ServiceException("OSS 服务未配置或未初始化");
+        }
     }
 
     private String buildObjectKey(String bizDir, String originalName) {
