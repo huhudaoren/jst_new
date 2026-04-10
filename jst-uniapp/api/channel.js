@@ -82,3 +82,69 @@ export function resubmitChannelApply(id, body) {
 export function cancelChannelApply(id) {
   return request({ url: `/jst/wx/channel/auth/cancel/${id}`, method: 'POST' })
 }
+
+/* ---------------- 渠道工作台 (E1-CH-2) ---------------- */
+
+/** 渠道 dashboard 月度统计 (绑定学生/代报名/待付款) */
+export function getChannelMonthly() {
+  return request({ url: '/jst/wx/channel/dashboard/monthly', method: 'GET' })
+}
+
+/** 渠道 dashboard 综合统计 */
+export function getChannelDashboardStats(params) {
+  return request({ url: '/jst/wx/channel/dashboard/stats', method: 'GET', data: params })
+}
+
+/** 渠道权益列表 */
+export function getChannelRightsMy() {
+  return request({ url: '/jst/wx/channel/rights/my', method: 'GET' })
+}
+
+/** 渠道订单列表 (工作台最近3条 / 订单页分页) */
+export function getChannelOrders(params) {
+  return request({ url: '/jst/wx/channel/orders', method: 'GET', data: params })
+}
+
+/** 渠道订单详情 */
+export function getChannelOrderDetail(orderId) {
+  return request({ url: `/jst/wx/channel/orders/${orderId}`, method: 'GET' })
+}
+
+/* ---------------- 学生管理 (E1-CH-3) ---------------- */
+
+/** 渠道绑定学生列表 */
+export function getChannelStudents(params) {
+  return request({ url: '/jst/wx/channel/students', method: 'GET', data: params })
+}
+
+/** 解绑学生 */
+export function unbindStudent(bindingId) {
+  return request({ url: `/jst/wx/channel/binding/${bindingId}/unbind`, method: 'POST' })
+}
+
+/** 学生成绩列表 */
+export function getStudentScore(studentId) {
+  return request({ url: `/jst/wx/channel/students/${studentId}/score`, method: 'GET' })
+}
+
+/** 学生证书列表 */
+export function getStudentCert(studentId) {
+  return request({ url: `/jst/wx/channel/students/${studentId}/cert`, method: 'GET' })
+}
+
+/* ---------------- 数据统计 (E1-CH-6) ---------------- */
+
+/** 渠道统计数据 (含时间段筛选) */
+export function getChannelStats(params) {
+  return request({ url: '/jst/wx/channel/dashboard/stats', method: 'GET', data: params })
+}
+
+/** 热门赛事排行 TOP5 */
+export function getTopContests(params) {
+  return request({ url: '/jst/wx/channel/dashboard/top-contests', method: 'GET', data: params })
+}
+
+/** 活跃学生排行 TOP5 */
+export function getTopStudents(params) {
+  return request({ url: '/jst/wx/channel/dashboard/top-students', method: 'GET', data: params })
+}
