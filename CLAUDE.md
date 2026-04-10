@@ -159,7 +159,14 @@ D:\coding\jst_v1\
 | **DEBT-1** | 代码债清理 | ✅ 完成 |
 | **POLISH** | 视觉对齐（对照 91 张 PNG 截图） | 🟡 批 1/批 2 完成，POLISH-FULL 与 E 阶段并行 |
 | **阶段 D 批 2** | POLISH-BATCH2 / DEBT-3 / F-USER-ADDRESS / D2-1a 配置化 / D2-1b uqrcode / D2-2 F-ADDR 联调 / D2-3 字段补齐 / D2-4 基线角色 | ✅ 全部完成 |
-| **阶段 E（规划中）** | 全端 PRD 对齐，E-0 后端预备 + E-1-CH 渠道端 7 卡 + E-2-PA 赛事方 9 卡 | 📋 任务卡已出，待派发 |
+| **E-0 后端接口预备** | DDL 3 列 + 2 角色 + 11 新端点（认证/权益/批量/退款配置） | ✅ 完成 |
+| **E2-PA-9 PartnerScope** | 赛事方数据隔离切面 + 基类 + 6 单测 + 35 文档 | ✅ 完成 |
+| **E1-CH-1 渠道认证前端** | apply-entry/form/status 3 页 + Q-02 锁定 | ✅ 完成 |
+| **E1-CH-5 返点+提现** | rebate 7 Tab + settlement 合并页 | ✅ 完成 |
+| **E2-PA-1 赛事方入驻** | 3 公开页 + 4 步表单 + 响应式 + 匿名上传接口 | ✅ 完成 |
+| **E2-PA-2 赛事方工作台** | home.vue 4 区块 + jst_partner 登录跳转 | ✅ 完成 |
+| **E2-PA-4 报名审核** | enroll-manage + 详情抽屉 + 批量审核 | ✅ 完成 |
+| **E1-CH-2/3/4/6 + E2-PA-3** | 渠道工作台/学生管理/订单/数据 + 赛事 CRUD | 🏃 执行中（第三波，5 Agent 并行） |
 | **E-4-WEB Web 后台** | 65 菜单 PC + 手机响应式（承担 H5 审核端职能） | ⏸️ 等原型出齐后启动（Vue 2） |
 
 ---
@@ -208,45 +215,63 @@ D:\coding\jst_v1\
 
 ## 六、已知问题与待办
 
-### 批 4 已全部合并（2026-04-09 21:30 UTC）
-- C9 商城售后退款 ✅
-- F-POINTS-CENTER-BE 积分中心 5 接口 ✅
-- F-MARKETING-RIGHTS-BE 优惠券 + 权益 + 营销全套后端 ✅
-- WX-C4 积分权益营销前端 9 页 ✅（9 处字段假设待联调）
-- P-POLISH-BATCH1 前端遗留清理 ✅（A/C/D/E/G 完成，B uqrcode blocked，F address API skip）
-- 18 模块 mvn compile BUILD SUCCESS
-- **学生 + 渠道方用户端核心闭环 100% 可上线**
+> 最后更新：2026-04-10 阶段 E 第三波派发
 
-### 阶段 C 收尾完成，阶段 D 候选
-1. **POLISH-BATCH2** 批 4 遗留：uqrcode 接入 / coupon select 调用方接入 enroll / WX-C4 9 字段联调 / H1~H3 3 条小 bug / my/index grid 分组折叠
-2. **DEBT-3** 23-基础数据权限点补齐 C5~C8/F-CD/F-MR/C9 + owner_type 清洗 + orphan 文件清理
-3. **F-USER-ADDRESS** 后端补齐地址 CRUD 接口（商城实物商品依赖）
-4. **F-PARTNER-WEB** 赛事方 H5 工作台（独立端 8 页，大工程）
-5. **F-ADMIN-H5** 独立 H5 管理员端（14 页，大工程）
-6. **F-ANALYSIS** 经营分析 2 页（依赖 F-CHANNEL-DASHBOARD 扩展）
-7. **F-CONTRACT-INVOICE** 合同开票 2 页
-8. **F-AI-MAIC** AI 课程 OpenMAIC 集成 5 页
-9. **POLISH-FULL** 按设计 Token 全面对齐 91 页原型
-10. 真实微信支付/打款/OSS/视频点播对接（当前 Mock）
+### 阶段 E 进度总览（当前）
 
-### 阶段 C 后端已全部合并
-C1~C8 全部完成，mvn compile 18 模块 BUILD SUCCESS，C2/C4 端到端 .http 全绿。
+**已完成**：
+- E-0 后端接口预备（11 端点 + DDL + 角色） ✅
+- E2-PA-9 PartnerScope 切面 ✅
+- E1-CH-1 渠道认证前端 3 页 ✅
+- E1-CH-5 返点+提现结算合并 ✅
+- E2-PA-1 赛事方入驻申请 3 公开页 ✅
+- E2-PA-2 赛事方工作台首页 ✅
+- E2-PA-4 报名审核 ✅
 
-### 下一阶段候选
-- C9 商城售后退款（现金/积分/券回退，参考 C4 范式）
-- POLISH 阶段视觉对齐
-- 真实支付/打款对接（当前 Mock）
+**执行中（第三波，5 Agent 并行）**：
+- E1-CH-2 渠道工作台 home + my 视角重构
+- E1-CH-3 学生管理 + 邀请绑定（含倒计时解绑 Q-01）
+- E1-CH-4 渠道订单 + 订单详情 V4.0
+- E1-CH-6 数据统计轻量看板
+- E2-PA-3 赛事 CRUD 与提审
 
-### 技术债（持续）
-- 视觉对齐 polish sprint（对照 91 张 PNG，阶段 C 全部收尾后做）
-- Spring Boot 4.0+ 注意：`spring-boot-starter-aop` 已替换为 `spring-boot-starter-aspectj`
-- `orphan: test/temp_test_apply_patch.txt`（C4 报告中提到，非阻塞）
-- `jst_points_account.owner_type` 历史数据混 `user`/`student`，C8 已兼容读，长期需数据清洗
+**待派（第四波）**：
+- E1-CH-7 批量报名 + 临时参赛档案 + 团队预约
+- E2-PA-5 成绩导入与发布
+- E2-PA-6 证书管理
+- E2-PA-7 赛事结算中心
+- E2-PA-8 现场核销端
+
+**待补充**：
+- 赛事方菜单权限注册 SQL（sys_menu + sys_role_menu，第三波完成后补）
+- 赛事方后端 `/jst/partner/*` Controller 组（PA-3~7 会逐步补）
+- 后端字段缺口（PA-2 dashboard 3 接口、PA-4 partner enroll 路由）
+
+### 待做但暂缓
+
+| 项 | 状态 | 说明 |
+|---|---|---|
+| **E-4-WEB Web 后台** | ⏸️ 等原型 | 65 菜单 Vue 2 + 响应式（承担 H5 审核端职能） |
+| **POLISH-FULL** | 🟡 UI Agent 并行 | 91 页原型对齐，Design Token 基线已落 |
+| **F-AI-MAIC** | ⏸️ 缺外部文档 | OpenMAIC API 文档 + 测试账号待确认 |
+| **F-ANALYSIS** | ⏸️ F-2 批次 | 经营分析 2 页 |
+| **F-CONTRACT-INVOICE** | ⏸️ F-2 批次 | 合同开票 |
+| **F-RISK** | ⏸️ P3 | 风控完整化 |
 
 ### 技术债
-- 视觉对齐 polish sprint（对照 91 张 PNG）
-- 前端原型与实际页面不完全匹配（阶段 C 后统一处理）
-- Spring Boot 4.0+ 注意：`spring-boot-starter-aop` 已替换为 `spring-boot-starter-aspectj`
+
+| 项 | 状态 |
+|---|---|
+| `98-migration DDL` 测试库未执行 | 需手动跑 |
+| `lock:channel:unbind` 登记到 15-Redis-Key | 待补 |
+| `auto-claim` 查用户手机号逻辑 | E0-1 遗留 #5 |
+| `owner_type` 数据清洗 | DEBT-3 遗留脚本，需停服窗口 |
+| OSS 上传组件集成（小程序端认证表单用文本框占位） | 待真实 OSS 配置后接入 |
+| Spring Boot 4.0+ `spring-boot-starter-aspectj` | 已适配 |
+
+### CCB 决策索引
+- **`架构设计/34-功能闭环决策记录.md`**：Q-01~Q-14 全量决策（解绑倒计时/驳回上限/预约退款配置/账号模型等）
+- **`架构设计/35-PartnerScope切面使用说明.md`**：赛事方数据隔离接入指南
 
 ---
 
