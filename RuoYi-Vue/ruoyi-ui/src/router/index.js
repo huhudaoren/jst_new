@@ -102,6 +102,32 @@ export const partnerHomeRoute = {
       component: () => import('@/views/partner/home'),
       name: 'PartnerHome',
       meta: { title: '工作台', icon: 'dashboard', affix: true }
+    },
+    {
+      path: 'contest-list',
+      component: () => import('@/views/partner/contest-list'),
+      name: 'PartnerContestList',
+      meta: { title: '赛事管理', icon: 'flag' }
+    },
+    {
+      path: 'contest-edit',
+      component: () => import('@/views/partner/contest-edit'),
+      name: 'PartnerContestCreate',
+      hidden: true,
+      meta: { title: '新建赛事', activeMenu: '/partner/contest-list' }
+    },
+    {
+      path: 'contest-edit/:contestId(\\d+)',
+      component: () => import('@/views/partner/contest-edit'),
+      name: 'PartnerContestEdit',
+      hidden: true,
+      meta: { title: '编辑赛事', activeMenu: '/partner/contest-list' }
+    },
+    {
+      path: 'enroll-manage',
+      component: () => import('@/views/partner/enroll-manage'),
+      name: 'PartnerEnrollManage',
+      meta: { title: '报名审核', icon: 'form' }
     }
   ]
 }
