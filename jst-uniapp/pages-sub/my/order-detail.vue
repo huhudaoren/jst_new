@@ -8,6 +8,11 @@
       <view class="order-detail-page__nav-placeholder"></view>
     </view>
 
+    <!-- Q-03: 临时档案合并标注 -->
+    <view v-if="originalParticipantName" class="order-detail-page__merge-tag">
+      <text class="order-detail-page__merge-tag-text">📎 此订单原以"{{ originalParticipantName }}（临时档案）"名义报名</text>
+    </view>
+
     <template v-if="detail.orderId">
       <view class="order-detail-page__hero">
         <jst-status-badge :text="statusText" :tone="statusTone" />
@@ -171,6 +176,7 @@ export default {
       orderId: '',
       enrollId: '',
       detail: {},
+      originalParticipantName: '',
       refundPopupVisible: false,
       refundReason: '',
       refundSubmitting: false
@@ -282,6 +288,9 @@ export default {
       try {
         const data = await getOrderDetail(this.orderId, { silent: true })
         this.detail = data || {}
+        // Q-03: 临时档案合并标注
+        const snap = (data && (data.participantSnapshot || data.participant_snapshot)) || {}
+        this.originalParticipantName = snap.originalParticipantName || ''
       } catch (error) {
         this.detail = {}
       } finally {
@@ -766,6 +775,20 @@ export default {
 
 :deep(.jst-status-badge--refund .jst-status-badge__text) {
   color: #8b5cf6;
+}
+
+/* Q-03 临时档案标注 */
+.order-detail-page__merge-tag {
+  margin: 20rpx 24rpx 0;
+  padding: 20rpx 24rpx;
+  background: #fff8ec;
+  border-radius: 28rpx;
+  border-left: 8rpx solid #f39c12;
+}
+.order-detail-page__merge-tag-text {
+  font-size: 24rpx;
+  color: #b26a00;
+  line-height: 1.6;
 }
 
 :deep(.jst-status-badge--success) {

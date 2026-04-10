@@ -59,3 +59,18 @@ export function scanWriteoff(body) {
 export function getWriteoffRecords(params) {
   return request({ url: '/jst/wx/writeoff/records', method: 'GET', data: params })
 }
+
+/* ---------------- 团队预约 (E1-CH-7) ---------------- */
+
+/**
+ * 创建团队预约
+ * @param {Object} body { contestId, sessionCode, appointmentDate, studentIds:[], extraCount?, extraRemark? }
+ */
+export function createTeamAppointment(body) {
+  return request({ url: '/jst/wx/appointment/team/create', method: 'POST', data: body })
+}
+
+/** 团队预约详情 */
+export function getTeamAppointmentDetail(id) {
+  return request({ url: `/jst/wx/appointment/team/${id}`, method: 'GET' })
+}

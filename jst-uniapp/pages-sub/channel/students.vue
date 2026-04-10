@@ -199,8 +199,7 @@ export default {
     },
 
     goEnroll(stu) {
-      // CH-7 会补完整页面，本卡只需能跳且带 query
-      uni.showToast({ title: '批量报名 CH-7 后续开放', icon: 'none' })
+      uni.navigateTo({ url: '/pages-sub/channel/batch-enroll?singleStudentId=' + (stu.studentId || stu.bindingId) })
     },
     goScore(stu) {
       uni.navigateTo({ url: '/pages-sub/channel/student-score?studentId=' + (stu.studentId || stu.bindingId) + '&name=' + encodeURIComponent(stu.studentName || '') })

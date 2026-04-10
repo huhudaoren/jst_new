@@ -244,7 +244,10 @@
         { "path": "apply-status", "style": { "navigationBarTitleText": "\u8ba4\u8bc1\u72b6\u6001", "navigationStyle": "custom", "enablePullDownRefresh": true } },
         { "path": "order-detail", "style": { "navigationBarTitleText": "订单详情", "navigationStyle": "custom" } },
         { "path": "student-score", "style": { "navigationBarTitleText": "学生成绩", "navigationStyle": "custom" } },
-        { "path": "student-cert", "style": { "navigationBarTitleText": "学生证书", "navigationStyle": "custom" } }
+        { "path": "student-cert", "style": { "navigationBarTitleText": "学生证书", "navigationStyle": "custom" } },
+        { "path": "batch-enroll", "style": { "navigationBarTitleText": "批量报名", "navigationStyle": "custom" } },
+        { "path": "participants", "style": { "navigationBarTitleText": "临时档案", "navigationStyle": "custom" } },
+        { "path": "appointment", "style": { "navigationBarTitleText": "团队预约", "navigationStyle": "custom" } }
       ]
     },
     {

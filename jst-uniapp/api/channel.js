@@ -148,3 +148,60 @@ export function getTopContests(params) {
 export function getTopStudents(params) {
   return request({ url: '/jst/wx/channel/dashboard/top-students', method: 'GET', data: params })
 }
+
+/* ---------------- 批量报名 + 临时档案 (E1-CH-7) ---------------- */
+
+/**
+ * 批量创建临时参赛档案
+ * @param {Object} body { participants: [{ name, gender, birthday, guardianName, guardianMobile, school, className, idType, idNo }] }
+ */
+export function batchCreateParticipants(body) {
+  return request({ url: '/jst/wx/channel/participant/batch-create', method: 'POST', data: body })
+}
+
+/**
+ * 批量报名
+ * @param {Object} body { contestId, participantIds: Long[], sessionCode? }
+ */
+export function batchEnroll(body) {
+  return request({ url: '/jst/wx/channel/participant/batch-enroll', method: 'POST', data: body })
+}
+
+/**
+ * Excel 批量导入临时档案 (文件上传, 后端解析)
+ * @param {String} filePath 本地文件路径
+ * @param {String} token Bearer token
+ */
+export function batchImportParticipants(filePath, token) {
+  return new Promise((resolve, reject) => {
+    uni.uploadFile({
+      url: 'http://127.0.0.1:8080/jst/wx/channel/participant/batch-create',
+      filePath,
+      name: 'file',
+      header: token ? { Authorization: `Bearer ${token}` } : {},
+      success: (res) => {
+        try {
+          const body = JSON.parse(res.data)
+          if (body.code === 200) resolve(body.data)
+          else { uni.showToast({ title: body.msg || '导入失败', icon: 'none' }); reject(body) }
+        } catch (e) { reject(e) }
+      },
+      fail: (err) => { uni.showToast({ title: '上传失败', icon: 'none' }); reject(err) }
+    })
+  })
+}
+
+/** 渠道方的临时档案列表 */
+export function getMyParticipants(params) {
+  return request({ url: '/jst/wx/channel/participant/my', method: 'GET', data: params })
+}
+
+/** 更新临时档案 */
+export function updateParticipant(id, body) {
+  return request({ url: `/jst/wx/channel/participant/${id}`, method: 'PUT', data: body })
+}
+
+/** 删除临时档案 (仅 unclaimed) */
+export function deleteParticipant(id) {
+  return request({ url: `/jst/wx/channel/participant/${id}`, method: 'DELETE' })
+}

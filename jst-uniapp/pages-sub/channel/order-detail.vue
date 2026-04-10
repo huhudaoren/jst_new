@@ -10,6 +10,11 @@
       <text class="od-header__title">订单详情</text>
     </view>
 
+    <!-- Q-03: 临时档案合并标注 -->
+    <view v-if="originalParticipantName" class="od-merge-tag">
+      <text class="od-merge-tag__text">📎 此订单原以"{{ originalParticipantName }}（临时档案）"名义报名</text>
+    </view>
+
     <!-- A. 基础信息 -->
     <view class="od-section">
       <view class="od-info-row">
@@ -134,7 +139,7 @@ const STATUS_MAP = {
 
 export default {
   data() {
-    return { detail: {}, timeline: [] }
+    return { detail: {}, timeline: [], originalParticipantName: '' }
   },
   onLoad(opts) {
     this.orderId = opts.id || ''
@@ -147,6 +152,9 @@ export default {
         const res = await getChannelOrderDetail(this.orderId)
         this.detail = res || {}
         this.timeline = res.timeline || []
+        // Q-03: 临时档案合并标注
+        const snap = res.participantSnapshot || res.participant_snapshot || {}
+        this.originalParticipantName = snap.originalParticipantName || ''
       } catch (e) {}
     },
 
@@ -232,4 +240,8 @@ export default {
 .od-actions { display: flex; gap: 20rpx; padding: 32rpx; }
 .od-action-btn { flex: 1; height: 88rpx; border-radius: var(--jst-radius-md); display: flex; align-items: center; justify-content: center; font-size: 28rpx; font-weight: 600; background: var(--jst-color-page-bg); color: var(--jst-color-text-secondary); }
 .od-action-btn--primary { background: #3F51B5; color: #fff; }
+
+/* Q-03 临时档案标注 */
+.od-merge-tag { margin: 24rpx 32rpx 0; padding: 20rpx 28rpx; background: var(--jst-color-warning-soft); border-radius: var(--jst-radius-md); border-left: 8rpx solid var(--jst-color-warning); }
+.od-merge-tag__text { font-size: 26rpx; color: #B26A00; line-height: 1.6; }
 </style>
