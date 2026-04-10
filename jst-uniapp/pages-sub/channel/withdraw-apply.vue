@@ -198,13 +198,13 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.apply-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: var(--jst-color-page-bg); }
+.apply-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: #F7F8FA; }
 .apply-hero { padding: 72rpx 32rpx 56rpx; background: linear-gradient(135deg, #1A237E, #1058A0); color: #fff; }
 .apply-hero__label { display: block; font-size: 24rpx; color: var(--jst-color-white-76); }
 .apply-hero__amount { display: block; margin-top: 8rpx; font-size: 64rpx; font-weight: 800; color: #FFD54F; }
 .apply-hero__hint { display: block; margin-top: 16rpx; font-size: 22rpx; color: var(--jst-color-white-72); }
 
-.apply-section { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); }
+.apply-section { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
 .apply-section__title { display: flex; align-items: center; justify-content: space-between; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); margin-bottom: 16rpx; }
 .apply-section__action { font-size: 24rpx; color: var(--jst-color-brand); font-weight: 500; }
 

@@ -80,8 +80,9 @@
 <script>
 import { getRebateSummary, getRebateLedgerList } from '@/api/channel'
 
-// POLISH-C: 6 tab, 移除"全部" (原型 channel-rebate.html 仅 6 状态)
+// E1-CH-5: PRD V4.0 要求全部 + 6 状态共 7 个 tab
 const STATUS_TABS = [
+  { value: '', label: '全部' },
   { value: 'pending', label: '待结算' },
   { value: 'withdrawable', label: '可提现' },
   { value: 'in_review', label: '审核中' },
@@ -104,7 +105,7 @@ export default {
     return {
       summary: { withdrawableAmount: '0.00', reviewingAmount: '0.00', paidAmount: '0.00', rolledBackAmount: '0.00' },
       statusTabs: STATUS_TABS,
-      activeStatus: 'pending',
+      activeStatus: '',
       list: [],
       pageNum: 1,
       pageSize: 10,
@@ -172,16 +173,12 @@ export default {
       this.loadList(true)
     },
     goWithdrawApply() {
-      // 把当前"可提现"台账交给申请页用于预选；申请页内部会自己再拉完整列表
-      const ledgerIds = this.list
-        .filter((i) => i.status === 'withdrawable')
-        .map((i) => i.ledgerId)
-      uni.navigateTo({
-        url: '/pages-sub/channel/withdraw-apply?ledgerIds=' + encodeURIComponent(JSON.stringify(ledgerIds))
-      })
+      // E1-CH-5: 跳 settlement 统一结算页
+      uni.navigateTo({ url: '/pages-sub/channel/settlement' })
     },
     navigateWithdrawList() {
-      uni.navigateTo({ url: '/pages-sub/channel/withdraw-list' })
+      // E1-CH-5: 跳 settlement 统一结算页
+      uni.navigateTo({ url: '/pages-sub/channel/settlement' })
     },
     formatAmount(v) {
       // money 直接展示后端返回的字符串, 仅在缺省时回落到 '0.00'

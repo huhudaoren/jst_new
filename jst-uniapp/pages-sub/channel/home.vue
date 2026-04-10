@@ -16,7 +16,7 @@
 
     <view class="ch-grid">
       <view class="ch-tile" @tap="go('/pages-sub/channel/rebate')"><text class="ch-tile__icon">💰</text><text class="ch-tile__text">返点中心</text></view>
-      <view class="ch-tile" @tap="go('/pages-sub/channel/withdraw-list')"><text class="ch-tile__icon">📄</text><text class="ch-tile__text">提现记录</text></view>
+      <view class="ch-tile" @tap="go('/pages-sub/channel/settlement')"><text class="ch-tile__icon">📄</text><text class="ch-tile__text">提现记录</text></view>
       <view class="ch-tile" @tap="go('/pages-sub/channel/students')"><text class="ch-tile__icon">👥</text><text class="ch-tile__text">我的学生</text></view>
       <view class="ch-tile" @tap="go('/pages-sub/channel/orders')"><text class="ch-tile__icon">🧾</text><text class="ch-tile__text">渠道订单</text></view>
       <view class="ch-tile" @tap="go('/pages-sub/channel/data')"><text class="ch-tile__icon">📊</text><text class="ch-tile__text">渠道数据</text></view>
@@ -25,7 +25,7 @@
     <view class="ch-section">
       <view class="ch-section__title">
         <text>最近提现</text>
-        <text class="ch-section__more" @tap="go('/pages-sub/channel/withdraw-list')">查看全部 ></text>
+        <text class="ch-section__more" @tap="go('/pages-sub/channel/settlement')">查看全部 ></text>
       </view>
       <view v-for="item in recentList" :key="item.settlementId" class="ch-row" @tap="goDetail(item.settlementId)">
         <view class="ch-row__main">
