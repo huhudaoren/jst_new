@@ -1,5 +1,5 @@
 import auth from '@/plugins/auth'
-import router, { constantRoutes, dynamicRoutes } from '@/router'
+import router, { constantRoutes, dynamicRoutes, partnerHomeRoute } from '@/router'
 import { getRouters } from '@/api/menu'
 import Layout from '@/layout/index'
 import ParentView from '@/components/ParentView'
@@ -39,6 +39,11 @@ const permission = {
           const sidebarRoutes = filterAsyncRouter(sdata)
           const rewriteRoutes = filterAsyncRouter(rdata, false, true)
           const asyncRoutes = filterDynamicRoutes(dynamicRoutes)
+          const partnerRoutes = getPartnerLocalRoutes()
+          if (partnerRoutes.length > 0) {
+            rewriteRoutes.unshift(...partnerRoutes.map(route => cloneRoute(route)))
+            sidebarRoutes.unshift(...partnerRoutes.map(route => cloneRoute(route)))
+          }
           rewriteRoutes.push({ path: '*', redirect: '/404', hidden: true })
           router.addRoutes(asyncRoutes)
           commit('SET_ROUTES', rewriteRoutes)
@@ -108,6 +113,24 @@ export function filterDynamicRoutes(routes) {
     }
   })
   return res
+}
+
+function getPartnerLocalRoutes() {
+  if (!auth.hasRole('jst_partner')) {
+    return []
+  }
+  return [partnerHomeRoute]
+}
+
+function cloneRoute(route) {
+  return {
+    ...route,
+    meta: route.meta ? { ...route.meta } : undefined,
+    children: (route.children || []).map(child => ({
+      ...child,
+      meta: child.meta ? { ...child.meta } : undefined
+    }))
+  }
 }
 
 export const loadView = (view) => {
