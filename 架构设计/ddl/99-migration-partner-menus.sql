@@ -58,6 +58,7 @@ VALUES
 (9712, '赛事提审',    9702, 3, '', NULL, NULL, 1, 0, 'F', '0', '0', 'jst:partner:contest:submit',  '#', 'migration', NOW(), '', NULL, ''),
 (9713, '赛事下线',    9702, 4, '', NULL, NULL, 1, 0, 'F', '0', '0', 'jst:partner:contest:offline', '#', 'migration', NOW(), '', NULL, ''),
 (9714, '赛事删除',    9702, 5, '', NULL, NULL, 1, 0, 'F', '0', '0', 'jst:partner:contest:remove',  '#', 'migration', NOW(), '', NULL, ''),
+(9715, '赛事提交审核',9702, 6, '', NULL, NULL, 1, 0, 'F', '0', '0', 'jst:event:contest:submit',    '#', 'migration', NOW(), '', NULL, '兼容后端 submit 接口权限'),
 -- 报名审核按钮
 (9720, '报名查询',    9703, 1, '', NULL, NULL, 1, 0, 'F', '0', '0', 'jst:partner:enroll:query',    '#', 'migration', NOW(), '', NULL, ''),
 (9721, '报名审核',    9703, 2, '', NULL, NULL, 1, 0, 'F', '0', '0', 'jst:partner:enroll:audit',    '#', 'migration', NOW(), '', NULL, ''),

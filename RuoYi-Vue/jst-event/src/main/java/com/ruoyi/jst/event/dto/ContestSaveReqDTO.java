@@ -70,13 +70,13 @@ public class ContestSaveReqDTO {
     private Integer supportAppointment;
 
     @Min(value = 0, message = "预约容量不能小于0")
-    private Integer appointmentCapacity;
+    private Integer appointmentCapacity = 0;
 
     private String writeoffConfig;
 
     @Min(value = 0, message = "是否允许重复预约取值非法")
     @Max(value = 1, message = "是否允许重复预约取值非法")
-    private Integer allowRepeatAppointment;
+    private Integer allowRepeatAppointment = 0;
 
     private String certRuleJson;
 

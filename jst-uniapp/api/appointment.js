@@ -67,10 +67,10 @@ export function getWriteoffRecords(params) {
  * @param {Object} body { contestId, sessionCode, appointmentDate, studentIds:[], extraCount?, extraRemark? }
  */
 export function createTeamAppointment(body) {
-  return request({ url: '/jst/wx/appointment/team/create', method: 'POST', data: body })
+  return request({ url: '/jst/wx/team-appointment/apply', method: 'POST', data: body })
 }
 
 /** 团队预约详情 */
 export function getTeamAppointmentDetail(id) {
-  return request({ url: `/jst/wx/appointment/team/${id}`, method: 'GET' })
+  return request({ url: `/jst/wx/team-appointment/${id}`, method: 'GET' })
 }

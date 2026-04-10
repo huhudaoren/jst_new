@@ -72,6 +72,7 @@ public class ContestServiceImpl implements ContestService {
         validateSaveReq(req);
         Long partnerId = requirePartnerId(req.getPartnerId());
         validateFormTemplate(req.getFormTemplateId());
+        normalizeAppointmentDefaults(req);
 
         Date now = DateUtils.getNowDate();
         JstContest contest = new JstContest();
@@ -127,6 +128,7 @@ public class ContestServiceImpl implements ContestService {
         }
         validateSaveReq(req);
         validateFormTemplate(req.getFormTemplateId());
+        normalizeAppointmentDefaults(req);
 
         JstContest contest = getRequiredContest(req.getContestId());
         assertContestOwnership(contest);
@@ -152,6 +154,9 @@ public class ContestServiceImpl implements ContestService {
         update.setSupportChannelEnroll(req.getSupportChannelEnroll());
         update.setSupportPointsDeduct(req.getSupportPointsDeduct());
         update.setSupportAppointment(req.getSupportAppointment());
+        update.setAppointmentCapacity(req.getAppointmentCapacity());
+        update.setWriteoffConfig(req.getWriteoffConfig());
+        update.setAllowRepeatAppointment(req.getAllowRepeatAppointment());
         update.setCertRuleJson(req.getCertRuleJson());
         update.setScoreRuleJson(req.getScoreRuleJson());
         update.setFormTemplateId(req.getFormTemplateId());
@@ -466,6 +471,15 @@ public class ContestServiceImpl implements ContestService {
         BigDecimal price = req.getPrice();
         if (price != null && price.compareTo(BigDecimal.ZERO) < 0) {
             throw new ServiceException("报名价格不能小于0", BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+        }
+    }
+
+    private void normalizeAppointmentDefaults(ContestSaveReqDTO req) {
+        if (req.getAppointmentCapacity() == null) {
+            req.setAppointmentCapacity(0);
+        }
+        if (req.getAllowRepeatAppointment() == null) {
+            req.setAllowRepeatAppointment(0);
         }
     }
 

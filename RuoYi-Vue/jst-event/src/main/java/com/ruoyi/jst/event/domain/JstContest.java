@@ -87,7 +87,7 @@ public class JstContest extends BaseEntity
 
     /** 预约容量 */
     @Excel(name = "预约容量")
-    private Integer appointmentCapacity;
+    private Integer appointmentCapacity = 0;
 
     /** 核销子项配置JSON */
     @Excel(name = "核销子项配置JSON")
@@ -95,7 +95,7 @@ public class JstContest extends BaseEntity
 
     /** 是否允许重复预约：0否 1是 */
     @Excel(name = "是否允许重复预约：0否 1是")
-    private Integer allowRepeatAppointment;
+    private Integer allowRepeatAppointment = 0;
 
     /** 是否允许预约退款（Q-07 配置化）：0=不允许（默认），1=允许 */
     @Excel(name = "是否允许预约退款：0否 1是")

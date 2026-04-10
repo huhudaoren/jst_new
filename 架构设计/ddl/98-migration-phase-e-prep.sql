@@ -119,3 +119,14 @@ FROM sys_role WHERE role_key = 'jst_platform_auditor' AND del_flag = '0';
 SELECT 'E0-VERIFY: sys_role jst_platform_finance' AS chk,
        COUNT(1) AS role_exists
 FROM sys_role WHERE role_key = 'jst_platform_finance' AND del_flag = '0';
+
+-- =====================================================================
+-- 4. FIX-1: appointment defaults for partner contest create/edit
+-- =====================================================================
+ALTER TABLE jst_contest
+    MODIFY COLUMN appointment_capacity INT NOT NULL DEFAULT 0
+        COMMENT '预约容量';
+
+ALTER TABLE jst_contest
+    MODIFY COLUMN allow_repeat_appointment TINYINT(1) NOT NULL DEFAULT 0
+        COMMENT '是否允许重复预约：0否 1是';
