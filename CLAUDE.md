@@ -90,11 +90,13 @@ D:\coding\jst_v1\
 │   ├── 竞赛通-产品需求文档-统一版-V4.1.md   # PRD (Single Source of Truth)
 │   └── 竞赛通-管理后台Web端需求文档-V4.0.md
 ├── subagent\                     # ⭐ 子 Agent 协作体系
-│   ├── SUBAGENT_PROMPT.md        # 后端 Agent 系统提示
-│   ├── BACKEND_AGENT_PROMPT.md
+│   ├── BACKEND_AGENT_PROMPT.md   # 后端 Agent 系统提示
 │   ├── MINIPROGRAM_AGENT_PROMPT.md  # 前端 Agent 系统提示（含 PNG 对齐要求）
+│   ├── UI_POLISH_AGENT_PROMPT.md    # UI 视觉优化 Agent（直连用户对话模式）
+│   ├── TEST_AGENT_PROMPT.md         # ⭐ 测试审计 Agent（Layer1 静态 + Layer2 运行态 + Layer3 前端访问）
 │   ├── TASK_CARD_TEMPLATE.md
 │   ├── WORKFLOW.md
+│   ├── ui-feedback\              # UI Agent 字段缺口反馈文档
 │   └── tasks\                    # 任务卡 + 任务报告
 │       ├── F4-学生渠道绑定.md
 │       ├── F5-赛事方入驻审核.md
@@ -166,7 +168,14 @@ D:\coding\jst_v1\
 | **E2-PA-1 赛事方入驻** | 3 公开页 + 4 步表单 + 响应式 + 匿名上传接口 | ✅ 完成 |
 | **E2-PA-2 赛事方工作台** | home.vue 4 区块 + jst_partner 登录跳转 | ✅ 完成 |
 | **E2-PA-4 报名审核** | enroll-manage + 详情抽屉 + 批量审核 | ✅ 完成 |
-| **E1-CH-2/3/4/6 + E2-PA-3** | 渠道工作台/学生管理/订单/数据 + 赛事 CRUD | 🏃 执行中（第三波，5 Agent 并行） |
+| **E1-CH-2/3/4/6** | 渠道工作台/学生管理/订单/数据统计 | ✅ 完成 |
+| **E2-PA-3** | 赛事 CRUD 与提审 | ✅ 完成 |
+| **E1-CH-7** | 批量报名 + 临时档案 + 团队预约 | ✅ 完成 |
+| **E2-PA-5/6** | 成绩导入 + 证书管理（后端+前端） | ✅ 完成 |
+| **E2-PA-7/8** | 赛事结算 + 现场核销 | ✅ 完成 |
+| **菜单 SQL** | 99-migration-partner-menus.sql（9700-9799 段） | ✅ 完成 |
+| **入口修复** | my 老师→申请渠道方 + home 批量报名/团队预约跳转 | ✅ 完成 |
+| **测试审计** | Test Agent Layer 1/2/3 | 🏃 执行中 |
 | **E-4-WEB Web 后台** | 65 菜单 PC + 手机响应式（承担 H5 审核端职能） | ⏸️ 等原型出齐后启动（Vue 2） |
 
 ---
@@ -228,24 +237,19 @@ D:\coding\jst_v1\
 - E2-PA-2 赛事方工作台首页 ✅
 - E2-PA-4 报名审核 ✅
 
-**执行中（第三波，5 Agent 并行）**：
-- E1-CH-2 渠道工作台 home + my 视角重构
-- E1-CH-3 学生管理 + 邀请绑定（含倒计时解绑 Q-01）
-- E1-CH-4 渠道订单 + 订单详情 V4.0
-- E1-CH-6 数据统计轻量看板
-- E2-PA-3 赛事 CRUD 与提审
+**第三波 ✅**：E1-CH-2/3/4/6 + E2-PA-3 全部完成
+**第四波 ✅**：E1-CH-7 + E2-PA-5/6/7/8 全部完成
+**菜单 SQL ✅**：`99-migration-partner-menus.sql` 赛事方 8 菜单 + 22 按钮权限注册
+**入口修复 ✅**：my/index "老师→申请渠道方" + home 批量报名/团队预约跳转修复
 
-**待派（第四波）**：
-- E1-CH-7 批量报名 + 临时参赛档案 + 团队预约
-- E2-PA-5 成绩导入与发布
-- E2-PA-6 证书管理
-- E2-PA-7 赛事结算中心
-- E2-PA-8 现场核销端
+**🧪 测试审计（进行中）**：
+- Test Agent 已派发（Layer 1 静态 + Layer 2 运行态 + Layer 3 前端访问）
+- 静态扫描已知：12 处 toast 占位 / 5 处 API 后端 404 / 2 处 URL 路径不一致
+- 等报告回来再出精确修复卡（FIX-LINK-FE + FIX-LINK-BE，任务卡已预写待确认）
 
 **待补充**：
-- 赛事方菜单权限注册 SQL（sys_menu + sys_role_menu，第三波完成后补）
-- 赛事方后端 `/jst/partner/*` Controller 组（PA-3~7 会逐步补）
-- 后端字段缺口（PA-2 dashboard 3 接口、PA-4 partner enroll 路由）
+- 赛事方后端 `/jst/partner/*` Controller 部分接口桥接到 F7/F9 现有路由（PA-3/PA-4 前端已做兜底）
+- 后端字段缺口文档（PA-2 dashboard 3 接口、PA-4 partner enroll 路由、CH-4 订单详情费用明细）→ `subagent/ui-feedback/` 目录
 
 ### 待做但暂缓
 
@@ -291,7 +295,13 @@ D:\coding\jst_v1\
 | 10-jst-finance.sql | 财务 |
 | 23-基础数据初始化.sql | 字典、权限等基础数据 |
 | 90-reset-fixtures.sql | 测试 fixture 重置 |
-| 95~98-migration-*.sql | 迁移脚本（含 `97-migration-baseline-roles.sql` 基线角色补齐） |
+| 95-migration-phase-c-permissions.sql | C 阶段权限点补齐（60 菜单 + 71 角色绑定） |
+| 95-migration-unify-owner-type.sql | owner_type 清洗脚本（未执行，需停服窗口） |
+| 96-migration-user-address.sql | jst_user_address 建表 |
+| 96-grant-jst-partner-permissions.sql | jst_partner 角色权限绑定 |
+| 97-migration-baseline-roles.sql | 基线角色补齐（student/partner/channel/platform_op） |
+| 98-migration-phase-e-prep.sql | E 阶段 DDL（reject_count/allow_appointment_refund/新角色） |
+| 99-migration-partner-menus.sql | ⭐ 赛事方菜单树（9700-9799 段，8 菜单 + 22 按钮） |
 | 99-test-fixtures.sql | 测试数据 |
 
 ---
