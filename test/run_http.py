@@ -10,7 +10,7 @@ import json
 import requests
 
 def parse_http(path):
-    with open(path, encoding='utf-8') as f:
+    with open(path, encoding='utf-8', errors='replace') as f:
         text = f.read()
     # Collect file-level @vars
     vars_ = {}

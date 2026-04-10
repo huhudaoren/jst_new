@@ -23,7 +23,12 @@ WHERE m.perms IN (
     -- 表单模板 (赛事方需要配置自己的表单)
     'jst:event:formTemplate:list','jst:event:formTemplate:edit','jst:event:formTemplate:audit',
     -- 报名/成绩/证书 (查看自己的)
-    'jst:event:enrollRecord:list','jst:event:scoreRecord:list', 'jst:event:certRecord:list'
+    'jst:event:enrollRecord:list','jst:event:scoreRecord:list', 'jst:event:certRecord:list',
+    'jst:event:score_record:list','jst:event:score_record:query','jst:event:score_record:add','jst:event:score_record:edit',
+    'jst:event:cert_record:list','jst:event:cert_record:query','jst:event:cert_record:add','jst:event:cert_record:edit',
+    'jst:event:cert_template:list','jst:event:cert_template:query','jst:event:cert_template:add','jst:event:cert_template:edit',
+    'jst:channel:event_settlement:list', 'jst:channel:event_settlement:query',
+    'jst:channel:event_settlement:edit'
 )
 AND NOT EXISTS (
     SELECT 1 FROM sys_role_menu rm WHERE rm.role_id = @partner_role_id AND rm.menu_id = m.menu_id

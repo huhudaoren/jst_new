@@ -111,6 +111,10 @@ DELETE FROM jst_appointment_writeoff_item WHERE writeoff_item_id BETWEEN 96800 A
 DELETE FROM jst_appointment_record WHERE appointment_id BETWEEN 96700 AND 96899;
 DELETE FROM jst_team_appointment_member WHERE member_id BETWEEN 96600 AND 96799;
 DELETE FROM jst_team_appointment WHERE team_appointment_id BETWEEN 96600 AND 96699;
+DELETE FROM jst_payment_pay_record WHERE business_type = 'event_settlement' AND business_id BETWEEN 94700 AND 94799;
+DELETE FROM jst_contract_record WHERE ref_settlement_id BETWEEN 94700 AND 94799;
+DELETE FROM jst_invoice_record WHERE ref_settlement_no LIKE 'ES_PA7_%';
+DELETE FROM jst_event_settlement WHERE event_settlement_id BETWEEN 94700 AND 94799;
 -- =====================================================================
 -- jst-user 模块测试数据 (含临时档案认领样�?feature)
 -- =====================================================================
@@ -486,6 +490,18 @@ INSERT INTO sys_user_role (user_id, role_id)
 VALUES
 (9101, 101),
 (9102, 101);
+-- E2-PA-7 grant partner settlement permissions to fixture partner role.
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT 101, m.menu_id
+FROM sys_menu m
+WHERE m.perms IN (
+    'jst:channel:event_settlement:list',
+    'jst:channel:event_settlement:query',
+    'jst:channel:event_settlement:edit'
+)
+AND NOT EXISTS (
+    SELECT 1 FROM sys_role_menu rm WHERE rm.role_id = 101 AND rm.menu_id = m.menu_id
+);
 
 INSERT INTO jst_event_partner (
     partner_id, user_id, partner_name, contact_name, contact_mobile,
@@ -522,6 +538,53 @@ INSERT INTO jst_contest (
 -- F8 jst-event 动态表单模板测试数�?-- 涉及表：jst_enroll_form_template / jst_contest
 -- =====================================================================
 
+
+-- =====================================================================
+-- E2-PA-7 partner event settlement fixtures
+-- Tables: jst_event_settlement / jst_payment_pay_record / jst_contract_record / jst_invoice_record
+-- =====================================================================
+INSERT INTO jst_event_settlement (
+    event_settlement_id, settlement_no, partner_id, contest_id,
+    total_list_amount, total_coupon_amount, total_points_amount, platform_bear_amount,
+    total_net_pay, total_refund, total_rebate, total_service_fee, contract_deduction, final_amount,
+    status, audit_remark, pay_voucher_url, pay_time,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(94701, 'ES_PA7_94701', 8101, 8201, 2000.00, 100.00, 50.00, 150.00, 1850.00, 120.00, 200.00, 100.00, 30.00, 1550.00, 'pending_confirm', NULL, NULL, NULL, 'fixture', NOW(), 'fixture', NOW(), 'PA7 pending confirm A', '0'),
+(94702, 'ES_PA7_94702', 8102, 8204, 800.00, 0.00, 0.00, 0.00, 800.00, 0.00, 60.00, 40.00, 0.00, 700.00, 'pending_confirm', NULL, NULL, NULL, 'fixture', NOW(), 'fixture', NOW(), 'PA7 pending confirm B', '0'),
+(94703, 'ES_PA7_94703', 8101, 8201, 1200.00, 80.00, 20.00, 100.00, 1100.00, 0.00, 90.00, 60.00, 10.00, 1040.00, 'reviewing', 'DISPUTE:amount needs platform review', NULL, NULL, 'fixture', NOW(), 'fixture', NOW(), 'PA7 dispute reviewing', '0'),
+(94704, 'ES_PA7_94704', 8101, 8201, 1500.00, 0.00, 0.00, 0.00, 1500.00, 0.00, 100.00, 80.00, 0.00, 1320.00, 'paid', 'paid by platform', 'https://fixture.example.com/pa7/pay-94704.pdf', DATE_SUB(NOW(), INTERVAL 1 DAY), 'fixture', NOW(), 'fixture', NOW(), 'PA7 paid', '0'),
+(94705, 'ES_PA7_94705', 8101, 8201, 900.00, 50.00, 0.00, 50.00, 850.00, 0.00, 70.00, 45.00, 5.00, 780.00, 'pending_confirm', NULL, NULL, NULL, 'fixture', NOW(), 'fixture', NOW(), 'PA7 pending dispute target', '0');
+
+INSERT INTO jst_payment_pay_record (
+    pay_record_id, pay_no, business_type, business_id, target_type, target_id,
+    amount, pay_account, pay_time, voucher_url, operator_id,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES (
+    94741, 'PAY_PA7_94704', 'event_settlement', 94704, 'partner', 8101,
+    1320.00, 'platform-settlement-account', DATE_SUB(NOW(), INTERVAL 1 DAY), 'https://fixture.example.com/pa7/pay-94704.pdf', 1,
+    'fixture', NOW(), 'fixture', NOW(), 'PA7 payout voucher', '0'
+);
+
+INSERT INTO jst_contract_record (
+    contract_id, contract_no, contract_type, target_type, target_id, template_id,
+    file_url, status, effective_time, sign_time, ref_settlement_id,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES (
+    94761, 'CT_PA7_94704', 'partner_coop', 'partner', 8101, NULL,
+    'https://fixture.example.com/pa7/contract-94704.pdf', 'signed', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 9 DAY), 94704,
+    'fixture', NOW(), 'fixture', NOW(), 'PA7 contract display only', '0'
+);
+
+INSERT INTO jst_invoice_record (
+    invoice_id, invoice_no, target_type, target_id, ref_settlement_no,
+    invoice_title, tax_no, amount, status, file_url, express_status, issue_time,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES (
+    94771, 'INV_PA7_94704', 'partner', 8101, 'ES_PA7_94704',
+    'PA7 Partner A Settlement Invoice', 'TAXPA794704', 1320.00, 'issued', 'https://fixture.example.com/pa7/invoice-94704.pdf', NULL, DATE_SUB(NOW(), INTERVAL 1 DAY),
+    'fixture', NOW(), 'fixture', NOW(), 'PA7 invoice display only', '0'
+);
 INSERT INTO jst_enroll_form_template (
     template_id, template_name, template_version, owner_type, owner_id,
     schema_json, audit_status, status, effective_time, create_by, create_time, update_by, update_time
@@ -1771,3 +1834,65 @@ INSERT INTO jst_user_rights (
 
 
 
+
+-- =====================================================================
+-- E2-PA-5 / E2-PA-6 partner score and certificate fixtures
+-- Tables: jst_score_record / jst_cert_template / jst_cert_record
+-- Contest: 8201, partner: 8101, enroll records: 8904/8905/8906
+-- =====================================================================
+DELETE FROM jst_cert_record WHERE cert_id BETWEEN 97080 AND 97099 OR create_by = 'fixture_pa5_pa6';
+DELETE FROM jst_cert_template WHERE template_id BETWEEN 97050 AND 97079 OR create_by = 'fixture_pa5_pa6';
+DELETE FROM jst_score_record WHERE score_id BETWEEN 97001 AND 97049 OR create_by = 'fixture_pa5_pa6';
+
+INSERT INTO jst_score_record (
+    score_id, contest_id, enroll_id, user_id, participant_id, score_value, award_level,
+    rank_no, import_batch_no, audit_status, publish_status, publish_time,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES
+(
+    97001, 8201, 8904, 1001, 3001, 88.50, 'PA5_SILVER',
+    2, 'SC_FIXTURE_PA5_DRAFT', 'draft', 'unpublished', NULL,
+    'fixture_pa5_pa6', NOW(), 'fixture_pa5_pa6', NOW(), 'PA5 draft editable', '0'
+),
+(
+    97002, 8201, 8905, 1001, 3004, 92.00, 'PA5_GOLD',
+    1, 'SC_FIXTURE_PA5_PENDING', 'pending', 'unpublished', NULL,
+    'fixture_pa5_pa6', NOW(), 'fixture_pa5_pa6', NOW(), 'PA5 pending review', '0'
+),
+(
+    97003, 8201, 8906, 1001, 3001, 95.00, 'PA5_INTL_GOLD',
+    1, 'SC_FIXTURE_PA5_PUBLISHED', 'approved', 'published', NOW(),
+    'fixture_pa5_pa6', NOW(), 'fixture_pa5_pa6', NOW(), 'PA5 published correction target', '0'
+);
+
+INSERT INTO jst_cert_template (
+    template_id, template_name, owner_type, owner_id, bg_image, layout_json, audit_status,
+    status, create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES (
+    97051, 'PA6_PARTNER_TEMPLATE', 'partner', 8101,
+    'https://fixture.example.com/cert/pa6-template.png',
+    JSON_OBJECT('title', 'Certificate', 'participantField', 'participantName'),
+    'pending', 1, 'fixture_pa5_pa6', NOW(), 'fixture_pa5_pa6', NOW(), 'PA6 partner template pending review', '0'
+);
+
+-- E2-PA-6 extra published score and preview cert fixture
+INSERT INTO jst_score_record (
+    score_id, contest_id, enroll_id, user_id, participant_id, score_value, award_level,
+    rank_no, import_batch_no, audit_status, publish_status, publish_time,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES (
+    97004, 8201, 8907, 1001, 3004, 89.00, 'PA6_BATCH_TARGET',
+    3, 'SC_FIXTURE_PA6_BATCH', 'approved', 'published', NOW(),
+    'fixture_pa5_pa6', NOW(), 'fixture_pa5_pa6', NOW(), 'PA6 batch grant target', '0'
+);
+
+INSERT INTO jst_cert_record (
+    cert_id, cert_no, contest_id, score_id, enroll_id, user_id, participant_id,
+    template_id, cert_file_url, issue_status, issue_time, void_reason, verify_code,
+    create_by, create_time, update_by, update_time, remark, del_flag
+) VALUES (
+    97081, 'JST-2026-ART-97081', 8201, 97003, 8906, 1001, 3001,
+    97051, NULL, 'draft', NULL, NULL, 'VC97081',
+    'fixture_pa5_pa6', NOW(), 'fixture_pa5_pa6', NOW(), 'PA6 preview and submit target', '0'
+);
+UPDATE jst_cert_template SET audit_status = 'approved', remark = 'PA6 partner template approved for batch fixture' WHERE template_id = 97051;

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.PartnerScoreMapper">
+
+    <resultMap id="ScoreRecordResult" type="com.ruoyi.jst.event.domain.JstScoreRecord">
+        <id property="scoreId" column="score_id"/>
+        <result property="contestId" column="contest_id"/>
+        <result property="enrollId" column="enroll_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="participantId" column="participant_id"/>
+        <result property="scoreValue" column="score_value"/>
+        <result property="awardLevel" column="award_level"/>
+        <result property="rankNo" column="rank_no"/>
+        <result property="importBatchNo" column="import_batch_no"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="publishStatus" column="publish_status"/>
+        <result property="publishTime" column="publish_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <select id="selectScoreList" parameterType="com.ruoyi.jst.event.dto.ScoreQueryReqDTO"
+            resultType="com.ruoyi.jst.event.vo.PartnerScoreResVO">
+        select s.score_id as scoreId,
+               s.contest_id as contestId,
+               c.contest_name as contestName,
+               s.enroll_id as enrollId,
+               er.enroll_no as enrollNo,
+               s.user_id as userId,
+               s.participant_id as participantId,
+               p.name as participantName,
+               p.guardian_mobile as guardianMobileMasked,
+               s.score_value as scoreValue,
+               s.award_level as awardLevel,
+               s.rank_no as rankNo,
+               s.import_batch_no as importBatchNo,
+               s.audit_status as auditStatus,
+               s.publish_status as publishStatus,
+               s.publish_time as publishTime,
+               s.remark as remark,
+               s.update_time as updateTime
+        from jst_score_record s
+                 left join jst_contest c on c.contest_id = s.contest_id and c.del_flag = '0'
+                 left join jst_enroll_record er on er.enroll_id = s.enroll_id and er.del_flag = '0'
+                 left join jst_participant p on p.participant_id = s.participant_id and p.del_flag = '0'
+        <where>
+            s.del_flag = '0'
+            <if test="contestId != null">
+                and s.contest_id = #{contestId}
+            </if>
+            <if test="participantName != null and participantName != ''">
+                and p.name like concat('%', #{participantName}, '%')
+            </if>
+            <if test="auditStatus != null and auditStatus != ''">
+                and s.audit_status = #{auditStatus}
+            </if>
+            <if test="publishStatus != null and publishStatus != ''">
+                and s.publish_status = #{publishStatus}
+            </if>
+            <if test="displayStatus != null and displayStatus == 'pending_review'">
+                and s.audit_status = 'pending'
+            </if>
+            <if test="displayStatus != null and displayStatus == 'published'">
+                and s.publish_status = 'published'
+            </if>
+            <if test="displayStatus != null and displayStatus == 'correction_requested'">
+                and s.publish_status = 'published'
+                and s.remark like '[CORRECTION_REQUESTED]%'
+            </if>
+            <if test="params.dataScope != null and params.dataScope != ''">
+                ${params.dataScope}
+            </if>
+        </where>
+        order by s.update_time desc, s.score_id desc
+    </select>
+
+    <select id="selectScoreStats" resultType="com.ruoyi.jst.event.vo.ScoreStatsResVO">
+        select
+            (select count(1)
+             from jst_enroll_record er
+             join jst_contest c on c.contest_id = er.contest_id and c.del_flag = '0'
+             where er.del_flag = '0'
+               and er.contest_id = #{contestId}
+               and c.partner_id = #{partnerId}) as enrollCount,
+            (select count(1)
+             from jst_score_record s
+             join jst_contest c on c.contest_id = s.contest_id and c.del_flag = '0'
+             where s.del_flag = '0'
+               and s.contest_id = #{contestId}
+               and c.partner_id = #{partnerId}) as scoredCount,
+            (select count(1)
+             from jst_score_record s
+             join jst_contest c on c.contest_id = s.contest_id and c.del_flag = '0'
+             where s.del_flag = '0'
+               and s.contest_id = #{contestId}
+               and s.audit_status = 'pending'
+               and c.partner_id = #{partnerId}) as pendingReviewCount,
+            (select count(1)
+             from jst_score_record s
+             join jst_contest c on c.contest_id = s.contest_id and c.del_flag = '0'
+             where s.del_flag = '0'
+               and s.contest_id = #{contestId}
+               and s.publish_status = 'published'
+               and c.partner_id = #{partnerId}) as publishedCount
+    </select>
+
+    <select id="selectById" resultMap="ScoreRecordResult">
+        select score_id, contest_id, enroll_id, user_id, participant_id, score_value, award_level,
+               rank_no, import_batch_no, audit_status, publish_status, publish_time, create_by,
+               create_time, update_by, update_time, remark, del_flag
+        from jst_score_record
+        where score_id = #{scoreId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectEnrollRef" resultType="com.ruoyi.jst.event.vo.ScoreEnrollRefVO">
+        select enroll_id as enrollId,
+               enroll_no as enrollNo,
+               contest_id as contestId,
+               user_id as userId,
+               participant_id as participantId,
+               audit_status as auditStatus
+        from jst_enroll_record
+        where contest_id = #{contestId}
+          and enroll_id = #{enrollId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="countScoreByEnroll" resultType="int">
+        select count(1)
+        from jst_score_record
+        where enroll_id = #{enrollId}
+          and del_flag = '0'
+          <if test="excludeScoreId != null">
+              and score_id <![CDATA[<>]]> #{excludeScoreId}
+          </if>
+    </select>
+
+    <insert id="insertScore" parameterType="com.ruoyi.jst.event.domain.JstScoreRecord"
+            useGeneratedKeys="true" keyProperty="scoreId">
+        insert into jst_score_record (
+            contest_id, enroll_id, user_id, participant_id, score_value, award_level,
+            rank_no, import_batch_no, audit_status, publish_status, create_by,
+            create_time, update_by, update_time, remark, del_flag
+        ) values (
+            #{contestId}, #{enrollId}, #{userId}, #{participantId}, #{scoreValue}, #{awardLevel},
+            #{rankNo}, #{importBatchNo}, #{auditStatus}, #{publishStatus}, #{createBy},
+            #{createTime}, #{updateBy}, #{updateTime}, #{remark}, #{delFlag}
+        )
+    </insert>
+
+    <update id="updateDraftScore">
+        update jst_score_record
+        set contest_id = #{score.contestId},
+            enroll_id = #{score.enrollId},
+            user_id = #{score.userId},
+            participant_id = #{score.participantId},
+            score_value = #{score.scoreValue},
+            award_level = #{score.awardLevel},
+            rank_no = #{score.rankNo},
+            remark = #{score.remark},
+            update_by = #{score.updateBy},
+            update_time = #{score.updateTime}
+        where score_id = #{score.scoreId}
+          and audit_status = #{expectedAuditStatus}
+          and publish_status = 'unpublished'
+          and del_flag = '0'
+    </update>
+
+    <update id="updateAuditStatusByExpected">
+        update jst_score_record
+        set audit_status = #{targetAuditStatus},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where score_id = #{scoreId}
+          and audit_status = #{expectedAuditStatus}
+          and publish_status = 'unpublished'
+          and del_flag = '0'
+    </update>
+
+    <update id="markCorrectionRequested">
+        update jst_score_record
+        set remark = #{remark},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where score_id = #{scoreId}
+          and publish_status = 'published'
+          and del_flag = '0'
+    </update>
+</mapper>

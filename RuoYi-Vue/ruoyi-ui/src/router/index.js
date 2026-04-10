@@ -128,6 +128,30 @@ export const partnerHomeRoute = {
       component: () => import('@/views/partner/enroll-manage'),
       name: 'PartnerEnrollManage',
       meta: { title: '报名审核', icon: 'form' }
+    },
+    {
+      path: 'score-manage',
+      component: () => import('@/views/partner/score-manage'),
+      name: 'PartnerScoreManage',
+      meta: { title: '成绩管理', icon: 'edit' }
+    },
+    {
+      path: 'cert-manage',
+      component: () => import('@/views/partner/cert-manage'),
+      name: 'PartnerCertManage',
+      meta: { title: '证书管理', icon: 'education' }
+    },
+    {
+      path: 'writeoff',
+      component: () => import('@/views/partner/writeoff'),
+      name: 'PartnerWriteoff',
+      meta: { title: '现场核销', icon: 'form' }
+    },
+    {
+      path: 'settlement',
+      component: () => import('@/views/partner/settlement'),
+      name: 'PartnerSettlement',
+      meta: { title: '结算中心', icon: 'money' }
     }
   ]
 }

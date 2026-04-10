@@ -447,6 +447,74 @@ client.test("瓒婃潈搴斿け璐?, function() {
 
 
 ### =====================================================================
+
+### =====================================================================
+### E2-PA-7 partner event settlement
+### Preconditions: fixtures 94701/94702/94704/94705 exist and partner_f7_a has settlement permissions
+### =====================================================================
+
+### PA7-A1. partner A settlement list
+GET {{baseUrl}}/jst/partner/settlement/list?pageNum=1&pageSize=10
+Authorization: Bearer {{partner_a_token}}
+
+> {%
+client.test("PA7-A1 partner settlement list success", function() {
+    client.assert(response.body.code === 200 || response.status === 200);
+    client.assert(Array.isArray(response.body.rows));
+    client.assert(response.body.rows.every(function(row) { return row.partnerId === 8101; }));
+});
+%}
+
+### PA7-A2. partner A settlement detail
+GET {{baseUrl}}/jst/partner/settlement/94701
+Authorization: Bearer {{partner_a_token}}
+
+> {%
+client.test("PA7-A2 settlement detail has amount split", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.eventSettlementId === 94701);
+    client.assert(Array.isArray(response.body.data.orderList));
+    client.assert(response.body.data.finalAmount !== undefined);
+});
+%}
+
+### PA7-A3. partner A confirms pending settlement
+POST {{baseUrl}}/jst/partner/settlement/94701/confirm
+Authorization: Bearer {{partner_a_token}}
+
+> {%
+client.test("PA7-A3 confirm changes status to reviewing", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.status === "reviewing");
+});
+%}
+
+### PA7-A4. partner A submits dispute
+POST {{baseUrl}}/jst/partner/settlement/94705/dispute
+Content-Type: {{contentType}}
+Authorization: Bearer {{partner_a_token}}
+
+{
+  "disputeReason": "Need platform review for service fee"
+}
+
+> {%
+client.test("PA7-A4 dispute changes status to reviewing", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data.status === "reviewing");
+    client.assert(response.body.data.auditRemark.indexOf("DISPUTE:") === 0);
+});
+%}
+
+### PA7-A5. partner A cannot view partner B settlement
+GET {{baseUrl}}/jst/partner/settlement/94702
+Authorization: Bearer {{partner_a_token}}
+
+> {%
+client.test("PA7-A5 cross-partner settlement should be rejected", function() {
+    client.assert(response.status === 403 || response.body.code !== 200);
+});
+%}
 ### I. 鍔ㄦ�佽〃鍗曟ā鏉?admin (jst-event / FormTemplateController) - F8
 ### =====================================================================
 
@@ -1505,3 +1573,200 @@ client.test("MR-RT-A2 批量发权益成功", function() {
 %}
 
 
+
+### =====================================================================
+### E2-PA-5 partner score import/review/correction (PartnerScoreController)
+### Preconditions: 96-grant-jst-partner-permissions.sql and 99-test-fixtures.sql loaded
+### =====================================================================
+
+### PA5-0. partner A login
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_a",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("pa5_partner_token", response.body.token);
+%}
+
+### PA5-1. list scores by contest
+GET {{baseUrl}}/jst/partner/score/list?contestId=8201&pageNum=1&pageSize=10
+Authorization: Bearer {{pa5_partner_token}}
+
+> {%
+client.test("PA5-1 partner score list success", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.rows && response.body.rows.length > 0);
+});
+%}
+
+### PA5-2. edit draft score
+PUT {{baseUrl}}/jst/partner/score/97001
+Content-Type: {{contentType}}
+Authorization: Bearer {{pa5_partner_token}}
+
+{
+  "contestId": 8201,
+  "enrollId": 8904,
+  "scoreValue": 91.50,
+  "awardLevel": "PA5_SILVER_EDITED",
+  "rankNo": 2,
+  "remark": "PA5 edit draft"
+}
+
+> {%
+client.test("PA5-2 edit draft score success", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### PA5-3. submit draft score review
+PUT {{baseUrl}}/jst/partner/score/submit-review
+Content-Type: {{contentType}}
+Authorization: Bearer {{pa5_partner_token}}
+
+{
+  "scoreIds": [97001]
+}
+
+> {%
+client.test("PA5-3 submit score review success", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### PA5-4. edit published score should fail
+PUT {{baseUrl}}/jst/partner/score/97003
+Content-Type: {{contentType}}
+Authorization: Bearer {{pa5_partner_token}}
+
+{
+  "contestId": 8201,
+  "enrollId": 8906,
+  "scoreValue": 99.00,
+  "awardLevel": "PA5_ILLEGAL_EDIT",
+  "rankNo": 1,
+  "remark": "should fail"
+}
+
+> {%
+client.test("PA5-4 edit published score rejected", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### PA5-5. apply correction for published score
+POST {{baseUrl}}/jst/partner/score/correction/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{pa5_partner_token}}
+
+{
+  "scoreId": 97003,
+  "newScoreValue": 96.00,
+  "newAwardLevel": "PA5_INTL_GOLD_CORRECTED",
+  "newRankNo": 1,
+  "reason": "PA5 correction request"
+}
+
+> {%
+client.test("PA5-5 correction apply success", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### =====================================================================
+### E2-PA-6 partner certificate template/grant/review/preview (PartnerCertController)
+### Preconditions: 96-grant-jst-partner-permissions.sql and 99-test-fixtures.sql loaded
+### =====================================================================
+
+### PA6-1. list certificate templates
+GET {{baseUrl}}/jst/partner/cert/template/list
+Authorization: Bearer {{pa5_partner_token}}
+
+> {%
+client.test("PA6-1 template list success", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### PA6-2. create template by JSON
+POST {{baseUrl}}/jst/partner/cert/template
+Content-Type: {{contentType}}
+Authorization: Bearer {{pa5_partner_token}}
+
+{
+  "templateName": "PA6_JSON_TEMPLATE",
+  "bgImage": "https://fixture.example.com/cert/pa6-json-template.png",
+  "layoutJson": "{\"title\":\"Certificate\"}"
+}
+
+> {%
+client.test("PA6-2 create template success", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### PA6-3. batch grant by published score
+POST {{baseUrl}}/jst/partner/cert/batch-grant
+Content-Type: {{contentType}}
+Authorization: Bearer {{pa5_partner_token}}
+
+{
+  "contestId": 8201,
+  "templateId": 97051,
+  "scoreIds": [97004]
+}
+
+> {%
+client.test("PA6-3 batch grant success", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### PA6-4. submit certificate review
+POST {{baseUrl}}/jst/partner/cert/submit-review
+Content-Type: {{contentType}}
+Authorization: Bearer {{pa5_partner_token}}
+
+{
+  "certIds": [97081]
+}
+
+> {%
+client.test("PA6-4 submit cert review success", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### PA6-5. certificate preview
+GET {{baseUrl}}/jst/partner/cert/97081/preview
+Authorization: Bearer {{pa5_partner_token}}
+
+> {%
+client.test("PA6-5 cert preview success", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.previewImage.indexOf("data:image/png;base64,") === 0);
+});
+%}
+
+### PA6-6. batch grant unpublished score should fail
+POST {{baseUrl}}/jst/partner/cert/batch-grant
+Content-Type: {{contentType}}
+Authorization: Bearer {{pa5_partner_token}}
+
+{
+  "contestId": 8201,
+  "templateId": 97051,
+  "scoreIds": [97002]
+}
+
+> {%
+client.test("PA6-6 unpublished score rejected", function() {
+  client.assert(response.body.code !== 200);
+});
+%}

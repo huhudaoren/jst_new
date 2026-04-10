@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.PartnerCertMapper">
+
+    <resultMap id="CertRecordResult" type="com.ruoyi.jst.event.domain.JstCertRecord">
+        <id property="certId" column="cert_id"/>
+        <result property="certNo" column="cert_no"/>
+        <result property="contestId" column="contest_id"/>
+        <result property="scoreId" column="score_id"/>
+        <result property="enrollId" column="enroll_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="participantId" column="participant_id"/>
+        <result property="templateId" column="template_id"/>
+        <result property="certFileUrl" column="cert_file_url"/>
+        <result property="issueStatus" column="issue_status"/>
+        <result property="issueTime" column="issue_time"/>
+        <result property="voidReason" column="void_reason"/>
+        <result property="verifyCode" column="verify_code"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <resultMap id="TemplateResult" type="com.ruoyi.jst.event.domain.JstCertTemplate">
+        <id property="templateId" column="template_id"/>
+        <result property="templateName" column="template_name"/>
+        <result property="ownerType" column="owner_type"/>
+        <result property="ownerId" column="owner_id"/>
+        <result property="bgImage" column="bg_image"/>
+        <result property="layoutJson" column="layout_json"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <insert id="insertTemplate" parameterType="com.ruoyi.jst.event.domain.JstCertTemplate"
+            useGeneratedKeys="true" keyProperty="templateId">
+        insert into jst_cert_template (
+            template_name, owner_type, owner_id, bg_image, layout_json, audit_status,
+            status, create_by, create_time, update_by, update_time, remark, del_flag
+        ) values (
+            #{templateName}, #{ownerType}, #{ownerId}, #{bgImage}, #{layoutJson}, #{auditStatus},
+            #{status}, #{createBy}, #{createTime}, #{updateBy}, #{updateTime}, #{remark}, #{delFlag}
+        )
+    </insert>
+
+    <select id="selectTemplateById" resultMap="TemplateResult">
+        select template_id, template_name, owner_type, owner_id, bg_image, layout_json,
+               audit_status, status, create_by, create_time, update_by, update_time, remark, del_flag
+        from jst_cert_template
+        where template_id = #{templateId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectTemplateList" resultType="com.ruoyi.jst.event.vo.CertTemplateResVO">
+        select template_id as templateId,
+               template_name as templateName,
+               owner_type as ownerType,
+               owner_id as ownerId,
+               bg_image as bgImage,
+               layout_json as layoutJson,
+               audit_status as auditStatus,
+               status as status,
+               create_time as createTime
+        from jst_cert_template
+        where del_flag = '0'
+          and status = 1
+          and (
+              (owner_type = 'partner' and owner_id = #{partnerId})
+              or (owner_type = 'platform' and audit_status = 'approved')
+          )
+        order by create_time desc, template_id desc
+    </select>
+
+    <select id="selectCertList" parameterType="com.ruoyi.jst.event.dto.CertQueryReqDTO"
+            resultType="com.ruoyi.jst.event.vo.PartnerCertResVO">
+        select cr.cert_id as certId,
+               cr.cert_no as certNo,
+               cr.contest_id as contestId,
+               c.contest_name as contestName,
+               cr.score_id as scoreId,
+               cr.enroll_id as enrollId,
+               er.enroll_no as enrollNo,
+               cr.user_id as userId,
+               cr.participant_id as participantId,
+               p.name as participantName,
+               p.guardian_mobile as guardianMobileMasked,
+               cr.template_id as templateId,
+               t.template_name as templateName,
+               cr.cert_file_url as certFileUrl,
+               cr.issue_status as issueStatus,
+               cr.issue_time as issueTime,
+               cr.verify_code as verifyCode,
+               s.award_level as awardLevel
+        from jst_cert_record cr
+                 left join jst_contest c on c.contest_id = cr.contest_id and c.del_flag = '0'
+                 left join jst_score_record s on s.score_id = cr.score_id and s.del_flag = '0'
+                 left join jst_enroll_record er on er.enroll_id = cr.enroll_id and er.del_flag = '0'
+                 left join jst_participant p on p.participant_id = cr.participant_id and p.del_flag = '0'
+                 left join jst_cert_template t on t.template_id = cr.template_id and t.del_flag = '0'
+        <where>
+            cr.del_flag = '0'
+            <if test="contestId != null">
+                and cr.contest_id = #{contestId}
+            </if>
+            <if test="certNo != null and certNo != ''">
+                and cr.cert_no = #{certNo}
+            </if>
+            <if test="participantName != null and participantName != ''">
+                and p.name like concat('%', #{participantName}, '%')
+            </if>
+            <if test="issueStatus != null and issueStatus != ''">
+                and cr.issue_status = #{issueStatus}
+            </if>
+            <if test="displayStatus != null and displayStatus == 'granted'">
+                and cr.issue_status = 'issued'
+            </if>
+            <if test="displayStatus != null and displayStatus != 'granted'">
+                and cr.issue_status = #{displayStatus}
+            </if>
+            <if test="params.dataScope != null and params.dataScope != ''">
+                ${params.dataScope}
+            </if>
+        </where>
+        order by cr.update_time desc, cr.cert_id desc
+    </select>
+
+    <select id="selectCertById" resultMap="CertRecordResult">
+        select cert_id, cert_no, contest_id, score_id, enroll_id, user_id, participant_id,
+               template_id, cert_file_url, issue_status, issue_time, void_reason,
+               verify_code, create_by, create_time, update_by, update_time, remark, del_flag
+        from jst_cert_record
+        where cert_id = #{certId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectCertDetail" resultType="com.ruoyi.jst.event.vo.PartnerCertResVO">
+        select cr.cert_id as certId,
+               cr.cert_no as certNo,
+               cr.contest_id as contestId,
+               c.contest_name as contestName,
+               cr.score_id as scoreId,
+               cr.enroll_id as enrollId,
+               er.enroll_no as enrollNo,
+               cr.user_id as userId,
+               cr.participant_id as participantId,
+               p.name as participantName,
+               p.guardian_mobile as guardianMobileMasked,
+               cr.template_id as templateId,
+               t.template_name as templateName,
+               cr.cert_file_url as certFileUrl,
+               cr.issue_status as issueStatus,
+               cr.issue_time as issueTime,
+               cr.verify_code as verifyCode,
+               s.award_level as awardLevel
+        from jst_cert_record cr
+                 left join jst_contest c on c.contest_id = cr.contest_id and c.del_flag = '0'
+                 left join jst_score_record s on s.score_id = cr.score_id and s.del_flag = '0'
+                 left join jst_enroll_record er on er.enroll_id = cr.enroll_id and er.del_flag = '0'
+                 left join jst_participant p on p.participant_id = cr.participant_id and p.del_flag = '0'
+                 left join jst_cert_template t on t.template_id = cr.template_id and t.del_flag = '0'
+        where cr.cert_id = #{certId}
+          and cr.del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectPublishedScoresForBatch" resultType="com.ruoyi.jst.event.vo.CertScoreRefVO">
+        select s.score_id as scoreId,
+               s.contest_id as contestId,
+               s.enroll_id as enrollId,
+               s.user_id as userId,
+               s.participant_id as participantId,
+               s.score_value as scoreValue,
+               s.award_level as awardLevel,
+               p.name as participantName,
+               c.contest_name as contestName
+        from jst_score_record s
+                 left join jst_participant p on p.participant_id = s.participant_id and p.del_flag = '0'
+                 left join jst_contest c on c.contest_id = s.contest_id and c.del_flag = '0'
+        where s.contest_id = #{contestId}
+          and s.audit_status = 'approved'
+          and s.publish_status = 'published'
+          and s.del_flag = '0'
+          <if test="scoreIds != null and scoreIds.size() > 0">
+              and s.score_id in
+              <foreach item="scoreId" collection="scoreIds" open="(" separator="," close=")">
+                  #{scoreId}
+              </foreach>
+          </if>
+        order by s.score_id asc
+    </select>
+
+    <select id="countCertByScoreId" resultType="int">
+        select count(1)
+        from jst_cert_record
+        where score_id = #{scoreId}
+          and issue_status != 'voided'
+          and del_flag = '0'
+    </select>
+
+    <insert id="insertCert" parameterType="com.ruoyi.jst.event.domain.JstCertRecord"
+            useGeneratedKeys="true" keyProperty="certId">
+        insert into jst_cert_record (
+            cert_no, contest_id, score_id, enroll_id, user_id, participant_id,
+            template_id, cert_file_url, issue_status, verify_code, create_by,
+            create_time, update_by, update_time, remark, del_flag
+        ) values (
+            #{certNo}, #{contestId}, #{scoreId}, #{enrollId}, #{userId}, #{participantId},
+            #{templateId}, #{certFileUrl}, #{issueStatus}, #{verifyCode}, #{createBy},
+            #{createTime}, #{updateBy}, #{updateTime}, #{remark}, #{delFlag}
+        )
+    </insert>
+
+    <update id="updateIssueStatusByExpected">
+        update jst_cert_record
+        set issue_status = #{targetIssueStatus},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where cert_id = #{certId}
+          and issue_status = #{expectedIssueStatus}
+          and del_flag = '0'
+    </update>
+</mapper>

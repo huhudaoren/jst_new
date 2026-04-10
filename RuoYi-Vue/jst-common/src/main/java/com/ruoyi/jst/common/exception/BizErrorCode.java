@@ -35,6 +35,14 @@ public enum BizErrorCode {
     JST_EVENT_PARTNER_NOT_AUTHED(20030, "赛事方未通过审核"),
     JST_EVENT_COURSE_NOT_FOUND(20040, "课程不存在"),
     JST_EVENT_COURSE_NOT_ON(20041, "课程未上架或未审核通过"),
+    JST_EVENT_SCORE_NOT_FOUND(20050, "成绩记录不存在"),
+    JST_EVENT_SCORE_NOT_EDITABLE(20051, "当前成绩状态不允许编辑"),
+    JST_EVENT_SCORE_ILLEGAL_TRANSIT(20052, "成绩状态非法流转"),
+    JST_EVENT_SCORE_IMPORT_FAILED(20053, "成绩导入失败"),
+    JST_EVENT_CERT_TEMPLATE_NOT_FOUND(20060, "证书模板不存在"),
+    JST_EVENT_CERT_NOT_FOUND(20061, "证书记录不存在"),
+    JST_EVENT_CERT_ILLEGAL_TRANSIT(20062, "证书状态非法流转"),
+    JST_EVENT_CERT_BATCH_EMPTY(20063, "没有可生成证书的已发布成绩"),
 
     // ========== jst-order (3xxxx) ==========
     JST_ORDER_NOT_FOUND(30001, "订单不存在"),
@@ -132,6 +140,8 @@ public enum BizErrorCode {
     // ========== jst-finance (99xxx) ==========
     JST_FINANCE_INVOICE_NOT_FOUND(99001, "发票不存在"),
     JST_FINANCE_PAY_RECORD_DUPLICATE(99002, "重复打款记录"),
+    JST_FINANCE_SETTLEMENT_NOT_FOUND(99003, "赛事结算单不存在"),
+    JST_FINANCE_SETTLEMENT_STATUS_INVALID(99004, "赛事结算单状态非法流转"),
 
     // ========== E0 phase-e-prep ==========
     JST_CHANNEL_AUTH_LOCKED(10040, "认证申请已达最大驳回次数，请联系客服"),
