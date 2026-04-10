@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.finance.mapper.PartnerSettlementMapper">
+
+    <sql id="PartnerSettlementBaseSelect">
+        select
+            s.event_settlement_id as eventSettlementId,
+            s.settlement_no as settlementNo,
+            s.partner_id as partnerId,
+            p.partner_name as partnerName,
+            s.contest_id as contestId,
+            c.contest_name as contestName,
+            ifnull(oc.enroll_count, 0) as enrollCount,
+            s.total_list_amount as totalListAmount,
+            s.total_coupon_amount as totalCouponAmount,
+            s.total_points_amount as totalPointsAmount,
+            s.platform_bear_amount as platformBearAmount,
+            s.total_net_pay as totalNetPay,
+            s.total_refund as totalRefund,
+            s.total_rebate as totalRebate,
+            s.total_service_fee as totalServiceFee,
+            s.contract_deduction as contractDeduction,
+            s.final_amount as finalAmount,
+            s.status as status,
+            s.audit_remark as auditRemark,
+            s.pay_voucher_url as payVoucherUrl,
+            s.pay_time as payTime,
+            s.create_time as createTime
+        from jst_event_settlement s
+        left join jst_event_partner p on p.partner_id = s.partner_id and p.del_flag = '0'
+        left join jst_contest c on c.contest_id = s.contest_id and c.del_flag = '0'
+        left join (
+            select partner_id, contest_id, count(order_id) as enroll_count
+            from jst_order_main
+            where del_flag = '0' and business_type = 'enroll'
+            group by partner_id, contest_id
+        ) oc on oc.partner_id = s.partner_id and oc.contest_id = s.contest_id
+    </sql>
+
+    <select id="selectSettlementList" parameterType="com.ruoyi.jst.finance.dto.PartnerSettlementQueryReqDTO"
+            resultType="com.ruoyi.jst.finance.vo.PartnerSettlementListResVO">
+        <include refid="PartnerSettlementBaseSelect"/>
+        where s.del_flag = '0'
+        <if test="status != null and status != ''">
+            and s.status = #{status}
+        </if>
+        <if test="contestId != null">
+            and s.contest_id = #{contestId}
+        </if>
+        <if test="params.dataScope != null and params.dataScope != ''">
+            ${params.dataScope}
+        </if>
+        order by s.create_time desc, s.event_settlement_id desc
+    </select>
+
+    <select id="selectSettlementDetail" resultType="com.ruoyi.jst.finance.vo.PartnerSettlementDetailResVO">
+        <include refid="PartnerSettlementBaseSelect"/>
+        where s.del_flag = '0'
+          and s.event_settlement_id = #{eventSettlementId}
+          and s.partner_id = #{partnerId}
+    </select>
+
+    <select id="selectSettlementOrders" resultType="com.ruoyi.jst.finance.vo.PartnerSettlementOrderResVO">
+        select
+            o.order_id as orderId,
+            o.order_no as orderNo,
+            o.user_id as userId,
+            o.participant_id as participantId,
+            o.pay_method as payMethod,
+            o.pay_time as payTime,
+            o.list_amount as listAmount,
+            o.coupon_amount as couponAmount,
+            o.points_deduct_amount as pointsDeductAmount,
+            o.platform_bear_amount as platformBearAmount,
+            o.net_pay_amount as netPayAmount,
+            o.service_fee as serviceFee,
+            o.order_status as orderStatus,
+            o.refund_status as refundStatus
+        from jst_order_main o
+        where o.del_flag = '0'
+          and o.business_type = 'enroll'
+          and o.partner_id = #{partnerId}
+          and o.contest_id = #{contestId}
+        order by o.pay_time desc, o.order_id desc
+    </select>
+
+    <select id="selectPayoutFiles" resultType="com.ruoyi.jst.finance.vo.PartnerSettlementFileResVO">
+        select
+            'payout' as fileType,
+            pay_no as fileNo,
+            concat('打款凭证-', pay_no) as fileName,
+            voucher_url as fileUrl,
+            'paid' as status,
+            create_time as createTime
+        from jst_payment_pay_record
+        where del_flag = '0'
+          and business_type = 'event_settlement'
+          and business_id = #{eventSettlementId}
+          and target_type = 'partner'
+          and target_id = #{partnerId}
+        order by pay_time desc, pay_record_id desc
+    </select>
+
+    <select id="selectContractFiles" resultType="com.ruoyi.jst.finance.vo.PartnerSettlementFileResVO">
+        select
+            'contract' as fileType,
+            contract_no as fileNo,
+            concat('合同-', contract_no) as fileName,
+            file_url as fileUrl,
+            status as status,
+            create_time as createTime
+        from jst_contract_record
+        where del_flag = '0'
+          and target_type = 'partner'
+          and target_id = #{partnerId}
+          and (ref_settlement_id = #{eventSettlementId} or ref_settlement_id is null)
+        order by create_time desc, contract_id desc
+    </select>
+
+    <select id="selectInvoiceFiles" resultType="com.ruoyi.jst.finance.vo.PartnerSettlementFileResVO">
+        select
+            'invoice' as fileType,
+            invoice_no as fileNo,
+            invoice_title as fileName,
+            file_url as fileUrl,
+            status as status,
+            create_time as createTime
+        from jst_invoice_record
+        where del_flag = '0'
+          and target_type = 'partner'
+          and target_id = #{partnerId}
+          and ref_settlement_no = #{settlementNo}
+        order by issue_time desc, invoice_id desc
+    </select>
+
+    <update id="updateStatus">
+        update jst_event_settlement
+        set status = #{toStatus},
+            audit_remark = #{auditRemark},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where del_flag = '0'
+          and event_settlement_id = #{eventSettlementId}
+          and partner_id = #{partnerId}
+          and status = #{fromStatus}
+    </update>
+</mapper>
