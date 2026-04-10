@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.WxCertMapper">
+
+    <select id="selectMyCertList" resultType="com.ruoyi.jst.event.vo.WxCertVO">
+        select cr.cert_id as certId,
+               cr.contest_id as contestId,
+               c.contest_name as contestName,
+               c.category as category,
+               ifnull(t.template_name, '获奖证书') as certName,
+               cr.cert_no as certNo,
+               s.award_level as awardLevel,
+               cr.cert_file_url as certImageUrl,
+               cr.cert_file_url as certFileUrl,
+               p.name as holderName,
+               cr.issue_time as issueTime,
+               cr.issue_time as issueDate
+        from jst_cert_record cr
+                 left join jst_contest c on c.contest_id = cr.contest_id and c.del_flag = '0'
+                 left join jst_score_record s on s.score_id = cr.score_id and s.del_flag = '0'
+                 left join jst_participant p on p.participant_id = cr.participant_id and p.del_flag = '0'
+                 left join jst_cert_template t on t.template_id = cr.template_id and t.del_flag = '0'
+        where cr.del_flag = '0'
+          and cr.user_id = #{userId}
+          and cr.issue_status in ('granted', 'issued')
+        order by cr.issue_time desc, cr.cert_id desc
+    </select>
+
+    <select id="selectPublicCertVerify" parameterType="com.ruoyi.jst.event.dto.PublicCertVerifyQueryDTO"
+            resultType="com.ruoyi.jst.event.vo.PublicCertVerifyVO">
+        select cr.cert_no as certNo,
+               c.contest_name as contestName,
+               p.name as holderName,
+               s.award_level as awardLevel,
+               c.group_levels as groupLevel,
+               '竞赛通平台' as issueOrg,
+               cr.issue_time as issueTime,
+               cr.issue_time as issueDate,
+               cr.issue_status as issueStatus
+        from jst_cert_record cr
+                 left join jst_contest c on c.contest_id = cr.contest_id and c.del_flag = '0'
+                 left join jst_score_record s on s.score_id = cr.score_id and s.del_flag = '0'
+                 left join jst_participant p on p.participant_id = cr.participant_id and p.del_flag = '0'
+        <where>
+            cr.del_flag = '0'
+            <choose>
+                <when test="certNo != null and certNo != ''">
+                    and cr.cert_no = #{certNo}
+                </when>
+                <otherwise>
+                    and cr.verify_code = #{verifyCode}
+                </otherwise>
+            </choose>
+        </where>
+        order by cr.cert_id desc
+        limit 1
+    </select>
+</mapper>

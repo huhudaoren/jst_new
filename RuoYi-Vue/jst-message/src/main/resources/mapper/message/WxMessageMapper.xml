@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.message.mapper.WxMessageMapper">
+
+    <select id="selectMyMessageList" resultType="com.ruoyi.jst.message.vo.WxMessageVO">
+        select m.message_id as messageId,
+               m.type as type,
+               ifnull(m.biz_type, m.type) as msgType,
+               m.title as title,
+               m.content as content,
+               m.read_status as readStatus,
+               case when m.read_status = 1 then 1 else 0 end as readFlag,
+               m.biz_type as bizType,
+               m.biz_id as bizId,
+               null as linkUrl,
+               null as linkText,
+               m.create_time as createTime
+        from jst_message m
+        <where>
+            m.del_flag = '0'
+            and m.user_id = #{userId}
+            <if test="query != null and query.type != null and query.type != ''">
+                and (m.type = #{query.type} or m.biz_type = #{query.type})
+            </if>
+            <if test="query != null and query.readStatus != null">
+                and m.read_status = #{query.readStatus}
+            </if>
+        </where>
+        order by m.create_time desc, m.message_id desc
+    </select>
+
+    <update id="markMessageRead">
+        update jst_message
+        set read_status = 1
+        where message_id = #{messageId}
+          and user_id = #{userId}
+          and del_flag = '0'
+    </update>
+
+    <update id="markAllRead">
+        update jst_message
+        set read_status = 1
+        where user_id = #{userId}
+          and read_status = 0
+          and del_flag = '0'
+    </update>
+</mapper>

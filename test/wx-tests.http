@@ -3113,3 +3113,87 @@ client.test("FIX-2-10 recent notices should succeed", function() {
   client.assert(Array.isArray(response.body.data));
 });
 %}
+
+### =====================================================================
+### FIX-5. 缺失页面后端接口
+### Preconditions:
+###   1. ruoyi-admin 已在 8080 启动
+###   2. 99-test-fixtures.sql 已导入
+### =====================================================================
+
+### FIX5-1. login student user 1001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("fix5_user_token", response.body.data.token);
+client.test("FIX5-1 login should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(!!response.body.data.token);
+});
+%}
+
+### FIX5-2. my score list
+GET {{baseUrl}}/jst/wx/score/my
+Authorization: Bearer {{fix5_user_token}}
+
+> {%
+client.test("FIX5-2 my score should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### FIX5-3. my cert list
+GET {{baseUrl}}/jst/wx/cert/my
+Authorization: Bearer {{fix5_user_token}}
+
+> {%
+client.test("FIX5-3 my cert should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### FIX5-4. my message list
+GET {{baseUrl}}/jst/wx/message/my
+Authorization: Bearer {{fix5_user_token}}
+
+> {%
+client.test("FIX5-4 my messages should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### FIX5-5. mark all messages read
+POST {{baseUrl}}/jst/wx/message/read-all
+Authorization: Bearer {{fix5_user_token}}
+
+> {%
+client.test("FIX5-5 read all should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### FIX5-6. public score query
+GET {{baseUrl}}/jst/public/score/query?name=%E6%B5%8B%E8%AF%95&mobile=13800001001
+
+> {%
+client.test("FIX5-6 public score query should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### FIX5-7. public cert verify
+GET {{baseUrl}}/jst/public/cert/verify?certNo=CERT_TEST_001
+
+> {%
+client.test("FIX5-7 public cert verify should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data === null || typeof response.body.data === "object");
+});
+%}

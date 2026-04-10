@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.WxScoreMapper">
+
+    <select id="selectMyScoreList" resultType="com.ruoyi.jst.event.vo.WxScoreVO">
+        select s.score_id as scoreId,
+               s.enroll_id as enrollId,
+               s.contest_id as contestId,
+               c.contest_name as contestName,
+               c.category as category,
+               s.score_value as scoreValue,
+               s.score_value as score,
+               s.rank_no as rankNo,
+               s.rank_no as rank,
+               s.award_level as awardLevel,
+               s.remark as remark,
+               s.publish_time as publishTime
+        from jst_score_record s
+                 left join jst_contest c on c.contest_id = s.contest_id and c.del_flag = '0'
+        where s.del_flag = '0'
+          and s.user_id = #{userId}
+          and s.publish_status = 'published'
+          <if test="contestId != null">
+              and s.contest_id = #{contestId}
+          </if>
+        order by s.publish_time desc, s.score_id desc
+    </select>
+
+    <select id="selectMyScoreFallbackList" resultType="com.ruoyi.jst.event.vo.WxScoreVO">
+        select er.enroll_id as enrollId,
+               er.contest_id as contestId,
+               c.contest_name as contestName,
+               c.category as category,
+               er.score_value as scoreValue,
+               er.score_value as score,
+               er.award as awardLevel,
+               er.remark as remark,
+               er.publish_time as publishTime
+        from jst_enroll_record er
+                 left join jst_contest c on c.contest_id = er.contest_id and c.del_flag = '0'
+        where er.del_flag = '0'
+          and er.user_id = #{userId}
+          and er.score_value is not null
+          <if test="contestId != null">
+              and er.contest_id = #{contestId}
+          </if>
+        order by er.publish_time desc, er.enroll_id desc
+    </select>
+
+    <select id="selectIssuedCertScoreIds" resultType="java.lang.Long">
+        select distinct score_id
+        from jst_cert_record
+        where del_flag = '0'
+          and issue_status in ('granted', 'issued')
+          and score_id is not null
+          and score_id in
+          <foreach collection="scoreIds" item="scoreId" open="(" separator="," close=")">
+              #{scoreId}
+          </foreach>
+    </select>
+
+    <select id="selectPublicScoreList" parameterType="com.ruoyi.jst.event.dto.PublicScoreQueryDTO"
+            resultType="com.ruoyi.jst.event.vo.PublicScoreVO">
+        select s.contest_id as contestId,
+               c.contest_name as contestName,
+               c.category as category,
+               s.score_value as scoreValue,
+               s.score_value as score,
+               s.rank_no as rankNo,
+               s.rank_no as rank,
+               s.award_level as awardLevel,
+               s.remark as remark,
+               s.publish_time as publishTime
+        from jst_score_record s
+                 left join jst_contest c on c.contest_id = s.contest_id and c.del_flag = '0'
+                 left join jst_enroll_record er on er.enroll_id = s.enroll_id and er.del_flag = '0'
+                 left join jst_participant p on p.participant_id = s.participant_id and p.del_flag = '0'
+        <where>
+            s.del_flag = '0'
+            and s.publish_status = 'published'
+            <if test="contestIdNum != null">
+                and s.contest_id = #{contestIdNum}
+            </if>
+            <if test="contestKeyword != null and contestKeyword != ''">
+                and c.contest_name like concat('%', #{contestKeyword}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                and p.name = #{name}
+            </if>
+            <if test="mobile != null and mobile != ''">
+                and p.guardian_mobile = #{mobile}
+            </if>
+            <if test="idCard4 != null and idCard4 != ''">
+                and p.id_card_no like concat('%', #{idCard4})
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (p.guardian_mobile = #{keyword} or er.enroll_no = #{keyword})
+            </if>
+        </where>
+        order by s.publish_time desc, s.score_id desc
+        limit 20
+    </select>
+
+    <select id="selectPublicScoreFallbackList" parameterType="com.ruoyi.jst.event.dto.PublicScoreQueryDTO"
+            resultType="com.ruoyi.jst.event.vo.PublicScoreVO">
+        select er.contest_id as contestId,
+               c.contest_name as contestName,
+               c.category as category,
+               er.score_value as scoreValue,
+               er.score_value as score,
+               er.award as awardLevel,
+               er.remark as remark,
+               er.publish_time as publishTime
+        from jst_enroll_record er
+                 left join jst_contest c on c.contest_id = er.contest_id and c.del_flag = '0'
+                 left join jst_participant p on p.participant_id = er.participant_id and p.del_flag = '0'
+        <where>
+            er.del_flag = '0'
+            and er.score_value is not null
+            <if test="contestIdNum != null">
+                and er.contest_id = #{contestIdNum}
+            </if>
+            <if test="contestKeyword != null and contestKeyword != ''">
+                and c.contest_name like concat('%', #{contestKeyword}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                and p.name = #{name}
+            </if>
+            <if test="mobile != null and mobile != ''">
+                and p.guardian_mobile = #{mobile}
+            </if>
+            <if test="idCard4 != null and idCard4 != ''">
+                and p.id_card_no like concat('%', #{idCard4})
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (p.guardian_mobile = #{keyword} or er.enroll_no = #{keyword})
+            </if>
+        </where>
+        order by er.publish_time desc, er.enroll_id desc
+        limit 20
+    </select>
+</mapper>
