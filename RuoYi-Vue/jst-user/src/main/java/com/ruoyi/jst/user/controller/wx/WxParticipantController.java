@@ -73,6 +73,9 @@ public class WxParticipantController extends BaseController {
     @Autowired
     private ChannelParticipantService channelParticipantService;
 
+    @Autowired
+    private com.ruoyi.jst.user.mapper.JstUserMapper jstUserMapper;
+
     // ========== 学生端原有接口 ==========
 
     /**
@@ -287,12 +290,13 @@ public class WxParticipantController extends BaseController {
                     BizErrorCode.JST_COMMON_AUTH_DENIED.code());
         }
 
-        // 从 jst_user 获取当前用户手机号和姓名
-        // 复用已有的 claimByAuto 逻辑
-        // claimByAuto 内部已实现：按 mobile+name 精确匹配、多候选转人工
-        String mobile = null;
-        String name = null;
-        // TODO: 从 jst_user 查询 mobile 和 real_name，当前由 claimByAuto 内部处理
+        // 从 jst_user 查询当前用户手机号和姓名，用于临时档案自动认领匹配
+        com.ruoyi.jst.user.domain.JstUser jstUser = jstUserMapper.selectJstUserByUserId(userId);
+        String mobile = jstUser != null ? jstUser.getMobile() : null;
+        String name = jstUser != null ? jstUser.getRealName() : null;
+        if (mobile == null || mobile.isEmpty()) {
+            return AjaxResult.success("用户未绑定手机号，无法自动认领");
+        }
         ParticipantClaimResVO vo = claimService.claimByAuto(userId, mobile, name);
         if (vo == null) {
             return AjaxResult.success("无匹配的临时档案，或已转人工处理");

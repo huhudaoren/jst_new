@@ -61,6 +61,16 @@
       <view class="my-page__quick-tag" @tap="navigateRightsCenter">🎖 我的权益</view>
     </view>
 
+    <!-- ===== 渠道绑定卡 (已绑定时显示) ===== -->
+    <view v-if="profile.channelBinding && profile.channelBinding.name" class="my-page__binding-card" @tap="navigateBinding">
+      <view class="my-page__binding-dot"></view>
+      <view class="my-page__binding-body">
+        <text class="my-page__binding-title">已绑定：{{ profile.channelBinding.name }}（渠道方）</text>
+        <text class="my-page__binding-desc">{{ profile.channelBinding.school || '' }}{{ profile.channelBinding.remark ? (' · ' + profile.channelBinding.remark) : '' }}</text>
+      </view>
+      <text class="my-page__binding-tag">已绑定</text>
+    </view>
+
     <!-- ===== 渠道方视角 ===== -->
     <template v-if="currentView === 'channel' && isChannelUser">
       <view class="my-page__section">
@@ -153,7 +163,7 @@
         <view class="my-page__card">
           <view class="my-page__cell" @tap="navigatePointsCenter"><view class="my-page__cell-icon my-page__cell-icon--brand">💎</view><view class="my-page__cell-body"><text class="my-page__cell-title">积分中心</text><text class="my-page__cell-desc">等级权益，可用积分 {{ profile.availablePoints || 0 }}</text></view><text class="my-page__cell-arrow">›</text></view>
           <view class="my-page__cell" @tap="navigateMall"><view class="my-page__cell-icon my-page__cell-icon--gold">🎁</view><view class="my-page__cell-body"><text class="my-page__cell-title">积分商城</text><text class="my-page__cell-desc">兑换实物与虚拟权益</text></view><text class="my-page__cell-arrow">›</text></view>
-          <view class="my-page__cell" @tap="navigateCouponCenter"><view class="my-page__cell-icon my-page__cell-icon--red">🎫</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的优惠券</text></view><text class="my-page__cell-arrow">›</text></view>
+          <view class="my-page__cell" @tap="navigateCouponCenter"><view class="my-page__cell-icon my-page__cell-icon--red">🎫</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的优惠券</text><text v-if="profile.couponCount" class="my-page__cell-desc">{{ profile.couponCount }} 张可用</text></view><view v-if="profile.couponCount" class="my-page__cell-badge">{{ profile.couponCount > 99 ? '99+' : profile.couponCount }}</view><text class="my-page__cell-arrow">›</text></view>
           <view class="my-page__cell" @tap="navigateRightsCenter"><view class="my-page__cell-icon my-page__cell-icon--purple">🏅</view><view class="my-page__cell-body"><text class="my-page__cell-title">专属权益</text><text class="my-page__cell-desc">课程减免 · 客服特权</text></view><text class="my-page__cell-arrow">›</text></view>
           <view class="my-page__cell" @tap="navigateWriteoffRecord"><view class="my-page__cell-icon my-page__cell-icon--teal">📋</view><view class="my-page__cell-body"><text class="my-page__cell-title">核销记录</text><text class="my-page__cell-desc">查看历史权益核销记录</text></view><text class="my-page__cell-arrow">›</text></view>
         </view>
@@ -163,7 +173,7 @@
       <view class="my-page__section">
         <text class="my-page__section-title">消息与互动</text>
         <view class="my-page__card">
-          <view class="my-page__cell" @tap="navigateMessage"><view class="my-page__cell-icon my-page__cell-icon--orange">🔔</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的消息</text><text class="my-page__cell-desc">订单/积分/权益/物流消息</text></view><text class="my-page__cell-arrow">›</text></view>
+          <view class="my-page__cell" @tap="navigateMessage"><view class="my-page__cell-icon my-page__cell-icon--orange">🔔</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的消息</text><text class="my-page__cell-desc">订单/积分/权益/物流消息</text></view><view v-if="profile.unreadMsgCount" class="my-page__cell-badge">{{ profile.unreadMsgCount > 99 ? '99+' : profile.unreadMsgCount }}</view><text class="my-page__cell-arrow">›</text></view>
           <view class="my-page__cell" @tap="navigateBinding"><view class="my-page__cell-icon my-page__cell-icon--teal">🔗</view><view class="my-page__cell-body"><text class="my-page__cell-title">绑定关系</text><text class="my-page__cell-desc">管理与渠道方的绑定</text></view><text class="my-page__cell-arrow">›</text></view>
         </view>
       </view>
@@ -251,7 +261,7 @@ export default {
     switchView(v) { this.currentView = v },
     navigateChannelApplyStatus() { uni.navigateTo({ url: '/pages-sub/channel/apply-status' }) },
     async loadProfile() { const userStore = useUserStore(); if (!userStore.token) return; this.pageLoading = true; try { const profile = await userStore.fetchProfile(); this.profile = this.normalizeProfile(profile || {}) } finally { this.pageLoading = false } },
-    normalizeProfile(profile) { return { nickname: profile.nickname || '', avatar: profile.avatar || '', mobileMasked: profile.mobileMasked || '', currentLevelId: profile.currentLevelId || 0, availablePoints: profile.availablePoints || 0, totalPoints: profile.totalPoints || 0, growthValue: profile.growthValue || 0 } },
+    normalizeProfile(profile) { return { nickname: profile.nickname || '', avatar: profile.avatar || '', mobileMasked: profile.mobileMasked || '', currentLevelId: profile.currentLevelId || 0, availablePoints: profile.availablePoints || 0, totalPoints: profile.totalPoints || 0, growthValue: profile.growthValue || 0, enrollCount: profile.enrollCount || 0, scoreCount: profile.scoreCount || 0, certCount: profile.certCount || 0, courseCount: profile.courseCount || 0, frozenPoints: profile.frozenPoints || 0, levelName: profile.levelName || '', couponCount: profile.couponCount || 0, unreadMsgCount: profile.unreadMsgCount || 0, channelBinding: profile.channelBinding || null, nextLevelGrowth: profile.nextLevelGrowth || 100 } },
     getAvatarText() { return (this.profile.nickname || '竞').slice(0, 1) },
     navigateProfileEdit() { uni.navigateTo({ url: '/pages-sub/my/profile-edit' }) },
     navigateParticipant() { uni.navigateTo({ url: '/pages-sub/my/participant' }) },
@@ -359,7 +369,16 @@ $xs-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04);
 .my-page__cell-desc { display: block; margin-top: 4rpx; font-size: 22rpx; color: #8A8A8A; }
 .my-page__cell-arrow { font-size: 28rpx; color: #C0C4CC; flex-shrink: 0; }
 .my-page__cell-soon { flex-shrink: 0; padding: 4rpx 14rpx; border-radius: 999rpx; background: #F2F3F5; font-size: 20rpx; color: #8A8A8A; }
+.my-page__cell-badge { flex-shrink: 0; min-width: 32rpx; height: 32rpx; padding: 0 8rpx; border-radius: 999rpx; background: #E74C3C; color: #fff; font-size: 20rpx; font-weight: 600; text-align: center; line-height: 32rpx; }
 .my-page__cell--disabled { opacity: 0.55; }
+
+/* === 绑定卡 === */
+.my-page__binding-card { display: flex; align-items: center; gap: 16rpx; margin: 20rpx 32rpx 0; padding: 24rpx; border-radius: 20rpx; background: #fff; box-shadow: $xs-shadow; border-left: 6rpx solid #3949AB; }
+.my-page__binding-dot { width: 12rpx; height: 12rpx; border-radius: 50%; background: #27AE60; flex-shrink: 0; }
+.my-page__binding-body { flex: 1; min-width: 0; }
+.my-page__binding-title { display: block; font-size: 26rpx; font-weight: 600; color: #1A1A1A; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.my-page__binding-desc { display: block; margin-top: 4rpx; font-size: 22rpx; color: #8A8A8A; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.my-page__binding-tag { flex-shrink: 0; padding: 6rpx 16rpx; border-radius: 999rpx; background: #EAF4FC; font-size: 20rpx; font-weight: 500; color: #3949AB; }
 
 /* === Grid (渠道视角) === */
 .my-page__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16rpx; }
