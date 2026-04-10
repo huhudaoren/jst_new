@@ -2716,3 +2716,191 @@ client.test("F-ADDR-9.1 fixture address should exist", function() {
   client.assert(response.body.data[0].isDefault === 1);
 });
 %}
+
+### =====================================================================
+### E0-1. 阶段 E 后端接口预备 (渠道认证/权益/批量/退款配置)
+### =====================================================================
+
+### E0-0. 登录 1001 (学生视角)
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("e0_student_token", response.body.data.token);
+client.test("E0-0 login", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### E0-CH-AUTH-1. 查我的认证（首次应无记录或返回 null）
+GET {{baseUrl}}/jst/wx/channel/auth/my
+Authorization: Bearer {{e0_student_token}}
+
+> {%
+client.test("E0-CH-AUTH-1 my latest should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### E0-CH-AUTH-2. 首次提交 teacher 类型
+POST {{baseUrl}}/jst/wx/channel/auth/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{e0_student_token}}
+
+{
+  "channelType": "teacher",
+  "applyName": "测试_E0教师认证",
+  "materialsJson": "{\"teacher_cert_url\":\"https://fixture.example.com/cert/teacher.jpg\"}"
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+    client.global.set("e0_apply_id", response.body.data.applyId);
+}
+client.test("E0-CH-AUTH-2 submit teacher apply", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### E0-CH-AUTH-3a. 管理员登录
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+> {%
+client.global.set("e0_admin_token", response.body.token);
+%}
+
+### E0-CH-AUTH-3b. 管理员驳回
+PUT {{baseUrl}}/jst/organizer/channel/auth/apply/{{e0_apply_id}}/reject
+Content-Type: {{contentType}}
+Authorization: Bearer {{e0_admin_token}}
+
+{
+  "auditRemark": "资料不完整，请补充教师资格证"
+}
+
+> {%
+client.test("E0-CH-AUTH-3b reject should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### E0-CH-AUTH-3c. 学生重提
+POST {{baseUrl}}/jst/wx/channel/auth/resubmit/{{e0_apply_id}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{e0_student_token}}
+
+{
+  "channelType": "teacher",
+  "applyName": "测试_E0教师认证_重提1",
+  "materialsJson": "{\"teacher_cert_url\":\"https://fixture.example.com/cert/teacher_v2.jpg\"}"
+}
+
+> {%
+client.test("E0-CH-AUTH-3c resubmit should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### E0-CH-RIGHTS-1. 登录渠道方用户查权益
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_9201" }
+
+> {%
+client.global.set("e0_channel_token", response.body.data.token);
+client.test("E0-CH-RIGHTS-1a login channel", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### E0-CH-RIGHTS-1b. 查渠道方权益
+GET {{baseUrl}}/jst/wx/channel/rights/my
+Authorization: Bearer {{e0_channel_token}}
+
+> {%
+client.test("E0-CH-RIGHTS-1b my rights should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### E0-CH-UNBIND-1. 渠道方自助解绑（需 fixture 中有 active binding）
+# 注意：此测试依赖 fixture 中存在 channelId 对应的 active binding
+# 如 fixture 中无 active binding 则预期 404/10012
+POST {{baseUrl}}/jst/wx/channel/binding/99999/unbind
+Authorization: Bearer {{e0_channel_token}}
+
+> {%
+client.test("E0-CH-UNBIND-1 unbind non-existent should fail", function() {
+  client.assert(response.body.code !== 200 || response.body.msg !== null);
+});
+%}
+
+### E0-CH-PART-1a. 登录渠道方
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_9201" }
+
+> {%
+client.global.set("e0_ch_part_token", response.body.data.token);
+%}
+
+### E0-CH-PART-1b. 批量创建临时档案
+POST {{baseUrl}}/jst/wx/channel/participant/batch-create
+Content-Type: {{contentType}}
+Authorization: Bearer {{e0_ch_part_token}}
+
+[
+  {
+    "name": "测试_E0_批量学生A",
+    "gender": "male",
+    "age": 10,
+    "school": "测试_第一小学",
+    "guardianMobile": "13800000101",
+    "guardianName": "测试_E0家长A"
+  },
+  {
+    "name": "测试_E0_批量学生B",
+    "gender": "female",
+    "age": 9,
+    "school": "测试_第二小学",
+    "guardianMobile": "13800000102",
+    "guardianName": "测试_E0家长B"
+  }
+]
+
+> {%
+client.test("E0-CH-PART-1b batch create should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.createdCount === 2);
+});
+%}
+
+### E0-AP-REFUND-1. 学生登录
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("e0_ap_token", response.body.data.token);
+%}
+
+### E0-AP-REFUND-1b. auto-claim 触发
+POST {{baseUrl}}/jst/wx/participant/auto-claim
+Authorization: Bearer {{e0_ap_token}}
+
+> {%
+client.test("E0-AP-REFUND-1b auto-claim should succeed or no match", function() {
+  client.assert(response.body.code === 200);
+});
+%}

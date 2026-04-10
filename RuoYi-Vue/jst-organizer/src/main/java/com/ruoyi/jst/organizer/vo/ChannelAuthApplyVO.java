@@ -23,6 +23,8 @@ public class ChannelAuthApplyVO {
     private String materialsJson;
     private String applyStatus;
     private String auditRemark;
+    private Integer rejectCount;
+    private Integer lockedForManual;
     private Date submitTime;
     private Date auditTime;
 
@@ -96,6 +98,22 @@ public class ChannelAuthApplyVO {
 
     public void setAuditRemark(String auditRemark) {
         this.auditRemark = auditRemark;
+    }
+
+    public Integer getRejectCount() {
+        return rejectCount;
+    }
+
+    public void setRejectCount(Integer rejectCount) {
+        this.rejectCount = rejectCount;
+    }
+
+    public Integer getLockedForManual() {
+        return lockedForManual;
+    }
+
+    public void setLockedForManual(Integer lockedForManual) {
+        this.lockedForManual = lockedForManual;
     }
 
     public Date getSubmitTime() {

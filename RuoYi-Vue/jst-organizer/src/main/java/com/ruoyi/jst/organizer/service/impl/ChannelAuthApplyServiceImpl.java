@@ -13,8 +13,10 @@ import com.ruoyi.jst.organizer.domain.JstChannelAuthApply;
 import com.ruoyi.jst.organizer.dto.ApproveChannelReqDTO;
 import com.ruoyi.jst.organizer.dto.ChannelAuthApplyQueryDTO;
 import com.ruoyi.jst.organizer.dto.ChannelAuthApplyReqDTO;
+import com.ruoyi.jst.organizer.dto.ChannelAuthResubmitReqDTO;
 import com.ruoyi.jst.organizer.dto.RejectReqDTO;
 import com.ruoyi.jst.organizer.enums.ChannelAuthStatus;
+import com.ruoyi.jst.common.event.ChannelAuthApprovedEvent;
 import com.ruoyi.jst.organizer.mapper.ChannelAuthApplyMapperExt;
 import com.ruoyi.jst.organizer.mapper.SysUserExtMapper;
 import com.ruoyi.jst.organizer.service.ChannelAuthApplyService;
@@ -28,8 +30,11 @@ import com.ruoyi.jst.user.service.IJstUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Date;
 import java.util.List;
@@ -66,6 +71,12 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
 
     @Autowired
     private SnowflakeIdWorker snowflakeIdWorker;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    /** Q-02: 最大驳回次数 */
+    private static final int MAX_REJECT_COUNT = 3;
 
     /**
      * 当前用户提交渠道认证申请
@@ -235,6 +246,20 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
                     applyId, apply.getUserId(), channel.getChannelId(), MaskUtil.mobile(user.getMobile()));
             log.info("[ChannelAuthApply] Mock 短信: userId={} 渠道认证审核已通过", apply.getUserId());
 
+            // Q-05: 事务提交后发布 ChannelAuthApprovedEvent，触发初始权益发放
+            final Long eventUserId = apply.getUserId();
+            final Long eventChannelId = channel.getChannelId();
+            final String eventChannelType = apply.getChannelType();
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    eventPublisher.publishEvent(
+                            new ChannelAuthApprovedEvent(this, eventUserId, eventChannelId, eventChannelType));
+                    log.info("[ChannelAuthApply] ChannelAuthApprovedEvent published userId={} channelId={}",
+                            eventUserId, eventChannelId);
+                }
+            });
+
             ChannelAuthApproveResVO vo = new ChannelAuthApproveResVO();
             vo.setChannelId(channel.getChannelId());
             return vo;
@@ -275,8 +300,14 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
                         BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
             }
 
-            log.info("[ChannelAuthApply] 审核驳回 applyId={} userId={} remark={}",
-                    applyId, apply.getUserId(), req.getAuditRemark());
+            // Q-02: 驳回时递增 reject_count，达到 MAX_REJECT_COUNT 时置 locked_for_manual=1
+            int currentRejectCount = apply.getRejectCount() == null ? 0 : apply.getRejectCount();
+            int newRejectCount = currentRejectCount + 1;
+            int lockedFlag = newRejectCount >= MAX_REJECT_COUNT ? 1 : 0;
+            channelAuthApplyMapperExt.updateRejectCount(applyId, newRejectCount, lockedFlag);
+
+            log.info("[ChannelAuthApply] 审核驳回 applyId={} userId={} rejectCount={}/{} locked={} remark={}",
+                    applyId, apply.getUserId(), newRejectCount, MAX_REJECT_COUNT, lockedFlag, req.getAuditRemark());
             log.info("[ChannelAuthApply] Mock 短信: userId={} 渠道认证审核未通过", apply.getUserId());
             return null;
         });
@@ -338,6 +369,142 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
             }
 
             log.info("[ChannelAuthApply] 渠道方已暂停 applyId={} channelId={}", applyId, apply.getChannelId());
+            return null;
+        });
+    }
+
+    /**
+     * 查询当前用户最新一条认证申请
+     *
+     * @param userId 当前用户ID
+     * @return 最新申请 VO（含 rejectCount/lockedForManual），无则 null
+     * @关联表 jst_channel_auth_apply
+     * @关联权限 hasRole('jst_student')
+     */
+    @Override
+    public ChannelAuthApplyVO getMyLatest(Long userId) {
+        loadRequiredUser(userId);
+        return channelAuthApplyMapperExt.selectLatestByUserId(userId);
+    }
+
+    /**
+     * 驳回后重提申请
+     * <p>
+     * Q-02: rejectCount >= 3 时已锁定，禁止重提，返回 JST_CHANNEL_AUTH_LOCKED
+     *
+     * @param userId  当前用户ID
+     * @param applyId 原被驳回的申请ID
+     * @param req     重提入参
+     * @return 新提交结果
+     * @关联表 jst_channel_auth_apply
+     * @关联状态机 SM-3 rejected → pending
+     * @关联权限 hasRole('jst_student')
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class) // TX: resubmit
+    @OperateLog(module = "渠道认证", action = "APPLY_RESUBMIT", target = "#{applyId}")
+    public ChannelAuthApplySubmitResVO resubmit(Long userId, Long applyId, ChannelAuthResubmitReqDTO req) {
+        // LOCK: lock:org:channelApply:{applyId}
+        return jstLockTemplate.execute(lockKey(applyId), 3, 10, () -> {
+            JstChannelAuthApply apply = getRequiredApply(applyId);
+
+            // 归属校验
+            if (!apply.getUserId().equals(userId)) {
+                throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
+                        BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+            }
+
+            // 状态机校验: rejected → pending  // SM-3
+            ChannelAuthStatus.fromDb(apply.getApplyStatus()).assertCanTransitTo(ChannelAuthStatus.PENDING);
+
+            // Q-02: 锁定检查
+            if (apply.getLockedForManual() != null && apply.getLockedForManual() == 1) {
+                throw new ServiceException(BizErrorCode.JST_CHANNEL_AUTH_LOCKED.message(),
+                        BizErrorCode.JST_CHANNEL_AUTH_LOCKED.code());
+            }
+            int rejectCount = apply.getRejectCount() == null ? 0 : apply.getRejectCount();
+            if (rejectCount >= MAX_REJECT_COUNT) {
+                throw new ServiceException(BizErrorCode.JST_CHANNEL_AUTH_LOCKED.message(),
+                        BizErrorCode.JST_CHANNEL_AUTH_LOCKED.code());
+            }
+
+            ensureNotApprovedChannel(userId);
+
+            // 更新原申请为 pending + 覆盖材料
+            Date now = DateUtils.getNowDate();
+            apply.setChannelType(req.getChannelType());
+            apply.setApplyName(req.getApplyName());
+            apply.setMaterialsJson(req.getMaterialsJson());
+
+            int updated = channelAuthApplyMapperExt.updateApplyStatus(
+                    applyId,
+                    ChannelAuthStatus.REJECTED.dbValue(),
+                    ChannelAuthStatus.PENDING.dbValue(),
+                    apply.getChannelId(),
+                    null,
+                    null,
+                    now,
+                    String.valueOf(userId));
+            if (updated == 0) {
+                throw new ServiceException("重提失败，申请状态已变化，请刷新重试",
+                        BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
+            }
+
+            log.info("[ChannelAuthApply] 驳回后重提 applyId={} userId={} rejectCount={}",
+                    applyId, userId, rejectCount);
+
+            ChannelAuthApplySubmitResVO vo = new ChannelAuthApplySubmitResVO();
+            vo.setApplyId(applyId);
+            vo.setApplyNo(apply.getApplyNo());
+            return vo;
+        });
+    }
+
+    /**
+     * 撤回 pending 状态的申请
+     *
+     * @param userId  当前用户ID
+     * @param applyId 申请ID
+     * @关联表 jst_channel_auth_apply
+     * @关联状态机 SM-3 pending → (逻辑删除)
+     * @关联权限 hasRole('jst_student')
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class) // TX: cancelApply
+    @OperateLog(module = "渠道认证", action = "APPLY_CANCEL", target = "#{applyId}")
+    public void cancelApply(Long userId, Long applyId) {
+        // LOCK: lock:org:channelApply:{applyId}
+        jstLockTemplate.execute(lockKey(applyId), 3, 10, () -> {
+            JstChannelAuthApply apply = getRequiredApply(applyId);
+
+            // 归属校验
+            if (!apply.getUserId().equals(userId)) {
+                throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
+                        BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+            }
+
+            // 只有 pending 状态允许撤回
+            if (!ChannelAuthStatus.PENDING.dbValue().equals(apply.getApplyStatus())) {
+                throw new ServiceException("仅 pending 状态的申请可以撤回",
+                        BizErrorCode.JST_CHANNEL_AUTH_APPLY_ILLEGAL_TRANSIT.code());
+            }
+
+            // 逻辑删除
+            int updated = channelAuthApplyMapperExt.updateApplyStatus(
+                    applyId,
+                    ChannelAuthStatus.PENDING.dbValue(),
+                    "cancelled",
+                    apply.getChannelId(),
+                    "用户主动撤回",
+                    null,
+                    DateUtils.getNowDate(),
+                    String.valueOf(userId));
+            if (updated == 0) {
+                throw new ServiceException("撤回失败，申请状态已变化，请刷新重试",
+                        BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
+            }
+
+            log.info("[ChannelAuthApply] 用户撤回申请 applyId={} userId={}", applyId, userId);
             return null;
         });
     }

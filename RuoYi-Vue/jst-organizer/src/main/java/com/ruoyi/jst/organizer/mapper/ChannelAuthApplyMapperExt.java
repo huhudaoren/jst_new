@@ -68,6 +68,26 @@ public interface ChannelAuthApplyMapperExt {
     int insertApply(JstChannelAuthApply apply);
 
     /**
+     * 查询当前用户最新一条申请
+     *
+     * @param userId 当前用户ID
+     * @return 最新申请（含 rejectCount/lockedForManual）
+     */
+    ChannelAuthApplyVO selectLatestByUserId(@Param("userId") Long userId);
+
+    /**
+     * 驳回时递增 reject_count 并可能锁定
+     *
+     * @param applyId          申请ID
+     * @param newRejectCount   新的驳回次数
+     * @param lockedForManual  是否锁定
+     * @return 影响行数
+     */
+    int updateRejectCount(@Param("applyId") Long applyId,
+                          @Param("newRejectCount") int newRejectCount,
+                          @Param("lockedForManual") int lockedForManual);
+
+    /**
      * 按预期状态推进申请
      *
      * @param applyId        申请ID

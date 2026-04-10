@@ -66,6 +66,12 @@ public class JstChannelAuthApply extends BaseEntity
     @Excel(name = "审核时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date auditTime;
 
+    /** 累计驳回次数（Q-02 限制 3 次） */
+    private Integer rejectCount;
+
+    /** >=3 次驳回后锁定 */
+    private Integer lockedForManual;
+
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
@@ -189,12 +195,28 @@ public class JstChannelAuthApply extends BaseEntity
         return auditTime;
     }
 
-    public void setDelFlag(String delFlag) 
+    public Integer getRejectCount() {
+        return rejectCount;
+    }
+
+    public void setRejectCount(Integer rejectCount) {
+        this.rejectCount = rejectCount;
+    }
+
+    public Integer getLockedForManual() {
+        return lockedForManual;
+    }
+
+    public void setLockedForManual(Integer lockedForManual) {
+        this.lockedForManual = lockedForManual;
+    }
+
+    public void setDelFlag(String delFlag)
     {
         this.delFlag = delFlag;
     }
 
-    public String getDelFlag() 
+    public String getDelFlag()
     {
         return delFlag;
     }

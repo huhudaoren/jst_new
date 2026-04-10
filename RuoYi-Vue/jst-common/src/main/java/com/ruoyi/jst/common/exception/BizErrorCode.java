@@ -133,6 +133,12 @@ public enum BizErrorCode {
     JST_FINANCE_INVOICE_NOT_FOUND(99001, "发票不存在"),
     JST_FINANCE_PAY_RECORD_DUPLICATE(99002, "重复打款记录"),
 
+    // ========== E0 phase-e-prep ==========
+    JST_CHANNEL_AUTH_LOCKED(10040, "认证申请已达最大驳回次数，请联系客服"),
+    JST_APPOINTMENT_REFUND_NOT_ALLOWED(10041, "本活动不支持预约退款"),
+    JST_CHANNEL_UNBIND_FAILED(10042, "解绑学生失败"),
+    JST_PARTICIPANT_AUTO_CLAIM_CONFLICT(10043, "临时档案自动认领存在多个候选，需人工处理"),
+
     // ========== common ==========
     JST_COMMON_LOCK_TIMEOUT(99900, "操作过于频繁，请稍后再试"),
     JST_COMMON_PARAM_INVALID(99901, "参数校验失败"),

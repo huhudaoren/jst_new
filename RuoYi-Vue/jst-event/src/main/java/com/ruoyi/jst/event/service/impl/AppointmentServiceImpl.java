@@ -278,8 +278,43 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
         writeoffItemMapperExt.voidUnusedByAppointmentId(appointmentId, operator, now);
 
-        boolean needManualRefund = cancelLinkedOrderIfNeeded(record.getOrderId(), userId, operator, now);
-        return needManualRefund ? "预约已取消，如已支付请联系客服处理退款" : "预约已取消";
+        // Q-07: 检查赛事级 allow_appointment_refund 配置
+        JstContest contest = contestMapperExt.selectById(record.getContestId());
+        if (contest != null && contest.getAllowAppointmentRefund() != null
+                && contest.getAllowAppointmentRefund() == 1) {
+            // allow_appointment_refund=1: 正常走退款链路（复用 C4 范式）
+            boolean needManualRefund = cancelLinkedOrderIfNeeded(record.getOrderId(), userId, operator, now);
+            return needManualRefund ? "预约已取消，退款将在 1-3 个工作日内处理" : "预约已取消";
+        } else {
+            // allow_appointment_refund=0（默认）: 仅取消预约状态，不触发退款
+            // 仍需取消未支付订单（created/pending_pay → cancelled）
+            cancelUnpaidOrderOnly(record.getOrderId(), userId, operator, now);
+            return "预约已取消，本活动不支持预约退款";
+        }
+    }
+
+    /**
+     * 仅取消未支付的关联订单（Q-07: 不支持退款时使用）
+     */
+    private void cancelUnpaidOrderOnly(Long orderId, Long userId, String operator, Date now) {
+        if (orderId == null) {
+            return;
+        }
+        JstOrderMain order = jstOrderMainMapper.selectJstOrderMainByOrderId(orderId);
+        if (order == null || !"0".equals(defaultDelFlag(order.getDelFlag()))) {
+            return;
+        }
+        if (!Objects.equals(userId, order.getUserId()) || !"appointment".equals(order.getBusinessType())) {
+            return;
+        }
+        OrderStatus current = OrderStatus.fromDb(order.getOrderStatus());
+        // 仅取消 created / pending_pay 状态订单，已付款的不动
+        if (current == OrderStatus.CREATED || current == OrderStatus.PENDING_PAY) {
+            current.assertCanTransitTo(OrderStatus.CANCELLED);
+            orderMainMapperExt.updateStatusByExpected(orderId, current.dbValue(),
+                    OrderStatus.CANCELLED.dbValue(), null, operator, now);
+        }
+        // 已支付的订单保持原状态，不触发退款
     }
 
     private boolean cancelLinkedOrderIfNeeded(Long orderId, Long userId, String operator, Date now) {

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.lookup.ChannelSupplementLookupMapper">
+
+    <!-- 查询用户权益列表 -->
+    <select id="selectRightsByUserId" resultType="java.util.LinkedHashMap">
+        select ur.user_rights_id as userRightsId,
+               rt.rights_name as rightsName,
+               rt.rights_type as rightsType,
+               ur.remain_quota as remainQuota,
+               ur.quota_value as quotaValue,
+               ur.status,
+               ur.valid_end as expireTime,
+               ur.valid_start as validStart
+        from jst_user_rights ur
+        left join jst_rights_template rt on ur.rights_template_id = rt.rights_template_id
+        where ur.del_flag = '0'
+          and ur.owner_id = #{userId}
+          and ur.owner_type in ('channel', 'user')
+          and ur.status in ('available', 'approved')
+        order by ur.valid_end asc
+    </select>
+
+    <!-- 校验学生是否绑定到指定渠道 -->
+    <select id="countBindingForChannel" resultType="int">
+        select count(1)
+        from jst_student_channel_binding
+        where channel_id = #{channelId}
+          and user_id = #{studentUserId}
+          and binding_status = 'active'
+          and del_flag = '0'
+    </select>
+
+    <!-- 查询绑定学生的成绩（jst_enroll_record 中已发布成绩的记录） -->
+    <select id="selectStudentScores" resultType="java.util.LinkedHashMap">
+        select er.enroll_id as enrollId,
+               c.contest_name as contestName,
+               er.score_value as scoreValue,
+               er.score_rank as scoreRank,
+               er.score_level as scoreLevel,
+               er.score_remark as scoreRemark,
+               er.update_time as updateTime
+        from jst_enroll_record er
+        inner join jst_contest c on er.contest_id = c.contest_id
+        where er.del_flag = '0'
+          and er.user_id = #{studentUserId}
+          and er.score_value is not null
+        order by er.update_time desc
+    </select>
+
+    <!-- 查询绑定学生的证书 -->
+    <select id="selectStudentCerts" resultType="java.util.LinkedHashMap">
+        select er.enroll_id as enrollId,
+               c.contest_name as contestName,
+               er.cert_url as certUrl,
+               er.cert_no as certNo,
+               er.update_time as updateTime
+        from jst_enroll_record er
+        inner join jst_contest c on er.contest_id = c.contest_id
+        where er.del_flag = '0'
+          and er.user_id = #{studentUserId}
+          and er.cert_url is not null
+        order by er.update_time desc
+    </select>
+
+    <!-- 查询绑定记录 -->
+    <select id="selectBindingById" resultType="java.util.LinkedHashMap">
+        select binding_id as bindingId,
+               user_id as userId,
+               channel_id as channelId,
+               binding_status as bindingStatus
+        from jst_student_channel_binding
+        where binding_id = #{bindingId}
+          and del_flag = '0'
+    </select>
+
+    <!-- 解绑（乐观锁） -->
+    <update id="unbindByBindingId">
+        update jst_student_channel_binding
+        set binding_status = 'unbound',
+            unbind_time = #{updateTime},
+            unbind_reason = '渠道方自助解绑',
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where binding_id = #{bindingId}
+          and binding_status = #{expectedStatus}
+          and del_flag = '0'
+    </update>
+
+</mapper>

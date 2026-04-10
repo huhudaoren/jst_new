@@ -30,4 +30,7 @@ public interface ParticipantMapper {
                           @Param("expectedStatus") String expectedStatus,
                           @Param("newStatus") String newStatus,
                           @Param("claimedUserId") Long claimedUserId);
+
+    /** 新增临时参赛档案（E0-1 批量创建） */
+    int insertParticipant(Participant participant);
 }

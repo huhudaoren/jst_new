@@ -97,6 +97,10 @@ public class JstContest extends BaseEntity
     @Excel(name = "是否允许重复预约：0否 1是")
     private Integer allowRepeatAppointment;
 
+    /** 是否允许预约退款（Q-07 配置化）：0=不允许（默认），1=允许 */
+    @Excel(name = "是否允许预约退款：0否 1是")
+    private Integer allowAppointmentRefund;
+
     /** 证书发放规则JSON */
     @Excel(name = "证书发放规则JSON")
     private String certRuleJson;
@@ -318,7 +322,15 @@ public class JstContest extends BaseEntity
         return allowRepeatAppointment;
     }
 
-    public void setCertRuleJson(String certRuleJson) 
+    public Integer getAllowAppointmentRefund() {
+        return allowAppointmentRefund;
+    }
+
+    public void setAllowAppointmentRefund(Integer allowAppointmentRefund) {
+        this.allowAppointmentRefund = allowAppointmentRefund;
+    }
+
+    public void setCertRuleJson(String certRuleJson)
     {
         this.certRuleJson = certRuleJson;
     }
@@ -420,6 +432,7 @@ public class JstContest extends BaseEntity
             .append("appointmentCapacity", getAppointmentCapacity())
             .append("writeoffConfig", getWriteoffConfig())
             .append("allowRepeatAppointment", getAllowRepeatAppointment())
+            .append("allowAppointmentRefund", getAllowAppointmentRefund())
             .append("certRuleJson", getCertRuleJson())
             .append("scoreRuleJson", getScoreRuleJson())
             .append("formTemplateId", getFormTemplateId())

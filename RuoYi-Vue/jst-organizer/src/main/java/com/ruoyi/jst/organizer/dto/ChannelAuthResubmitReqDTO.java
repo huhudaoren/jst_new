@@ -1,0 +1,53 @@
+package com.ruoyi.jst.organizer.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+/**
+ * 渠道认证申请-驳回后重提入参
+ * <p>
+ * 关联表：jst_channel_auth_apply
+ * 关联状态机：SM-3 rejected → pending
+ * 关联决策：Q-02 驳回 ≤3 次后锁定
+ *
+ * @author jst
+ * @since 1.0.0
+ */
+public class ChannelAuthResubmitReqDTO {
+
+    @NotBlank(message = "渠道类型不能为空")
+    @Pattern(regexp = "teacher|organization|individual", message = "渠道类型非法")
+    private String channelType;
+
+    @NotBlank(message = "申请名称不能为空")
+    @Size(max = 128, message = "申请名称长度不能超过128个字符")
+    private String applyName;
+
+    @NotBlank(message = "认证材料不能为空")
+    private String materialsJson;
+
+    public String getChannelType() {
+        return channelType;
+    }
+
+    public void setChannelType(String channelType) {
+        this.channelType = channelType;
+    }
+
+    public String getApplyName() {
+        return applyName;
+    }
+
+    public void setApplyName(String applyName) {
+        this.applyName = applyName;
+    }
+
+    public String getMaterialsJson() {
+        return materialsJson;
+    }
+
+    public void setMaterialsJson(String materialsJson) {
+        this.materialsJson = materialsJson;
+    }
+}

@@ -63,6 +63,20 @@
           AND del_flag = '0'
     </select>
 
+    <!-- E0-1: 新增临时参赛档案（批量创建） -->
+    <insert id="insertParticipant" parameterType="com.ruoyi.jst.user.domain.Participant"
+            useGeneratedKeys="true" keyProperty="participantId">
+        INSERT INTO jst_participant (
+            name, gender, age, school, class_name,
+            guardian_mobile, guardian_name,
+            claim_status, create_by, create_time, update_by, update_time
+        ) VALUES (
+            #{name}, #{gender}, #{age}, #{school}, #{className},
+            #{guardianMobile}, #{guardianName},
+            #{claimStatus}, #{createBy}, #{createTime}, #{updateBy}, #{updateTime}
+        )
+    </insert>
+
     <!--
         关键:UPDATE WHERE claim_status=#{expectedStatus} 实现乐观锁
         效果:并发场景下只有一个线程能更新成功(返回 1),其余返回 0,Service 层据此判断

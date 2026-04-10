@@ -35,7 +35,7 @@ public enum ChannelAuthStatus {
     static {
         ALLOWED.put(PENDING, EnumSet.of(APPROVED, REJECTED));
         ALLOWED.put(APPROVED, EnumSet.of(SUSPENDED));
-        ALLOWED.put(REJECTED, Collections.emptySet());
+        ALLOWED.put(REJECTED, EnumSet.of(PENDING));  // Q-02: 驳回后允许重提（受 rejectCount 限制）
         ALLOWED.put(SUSPENDED, Collections.emptySet());
     }
 

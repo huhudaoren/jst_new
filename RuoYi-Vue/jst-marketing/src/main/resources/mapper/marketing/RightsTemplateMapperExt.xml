@@ -50,4 +50,22 @@
         where rights_template_id = #{rightsTemplateId}
           and del_flag = '0'
     </update>
+
+    <!-- Q-05: 查询可自动发放的权益模板 -->
+    <select id="selectAutoGrantTemplates" resultType="java.util.LinkedHashMap">
+        select rights_template_id as rightsTemplateId,
+               rights_name as rightsName,
+               rights_type as rightsType,
+               quota_mode as quotaMode,
+               quota_value as quotaValue,
+               valid_days as validDays,
+               writeoff_mode as writeoffMode
+        from jst_rights_template
+        where del_flag = '0'
+          and status = 1
+          and (applicable_role = #{applicableRole}
+               or applicable_role = 'all'
+               or applicable_role like concat('%', #{applicableRole}, '%'))
+        order by rights_template_id asc
+    </select>
 </mapper>
