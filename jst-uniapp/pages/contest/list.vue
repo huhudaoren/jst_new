@@ -1,9 +1,18 @@
 <template>
   <view class="contest-list-page">
     <view class="contest-list-page__sticky">
-      <view class="contest-list-page__search" @tap="handleSearchTap">
+      <view class="contest-list-page__search">
         <text class="contest-list-page__search-icon">🔍</text>
-        <text class="contest-list-page__search-text">搜索赛事名称、学科...</text>
+        <input
+          class="contest-list-page__search-input"
+          v-model="keyword"
+          placeholder="搜索赛事名称、学科..."
+          placeholder-class="contest-list-page__search-placeholder"
+          confirm-type="search"
+          @confirm="onSearch"
+          @input="onSearchInput"
+        />
+        <text v-if="keyword" class="contest-list-page__search-clear" @tap="onClearSearch">✕</text>
       </view>
 
       <scroll-view class="contest-list-page__tabs" scroll-x>
@@ -15,8 +24,8 @@
           全部
         </view>
         <view
-          v-for="item in categories"
-          :key="item.code"
+          v-for="(item, idx) in categories"
+          :key="(item.code || 'cat') + '-' + idx"
           class="contest-list-page__tab"
           :class="{ 'contest-list-page__tab--active': currentCategory === item.code }"
           @tap="handleCategoryChange(item.code)"
@@ -37,7 +46,10 @@
     <jst-loading :loading="pageLoading && !contestList.length" text="赛事加载中..." />
 
     <view v-if="contestList.length" class="contest-list-page__list">
-      <jst-contest-card v-for="item in contestList" :key="item.contestId" :contest="item" @tap="openContestDetail" />
+      <!-- 外层 view 捕获 tap, 避免 uni-app 下自定义组件 @tap 事件透传不一致 -->
+      <view v-for="item in contestList" :key="item.contestId" @tap="openContestDetail(item)">
+        <jst-contest-card :contest="item" />
+      </view>
     </view>
 
     <jst-empty v-else-if="!pageLoading && !listLoading" icon="🏆" text="赛事数据准备中，待后端联调完成后自动展示。" />
@@ -71,6 +83,7 @@ export default {
       contestList: [],
       total: 0,
       hasMore: true,
+      keyword: '',
       query: {
         pageNum: 1,
         pageSize: 10
@@ -83,7 +96,10 @@ export default {
       }
     }
   },
-  onLoad() {
+  onLoad(query) {
+    if (query && query.keyword) {
+      this.keyword = decodeURIComponent(query.keyword)
+    }
     this.initializePage()
   },
   onPullDownRefresh() {
@@ -104,7 +120,16 @@ export default {
       this.categoriesLoading = true
       try {
         const list = await getContestCategories({ silent: true })
-        this.categories = Array.isArray(list) ? list : []
+        // 后端可能返回重复 code, 按 code 去重保留首条
+        const seen = new Set()
+        const deduped = []
+        ;(Array.isArray(list) ? list : []).forEach((item) => {
+          const code = item && item.code
+          if (code != null && seen.has(code)) return
+          if (code != null) seen.add(code)
+          deduped.push(item)
+        })
+        this.categories = deduped
       } catch (error) {
         this.categories = []
       } finally {
@@ -145,7 +170,8 @@ export default {
           {
             pageNum: this.query.pageNum,
             pageSize: this.query.pageSize,
-            category: this.currentCategory || undefined
+            category: this.currentCategory || undefined,
+            keyword: this.keyword || undefined
           },
           { silent: true }
         )
@@ -175,8 +201,16 @@ export default {
       uni.navigateTo({ url: `/pages-sub/contest/detail?id=${contest.contestId}` })
     },
 
-    handleSearchTap() {
-      uni.showToast({ title: '搜索功能后续开放', icon: 'none' })
+    onSearch(e) {
+      this.keyword = (e && e.detail && e.detail.value) || this.keyword
+      this.resetAndLoadList()
+    },
+    onSearchInput(e) {
+      this.keyword = (e && e.detail && e.detail.value) || ''
+    },
+    onClearSearch() {
+      this.keyword = ''
+      this.resetAndLoadList()
     }
   }
 }
@@ -186,7 +220,7 @@ export default {
 .contest-list-page {
   min-height: 100vh;
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
-  background: var(--jst-color-page-bg);
+  background: #F7F8FA;
 }
 
 .contest-list-page__sticky {
@@ -195,7 +229,7 @@ export default {
   z-index: 20;
   padding: 24rpx 0 0;
   background: var(--jst-color-card-bg);
-  box-shadow: 0 8rpx 16rpx rgba(16, 88, 160, 0.06);
+  box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04);
 }
 
 .contest-list-page__search {
@@ -212,10 +246,20 @@ export default {
   font-size: 28rpx;
 }
 
-.contest-list-page__search-text {
+.contest-list-page__search-input {
+  flex: 1;
   margin-left: 16rpx;
   font-size: 26rpx;
+  color: var(--jst-color-text);
+}
+.contest-list-page__search-placeholder {
   color: var(--jst-color-text-tertiary);
+}
+.contest-list-page__search-clear {
+  margin-left: 12rpx;
+  font-size: 24rpx;
+  color: var(--jst-color-text-tertiary);
+  padding: 8rpx;
 }
 
 .contest-list-page__tabs {
@@ -238,7 +282,7 @@ export default {
 .contest-list-page__tab--active {
   background: var(--jst-color-brand-soft);
   color: var(--jst-color-brand);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .contest-list-page__tab-count {
@@ -266,7 +310,10 @@ export default {
 }
 
 .contest-list-page__list {
-  background: var(--jst-color-card-bg);
+  padding: 8rpx 24rpx 0;
+}
+.contest-list-page__list > * + * {
+  margin-top: 16rpx;
 }
 
 .contest-list-page__load-more {

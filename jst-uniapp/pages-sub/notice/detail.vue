@@ -4,7 +4,7 @@
     <view class="notice-detail__header">
       <view class="notice-detail__back" @tap="goBack">←</view>
       <text class="notice-detail__header-title">公告详情</text>
-      <view class="notice-detail__more" @tap="showShareComingSoon">⋯</view>
+      <button class="notice-detail__more" open-type="share">⋯</button>
     </view>
 
     <jst-loading :loading="loading" text="公告详情加载中..." />
@@ -41,8 +41,8 @@
         <button class="notice-detail__button notice-detail__button--secondary" @tap="goBack">
           返回公告
         </button>
-        <button class="notice-detail__button notice-detail__button--primary" @tap="showShareComingSoon">
-          分享占位
+        <button class="notice-detail__button notice-detail__button--primary" open-type="share">
+          分享
         </button>
       </view>
     </template>
@@ -63,15 +63,22 @@ export default {
     return {
       loading: false,
       notice: {},
-      safeContent: ''
+      safeContent: '',
+      noticeId: ''
     }
   },
   onLoad(query) {
-    const noticeId = query && query.id
-    if (!noticeId) {
+    this.noticeId = (query && query.id) || ''
+    if (!this.noticeId) {
       return
     }
-    this.loadDetail(noticeId)
+    this.loadDetail(this.noticeId)
+  },
+  onShareAppMessage() {
+    return {
+      title: this.notice.title || '竞赛通公告',
+      path: `/pages-sub/notice/detail?id=${this.noticeId}`
+    }
   },
   methods: {
     async loadDetail(noticeId) {
@@ -149,12 +156,6 @@ export default {
       uni.switchTab({ url: '/pages/notice/list' })
     },
 
-    showShareComingSoon() {
-      uni.showToast({
-        title: '分享功能后续开放',
-        icon: 'none'
-      })
-    }
   }
 }
 </script>
@@ -183,7 +184,11 @@ export default {
   box-shadow: var(--jst-shadow-card);
   font-size: 30rpx;
   color: var(--jst-color-text);
+  padding: 0;
+  border: none;
+  line-height: 72rpx;
 }
+.notice-detail__more::after { display: none; }
 
 .notice-detail__header-title {
   flex: 1;

@@ -38,7 +38,7 @@
 
     <view class="login-page__footer">
       <text class="login-page__footer-line">登录即表示同意《用户服务协议》与《隐私保护政策》</text>
-      <text class="login-page__footer-line">当前页面仅做 P1 登录闭环，渠道绑定与老师视角后续开放</text>
+      <text class="login-page__footer-line">微信一键登录，开启竞赛之旅</text>
     </view>
   </view>
 </template>
@@ -85,7 +85,7 @@ export default {
 
       try {
         const userStore = useUserStore()
-        const res = await userStore.login('MOCK_1001')
+        const res = await userStore.login('MOCK_1003')
         await this.finishLogin(res)
       } catch (error) {
         this.message = '登录失败，请检查后端或测试数据'

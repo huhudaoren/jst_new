@@ -133,6 +133,41 @@
             "navigationBarTitleText": "\u7f16\u8f91\u5730\u5740",
             "navigationStyle": "custom"
           }
+        },
+        {
+          "path": "score",
+          "style": {
+            "navigationBarTitleText": "我的成绩",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "cert",
+          "style": {
+            "navigationBarTitleText": "我的证书",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "message",
+          "style": {
+            "navigationBarTitleText": "我的消息",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "settings",
+          "style": {
+            "navigationBarTitleText": "设置",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "privacy",
+          "style": {
+            "navigationBarTitleText": "隐私政策",
+            "navigationStyle": "custom"
+          }
         }
       ]
     },
@@ -162,6 +197,13 @@
           "path": "detail",
           "style": {
             "navigationBarTitleText": "\u516c\u544a\u8be6\u60c5",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "message",
+          "style": {
+            "navigationBarTitleText": "公告消息",
             "navigationStyle": "custom"
           }
         }
@@ -271,6 +313,20 @@
           "path": "help",
           "style": {
             "navigationBarTitleText": "\u5ba2\u670d\u4e0e\u5e2e\u52a9",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "score-query",
+          "style": {
+            "navigationBarTitleText": "成绩公开查询",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "cert-verify",
+          "style": {
+            "navigationBarTitleText": "证书验真",
             "navigationStyle": "custom"
           }
         }
