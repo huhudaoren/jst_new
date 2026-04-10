@@ -237,7 +237,11 @@
         { "path": "withdraw-detail", "style": { "navigationBarTitleText": "\u63d0\u73b0\u8be6\u60c5", "navigationStyle": "custom" } },
         { "path": "orders", "style": { "navigationBarTitleText": "\u6e20\u9053\u8ba2\u5355", "navigationStyle": "custom" } },
         { "path": "students", "style": { "navigationBarTitleText": "\u6211\u7684\u5b66\u751f", "navigationStyle": "custom" } },
-        { "path": "data", "style": { "navigationBarTitleText": "\u6e20\u9053\u6570\u636e", "navigationStyle": "custom" } }
+        { "path": "data", "style": { "navigationBarTitleText": "\u6e20\u9053\u6570\u636e", "navigationStyle": "custom" } },
+        { "path": "settlement", "style": { "navigationBarTitleText": "\u63d0\u73b0\u7ed3\u7b97", "navigationStyle": "custom", "enablePullDownRefresh": true } },
+        { "path": "apply-entry", "style": { "navigationBarTitleText": "\u6e20\u9053\u8ba4\u8bc1", "navigationStyle": "custom" } },
+        { "path": "apply-form", "style": { "navigationBarTitleText": "\u586b\u5199\u6750\u6599", "navigationStyle": "custom" } },
+        { "path": "apply-status", "style": { "navigationBarTitleText": "\u8ba4\u8bc1\u72b6\u6001", "navigationStyle": "custom", "enablePullDownRefresh": true } }
       ]
     },
     {
@@ -268,8 +272,8 @@
     }
   ],
   "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#FF6B35",
+    "color": "#8A8A8A",
+    "selectedColor": "#1058A0",
     "backgroundColor": "#FFFFFF",
     "borderStyle": "white",
     "list": [

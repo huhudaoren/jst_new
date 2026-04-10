@@ -60,3 +60,25 @@ export function getWithdrawList(params) {
 export function getWithdrawDetail(settlementId) {
   return request({ url: `/jst/wx/channel/withdraw/${settlementId}`, method: 'GET' })
 }
+
+/* ---------------- 渠道认证 (E1-CH-1) ---------------- */
+
+/** 查询当前用户最新认证申请 */
+export function getMyChannelApply() {
+  return request({ url: '/jst/wx/channel/auth/my', method: 'GET' })
+}
+
+/** 提交渠道认证申请: { channelType, applyName, materialsJson } */
+export function submitChannelApply(body) {
+  return request({ url: '/jst/wx/channel/auth/apply', method: 'POST', data: body })
+}
+
+/** 驳回后重提认证申请 */
+export function resubmitChannelApply(id, body) {
+  return request({ url: `/jst/wx/channel/auth/resubmit/${id}`, method: 'POST', data: body })
+}
+
+/** 撤回 pending 状态认证申请 */
+export function cancelChannelApply(id) {
+  return request({ url: `/jst/wx/channel/auth/cancel/${id}`, method: 'POST' })
+}
