@@ -1,5 +1,9 @@
 package com.ruoyi.jst.channel.service;
 
+import com.ruoyi.jst.channel.vo.ChannelOrderDetailResVO;
+import com.ruoyi.jst.channel.vo.ChannelTopContestResVO;
+import com.ruoyi.jst.channel.vo.ChannelTopStudentResVO;
+
 import java.util.List;
 import java.util.Map;
 
@@ -45,5 +49,33 @@ public interface ChannelSupplementService {
      * @param channelId 渠道方ID
      * @param bindingId 绑定记录ID
      */
+    /**
+     * 查询渠道工作台热门赛事排行榜。
+     *
+     * @param channelId 渠道方ID
+     * @param period 查询周期
+     * @param limit 返回条数
+     * @return 热门赛事列表
+     */
+    List<ChannelTopContestResVO> selectTopContests(Long channelId, String period, Integer limit);
+
+    /**
+     * 查询渠道工作台活跃学生排行榜。
+     *
+     * @param channelId 渠道方ID
+     * @param limit 返回条数
+     * @return 活跃学生列表
+     */
+    List<ChannelTopStudentResVO> selectTopStudents(Long channelId, Integer limit);
+
+    /**
+     * 查询渠道订单详情。
+     *
+     * @param channelId 渠道方ID
+     * @param orderId 订单ID
+     * @return 订单详情
+     */
+    ChannelOrderDetailResVO selectOrderDetail(Long channelId, Long orderId);
+
     void unbindStudent(Long channelId, Long bindingId);
 }

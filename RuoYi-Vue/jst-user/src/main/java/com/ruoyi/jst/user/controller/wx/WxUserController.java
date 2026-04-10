@@ -8,6 +8,8 @@ import com.ruoyi.jst.common.exception.BizErrorCode;
 import com.ruoyi.jst.common.util.MaskUtil;
 import com.ruoyi.jst.user.domain.JstUser;
 import com.ruoyi.jst.user.service.IJstUserService;
+import com.ruoyi.jst.user.service.UserProfileService;
+import com.ruoyi.jst.user.vo.UserProfileVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,6 +39,9 @@ public class WxUserController extends BaseController {
     @Autowired
     private IJstUserService jstUserService;
 
+    @Autowired
+    private UserProfileService userProfileService;
+
     /**
      * 当前用户资料 (含脱敏字段)
      */
@@ -52,6 +57,7 @@ public class WxUserController extends BaseController {
                     BizErrorCode.JST_USER_NOT_FOUND.code());
         }
         // 输出 Map(避免直返 Entity,符合架构规范)
+        UserProfileVO profile = userProfileService.getProfile(userId);
         Map<String, Object> vo = new HashMap<>();
         vo.put("userId", user.getUserId());
         vo.put("nickname", user.getNickname());
@@ -68,6 +74,15 @@ public class WxUserController extends BaseController {
         vo.put("availablePoints", user.getAvailablePoints());
         vo.put("growthValue", user.getGrowthValue());
         vo.put("registerTime", user.getRegisterTime());
+        vo.put("enrollCount", profile.getEnrollCount());
+        vo.put("scoreCount", profile.getScoreCount());
+        vo.put("certCount", profile.getCertCount());
+        vo.put("courseCount", profile.getCourseCount());
+        vo.put("frozenPoints", profile.getFrozenPoints());
+        vo.put("levelName", profile.getLevelName());
+        vo.put("couponCount", profile.getCouponCount());
+        vo.put("unreadMsgCount", profile.getUnreadMsgCount());
+        vo.put("channelBinding", profile.getChannelBinding());
         return AjaxResult.success(vo);
     }
 

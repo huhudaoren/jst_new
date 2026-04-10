@@ -6,6 +6,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.jst.channel.dto.ChannelDashboardQueryDTO;
+import com.ruoyi.jst.channel.dto.ChannelTopRankingReqDTO;
 import com.ruoyi.jst.channel.mapper.lookup.ChannelLookupMapper;
 import com.ruoyi.jst.channel.service.ChannelDashboardService;
 import com.ruoyi.jst.channel.service.ChannelSupplementService;
@@ -131,6 +132,27 @@ public class WxChannelDashboardController extends BaseController {
     public AjaxResult studentCert(@PathVariable("studentId") Long studentId) {
         Long channelId = requireCurrentChannelId();
         return AjaxResult.success(channelSupplementService.selectStudentCerts(channelId, studentId));
+    }
+
+    @PreAuthorize("@ss.hasRole('jst_channel')")
+    @GetMapping("/dashboard/top-contests")
+    public AjaxResult topContests(@Valid ChannelTopRankingReqDTO query) {
+        Long channelId = requireCurrentChannelId();
+        return AjaxResult.success(channelSupplementService.selectTopContests(channelId, query.getPeriod(), query.getLimit()));
+    }
+
+    @PreAuthorize("@ss.hasRole('jst_channel')")
+    @GetMapping("/dashboard/top-students")
+    public AjaxResult topStudents(@Valid ChannelTopRankingReqDTO query) {
+        Long channelId = requireCurrentChannelId();
+        return AjaxResult.success(channelSupplementService.selectTopStudents(channelId, query.getLimit()));
+    }
+
+    @PreAuthorize("@ss.hasRole('jst_channel')")
+    @GetMapping("/orders/{orderId}")
+    public AjaxResult orderDetail(@PathVariable("orderId") Long orderId) {
+        Long channelId = requireCurrentChannelId();
+        return AjaxResult.success(channelSupplementService.selectOrderDetail(channelId, orderId));
     }
 
     /**

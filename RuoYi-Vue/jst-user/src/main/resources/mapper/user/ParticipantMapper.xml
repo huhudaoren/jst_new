@@ -32,12 +32,40 @@
         <result column="remark"                property="remark"/>
     </resultMap>
 
+    <resultMap id="ChannelParticipantResultMap" type="com.ruoyi.jst.user.vo.ChannelParticipantResVO">
+        <id     column="participantId"         property="participantId"/>
+        <result column="name"                  property="name"/>
+        <result column="guardianMobile"        property="guardianMobile"/>
+        <result column="guardianMobileMasked"  property="guardianMobileMasked"/>
+        <result column="school"                property="school"/>
+        <result column="className"             property="className"/>
+        <result column="claimStatus"           property="claimStatus"/>
+        <result column="claimedUserName"       property="claimedUserName"/>
+        <result column="createTime"            property="createTime"/>
+    </resultMap>
+
     <sql id="Base_Column_List">
         participant_id, user_id, participant_type, name, gender, birthday, age,
         guardian_name, guardian_mobile, school, organization, class_name,
         id_card_type, id_card_no, created_by_channel_id,
         claim_status, claimed_user_id, claimed_time, visible_scope,
         create_by, create_time, update_by, update_time, remark
+    </sql>
+
+    <sql id="Channel_Participant_Column_List">
+        p.participant_id as participantId,
+        p.name as name,
+        p.guardian_mobile as guardianMobile,
+        p.guardian_mobile as guardianMobileMasked,
+        p.school as school,
+        p.class_name as className,
+        case
+            when p.claim_status = 'unclaimed' then 'unclaimed'
+            when p.claim_status = 'pending_manual' then 'conflict'
+            else 'claimed'
+        end as claimStatus,
+        coalesce(nullif(u.real_name, ''), u.nickname) as claimedUserName,
+        p.create_time as createTime
     </sql>
 
     <select id="selectByPk" resultMap="BaseResultMap">
@@ -64,16 +92,51 @@
     </select>
 
     <!-- E0-1: 新增临时参赛档案（批量创建） -->
+    <select id="selectChannelParticipantList" resultMap="ChannelParticipantResultMap">
+        select <include refid="Channel_Participant_Column_List"/>
+        from jst_participant p
+                 left join jst_user u on u.user_id = p.claimed_user_id and u.del_flag = '0'
+        where p.create_by = #{createBy}
+          and p.del_flag = '0'
+        <if test="status != null and status != ''">
+            and case
+                    when p.claim_status = 'unclaimed' then 'unclaimed'
+                    when p.claim_status = 'pending_manual' then 'conflict'
+                    else 'claimed'
+                end = #{status}
+        </if>
+        order by p.create_time desc, p.participant_id desc
+    </select>
+
+    <select id="selectChannelParticipantDetail" resultMap="ChannelParticipantResultMap">
+        select <include refid="Channel_Participant_Column_List"/>
+        from jst_participant p
+                 left join jst_user u on u.user_id = p.claimed_user_id and u.del_flag = '0'
+        where p.participant_id = #{participantId}
+          and p.create_by = #{createBy}
+          and p.del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectChannelOwnedTemporary" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from jst_participant
+        where participant_id = #{participantId}
+          and create_by = #{createBy}
+          and del_flag = '0'
+        limit 1
+    </select>
+
     <insert id="insertParticipant" parameterType="com.ruoyi.jst.user.domain.Participant"
             useGeneratedKeys="true" keyProperty="participantId">
         INSERT INTO jst_participant (
-            name, gender, age, school, class_name,
+            participant_type, name, gender, age, school, class_name,
             guardian_mobile, guardian_name,
-            claim_status, create_by, create_time, update_by, update_time
+            claim_status, visible_scope, create_by, create_time, update_by, update_time
         ) VALUES (
-            #{name}, #{gender}, #{age}, #{school}, #{className},
+            #{participantType}, #{name}, #{gender}, #{age}, #{school}, #{className},
             #{guardianMobile}, #{guardianName},
-            #{claimStatus}, #{createBy}, #{createTime}, #{updateBy}, #{updateTime}
+            #{claimStatus}, #{visibleScope}, #{createBy}, #{createTime}, #{updateBy}, #{updateTime}
         )
     </insert>
 
@@ -90,6 +153,31 @@
         WHERE participant_id = #{participantId}
           AND claim_status   = #{expectedStatus}
           AND del_flag       = '0'
+    </update>
+
+    <update id="updateChannelParticipant" parameterType="com.ruoyi.jst.user.domain.Participant">
+        update jst_participant
+        set name = #{name},
+            guardian_mobile = #{guardianMobile},
+            school = #{school},
+            class_name = #{className},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where participant_id = #{participantId}
+          and create_by = #{createBy}
+          and claim_status = 'unclaimed'
+          and del_flag = '0'
+    </update>
+
+    <update id="softDeleteChannelParticipant">
+        update jst_participant
+        set del_flag = '2',
+            update_by = #{updateBy},
+            update_time = now()
+        where participant_id = #{participantId}
+          and create_by = #{createBy}
+          and claim_status = 'unclaimed'
+          and del_flag = '0'
     </update>
 
 </mapper>

@@ -188,7 +188,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                  order by pr.payment_id desc limit 1) as payment_no,
                (select pr.third_party_no from jst_payment_record pr
                  where pr.order_id = om.order_id and pr.del_flag = '0'
-                 order by pr.payment_id desc limit 1) as third_party_no
+                 order by pr.payment_id desc limit 1) as third_party_no,
+               null as original_participant_name
         from jst_order_main om
         left join jst_contest c on c.contest_id = om.contest_id and c.del_flag = '0'
         left join jst_participant p on p.participant_id = om.participant_id and p.del_flag = '0'

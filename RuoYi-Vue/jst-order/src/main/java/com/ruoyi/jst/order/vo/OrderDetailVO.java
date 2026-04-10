@@ -72,6 +72,10 @@ public class OrderDetailVO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
+    private String originalParticipantName;
+
+    private ParticipantSnapshotVO participantSnapshot;
+
     public Long getOrderId() {
         return orderId;
     }
@@ -294,5 +298,34 @@ public class OrderDetailVO {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public String getOriginalParticipantName() {
+        return originalParticipantName;
+    }
+
+    public void setOriginalParticipantName(String originalParticipantName) {
+        this.originalParticipantName = originalParticipantName;
+    }
+
+    public ParticipantSnapshotVO getParticipantSnapshot() {
+        return participantSnapshot;
+    }
+
+    public void setParticipantSnapshot(ParticipantSnapshotVO participantSnapshot) {
+        this.participantSnapshot = participantSnapshot;
+    }
+
+    public static class ParticipantSnapshotVO {
+
+        private String originalParticipantName;
+
+        public String getOriginalParticipantName() {
+            return originalParticipantName;
+        }
+
+        public void setOriginalParticipantName(String originalParticipantName) {
+            this.originalParticipantName = originalParticipantName;
+        }
     }
 }

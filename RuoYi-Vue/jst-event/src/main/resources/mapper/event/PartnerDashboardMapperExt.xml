@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.PartnerDashboardMapperExt">
+
+    <select id="selectSummary" parameterType="com.ruoyi.jst.event.dto.PartnerDashboardQueryReqDTO"
+            resultType="com.ruoyi.jst.event.vo.PartnerDashboardSummaryResVO">
+        select
+            (select count(1)
+             from jst_enroll_record er
+                      left join jst_contest c on c.contest_id = er.contest_id and c.del_flag = '0'
+             where er.del_flag = '0'
+               and er.audit_status = 'pending'
+               <if test="params.dataScope != null and params.dataScope != ''">
+                   ${params.dataScope}
+               </if>) as pendingEnrollCount,
+            (select count(1)
+             from jst_enroll_record er
+                      left join jst_contest c on c.contest_id = er.contest_id and c.del_flag = '0'
+             where er.del_flag = '0'
+               and er.create_time <![CDATA[ >= ]]> date_format(now(), '%Y-%m-01 00:00:00')
+               <if test="params.dataScope != null and params.dataScope != ''">
+                   ${params.dataScope}
+               </if>) as monthEnrollCount,
+            (select count(1)
+             from jst_score_record s
+                      left join jst_contest c on c.contest_id = s.contest_id and c.del_flag = '0'
+             where s.del_flag = '0'
+               and s.audit_status = 'approved'
+               and s.publish_status = 'unpublished'
+               <if test="params.dataScope != null and params.dataScope != ''">
+                   ${params.dataScope}
+               </if>) as pendingScoreCount,
+            (select count(1)
+             from jst_cert_record cr
+                      left join jst_contest c on c.contest_id = cr.contest_id and c.del_flag = '0'
+             where cr.del_flag = '0'
+               and cr.issue_status = 'pending'
+               <if test="params.dataScope != null and params.dataScope != ''">
+                   ${params.dataScope}
+               </if>) as pendingCertificateCount
+        from dual
+    </select>
+
+    <select id="selectPendingEnrollList" parameterType="com.ruoyi.jst.event.dto.PartnerDashboardQueryReqDTO"
+            resultType="com.ruoyi.jst.event.vo.PartnerDashboardTodoItemResVO">
+        select er.enroll_id as enrollId,
+               c.contest_name as contestName,
+               p.name as studentName,
+               coalesce(er.submit_time, er.create_time) as submitTime
+        from jst_enroll_record er
+                 left join jst_contest c on c.contest_id = er.contest_id and c.del_flag = '0'
+                 left join jst_participant p on p.participant_id = er.participant_id and p.del_flag = '0'
+        <where>
+            er.del_flag = '0'
+            and er.audit_status = 'pending'
+            <if test="params.dataScope != null and params.dataScope != ''">
+                ${params.dataScope}
+            </if>
+        </where>
+        order by coalesce(er.submit_time, er.create_time) desc, er.enroll_id desc
+        limit 5
+    </select>
+
+    <select id="selectPendingScoreList" parameterType="com.ruoyi.jst.event.dto.PartnerDashboardQueryReqDTO"
+            resultType="com.ruoyi.jst.event.vo.PartnerDashboardTodoItemResVO">
+        select s.score_id as scoreId,
+               c.contest_name as contestName,
+               null as stageName,
+               null as deadlineTime
+        from jst_score_record s
+                 left join jst_contest c on c.contest_id = s.contest_id and c.del_flag = '0'
+        <where>
+            s.del_flag = '0'
+            and s.audit_status = 'approved'
+            and s.publish_status = 'unpublished'
+            <if test="params.dataScope != null and params.dataScope != ''">
+                ${params.dataScope}
+            </if>
+        </where>
+        order by s.update_time desc, s.score_id desc
+        limit 5
+    </select>
+
+    <select id="selectRecentNoticeList" resultType="com.ruoyi.jst.event.vo.PartnerRecentNoticeResVO">
+        select n.notice_id as noticeId,
+               n.title as title,
+               n.content as summary,
+               n.publish_time as publishTime
+        from jst_notice n
+        where n.del_flag = '0'
+          and n.status = 'published'
+        order by n.publish_time desc, n.notice_id desc
+        limit #{limit}
+    </select>
+</mapper>

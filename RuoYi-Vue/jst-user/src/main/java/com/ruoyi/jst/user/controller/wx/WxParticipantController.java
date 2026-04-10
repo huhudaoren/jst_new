@@ -2,6 +2,7 @@ package com.ruoyi.jst.user.controller.wx;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
@@ -10,8 +11,11 @@ import com.ruoyi.jst.user.domain.Participant;
 import com.ruoyi.jst.user.domain.ParticipantUserMap;
 import com.ruoyi.jst.user.dto.BatchCreateParticipantReqDTO;
 import com.ruoyi.jst.user.dto.BatchEnrollReqDTO;
+import com.ruoyi.jst.user.dto.ChannelParticipantQueryReqDTO;
+import com.ruoyi.jst.user.dto.ChannelParticipantUpdateReqDTO;
 import com.ruoyi.jst.user.mapper.ParticipantMapper;
 import com.ruoyi.jst.user.mapper.ParticipantUserMapMapper;
+import com.ruoyi.jst.user.service.ChannelParticipantService;
 import com.ruoyi.jst.user.service.ParticipantClaimService;
 import com.ruoyi.jst.user.vo.ParticipantClaimResVO;
 import jakarta.validation.Valid;
@@ -20,9 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,6 +70,9 @@ public class WxParticipantController extends BaseController {
     @Autowired
     private ParticipantClaimService claimService;
 
+    @Autowired
+    private ChannelParticipantService channelParticipantService;
+
     // ========== 学生端原有接口 ==========
 
     /**
@@ -94,6 +103,30 @@ public class WxParticipantController extends BaseController {
             result.add(vo);
         }
         return AjaxResult.success(result);
+    }
+
+    @PreAuthorize("@ss.hasRole('jst_channel')")
+    @GetMapping("/jst/wx/channel/participant/my")
+    public TableDataInfo myCreatedParticipants(@Valid ChannelParticipantQueryReqDTO query) {
+        Long userId = SecurityUtils.getUserId();
+        startPage();
+        return getDataTable(channelParticipantService.selectMyParticipants(userId, query.getStatus()));
+    }
+
+    @PreAuthorize("@ss.hasRole('jst_channel')")
+    @PutMapping("/jst/wx/channel/participant/{participantId}")
+    public AjaxResult updateChannelParticipant(@PathVariable Long participantId,
+                                               @Valid @RequestBody ChannelParticipantUpdateReqDTO req) {
+        Long userId = SecurityUtils.getUserId();
+        return AjaxResult.success(channelParticipantService.updateParticipant(userId, participantId, req));
+    }
+
+    @PreAuthorize("@ss.hasRole('jst_channel')")
+    @DeleteMapping("/jst/wx/channel/participant/{participantId}")
+    public AjaxResult deleteChannelParticipant(@PathVariable Long participantId) {
+        Long userId = SecurityUtils.getUserId();
+        channelParticipantService.deleteParticipant(userId, participantId);
+        return AjaxResult.success();
     }
 
     /**
@@ -167,6 +200,7 @@ public class WxParticipantController extends BaseController {
 
         for (BatchCreateParticipantReqDTO item : list) {
             Participant p = new Participant();
+            p.setParticipantType("temporary_participant");
             p.setName(item.getName());
             p.setGender(item.getGender());
             p.setAge(item.getAge());
@@ -175,6 +209,7 @@ public class WxParticipantController extends BaseController {
             p.setGuardianMobile(item.getGuardianMobile());
             p.setGuardianName(item.getGuardianName());
             p.setClaimStatus("unclaimed");
+            p.setVisibleScope("channel_only");
             p.setCreateBy(operator);
             p.setCreateTime(now);
             p.setUpdateBy(operator);

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.user.mapper.UserProfileLookupMapper">
+
+    <select id="selectProfileStats" resultType="map">
+        select coalesce((select count(1)
+                         from jst_enroll_record er
+                         where er.user_id = #{userId}
+                           and er.del_flag = '0'), 0) as enrollCount,
+               coalesce((select count(1)
+                         from jst_score_record sr
+                         where sr.user_id = #{userId}
+                           and sr.publish_status = 'published'
+                           and sr.del_flag = '0'), 0) as scoreCount,
+               coalesce((select count(1)
+                         from jst_cert_record cr
+                         where cr.user_id = #{userId}
+                           and cr.issue_status = 'issued'
+                           and cr.del_flag = '0'), 0) as certCount,
+               coalesce((select count(1)
+                         from jst_course_learn_record clr
+                         where clr.user_id = #{userId}
+                           and clr.del_flag = '0'), 0) as courseCount,
+               coalesce((select pa.frozen_points
+                         from jst_points_account pa
+                         where pa.owner_id = #{userId}
+                           and pa.owner_type in ('user', 'student')
+                           and pa.del_flag = '0'
+                         order by pa.account_id desc
+                         limit 1), 0) as frozenPoints,
+               (select lc.level_name
+                from jst_user u
+                         left join jst_points_account pa
+                                   on pa.owner_id = u.user_id
+                                       and pa.owner_type in ('user', 'student')
+                                       and pa.del_flag = '0'
+                         left join jst_level_config lc
+                                   on lc.level_id = coalesce(pa.current_level_id, u.current_level_id)
+                                       and lc.del_flag = '0'
+                where u.user_id = #{userId}
+                  and u.del_flag = '0'
+                order by pa.account_id desc
+                limit 1) as levelName,
+               coalesce((select count(1)
+                         from jst_user_coupon uc
+                         where uc.user_id = #{userId}
+                           and uc.status = 'unused'
+                           and uc.del_flag = '0'), 0) as couponCount,
+               0 as unreadMsgCount
+        from dual
+    </select>
+
+    <select id="selectChannelBinding" resultType="map">
+        select c.channel_name as name,
+               null as school,
+               c.remark as remark
+        from jst_student_channel_binding b
+                 inner join jst_channel c on c.channel_id = b.channel_id and c.del_flag = '0'
+        where b.user_id = #{userId}
+          and b.status = 'active'
+          and b.del_flag = '0'
+        order by b.binding_id desc
+        limit 1
+    </select>
+</mapper>

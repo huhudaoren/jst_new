@@ -2904,3 +2904,212 @@ client.test("E0-AP-REFUND-1b auto-claim should succeed or no match", function() 
   client.assert(response.body.code === 200);
 });
 %}
+
+### =====================================================================
+### FIX-2. 后端接口补齐（排行榜 / profile / partner-dashboard / 临时档案 / 订单标注）
+### Preconditions:
+###   1. ruoyi-admin 已在 8080 启动
+###   2. 99-test-fixtures.sql 已导入
+### =====================================================================
+
+### FIX-2-0. login channel user 9201
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_9201" }
+
+> {%
+client.global.set("fix2_channel_token", response.body.data.token);
+client.test("FIX-2-0 channel login should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.userInfo.userId === 9201);
+});
+%}
+
+### FIX-2-1. top contests
+GET {{baseUrl}}/jst/wx/channel/dashboard/top-contests?period=last30d&limit=5
+Authorization: Bearer {{fix2_channel_token}}
+
+> {%
+client.test("FIX-2-1 top contests should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### FIX-2-2. top students
+GET {{baseUrl}}/jst/wx/channel/dashboard/top-students?limit=5
+Authorization: Bearer {{fix2_channel_token}}
+
+> {%
+client.test("FIX-2-2 top students should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### FIX-2-3. channel order detail
+GET {{baseUrl}}/jst/wx/channel/orders/94401
+Authorization: Bearer {{fix2_channel_token}}
+
+> {%
+client.test("FIX-2-3 channel order detail should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.orderId === 94401);
+  client.assert(response.body.data.priceOriginal != null);
+});
+%}
+
+### FIX-2-4a. batch create temporary participants
+POST {{baseUrl}}/jst/wx/channel/participant/batch-create
+Content-Type: {{contentType}}
+Authorization: Bearer {{fix2_channel_token}}
+
+[
+  {
+    "name": "测试_FIX2_HTTP_A",
+    "gender": 1,
+    "age": 10,
+    "school": "测试_FIX2小学",
+    "guardianMobile": "13800009021",
+    "guardianName": "测试_FIX2家长A"
+  },
+  {
+    "name": "测试_FIX2_HTTP_B",
+    "gender": 2,
+    "age": 9,
+    "school": "测试_FIX2小学",
+    "guardianMobile": "13800009022",
+    "guardianName": "测试_FIX2家长B"
+  }
+]
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("fix2_participant_id_a", response.body.data.participantIds[0]);
+  client.global.set("fix2_participant_id_b", response.body.data.participantIds[1]);
+}
+client.test("FIX-2-4a batch create should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.createdCount === 2);
+});
+%}
+
+### FIX-2-4. list my temporary participants
+GET {{baseUrl}}/jst/wx/channel/participant/my?status=unclaimed&pageNum=1&pageSize=10
+Authorization: Bearer {{fix2_channel_token}}
+
+> {%
+client.test("FIX-2-4 list should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.rows));
+});
+%}
+
+### FIX-2-5. update temporary participant
+PUT {{baseUrl}}/jst/wx/channel/participant/{{fix2_participant_id_a}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{fix2_channel_token}}
+
+{
+  "name": "测试_FIX2_HTTP_A_更新",
+  "school": "测试_FIX2小学_更新",
+  "className": "三年级1班",
+  "guardianMobile": "13800009021"
+}
+
+> {%
+client.test("FIX-2-5 update should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.participantId == client.global.get("fix2_participant_id_a"));
+});
+%}
+
+### FIX-2-6. soft delete temporary participant
+DELETE {{baseUrl}}/jst/wx/channel/participant/{{fix2_participant_id_b}}
+Authorization: Bearer {{fix2_channel_token}}
+
+> {%
+client.test("FIX-2-6 delete should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### FIX-2-7. profile enriched fields
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("fix2_user_token", response.body.data.token);
+%}
+
+### FIX-2-7.1. get profile
+GET {{baseUrl}}/jst/wx/user/profile
+Authorization: Bearer {{fix2_user_token}}
+
+> {%
+client.test("FIX-2-7 profile should include extra fields", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.hasOwnProperty("enrollCount"));
+  client.assert(response.body.data.hasOwnProperty("scoreCount"));
+  client.assert(response.body.data.hasOwnProperty("certCount"));
+  client.assert(response.body.data.hasOwnProperty("courseCount"));
+  client.assert(response.body.data.hasOwnProperty("frozenPoints"));
+  client.assert(response.body.data.hasOwnProperty("levelName"));
+  client.assert(response.body.data.hasOwnProperty("couponCount"));
+  client.assert(response.body.data.hasOwnProperty("unreadMsgCount"));
+  client.assert(response.body.data.hasOwnProperty("channelBinding"));
+});
+%}
+
+### FIX-2-8. partner login
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_a",
+  "password": "admin123"
+}
+
+> {%
+client.global.set("fix2_partner_token", response.body.token);
+client.test("FIX-2-8 partner login should succeed", function() {
+  client.assert(!!response.body.token);
+});
+%}
+
+### FIX-2-8.1. partner summary
+GET {{baseUrl}}/jst/partner/dashboard/summary
+Authorization: Bearer {{fix2_partner_token}}
+
+> {%
+client.test("FIX-2-8 summary should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.hasOwnProperty("pendingEnrollCount"));
+});
+%}
+
+### FIX-2-9. partner todo
+GET {{baseUrl}}/jst/partner/dashboard/todo
+Authorization: Bearer {{fix2_partner_token}}
+
+> {%
+client.test("FIX-2-9 todo should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data.pendingEnrollList));
+  client.assert(Array.isArray(response.body.data.pendingScoreList));
+});
+%}
+
+### FIX-2-10. recent notices
+GET {{baseUrl}}/jst/partner/notice/recent
+Authorization: Bearer {{fix2_partner_token}}
+
+> {%
+client.test("FIX-2-10 recent notices should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+});
+%}

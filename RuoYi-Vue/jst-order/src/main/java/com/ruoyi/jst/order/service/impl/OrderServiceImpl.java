@@ -210,6 +210,11 @@ public class OrderServiceImpl implements OrderService {
             throw new ServiceException(BizErrorCode.JST_ORDER_NOT_FOUND.message(),
                     BizErrorCode.JST_ORDER_NOT_FOUND.code());
         }
+        if (StringUtils.isNotBlank(detail.getOriginalParticipantName())) {
+            OrderDetailVO.ParticipantSnapshotVO participantSnapshot = new OrderDetailVO.ParticipantSnapshotVO();
+            participantSnapshot.setOriginalParticipantName(detail.getOriginalParticipantName());
+            detail.setParticipantSnapshot(participantSnapshot);
+        }
         return detail;
     }
 

@@ -1,6 +1,7 @@
 package com.ruoyi.jst.user.mapper;
 
 import com.ruoyi.jst.user.domain.Participant;
+import com.ruoyi.jst.user.vo.ChannelParticipantResVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -32,5 +33,20 @@ public interface ParticipantMapper {
                           @Param("claimedUserId") Long claimedUserId);
 
     /** 新增临时参赛档案（E0-1 批量创建） */
+    List<ChannelParticipantResVO> selectChannelParticipantList(@Param("createBy") String createBy,
+                                                               @Param("status") String status);
+
+    ChannelParticipantResVO selectChannelParticipantDetail(@Param("participantId") Long participantId,
+                                                           @Param("createBy") String createBy);
+
+    Participant selectChannelOwnedTemporary(@Param("participantId") Long participantId,
+                                            @Param("createBy") String createBy);
+
+    int updateChannelParticipant(Participant participant);
+
+    int softDeleteChannelParticipant(@Param("participantId") Long participantId,
+                                     @Param("createBy") String createBy,
+                                     @Param("updateBy") String updateBy);
+
     int insertParticipant(Participant participant);
 }
