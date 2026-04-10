@@ -25,7 +25,7 @@
         <view class="my-page__switcher">
           <view :class="['my-page__switcher-item', currentView === 'student' ? 'my-page__switcher-item--active' : '']" @tap="switchView('student')">学生</view>
           <view v-if="isChannelUser" :class="['my-page__switcher-item', currentView === 'channel' ? 'my-page__switcher-item--active' : '']" @tap="switchView('channel')">渠道方</view>
-          <view v-else class="my-page__switcher-item" @tap="showTeacherComingSoon">老师</view>
+          <view v-else class="my-page__switcher-item" @tap="navigateChannelApply">申请渠道方</view>
         </view>
       </view>
     </view>
