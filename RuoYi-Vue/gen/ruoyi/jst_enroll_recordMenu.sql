@@ -1,6 +1,6 @@
 -- 菜单 SQL
 insert into sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
-values('报名记录（含动态单快照）', '2200', '1', 'jst_enroll_record', 'jst/event/jst_enroll_record/index', 1, 0, 'C', '0', '0', 'jst:event:enroll_record:list', '#', 'admin', sysdate(), '', null, '报名记录（含动态单快照）菜单');
+values('报名记录（含动态单快照）', '2200', '1', 'jst_enroll_record', 'jst/event/jst_enroll_record/index', 1, 0, 'C', '1', '0', 'jst:event:enroll_record:list', '#', 'admin', sysdate(), '', null, '报名记录（含动态单快照）菜单');
 
 -- 按钮父菜单ID
 SELECT @parentId := LAST_INSERT_ID();

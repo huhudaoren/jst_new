@@ -1,528 +1,217 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+  <div class="app-container enhanced-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">渠道财务</p>
+        <h2>返点台账</h2>
+        <p class="hero-desc">查看渠道返点计提明细，按渠道、订单、方向筛选。只读查询。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
+      <el-form-item label="渠道ID" prop="channelId">
+        <el-input v-model="queryParams.channelId" placeholder="请输入渠道ID" clearable @keyup.enter.native="handleQuery" />
+      </el-form-item>
       <el-form-item label="订单ID" prop="orderId">
-        <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入订单ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.orderId" placeholder="请输入订单ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="订单明细ID" prop="itemId">
-        <el-input
-          v-model="queryParams.itemId"
-          placeholder="请输入订单明细ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="方向" prop="direction">
+        <el-select v-model="queryParams.direction" placeholder="全部" clearable>
+          <el-option label="收入" value="positive" />
+          <el-option label="扣减" value="negative" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="渠道方ID" prop="channelId">
-        <el-input
-          v-model="queryParams.channelId"
-          placeholder="请输入渠道方ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="赛事ID" prop="contestId">
-        <el-input
-          v-model="queryParams.contestId"
-          placeholder="请输入赛事ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="命中规则ID" prop="ruleId">
-        <el-input
-          v-model="queryParams.ruleId"
-          placeholder="请输入命中规则ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="标价金额" prop="listAmount">
-        <el-input
-          v-model="queryParams.listAmount"
-          placeholder="请输入标价金额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="净实付金额" prop="netPayAmount">
-        <el-input
-          v-model="queryParams.netPayAmount"
-          placeholder="请输入净实付金额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="服务费" prop="serviceFee">
-        <el-input
-          v-model="queryParams.serviceFee"
-          placeholder="请输入服务费"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="返点基数 = max(0, 标价 - 服务费)" prop="rebateBase">
-        <el-input
-          v-model="queryParams.rebateBase"
-          placeholder="请输入返点基数 = max(0, 标价 - 服务费)"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="返点金额" prop="rebateAmount">
-        <el-input
-          v-model="queryParams.rebateAmount"
-          placeholder="请输入返点金额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="方向：positive正向 / negative负向" prop="direction">
-        <el-input
-          v-model="queryParams.direction"
-          placeholder="请输入方向：positive正向 / negative负向"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="计提时间" prop="accrualTime">
-        <el-date-picker clearable
-          v-model="queryParams.accrualTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择计提时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="赛事结束时间快照" prop="eventEndTime">
-        <el-date-picker clearable
-          v-model="queryParams.eventEndTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择赛事结束时间快照">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="关联结算单ID" prop="settlementId">
-        <el-input
-          v-model="queryParams.settlementId"
-          placeholder="请输入关联结算单ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="全部" clearable>
+          <el-option v-for="s in statusOptions" :key="s.value" :label="s.label" :value="s.value" />
+        </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_rebate_ledger:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_rebate_ledger:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_rebate_ledger:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_rebate_ledger:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
+    <!-- 手机端卡片 -->
+    <div v-if="isMobile" v-loading="loading" class="mobile-list">
+      <div v-if="list.length">
+        <div v-for="row in list" :key="row.ledgerId" class="mobile-card">
+          <div class="mobile-card-top">
+            <div>
+              <div class="mobile-title">渠道 #{{ row.channelId || '--' }}</div>
+              <div class="mobile-sub">订单 #{{ row.orderId || '--' }}</div>
+            </div>
+            <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+          </div>
+          <div class="mobile-amount-row">
+            <el-tag size="mini" :type="row.direction === 'positive' ? 'success' : 'danger'">{{ row.direction === 'positive' ? '收入' : '扣减' }}</el-tag>
+            <span class="mobile-amount" :class="{ 'amount-negative': Number(row.rebateAmount) < 0 }">{{ formatMoney(row.rebateAmount) }}</span>
+          </div>
+          <div class="mobile-info-row">{{ parseTime(row.accrualTime) || parseTime(row.createTime) || '--' }}</div>
+          <div class="mobile-actions">
+            <el-button type="text" @click="openDetail(row)">详情</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无台账记录" :image-size="96" />
+    </div>
 
-    <el-table v-loading="loading" :data="jst_rebate_ledgerList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="台账ID" align="center" prop="ledgerId" />
-      <el-table-column label="订单ID" align="center" prop="orderId" />
-      <el-table-column label="订单明细ID" align="center" prop="itemId" />
-      <el-table-column label="渠道方ID" align="center" prop="channelId" />
-      <el-table-column label="赛事ID" align="center" prop="contestId" />
-      <el-table-column label="命中规则ID" align="center" prop="ruleId" />
-      <el-table-column label="标价金额" align="center" prop="listAmount" />
-      <el-table-column label="净实付金额" align="center" prop="netPayAmount" />
-      <el-table-column label="服务费" align="center" prop="serviceFee" />
-      <el-table-column label="返点基数 = max(0, 标价 - 服务费)" align="center" prop="rebateBase" />
-      <el-table-column label="返点金额" align="center" prop="rebateAmount" />
-      <el-table-column label="方向：positive正向 / negative负向" align="center" prop="direction" />
-      <el-table-column label="台账状态：pending_accrual/withdrawable/in_review/paid/rolled_back/negative" align="center" prop="status" />
-      <el-table-column label="计提时间" align="center" prop="accrualTime" width="180">
+    <!-- PC 端表格 -->
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="台账ID" prop="ledgerId" width="80" />
+      <el-table-column label="渠道ID" prop="channelId" width="90" />
+      <el-table-column label="订单ID" prop="orderId" width="90" />
+      <el-table-column label="方向" width="90">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.accrualTime, '{y}-{m}-{d}') }}</span>
+          <el-tag size="small" :type="scope.row.direction === 'positive' ? 'success' : 'danger'">{{ scope.row.direction === 'positive' ? '收入' : '扣减' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="赛事结束时间快照" align="center" prop="eventEndTime" width="180">
+      <el-table-column label="返点金额" min-width="120" align="right">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.eventEndTime, '{y}-{m}-{d}') }}</span>
+          <strong :class="{ 'amount-negative': Number(scope.row.rebateAmount) < 0 }">{{ formatMoney(scope.row.rebateAmount) }}</strong>
         </template>
       </el-table-column>
-      <el-table-column label="关联结算单ID" align="center" prop="settlementId" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="净付款" min-width="110" align="right">
+        <template slot-scope="scope">{{ formatMoney(scope.row.netPayAmount) }}</template>
+      </el-table-column>
+      <el-table-column label="服务费" min-width="100" align="right">
+        <template slot-scope="scope">{{ formatMoney(scope.row.serviceFee) }}</template>
+      </el-table-column>
+      <el-table-column label="状态" min-width="100">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_rebate_ledger:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_rebate_ledger:remove']"
-          >删除</el-button>
+          <el-tag size="small" :type="statusType(scope.row.status)">{{ statusLabel(scope.row.status) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="计提时间" min-width="160">
+        <template slot-scope="scope">{{ parseTime(scope.row.accrualTime) || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="操作" width="80" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改返点计提台账对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="订单ID" prop="orderId">
-              <el-input v-model="form.orderId" placeholder="请输入订单ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="订单明细ID" prop="itemId">
-              <el-input v-model="form.itemId" placeholder="请输入订单明细ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="渠道方ID" prop="channelId">
-              <el-input v-model="form.channelId" placeholder="请输入渠道方ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="赛事ID" prop="contestId">
-              <el-input v-model="form.contestId" placeholder="请输入赛事ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="命中规则ID" prop="ruleId">
-              <el-input v-model="form.ruleId" placeholder="请输入命中规则ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="标价金额" prop="listAmount">
-              <el-input v-model="form.listAmount" placeholder="请输入标价金额" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="净实付金额" prop="netPayAmount">
-              <el-input v-model="form.netPayAmount" placeholder="请输入净实付金额" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="服务费" prop="serviceFee">
-              <el-input v-model="form.serviceFee" placeholder="请输入服务费" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="返点基数 = max(0, 标价 - 服务费)" prop="rebateBase">
-              <el-input v-model="form.rebateBase" placeholder="请输入返点基数 = max(0, 标价 - 服务费)" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="返点金额" prop="rebateAmount">
-              <el-input v-model="form.rebateAmount" placeholder="请输入返点金额" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="方向：positive正向 / negative负向" prop="direction">
-              <el-input v-model="form.direction" placeholder="请输入方向：positive正向 / negative负向" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="计提时间" prop="accrualTime">
-              <el-date-picker clearable
-                v-model="form.accrualTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择计提时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="赛事结束时间快照" prop="eventEndTime">
-              <el-date-picker clearable
-                v-model="form.eventEndTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择赛事结束时间快照">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="关联结算单ID" prop="settlementId">
-              <el-input v-model="form.settlementId" placeholder="请输入关联结算单ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <!-- 详情抽屉 -->
+    <el-drawer :visible.sync="detailVisible" :size="isMobile ? '100%' : '560px'" title="台账详情" append-to-body>
+      <div v-if="detail" class="drawer-body">
+        <el-descriptions :column="isMobile ? 1 : 2" border>
+          <el-descriptions-item label="台账ID">{{ detail.ledgerId }}</el-descriptions-item>
+          <el-descriptions-item label="渠道ID">{{ detail.channelId }}</el-descriptions-item>
+          <el-descriptions-item label="订单ID">{{ detail.orderId }}</el-descriptions-item>
+          <el-descriptions-item label="赛事ID">{{ detail.contestId }}</el-descriptions-item>
+          <el-descriptions-item label="规则ID">{{ detail.ruleId }}</el-descriptions-item>
+          <el-descriptions-item label="方向">
+            <el-tag size="small" :type="detail.direction === 'positive' ? 'success' : 'danger'">{{ detail.direction === 'positive' ? '收入' : '扣减' }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="挂牌金额">{{ formatMoney(detail.listAmount) }}</el-descriptions-item>
+          <el-descriptions-item label="净付款">{{ formatMoney(detail.netPayAmount) }}</el-descriptions-item>
+          <el-descriptions-item label="服务费">{{ formatMoney(detail.serviceFee) }}</el-descriptions-item>
+          <el-descriptions-item label="返点基数">{{ formatMoney(detail.rebateBase) }}</el-descriptions-item>
+          <el-descriptions-item label="返点金额"><strong :class="{ 'amount-negative': Number(detail.rebateAmount) < 0 }">{{ formatMoney(detail.rebateAmount) }}</strong></el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag size="small" :type="statusType(detail.status)">{{ statusLabel(detail.status) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="计提时间">{{ parseTime(detail.accrualTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="赛事结束时间">{{ parseTime(detail.eventEndTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="结算单ID">{{ detail.settlementId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ parseTime(detail.createTime) || '--' }}</el-descriptions-item>
+        </el-descriptions>
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_rebate_ledger, getJst_rebate_ledger, delJst_rebate_ledger, addJst_rebate_ledger, updateJst_rebate_ledger } from "@/api/jst/channel/jst_rebate_ledger"
+import { listJst_rebate_ledger, getJst_rebate_ledger } from '@/api/jst/channel/jst_rebate_ledger'
+
+const STATUS_META = {
+  pending_accrual: { label: '待计提', type: 'info' },
+  withdrawable: { label: '可提现', type: 'success' },
+  in_review: { label: '审核中', type: 'warning' },
+  paid: { label: '已打款', type: 'success' },
+  rolled_back: { label: '已回退', type: 'danger' },
+  negative: { label: '负向抵扣', type: 'danger' }
+}
 
 export default {
-  name: "Jst_rebate_ledger",
+  name: 'RebateLedgerManage',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
+      loading: false,
+      isMobile: false,
+      list: [],
       total: 0,
-      // 返点计提台账表格数据
-      jst_rebate_ledgerList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        orderId: null,
-        itemId: null,
-        channelId: null,
-        contestId: null,
-        ruleId: null,
-        listAmount: null,
-        netPayAmount: null,
-        serviceFee: null,
-        rebateBase: null,
-        rebateAmount: null,
-        direction: null,
-        status: null,
-        accrualTime: null,
-        eventEndTime: null,
-        settlementId: null,
-      },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        orderId: [
-          { required: true, message: "订单ID不能为空", trigger: "blur" }
-        ],
-        itemId: [
-          { required: true, message: "订单明细ID不能为空", trigger: "blur" }
-        ],
-        channelId: [
-          { required: true, message: "渠道方ID不能为空", trigger: "blur" }
-        ],
-        contestId: [
-          { required: true, message: "赛事ID不能为空", trigger: "blur" }
-        ],
-        listAmount: [
-          { required: true, message: "标价金额不能为空", trigger: "blur" }
-        ],
-        netPayAmount: [
-          { required: true, message: "净实付金额不能为空", trigger: "blur" }
-        ],
-        serviceFee: [
-          { required: true, message: "服务费不能为空", trigger: "blur" }
-        ],
-        rebateBase: [
-          { required: true, message: "返点基数 = max(0, 标价 - 服务费)不能为空", trigger: "blur" }
-        ],
-        rebateAmount: [
-          { required: true, message: "返点金额不能为空", trigger: "blur" }
-        ],
-        direction: [
-          { required: true, message: "方向：positive正向 / negative负向不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "台账状态：pending_accrual/withdrawable/in_review/paid/rolled_back/negative不能为空", trigger: "change" }
-        ],
-      }
+      queryParams: { pageNum: 1, pageSize: 10, channelId: undefined, orderId: undefined, direction: undefined, status: undefined },
+      statusOptions: Object.entries(STATUS_META).map(([value, { label }]) => ({ value, label })),
+      detailVisible: false,
+      detail: null
     }
   },
   created() {
+    this.updateViewport()
+    window.addEventListener('resize', this.updateViewport)
     this.getList()
   },
+  beforeDestroy() { window.removeEventListener('resize', this.updateViewport) },
   methods: {
-    /** 查询返点计提台账列表 */
-    getList() {
+    updateViewport() { this.isMobile = window.innerWidth <= 768 },
+    async getList() {
       this.loading = true
-      listJst_rebate_ledger(this.queryParams).then(response => {
-        this.jst_rebate_ledgerList = response.rows
-        this.total = response.total
-        this.loading = false
-      })
+      try {
+        const res = await listJst_rebate_ledger(this.queryParams)
+        this.list = res.rows || []
+        this.total = res.total || 0
+      } finally { this.loading = false }
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        ledgerId: null,
-        orderId: null,
-        itemId: null,
-        channelId: null,
-        contestId: null,
-        ruleId: null,
-        listAmount: null,
-        netPayAmount: null,
-        serviceFee: null,
-        rebateBase: null,
-        rebateAmount: null,
-        direction: null,
-        status: null,
-        accrualTime: null,
-        eventEndTime: null,
-        settlementId: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
-    handleQuery() {
-      this.queryParams.pageNum = 1
+    handleQuery() { this.queryParams.pageNum = 1; this.getList() },
+    resetQuery() {
+      this.queryParams = { pageNum: 1, pageSize: 10, channelId: undefined, orderId: undefined, direction: undefined, status: undefined }
       this.getList()
     },
-    /** 重置按钮操作 */
-    resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
+    async openDetail(row) {
+      this.detailVisible = true
+      this.detail = null
+      try {
+        const res = await getJst_rebate_ledger(row.ledgerId)
+        this.detail = res.data
+      } catch (_) { this.detail = row }
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.ledgerId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加返点计提台账"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const ledgerId = row.ledgerId || this.ids
-      getJst_rebate_ledger(ledgerId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改返点计提台账"
-      })
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.ledgerId != null) {
-            updateJst_rebate_ledger(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_rebate_ledger(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
-      })
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const ledgerIds = row.ledgerId || this.ids
-      this.$modal.confirm('是否确认删除返点计提台账编号为"' + ledgerIds + '"的数据项？').then(function() {
-        return delJst_rebate_ledger(ledgerIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_rebate_ledger/export', {
-        ...this.queryParams
-      }, `jst_rebate_ledger_${new Date().getTime()}.xlsx`)
-    }
+    statusLabel(status) { return (STATUS_META[status] && STATUS_META[status].label) || status || '--' },
+    statusType(status) { return (STATUS_META[status] && STATUS_META[status].type) || 'info' },
+    formatMoney(v) { return '\u00a5' + Number(v || 0).toFixed(2) }
   }
 }
 </script>
+
+<style scoped>
+.enhanced-page { background: #f6f8fb; min-height: calc(100vh - 84px); }
+.page-hero { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px; margin-bottom: 18px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.hero-eyebrow { margin: 0 0 8px; color: #2f6fec; font-size: 13px; font-weight: 600; }
+.page-hero h2 { margin: 0; font-size: 24px; font-weight: 700; color: #172033; }
+.hero-desc { margin: 8px 0 0; color: #6f7b8f; }
+.query-panel { padding: 16px 16px 0; margin-bottom: 16px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.amount-negative { color: #f56c6c; font-weight: 600; }
+.drawer-body { padding: 20px; }
+.mobile-list { min-height: 180px; }
+.mobile-card { padding: 16px; margin-bottom: 12px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.mobile-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.mobile-title { font-weight: 700; color: #172033; }
+.mobile-sub { margin-top: 4px; font-size: 12px; color: #7a8495; }
+.mobile-amount-row { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
+.mobile-amount { font-size: 22px; font-weight: 700; color: #172033; }
+.mobile-info-row { margin-top: 8px; font-size: 13px; color: #7a8495; }
+.mobile-actions { margin-top: 12px; border-top: 1px solid #f0f2f5; padding-top: 12px; }
+@media (max-width: 768px) {
+  .enhanced-page { padding: 12px; }
+  .page-hero { display: block; padding: 18px; }
+  .page-hero .el-button { width: 100%; min-height: 44px; margin-top: 16px; }
+  .page-hero h2 { font-size: 20px; }
+  .query-panel { padding-bottom: 8px; }
+  .query-panel ::v-deep .el-form-item { display: block; margin-right: 0; }
+  .query-panel ::v-deep .el-form-item__content, .query-panel ::v-deep .el-select, .query-panel ::v-deep .el-input { width: 100%; }
+}
+</style>

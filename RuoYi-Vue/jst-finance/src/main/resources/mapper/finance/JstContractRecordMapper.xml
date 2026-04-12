@@ -49,6 +49,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where contract_id = #{contractId}
     </select>
 
+    <select id="selectByTarget" resultMap="JstContractRecordResult">
+        <include refid="selectJstContractRecordVo"/>
+        where del_flag = '0'
+          and target_type = #{targetType}
+          and target_id = #{targetId}
+        order by create_time desc, contract_id desc
+    </select>
+
+    <select id="selectByIdAndTarget" resultMap="JstContractRecordResult">
+        <include refid="selectJstContractRecordVo"/>
+        where del_flag = '0'
+          and contract_id = #{contractId}
+          and target_type = #{targetType}
+          and target_id = #{targetId}
+    </select>
+
     <insert id="insertJstContractRecord" parameterType="JstContractRecord" useGeneratedKeys="true" keyProperty="contractId">
         insert into jst_contract_record
         <trim prefix="(" suffix=")" suffixOverrides=",">

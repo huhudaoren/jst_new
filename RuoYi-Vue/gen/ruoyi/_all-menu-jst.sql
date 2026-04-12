@@ -1039,7 +1039,7 @@ values('用户权益持有导出', @parentId, '5',  '#', '', 1, 0, 'F', '0', '0'
 -- ===== jst_enroll_record =====
 -- 菜单 SQL
 insert into sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
-values('报名记录（含动态单快照）', '2200', '1', 'jst_enroll_record', 'jst/event/jst_enroll_record/index', 1, 0, 'C', '0', '0', 'jst:event:enroll_record:list', '#', 'admin', sysdate(), '', null, '报名记录（含动态单快照）菜单');
+values('报名记录（含动态单快照）', '2200', '1', 'jst_enroll_record', 'jst/event/jst_enroll_record/index', 1, 0, 'C', '1', '0', 'jst:event:enroll_record:list', '#', 'admin', sysdate(), '', null, '报名记录（含动态单快照）菜单');
 
 -- 按钮父菜单ID
 SELECT @parentId := LAST_INSERT_ID();
@@ -1085,7 +1085,7 @@ values('团队预约主记录导出', @parentId, '5',  '#', '', 1, 0, 'F', '0', 
 -- ===== jst_contest =====
 -- 菜单 SQL
 insert into sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
-values('赛事主', '2200', '1', 'jst_contest', 'jst/event/jst_contest/index', 1, 0, 'C', '0', '0', 'jst:event:contest:list', '#', 'admin', sysdate(), '', null, '赛事主菜单');
+values('赛事主', '2200', '1', 'jst_contest', 'jst/event/jst_contest/index', 1, 0, 'C', '1', '0', 'jst:event:contest:list', '#', 'admin', sysdate(), '', null, '赛事主菜单');
 
 -- 按钮父菜单ID
 SELECT @parentId := LAST_INSERT_ID();
@@ -1131,7 +1131,7 @@ values('成长值流水导出', @parentId, '5',  '#', '', 1, 0, 'F', '0', '0', '
 -- ===== jst_course =====
 -- 菜单 SQL
 insert into sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
-values('课程', '2200', '1', 'jst_course', 'jst/event/jst_course/index', 1, 0, 'C', '0', '0', 'jst:event:course:list', '#', 'admin', sysdate(), '', null, '课程菜单');
+values('课程', '2200', '1', 'jst_course', 'jst/event/jst_course/index', 1, 0, 'C', '1', '0', 'jst:event:course:list', '#', 'admin', sysdate(), '', null, '课程菜单');
 
 -- 按钮父菜单ID
 SELECT @parentId := LAST_INSERT_ID();

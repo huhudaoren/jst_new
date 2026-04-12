@@ -1,147 +1,205 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+  <div class="app-container jst-cert-template-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">证书配置</p>
+        <h2>证书模板</h2>
+        <p class="hero-desc">管理模板底图与布局配置，支持缩略图预览和快速编辑。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form
+      ref="queryForm"
+      :model="queryParams"
+      size="small"
+      :inline="true"
+      label-width="88px"
+      class="query-panel"
+    >
       <el-form-item label="模板名称" prop="templateName">
         <el-input
-          v-model="queryParams.templateName"
+          v-model.trim="queryParams.templateName"
           placeholder="请输入模板名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="所属赛事方ID" prop="ownerId">
-        <el-input
-          v-model="queryParams.ownerId"
-          placeholder="请输入所属赛事方ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="所属类型" prop="ownerType">
+        <el-select v-model="queryParams.ownerType" placeholder="全部" clearable>
+          <el-option v-for="item in ownerTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="审核状态" prop="auditStatus">
+        <el-select v-model="queryParams.auditStatus" placeholder="全部" clearable>
+          <el-option v-for="item in auditStatusOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="启停状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="全部" clearable>
+          <el-option v-for="item in enableStatusOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_cert_template:add']"
-        >新增</el-button>
+    <el-row :gutter="10" class="mb8 action-row">
+      <el-col :xs="12" :sm="8" :md="4">
+        <el-button type="primary" icon="el-icon-plus" @click="handleAdd" v-hasPermi="['jst:event:cert_template:add']">新增</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_cert_template:edit']"
-        >修改</el-button>
+      <el-col :xs="12" :sm="8" :md="4">
+        <el-button icon="el-icon-download" @click="handleExport" v-hasPermi="['jst:event:cert_template:export']">导出</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_cert_template:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_cert_template:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="jst_cert_templateList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="模板ID" align="center" prop="templateId" />
-      <el-table-column label="模板名称" align="center" prop="templateName" />
-      <el-table-column label="所属：platform/partner" align="center" prop="ownerType" />
-      <el-table-column label="所属赛事方ID" align="center" prop="ownerId" />
-      <el-table-column label="底图URL" align="center" prop="bgImage" width="100">
+    <div v-if="isMobile" v-loading="loading" class="mobile-list">
+      <div v-if="templateList.length">
+        <div v-for="row in templateList" :key="row.templateId" class="mobile-card">
+          <div class="mobile-card-top">
+            <div>
+              <div class="mobile-title">{{ row.templateName || '--' }}</div>
+              <div class="mobile-sub">模板ID：{{ row.templateId }}</div>
+            </div>
+            <JstStatusBadge :status="String(row.auditStatus || '')" :status-map="auditStatusMap" />
+          </div>
+          <div class="mobile-preview">
+            <image-preview v-if="row.bgImage" :src="row.bgImage" :width="110" :height="62" />
+            <span v-else class="preview-empty">暂无底图</span>
+          </div>
+          <div class="mobile-info-row">所属：{{ ownerTypeLabel(row.ownerType) }}</div>
+          <div class="mobile-info-row">
+            启停状态：
+            <JstStatusBadge :status="String(row.status)" :status-map="enableStatusMap" />
+          </div>
+          <div class="mobile-actions">
+            <el-button type="text" @click="openDetail(row)">详情</el-button>
+            <el-button type="text" v-hasPermi="['jst:event:cert_template:edit']" @click="handleUpdate(row)">编辑</el-button>
+            <el-button type="text" class="danger-text" v-hasPermi="['jst:event:cert_template:remove']" @click="handleDelete(row)">删除</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无证书模板" :image-size="96" />
+    </div>
+
+    <el-table v-else v-loading="loading" :data="templateList">
+      <template slot="empty">
+        <el-empty description="暂无证书模板" :image-size="96" />
+      </template>
+      <el-table-column label="模板ID" prop="templateId" min-width="90" />
+      <el-table-column label="模板名称" prop="templateName" min-width="160" show-overflow-tooltip />
+      <el-table-column label="所属类型" min-width="110">
         <template slot-scope="scope">
-          <image-preview :src="scope.row.bgImage" :width="50" :height="50"/>
+          {{ ownerTypeLabel(scope.row.ownerType) }}
         </template>
       </el-table-column>
-      <el-table-column label="布局/字段配置JSON" align="center" prop="layoutJson" />
-      <el-table-column label="审核状态：pending/approved/rejected" align="center" prop="auditStatus" />
-      <el-table-column label="启停：0停 1启" align="center" prop="status" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="所属方ID" prop="ownerId" min-width="110" />
+      <el-table-column label="底图预览" min-width="120">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_cert_template:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_cert_template:remove']"
-          >删除</el-button>
+          <image-preview v-if="scope.row.bgImage" :src="scope.row.bgImage" :width="84" :height="48" />
+          <span v-else>--</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="审核状态" min-width="110">
+        <template slot-scope="scope">
+          <JstStatusBadge :status="String(scope.row.auditStatus || '')" :status-map="auditStatusMap" />
+        </template>
+      </el-table-column>
+      <el-table-column label="启停状态" min-width="110">
+        <template slot-scope="scope">
+          <JstStatusBadge :status="String(scope.row.status)" :status-map="enableStatusMap" />
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="210" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
+          <el-button type="text" v-hasPermi="['jst:event:cert_template:edit']" @click="handleUpdate(scope.row)">编辑</el-button>
+          <el-button type="text" class="danger-text" v-hasPermi="['jst:event:cert_template:remove']" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
 
-    <!-- 添加或修改证书模板对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+    <el-drawer
+      title="模板详情"
+      :visible.sync="detailVisible"
+      :size="isMobile ? '100%' : '50%'"
+      append-to-body
+    >
+      <div v-loading="detailLoading" class="drawer-body">
+        <template v-if="detailData">
+          <div class="drawer-preview">
+            <image-preview v-if="detailData.bgImage" :src="detailData.bgImage" :width="240" :height="136" />
+            <el-empty v-else description="暂无底图" :image-size="80" />
+          </div>
+          <el-descriptions :column="isMobile ? 1 : 2" border>
+            <el-descriptions-item label="模板ID">{{ detailData.templateId || '--' }}</el-descriptions-item>
+            <el-descriptions-item label="模板名称">{{ detailData.templateName || '--' }}</el-descriptions-item>
+            <el-descriptions-item label="所属类型">{{ ownerTypeLabel(detailData.ownerType) }}</el-descriptions-item>
+            <el-descriptions-item label="所属方ID">{{ detailData.ownerId || '--' }}</el-descriptions-item>
+            <el-descriptions-item label="审核状态">
+              <JstStatusBadge :status="String(detailData.auditStatus || '')" :status-map="auditStatusMap" />
+            </el-descriptions-item>
+            <el-descriptions-item label="启停状态">
+              <JstStatusBadge :status="String(detailData.status)" :status-map="enableStatusMap" />
+            </el-descriptions-item>
+            <el-descriptions-item label="备注" :span="isMobile ? 1 : 2">{{ detailData.remark || '--' }}</el-descriptions-item>
+            <el-descriptions-item label="布局JSON" :span="isMobile ? 1 : 2">
+              <pre class="json-preview">{{ formatJson(detailData.layoutJson) }}</pre>
+            </el-descriptions-item>
+          </el-descriptions>
+        </template>
+      </div>
+    </el-drawer>
+
+    <el-dialog :title="title" :visible.sync="open" width="560px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="模板名称" prop="templateName">
-              <el-input v-model="form.templateName" placeholder="请输入模板名称" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="所属赛事方ID" prop="ownerId">
-              <el-input v-model="form.ownerId" placeholder="请输入所属赛事方ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="底图URL" prop="bgImage">
-              <image-upload v-model="form.bgImage"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
+        <el-form-item label="模板名称" prop="templateName">
+          <el-input v-model="form.templateName" placeholder="请输入模板名称" />
+        </el-form-item>
+        <el-form-item label="所属类型" prop="ownerType">
+          <el-select v-model="form.ownerType" placeholder="请选择">
+            <el-option v-for="item in ownerTypeOptions" :key="'f-o-' + item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="所属方ID" prop="ownerId">
+          <el-input v-model="form.ownerId" placeholder="请输入所属方ID" />
+        </el-form-item>
+        <el-form-item label="底图" prop="bgImage">
+          <image-upload v-model="form.bgImage" />
+        </el-form-item>
+        <el-form-item label="布局JSON" prop="layoutJson">
+          <el-input
+            v-model="form.layoutJson"
+            type="textarea"
+            :rows="4"
+            maxlength="5000"
+            show-word-limit
+            placeholder="请输入布局/字段配置JSON"
+          />
+        </el-form-item>
+        <el-form-item label="审核状态" prop="auditStatus">
+          <el-select v-model="form.auditStatus" placeholder="请选择">
+            <el-option v-for="item in auditStatusOptions" :key="'f-a-' + item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="启停状态" prop="status">
+          <el-select v-model="form.status" placeholder="请选择">
+            <el-option v-for="item in enableStatusOptions" :key="'f-s-' + item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="form.remark" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="请输入备注" />
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -152,167 +210,345 @@
 </template>
 
 <script>
-import { listJst_cert_template, getJst_cert_template, delJst_cert_template, addJst_cert_template, updateJst_cert_template } from "@/api/jst/event/jst_cert_template"
+import {
+  addJst_cert_template,
+  delJst_cert_template,
+  getJst_cert_template,
+  listJst_cert_template,
+  updateJst_cert_template
+} from '@/api/jst/event/jst_cert_template'
 
 export default {
-  name: "Jst_cert_template",
+  name: 'JstCertTemplate',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
+      loading: false,
       total: 0,
-      // 证书模板表格数据
-      jst_cert_templateList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
+      templateList: [],
+      detailVisible: false,
+      detailLoading: false,
+      detailData: null,
+      title: '',
       open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        templateName: null,
-        ownerType: null,
-        ownerId: null,
-        bgImage: null,
-        layoutJson: null,
-        auditStatus: null,
-        status: null,
+        templateName: undefined,
+        ownerType: undefined,
+        auditStatus: undefined,
+        status: undefined
       },
-      // 表单参数
       form: {},
-      // 表单校验
       rules: {
-        templateName: [
-          { required: true, message: "模板名称不能为空", trigger: "blur" }
-        ],
-        ownerType: [
-          { required: true, message: "所属：platform/partner不能为空", trigger: "change" }
-        ],
-        auditStatus: [
-          { required: true, message: "审核状态：pending/approved/rejected不能为空", trigger: "change" }
-        ],
-        status: [
-          { required: true, message: "启停：0停 1启不能为空", trigger: "change" }
-        ],
+        templateName: [{ required: true, message: '模板名称不能为空', trigger: 'blur' }],
+        ownerType: [{ required: true, message: '所属类型不能为空', trigger: 'change' }],
+        auditStatus: [{ required: true, message: '审核状态不能为空', trigger: 'change' }],
+        status: [{ required: true, message: '启停状态不能为空', trigger: 'change' }]
+      },
+      ownerTypeOptions: [
+        { label: '平台模板', value: 'platform' },
+        { label: '赛事方模板', value: 'partner' }
+      ],
+      auditStatusOptions: [
+        { label: '待审核', value: 'pending' },
+        { label: '审核通过', value: 'approved' },
+        { label: '已驳回', value: 'rejected' }
+      ],
+      enableStatusOptions: [
+        { label: '停用', value: 0 },
+        { label: '启用', value: 1 }
+      ],
+      auditStatusMap: {
+        pending: { label: '待审核', type: 'warning' },
+        approved: { label: '审核通过', type: 'success' },
+        rejected: { label: '已驳回', type: 'danger' }
+      },
+      enableStatusMap: {
+        0: { label: '停用', type: 'info' },
+        1: { label: '启用', type: 'success' }
       }
+    }
+  },
+  computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     }
   },
   created() {
     this.getList()
   },
   methods: {
-    /** 查询证书模板列表 */
-    getList() {
+    async getList() {
       this.loading = true
-      listJst_cert_template(this.queryParams).then(response => {
-        this.jst_cert_templateList = response.rows
-        this.total = response.total
+      try {
+        const res = await listJst_cert_template({ ...this.queryParams })
+        this.templateList = Array.isArray(res.rows) ? res.rows : []
+        this.total = Number(res.total || 0)
+      } finally {
         this.loading = false
-      })
+      }
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
     reset() {
       this.form = {
-        templateId: null,
-        templateName: null,
-        ownerType: null,
-        ownerId: null,
-        bgImage: null,
-        layoutJson: null,
-        auditStatus: null,
-        status: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
+        templateId: undefined,
+        templateName: undefined,
+        ownerType: undefined,
+        ownerId: undefined,
+        bgImage: undefined,
+        layoutJson: undefined,
+        auditStatus: undefined,
+        status: undefined,
+        remark: undefined
       }
-      this.resetForm("form")
+      this.resetForm('form')
     },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
+      this.resetForm('queryForm')
+      this.queryParams.pageNum = 1
+      this.getList()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.templateId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
     handleAdd() {
       this.reset()
       this.open = true
-      this.title = "添加证书模板"
+      this.title = '添加证书模板'
     },
-    /** 修改按钮操作 */
     handleUpdate(row) {
+      const templateId = row && row.templateId
+      if (!templateId) return
       this.reset()
-      const templateId = row.templateId || this.ids
-      getJst_cert_template(templateId).then(response => {
-        this.form = response.data
+      getJst_cert_template(templateId).then(res => {
+        this.form = { ...this.form, ...(res.data || {}) }
         this.open = true
-        this.title = "修改证书模板"
+        this.title = '编辑证书模板'
       })
     },
-    /** 提交按钮 */
+    cancel() {
+      this.open = false
+      this.reset()
+    },
     submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.templateId != null) {
-            updateJst_cert_template(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_cert_template(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
+      this.$refs.form.validate(valid => {
+        if (!valid) return
+        const api = this.form.templateId ? updateJst_cert_template : addJst_cert_template
+        api(this.form).then(() => {
+          this.$modal.msgSuccess(this.form.templateId ? '修改成功' : '新增成功')
+          this.open = false
+          this.getList()
+        })
       })
     },
-    /** 删除按钮操作 */
     handleDelete(row) {
-      const templateIds = row.templateId || this.ids
-      this.$modal.confirm('是否确认删除证书模板编号为"' + templateIds + '"的数据项？').then(function() {
-        return delJst_cert_template(templateIds)
+      const templateId = row && row.templateId
+      if (!templateId) return
+      this.$modal.confirm('确认删除证书模板「' + templateId + '」吗？').then(() => {
+        return delJst_cert_template(templateId)
       }).then(() => {
+        this.$modal.msgSuccess('删除成功')
         this.getList()
-        this.$modal.msgSuccess("删除成功")
       }).catch(() => {})
     },
-    /** 导出按钮操作 */
     handleExport() {
-      this.download('system/jst_cert_template/export', {
-        ...this.queryParams
-      }, `jst_cert_template_${new Date().getTime()}.xlsx`)
+      this.download('jst/event/jst_cert_template/export', { ...this.queryParams }, `jst_cert_template_${Date.now()}.xlsx`)
+    },
+    openDetail(row) {
+      const templateId = row && row.templateId
+      this.detailData = row || null
+      this.detailVisible = true
+      if (!templateId) return
+      this.detailLoading = true
+      getJst_cert_template(templateId).then(res => {
+        this.detailData = res.data || row
+      }).finally(() => {
+        this.detailLoading = false
+      })
+    },
+    ownerTypeLabel(value) {
+      const found = this.ownerTypeOptions.find(item => item.value === value)
+      return found ? found.label : (value || '--')
+    },
+    formatJson(value) {
+      if (!value) return '--'
+      if (typeof value !== 'string') {
+        try {
+          return JSON.stringify(value, null, 2)
+        } catch (e) {
+          return String(value)
+        }
+      }
+      try {
+        return JSON.stringify(JSON.parse(value), null, 2)
+      } catch (e) {
+        return value
+      }
     }
   }
 }
 </script>
+
+<style scoped lang="scss">
+.jst-cert-template-page {
+  background: #f6f8fb;
+  min-height: calc(100vh - 84px);
+}
+
+.page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  margin-bottom: 18px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.hero-eyebrow {
+  margin: 0 0 8px;
+  color: #2f6fec;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.page-hero h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.hero-desc {
+  margin: 8px 0 0;
+  color: #6f7b8f;
+}
+
+.query-panel {
+  padding: 16px 16px 0;
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.action-row .el-button {
+  width: 100%;
+}
+
+.mobile-list {
+  min-height: 180px;
+}
+
+.mobile-card {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.mobile-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mobile-title {
+  font-weight: 700;
+  color: #172033;
+}
+
+.mobile-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #7a8495;
+}
+
+.mobile-preview {
+  margin-top: 10px;
+}
+
+.preview-empty {
+  font-size: 12px;
+  color: #9aa5b5;
+}
+
+.mobile-info-row {
+  margin-top: 8px;
+  color: #6f7b8f;
+  font-size: 13px;
+}
+
+.mobile-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.danger-text {
+  color: #f56c6c;
+}
+
+.drawer-body {
+  padding: 8px 16px 16px;
+}
+
+.drawer-preview {
+  margin-bottom: 12px;
+}
+
+.json-preview {
+  max-height: 260px;
+  margin: 0;
+  padding: 8px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  background: #f7f9fc;
+  border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+  .jst-cert-template-page {
+    padding: 12px;
+  }
+
+  .page-hero {
+    display: block;
+    padding: 18px;
+  }
+
+  .page-hero .el-button {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 16px;
+  }
+
+  .page-hero h2 {
+    font-size: 20px;
+  }
+
+  .query-panel {
+    padding-bottom: 8px;
+  }
+
+  .query-panel ::v-deep .el-form-item {
+    display: block;
+    margin-right: 0;
+  }
+
+  .query-panel ::v-deep .el-form-item__content,
+  .query-panel ::v-deep .el-select,
+  .query-panel ::v-deep .el-input {
+    width: 100%;
+  }
+
+  .mobile-actions .el-button {
+    min-height: 44px;
+  }
+}
+</style>

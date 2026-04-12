@@ -1,53 +1,20 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
       <el-form-item label="账户ID" prop="accountId">
-        <el-input
-          v-model="queryParams.accountId"
-          placeholder="请输入账户ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.accountId" placeholder="请输入账户ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="来源ID" prop="sourceRefId">
-        <el-input
-          v-model="queryParams.sourceRefId"
-          placeholder="请输入来源ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="变更类型" prop="changeType">
+        <el-select v-model="queryParams.changeType" placeholder="全部" clearable>
+          <el-option label="获取" value="earn" />
+          <el-option label="调整" value="adjust" />
+          <el-option label="升级" value="level_up" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="变化值" prop="growthChange">
-        <el-input
-          v-model="queryParams.growthChange"
-          placeholder="请输入变化值"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="变更后余额" prop="balanceAfter">
-        <el-input
-          v-model="queryParams.balanceAfter"
-          placeholder="请输入变更后余额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="升级前等级" prop="levelBefore">
-        <el-input
-          v-model="queryParams.levelBefore"
-          placeholder="请输入升级前等级"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="升级后等级" prop="levelAfter">
-        <el-input
-          v-model="queryParams.levelAfter"
-          placeholder="请输入升级后等级"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="来源行为" prop="sourceType">
+        <el-select v-model="queryParams.sourceType" placeholder="全部" clearable>
+          <el-option v-for="item in sourceTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -56,312 +23,216 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_growth_ledger:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_growth_ledger:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_growth_ledger:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_growth_ledger:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="jst_growth_ledgerList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="流水ID" align="center" prop="ledgerId" />
-      <el-table-column label="账户ID" align="center" prop="accountId" />
-      <el-table-column label="类型：earn/adjust/level_up" align="center" prop="changeType" />
-      <el-table-column label="来源：enroll/course/sign/invite/learn/award/manual" align="center" prop="sourceType" />
-      <el-table-column label="来源ID" align="center" prop="sourceRefId" />
-      <el-table-column label="变化值" align="center" prop="growthChange" />
-      <el-table-column label="变更后余额" align="center" prop="balanceAfter" />
-      <el-table-column label="升级前等级" align="center" prop="levelBefore" />
-      <el-table-column label="升级后等级" align="center" prop="levelAfter" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_growth_ledger:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_growth_ledger:remove']"
-          >删除</el-button>
+    <div v-if="isMobile" v-loading="loading">
+      <div v-if="list.length" class="mobile-card-list">
+        <div v-for="row in list" :key="row.ledgerId" class="mobile-card">
+          <div class="mobile-card__head">
+            <span class="mobile-card__title">成长流水 #{{ row.ledgerId }}</span>
+            <el-tag size="mini" :type="Number(row.growthChange) >= 0 ? 'success' : 'danger'">
+              {{ Number(row.growthChange) >= 0 ? '增加' : '减少' }}
+            </el-tag>
+          </div>
+          <div class="mobile-card__meta">
+            <span>账户：{{ row.accountId }}</span>
+            <span>来源：{{ sourceTypeLabel(row.sourceType) }}</span>
+            <span :class="Number(row.growthChange) >= 0 ? 'points-positive' : 'points-negative'">
+              {{ Number(row.growthChange) >= 0 ? '+' : '' }}{{ row.growthChange || 0 }}
+            </span>
+            <span>余额：{{ row.balanceAfter || 0 }}</span>
+          </div>
+          <div class="mobile-card__actions">
+            <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无成长值流水" />
+    </div>
+
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="流水ID" prop="ledgerId" width="90" />
+      <el-table-column label="账户ID" prop="accountId" min-width="100" />
+      <el-table-column label="变更类型" prop="changeType" min-width="100" />
+      <el-table-column label="来源行为" min-width="120">
+        <template slot-scope="{ row }">{{ sourceTypeLabel(row.sourceType) }}</template>
+      </el-table-column>
+      <el-table-column label="来源ID" prop="sourceRefId" min-width="100" />
+      <el-table-column label="变化值" min-width="100" align="right">
+        <template slot-scope="{ row }">
+          <span :class="Number(row.growthChange) >= 0 ? 'points-positive' : 'points-negative'">
+            {{ Number(row.growthChange) >= 0 ? '+' : '' }}{{ row.growthChange || 0 }}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column label="变更后余额" prop="balanceAfter" min-width="100" align="right" />
+      <el-table-column label="等级变更" min-width="130">
+        <template slot-scope="{ row }">{{ row.levelBefore || '--' }} → {{ row.levelAfter || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="创建时间" min-width="160">
+        <template slot-scope="{ row }">{{ parseTime(row.createTime) }}</template>
+      </el-table-column>
+      <el-table-column label="操作" fixed="right" width="90">
+        <template slot-scope="{ row }">
+          <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改成长值流水对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="账户ID" prop="accountId">
-              <el-input v-model="form.accountId" placeholder="请输入账户ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="来源ID" prop="sourceRefId">
-              <el-input v-model="form.sourceRefId" placeholder="请输入来源ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="变化值" prop="growthChange">
-              <el-input v-model="form.growthChange" placeholder="请输入变化值" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="变更后余额" prop="balanceAfter">
-              <el-input v-model="form.balanceAfter" placeholder="请输入变更后余额" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="升级前等级" prop="levelBefore">
-              <el-input v-model="form.levelBefore" placeholder="请输入升级前等级" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="升级后等级" prop="levelAfter">
-              <el-input v-model="form.levelAfter" placeholder="请输入升级后等级" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <el-drawer :title="'成长值流水详情 #' + (detailData.ledgerId || '')" :visible.sync="detailVisible" :size="isMobile ? '100%' : '500px'" append-to-body>
+      <div class="detail-body">
+        <el-descriptions :column="1" border size="small">
+          <el-descriptions-item label="流水ID">{{ detailData.ledgerId }}</el-descriptions-item>
+          <el-descriptions-item label="账户ID">{{ detailData.accountId }}</el-descriptions-item>
+          <el-descriptions-item label="变更类型">{{ detailData.changeType || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="来源行为">{{ sourceTypeLabel(detailData.sourceType) }}</el-descriptions-item>
+          <el-descriptions-item label="来源ID">{{ detailData.sourceRefId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="变化值">
+            <span :class="Number(detailData.growthChange) >= 0 ? 'points-positive' : 'points-negative'">
+              {{ Number(detailData.growthChange) >= 0 ? '+' : '' }}{{ detailData.growthChange || 0 }}
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="变更后余额">{{ detailData.balanceAfter || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="等级变化">{{ detailData.levelBefore || '--' }} → {{ detailData.levelAfter || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="备注">{{ detailData.remark || '--' }}</el-descriptions-item>
+        </el-descriptions>
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_growth_ledger, getJst_growth_ledger, delJst_growth_ledger, addJst_growth_ledger, updateJst_growth_ledger } from "@/api/jst/points/jst_growth_ledger"
+import { parseTime } from '@/utils/ruoyi'
+import { listJst_growth_ledger, getJst_growth_ledger } from '@/api/jst/points/jst_growth_ledger'
+
+const SOURCE_TYPE_OPTIONS = [
+  { label: '报名', value: 'enroll' },
+  { label: '课程', value: 'course' },
+  { label: '签到', value: 'sign' },
+  { label: '邀请', value: 'invite' },
+  { label: '学习', value: 'learn' },
+  { label: '获奖', value: 'award' },
+  { label: '手工调整', value: 'manual' }
+]
 
 export default {
-  name: "Jst_growth_ledger",
+  name: 'JstGrowthLedger',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
+      loading: false,
       showSearch: true,
-      // 总条数
+      list: [],
       total: 0,
-      // 成长值流水表格数据
-      jst_growth_ledgerList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
         accountId: null,
         changeType: null,
-        sourceType: null,
-        sourceRefId: null,
-        growthChange: null,
-        balanceAfter: null,
-        levelBefore: null,
-        levelAfter: null,
+        sourceType: null
       },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        accountId: [
-          { required: true, message: "账户ID不能为空", trigger: "blur" }
-        ],
-        changeType: [
-          { required: true, message: "类型：earn/adjust/level_up不能为空", trigger: "change" }
-        ],
-        sourceType: [
-          { required: true, message: "来源：enroll/course/sign/invite/learn/award/manual不能为空", trigger: "change" }
-        ],
-        growthChange: [
-          { required: true, message: "变化值不能为空", trigger: "blur" }
-        ],
-        balanceAfter: [
-          { required: true, message: "变更后余额不能为空", trigger: "blur" }
-        ],
-      }
+      sourceTypeOptions: SOURCE_TYPE_OPTIONS,
+      detailVisible: false,
+      detailData: {}
+    }
+  },
+  computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     }
   },
   created() {
     this.getList()
   },
   methods: {
-    /** 查询成长值流水列表 */
+    parseTime,
+    sourceTypeLabel(sourceType) {
+      const match = SOURCE_TYPE_OPTIONS.find(item => item.value === sourceType)
+      return match ? match.label : sourceType || '--'
+    },
     getList() {
       this.loading = true
-      listJst_growth_ledger(this.queryParams).then(response => {
-        this.jst_growth_ledgerList = response.rows
-        this.total = response.total
+      listJst_growth_ledger(this.queryParams).then(res => {
+        this.list = res.rows || []
+        this.total = res.total || 0
+      }).finally(() => {
         this.loading = false
       })
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        ledgerId: null,
-        accountId: null,
-        changeType: null,
-        sourceType: null,
-        sourceRefId: null,
-        growthChange: null,
-        balanceAfter: null,
-        levelBefore: null,
-        levelAfter: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
+      this.$refs.queryForm && this.$refs.queryForm.resetFields()
       this.handleQuery()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.ledgerId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加成长值流水"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const ledgerId = row.ledgerId || this.ids
-      getJst_growth_ledger(ledgerId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改成长值流水"
+    handleDetail(row) {
+      getJst_growth_ledger(row.ledgerId).then(res => {
+        this.detailData = res.data || res || row
+        this.detailVisible = true
       })
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.ledgerId != null) {
-            updateJst_growth_ledger(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_growth_ledger(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
-      })
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const ledgerIds = row.ledgerId || this.ids
-      this.$modal.confirm('是否确认删除成长值流水编号为"' + ledgerIds + '"的数据项？').then(function() {
-        return delJst_growth_ledger(ledgerIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_growth_ledger/export', {
-        ...this.queryParams
-      }, `jst_growth_ledger_${new Date().getTime()}.xlsx`)
     }
   }
 }
 </script>
+
+<style scoped>
+.points-positive {
+  color: #67c23a;
+  font-weight: 600;
+}
+
+.points-negative {
+  color: #f56c6c;
+  font-weight: 600;
+}
+
+.detail-body {
+  padding: 0 16px 16px;
+}
+
+.mobile-card-list {
+  padding: 0 4px;
+}
+
+.mobile-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.mobile-card__title {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65%;
+}
+
+.mobile-card__meta {
+  font-size: 12px;
+  color: #909399;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.mobile-card__actions {
+  display: flex;
+  gap: 6px;
+}
+</style>

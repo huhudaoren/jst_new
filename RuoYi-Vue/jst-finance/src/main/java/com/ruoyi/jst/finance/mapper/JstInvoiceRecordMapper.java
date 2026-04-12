@@ -1,7 +1,9 @@
 package com.ruoyi.jst.finance.mapper;
 
+import java.math.BigDecimal;
 import java.util.List;
 import com.ruoyi.jst.finance.domain.JstInvoiceRecord;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 发票记录Mapper接口
@@ -58,4 +60,45 @@ public interface JstInvoiceRecordMapper
      * @return 结果
      */
     public int deleteJstInvoiceRecordByInvoiceIds(Long[] invoiceIds);
+
+    /**
+     * 按对象归属查询发票列表（小程序端）。
+     *
+     * @param targetType 对象类型(channel/partner)
+     * @param targetId   对象ID
+     * @return 发票记录集合
+     */
+    List<JstInvoiceRecord> selectByTarget(@Param("targetType") String targetType, @Param("targetId") Long targetId);
+
+    /**
+     * 按发票ID+对象归属查询详情（小程序端）。
+     *
+     * @param invoiceId  发票ID
+     * @param targetType 对象类型(channel/partner)
+     * @param targetId   对象ID
+     * @return 发票记录
+     */
+    JstInvoiceRecord selectByIdAndTarget(@Param("invoiceId") Long invoiceId,
+                                         @Param("targetType") String targetType,
+                                         @Param("targetId") Long targetId);
+
+    /**
+     * 查询渠道提现单实付金额（按 settlementNo + channel 归属）。
+     *
+     * @param settlementNo 提现单号
+     * @param channelId    渠道ID
+     * @return 实付金额
+     */
+    BigDecimal selectRebateSettlementActualAmount(@Param("settlementNo") String settlementNo,
+                                                  @Param("channelId") Long channelId);
+
+    /**
+     * 查询赛事方结算单最终金额（按 settlementNo + partner 归属）。
+     *
+     * @param settlementNo 结算单号
+     * @param partnerId    赛事方ID
+     * @return 最终金额
+     */
+    BigDecimal selectEventSettlementFinalAmount(@Param("settlementNo") String settlementNo,
+                                                @Param("partnerId") Long partnerId);
 }

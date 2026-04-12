@@ -1,353 +1,232 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+  <div class="app-container enhanced-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">风控中心</p>
+        <h2>黑名单管理</h2>
+        <p class="hero-desc">管理黑白名单，按类型和目标灵活添加与移除，移除操作需二次确认。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
+      <el-form-item label="名单类型" prop="listType">
+        <el-select v-model="queryParams.listType" placeholder="全部" clearable>
+          <el-option label="黑名单" value="black" />
+          <el-option label="白名单" value="white" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="目标类型" prop="targetType">
+        <el-select v-model="queryParams.targetType" placeholder="全部" clearable>
+          <el-option label="用户" value="user" />
+          <el-option label="设备" value="device" />
+          <el-option label="手机" value="mobile" />
+          <el-option label="渠道" value="channel" />
+          <el-option label="地址" value="address" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="目标值" prop="targetValue">
-        <el-input
-          v-model="queryParams.targetValue"
-          placeholder="请输入目标值"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="入名单原因" prop="reason">
-        <el-input
-          v-model="queryParams.reason"
-          placeholder="请输入入名单原因"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="生效时间" prop="effectiveTime">
-        <el-date-picker clearable
-          v-model="queryParams.effectiveTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择生效时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="失效时间" prop="expireTime">
-        <el-date-picker clearable
-          v-model="queryParams.expireTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择失效时间">
-        </el-date-picker>
+        <el-input v-model="queryParams.targetValue" placeholder="请输入目标值" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
+    <el-row :gutter="10" class="mb8 action-bar">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_risk_blacklist:add']"
-        >新增</el-button>
+        <el-button type="primary" icon="el-icon-plus" size="small" @click="handleAdd" v-hasPermi="['jst:risk:blacklist:add']">添加</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_risk_blacklist:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_risk_blacklist:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_risk_blacklist:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="jst_risk_blacklistList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="ID" align="center" prop="listId" />
-      <el-table-column label="名单类型：black/white" align="center" prop="listType" />
-      <el-table-column label="对象类型：user/channel/device/mobile/address" align="center" prop="targetType" />
-      <el-table-column label="目标值" align="center" prop="targetValue" />
-      <el-table-column label="入名单原因" align="center" prop="reason" />
-      <el-table-column label="生效时间" align="center" prop="effectiveTime" width="180">
+    <!-- 手机端卡片 -->
+    <div v-if="isMobile" v-loading="loading" class="mobile-list">
+      <div v-if="list.length">
+        <div v-for="row in list" :key="row.listId" class="mobile-card">
+          <div class="mobile-card-top">
+            <div>
+              <div class="mobile-title">{{ row.targetValue || '--' }}</div>
+              <div class="mobile-sub">{{ targetTypeLabel(row.targetType) }}</div>
+            </div>
+            <el-tag size="small" :type="row.listType === 'black' ? 'danger' : 'success'">{{ row.listType === 'black' ? '黑名单' : '白名单' }}</el-tag>
+          </div>
+          <div class="mobile-info-row">{{ row.reason || '--' }}</div>
+          <div class="mobile-info-row">有效期：{{ parseTime(row.effectiveTime, '{y}-{m}-{d}') || '--' }} ~ {{ parseTime(row.expireTime, '{y}-{m}-{d}') || '永久' }}</div>
+          <div class="mobile-actions">
+            <el-popconfirm title="确认移除该记录？" @confirm="handleDelete(row)">
+              <el-button slot="reference" type="text" class="danger-text" v-hasPermi="['jst:risk:blacklist:remove']">移除</el-button>
+            </el-popconfirm>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无名单记录" :image-size="96" />
+    </div>
+
+    <!-- PC 端表格 -->
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="ID" prop="listId" width="70" />
+      <el-table-column label="名单类型" min-width="90">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.effectiveTime, '{y}-{m}-{d}') }}</span>
+          <el-tag size="small" :type="scope.row.listType === 'black' ? 'danger' : 'success'">{{ scope.row.listType === 'black' ? '黑名单' : '白名单' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="失效时间" align="center" prop="expireTime" width="180">
+      <el-table-column label="目标类型" min-width="90">
+        <template slot-scope="scope">{{ targetTypeLabel(scope.row.targetType) }}</template>
+      </el-table-column>
+      <el-table-column label="目标值" prop="targetValue" min-width="160" show-overflow-tooltip />
+      <el-table-column label="原因" prop="reason" min-width="200" show-overflow-tooltip />
+      <el-table-column label="生效时间" min-width="120">
+        <template slot-scope="scope">{{ parseTime(scope.row.effectiveTime, '{y}-{m}-{d}') || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="过期时间" min-width="120">
+        <template slot-scope="scope">{{ parseTime(scope.row.expireTime, '{y}-{m}-{d}') || '永久' }}</template>
+      </el-table-column>
+      <el-table-column label="状态" width="80" align="center">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.expireTime, '{y}-{m}-{d}') }}</span>
+          <el-tag size="mini" :type="scope.row.status === 1 ? 'success' : 'info'">{{ scope.row.status === 1 ? '生效' : '停用' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="启停：0停 1启" align="center" prop="status" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" width="100" fixed="right">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_risk_blacklist:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_risk_blacklist:remove']"
-          >删除</el-button>
+          <el-popconfirm title="确认移除该记录？" @confirm="handleDelete(scope.row)">
+            <el-button slot="reference" type="text" class="danger-text" v-hasPermi="['jst:risk:blacklist:remove']">移除</el-button>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改风控黑白名单对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="目标值" prop="targetValue">
-              <el-input v-model="form.targetValue" placeholder="请输入目标值" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="入名单原因" prop="reason">
-              <el-input v-model="form.reason" placeholder="请输入入名单原因" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="生效时间" prop="effectiveTime">
-              <el-date-picker clearable
-                v-model="form.effectiveTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择生效时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="失效时间" prop="expireTime">
-              <el-date-picker clearable
-                v-model="form.expireTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择失效时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <!-- 添加弹窗 -->
+    <el-dialog title="添加名单" :visible.sync="dialogVisible" :width="isMobile ? '95%' : '560px'" append-to-body>
+      <el-form ref="addForm" :model="form" :rules="rules" label-width="90px">
+        <el-form-item label="名单类型" prop="listType">
+          <el-select v-model="form.listType" style="width:100%">
+            <el-option label="黑名单" value="black" />
+            <el-option label="白名单" value="white" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="目标类型" prop="targetType">
+          <el-select v-model="form.targetType" style="width:100%">
+            <el-option label="用户" value="user" />
+            <el-option label="设备" value="device" />
+            <el-option label="手机" value="mobile" />
+            <el-option label="渠道" value="channel" />
+            <el-option label="地址" value="address" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="目标值" prop="targetValue">
+          <el-input v-model="form.targetValue" placeholder="用户ID / 设备ID / 手机号等" />
+        </el-form-item>
+        <el-form-item label="原因" prop="reason">
+          <el-input v-model="form.reason" type="textarea" :rows="2" placeholder="请输入原因" />
+        </el-form-item>
+        <el-form-item label="过期时间">
+          <el-date-picker v-model="form.expireTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="留空为永久" style="width:100%" />
+        </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+      <div slot="footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitForm">确定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listJst_risk_blacklist, getJst_risk_blacklist, delJst_risk_blacklist, addJst_risk_blacklist, updateJst_risk_blacklist } from "@/api/jst/risk/jst_risk_blacklist"
+import { listJst_risk_blacklist, addJst_risk_blacklist, delJst_risk_blacklist } from '@/api/jst/risk/jst_risk_blacklist'
 
 export default {
-  name: "Jst_risk_blacklist",
+  name: 'RiskBlacklistManage',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
+      loading: false,
+      submitLoading: false,
+      isMobile: false,
+      list: [],
       total: 0,
-      // 风控黑白名单表格数据
-      jst_risk_blacklistList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        listType: null,
-        targetType: null,
-        targetValue: null,
-        reason: null,
-        effectiveTime: null,
-        expireTime: null,
-        status: null,
-      },
-      // 表单参数
+      queryParams: { pageNum: 1, pageSize: 10, listType: undefined, targetType: undefined, targetValue: undefined },
+      dialogVisible: false,
       form: {},
-      // 表单校验
       rules: {
-        listType: [
-          { required: true, message: "名单类型：black/white不能为空", trigger: "change" }
-        ],
-        targetType: [
-          { required: true, message: "对象类型：user/channel/device/mobile/address不能为空", trigger: "change" }
-        ],
-        targetValue: [
-          { required: true, message: "目标值不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "启停：0停 1启不能为空", trigger: "change" }
-        ],
+        listType: [{ required: true, message: '请选择名单类型', trigger: 'change' }],
+        targetType: [{ required: true, message: '请选择目标类型', trigger: 'change' }],
+        targetValue: [{ required: true, message: '请输入目标值', trigger: 'blur' }]
       }
     }
   },
   created() {
+    this.updateViewport()
+    window.addEventListener('resize', this.updateViewport)
     this.getList()
   },
+  beforeDestroy() { window.removeEventListener('resize', this.updateViewport) },
   methods: {
-    /** 查询风控黑白名单列表 */
-    getList() {
+    updateViewport() { this.isMobile = window.innerWidth <= 768 },
+    async getList() {
       this.loading = true
-      listJst_risk_blacklist(this.queryParams).then(response => {
-        this.jst_risk_blacklistList = response.rows
-        this.total = response.total
-        this.loading = false
-      })
+      try {
+        const res = await listJst_risk_blacklist(this.queryParams)
+        this.list = res.rows || []
+        this.total = res.total || 0
+      } finally { this.loading = false }
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        listId: null,
-        listType: null,
-        targetType: null,
-        targetValue: null,
-        reason: null,
-        effectiveTime: null,
-        expireTime: null,
-        status: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
-    handleQuery() {
-      this.queryParams.pageNum = 1
+    handleQuery() { this.queryParams.pageNum = 1; this.getList() },
+    resetQuery() {
+      this.queryParams = { pageNum: 1, pageSize: 10, listType: undefined, targetType: undefined, targetValue: undefined }
       this.getList()
     },
-    /** 重置按钮操作 */
-    resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
-    },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.listId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
     handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加风控黑白名单"
+      this.form = { listType: 'black', targetType: 'user', status: 1 }
+      this.dialogVisible = true
+      this.$nextTick(() => this.$refs.addForm && this.$refs.addForm.clearValidate())
     },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const listId = row.listId || this.ids
-      getJst_risk_blacklist(listId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改风控黑白名单"
-      })
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.listId != null) {
-            updateJst_risk_blacklist(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_risk_blacklist(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
-      })
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const listIds = row.listId || this.ids
-      this.$modal.confirm('是否确认删除风控黑白名单编号为"' + listIds + '"的数据项？').then(function() {
-        return delJst_risk_blacklist(listIds)
-      }).then(() => {
+    async submitForm() {
+      await this.$refs.addForm.validate()
+      this.submitLoading = true
+      try {
+        await addJst_risk_blacklist(this.form)
+        this.$modal.msgSuccess('添加成功')
+        this.dialogVisible = false
         this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
+      } finally { this.submitLoading = false }
     },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_risk_blacklist/export', {
-        ...this.queryParams
-      }, `jst_risk_blacklist_${new Date().getTime()}.xlsx`)
-    }
+    async handleDelete(row) {
+      try {
+        await delJst_risk_blacklist(row.listId)
+        this.$modal.msgSuccess('移除成功')
+        this.getList()
+      } catch (_) {}
+    },
+    targetTypeLabel(t) { return { user: '用户', device: '设备', mobile: '手机', channel: '渠道', address: '地址' }[t] || t || '--' }
   }
 }
 </script>
+
+<style scoped>
+.enhanced-page { background: #f6f8fb; min-height: calc(100vh - 84px); }
+.page-hero { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px; margin-bottom: 18px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.hero-eyebrow { margin: 0 0 8px; color: #2f6fec; font-size: 13px; font-weight: 600; }
+.page-hero h2 { margin: 0; font-size: 24px; font-weight: 700; color: #172033; }
+.hero-desc { margin: 8px 0 0; color: #6f7b8f; }
+.query-panel { padding: 16px 16px 0; margin-bottom: 16px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.action-bar { padding: 0 4px; margin-bottom: 12px; }
+.danger-text { color: #f56c6c; }
+.mobile-list { min-height: 180px; }
+.mobile-card { padding: 16px; margin-bottom: 12px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.mobile-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.mobile-title { font-weight: 700; color: #172033; }
+.mobile-sub { margin-top: 4px; font-size: 12px; color: #7a8495; }
+.mobile-info-row { margin-top: 8px; font-size: 13px; color: #7a8495; }
+.mobile-actions { margin-top: 12px; border-top: 1px solid #f0f2f5; padding-top: 12px; }
+@media (max-width: 768px) {
+  .enhanced-page { padding: 12px; }
+  .page-hero { display: block; padding: 18px; }
+  .page-hero .el-button { width: 100%; min-height: 44px; margin-top: 16px; }
+  .page-hero h2 { font-size: 20px; }
+  .query-panel { padding-bottom: 8px; }
+  .query-panel ::v-deep .el-form-item { display: block; margin-right: 0; }
+  .query-panel ::v-deep .el-form-item__content, .query-panel ::v-deep .el-select, .query-panel ::v-deep .el-input { width: 100%; }
+}
+</style>

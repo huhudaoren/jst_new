@@ -51,6 +51,40 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where invoice_id = #{invoiceId}
     </select>
 
+    <select id="selectByTarget" resultMap="JstInvoiceRecordResult">
+        <include refid="selectJstInvoiceRecordVo"/>
+        where del_flag = '0'
+          and target_type = #{targetType}
+          and target_id = #{targetId}
+        order by create_time desc, invoice_id desc
+    </select>
+
+    <select id="selectByIdAndTarget" resultMap="JstInvoiceRecordResult">
+        <include refid="selectJstInvoiceRecordVo"/>
+        where del_flag = '0'
+          and invoice_id = #{invoiceId}
+          and target_type = #{targetType}
+          and target_id = #{targetId}
+    </select>
+
+    <select id="selectRebateSettlementActualAmount" resultType="java.math.BigDecimal">
+        select actual_pay_amount
+        from jst_rebate_settlement
+        where del_flag = '0'
+          and settlement_no = #{settlementNo}
+          and channel_id = #{channelId}
+        limit 1
+    </select>
+
+    <select id="selectEventSettlementFinalAmount" resultType="java.math.BigDecimal">
+        select final_amount
+        from jst_event_settlement
+        where del_flag = '0'
+          and settlement_no = #{settlementNo}
+          and partner_id = #{partnerId}
+        limit 1
+    </select>
+
     <insert id="insertJstInvoiceRecord" parameterType="JstInvoiceRecord" useGeneratedKeys="true" keyProperty="invoiceId">
         insert into jst_invoice_record
         <trim prefix="(" suffix=")" suffixOverrides=",">

@@ -1,53 +1,14 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="等级编码" prop="levelCode">
-        <el-input
-          v-model="queryParams.levelCode"
-          placeholder="请输入等级编码"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
       <el-form-item label="等级名称" prop="levelName">
-        <el-input
-          v-model="queryParams.levelName"
-          placeholder="请输入等级名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.levelName" placeholder="请输入等级名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="等级序号" prop="levelNo">
-        <el-input
-          v-model="queryParams.levelNo"
-          placeholder="请输入等级序号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="成长值门槛" prop="growthThreshold">
-        <el-input
-          v-model="queryParams.growthThreshold"
-          placeholder="请输入成长值门槛"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="等级图标URL" prop="icon">
-        <el-input
-          v-model="queryParams.icon"
-          placeholder="请输入等级图标URL"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="适用角色：student/channel/both" prop="applicableRole">
-        <el-input
-          v-model="queryParams.applicableRole"
-          placeholder="请输入适用角色：student/channel/both"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="全部" clearable>
+          <el-option label="启用" :value="1" />
+          <el-option label="停用" :value="0" />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -57,311 +18,272 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_level_config:add']"
-        >新增</el-button>
+        <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAdd" v-hasPermi="['jst:points:level_config:add']">新增</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_level_config:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_level_config:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_level_config:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="jst_level_configList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="等级ID" align="center" prop="levelId" />
-      <el-table-column label="等级编码" align="center" prop="levelCode" />
-      <el-table-column label="等级名称" align="center" prop="levelName" />
-      <el-table-column label="等级序号" align="center" prop="levelNo" />
-      <el-table-column label="成长值门槛" align="center" prop="growthThreshold" />
-      <el-table-column label="等级图标URL" align="center" prop="icon" />
-      <el-table-column label="适用角色：student/channel/both" align="center" prop="applicableRole" />
-      <el-table-column label="启停：0停 1启" align="center" prop="status" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_level_config:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_level_config:remove']"
-          >删除</el-button>
+    <div v-if="isMobile" v-loading="loading">
+      <div v-if="sortedList.length" class="mobile-card-list">
+        <div v-for="row in sortedList" :key="row.levelId" class="mobile-card">
+          <div class="mobile-card__head">
+            <span class="mobile-card__title">Lv.{{ row.levelNo }} {{ row.levelName }}</span>
+            <el-tag size="mini" :type="row.status === 1 ? 'success' : 'info'">{{ row.status === 1 ? '启用' : '停用' }}</el-tag>
+          </div>
+          <div class="mobile-card__meta">
+            <span>编码：{{ row.levelCode }}</span>
+            <span>门槛：{{ row.growthThreshold }}</span>
+            <span>角色：{{ row.applicableRole }}</span>
+          </div>
+          <div class="mobile-card__actions">
+            <el-button type="text" size="mini" @click="handleEdit(row)" v-hasPermi="['jst:points:level_config:edit']">编辑</el-button>
+            <el-button type="text" size="mini" @click="handleToggle(row)" v-hasPermi="['jst:points:level_config:edit']">
+              {{ row.status === 1 ? '停用' : '启用' }}
+            </el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无等级配置" />
+    </div>
+
+    <el-table v-else v-loading="loading" :data="sortedList">
+      <el-table-column label="等级ID" prop="levelId" width="90" />
+      <el-table-column label="等级序号" prop="levelNo" width="90" />
+      <el-table-column label="等级编码" prop="levelCode" min-width="120" />
+      <el-table-column label="等级名称" prop="levelName" min-width="120" />
+      <el-table-column label="成长值门槛" prop="growthThreshold" min-width="110" align="right" />
+      <el-table-column label="适用角色" prop="applicableRole" min-width="100" />
+      <el-table-column label="权益描述" prop="remark" min-width="180" show-overflow-tooltip />
+      <el-table-column label="状态" width="90">
+        <template slot-scope="{ row }">
+          <el-switch
+            v-model="row.status"
+            :active-value="1"
+            :inactive-value="0"
+            @change="handleStatusChange(row)"
+            v-hasPermi="['jst:points:level_config:edit']"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" fixed="right" width="90">
+        <template slot-scope="{ row }">
+          <el-button type="text" size="mini" @click="handleEdit(row)" v-hasPermi="['jst:points:level_config:edit']">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改等级配置对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" :width="isMobile ? '100%' : '620px'" :fullscreen="isMobile" append-to-body>
+      <el-form ref="form" :model="form" :rules="formRules" :label-width="isMobile ? '84px' : '100px'">
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="等级编码" prop="levelCode">
               <el-input v-model="form.levelCode" placeholder="请输入等级编码" />
             </el-form-item>
           </el-col>
-          <el-col :span="24">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="等级名称" prop="levelName">
               <el-input v-model="form.levelName" placeholder="请输入等级名称" />
             </el-form-item>
           </el-col>
-          <el-col :span="24">
+        </el-row>
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="等级序号" prop="levelNo">
-              <el-input v-model="form.levelNo" placeholder="请输入等级序号" />
+              <el-input-number v-model="form.levelNo" :min="1" :max="9999" controls-position="right" style="width:100%" />
             </el-form-item>
           </el-col>
-          <el-col :span="24">
-            <el-form-item label="成长值门槛" prop="growthThreshold">
-              <el-input v-model="form.growthThreshold" placeholder="请输入成长值门槛" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="等级图标URL" prop="icon">
-              <el-input v-model="form.icon" placeholder="请输入等级图标URL" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="适用角色：student/channel/both" prop="applicableRole">
-              <el-input v-model="form.applicableRole" placeholder="请输入适用角色：student/channel/both" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="成长阈值" prop="growthThreshold">
+              <el-input-number v-model="form.growthThreshold" :min="0" :max="99999999" controls-position="right" style="width:100%" />
             </el-form-item>
           </el-col>
         </el-row>
+        <el-form-item label="适用角色" prop="applicableRole">
+          <el-select v-model="form.applicableRole" placeholder="请选择">
+            <el-option label="学生" value="student" />
+            <el-option label="渠道" value="channel" />
+            <el-option label="全部" value="both" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="权益描述" prop="remark">
+          <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="请输入权益描述" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
+        </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+      <div slot="footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listJst_level_config, getJst_level_config, delJst_level_config, addJst_level_config, updateJst_level_config } from "@/api/jst/points/jst_level_config"
+import { listJst_level_config, getJst_level_config, addJst_level_config, updateJst_level_config } from '@/api/jst/points/jst_level_config'
 
 export default {
-  name: "Jst_level_config",
+  name: 'JstLevelConfig',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
+      loading: false,
+      submitLoading: false,
       showSearch: true,
-      // 总条数
+      list: [],
       total: 0,
-      // 等级配置表格数据
-      jst_level_configList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        levelCode: null,
         levelName: null,
-        levelNo: null,
-        growthThreshold: null,
-        icon: null,
-        applicableRole: null,
-        status: null,
+        status: null
       },
-      // 表单参数
+      dialogVisible: false,
+      dialogTitle: '',
       form: {},
-      // 表单校验
-      rules: {
-        levelCode: [
-          { required: true, message: "等级编码不能为空", trigger: "blur" }
-        ],
-        levelName: [
-          { required: true, message: "等级名称不能为空", trigger: "blur" }
-        ],
-        levelNo: [
-          { required: true, message: "等级序号不能为空", trigger: "blur" }
-        ],
-        growthThreshold: [
-          { required: true, message: "成长值门槛不能为空", trigger: "blur" }
-        ],
-        applicableRole: [
-          { required: true, message: "适用角色：student/channel/both不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "启停：0停 1启不能为空", trigger: "change" }
-        ],
+      formRules: {
+        levelCode: [{ required: true, message: '等级编码不能为空', trigger: 'blur' }],
+        levelName: [{ required: true, message: '等级名称不能为空', trigger: 'blur' }],
+        levelNo: [{ required: true, message: '等级序号不能为空', trigger: 'blur' }],
+        growthThreshold: [{ required: true, message: '成长阈值不能为空', trigger: 'blur' }],
+        applicableRole: [{ required: true, message: '请选择适用角色', trigger: 'change' }]
       }
+    }
+  },
+  computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
+    },
+    sortedList() {
+      return (this.list || []).slice().sort((a, b) => Number(a.levelNo || 0) - Number(b.levelNo || 0))
     }
   },
   created() {
     this.getList()
   },
   methods: {
-    /** 查询等级配置列表 */
     getList() {
       this.loading = true
-      listJst_level_config(this.queryParams).then(response => {
-        this.jst_level_configList = response.rows
-        this.total = response.total
+      listJst_level_config(this.queryParams).then(res => {
+        this.list = res.rows || []
+        this.total = res.total || 0
+      }).finally(() => {
         this.loading = false
       })
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        levelId: null,
-        levelCode: null,
-        levelName: null,
-        levelNo: null,
-        growthThreshold: null,
-        icon: null,
-        applicableRole: null,
-        status: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
+      this.$refs.queryForm && this.$refs.queryForm.resetFields()
       this.handleQuery()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.levelId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
+    initForm() {
+      return {
+        levelId: null,
+        levelCode: '',
+        levelName: '',
+        levelNo: 1,
+        growthThreshold: 0,
+        icon: '',
+        applicableRole: 'student',
+        status: 1,
+        remark: ''
+      }
     },
-    /** 新增按钮操作 */
     handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加等级配置"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const levelId = row.levelId || this.ids
-      getJst_level_config(levelId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改等级配置"
+      this.form = this.initForm()
+      this.dialogTitle = '新增等级配置'
+      this.dialogVisible = true
+      this.$nextTick(() => {
+        this.$refs.form && this.$refs.form.clearValidate()
       })
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.levelId != null) {
-            updateJst_level_config(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_level_config(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
+    handleEdit(row) {
+      getJst_level_config(row.levelId).then(res => {
+        this.form = { ...this.initForm(), ...(res.data || res || row) }
+        this.dialogTitle = '编辑等级配置'
+        this.dialogVisible = true
       })
     },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const levelIds = row.levelId || this.ids
-      this.$modal.confirm('是否确认删除等级配置编号为"' + levelIds + '"的数据项？').then(function() {
-        return delJst_level_config(levelIds)
-      }).then(() => {
+    handleToggle(row) {
+      const status = row.status === 1 ? 0 : 1
+      this.updateStatus({ ...row, status })
+    },
+    handleStatusChange(row) {
+      this.updateStatus(row)
+    },
+    updateStatus(payload) {
+      updateJst_level_config(payload).then(() => {
+        this.$modal.msgSuccess('状态更新成功')
         this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
+      }).catch(() => {
+        this.getList()
+      })
     },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_level_config/export', {
-        ...this.queryParams
-      }, `jst_level_config_${new Date().getTime()}.xlsx`)
+    handleSubmit() {
+      this.$refs.form.validate(valid => {
+        if (!valid) {
+          return
+        }
+        this.submitLoading = true
+        const api = this.form.levelId ? updateJst_level_config : addJst_level_config
+        api(this.form).then(() => {
+          this.$modal.msgSuccess(this.form.levelId ? '修改成功' : '新增成功')
+          this.dialogVisible = false
+          this.getList()
+        }).finally(() => {
+          this.submitLoading = false
+        })
+      })
     }
   }
 }
 </script>
+
+<style scoped>
+.mobile-card-list {
+  padding: 0 4px;
+}
+
+.mobile-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.mobile-card__title {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65%;
+}
+
+.mobile-card__meta {
+  font-size: 12px;
+  color: #909399;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.mobile-card__actions {
+  display: flex;
+  gap: 6px;
+}
+</style>

@@ -3480,3 +3480,185 @@ client.test("FILTER-4 course list with filters should succeed", function() {
   client.assert(Array.isArray(response.body.rows));
 });
 %}
+
+### =====================================================================
+### F-CONTRACT-INVOICE-BE 合同/发票小程序端接口 (jst-finance)
+### =====================================================================
+
+### F-CI-0 channel login (9201)
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_9201" }
+
+> {%
+client.global.set("fci_channel_token", response.body.data.token);
+client.test("F-CI-0 channel login should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### F-CI-1 channel contract list
+GET {{baseUrl}}/jst/wx/contract/list
+Authorization: Bearer {{fci_channel_token}}
+
+> {%
+client.test("F-CI-1 channel contract list should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.rows));
+});
+%}
+
+### F-CI-2 channel invoice list
+GET {{baseUrl}}/jst/wx/invoice/list
+Authorization: Bearer {{fci_channel_token}}
+
+> {%
+client.test("F-CI-2 channel invoice list should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.rows));
+});
+%}
+
+### F-CI-3 channel apply invoice success (<= actual_pay_amount)
+POST {{baseUrl}}/jst/wx/invoice/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{fci_channel_token}}
+
+{
+  "refSettlementNo": "WD_FIXTURE_C5A_PAID",
+  "invoiceTitle": "测试_渠道开票抬头",
+  "taxNo": "91110000MA0123456X",
+  "amount": 100.00,
+  "remark": "F-CI success"
+}
+
+> {%
+if (response.body.code === 200) {
+  client.global.set("fci_channel_invoice_id", response.body.data);
+}
+client.test("F-CI-3 channel apply invoice should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(!!response.body.data);
+});
+%}
+
+### F-CI-4 channel apply invoice amount overflow
+POST {{baseUrl}}/jst/wx/invoice/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{fci_channel_token}}
+
+{
+  "refSettlementNo": "WD_FIXTURE_C5A_PAID",
+  "invoiceTitle": "测试_渠道开票超限",
+  "taxNo": "91110000MA0123456X",
+  "amount": 9999.00
+}
+
+> {%
+client.test("F-CI-4 channel amount overflow should fail", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### F-CI-5 partner login (partner_f7_a)
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_a",
+  "password": "admin123"
+}
+
+> {%
+client.global.set("fci_partner_token", response.body.token);
+client.test("F-CI-5 partner login should succeed", function() {
+  client.assert(!!response.body.token);
+});
+%}
+
+### F-CI-6 partner contract list (should include CT_PA7_94704)
+GET {{baseUrl}}/jst/wx/contract/list
+Authorization: Bearer {{fci_partner_token}}
+
+> {%
+client.test("F-CI-6 partner contract list should include fixture contract", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.rows));
+  client.assert(response.body.rows.some(function(item) { return item.contractNo === "CT_PA7_94704"; }));
+});
+%}
+
+### F-CI-7 partner contract detail
+GET {{baseUrl}}/jst/wx/contract/94761
+Authorization: Bearer {{fci_partner_token}}
+
+> {%
+client.test("F-CI-7 partner contract detail should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.contractNo === "CT_PA7_94704");
+});
+%}
+
+### F-CI-8 partner invoice list (should include INV_PA7_94704)
+GET {{baseUrl}}/jst/wx/invoice/list
+Authorization: Bearer {{fci_partner_token}}
+
+> {%
+client.test("F-CI-8 partner invoice list should include fixture invoice", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.rows));
+  client.assert(response.body.rows.some(function(item) { return item.invoiceNo === "INV_PA7_94704"; }));
+});
+%}
+
+### F-CI-9 partner invoice detail
+GET {{baseUrl}}/jst/wx/invoice/94771
+Authorization: Bearer {{fci_partner_token}}
+
+> {%
+client.test("F-CI-9 partner invoice detail should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.invoiceNo === "INV_PA7_94704");
+});
+%}
+
+### F-CI-10 channel cannot access partner contract detail
+GET {{baseUrl}}/jst/wx/contract/94761
+Authorization: Bearer {{fci_channel_token}}
+
+> {%
+client.test("F-CI-10 channel query partner contract should fail", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### F-CI-11 channel cannot access partner invoice detail
+GET {{baseUrl}}/jst/wx/invoice/94771
+Authorization: Bearer {{fci_channel_token}}
+
+> {%
+client.test("F-CI-11 channel query partner invoice should fail", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### F-CI-12 student should be forbidden
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("fci_student_token", response.body.data.token);
+%}
+
+### F-CI-12.1 student call contract list
+GET {{baseUrl}}/jst/wx/contract/list
+Authorization: Bearer {{fci_student_token}}
+
+> {%
+client.test("F-CI-12.1 student should be forbidden", function() {
+  client.assert(response.status === 403 || response.body.code !== 200);
+});
+%}

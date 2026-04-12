@@ -1,4 +1,5 @@
 <template>
+  <!-- DEPRECATED: 请使用 jst/contest/index.vue -->
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="赛事名称" prop="contestName">

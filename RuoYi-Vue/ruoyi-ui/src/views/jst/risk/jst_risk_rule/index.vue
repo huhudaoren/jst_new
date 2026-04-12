@@ -1,325 +1,267 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+  <div class="app-container enhanced-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">风控中心</p>
+        <h2>风控规则</h2>
+        <p class="hero-desc">管理平台风控规则，配置阈值与触发动作，按维度和类型灵活启停。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
       <el-form-item label="规则名" prop="ruleName">
-        <el-input
-          v-model="queryParams.ruleName"
-          placeholder="请输入规则名"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.ruleName" placeholder="请输入规则名" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="维度：user/device/mobile/channel" prop="dimension">
-        <el-input
-          v-model="queryParams.dimension"
-          placeholder="请输入维度：user/device/mobile/channel"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="维度" prop="dimension">
+        <el-select v-model="queryParams.dimension" placeholder="全部" clearable>
+          <el-option label="用户" value="user" />
+          <el-option label="设备" value="device" />
+          <el-option label="手机" value="mobile" />
+          <el-option label="渠道" value="channel" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="命中动作：warn告警/intercept拦截/manual人工" prop="action">
-        <el-input
-          v-model="queryParams.action"
-          placeholder="请输入命中动作：warn告警/intercept拦截/manual人工"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="全部" clearable>
+          <el-option label="启用" :value="1" />
+          <el-option label="停用" :value="0" />
+        </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
+    <el-row :gutter="10" class="mb8 action-bar">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_risk_rule:add']"
-        >新增</el-button>
+        <el-button type="primary" icon="el-icon-plus" size="small" @click="handleAdd" v-hasPermi="['jst:risk:rule:add']">新增</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_risk_rule:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_risk_rule:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_risk_rule:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="jst_risk_ruleList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="规则ID" align="center" prop="riskRuleId" />
-      <el-table-column label="规则名" align="center" prop="ruleName" />
-      <el-table-column label="类型：bind_freq/coupon_freq/refund_freq/rebate_anomaly/zero_order_freq/aftersale_anomaly" align="center" prop="ruleType" />
-      <el-table-column label="维度：user/device/mobile/channel" align="center" prop="dimension" />
-      <el-table-column label="阈值配置JSON" align="center" prop="thresholdJson" />
-      <el-table-column label="命中动作：warn告警/intercept拦截/manual人工" align="center" prop="action" />
-      <el-table-column label="启停：0停 1启" align="center" prop="status" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+    <!-- 手机端卡片 -->
+    <div v-if="isMobile" v-loading="loading" class="mobile-list">
+      <div v-if="list.length">
+        <div v-for="row in list" :key="row.riskRuleId" class="mobile-card">
+          <div class="mobile-card-top">
+            <div>
+              <div class="mobile-title">{{ row.ruleName || '--' }}</div>
+              <div class="mobile-sub">{{ ruleTypeLabel(row.ruleType) }} / {{ dimensionLabel(row.dimension) }}</div>
+            </div>
+            <el-switch v-model="row.status" :active-value="1" :inactive-value="0" @change="handleStatusChange(row)" v-hasPermi="['jst:risk:rule:edit']" />
+          </div>
+          <div class="mobile-info-row">
+            <el-tag size="mini" :type="actionType(row.action)">{{ actionLabel(row.action) }}</el-tag>
+          </div>
+          <div class="mobile-actions">
+            <el-button type="text" @click="handleEdit(row)" v-hasPermi="['jst:risk:rule:edit']">编辑</el-button>
+            <el-button type="text" class="danger-text" @click="handleDelete(row)" v-hasPermi="['jst:risk:rule:remove']">删除</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无风控规则" :image-size="96" />
+    </div>
+
+    <!-- PC 端表格 -->
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="ID" prop="riskRuleId" width="70" />
+      <el-table-column label="规则名" prop="ruleName" min-width="160" show-overflow-tooltip />
+      <el-table-column label="规则类型" min-width="120">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_risk_rule:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_risk_rule:remove']"
-          >删除</el-button>
+          <el-tag size="small" type="info">{{ ruleTypeLabel(scope.row.ruleType) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="维度" min-width="90">
+        <template slot-scope="scope">
+          <el-tag size="small">{{ dimensionLabel(scope.row.dimension) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="触发动作" min-width="100">
+        <template slot-scope="scope">
+          <el-tag size="small" :type="actionType(scope.row.action)">{{ actionLabel(scope.row.action) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" width="90" align="center">
+        <template slot-scope="scope">
+          <el-switch v-model="scope.row.status" :active-value="1" :inactive-value="0" @change="handleStatusChange(scope.row)" v-hasPermi="['jst:risk:rule:edit']" />
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="140" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="text" @click="handleEdit(scope.row)" v-hasPermi="['jst:risk:rule:edit']">编辑</el-button>
+          <el-button type="text" class="danger-text" @click="handleDelete(scope.row)" v-hasPermi="['jst:risk:rule:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改风控规则对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="规则名" prop="ruleName">
-              <el-input v-model="form.ruleName" placeholder="请输入规则名" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="维度：user/device/mobile/channel" prop="dimension">
-              <el-input v-model="form.dimension" placeholder="请输入维度：user/device/mobile/channel" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="命中动作：warn告警/intercept拦截/manual人工" prop="action">
-              <el-input v-model="form.action" placeholder="请输入命中动作：warn告警/intercept拦截/manual人工" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <!-- 编辑弹窗 -->
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" :width="isMobile ? '95%' : '640px'" append-to-body>
+      <el-form ref="editForm" :model="form" :rules="rules" label-width="100px">
+        <el-form-item label="规则名" prop="ruleName">
+          <el-input v-model="form.ruleName" placeholder="请输入规则名" />
+        </el-form-item>
+        <el-form-item label="规则类型" prop="ruleType">
+          <el-select v-model="form.ruleType" placeholder="请选择" style="width:100%">
+            <el-option v-for="t in ruleTypes" :key="t.value" :label="t.label" :value="t.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="维度" prop="dimension">
+          <el-select v-model="form.dimension" placeholder="请选择" style="width:100%">
+            <el-option label="用户" value="user" />
+            <el-option label="设备" value="device" />
+            <el-option label="手机" value="mobile" />
+            <el-option label="渠道" value="channel" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="触发动作" prop="action">
+          <el-select v-model="form.action" placeholder="请选择" style="width:100%">
+            <el-option label="告警" value="warn" />
+            <el-option label="拦截" value="intercept" />
+            <el-option label="人工审核" value="manual" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="阈值配置" prop="thresholdJson">
+          <el-input v-model="form.thresholdJson" type="textarea" :rows="4" placeholder='JSON 格式，如 {"max_count":5,"window_minutes":60}' />
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="form.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+        </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+      <div slot="footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitForm">确定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listJst_risk_rule, getJst_risk_rule, delJst_risk_rule, addJst_risk_rule, updateJst_risk_rule } from "@/api/jst/risk/jst_risk_rule"
+import { listJst_risk_rule, getJst_risk_rule, addJst_risk_rule, updateJst_risk_rule, delJst_risk_rule } from '@/api/jst/risk/jst_risk_rule'
+
+const RULE_TYPES = [
+  { value: 'bind_freq', label: '绑定频率' },
+  { value: 'coupon_freq', label: '优惠券频率' },
+  { value: 'refund_freq', label: '退款频率' },
+  { value: 'rebate_anomaly', label: '返点异常' },
+  { value: 'zero_order_freq', label: '零元订单频率' },
+  { value: 'aftersale_anomaly', label: '售后异常' }
+]
 
 export default {
-  name: "Jst_risk_rule",
+  name: 'RiskRuleManage',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
+      loading: false,
+      submitLoading: false,
+      isMobile: false,
+      list: [],
       total: 0,
-      // 风控规则表格数据
-      jst_risk_ruleList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        ruleName: null,
-        ruleType: null,
-        dimension: null,
-        thresholdJson: null,
-        action: null,
-        status: null,
-      },
-      // 表单参数
+      queryParams: { pageNum: 1, pageSize: 10, ruleName: undefined, dimension: undefined, status: undefined },
+      dialogVisible: false,
+      dialogTitle: '',
       form: {},
-      // 表单校验
+      ruleTypes: RULE_TYPES,
       rules: {
-        ruleName: [
-          { required: true, message: "规则名不能为空", trigger: "blur" }
-        ],
-        ruleType: [
-          { required: true, message: "类型：bind_freq/coupon_freq/refund_freq/rebate_anomaly/zero_order_freq/aftersale_anomaly不能为空", trigger: "change" }
-        ],
-        dimension: [
-          { required: true, message: "维度：user/device/mobile/channel不能为空", trigger: "blur" }
-        ],
-        thresholdJson: [
-          { required: true, message: "阈值配置JSON不能为空", trigger: "blur" }
-        ],
-        action: [
-          { required: true, message: "命中动作：warn告警/intercept拦截/manual人工不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "启停：0停 1启不能为空", trigger: "change" }
-        ],
+        ruleName: [{ required: true, message: '请输入规则名', trigger: 'blur' }],
+        ruleType: [{ required: true, message: '请选择规则类型', trigger: 'change' }],
+        dimension: [{ required: true, message: '请选择维度', trigger: 'change' }],
+        action: [{ required: true, message: '请选择触发动作', trigger: 'change' }]
       }
     }
   },
   created() {
+    this.updateViewport()
+    window.addEventListener('resize', this.updateViewport)
     this.getList()
   },
+  beforeDestroy() { window.removeEventListener('resize', this.updateViewport) },
   methods: {
-    /** 查询风控规则列表 */
-    getList() {
+    updateViewport() { this.isMobile = window.innerWidth <= 768 },
+    async getList() {
       this.loading = true
-      listJst_risk_rule(this.queryParams).then(response => {
-        this.jst_risk_ruleList = response.rows
-        this.total = response.total
-        this.loading = false
-      })
+      try {
+        const res = await listJst_risk_rule(this.queryParams)
+        this.list = res.rows || []
+        this.total = res.total || 0
+      } finally { this.loading = false }
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        riskRuleId: null,
-        ruleName: null,
-        ruleType: null,
-        dimension: null,
-        thresholdJson: null,
-        action: null,
-        status: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
-    handleQuery() {
-      this.queryParams.pageNum = 1
+    handleQuery() { this.queryParams.pageNum = 1; this.getList() },
+    resetQuery() {
+      this.queryParams = { pageNum: 1, pageSize: 10, ruleName: undefined, dimension: undefined, status: undefined }
       this.getList()
     },
-    /** 重置按钮操作 */
-    resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
-    },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.riskRuleId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
     handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加风控规则"
+      this.dialogTitle = '新增风控规则'
+      this.form = { status: 1, action: 'warn', thresholdJson: '' }
+      this.dialogVisible = true
+      this.$nextTick(() => this.$refs.editForm && this.$refs.editForm.clearValidate())
     },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const riskRuleId = row.riskRuleId || this.ids
-      getJst_risk_rule(riskRuleId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改风控规则"
-      })
+    handleEdit(row) {
+      this.dialogTitle = '编辑风控规则'
+      this.form = { ...row }
+      this.dialogVisible = true
+      this.$nextTick(() => this.$refs.editForm && this.$refs.editForm.clearValidate())
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.riskRuleId != null) {
-            updateJst_risk_rule(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_risk_rule(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
+    async submitForm() {
+      await this.$refs.editForm.validate()
+      this.submitLoading = true
+      try {
+        if (this.form.riskRuleId) {
+          await updateJst_risk_rule(this.form)
+          this.$modal.msgSuccess('修改成功')
+        } else {
+          await addJst_risk_rule(this.form)
+          this.$modal.msgSuccess('新增成功')
         }
-      })
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const riskRuleIds = row.riskRuleId || this.ids
-      this.$modal.confirm('是否确认删除风控规则编号为"' + riskRuleIds + '"的数据项？').then(function() {
-        return delJst_risk_rule(riskRuleIds)
-      }).then(() => {
+        this.dialogVisible = false
         this.getList()
-        this.$modal.msgSuccess("删除成功")
+      } finally { this.submitLoading = false }
+    },
+    async handleStatusChange(row) {
+      try {
+        await updateJst_risk_rule({ riskRuleId: row.riskRuleId, status: row.status })
+        this.$modal.msgSuccess(row.status === 1 ? '已启用' : '已停用')
+      } catch (_) { row.status = row.status === 1 ? 0 : 1 }
+    },
+    handleDelete(row) {
+      this.$modal.confirm('确认删除该风控规则？').then(() => delJst_risk_rule(row.riskRuleId)).then(() => {
+        this.getList()
+        this.$modal.msgSuccess('删除成功')
       }).catch(() => {})
     },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_risk_rule/export', {
-        ...this.queryParams
-      }, `jst_risk_rule_${new Date().getTime()}.xlsx`)
-    }
+    ruleTypeLabel(t) { const found = RULE_TYPES.find(r => r.value === t); return found ? found.label : t || '--' },
+    dimensionLabel(d) { return { user: '用户', device: '设备', mobile: '手机', channel: '渠道' }[d] || d || '--' },
+    actionLabel(a) { return { warn: '告警', intercept: '拦截', manual: '人工审核' }[a] || a || '--' },
+    actionType(a) { return { warn: 'warning', intercept: 'danger', manual: 'info' }[a] || 'info' }
   }
 }
 </script>
+
+<style scoped>
+.enhanced-page { background: #f6f8fb; min-height: calc(100vh - 84px); }
+.page-hero { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px; margin-bottom: 18px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.hero-eyebrow { margin: 0 0 8px; color: #2f6fec; font-size: 13px; font-weight: 600; }
+.page-hero h2 { margin: 0; font-size: 24px; font-weight: 700; color: #172033; }
+.hero-desc { margin: 8px 0 0; color: #6f7b8f; }
+.query-panel { padding: 16px 16px 0; margin-bottom: 16px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.action-bar { padding: 0 4px; margin-bottom: 12px; }
+.danger-text { color: #f56c6c; }
+.mobile-list { min-height: 180px; }
+.mobile-card { padding: 16px; margin-bottom: 12px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.mobile-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.mobile-title { font-weight: 700; color: #172033; }
+.mobile-sub { margin-top: 4px; font-size: 12px; color: #7a8495; }
+.mobile-info-row { margin-top: 8px; font-size: 13px; color: #7a8495; display: flex; align-items: center; gap: 8px; }
+.mobile-actions { margin-top: 12px; display: flex; gap: 12px; border-top: 1px solid #f0f2f5; padding-top: 12px; }
+@media (max-width: 768px) {
+  .enhanced-page { padding: 12px; }
+  .page-hero { display: block; padding: 18px; }
+  .page-hero .el-button { width: 100%; min-height: 44px; margin-top: 16px; }
+  .page-hero h2 { font-size: 20px; }
+  .query-panel { padding-bottom: 8px; }
+  .query-panel ::v-deep .el-form-item { display: block; margin-right: 0; }
+  .query-panel ::v-deep .el-form-item__content, .query-panel ::v-deep .el-select, .query-panel ::v-deep .el-input { width: 100%; }
+}
+</style>

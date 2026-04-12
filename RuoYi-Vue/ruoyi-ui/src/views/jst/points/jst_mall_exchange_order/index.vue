@@ -1,93 +1,16 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="单号" prop="exchangeNo">
-        <el-input
-          v-model="queryParams.exchangeNo"
-          placeholder="请输入单号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
+      <el-form-item label="订单号" prop="exchangeNo">
+        <el-input v-model="queryParams.exchangeNo" placeholder="请输入兑换订单号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="用户ID" prop="userId">
-        <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入用户ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.userId" placeholder="请输入用户ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="商品ID" prop="goodsId">
-        <el-input
-          v-model="queryParams.goodsId"
-          placeholder="请输入商品ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="数量" prop="quantity">
-        <el-input
-          v-model="queryParams.quantity"
-          placeholder="请输入数量"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="消耗积分" prop="pointsUsed">
-        <el-input
-          v-model="queryParams.pointsUsed"
-          placeholder="请输入消耗积分"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="现金补差金额" prop="cashAmount">
-        <el-input
-          v-model="queryParams.cashAmount"
-          placeholder="请输入现金补差金额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="关联现金支付订单ID" prop="orderId">
-        <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入关联现金支付订单ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="物流公司" prop="logisticsCompany">
-        <el-input
-          v-model="queryParams.logisticsCompany"
-          placeholder="请输入物流公司"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="物流单号" prop="logisticsNo">
-        <el-input
-          v-model="queryParams.logisticsNo"
-          placeholder="请输入物流单号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="发货时间" prop="shipTime">
-        <el-date-picker clearable
-          v-model="queryParams.shipTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择发货时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="完成时间" prop="completeTime">
-        <el-date-picker clearable
-          v-model="queryParams.completeTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择完成时间">
-        </el-date-picker>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="全部" clearable>
+          <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -96,379 +19,285 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_mall_exchange_order:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_mall_exchange_order:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_mall_exchange_order:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_mall_exchange_order:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="jst_mall_exchange_orderList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="兑换订单ID" align="center" prop="exchangeId" />
-      <el-table-column label="单号" align="center" prop="exchangeNo" />
-      <el-table-column label="用户ID" align="center" prop="userId" />
-      <el-table-column label="商品ID" align="center" prop="goodsId" />
-      <el-table-column label="数量" align="center" prop="quantity" />
-      <el-table-column label="消耗积分" align="center" prop="pointsUsed" />
-      <el-table-column label="现金补差金额" align="center" prop="cashAmount" />
-      <el-table-column label="关联现金支付订单ID" align="center" prop="orderId" />
-      <el-table-column label="收货地址快照JSON" align="center" prop="addressSnapshotJson" />
-      <el-table-column label="订单状态：pending_pay/paid/pending_ship/shipped/completed/aftersale/closed" align="center" prop="status" />
-      <el-table-column label="物流公司" align="center" prop="logisticsCompany" />
-      <el-table-column label="物流单号" align="center" prop="logisticsNo" />
-      <el-table-column label="发货时间" align="center" prop="shipTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.shipTime, '{y}-{m}-{d}') }}</span>
+    <div v-if="isMobile" v-loading="loading">
+      <div v-if="list.length" class="mobile-card-list">
+        <div v-for="row in list" :key="row.exchangeId" class="mobile-card">
+          <div class="mobile-card__head">
+            <span class="mobile-card__title">{{ row.goodsName || '--' }}</span>
+            <el-tag size="mini" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+          </div>
+          <div class="mobile-card__meta">
+            <span>{{ row.exchangeNo }}</span>
+            <span>用户：{{ row.userId || '--' }}</span>
+            <span>{{ row.pointsUsed || 0 }} 积分</span>
+            <span class="amount-cell">¥ {{ formatAmount(row.cashAmount) }}</span>
+          </div>
+          <div class="mobile-card__actions">
+            <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
+            <el-button v-if="row.status === 'pending_ship'" type="text" size="mini" @click="openShipDialog(row)" v-hasPermi="['jst:points:mall:exchange:ship']">发货</el-button>
+            <el-button v-if="row.status === 'shipped'" type="text" size="mini" @click="handleComplete(row)" v-hasPermi="['jst:points:mall:exchange:ship']">完成</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无兑换订单" />
+    </div>
+
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="订单ID" prop="exchangeId" width="90" />
+      <el-table-column label="订单号" prop="exchangeNo" min-width="150" show-overflow-tooltip />
+      <el-table-column label="用户ID" prop="userId" min-width="100" />
+      <el-table-column label="商品ID" prop="goodsId" min-width="90" />
+      <el-table-column label="数量" prop="quantity" min-width="70" align="right" />
+      <el-table-column label="积分消耗" prop="pointsUsed" min-width="100" align="right" />
+      <el-table-column label="现金补差" min-width="100" align="right">
+        <template slot-scope="{ row }">
+          <span class="amount-cell">¥ {{ formatAmount(row.cashAmount) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="完成时间" align="center" prop="completeTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.completeTime, '{y}-{m}-{d}') }}</span>
+      <el-table-column label="状态" width="100">
+        <template slot-scope="{ row }">
+          <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="售后状态：none/applying/refunding/refunded" align="center" prop="aftersaleStatus" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_mall_exchange_order:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_mall_exchange_order:remove']"
-          >删除</el-button>
+      <el-table-column label="发货时间" min-width="160">
+        <template slot-scope="{ row }">{{ parseTime(row.shipTime) || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="创建时间" min-width="160">
+        <template slot-scope="{ row }">{{ parseTime(row.createTime) }}</template>
+      </el-table-column>
+      <el-table-column label="操作" fixed="right" width="170">
+        <template slot-scope="{ row }">
+          <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
+          <el-button v-if="row.status === 'pending_ship'" type="text" size="mini" @click="openShipDialog(row)" v-hasPermi="['jst:points:mall:exchange:ship']">发货</el-button>
+          <el-button v-if="row.status === 'shipped'" type="text" size="mini" @click="handleComplete(row)" v-hasPermi="['jst:points:mall:exchange:ship']">完成</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改积分商城兑换订单对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="单号" prop="exchangeNo">
-              <el-input v-model="form.exchangeNo" placeholder="请输入单号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="用户ID" prop="userId">
-              <el-input v-model="form.userId" placeholder="请输入用户ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="商品ID" prop="goodsId">
-              <el-input v-model="form.goodsId" placeholder="请输入商品ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="数量" prop="quantity">
-              <el-input v-model="form.quantity" placeholder="请输入数量" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="消耗积分" prop="pointsUsed">
-              <el-input v-model="form.pointsUsed" placeholder="请输入消耗积分" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="现金补差金额" prop="cashAmount">
-              <el-input v-model="form.cashAmount" placeholder="请输入现金补差金额" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="关联现金支付订单ID" prop="orderId">
-              <el-input v-model="form.orderId" placeholder="请输入关联现金支付订单ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="物流公司" prop="logisticsCompany">
-              <el-input v-model="form.logisticsCompany" placeholder="请输入物流公司" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="物流单号" prop="logisticsNo">
-              <el-input v-model="form.logisticsNo" placeholder="请输入物流单号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="发货时间" prop="shipTime">
-              <el-date-picker clearable
-                v-model="form.shipTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择发货时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="完成时间" prop="completeTime">
-              <el-date-picker clearable
-                v-model="form.completeTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择完成时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <el-dialog title="订单发货" :visible.sync="shipVisible" :width="isMobile ? '100%' : '460px'" :fullscreen="isMobile" append-to-body>
+      <el-form ref="shipForm" :model="shipForm" :rules="shipRules" :label-width="isMobile ? '84px' : '96px'">
+        <el-form-item label="物流公司" prop="logisticsCompany">
+          <el-input v-model="shipForm.logisticsCompany" placeholder="请输入物流公司" />
+        </el-form-item>
+        <el-form-item label="物流单号" prop="logisticsNo">
+          <el-input v-model="shipForm.logisticsNo" placeholder="请输入物流单号" />
+        </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+      <div slot="footer">
+        <el-button @click="shipVisible = false">取 消</el-button>
+        <el-button type="primary" :loading="shipLoading" @click="submitShip">确认发货</el-button>
       </div>
     </el-dialog>
+
+    <el-drawer :title="'兑换订单详情 #' + (detailData.exchangeId || '')" :visible.sync="detailVisible" :size="isMobile ? '100%' : '520px'" append-to-body>
+      <div class="detail-body">
+        <el-descriptions :column="1" border size="small">
+          <el-descriptions-item label="订单号">{{ detailData.exchangeNo || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="用户ID">{{ detailData.userId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="商品ID">{{ detailData.goodsId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="数量">{{ detailData.quantity || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="积分消耗">{{ detailData.pointsUsed || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="现金补差">¥ {{ formatAmount(detailData.cashAmount) }}</el-descriptions-item>
+          <el-descriptions-item label="订单状态">
+            <el-tag size="small" :type="statusType(detailData.status)">{{ statusLabel(detailData.status) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="物流公司">{{ detailData.logisticsCompany || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="物流单号">{{ detailData.logisticsNo || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="发货时间">{{ parseTime(detailData.shipTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="完成时间">{{ parseTime(detailData.completeTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="地址快照">{{ detailData.addressSnapshotJson || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="备注">{{ detailData.remark || '--' }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_mall_exchange_order, getJst_mall_exchange_order, delJst_mall_exchange_order, addJst_mall_exchange_order, updateJst_mall_exchange_order } from "@/api/jst/points/jst_mall_exchange_order"
+import { parseTime } from '@/utils/ruoyi'
+import { listExchangeOrder, getExchangeOrder, shipExchangeOrder, completeExchangeOrder } from '@/api/jst/mall'
+
+const STATUS_META = {
+  pending_pay: { label: '待付款', type: 'warning' },
+  paid: { label: '已支付', type: '' },
+  pending_ship: { label: '待发货', type: 'warning' },
+  shipped: { label: '已发货', type: '' },
+  completed: { label: '已完成', type: 'success' },
+  aftersale: { label: '售后中', type: 'danger' },
+  closed: { label: '已关闭', type: 'info' }
+}
 
 export default {
-  name: "Jst_mall_exchange_order",
+  name: 'JstMallExchangeOrderAdmin',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
+      loading: false,
       showSearch: true,
-      // 总条数
+      list: [],
       total: 0,
-      // 积分商城兑换订单表格数据
-      jst_mall_exchange_orderList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
         exchangeNo: null,
         userId: null,
-        goodsId: null,
-        quantity: null,
-        pointsUsed: null,
-        cashAmount: null,
-        orderId: null,
-        addressSnapshotJson: null,
-        status: null,
-        logisticsCompany: null,
-        logisticsNo: null,
-        shipTime: null,
-        completeTime: null,
-        aftersaleStatus: null,
+        status: null
       },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        exchangeNo: [
-          { required: true, message: "单号不能为空", trigger: "blur" }
-        ],
-        userId: [
-          { required: true, message: "用户ID不能为空", trigger: "blur" }
-        ],
-        goodsId: [
-          { required: true, message: "商品ID不能为空", trigger: "blur" }
-        ],
-        quantity: [
-          { required: true, message: "数量不能为空", trigger: "blur" }
-        ],
-        pointsUsed: [
-          { required: true, message: "消耗积分不能为空", trigger: "blur" }
-        ],
-        cashAmount: [
-          { required: true, message: "现金补差金额不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "订单状态：pending_pay/paid/pending_ship/shipped/completed/aftersale/closed不能为空", trigger: "change" }
-        ],
+      statusOptions: Object.keys(STATUS_META).map(key => ({ value: key, label: STATUS_META[key].label })),
+      detailVisible: false,
+      detailData: {},
+      shipVisible: false,
+      shipLoading: false,
+      shipTargetId: null,
+      shipForm: {
+        logisticsCompany: '',
+        logisticsNo: ''
+      },
+      shipRules: {
+        logisticsCompany: [{ required: true, message: '物流公司不能为空', trigger: 'blur' }],
+        logisticsNo: [{ required: true, message: '物流单号不能为空', trigger: 'blur' }]
       }
+    }
+  },
+  computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     }
   },
   created() {
     this.getList()
   },
   methods: {
-    /** 查询积分商城兑换订单列表 */
+    parseTime,
+    statusType(status) {
+      return (STATUS_META[status] || {}).type || 'info'
+    },
+    statusLabel(status) {
+      return (STATUS_META[status] || {}).label || status || '--'
+    },
+    formatAmount(value) {
+      if (value === null || value === undefined || value === '') {
+        return '0.00'
+      }
+      const num = Number(value)
+      if (Number.isNaN(num)) {
+        return value
+      }
+      const displayNum = Number.isInteger(num) ? num / 100 : num
+      return displayNum.toFixed(2)
+    },
     getList() {
       this.loading = true
-      listJst_mall_exchange_order(this.queryParams).then(response => {
-        this.jst_mall_exchange_orderList = response.rows
-        this.total = response.total
+      listExchangeOrder(this.queryParams).then(res => {
+        this.list = res.rows || []
+        this.total = res.total || 0
+      }).finally(() => {
         this.loading = false
       })
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        exchangeId: null,
-        exchangeNo: null,
-        userId: null,
-        goodsId: null,
-        quantity: null,
-        pointsUsed: null,
-        cashAmount: null,
-        orderId: null,
-        addressSnapshotJson: null,
-        status: null,
-        logisticsCompany: null,
-        logisticsNo: null,
-        shipTime: null,
-        completeTime: null,
-        aftersaleStatus: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
+      this.$refs.queryForm && this.$refs.queryForm.resetFields()
       this.handleQuery()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.exchangeId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加积分商城兑换订单"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const exchangeId = row.exchangeId || this.ids
-      getJst_mall_exchange_order(exchangeId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改积分商城兑换订单"
+    handleDetail(row) {
+      getExchangeOrder(row.exchangeId).then(res => {
+        this.detailData = res.data || res || row
+        this.detailVisible = true
       })
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.exchangeId != null) {
-            updateJst_mall_exchange_order(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_mall_exchange_order(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
+    openShipDialog(row) {
+      this.shipTargetId = row.exchangeId
+      this.shipForm = { logisticsCompany: '', logisticsNo: '' }
+      this.shipVisible = true
+      this.$nextTick(() => {
+        this.$refs.shipForm && this.$refs.shipForm.clearValidate()
+      })
+    },
+    submitShip() {
+      this.$refs.shipForm.validate(valid => {
+        if (!valid) {
+          return
         }
+        this.shipLoading = true
+        shipExchangeOrder(this.shipTargetId, this.shipForm).then(() => {
+          this.$modal.msgSuccess('发货成功')
+          this.shipVisible = false
+          this.getList()
+        }).finally(() => {
+          this.shipLoading = false
+        })
       })
     },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const exchangeIds = row.exchangeId || this.ids
-      this.$modal.confirm('是否确认删除积分商城兑换订单编号为"' + exchangeIds + '"的数据项？').then(function() {
-        return delJst_mall_exchange_order(exchangeIds)
+    handleComplete(row) {
+      this.$modal.confirm('确认将该订单标记为已完成吗？').then(() => {
+        return completeExchangeOrder(row.exchangeId)
       }).then(() => {
+        this.$modal.msgSuccess('操作成功')
         this.getList()
-        this.$modal.msgSuccess("删除成功")
       }).catch(() => {})
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_mall_exchange_order/export', {
-        ...this.queryParams
-      }, `jst_mall_exchange_order_${new Date().getTime()}.xlsx`)
     }
   }
 }
 </script>
+
+<style scoped>
+.amount-cell {
+  text-align: right;
+  display: inline-block;
+  min-width: 68px;
+}
+
+.detail-body {
+  padding: 0 16px 16px;
+}
+
+.mobile-card-list {
+  padding: 0 4px;
+}
+
+.mobile-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.mobile-card__title {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65%;
+}
+
+.mobile-card__meta {
+  font-size: 12px;
+  color: #909399;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.mobile-card__actions {
+  display: flex;
+  gap: 6px;
+}
+</style>

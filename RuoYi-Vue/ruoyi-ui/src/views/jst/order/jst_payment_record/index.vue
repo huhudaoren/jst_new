@@ -1,446 +1,464 @@
-<template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="内部支付流水号" prop="paymentNo">
+﻿<template>
+  <div class="app-container payment-record-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">订单中心</p>
+        <h2>支付记录管理</h2>
+        <p class="hero-desc">支持支付单号与订单号检索、支付方式/状态筛选，金额统一按分转元展示。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="88px" class="query-panel">
+      <el-form-item label="支付单号">
         <el-input
           v-model="queryParams.paymentNo"
-          placeholder="请输入内部支付流水号"
+          placeholder="请输入支付单号"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="订单ID" prop="orderId">
+      <el-form-item label="订单号/ID">
         <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入订单ID"
+          v-model="queryParams.orderKeyword"
+          placeholder="请输入订单号或订单ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="支付方式：wechat/bank_transfer/points/mix" prop="payMethod">
-        <el-input
-          v-model="queryParams.payMethod"
-          placeholder="请输入支付方式：wechat/bank_transfer/points/mix"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="支付方式">
+        <el-select v-model="queryParams.payMethod" placeholder="全部" clearable>
+          <el-option v-for="item in payMethodOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="现金金额" prop="cashAmount">
-        <el-input
-          v-model="queryParams.cashAmount"
-          placeholder="请输入现金金额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="支付状态">
+        <el-select v-model="queryParams.payStatus" placeholder="全部" clearable>
+          <el-option v-for="item in payStatusOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="积分折现金额" prop="pointsAmount">
-        <el-input
-          v-model="queryParams.pointsAmount"
-          placeholder="请输入积分折现金额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="消耗积分数" prop="pointsUsed">
-        <el-input
-          v-model="queryParams.pointsUsed"
-          placeholder="请输入消耗积分数"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="第三方流水号" prop="thirdPartyNo">
-        <el-input
-          v-model="queryParams.thirdPartyNo"
-          placeholder="请输入第三方流水号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="对公转账凭证URL" prop="voucherUrl">
-        <el-input
-          v-model="queryParams.voucherUrl"
-          placeholder="请输入对公转账凭证URL"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="完成时间" prop="payTime">
-        <el-date-picker clearable
-          v-model="queryParams.payTime"
-          type="date"
+      <el-form-item label="支付时间">
+        <el-date-picker
+          v-model="dateRange"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始"
+          end-placeholder="结束"
           value-format="yyyy-MM-dd"
-          placeholder="请选择完成时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="操作人ID" prop="operatorId">
-        <el-input
-          v-model="queryParams.operatorId"
-          placeholder="请输入操作人ID"
-          clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_payment_record:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_payment_record:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_payment_record:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_payment_record:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
+    <div v-if="isMobile" v-loading="loading" class="mobile-list">
+      <div v-if="list.length">
+        <div v-for="row in list" :key="row.paymentId" class="mobile-card">
+          <div class="mobile-card-top">
+            <div>
+              <div class="mobile-title">{{ row.paymentNo || '--' }}</div>
+              <div class="mobile-sub">订单 {{ row.orderNo || row.orderId || '--' }}</div>
+            </div>
+            <el-tag size="small" :type="payStatusType(row.payStatus)">{{ payStatusLabel(row.payStatus) }}</el-tag>
+          </div>
+          <div class="mobile-amount">{{ formatMoney(totalAmount(row)) }}</div>
+          <div class="mobile-info-row">
+            <span>现金 {{ formatMoney(row.cashAmount) }}</span>
+            <span>积分折现 {{ formatMoney(row.pointsAmount) }}</span>
+          </div>
+          <div class="mobile-info-row">
+            <span>{{ payMethodLabel(row.payMethod) }}</span>
+            <span>{{ parseTime(row.payTime) || '--' }}</span>
+          </div>
+          <div class="mobile-actions">
+            <el-button type="text" @click="openDetail(row)">查看详情</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无支付记录" :image-size="96" />
+    </div>
 
-    <el-table v-loading="loading" :data="jst_payment_recordList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="支付ID" align="center" prop="paymentId" />
-      <el-table-column label="内部支付流水号" align="center" prop="paymentNo" />
-      <el-table-column label="订单ID" align="center" prop="orderId" />
-      <el-table-column label="支付方式：wechat/bank_transfer/points/mix" align="center" prop="payMethod" />
-      <el-table-column label="现金金额" align="center" prop="cashAmount" />
-      <el-table-column label="积分折现金额" align="center" prop="pointsAmount" />
-      <el-table-column label="消耗积分数" align="center" prop="pointsUsed" />
-      <el-table-column label="第三方流水号" align="center" prop="thirdPartyNo" />
-      <el-table-column label="对公转账凭证URL" align="center" prop="voucherUrl" />
-      <el-table-column label="凭证审核状态：pending/approved/rejected" align="center" prop="voucherAuditStatus" />
-      <el-table-column label="支付状态：pending/success/failed/refunding/refunded" align="center" prop="payStatus" />
-      <el-table-column label="完成时间" align="center" prop="payTime" width="180">
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="支付单号" prop="paymentNo" min-width="170" show-overflow-tooltip />
+      <el-table-column label="订单号/ID" min-width="170" show-overflow-tooltip>
+        <template slot-scope="scope">{{ scope.row.orderNo || scope.row.orderId || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="支付方式" min-width="120">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.payTime, '{y}-{m}-{d}') }}</span>
+          <el-tag size="small" type="info">{{ payMethodLabel(scope.row.payMethod) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作人ID" align="center" prop="operatorId" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="支付状态" min-width="120">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_payment_record:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_payment_record:remove']"
-          >删除</el-button>
+          <el-tag size="small" :type="payStatusType(scope.row.payStatus)">{{ payStatusLabel(scope.row.payStatus) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="现金金额" min-width="120" align="right">
+        <template slot-scope="scope">{{ formatMoney(scope.row.cashAmount) }}</template>
+      </el-table-column>
+      <el-table-column label="积分折现" min-width="120" align="right">
+        <template slot-scope="scope">{{ formatMoney(scope.row.pointsAmount) }}</template>
+      </el-table-column>
+      <el-table-column label="合计金额" min-width="120" align="right">
+        <template slot-scope="scope">
+          <span class="amount-strong">{{ formatMoney(totalAmount(scope.row)) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="消耗积分" prop="pointsUsed" min-width="100" align="right" />
+      <el-table-column label="完成时间" min-width="160">
+        <template slot-scope="scope">{{ parseTime(scope.row.payTime) || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="操作" width="120" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
 
-    <!-- 添加或修改支付记录对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="内部支付流水号" prop="paymentNo">
-              <el-input v-model="form.paymentNo" placeholder="请输入内部支付流水号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="订单ID" prop="orderId">
-              <el-input v-model="form.orderId" placeholder="请输入订单ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="支付方式：wechat/bank_transfer/points/mix" prop="payMethod">
-              <el-input v-model="form.payMethod" placeholder="请输入支付方式：wechat/bank_transfer/points/mix" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="现金金额" prop="cashAmount">
-              <el-input v-model="form.cashAmount" placeholder="请输入现金金额" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="积分折现金额" prop="pointsAmount">
-              <el-input v-model="form.pointsAmount" placeholder="请输入积分折现金额" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="消耗积分数" prop="pointsUsed">
-              <el-input v-model="form.pointsUsed" placeholder="请输入消耗积分数" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="第三方流水号" prop="thirdPartyNo">
-              <el-input v-model="form.thirdPartyNo" placeholder="请输入第三方流水号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="对公转账凭证URL" prop="voucherUrl">
-              <el-input v-model="form.voucherUrl" placeholder="请输入对公转账凭证URL" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="完成时间" prop="payTime">
-              <el-date-picker clearable
-                v-model="form.payTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择完成时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="操作人ID" prop="operatorId">
-              <el-input v-model="form.operatorId" placeholder="请输入操作人ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <el-drawer :visible.sync="detailVisible" :size="isMobile ? '100%' : '680px'" title="支付记录详情" append-to-body>
+      <div v-loading="detailLoading" class="drawer-body">
+        <el-descriptions v-if="detail" :column="isMobile ? 1 : 2" border>
+          <el-descriptions-item label="支付ID">{{ detail.paymentId }}</el-descriptions-item>
+          <el-descriptions-item label="支付单号">{{ detail.paymentNo || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="订单号/ID">{{ detail.orderNo || detail.orderId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="支付方式">{{ payMethodLabel(detail.payMethod) }}</el-descriptions-item>
+          <el-descriptions-item label="支付状态">
+            <el-tag size="small" :type="payStatusType(detail.payStatus)">{{ payStatusLabel(detail.payStatus) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="凭证审核状态">{{ voucherAuditLabel(detail.voucherAuditStatus) }}</el-descriptions-item>
+          <el-descriptions-item label="现金金额">{{ formatMoney(detail.cashAmount) }}</el-descriptions-item>
+          <el-descriptions-item label="积分折现金额">{{ formatMoney(detail.pointsAmount) }}</el-descriptions-item>
+          <el-descriptions-item label="合计金额">
+            <span class="amount-strong">{{ formatMoney(totalAmount(detail)) }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="消耗积分">{{ detail.pointsUsed || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="第三方流水号">{{ detail.thirdPartyNo || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="对公凭证URL">{{ detail.voucherUrl || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="操作人ID">{{ detail.operatorId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="完成时间">{{ parseTime(detail.payTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ parseTime(detail.createTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="备注" :span="isMobile ? 1 : 2">{{ detail.remark || '--' }}</el-descriptions-item>
+        </el-descriptions>
+        <el-empty v-else description="暂无详情数据" :image-size="96" />
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_payment_record, getJst_payment_record, delJst_payment_record, addJst_payment_record, updateJst_payment_record } from "@/api/jst/order/jst_payment_record"
+import { listJst_payment_record, getJst_payment_record } from '@/api/jst/order/jst_payment_record'
+
+const PAY_METHOD_MAP = {
+  wechat: '微信支付',
+  bank_transfer: '对公转账',
+  points: '纯积分',
+  mix: '混合支付',
+  points_cash_mix: '积分+现金'
+}
+
+const PAY_STATUS_MAP = {
+  pending: { label: '待支付', type: 'warning' },
+  success: { label: '支付成功', type: 'success' },
+  failed: { label: '支付失败', type: 'danger' },
+  refunding: { label: '退款中', type: 'warning' },
+  refunded: { label: '已退款', type: 'info' }
+}
+
+const VOUCHER_AUDIT_MAP = {
+  pending: '待审核',
+  approved: '已通过',
+  rejected: '已驳回'
+}
 
 export default {
-  name: "Jst_payment_record",
+  name: 'JstPaymentRecordManage',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
+      loading: false,
+      detailLoading: false,
+      isMobile: false,
+      list: [],
       total: 0,
-      // 支付记录表格数据
-      jst_payment_recordList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
+      dateRange: [],
+      detailVisible: false,
+      detail: null,
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        paymentNo: null,
-        orderId: null,
-        payMethod: null,
-        cashAmount: null,
-        pointsAmount: null,
-        pointsUsed: null,
-        thirdPartyNo: null,
-        voucherUrl: null,
-        voucherAuditStatus: null,
-        payStatus: null,
-        payTime: null,
-        operatorId: null,
+        paymentNo: '',
+        orderKeyword: '',
+        payMethod: undefined,
+        payStatus: undefined
       },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        paymentNo: [
-          { required: true, message: "内部支付流水号不能为空", trigger: "blur" }
-        ],
-        orderId: [
-          { required: true, message: "订单ID不能为空", trigger: "blur" }
-        ],
-        payMethod: [
-          { required: true, message: "支付方式：wechat/bank_transfer/points/mix不能为空", trigger: "blur" }
-        ],
-        cashAmount: [
-          { required: true, message: "现金金额不能为空", trigger: "blur" }
-        ],
-        pointsAmount: [
-          { required: true, message: "积分折现金额不能为空", trigger: "blur" }
-        ],
-        pointsUsed: [
-          { required: true, message: "消耗积分数不能为空", trigger: "blur" }
-        ],
-        payStatus: [
-          { required: true, message: "支付状态：pending/success/failed/refunding/refunded不能为空", trigger: "change" }
-        ],
-      }
+      payMethodOptions: Object.keys(PAY_METHOD_MAP).map(key => ({ value: key, label: PAY_METHOD_MAP[key] })),
+      payStatusOptions: Object.keys(PAY_STATUS_MAP).map(key => ({ value: key, label: PAY_STATUS_MAP[key].label }))
     }
   },
   created() {
+    this.updateViewport()
+    window.addEventListener('resize', this.updateViewport)
     this.getList()
   },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.updateViewport)
+  },
   methods: {
-    /** 查询支付记录列表 */
-    getList() {
+    updateViewport() {
+      this.isMobile = window.innerWidth <= 768
+    },
+    isNumericKeyword(value) {
+      return /^\d+$/.test(String(value || '').trim())
+    },
+    async getList() {
       this.loading = true
-      listJst_payment_record(this.queryParams).then(response => {
-        this.jst_payment_recordList = response.rows
-        this.total = response.total
+      try {
+        const keyword = String(this.queryParams.orderKeyword || '').trim()
+        const params = {
+          pageNum: this.queryParams.pageNum,
+          pageSize: this.queryParams.pageSize,
+          paymentNo: this.queryParams.paymentNo || undefined,
+          payMethod: this.queryParams.payMethod || undefined,
+          payStatus: this.queryParams.payStatus || undefined
+        }
+        if (this.isNumericKeyword(keyword)) {
+          params.orderId = Number(keyword)
+        }
+        if (this.dateRange && this.dateRange.length === 2) {
+          params.beginPayTime = this.dateRange[0]
+          params.endPayTime = this.dateRange[1]
+        }
+
+        const res = await listJst_payment_record(params)
+        const rows = res.rows || []
+        const shouldLocalFilter = (keyword && !this.isNumericKeyword(keyword)) || (this.dateRange && this.dateRange.length === 2)
+
+        if (shouldLocalFilter) {
+          const localKeyword = keyword.toLowerCase()
+          this.list = rows.filter(row => {
+            const orderText = String(row.orderNo || row.orderId || '').toLowerCase()
+            const orderMatch = !localKeyword || orderText.indexOf(localKeyword) > -1
+            const timeMatch = this.matchRange(row.payTime, this.dateRange)
+            return orderMatch && timeMatch
+          })
+          this.total = this.list.length
+        } else {
+          this.list = rows
+          this.total = res.total || 0
+        }
+      } finally {
         this.loading = false
-      })
-    },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        paymentId: null,
-        paymentNo: null,
-        orderId: null,
-        payMethod: null,
-        cashAmount: null,
-        pointsAmount: null,
-        pointsUsed: null,
-        thirdPartyNo: null,
-        voucherUrl: null,
-        voucherAuditStatus: null,
-        payStatus: null,
-        payTime: null,
-        operatorId: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
       }
-      this.resetForm("form")
     },
-    /** 搜索按钮操作 */
+    matchRange(value, range) {
+      if (!range || range.length !== 2) return true
+      if (!value) return false
+      const begin = new Date(range[0] + ' 00:00:00').getTime()
+      const end = new Date(range[1] + ' 23:59:59').getTime()
+      const current = new Date(value).getTime()
+      if (Number.isNaN(current)) return false
+      return current >= begin && current <= end
+    },
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
+      this.dateRange = []
+      this.queryParams = {
+        pageNum: 1,
+        pageSize: 10,
+        paymentNo: '',
+        orderKeyword: '',
+        payMethod: undefined,
+        payStatus: undefined
+      }
+      this.getList()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.paymentId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
+    async openDetail(row) {
+      this.detailVisible = true
+      this.detailLoading = true
+      try {
+        const res = await getJst_payment_record(row.paymentId)
+        this.detail = res.data || null
+      } finally {
+        this.detailLoading = false
+      }
     },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加支付记录"
+    totalAmount(row) {
+      return Number(row.cashAmount || 0) + Number(row.pointsAmount || 0)
     },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const paymentId = row.paymentId || this.ids
-      getJst_payment_record(paymentId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改支付记录"
-      })
+    payMethodLabel(value) {
+      return PAY_METHOD_MAP[value] || value || '--'
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.paymentId != null) {
-            updateJst_payment_record(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_payment_record(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
-      })
+    payStatusLabel(value) {
+      return (PAY_STATUS_MAP[value] && PAY_STATUS_MAP[value].label) || value || '--'
     },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const paymentIds = row.paymentId || this.ids
-      this.$modal.confirm('是否确认删除支付记录编号为"' + paymentIds + '"的数据项？').then(function() {
-        return delJst_payment_record(paymentIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
+    payStatusType(value) {
+      return (PAY_STATUS_MAP[value] && PAY_STATUS_MAP[value].type) || 'info'
     },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_payment_record/export', {
-        ...this.queryParams
-      }, `jst_payment_record_${new Date().getTime()}.xlsx`)
+    voucherAuditLabel(value) {
+      return VOUCHER_AUDIT_MAP[value] || value || '--'
+    },
+    formatMoney(value) {
+      const n = Number(value || 0)
+      return '\u00A5' + (n / 100).toFixed(2)
     }
   }
 }
 </script>
+
+<style scoped>
+.payment-record-page {
+  background: #f6f8fb;
+  min-height: calc(100vh - 84px);
+}
+
+.page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  margin-bottom: 18px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.hero-eyebrow {
+  margin: 0 0 8px;
+  color: #2f6fec;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.page-hero h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.hero-desc {
+  margin: 8px 0 0;
+  color: #6f7b8f;
+}
+
+.query-panel {
+  padding: 16px 16px 0;
+  margin-bottom: 16px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.amount-strong {
+  font-weight: 700;
+}
+
+.drawer-body {
+  padding: 0 24px 24px;
+}
+
+.mobile-list {
+  min-height: 180px;
+}
+
+.mobile-card {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.mobile-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mobile-title {
+  font-weight: 700;
+  color: #172033;
+}
+
+.mobile-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #7a8495;
+}
+
+.mobile-amount {
+  margin-top: 12px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.mobile-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #7a8495;
+}
+
+.mobile-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .payment-record-page {
+    padding: 12px;
+  }
+
+  .page-hero {
+    display: block;
+    padding: 18px;
+  }
+
+  .page-hero .el-button {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 16px;
+  }
+
+  .page-hero h2 {
+    font-size: 20px;
+  }
+
+  .query-panel {
+    padding-bottom: 8px;
+  }
+
+  .query-panel ::v-deep .el-form-item {
+    display: block;
+    margin-right: 0;
+  }
+
+  .query-panel ::v-deep .el-form-item__content,
+  .query-panel ::v-deep .el-select,
+  .query-panel ::v-deep .el-input,
+  .query-panel ::v-deep .el-date-editor {
+    width: 100%;
+  }
+
+  .mobile-actions .el-button {
+    min-height: 44px;
+  }
+}
+</style>

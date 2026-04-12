@@ -1,69 +1,15 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="持有者业务ID" prop="ownerId">
-        <el-input
-          v-model="queryParams.ownerId"
-          placeholder="请输入持有者业务ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
+      <el-form-item label="持有者类型" prop="ownerType">
+        <el-select v-model="queryParams.ownerType" placeholder="全部" clearable>
+          <el-option label="学生" value="student" />
+          <el-option label="渠道" value="channel" />
+          <el-option label="用户" value="user" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="可用积分" prop="availablePoints">
-        <el-input
-          v-model="queryParams.availablePoints"
-          placeholder="请输入可用积分"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="冻结积分" prop="frozenPoints">
-        <el-input
-          v-model="queryParams.frozenPoints"
-          placeholder="请输入冻结积分"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="累计获取" prop="totalEarn">
-        <el-input
-          v-model="queryParams.totalEarn"
-          placeholder="请输入累计获取"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="累计消耗" prop="totalSpend">
-        <el-input
-          v-model="queryParams.totalSpend"
-          placeholder="请输入累计消耗"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="成长值" prop="growthValue">
-        <el-input
-          v-model="queryParams.growthValue"
-          placeholder="请输入成长值"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="当前等级ID" prop="currentLevelId">
-        <el-input
-          v-model="queryParams.currentLevelId"
-          placeholder="请输入当前等级ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="乐观锁版本号" prop="version">
-        <el-input
-          v-model="queryParams.version"
-          placeholder="请输入乐观锁版本号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="持有者ID" prop="ownerId">
+        <el-input v-model="queryParams.ownerId" placeholder="请输入持有者ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -72,334 +18,259 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_points_account:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_points_account:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_points_account:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_points_account:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="jst_points_accountList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="账户ID" align="center" prop="accountId" />
-      <el-table-column label="持有者类型：student/channel" align="center" prop="ownerType" />
-      <el-table-column label="持有者业务ID" align="center" prop="ownerId" />
-      <el-table-column label="可用积分" align="center" prop="availablePoints" />
-      <el-table-column label="冻结积分" align="center" prop="frozenPoints" />
-      <el-table-column label="累计获取" align="center" prop="totalEarn" />
-      <el-table-column label="累计消耗" align="center" prop="totalSpend" />
-      <el-table-column label="成长值" align="center" prop="growthValue" />
-      <el-table-column label="当前等级ID" align="center" prop="currentLevelId" />
-      <el-table-column label="乐观锁版本号" align="center" prop="version" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_points_account:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_points_account:remove']"
-          >删除</el-button>
+    <div v-if="isMobile" v-loading="loading">
+      <div v-if="list.length" class="mobile-card-list">
+        <div v-for="row in list" :key="row.accountId" class="mobile-card">
+          <div class="mobile-card__head">
+            <span class="mobile-card__title">账户 #{{ row.accountId }}</span>
+            <el-tag size="mini" :type="ownerTypeTagType(row.ownerType)">{{ ownerTypeLabel(row.ownerType) }}</el-tag>
+          </div>
+          <div class="mobile-card__meta">
+            <span>持有者ID：{{ row.ownerId }}</span>
+            <span class="points-positive">可用 {{ row.availablePoints || 0 }}</span>
+            <span class="points-negative">冻结 {{ row.frozenPoints || 0 }}</span>
+            <span>等级ID：{{ row.currentLevelId || '--' }}</span>
+          </div>
+          <div class="mobile-card__actions">
+            <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无积分账户" />
+    </div>
+
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="账户ID" prop="accountId" width="90" />
+      <el-table-column label="持有者类型" width="110">
+        <template slot-scope="{ row }">
+          <el-tag size="small" :type="ownerTypeTagType(row.ownerType)">{{ ownerTypeLabel(row.ownerType) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="持有者ID" prop="ownerId" min-width="120" />
+      <el-table-column label="可用积分" min-width="100" align="right">
+        <template slot-scope="{ row }">
+          <span class="points-positive">{{ row.availablePoints || 0 }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="冻结积分" min-width="100" align="right">
+        <template slot-scope="{ row }">
+          <span class="points-negative">{{ row.frozenPoints || 0 }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="累计获取" prop="totalEarn" min-width="100" align="right" />
+      <el-table-column label="累计消耗" prop="totalSpend" min-width="100" align="right" />
+      <el-table-column label="成长值" prop="growthValue" min-width="100" align="right" />
+      <el-table-column label="当前等级ID" prop="currentLevelId" min-width="100" />
+      <el-table-column label="更新时间" min-width="160">
+        <template slot-scope="{ row }">{{ parseTime(row.updateTime) }}</template>
+      </el-table-column>
+      <el-table-column label="操作" fixed="right" width="90">
+        <template slot-scope="{ row }">
+          <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改积分账户对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="持有者业务ID" prop="ownerId">
-              <el-input v-model="form.ownerId" placeholder="请输入持有者业务ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="可用积分" prop="availablePoints">
-              <el-input v-model="form.availablePoints" placeholder="请输入可用积分" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="冻结积分" prop="frozenPoints">
-              <el-input v-model="form.frozenPoints" placeholder="请输入冻结积分" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="累计获取" prop="totalEarn">
-              <el-input v-model="form.totalEarn" placeholder="请输入累计获取" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="累计消耗" prop="totalSpend">
-              <el-input v-model="form.totalSpend" placeholder="请输入累计消耗" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="成长值" prop="growthValue">
-              <el-input v-model="form.growthValue" placeholder="请输入成长值" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="当前等级ID" prop="currentLevelId">
-              <el-input v-model="form.currentLevelId" placeholder="请输入当前等级ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="乐观锁版本号" prop="version">
-              <el-input v-model="form.version" placeholder="请输入乐观锁版本号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <el-drawer :title="'积分账户详情 #' + (detailData.accountId || '')" :visible.sync="detailVisible" :size="isMobile ? '100%' : '520px'" append-to-body>
+      <div class="detail-body">
+        <el-descriptions :column="1" border size="small">
+          <el-descriptions-item label="持有者">{{ ownerTypeLabel(detailData.ownerType) }} / {{ detailData.ownerId }}</el-descriptions-item>
+          <el-descriptions-item label="可用积分"><span class="points-positive">{{ detailData.availablePoints || 0 }}</span></el-descriptions-item>
+          <el-descriptions-item label="冻结积分"><span class="points-negative">{{ detailData.frozenPoints || 0 }}</span></el-descriptions-item>
+          <el-descriptions-item label="累计获取">{{ detailData.totalEarn || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="累计消耗">{{ detailData.totalSpend || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="成长值">{{ detailData.growthValue || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="当前等级ID">{{ detailData.currentLevelId || '--' }}</el-descriptions-item>
+        </el-descriptions>
+
+        <div class="drawer-block-title">最近流水</div>
+        <el-table v-loading="ledgerLoading" :data="ledgerList" size="mini" max-height="260">
+          <el-table-column label="时间" min-width="140">
+            <template slot-scope="{ row }">{{ parseTime(row.createTime) }}</template>
+          </el-table-column>
+          <el-table-column label="类型" min-width="110">
+            <template slot-scope="{ row }">{{ changeTypeLabel(row.changeType) }}</template>
+          </el-table-column>
+          <el-table-column label="变化" min-width="90" align="right">
+            <template slot-scope="{ row }">
+              <span :class="Number(row.pointsChange) >= 0 ? 'points-positive' : 'points-negative'">
+                {{ Number(row.pointsChange) >= 0 ? '+' : '' }}{{ row.pointsChange || 0 }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="余额" prop="balanceAfter" min-width="80" align="right" />
+        </el-table>
+        <el-empty v-if="!ledgerLoading && !ledgerList.length" :image-size="80" description="暂无流水" />
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_points_account, getJst_points_account, delJst_points_account, addJst_points_account, updateJst_points_account } from "@/api/jst/points/jst_points_account"
+import { parseTime } from '@/utils/ruoyi'
+import { listJst_points_account, getJst_points_account } from '@/api/jst/points/jst_points_account'
+import { listJst_points_ledger } from '@/api/jst/points/jst_points_ledger'
+
+const OWNER_TYPE_MAP = {
+  student: { label: '学生', tag: 'success' },
+  channel: { label: '渠道', tag: 'warning' },
+  user: { label: '用户', tag: 'info' }
+}
+
+const CHANGE_TYPE_MAP = {
+  earn: '获取',
+  spend: '消耗',
+  freeze: '冻结',
+  unfreeze: '解冻',
+  adjust: '调整',
+  rollback: '回滚',
+  aftersale_refund: '售后返还'
+}
 
 export default {
-  name: "Jst_points_account",
+  name: 'JstPointsAccount',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
+      loading: false,
       showSearch: true,
-      // 总条数
+      list: [],
       total: 0,
-      // 积分账户表格数据
-      jst_points_accountList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
         ownerType: null,
-        ownerId: null,
-        availablePoints: null,
-        frozenPoints: null,
-        totalEarn: null,
-        totalSpend: null,
-        growthValue: null,
-        currentLevelId: null,
-        version: null,
+        ownerId: null
       },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        ownerType: [
-          { required: true, message: "持有者类型：student/channel不能为空", trigger: "change" }
-        ],
-        ownerId: [
-          { required: true, message: "持有者业务ID不能为空", trigger: "blur" }
-        ],
-        availablePoints: [
-          { required: true, message: "可用积分不能为空", trigger: "blur" }
-        ],
-        frozenPoints: [
-          { required: true, message: "冻结积分不能为空", trigger: "blur" }
-        ],
-        totalEarn: [
-          { required: true, message: "累计获取不能为空", trigger: "blur" }
-        ],
-        totalSpend: [
-          { required: true, message: "累计消耗不能为空", trigger: "blur" }
-        ],
-        growthValue: [
-          { required: true, message: "成长值不能为空", trigger: "blur" }
-        ],
-        version: [
-          { required: true, message: "乐观锁版本号不能为空", trigger: "blur" }
-        ],
-      }
+      detailVisible: false,
+      detailData: {},
+      ledgerLoading: false,
+      ledgerList: []
+    }
+  },
+  computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     }
   },
   created() {
     this.getList()
   },
   methods: {
-    /** 查询积分账户列表 */
+    parseTime,
+    ownerTypeLabel(ownerType) {
+      return (OWNER_TYPE_MAP[ownerType] || {}).label || ownerType || '--'
+    },
+    ownerTypeTagType(ownerType) {
+      return (OWNER_TYPE_MAP[ownerType] || {}).tag || 'info'
+    },
+    changeTypeLabel(changeType) {
+      return CHANGE_TYPE_MAP[changeType] || changeType || '--'
+    },
     getList() {
       this.loading = true
-      listJst_points_account(this.queryParams).then(response => {
-        this.jst_points_accountList = response.rows
-        this.total = response.total
+      listJst_points_account(this.queryParams).then(res => {
+        this.list = res.rows || []
+        this.total = res.total || 0
+      }).finally(() => {
         this.loading = false
       })
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        accountId: null,
-        ownerType: null,
-        ownerId: null,
-        availablePoints: null,
-        frozenPoints: null,
-        totalEarn: null,
-        totalSpend: null,
-        growthValue: null,
-        currentLevelId: null,
-        version: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
+      this.$refs.queryForm && this.$refs.queryForm.resetFields()
       this.handleQuery()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.accountId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加积分账户"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const accountId = row.accountId || this.ids
-      getJst_points_account(accountId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改积分账户"
+    handleDetail(row) {
+      getJst_points_account(row.accountId).then(res => {
+        this.detailData = res.data || res || row
+        this.detailVisible = true
+        this.getLedgerList(this.detailData.accountId)
       })
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.accountId != null) {
-            updateJst_points_account(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_points_account(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
+    getLedgerList(accountId) {
+      this.ledgerLoading = true
+      listJst_points_ledger({
+        pageNum: 1,
+        pageSize: 20,
+        accountId: accountId
+      }).then(res => {
+        this.ledgerList = res.rows || []
+      }).finally(() => {
+        this.ledgerLoading = false
       })
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const accountIds = row.accountId || this.ids
-      this.$modal.confirm('是否确认删除积分账户编号为"' + accountIds + '"的数据项？').then(function() {
-        return delJst_points_account(accountIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_points_account/export', {
-        ...this.queryParams
-      }, `jst_points_account_${new Date().getTime()}.xlsx`)
     }
   }
 }
 </script>
+
+<style scoped>
+.points-positive {
+  color: #67c23a;
+  font-weight: 600;
+}
+
+.points-negative {
+  color: #f56c6c;
+  font-weight: 600;
+}
+
+.detail-body {
+  padding: 0 16px 16px;
+}
+
+.drawer-block-title {
+  margin: 14px 0 8px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.mobile-card-list {
+  padding: 0 4px;
+}
+
+.mobile-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.mobile-card__title {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65%;
+}
+
+.mobile-card__meta {
+  font-size: 12px;
+  color: #909399;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.mobile-card__actions {
+  display: flex;
+  gap: 6px;
+}
+</style>

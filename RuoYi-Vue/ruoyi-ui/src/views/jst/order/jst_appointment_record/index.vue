@@ -1,443 +1,481 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="预约号" prop="appointmentNo">
+  <div class="app-container appointment-record-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">预约中心</p>
+        <h2>个人预约记录管理</h2>
+        <p class="hero-desc">支持按预约人/赛事智能检索，展示预约状态与核销状态，支持详情抽屉查看。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="88px" class="query-panel">
+      <el-form-item label="预约单号">
         <el-input
           v-model="queryParams.appointmentNo"
-          placeholder="请输入预约号"
+          placeholder="请输入预约单号"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="关联活动" prop="contestId">
+      <el-form-item label="预约人">
         <el-input
-          v-model="queryParams.contestId"
-          placeholder="请输入关联活动"
+          v-model="queryParams.participantKeyword"
+          placeholder="姓名/编号/ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="用户ID" prop="userId">
+      <el-form-item label="赛事">
         <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入用户ID"
+          v-model="queryParams.contestKeyword"
+          placeholder="赛事名/赛事ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="参赛人ID" prop="participantId">
-        <el-input
-          v-model="queryParams.participantId"
-          placeholder="请输入参赛人ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="预约状态">
+        <el-select v-model="queryParams.mainStatus" placeholder="全部" clearable>
+          <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="锁定渠道方" prop="channelId">
-        <el-input
-          v-model="queryParams.channelId"
-          placeholder="请输入锁定渠道方"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="关联团队主记录" prop="teamAppointmentId">
-        <el-input
-          v-model="queryParams.teamAppointmentId"
-          placeholder="请输入关联团队主记录"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="预约日期" prop="appointmentDate">
-        <el-date-picker clearable
-          v-model="queryParams.appointmentDate"
-          type="date"
+      <el-form-item label="预约日期">
+        <el-date-picker
+          v-model="dateRange"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始"
+          end-placeholder="结束"
           value-format="yyyy-MM-dd"
-          placeholder="请选择预约日期">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="场次/时段" prop="sessionCode">
-        <el-input
-          v-model="queryParams.sessionCode"
-          placeholder="请输入场次/时段"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="关联订单" prop="orderId">
-        <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入关联订单"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="主二维码URL" prop="qrCode">
-        <el-input
-          v-model="queryParams.qrCode"
-          placeholder="请输入主二维码URL"
-          clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_appointment_record:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_appointment_record:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_appointment_record:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_appointment_record:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
+    <div v-if="isMobile" v-loading="loading" class="mobile-list">
+      <div v-if="list.length">
+        <div v-for="row in list" :key="row.appointmentId" class="mobile-card">
+          <div class="mobile-card-top">
+            <div>
+              <div class="mobile-title">{{ row.appointmentNo || '--' }}</div>
+              <div class="mobile-sub">{{ contestText(row) }}</div>
+            </div>
+            <el-tag size="small" :type="statusType(row.mainStatus)">{{ statusLabel(row.mainStatus) }}</el-tag>
+          </div>
+          <div class="mobile-info-row">
+            <span>预约人 {{ participantText(row) }}</span>
+            <span>{{ row.appointmentDate || '--' }}</span>
+          </div>
+          <div class="mobile-info-row">
+            <span>核销状态</span>
+            <el-tag size="mini" :type="writeoffMeta(row).type">{{ writeoffMeta(row).label }}</el-tag>
+          </div>
+          <div class="mobile-actions">
+            <el-button type="text" @click="openDetail(row)">查看详情</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无预约记录" :image-size="96" />
+    </div>
 
-    <el-table v-loading="loading" :data="jst_appointment_recordList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="预约ID" align="center" prop="appointmentId" />
-      <el-table-column label="预约号" align="center" prop="appointmentNo" />
-      <el-table-column label="关联活动" align="center" prop="contestId" />
-      <el-table-column label="用户ID" align="center" prop="userId" />
-      <el-table-column label="参赛人ID" align="center" prop="participantId" />
-      <el-table-column label="锁定渠道方" align="center" prop="channelId" />
-      <el-table-column label="类型：individual/team" align="center" prop="appointmentType" />
-      <el-table-column label="关联团队主记录" align="center" prop="teamAppointmentId" />
-      <el-table-column label="预约日期" align="center" prop="appointmentDate" width="180">
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="预约单号" prop="appointmentNo" min-width="170" show-overflow-tooltip />
+      <el-table-column label="赛事" min-width="180" show-overflow-tooltip>
+        <template slot-scope="scope">{{ contestText(scope.row) }}</template>
+      </el-table-column>
+      <el-table-column label="预约人" min-width="140" show-overflow-tooltip>
+        <template slot-scope="scope">{{ participantText(scope.row) }}</template>
+      </el-table-column>
+      <el-table-column label="预约类型" min-width="110">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.appointmentDate, '{y}-{m}-{d}') }}</span>
+          <el-tag size="small" type="info">{{ appointmentTypeLabel(scope.row.appointmentType) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="场次/时段" align="center" prop="sessionCode" />
-      <el-table-column label="关联订单" align="center" prop="orderId" />
-      <el-table-column label="主状态：unbooked/booked/partial_writeoff/fully_writeoff/partial_writeoff_ended/cancelled/expired/no_show" align="center" prop="mainStatus" />
-      <el-table-column label="主二维码URL" align="center" prop="qrCode" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="预约日期" prop="appointmentDate" min-width="120" />
+      <el-table-column label="场次/时段" prop="sessionCode" min-width="120" show-overflow-tooltip />
+      <el-table-column label="预约状态" min-width="120">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_appointment_record:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_appointment_record:remove']"
-          >删除</el-button>
+          <el-tag size="small" :type="statusType(scope.row.mainStatus)">{{ statusLabel(scope.row.mainStatus) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="核销状态" min-width="120">
+        <template slot-scope="scope">
+          <el-tag size="small" :type="writeoffMeta(scope.row).type">{{ writeoffMeta(scope.row).label }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="关联订单ID" prop="orderId" min-width="120" />
+      <el-table-column label="操作" width="120" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
 
-    <!-- 添加或修改个人预约记录对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="预约号" prop="appointmentNo">
-              <el-input v-model="form.appointmentNo" placeholder="请输入预约号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="关联活动" prop="contestId">
-              <el-input v-model="form.contestId" placeholder="请输入关联活动" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="用户ID" prop="userId">
-              <el-input v-model="form.userId" placeholder="请输入用户ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="参赛人ID" prop="participantId">
-              <el-input v-model="form.participantId" placeholder="请输入参赛人ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="锁定渠道方" prop="channelId">
-              <el-input v-model="form.channelId" placeholder="请输入锁定渠道方" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="关联团队主记录" prop="teamAppointmentId">
-              <el-input v-model="form.teamAppointmentId" placeholder="请输入关联团队主记录" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="预约日期" prop="appointmentDate">
-              <el-date-picker clearable
-                v-model="form.appointmentDate"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择预约日期">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="场次/时段" prop="sessionCode">
-              <el-input v-model="form.sessionCode" placeholder="请输入场次/时段" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="关联订单" prop="orderId">
-              <el-input v-model="form.orderId" placeholder="请输入关联订单" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="主二维码URL" prop="qrCode">
-              <el-input v-model="form.qrCode" placeholder="请输入主二维码URL" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <el-drawer :visible.sync="detailVisible" :size="isMobile ? '100%' : '700px'" title="预约详情" append-to-body>
+      <div v-loading="detailLoading" class="drawer-body">
+        <el-descriptions v-if="detail" :column="isMobile ? 1 : 2" border>
+          <el-descriptions-item label="预约ID">{{ detail.appointmentId }}</el-descriptions-item>
+          <el-descriptions-item label="预约单号">{{ detail.appointmentNo || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="赛事">{{ contestText(detail) }}</el-descriptions-item>
+          <el-descriptions-item label="预约人">{{ participantText(detail) }}</el-descriptions-item>
+          <el-descriptions-item label="预约类型">{{ appointmentTypeLabel(detail.appointmentType) }}</el-descriptions-item>
+          <el-descriptions-item label="预约日期">{{ detail.appointmentDate || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="场次/时段">{{ detail.sessionCode || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="关联团队ID">{{ detail.teamAppointmentId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="关联订单ID">{{ detail.orderId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="渠道ID">{{ detail.channelId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="预约状态">
+            <el-tag size="small" :type="statusType(detail.mainStatus)">{{ statusLabel(detail.mainStatus) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="核销状态">
+            <el-tag size="small" :type="writeoffMeta(detail).type">{{ writeoffMeta(detail).label }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="二维码URL" :span="isMobile ? 1 : 2">{{ detail.qrCode || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ parseTime(detail.createTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="更新时间">{{ parseTime(detail.updateTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="备注" :span="isMobile ? 1 : 2">{{ detail.remark || '--' }}</el-descriptions-item>
+        </el-descriptions>
+        <el-empty v-else description="暂无详情数据" :image-size="96" />
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_appointment_record, getJst_appointment_record, delJst_appointment_record, addJst_appointment_record, updateJst_appointment_record } from "@/api/jst/order/jst_appointment_record"
+import { listJst_appointment_record, getJst_appointment_record } from '@/api/jst/order/jst_appointment_record'
+
+const APPOINTMENT_STATUS_MAP = {
+  unbooked: { label: '待预约', type: 'info' },
+  booked: { label: '已预约', type: 'primary' },
+  partial_writeoff: { label: '部分核销中', type: 'warning' },
+  fully_writeoff: { label: '已全部核销', type: 'success' },
+  partial_writeoff_ended: { label: '部分核销结束', type: 'warning' },
+  cancelled: { label: '已取消', type: 'info' },
+  expired: { label: '已过期', type: 'info' },
+  no_show: { label: '未到场', type: 'danger' }
+}
+
+const APPOINTMENT_TYPE_MAP = {
+  individual: '个人预约',
+  team: '团队预约'
+}
 
 export default {
-  name: "Jst_appointment_record",
+  name: 'JstAppointmentRecordManage',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
+      loading: false,
+      detailLoading: false,
+      isMobile: false,
+      list: [],
       total: 0,
-      // 个人预约记录表格数据
-      jst_appointment_recordList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
+      dateRange: [],
+      detailVisible: false,
+      detail: null,
+      lastAutoOpenKey: '',
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        appointmentNo: null,
-        contestId: null,
-        userId: null,
-        participantId: null,
-        channelId: null,
-        appointmentType: null,
-        teamAppointmentId: null,
-        appointmentDate: null,
-        sessionCode: null,
-        orderId: null,
-        mainStatus: null,
-        qrCode: null,
+        appointmentNo: '',
+        participantKeyword: '',
+        contestKeyword: '',
+        mainStatus: undefined
       },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        appointmentNo: [
-          { required: true, message: "预约号不能为空", trigger: "blur" }
-        ],
-        contestId: [
-          { required: true, message: "关联活动不能为空", trigger: "blur" }
-        ],
-        participantId: [
-          { required: true, message: "参赛人ID不能为空", trigger: "blur" }
-        ],
-        appointmentType: [
-          { required: true, message: "类型：individual/team不能为空", trigger: "change" }
-        ],
-        appointmentDate: [
-          { required: true, message: "预约日期不能为空", trigger: "blur" }
-        ],
-        mainStatus: [
-          { required: true, message: "主状态：unbooked/booked/partial_writeoff/fully_writeoff/partial_writeoff_ended/cancelled/expired/no_show不能为空", trigger: "change" }
-        ],
-      }
+      statusOptions: Object.keys(APPOINTMENT_STATUS_MAP).map(key => ({
+        value: key,
+        label: APPOINTMENT_STATUS_MAP[key].label
+      }))
+    }
+  },
+  watch: {
+    '$route.query': {
+      handler() {
+        this.tryAutoOpenFromRoute()
+      },
+      deep: true
     }
   },
   created() {
+    this.updateViewport()
+    window.addEventListener('resize', this.updateViewport)
     this.getList()
   },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.updateViewport)
+  },
   methods: {
-    /** 查询个人预约记录列表 */
-    getList() {
+    updateViewport() {
+      this.isMobile = window.innerWidth <= 768
+    },
+    isNumericKeyword(value) {
+      return /^\d+$/.test(String(value || '').trim())
+    },
+    async getList() {
       this.loading = true
-      listJst_appointment_record(this.queryParams).then(response => {
-        this.jst_appointment_recordList = response.rows
-        this.total = response.total
+      try {
+        const participantKeyword = String(this.queryParams.participantKeyword || '').trim()
+        const contestKeyword = String(this.queryParams.contestKeyword || '').trim()
+        const params = {
+          pageNum: this.queryParams.pageNum,
+          pageSize: this.queryParams.pageSize,
+          appointmentNo: this.queryParams.appointmentNo || undefined,
+          mainStatus: this.queryParams.mainStatus || undefined
+        }
+        if (this.isNumericKeyword(participantKeyword)) {
+          params.participantId = Number(participantKeyword)
+        }
+        if (this.isNumericKeyword(contestKeyword)) {
+          params.contestId = Number(contestKeyword)
+        }
+        if (this.dateRange && this.dateRange.length === 2) {
+          params.beginAppointmentDate = this.dateRange[0]
+          params.endAppointmentDate = this.dateRange[1]
+        }
+        const res = await listJst_appointment_record(params)
+        const rows = res.rows || []
+        const localParticipant = participantKeyword && !this.isNumericKeyword(participantKeyword)
+        const localContest = contestKeyword && !this.isNumericKeyword(contestKeyword)
+        const localDate = this.dateRange && this.dateRange.length === 2
+        if (localParticipant || localContest || localDate) {
+          const participantLower = participantKeyword.toLowerCase()
+          const contestLower = contestKeyword.toLowerCase()
+          this.list = rows.filter(row => {
+            const participantMatch = !localParticipant || this.participantText(row).toLowerCase().indexOf(participantLower) > -1
+            const contestMatch = !localContest || this.contestText(row).toLowerCase().indexOf(contestLower) > -1
+            const dateMatch = this.matchDateRange(row.appointmentDate, this.dateRange)
+            return participantMatch && contestMatch && dateMatch
+          })
+          this.total = this.list.length
+        } else {
+          this.list = rows
+          this.total = res.total || 0
+        }
+      } finally {
         this.loading = false
-      })
-    },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        appointmentId: null,
-        appointmentNo: null,
-        contestId: null,
-        userId: null,
-        participantId: null,
-        channelId: null,
-        appointmentType: null,
-        teamAppointmentId: null,
-        appointmentDate: null,
-        sessionCode: null,
-        orderId: null,
-        mainStatus: null,
-        qrCode: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
+        this.tryAutoOpenFromRoute()
       }
-      this.resetForm("form")
     },
-    /** 搜索按钮操作 */
+    matchDateRange(value, range) {
+      if (!range || range.length !== 2) return true
+      if (!value) return false
+      const begin = new Date(range[0] + ' 00:00:00').getTime()
+      const end = new Date(range[1] + ' 23:59:59').getTime()
+      const current = new Date(value + ' 12:00:00').getTime()
+      return current >= begin && current <= end
+    },
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
+      this.dateRange = []
+      this.queryParams = {
+        pageNum: 1,
+        pageSize: 10,
+        appointmentNo: '',
+        participantKeyword: '',
+        contestKeyword: '',
+        mainStatus: undefined
+      }
+      this.getList()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.appointmentId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
+    async openDetail(row) {
+      this.detailVisible = true
+      this.detailLoading = true
+      try {
+        const res = await getJst_appointment_record(row.appointmentId)
+        this.detail = res.data || null
+      } finally {
+        this.detailLoading = false
+      }
     },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加个人预约记录"
+    tryAutoOpenFromRoute() {
+      const query = this.$route.query || {}
+      const autoOpen = query.autoOpen
+      const appointmentId = query.appointmentId
+      if (autoOpen !== '1' || !appointmentId) return
+      const key = autoOpen + '-' + appointmentId
+      if (this.lastAutoOpenKey === key) return
+      this.lastAutoOpenKey = key
+      const id = Number(appointmentId)
+      if (!id) return
+      this.openDetail({ appointmentId: id })
     },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const appointmentId = row.appointmentId || this.ids
-      getJst_appointment_record(appointmentId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改个人预约记录"
-      })
+    contestText(row) {
+      return row.contestName || row.contestTitle || (row.contestId ? '赛事 #' + row.contestId : '--')
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.appointmentId != null) {
-            updateJst_appointment_record(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_appointment_record(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
-      })
+    participantText(row) {
+      return row.participantName || row.nameSnapshot || (row.participantId ? 'ID ' + row.participantId : '--')
     },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const appointmentIds = row.appointmentId || this.ids
-      this.$modal.confirm('是否确认删除个人预约记录编号为"' + appointmentIds + '"的数据项？').then(function() {
-        return delJst_appointment_record(appointmentIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
+    statusLabel(value) {
+      return (APPOINTMENT_STATUS_MAP[value] && APPOINTMENT_STATUS_MAP[value].label) || value || '--'
     },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_appointment_record/export', {
-        ...this.queryParams
-      }, `jst_appointment_record_${new Date().getTime()}.xlsx`)
+    statusType(value) {
+      return (APPOINTMENT_STATUS_MAP[value] && APPOINTMENT_STATUS_MAP[value].type) || 'info'
+    },
+    appointmentTypeLabel(value) {
+      return APPOINTMENT_TYPE_MAP[value] || value || '--'
+    },
+    writeoffMeta(row) {
+      const status = row.mainStatus
+      if (status === 'fully_writeoff') {
+        return { label: '已全部核销', type: 'success' }
+      }
+      if (status === 'partial_writeoff' || status === 'partial_writeoff_ended') {
+        return { label: '部分核销', type: 'warning' }
+      }
+      if (status === 'no_show' || status === 'expired' || status === 'cancelled') {
+        return { label: '未核销', type: 'info' }
+      }
+      return { label: '待核销', type: 'info' }
     }
   }
 }
 </script>
+
+<style scoped>
+.appointment-record-page {
+  background: #f6f8fb;
+  min-height: calc(100vh - 84px);
+}
+
+.page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  margin-bottom: 18px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.hero-eyebrow {
+  margin: 0 0 8px;
+  color: #2f6fec;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.page-hero h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.hero-desc {
+  margin: 8px 0 0;
+  color: #6f7b8f;
+}
+
+.query-panel {
+  padding: 16px 16px 0;
+  margin-bottom: 16px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.drawer-body {
+  padding: 0 24px 24px;
+}
+
+.mobile-list {
+  min-height: 180px;
+}
+
+.mobile-card {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.mobile-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mobile-title {
+  font-weight: 700;
+  color: #172033;
+}
+
+.mobile-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #7a8495;
+}
+
+.mobile-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #7a8495;
+}
+
+.mobile-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .appointment-record-page {
+    padding: 12px;
+  }
+
+  .page-hero {
+    display: block;
+    padding: 18px;
+  }
+
+  .page-hero .el-button {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 16px;
+  }
+
+  .page-hero h2 {
+    font-size: 20px;
+  }
+
+  .query-panel {
+    padding-bottom: 8px;
+  }
+
+  .query-panel ::v-deep .el-form-item {
+    display: block;
+    margin-right: 0;
+  }
+
+  .query-panel ::v-deep .el-form-item__content,
+  .query-panel ::v-deep .el-select,
+  .query-panel ::v-deep .el-input,
+  .query-panel ::v-deep .el-date-editor {
+    width: 100%;
+  }
+
+  .mobile-actions .el-button {
+    min-height: 44px;
+  }
+}
+</style>

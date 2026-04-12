@@ -121,15 +121,8 @@
             <view class="my-page__cell" @tap="navigateChannelRebate"><view class="my-page__cell-icon my-page__cell-icon--gold">💰</view><view class="my-page__cell-body"><text class="my-page__cell-title">返点中心</text></view><text class="my-page__cell-arrow">›</text></view>
             <view class="my-page__cell" @tap="navigateChannelWithdrawList"><view class="my-page__cell-icon my-page__cell-icon--blue">🏦</view><view class="my-page__cell-body"><text class="my-page__cell-title">提现结算</text></view><text class="my-page__cell-arrow">›</text></view>
             <view class="my-page__cell" @tap="navigateChannelData"><view class="my-page__cell-icon my-page__cell-icon--purple">📊</view><view class="my-page__cell-body"><text class="my-page__cell-title">经营分析</text></view><text class="my-page__cell-arrow">›</text></view>
-          </view>
-        </view>
-
-        <!-- 财务与结算 -->
-        <view class="my-page__section">
-          <text class="my-page__section-title">财务与结算</text>
-          <view class="my-page__card">
-            <view class="my-page__cell my-page__cell--disabled"><view class="my-page__cell-icon my-page__cell-icon--gray">📋</view><view class="my-page__cell-body"><text class="my-page__cell-title">合同中心</text></view><text class="my-page__cell-soon">即将上线</text></view>
-            <view class="my-page__cell my-page__cell--disabled"><view class="my-page__cell-icon my-page__cell-icon--gray">🧾</view><view class="my-page__cell-body"><text class="my-page__cell-title">开票中心</text></view><text class="my-page__cell-soon">即将上线</text></view>
+            <view class="my-page__cell" @tap="navigateContractList"><view class="my-page__cell-icon my-page__cell-icon--blue">📄</view><view class="my-page__cell-body"><text class="my-page__cell-title">合同中心</text></view><text class="my-page__cell-arrow">›</text></view>
+            <view class="my-page__cell" @tap="navigateInvoiceList"><view class="my-page__cell-icon my-page__cell-icon--orange">🧾</view><view class="my-page__cell-body"><text class="my-page__cell-title">开票中心</text></view><text class="my-page__cell-arrow">›</text></view>
           </view>
         </view>
 
@@ -137,8 +130,8 @@
         <view class="my-page__section">
           <view class="my-page__card">
             <view class="my-page__cell" @tap="navigateChannelApplyStatus"><view class="my-page__cell-icon my-page__cell-icon--teal">✅</view><view class="my-page__cell-body"><text class="my-page__cell-title">认证信息</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell my-page__cell--disabled"><view class="my-page__cell-icon my-page__cell-icon--blue">💬</view><view class="my-page__cell-body"><text class="my-page__cell-title">客服与帮助</text></view><text class="my-page__cell-soon">即将上线</text></view>
-            <view class="my-page__cell my-page__cell--disabled"><view class="my-page__cell-icon my-page__cell-icon--gray">⚙️</view><view class="my-page__cell-body"><text class="my-page__cell-title">设置</text></view><text class="my-page__cell-soon">即将上线</text></view>
+            <view class="my-page__cell" @tap="navigateHelp"><view class="my-page__cell-icon my-page__cell-icon--blue">💬</view><view class="my-page__cell-body"><text class="my-page__cell-title">客服与帮助</text></view><text class="my-page__cell-arrow">›</text></view>
+            <view class="my-page__cell" @tap="navigateSettings"><view class="my-page__cell-icon my-page__cell-icon--gray">⚙️</view><view class="my-page__cell-body"><text class="my-page__cell-title">设置</text></view><text class="my-page__cell-arrow">›</text></view>
           </view>
         </view>
       </template>
@@ -210,9 +203,8 @@
             <view class="my-page__cell" @tap="navigateParticipant"><view class="my-page__cell-icon my-page__cell-icon--orange">📁</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的档案</text><text class="my-page__cell-desc">参赛人信息管理</text></view><text class="my-page__cell-arrow">›</text></view>
             <view class="my-page__cell" @tap="navigateAddressList"><view class="my-page__cell-icon my-page__cell-icon--gray">📍</view><view class="my-page__cell-body"><text class="my-page__cell-title">收货地址</text><text class="my-page__cell-desc">地址管理</text></view><text class="my-page__cell-arrow">›</text></view>
             <view class="my-page__cell" @tap="navigateAppointmentList"><view class="my-page__cell-icon my-page__cell-icon--purple">📅</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的预约</text><text class="my-page__cell-desc">个人预约记录</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell my-page__cell--disabled"><view class="my-page__cell-icon my-page__cell-icon--blue">💬</view><view class="my-page__cell-body"><text class="my-page__cell-title">客服与帮助</text><text class="my-page__cell-desc">常见问题 & 在线咨询</text></view><text class="my-page__cell-soon">即将上线</text></view>
+            <view class="my-page__cell" @tap="navigateHelp"><view class="my-page__cell-icon my-page__cell-icon--blue">💬</view><view class="my-page__cell-body"><text class="my-page__cell-title">客服与帮助</text><text class="my-page__cell-desc">常见问题 & 在线咨询</text></view><text class="my-page__cell-arrow">›</text></view>
             <view class="my-page__cell" @tap="navigateSettings"><view class="my-page__cell-icon my-page__cell-icon--gray">⚙️</view><view class="my-page__cell-body"><text class="my-page__cell-title">设置</text><text class="my-page__cell-desc">消息提醒 & 账号安全</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell my-page__cell--disabled"><view class="my-page__cell-icon my-page__cell-icon--brand">ℹ️</view><view class="my-page__cell-body"><text class="my-page__cell-title">关于竞赛通</text><text class="my-page__cell-desc">版本 v4.1</text></view><text class="my-page__cell-soon">即将上线</text></view>
           </view>
         </view>
       </template>
@@ -230,6 +222,7 @@
 
 <script>
 import { useUserStore } from '@/store/user'
+import { pinia } from '@/store/index'
 import JstLoading from '@/components/jst-loading/jst-loading.vue'
 // [visual-effect]
 import { countUp } from '@/utils/visual-effects'
@@ -249,7 +242,7 @@ export default {
   computed: {
     // 渠道方视角: userInfo.userType === 'channel' 或 roles 包含 jst_channel
     isChannelUser() {
-      const store = useUserStore()
+      const store = useUserStore(pinia)
       const info = store.userInfo || {}
       if (info.userType === 'channel') return true
       const roles = store.roles || []
@@ -257,13 +250,13 @@ export default {
     },
     // POLISH-D: 赛事方/平台运营权限, 用于扫码核销入口
     isPartnerOrOp() {
-      const store = useUserStore()
+      const store = useUserStore(pinia)
       const roles = store.roles || []
       return Array.isArray(roles) && (roles.includes('jst_partner') || roles.includes('jst_platform_op'))
     },
     // 渠道认证状态图标
     channelAuthIcon() {
-      const store = useUserStore()
+      const store = useUserStore(pinia)
       const info = store.userInfo || {}
       if (info.channelAuthStatus === 'approved') return '✅'
       if (info.channelAuthStatus === 'pending') return '⏳'
@@ -272,7 +265,7 @@ export default {
     },
     // 渠道认证状态文字
     channelAuthText() {
-      const store = useUserStore()
+      const store = useUserStore(pinia)
       const info = store.userInfo || {}
       if (info.channelAuthStatus === 'approved') return '已通过认证'
       if (info.channelAuthStatus === 'pending') return '审核中'
@@ -299,14 +292,14 @@ export default {
   },
   // [visual-effect] end
   methods: {
-    ensureLogin() { const userStore = useUserStore(); if (!userStore.token) uni.reLaunch({ url: '/pages/login/login' }) },
+    ensureLogin() { const userStore = useUserStore(pinia); if (!userStore.token) uni.reLaunch({ url: '/pages/login/login' }) },
     // 初始化默认视角: 渠道用户默认渠道方视角
     initView() { if (this.isChannelUser) { this.currentView = 'channel' } },
     // 切换视角
     switchView(v) { this.currentView = v },
     navigateChannelApplyStatus() { uni.navigateTo({ url: '/pages-sub/channel/apply-status' }) },
     async loadProfile() {
-      const userStore = useUserStore(); if (!userStore.token) return; this.pageLoading = true
+      const userStore = useUserStore(pinia); if (!userStore.token) return; this.pageLoading = true
       try {
         const profile = await userStore.fetchProfile(); this.profile = this.normalizeProfile(profile || {})
         // [visual-effect] start
@@ -341,6 +334,8 @@ export default {
     navigateChannelStudents() { uni.navigateTo({ url: '/pages-sub/channel/students' }) },
     navigateChannelOrders() { uni.navigateTo({ url: '/pages-sub/channel/orders' }) },
     navigateChannelData() { uni.navigateTo({ url: '/pages-sub/channel/data' }) },
+    navigateContractList() { uni.navigateTo({ url: '/pages-sub/channel/contract-list' }) },
+    navigateInvoiceList() { uni.navigateTo({ url: '/pages-sub/channel/invoice-list' }) },
     navigateAppointmentList() { uni.navigateTo({ url: '/pages-sub/appointment/my-list' }) },
     navigateMall() { uni.navigateTo({ url: '/pages-sub/mall/list' }) },
     navigatePointsCenter() { uni.navigateTo({ url: '/pages-sub/points/center' }) },
@@ -353,8 +348,9 @@ export default {
     navigateMyScore() { uni.navigateTo({ url: '/pages-sub/my/score' }) },
     navigateMyCert() { uni.navigateTo({ url: '/pages-sub/my/cert' }) },
     navigateMessage() { uni.navigateTo({ url: '/pages-sub/my/message' }) },
+    navigateHelp() { uni.navigateTo({ url: '/pages-sub/public/help' }) },
     navigateSettings() { uni.navigateTo({ url: '/pages-sub/my/settings' }) },
-    handleLogout() { uni.showModal({ title: '退出登录', content: '确认退出当前账号？', success: async (res) => { if (!res.confirm) return; const userStore = useUserStore(); await userStore.doLogout(); uni.reLaunch({ url: '/pages/login/login' }) } }) }
+    handleLogout() { uni.showModal({ title: '退出登录', content: '确认退出当前账号？', success: async (res) => { if (!res.confirm) return; const userStore = useUserStore(pinia); await userStore.doLogout(); uni.reLaunch({ url: '/pages/login/login' }) } }) }
   }
 }
 </script>

@@ -1,364 +1,206 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="工单号" prop="caseNo">
-        <el-input
-          v-model="queryParams.caseNo"
-          placeholder="请输入工单号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+  <div class="app-container enhanced-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">风控中心</p>
+        <h2>风控案例</h2>
+        <p class="hero-desc">查看风控工单，按案例号、状态、处理人筛选，查看处理时间线。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
+      <el-form-item label="案例号" prop="caseNo">
+        <el-input v-model="queryParams.caseNo" placeholder="请输入案例号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="关联预警" prop="alertId">
-        <el-input
-          v-model="queryParams.alertId"
-          placeholder="请输入关联预警"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="全部" clearable>
+          <el-option v-for="s in statusOptions" :key="s.value" :label="s.label" :value="s.value" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="处理人" prop="assigneeId">
-        <el-input
-          v-model="queryParams.assigneeId"
-          placeholder="请输入处理人"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="处理结论" prop="conclusion">
-        <el-input
-          v-model="queryParams.conclusion"
-          placeholder="请输入处理结论"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="复核人" prop="reviewerId">
-        <el-input
-          v-model="queryParams.reviewerId"
-          placeholder="请输入复核人"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="关闭时间" prop="closeTime">
-        <el-date-picker clearable
-          v-model="queryParams.closeTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择关闭时间">
-        </el-date-picker>
+      <el-form-item label="处理人ID" prop="assigneeId">
+        <el-input v-model="queryParams.assigneeId" placeholder="请输入处理人ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_risk_case:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_risk_case:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_risk_case:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_risk_case:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
+    <!-- 手机端卡片 -->
+    <div v-if="isMobile" v-loading="loading" class="mobile-list">
+      <div v-if="list.length">
+        <div v-for="row in list" :key="row.caseId" class="mobile-card">
+          <div class="mobile-card-top">
+            <div>
+              <div class="mobile-title">{{ row.caseNo || '--' }}</div>
+              <div class="mobile-sub">告警 #{{ row.alertId || '--' }} / 处理人 #{{ row.assigneeId || '--' }}</div>
+            </div>
+            <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+          </div>
+          <div v-if="row.conclusion" class="mobile-info-row">{{ row.conclusion }}</div>
+          <div class="mobile-info-row">{{ parseTime(row.createTime) || '--' }}</div>
+          <div class="mobile-actions">
+            <el-button type="text" @click="openDetail(row)">详情</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无风控案例" :image-size="96" />
+    </div>
 
-    <el-table v-loading="loading" :data="jst_risk_caseList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="工单ID" align="center" prop="caseId" />
-      <el-table-column label="工单号" align="center" prop="caseNo" />
-      <el-table-column label="关联预警" align="center" prop="alertId" />
-      <el-table-column label="处理人" align="center" prop="assigneeId" />
-      <el-table-column label="状态：open/assigned/processing/reviewing/closed" align="center" prop="status" />
-      <el-table-column label="处理结论" align="center" prop="conclusion" />
-      <el-table-column label="复核人" align="center" prop="reviewerId" />
-      <el-table-column label="关闭时间" align="center" prop="closeTime" width="180">
+    <!-- PC 端表格 -->
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="ID" prop="caseId" width="70" />
+      <el-table-column label="案例号" prop="caseNo" min-width="160" show-overflow-tooltip />
+      <el-table-column label="告警ID" prop="alertId" width="80" />
+      <el-table-column label="处理人" prop="assigneeId" width="90" />
+      <el-table-column label="状态" min-width="100">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.closeTime, '{y}-{m}-{d}') }}</span>
+          <el-tag size="small" :type="statusType(scope.row.status)">{{ statusLabel(scope.row.status) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="结论" prop="conclusion" min-width="200" show-overflow-tooltip />
+      <el-table-column label="审核人" prop="reviewerId" width="80" />
+      <el-table-column label="关闭时间" min-width="160">
+        <template slot-scope="scope">{{ parseTime(scope.row.closeTime) || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="操作" width="80" fixed="right">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_risk_case:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_risk_case:remove']"
-          >删除</el-button>
+          <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改风险工单对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="工单号" prop="caseNo">
-              <el-input v-model="form.caseNo" placeholder="请输入工单号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="关联预警" prop="alertId">
-              <el-input v-model="form.alertId" placeholder="请输入关联预警" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="处理人" prop="assigneeId">
-              <el-input v-model="form.assigneeId" placeholder="请输入处理人" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="处理结论" prop="conclusion">
-              <el-input v-model="form.conclusion" placeholder="请输入处理结论" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="复核人" prop="reviewerId">
-              <el-input v-model="form.reviewerId" placeholder="请输入复核人" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="关闭时间" prop="closeTime">
-              <el-date-picker clearable
-                v-model="form.closeTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择关闭时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <!-- 详情抽屉 -->
+    <el-drawer :visible.sync="detailVisible" :size="isMobile ? '100%' : '600px'" title="案例详情" append-to-body>
+      <div v-if="detail" class="drawer-body">
+        <el-descriptions :column="isMobile ? 1 : 2" border>
+          <el-descriptions-item label="案例ID">{{ detail.caseId }}</el-descriptions-item>
+          <el-descriptions-item label="案例号">{{ detail.caseNo }}</el-descriptions-item>
+          <el-descriptions-item label="告警ID">{{ detail.alertId }}</el-descriptions-item>
+          <el-descriptions-item label="处理人ID">{{ detail.assigneeId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="状态"><el-tag size="small" :type="statusType(detail.status)">{{ statusLabel(detail.status) }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="审核人ID">{{ detail.reviewerId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="结论" :span="2">{{ detail.conclusion || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ parseTime(detail.createTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="关闭时间">{{ parseTime(detail.closeTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="备注" :span="2">{{ detail.remark || '--' }}</el-descriptions-item>
+        </el-descriptions>
+
+        <!-- 时间线 -->
+        <h4 style="margin: 20px 0 12px">处理时间线</h4>
+        <el-timeline>
+          <el-timeline-item v-for="(item, i) in timeline" :key="i" :timestamp="item.time" :type="item.type" placement="top">
+            {{ item.label }}
+          </el-timeline-item>
+        </el-timeline>
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_risk_case, getJst_risk_case, delJst_risk_case, addJst_risk_case, updateJst_risk_case } from "@/api/jst/risk/jst_risk_case"
+import { listJst_risk_case, getJst_risk_case } from '@/api/jst/risk/jst_risk_case'
+
+const STATUS_META = {
+  open: { label: '待处理', type: 'danger' },
+  assigned: { label: '已分配', type: 'warning' },
+  processing: { label: '处理中', type: 'warning' },
+  reviewing: { label: '审核中', type: '' },
+  closed: { label: '已关闭', type: 'success' }
+}
 
 export default {
-  name: "Jst_risk_case",
+  name: 'RiskCaseManage',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
+      loading: false,
+      isMobile: false,
+      list: [],
       total: 0,
-      // 风险工单表格数据
-      jst_risk_caseList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        caseNo: null,
-        alertId: null,
-        assigneeId: null,
-        status: null,
-        conclusion: null,
-        reviewerId: null,
-        closeTime: null,
-      },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        caseNo: [
-          { required: true, message: "工单号不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "状态：open/assigned/processing/reviewing/closed不能为空", trigger: "change" }
-        ],
+      queryParams: { pageNum: 1, pageSize: 10, caseNo: undefined, status: undefined, assigneeId: undefined },
+      statusOptions: Object.entries(STATUS_META).map(([value, { label }]) => ({ value, label })),
+      detailVisible: false,
+      detail: null
+    }
+  },
+  computed: {
+    timeline() {
+      if (!this.detail) return []
+      const items = []
+      if (this.detail.createTime) items.push({ label: '工单创建', time: this.parseTime(this.detail.createTime), type: 'primary' })
+      if (this.detail.assigneeId) items.push({ label: '分配给处理人 #' + this.detail.assigneeId, time: '', type: 'warning' })
+      if (this.detail.status === 'processing' || this.detail.status === 'reviewing' || this.detail.status === 'closed') {
+        items.push({ label: '开始处理', time: '', type: 'warning' })
       }
+      if (this.detail.status === 'reviewing' || this.detail.status === 'closed') {
+        items.push({ label: '提交审核' + (this.detail.reviewerId ? '（审核人 #' + this.detail.reviewerId + '）' : ''), time: '', type: '' })
+      }
+      if (this.detail.status === 'closed') {
+        items.push({ label: '工单关闭', time: this.parseTime(this.detail.closeTime) || '', type: 'success' })
+      }
+      return items
     }
   },
   created() {
+    this.updateViewport()
+    window.addEventListener('resize', this.updateViewport)
     this.getList()
   },
+  beforeDestroy() { window.removeEventListener('resize', this.updateViewport) },
   methods: {
-    /** 查询风险工单列表 */
-    getList() {
+    updateViewport() { this.isMobile = window.innerWidth <= 768 },
+    async getList() {
       this.loading = true
-      listJst_risk_case(this.queryParams).then(response => {
-        this.jst_risk_caseList = response.rows
-        this.total = response.total
-        this.loading = false
-      })
+      try {
+        const res = await listJst_risk_case(this.queryParams)
+        this.list = res.rows || []
+        this.total = res.total || 0
+      } finally { this.loading = false }
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        caseId: null,
-        caseNo: null,
-        alertId: null,
-        assigneeId: null,
-        status: null,
-        conclusion: null,
-        reviewerId: null,
-        closeTime: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
-    handleQuery() {
-      this.queryParams.pageNum = 1
+    handleQuery() { this.queryParams.pageNum = 1; this.getList() },
+    resetQuery() {
+      this.queryParams = { pageNum: 1, pageSize: 10, caseNo: undefined, status: undefined, assigneeId: undefined }
       this.getList()
     },
-    /** 重置按钮操作 */
-    resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
+    async openDetail(row) {
+      this.detailVisible = true
+      this.detail = null
+      try {
+        const res = await getJst_risk_case(row.caseId)
+        this.detail = res.data
+      } catch (_) { this.detail = row }
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.caseId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加风险工单"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const caseId = row.caseId || this.ids
-      getJst_risk_case(caseId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改风险工单"
-      })
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.caseId != null) {
-            updateJst_risk_case(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_risk_case(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
-      })
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const caseIds = row.caseId || this.ids
-      this.$modal.confirm('是否确认删除风险工单编号为"' + caseIds + '"的数据项？').then(function() {
-        return delJst_risk_case(caseIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_risk_case/export', {
-        ...this.queryParams
-      }, `jst_risk_case_${new Date().getTime()}.xlsx`)
-    }
+    statusLabel(s) { return (STATUS_META[s] && STATUS_META[s].label) || s || '--' },
+    statusType(s) { return (STATUS_META[s] && STATUS_META[s].type) || 'info' }
   }
 }
 </script>
+
+<style scoped>
+.enhanced-page { background: #f6f8fb; min-height: calc(100vh - 84px); }
+.page-hero { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px; margin-bottom: 18px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.hero-eyebrow { margin: 0 0 8px; color: #2f6fec; font-size: 13px; font-weight: 600; }
+.page-hero h2 { margin: 0; font-size: 24px; font-weight: 700; color: #172033; }
+.hero-desc { margin: 8px 0 0; color: #6f7b8f; }
+.query-panel { padding: 16px 16px 0; margin-bottom: 16px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.drawer-body { padding: 20px; }
+.mobile-list { min-height: 180px; }
+.mobile-card { padding: 16px; margin-bottom: 12px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.mobile-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.mobile-title { font-weight: 700; color: #172033; }
+.mobile-sub { margin-top: 4px; font-size: 12px; color: #7a8495; }
+.mobile-info-row { margin-top: 8px; font-size: 13px; color: #7a8495; }
+.mobile-actions { margin-top: 12px; border-top: 1px solid #f0f2f5; padding-top: 12px; }
+@media (max-width: 768px) {
+  .enhanced-page { padding: 12px; }
+  .page-hero { display: block; padding: 18px; }
+  .page-hero .el-button { width: 100%; min-height: 44px; margin-top: 16px; }
+  .page-hero h2 { font-size: 20px; }
+  .query-panel { padding-bottom: 8px; }
+  .query-panel ::v-deep .el-form-item { display: block; margin-right: 0; }
+  .query-panel ::v-deep .el-form-item__content, .query-panel ::v-deep .el-select, .query-panel ::v-deep .el-input { width: 100%; }
+}
+</style>

@@ -32,7 +32,7 @@
         <span class="section-header__hint">点击可快速跳转对应管理页面</span>
       </div>
       <el-row :gutter="16">
-        <el-col v-for="item in todoItems" :key="item.key" :xs="24" :sm="8" :md="8">
+        <el-col v-for="item in todoItems" :key="item.key" :xs="12" :sm="8" :md="4">
           <button class="todo-entry" type="button" @click="goTo(item.path)">
             <div class="todo-entry__icon" :class="item.theme">
               <i :class="item.icon" />
@@ -93,7 +93,7 @@
 </template>
 
 <script>
-import { countTodayOrders, countPendingContests, countPendingRefunds, countPendingWithdraws, topContests, topChannels } from '@/api/admin/dashboard'
+import { getOverview, getTodo, getTopContests, getTopChannels } from '@/api/admin/dashboard'
 
 export default {
   name: 'AdminDashboard',
@@ -102,11 +102,22 @@ export default {
       kpiLoading: false,
       todoLoading: false,
       rankLoading: false,
-      todayOrderCount: 0,
-      todayRevenue: 0,
-      pendingContestCount: 0,
-      pendingRefundCount: 0,
-      pendingWithdrawCount: 0,
+      overview: {
+        todayOrderCount: 0,
+        todayRevenue: 0,
+        monthRevenue: 0,
+        totalUserCount: 0,
+        totalContestCount: 0,
+        totalEnrollCount: 0
+      },
+      todo: {
+        pendingContestAudit: 0,
+        pendingEnrollAudit: 0,
+        pendingRefund: 0,
+        pendingWithdraw: 0,
+        pendingPartnerApply: 0,
+        pendingChannelAuth: 0
+      },
       contestRank: [],
       channelRank: []
     }
@@ -114,20 +125,24 @@ export default {
   computed: {
     kpiCards() {
       return [
-        { key: 'orders', label: '今日订单数', value: this.todayOrderCount, icon: 'el-icon-s-order', theme: 'theme-blue' },
-        { key: 'revenue', label: '今日营收(元)', value: this.formatMoney(this.todayRevenue), icon: 'el-icon-money', theme: 'theme-green' },
-        { key: 'pending', label: '待处理事项', value: this.totalPending, icon: 'el-icon-bell', theme: 'theme-orange' },
-        { key: 'contests', label: '待审赛事', value: this.pendingContestCount, icon: 'el-icon-s-flag', theme: 'theme-purple' }
+        { key: 'orders', label: '今日订单数', value: this.overview.todayOrderCount, icon: 'el-icon-s-order', theme: 'theme-blue' },
+        { key: 'revenue', label: '今日营收(元)', value: this.formatMoney(this.overview.todayRevenue), icon: 'el-icon-money', theme: 'theme-green' },
+        { key: 'monthRevenue', label: '本月营收(元)', value: this.formatMoney(this.overview.monthRevenue), icon: 'el-icon-data-analysis', theme: 'theme-orange' },
+        { key: 'users', label: '累计用户', value: this.overview.totalUserCount, icon: 'el-icon-user', theme: 'theme-purple' }
       ]
     },
     totalPending() {
-      return this.pendingContestCount + this.pendingRefundCount + this.pendingWithdrawCount
+      const t = this.todo
+      return t.pendingContestAudit + t.pendingEnrollAudit + t.pendingRefund + t.pendingWithdraw + t.pendingPartnerApply + t.pendingChannelAuth
     },
     todoItems() {
       return [
-        { key: 'contest', title: '待审核赛事', count: this.pendingContestCount, icon: 'el-icon-s-flag', theme: 'theme-blue', path: '/jst/event/jst_contest' },
-        { key: 'refund', title: '待审核退款', count: this.pendingRefundCount, icon: 'el-icon-coin', theme: 'theme-orange', path: '/jst/order/jst_refund_record' },
-        { key: 'withdraw', title: '待审核提现', count: this.pendingWithdrawCount, icon: 'el-icon-wallet', theme: 'theme-purple', path: '/jst/channel/jst_rebate_settlement' }
+        { key: 'contest', title: '待审核赛事', count: this.todo.pendingContestAudit, icon: 'el-icon-s-flag', theme: 'theme-blue', path: '/jst/contest' },
+        { key: 'enroll', title: '待审核报名', count: this.todo.pendingEnrollAudit, icon: 'el-icon-edit-outline', theme: 'theme-green', path: '/jst/enroll' },
+        { key: 'refund', title: '待处理退款', count: this.todo.pendingRefund, icon: 'el-icon-coin', theme: 'theme-orange', path: '/jst/order/admin-refund' },
+        { key: 'withdraw', title: '待审核提现', count: this.todo.pendingWithdraw, icon: 'el-icon-wallet', theme: 'theme-purple', path: '/jst/channel/admin-withdraw' },
+        { key: 'partner', title: '待审入驻申请', count: this.todo.pendingPartnerApply, icon: 'el-icon-office-building', theme: 'theme-blue', path: '/jst/partner-apply' },
+        { key: 'channel', title: '待审渠道认证', count: this.todo.pendingChannelAuth, icon: 'el-icon-postcard', theme: 'theme-green', path: '/jst/channel-auth' }
       ]
     },
     contestMaxEnroll() {
@@ -151,44 +166,32 @@ export default {
     async loadKpi() {
       this.kpiLoading = true
       try {
-        const today = this.getToday()
-        const res = await countTodayOrders({ beginCreateTime: today, endCreateTime: today })
-        this.todayOrderCount = res.total || 0
-        // 营收需从列表行聚合，暂用 total 占位
-        this.todayRevenue = 0
-        if (res.rows && res.rows.length) {
-          this.todayRevenue = Number(res.rows[0].actualPayAmount) || 0
+        const res = await getOverview()
+        if (res.code === 200) {
+          this.overview = res.data || this.overview
         }
-      } catch { this.todayOrderCount = 0 }
+      } catch { /* keep defaults */ }
       this.kpiLoading = false
     },
     async loadTodo() {
       this.todoLoading = true
       try {
-        const [contests, refunds, withdraws] = await Promise.all([
-          countPendingContests({ auditStatus: 'pending_audit' }).catch(() => ({ total: 0 })),
-          countPendingRefunds({ refundStatus: 'pending' }).catch(() => ({ total: 0 })),
-          countPendingWithdraws({ settlementStatus: 'pending' }).catch(() => ({ total: 0 }))
-        ])
-        this.pendingContestCount = contests.total || 0
-        this.pendingRefundCount = refunds.total || 0
-        this.pendingWithdrawCount = withdraws.total || 0
-      } catch {
-        this.pendingContestCount = 0
-        this.pendingRefundCount = 0
-        this.pendingWithdrawCount = 0
-      }
+        const res = await getTodo()
+        if (res.code === 200) {
+          this.todo = res.data || this.todo
+        }
+      } catch { /* keep defaults */ }
       this.todoLoading = false
     },
     async loadRank() {
       this.rankLoading = true
       try {
         const [contestRes, channelRes] = await Promise.all([
-          topContests({ orderByColumn: 'enroll_count', isAsc: 'desc' }).catch(() => ({ rows: [] })),
-          topChannels({ orderByColumn: 'total_rebate', isAsc: 'desc' }).catch(() => ({ rows: [] }))
+          getTopContests(5).catch(() => ({ data: [] })),
+          getTopChannels(5).catch(() => ({ data: [] }))
         ])
-        this.contestRank = (contestRes.rows || []).slice(0, 5)
-        this.channelRank = (channelRes.rows || []).slice(0, 5)
+        this.contestRank = (contestRes.code === 200 ? contestRes.data : []) || []
+        this.channelRank = (channelRes.code === 200 ? channelRes.data : []) || []
       } catch {
         this.contestRank = []
         this.channelRank = []
@@ -202,13 +205,6 @@ export default {
     barWidth(value, max) {
       if (!max) return '0%'
       return Math.round((Number(value || 0) / max) * 100) + '%'
-    },
-    getToday() {
-      const d = new Date()
-      const y = d.getFullYear()
-      const m = String(d.getMonth() + 1).padStart(2, '0')
-      const day = String(d.getDate()).padStart(2, '0')
-      return y + '-' + m + '-' + day
     },
     goTo(path) {
       this.$router.push({ path })

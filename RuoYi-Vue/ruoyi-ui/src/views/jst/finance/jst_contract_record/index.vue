@@ -1,404 +1,197 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="合同编号" prop="contractNo">
-        <el-input
-          v-model="queryParams.contractNo"
-          placeholder="请输入合同编号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+  <div class="app-container enhanced-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">财务中心</p>
+        <h2>合同记录</h2>
+        <p class="hero-desc">管理平台合同，按合同号、对象类型、状态筛选，查看有效期和签署信息。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
+      <el-form-item label="合同号" prop="contractNo">
+        <el-input v-model="queryParams.contractNo" placeholder="请输入合同号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="对象ID" prop="targetId">
-        <el-input
-          v-model="queryParams.targetId"
-          placeholder="请输入对象ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="对象类型" prop="targetType">
+        <el-select v-model="queryParams.targetType" placeholder="全部" clearable>
+          <el-option label="赛事方" value="partner" />
+          <el-option label="渠道方" value="channel" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="合同模板ID" prop="templateId">
-        <el-input
-          v-model="queryParams.templateId"
-          placeholder="请输入合同模板ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="合同文件URL" prop="fileUrl">
-        <el-input
-          v-model="queryParams.fileUrl"
-          placeholder="请输入合同文件URL"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="生效时间" prop="effectiveTime">
-        <el-date-picker clearable
-          v-model="queryParams.effectiveTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择生效时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="签署时间" prop="signTime">
-        <el-date-picker clearable
-          v-model="queryParams.signTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择签署时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="关联结算单ID" prop="refSettlementId">
-        <el-input
-          v-model="queryParams.refSettlementId"
-          placeholder="请输入关联结算单ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="全部" clearable>
+          <el-option v-for="s in statusOptions" :key="s.value" :label="s.label" :value="s.value" />
+        </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_contract_record:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_contract_record:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_contract_record:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_contract_record:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
+    <!-- 手机端卡片 -->
+    <div v-if="isMobile" v-loading="loading" class="mobile-list">
+      <div v-if="list.length">
+        <div v-for="row in list" :key="row.contractId" class="mobile-card">
+          <div class="mobile-card-top">
+            <div>
+              <div class="mobile-title">{{ row.contractNo || '--' }}</div>
+              <div class="mobile-sub">{{ contractTypeLabel(row.contractType) }} / {{ targetTypeLabel(row.targetType) }} #{{ row.targetId }}</div>
+            </div>
+            <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+          </div>
+          <div class="mobile-info-row">有效期：{{ parseTime(row.effectiveTime, '{y}-{m}-{d}') || '--' }} 起</div>
+          <div class="mobile-info-row">签署：{{ parseTime(row.signTime, '{y}-{m}-{d}') || '未签署' }}</div>
+          <div class="mobile-actions">
+            <el-button type="text" @click="openDetail(row)">详情</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无合同记录" :image-size="96" />
+    </div>
 
-    <el-table v-loading="loading" :data="jst_contract_recordList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="合同ID" align="center" prop="contractId" />
-      <el-table-column label="合同编号" align="center" prop="contractNo" />
-      <el-table-column label="合同类型：partner_coop赛事方合作/channel_settle渠道结算/supplement补充" align="center" prop="contractType" />
-      <el-table-column label="对象类型：partner/channel" align="center" prop="targetType" />
-      <el-table-column label="对象ID" align="center" prop="targetId" />
-      <el-table-column label="合同模板ID" align="center" prop="templateId" />
-      <el-table-column label="合同文件URL" align="center" prop="fileUrl" />
-      <el-table-column label="合同状态：draft/pending_sign/signed/expired/archived" align="center" prop="status" />
-      <el-table-column label="生效时间" align="center" prop="effectiveTime" width="180">
+    <!-- PC 端表格 -->
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="ID" prop="contractId" width="70" />
+      <el-table-column label="合同号" prop="contractNo" min-width="160" show-overflow-tooltip />
+      <el-table-column label="合同类型" min-width="110">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.effectiveTime, '{y}-{m}-{d}') }}</span>
+          <el-tag size="small" type="info">{{ contractTypeLabel(scope.row.contractType) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="签署时间" align="center" prop="signTime" width="180">
+      <el-table-column label="对象类型" min-width="90">
+        <template slot-scope="scope">{{ targetTypeLabel(scope.row.targetType) }}</template>
+      </el-table-column>
+      <el-table-column label="对象ID" prop="targetId" width="80" />
+      <el-table-column label="状态" min-width="100">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.signTime, '{y}-{m}-{d}') }}</span>
+          <el-tag size="small" :type="statusType(scope.row.status)">{{ statusLabel(scope.row.status) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="关联结算单ID" align="center" prop="refSettlementId" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="生效日期" min-width="120">
+        <template slot-scope="scope">{{ parseTime(scope.row.effectiveTime, '{y}-{m}-{d}') || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="签署日期" min-width="120">
+        <template slot-scope="scope">{{ parseTime(scope.row.signTime, '{y}-{m}-{d}') || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="操作" width="80" fixed="right">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_contract_record:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_contract_record:remove']"
-          >删除</el-button>
+          <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改合同记录对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="合同编号" prop="contractNo">
-              <el-input v-model="form.contractNo" placeholder="请输入合同编号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="对象ID" prop="targetId">
-              <el-input v-model="form.targetId" placeholder="请输入对象ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="合同模板ID" prop="templateId">
-              <el-input v-model="form.templateId" placeholder="请输入合同模板ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="合同文件URL" prop="fileUrl">
-              <el-input v-model="form.fileUrl" placeholder="请输入合同文件URL" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="生效时间" prop="effectiveTime">
-              <el-date-picker clearable
-                v-model="form.effectiveTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择生效时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="签署时间" prop="signTime">
-              <el-date-picker clearable
-                v-model="form.signTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择签署时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="关联结算单ID" prop="refSettlementId">
-              <el-input v-model="form.refSettlementId" placeholder="请输入关联结算单ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <!-- 详情抽屉 -->
+    <el-drawer :visible.sync="detailVisible" :size="isMobile ? '100%' : '560px'" title="合同详情" append-to-body>
+      <div v-if="detail" class="drawer-body">
+        <el-descriptions :column="isMobile ? 1 : 2" border>
+          <el-descriptions-item label="合同ID">{{ detail.contractId }}</el-descriptions-item>
+          <el-descriptions-item label="合同号">{{ detail.contractNo }}</el-descriptions-item>
+          <el-descriptions-item label="合同类型"><el-tag size="small" type="info">{{ contractTypeLabel(detail.contractType) }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="对象类型">{{ targetTypeLabel(detail.targetType) }}</el-descriptions-item>
+          <el-descriptions-item label="对象ID">{{ detail.targetId }}</el-descriptions-item>
+          <el-descriptions-item label="模板ID">{{ detail.templateId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="状态"><el-tag size="small" :type="statusType(detail.status)">{{ statusLabel(detail.status) }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="关联结算ID">{{ detail.refSettlementId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="生效日期">{{ parseTime(detail.effectiveTime, '{y}-{m}-{d}') || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="签署日期">{{ parseTime(detail.signTime, '{y}-{m}-{d}') || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="备注" :span="2">{{ detail.remark || '--' }}</el-descriptions-item>
+          <el-descriptions-item v-if="detail.fileUrl" label="合同文件" :span="2">
+            <a :href="detail.fileUrl" target="_blank" style="color:#2f6fec">查看合同文件</a>
+          </el-descriptions-item>
+        </el-descriptions>
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_contract_record, getJst_contract_record, delJst_contract_record, addJst_contract_record, updateJst_contract_record } from "@/api/jst/finance/jst_contract_record"
+import { listJst_contract_record, getJst_contract_record } from '@/api/jst/finance/jst_contract_record'
+
+const STATUS_META = {
+  draft: { label: '草稿', type: 'info' },
+  pending_sign: { label: '待签署', type: 'warning' },
+  signed: { label: '已签署', type: 'success' },
+  expired: { label: '已过期', type: 'danger' },
+  archived: { label: '已归档', type: 'info' }
+}
 
 export default {
-  name: "Jst_contract_record",
+  name: 'ContractRecordManage',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
+      loading: false,
+      isMobile: false,
+      list: [],
       total: 0,
-      // 合同记录表格数据
-      jst_contract_recordList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        contractNo: null,
-        contractType: null,
-        targetType: null,
-        targetId: null,
-        templateId: null,
-        fileUrl: null,
-        status: null,
-        effectiveTime: null,
-        signTime: null,
-        refSettlementId: null,
-      },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        contractNo: [
-          { required: true, message: "合同编号不能为空", trigger: "blur" }
-        ],
-        contractType: [
-          { required: true, message: "合同类型：partner_coop赛事方合作/channel_settle渠道结算/supplement补充不能为空", trigger: "change" }
-        ],
-        targetType: [
-          { required: true, message: "对象类型：partner/channel不能为空", trigger: "change" }
-        ],
-        targetId: [
-          { required: true, message: "对象ID不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "合同状态：draft/pending_sign/signed/expired/archived不能为空", trigger: "change" }
-        ],
-      }
+      queryParams: { pageNum: 1, pageSize: 10, contractNo: undefined, targetType: undefined, status: undefined },
+      statusOptions: Object.entries(STATUS_META).map(([value, { label }]) => ({ value, label })),
+      detailVisible: false,
+      detail: null
     }
   },
   created() {
+    this.updateViewport()
+    window.addEventListener('resize', this.updateViewport)
     this.getList()
   },
+  beforeDestroy() { window.removeEventListener('resize', this.updateViewport) },
   methods: {
-    /** 查询合同记录列表 */
-    getList() {
+    updateViewport() { this.isMobile = window.innerWidth <= 768 },
+    async getList() {
       this.loading = true
-      listJst_contract_record(this.queryParams).then(response => {
-        this.jst_contract_recordList = response.rows
-        this.total = response.total
-        this.loading = false
-      })
+      try {
+        const res = await listJst_contract_record(this.queryParams)
+        this.list = res.rows || []
+        this.total = res.total || 0
+      } finally { this.loading = false }
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        contractId: null,
-        contractNo: null,
-        contractType: null,
-        targetType: null,
-        targetId: null,
-        templateId: null,
-        fileUrl: null,
-        status: null,
-        effectiveTime: null,
-        signTime: null,
-        refSettlementId: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
-    handleQuery() {
-      this.queryParams.pageNum = 1
+    handleQuery() { this.queryParams.pageNum = 1; this.getList() },
+    resetQuery() {
+      this.queryParams = { pageNum: 1, pageSize: 10, contractNo: undefined, targetType: undefined, status: undefined }
       this.getList()
     },
-    /** 重置按钮操作 */
-    resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
+    async openDetail(row) {
+      this.detailVisible = true
+      this.detail = null
+      try {
+        const res = await getJst_contract_record(row.contractId)
+        this.detail = res.data
+      } catch (_) { this.detail = row }
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.contractId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加合同记录"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const contractId = row.contractId || this.ids
-      getJst_contract_record(contractId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改合同记录"
-      })
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.contractId != null) {
-            updateJst_contract_record(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_contract_record(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
-      })
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const contractIds = row.contractId || this.ids
-      this.$modal.confirm('是否确认删除合同记录编号为"' + contractIds + '"的数据项？').then(function() {
-        return delJst_contract_record(contractIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_contract_record/export', {
-        ...this.queryParams
-      }, `jst_contract_record_${new Date().getTime()}.xlsx`)
-    }
+    statusLabel(s) { return (STATUS_META[s] && STATUS_META[s].label) || s || '--' },
+    statusType(s) { return (STATUS_META[s] && STATUS_META[s].type) || 'info' },
+    contractTypeLabel(t) { return { partner_coop: '赛事合作', channel_settle: '渠道结算', supplement: '补充协议' }[t] || t || '--' },
+    targetTypeLabel(t) { return { partner: '赛事方', channel: '渠道方' }[t] || t || '--' }
   }
 }
 </script>
+
+<style scoped>
+.enhanced-page { background: #f6f8fb; min-height: calc(100vh - 84px); }
+.page-hero { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px; margin-bottom: 18px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.hero-eyebrow { margin: 0 0 8px; color: #2f6fec; font-size: 13px; font-weight: 600; }
+.page-hero h2 { margin: 0; font-size: 24px; font-weight: 700; color: #172033; }
+.hero-desc { margin: 8px 0 0; color: #6f7b8f; }
+.query-panel { padding: 16px 16px 0; margin-bottom: 16px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.drawer-body { padding: 20px; }
+.mobile-list { min-height: 180px; }
+.mobile-card { padding: 16px; margin-bottom: 12px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.mobile-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.mobile-title { font-weight: 700; color: #172033; }
+.mobile-sub { margin-top: 4px; font-size: 12px; color: #7a8495; }
+.mobile-info-row { margin-top: 8px; font-size: 13px; color: #7a8495; }
+.mobile-actions { margin-top: 12px; border-top: 1px solid #f0f2f5; padding-top: 12px; }
+@media (max-width: 768px) {
+  .enhanced-page { padding: 12px; }
+  .page-hero { display: block; padding: 18px; }
+  .page-hero .el-button { width: 100%; min-height: 44px; margin-top: 16px; }
+  .page-hero h2 { font-size: 20px; }
+  .query-panel { padding-bottom: 8px; }
+  .query-panel ::v-deep .el-form-item { display: block; margin-right: 0; }
+  .query-panel ::v-deep .el-form-item__content, .query-panel ::v-deep .el-select, .query-panel ::v-deep .el-input { width: 100%; }
+}
+</style>

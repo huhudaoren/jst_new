@@ -1,25 +1,25 @@
 <template>
-  <div class="writeoff-page">
-    <div class="top-bar">
+  <div class="app-container partner-writeoff-page">
+    <div class="page-hero">
       <div>
-        <p class="eyebrow">现场核销</p>
+        <p class="hero-eyebrow">现场核销</p>
         <h2>{{ currentContext.contestName }}</h2>
-        <p>{{ currentContext.dateText }} · {{ currentContext.sessionCode }}</p>
+        <p class="hero-desc">{{ currentContext.dateText }} · {{ currentContext.sessionCode }}</p>
       </div>
-      <el-button icon="el-icon-refresh" :loading="recordLoading" @click="loadRecent">刷新</el-button>
+      <el-button type="primary" icon="el-icon-refresh" :loading="recordLoading" @click="getList">刷新记录</el-button>
     </div>
 
     <div class="stats-grid">
       <div class="stats-item">
-        <span>已核销</span>
+        <span>本页已核销</span>
         <strong>{{ stats.used }}</strong>
       </div>
       <div class="stats-item">
-        <span>总人数</span>
+        <span>团队总人数</span>
         <strong>{{ stats.total }}</strong>
       </div>
       <div class="stats-item">
-        <span>剩余</span>
+        <span>团队剩余</span>
         <strong>{{ stats.remain }}</strong>
       </div>
     </div>
@@ -34,18 +34,18 @@
       >
         扫码核销
       </el-button>
-      <el-button class="manual-button" icon="el-icon-edit" @click="showManual = true">手工输入二维码内容</el-button>
+      <el-button class="manual-button" icon="el-icon-edit" @click="showManual = true">手工输入二维码</el-button>
       <p class="scan-tip">摄像头不可用时，可复制二维码内容后手工提交。</p>
     </div>
 
     <div v-if="showManual" class="manual-panel">
       <el-input
-        v-model="manualPayload"
+        v-model.trim="manualPayload"
         type="textarea"
         :rows="4"
-        placeholder="粘贴二维码内容"
         maxlength="512"
         show-word-limit
+        placeholder="粘贴二维码内容"
       />
       <el-button type="primary" :loading="scanLoading" @click="submitManual">确认核销</el-button>
     </div>
@@ -59,25 +59,125 @@
       </div>
     </div>
 
-    <div class="records-panel">
-      <div class="section-head">
-        <span>最近核销</span>
-        <small>最多展示 20 条</small>
-      </div>
-      <div v-loading="recordLoading" class="records-list">
-        <div v-if="records.length">
-          <div v-for="item in records" :key="item.writeoffItemId + '-' + item.writeoffTime" class="record-item">
+    <el-form
+      ref="queryForm"
+      :model="queryParams"
+      size="small"
+      :inline="true"
+      label-width="82px"
+      class="query-panel"
+    >
+      <el-form-item label="赛事ID" prop="contestId">
+        <el-input
+          v-model.trim="queryParams.contestId"
+          placeholder="输入赛事ID"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="核销时间">
+        <el-date-picker
+          v-model="writeoffRange"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          value-format="yyyy-MM-dd"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
+      </el-form-item>
+    </el-form>
+
+    <div v-if="isMobile" v-loading="recordLoading" class="mobile-list">
+      <div v-if="records.length">
+        <div v-for="item in records" :key="item.writeoffItemId + '-' + item.writeoffTime" class="mobile-card">
+          <div class="mobile-card-top">
             <div>
-              <strong>{{ item.memberName || '未命名成员' }}</strong>
-              <p>{{ item.itemName || item.itemType || '核销项目' }}</p>
-              <p>{{ item.contestName || '--' }} · {{ item.sessionCode || '--' }}</p>
+              <div class="mobile-title">{{ item.memberName || item.teamName || '未命名成员' }}</div>
+              <div class="mobile-sub">{{ item.itemName || item.itemType || '核销项目' }}</div>
             </div>
-            <span>{{ parseTime(item.writeoffTime) || '--' }}</span>
+            <JstStatusBadge :status="String(item.status || '')" :status-map="statusMap" />
+          </div>
+          <div class="mobile-info-row">赛事：{{ item.contestName || '--' }}</div>
+          <div class="mobile-info-row">场次：{{ item.sessionCode || '--' }}</div>
+          <div class="mobile-info-row">核销终端：{{ item.writeoffTerminal || '--' }}</div>
+          <div class="mobile-info-row">核销时间：{{ parseTime(item.writeoffTime) || '--' }}</div>
+          <div class="mobile-actions">
+            <el-button type="text" @click="openDetail(item)">详情</el-button>
           </div>
         </div>
-        <el-empty v-else description="暂无核销记录" :image-size="96" />
       </div>
+      <el-empty v-else description="暂无核销记录" :image-size="96" />
     </div>
+
+    <el-table v-else v-loading="recordLoading" :data="records">
+      <template slot="empty">
+        <el-empty description="暂无核销记录" :image-size="96" />
+      </template>
+      <el-table-column label="核销ID" prop="writeoffItemId" min-width="96" />
+      <el-table-column label="赛事" prop="contestName" min-width="180" show-overflow-tooltip />
+      <el-table-column label="成员/团队" min-width="140" show-overflow-tooltip>
+        <template slot-scope="scope">
+          {{ scope.row.memberName || scope.row.teamName || '--' }}
+        </template>
+      </el-table-column>
+      <el-table-column label="核销项目" min-width="140" show-overflow-tooltip>
+        <template slot-scope="scope">
+          {{ scope.row.itemName || scope.row.itemType || '--' }}
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" min-width="100">
+        <template slot-scope="scope">
+          <JstStatusBadge :status="String(scope.row.status || '')" :status-map="statusMap" />
+        </template>
+      </el-table-column>
+      <el-table-column label="场次" prop="sessionCode" min-width="120" show-overflow-tooltip />
+      <el-table-column label="核销终端" prop="writeoffTerminal" min-width="120" />
+      <el-table-column label="核销时间" min-width="170">
+        <template slot-scope="scope">{{ parseTime(scope.row.writeoffTime) || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="操作" width="120" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <pagination
+      v-show="total > 0"
+      :total="total"
+      :page.sync="queryParams.pageNum"
+      :limit.sync="queryParams.pageSize"
+      @pagination="getList"
+    />
+
+    <el-drawer
+      title="核销详情"
+      :visible.sync="detailVisible"
+      :size="isMobile ? '100%' : '46%'"
+      append-to-body
+    >
+      <div class="drawer-body">
+        <el-descriptions v-if="detailData" :column="isMobile ? 1 : 2" border>
+          <el-descriptions-item label="核销ID">{{ detailData.writeoffItemId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="赛事ID">{{ detailData.contestId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="赛事名称">{{ detailData.contestName || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="场次编码">{{ detailData.sessionCode || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="成员">{{ detailData.memberName || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="团队">{{ detailData.teamName || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="核销项目">{{ detailData.itemName || detailData.itemType || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <JstStatusBadge :status="String(detailData.status || '')" :status-map="statusMap" />
+          </el-descriptions-item>
+          <el-descriptions-item label="预约日期">{{ parseTime(detailData.appointmentDate, '{y}-{m}-{d}') || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="核销时间">{{ parseTime(detailData.writeoffTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="核销终端">{{ detailData.writeoffTerminal || '--' }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+    </el-drawer>
 
     <el-dialog
       title="扫码核销"
@@ -112,20 +212,38 @@ export default {
       showManual: false,
       manualPayload: '',
       records: [],
+      total: 0,
+      queryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        contestId: undefined
+      },
+      writeoffRange: [],
+      detailVisible: false,
+      detailData: null,
       lastResult: null,
       lastScanData: null,
       stream: null,
       detector: null,
       scanTimer: null,
-      scannerTip: '请将二维码置于取景框内'
+      scannerTip: '请将二维码置于取景框内',
+      statusMap: {
+        used: { label: '已核销', type: 'success' },
+        unused: { label: '未核销', type: 'info' },
+        expired: { label: '已过期', type: 'warning' },
+        voided: { label: '已作废', type: 'danger' }
+      }
     }
   },
   computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
+    },
     currentContext() {
       const first = this.records[0] || {}
       return {
         contestName: this.$route.query.contestName || first.contestName || '现场赛事',
-        dateText: this.$route.query.date || first.appointmentDate || '今日',
+        dateText: this.$route.query.date || (this.writeoffRange && this.writeoffRange.length ? this.writeoffRange.join(' 至 ') : '今日'),
         sessionCode: this.$route.query.sessionCode || first.sessionCode || '全部场次'
       }
     },
@@ -147,20 +265,42 @@ export default {
     }
   },
   created() {
-    this.loadRecent()
+    this.getList()
   },
   beforeDestroy() {
     this.stopScanner()
   },
   methods: {
-    async loadRecent() {
+    async getList() {
       this.recordLoading = true
       try {
-        const res = await getWriteoffRecent()
-        this.records = res.rows || []
+        const params = {
+          ...this.queryParams
+        }
+        if (this.writeoffRange && this.writeoffRange.length === 2) {
+          params.beginDate = this.writeoffRange[0]
+          params.endDate = this.writeoffRange[1]
+        }
+        const res = await getWriteoffRecent(params)
+        this.records = Array.isArray(res.rows) ? res.rows : []
+        this.total = Number(res.total || 0)
       } finally {
         this.recordLoading = false
       }
+    },
+    handleQuery() {
+      this.queryParams.pageNum = 1
+      this.getList()
+    },
+    resetQuery() {
+      this.resetForm('queryForm')
+      this.writeoffRange = []
+      this.queryParams.pageNum = 1
+      this.getList()
+    },
+    openDetail(row) {
+      this.detailData = row || null
+      this.detailVisible = true
     },
     async startScanner() {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.BarcodeDetector) {
@@ -178,6 +318,7 @@ export default {
         this.scannerVisible = true
         this.$nextTick(() => {
           const video = this.$refs.video
+          if (!video) return
           video.srcObject = this.stream
           video.play()
           this.scanTimer = window.setInterval(this.detectFrame, 600)
@@ -215,7 +356,7 @@ export default {
       }
     },
     submitManual() {
-      const value = (this.manualPayload || '').trim()
+      const value = String(this.manualPayload || '').trim()
       if (!value) {
         this.$modal.msgWarning('请先输入二维码内容')
         return
@@ -230,17 +371,18 @@ export default {
         this.lastScanData = data
         this.lastResult = {
           success: true,
-          message: data.teamStatus ? '团队预约进度已更新' : '该项目已完成核销',
+          message: data.teamStatus ? '团队预约进度已更新' : '核销成功',
           memberName: data.memberName,
           itemName: data.itemName
         }
         this.manualPayload = ''
         this.showManual = false
-        await this.loadRecent()
+        this.queryParams.pageNum = 1
+        await this.getList()
       } catch (error) {
         this.lastResult = {
           success: false,
-          message: '已核销过或二维码无效'
+          message: (error && error.msg) || '已核销过或二维码无效'
         }
       } finally {
         this.scanLoading = false
@@ -265,62 +407,56 @@ export default {
 }
 </script>
 
-<style scoped>
-.writeoff-page {
-  min-height: 100vh;
-  padding: 16px;
-  color: #172033;
+<style scoped lang="scss">
+.partner-writeoff-page {
   background: #f6f8fb;
+  min-height: calc(100vh - 84px);
 }
 
-.top-bar {
+.page-hero {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 18px;
-  background: #ffffff;
-  border: 1px solid #e4e9f2;
+  gap: 16px;
+  padding: 24px;
+  margin-bottom: 14px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
   border-radius: 8px;
 }
 
-.top-bar h2 {
-  margin: 0;
-  font-size: 22px;
-}
-
-.top-bar p {
-  margin: 6px 0 0;
-  color: #6f7b8f;
-}
-
-.eyebrow {
-  margin: 0 0 6px !important;
-  color: #2f6fec !important;
+.hero-eyebrow {
+  margin: 0 0 8px;
+  color: #2f6fec;
   font-size: 13px;
+  font-weight: 600;
+}
+
+.page-hero h2 {
+  margin: 0;
+  font-size: 24px;
   font-weight: 700;
+  color: #172033;
+}
+
+.hero-desc {
+  margin: 8px 0 0;
+  color: #6f7b8f;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  margin: 14px 0;
-}
-
-.stats-item,
-.scan-panel,
-.manual-panel,
-.result-card,
-.records-panel {
-  background: #ffffff;
-  border: 1px solid #e4e9f2;
-  border-radius: 8px;
+  margin-bottom: 14px;
 }
 
 .stats-item {
   padding: 16px 10px;
   text-align: center;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
 }
 
 .stats-item span {
@@ -336,36 +472,43 @@ export default {
 }
 
 .scan-panel,
+.manual-panel,
+.result-card {
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.scan-panel,
 .manual-panel {
   display: grid;
   gap: 12px;
   padding: 16px;
 }
 
+.manual-panel {
+  margin-top: 12px;
+}
+
 .scan-button,
 .manual-button,
 .manual-panel .el-button {
   width: 100%;
-  min-height: 52px;
-  font-size: 16px;
-  border-radius: 8px;
+  min-height: 50px;
 }
 
 .scan-tip,
 .scanner-tip {
   margin: 0;
-  color: #7a8495;
   font-size: 13px;
-}
-
-.manual-panel {
-  margin-top: 14px;
+  color: #7a8495;
 }
 
 .result-card {
   display: flex;
   gap: 12px;
-  margin-top: 14px;
+  margin-top: 12px;
+  margin-bottom: 14px;
   padding: 16px;
   border-color: #c8ead6;
   background: #f3fbf6;
@@ -390,50 +533,58 @@ export default {
   color: #e45656;
 }
 
-.records-panel {
-  margin-top: 14px;
-  padding: 16px;
+.query-panel {
+  padding: 16px 16px 0;
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
 }
 
-.section-head,
-.record-item {
+.mobile-list {
+  min-height: 180px;
+}
+
+.mobile-card {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.mobile-card-top {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 12px;
 }
 
-.section-head {
-  margin-bottom: 10px;
+.mobile-title {
   font-weight: 700;
+  color: #172033;
 }
 
-.section-head small {
+.mobile-sub {
+  margin-top: 4px;
+  font-size: 12px;
   color: #7a8495;
-  font-weight: 400;
 }
 
-.record-item {
-  min-height: 58px;
-  padding: 12px 0;
-  border-top: 1px solid #eef2f7;
-}
-
-.record-item:first-child {
-  border-top: 0;
-}
-
-.record-item p {
-  margin: 4px 0 0;
-  color: #7a8495;
+.mobile-info-row {
+  margin-top: 8px;
+  color: #6f7b8f;
   font-size: 13px;
 }
 
-.record-item > span {
-  flex-shrink: 0;
-  color: #7a8495;
-  font-size: 12px;
-  text-align: right;
+.mobile-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.drawer-body {
+  padding: 8px 16px 16px;
 }
 
 .scanner-box {
@@ -454,24 +605,48 @@ export default {
   display: none;
 }
 
-@media (min-width: 769px) {
-  .writeoff-page {
-    max-width: 720px;
-    min-height: calc(100vh - 84px);
-    margin: 0 auto;
-    padding: 24px;
+@media (max-width: 768px) {
+  .partner-writeoff-page {
+    padding: 12px;
   }
-}
 
-@media (max-width: 520px) {
-  .top-bar {
+  .page-hero {
     display: block;
+    padding: 18px;
   }
 
-  .top-bar .el-button {
+  .page-hero .el-button {
     width: 100%;
     min-height: 44px;
-    margin-top: 14px;
+    margin-top: 16px;
+  }
+
+  .page-hero h2 {
+    font-size: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .query-panel {
+    padding-bottom: 8px;
+  }
+
+  .query-panel ::v-deep .el-form-item {
+    display: block;
+    margin-right: 0;
+  }
+
+  .query-panel ::v-deep .el-form-item__content,
+  .query-panel ::v-deep .el-select,
+  .query-panel ::v-deep .el-input,
+  .query-panel ::v-deep .el-date-editor {
+    width: 100%;
+  }
+
+  .mobile-actions .el-button {
+    min-height: 44px;
   }
 }
 </style>

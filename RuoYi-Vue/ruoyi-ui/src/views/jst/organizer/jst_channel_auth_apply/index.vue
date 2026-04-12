@@ -1,420 +1,206 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="申请单号" prop="applyNo">
-        <el-input
-          v-model="queryParams.applyNo"
-          placeholder="请输入申请单号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+  <div class="app-container enhanced-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">入驻管理</p>
+        <h2>渠道认证申请</h2>
+        <p class="hero-desc">查看渠道方认证申请记录，按申请编号、用户、审核状态筛选。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
+      <el-form-item label="申请编号" prop="applyNo">
+        <el-input v-model="queryParams.applyNo" placeholder="请输入申请编号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="申请人用户ID" prop="userId">
-        <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入申请人用户ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="用户ID" prop="userId">
+        <el-input v-model="queryParams.userId" placeholder="请输入用户ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="通过后生成的渠道方ID" prop="channelId">
-        <el-input
-          v-model="queryParams.channelId"
-          placeholder="请输入通过后生成的渠道方ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="申请名称" prop="applyName">
-        <el-input
-          v-model="queryParams.applyName"
-          placeholder="请输入申请名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="审核备注" prop="auditRemark">
-        <el-input
-          v-model="queryParams.auditRemark"
-          placeholder="请输入审核备注"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="审核员ID" prop="auditUserId">
-        <el-input
-          v-model="queryParams.auditUserId"
-          placeholder="请输入审核员ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="提交时间" prop="submitTime">
-        <el-date-picker clearable
-          v-model="queryParams.submitTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择提交时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="审核时间" prop="auditTime">
-        <el-date-picker clearable
-          v-model="queryParams.auditTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择审核时间">
-        </el-date-picker>
+      <el-form-item label="审核状态" prop="applyStatus">
+        <el-select v-model="queryParams.applyStatus" placeholder="全部" clearable>
+          <el-option v-for="s in statusOptions" :key="s.value" :label="s.label" :value="s.value" />
+        </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_channel_auth_apply:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_channel_auth_apply:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_channel_auth_apply:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_channel_auth_apply:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
+    <!-- 手机端卡片 -->
+    <div v-if="isMobile" v-loading="loading" class="mobile-list">
+      <div v-if="list.length">
+        <div v-for="row in list" :key="row.applyId" class="mobile-card">
+          <div class="mobile-card-top">
+            <div>
+              <div class="mobile-title">{{ row.applyNo || '--' }}</div>
+              <div class="mobile-sub">{{ row.applyName || '--' }} (用户 #{{ row.userId }})</div>
+            </div>
+            <el-tag size="small" :type="statusType(row.applyStatus)">{{ statusLabel(row.applyStatus) }}</el-tag>
+          </div>
+          <div class="mobile-info-row">
+            <el-tag size="mini" type="info">{{ channelTypeLabel(row.channelType) }}</el-tag>
+            <span>{{ parseTime(row.submitTime, '{y}-{m}-{d}') || '--' }}</span>
+          </div>
+          <div class="mobile-actions">
+            <el-button type="text" @click="openDetail(row)">详情</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无认证申请" :image-size="96" />
+    </div>
 
-    <el-table v-loading="loading" :data="jst_channel_auth_applyList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="申请ID" align="center" prop="applyId" />
-      <el-table-column label="申请单号" align="center" prop="applyNo" />
-      <el-table-column label="申请人用户ID" align="center" prop="userId" />
-      <el-table-column label="通过后生成的渠道方ID" align="center" prop="channelId" />
-      <el-table-column label="渠道类型：teacher/organization/individual" align="center" prop="channelType" />
-      <el-table-column label="申请名称" align="center" prop="applyName" />
-      <el-table-column label="认证材料JSON" align="center" prop="materialsJson" />
-      <el-table-column label="状态：pending/approved/rejected/suspended" align="center" prop="applyStatus" />
-      <el-table-column label="审核备注" align="center" prop="auditRemark" />
-      <el-table-column label="审核员ID" align="center" prop="auditUserId" />
-      <el-table-column label="提交时间" align="center" prop="submitTime" width="180">
+    <!-- PC 端表格 -->
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="ID" prop="applyId" width="70" />
+      <el-table-column label="申请编号" prop="applyNo" min-width="160" show-overflow-tooltip />
+      <el-table-column label="用户ID" prop="userId" width="90" />
+      <el-table-column label="申请人" prop="applyName" min-width="120" show-overflow-tooltip />
+      <el-table-column label="渠道类型" min-width="100">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.submitTime, '{y}-{m}-{d}') }}</span>
+          <el-tag size="small" type="info">{{ channelTypeLabel(scope.row.channelType) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="审核时间" align="center" prop="auditTime" width="180">
+      <el-table-column label="审核状态" min-width="100">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.auditTime, '{y}-{m}-{d}') }}</span>
+          <el-tag size="small" :type="statusType(scope.row.applyStatus)">{{ statusLabel(scope.row.applyStatus) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="提交时间" min-width="160">
+        <template slot-scope="scope">{{ parseTime(scope.row.submitTime) || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="审核时间" min-width="160">
+        <template slot-scope="scope">{{ parseTime(scope.row.auditTime) || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="操作" width="80" fixed="right">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_channel_auth_apply:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_channel_auth_apply:remove']"
-          >删除</el-button>
+          <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改渠道认证申请对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="申请单号" prop="applyNo">
-              <el-input v-model="form.applyNo" placeholder="请输入申请单号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="申请人用户ID" prop="userId">
-              <el-input v-model="form.userId" placeholder="请输入申请人用户ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="通过后生成的渠道方ID" prop="channelId">
-              <el-input v-model="form.channelId" placeholder="请输入通过后生成的渠道方ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="申请名称" prop="applyName">
-              <el-input v-model="form.applyName" placeholder="请输入申请名称" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="审核备注" prop="auditRemark">
-              <el-input v-model="form.auditRemark" placeholder="请输入审核备注" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="审核员ID" prop="auditUserId">
-              <el-input v-model="form.auditUserId" placeholder="请输入审核员ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="提交时间" prop="submitTime">
-              <el-date-picker clearable
-                v-model="form.submitTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择提交时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="审核时间" prop="auditTime">
-              <el-date-picker clearable
-                v-model="form.auditTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择审核时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <!-- 详情抽屉 -->
+    <el-drawer :visible.sync="detailVisible" :size="isMobile ? '100%' : '600px'" title="认证申请详情" append-to-body>
+      <div v-if="detail" class="drawer-body">
+        <el-descriptions :column="isMobile ? 1 : 2" border>
+          <el-descriptions-item label="申请ID">{{ detail.applyId }}</el-descriptions-item>
+          <el-descriptions-item label="申请编号">{{ detail.applyNo }}</el-descriptions-item>
+          <el-descriptions-item label="用户ID">{{ detail.userId }}</el-descriptions-item>
+          <el-descriptions-item label="渠道ID">{{ detail.channelId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="申请人">{{ detail.applyName }}</el-descriptions-item>
+          <el-descriptions-item label="渠道类型"><el-tag size="small" type="info">{{ channelTypeLabel(detail.channelType) }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="审核状态"><el-tag size="small" :type="statusType(detail.applyStatus)">{{ statusLabel(detail.applyStatus) }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="审核备注">{{ detail.auditRemark || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="审核人ID">{{ detail.auditUserId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="提交时间">{{ parseTime(detail.submitTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="审核时间">{{ parseTime(detail.auditTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="备注">{{ detail.remark || '--' }}</el-descriptions-item>
+        </el-descriptions>
+        <div v-if="materials.length" style="margin-top: 16px">
+          <h4 style="margin-bottom: 12px">认证材料</h4>
+          <div v-for="(m, i) in materials" :key="i" class="material-item">
+            <span>{{ m.name || m.type || '附件' + (i + 1) }}</span>
+            <el-image v-if="isImage(m.url)" :src="m.url" style="max-width: 160px; margin-top: 4px" :preview-src-list="[m.url]" />
+            <a v-else :href="m.url" target="_blank" class="material-link">查看文件</a>
+          </div>
+        </div>
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_channel_auth_apply, getJst_channel_auth_apply, delJst_channel_auth_apply, addJst_channel_auth_apply, updateJst_channel_auth_apply } from "@/api/jst/organizer/jst_channel_auth_apply"
+import { listJst_channel_auth_apply, getJst_channel_auth_apply } from '@/api/jst/organizer/jst_channel_auth_apply'
+
+const STATUS_META = {
+  pending: { label: '待审核', type: 'warning' },
+  approved: { label: '已通过', type: 'success' },
+  rejected: { label: '已驳回', type: 'danger' }
+}
 
 export default {
-  name: "Jst_channel_auth_apply",
+  name: 'ChannelAuthApplyManage',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
+      loading: false,
+      isMobile: false,
+      list: [],
       total: 0,
-      // 渠道认证申请表格数据
-      jst_channel_auth_applyList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        applyNo: null,
-        userId: null,
-        channelId: null,
-        channelType: null,
-        applyName: null,
-        materialsJson: null,
-        applyStatus: null,
-        auditRemark: null,
-        auditUserId: null,
-        submitTime: null,
-        auditTime: null,
-      },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        applyNo: [
-          { required: true, message: "申请单号不能为空", trigger: "blur" }
-        ],
-        userId: [
-          { required: true, message: "申请人用户ID不能为空", trigger: "blur" }
-        ],
-        channelType: [
-          { required: true, message: "渠道类型：teacher/organization/individual不能为空", trigger: "change" }
-        ],
-        applyName: [
-          { required: true, message: "申请名称不能为空", trigger: "blur" }
-        ],
-        applyStatus: [
-          { required: true, message: "状态：pending/approved/rejected/suspended不能为空", trigger: "change" }
-        ],
-      }
+      queryParams: { pageNum: 1, pageSize: 10, applyNo: undefined, userId: undefined, applyStatus: undefined },
+      statusOptions: Object.entries(STATUS_META).map(([value, { label }]) => ({ value, label })),
+      detailVisible: false,
+      detail: null
+    }
+  },
+  computed: {
+    materials() {
+      if (!this.detail || !this.detail.materialsJson) return []
+      try { return JSON.parse(this.detail.materialsJson) } catch (_) { return [] }
     }
   },
   created() {
+    this.updateViewport()
+    window.addEventListener('resize', this.updateViewport)
     this.getList()
   },
+  beforeDestroy() { window.removeEventListener('resize', this.updateViewport) },
   methods: {
-    /** 查询渠道认证申请列表 */
-    getList() {
+    updateViewport() { this.isMobile = window.innerWidth <= 768 },
+    async getList() {
       this.loading = true
-      listJst_channel_auth_apply(this.queryParams).then(response => {
-        this.jst_channel_auth_applyList = response.rows
-        this.total = response.total
-        this.loading = false
-      })
+      try {
+        const res = await listJst_channel_auth_apply(this.queryParams)
+        this.list = res.rows || []
+        this.total = res.total || 0
+      } finally { this.loading = false }
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        applyId: null,
-        applyNo: null,
-        userId: null,
-        channelId: null,
-        channelType: null,
-        applyName: null,
-        materialsJson: null,
-        applyStatus: null,
-        auditRemark: null,
-        auditUserId: null,
-        submitTime: null,
-        auditTime: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
-    handleQuery() {
-      this.queryParams.pageNum = 1
+    handleQuery() { this.queryParams.pageNum = 1; this.getList() },
+    resetQuery() {
+      this.queryParams = { pageNum: 1, pageSize: 10, applyNo: undefined, userId: undefined, applyStatus: undefined }
       this.getList()
     },
-    /** 重置按钮操作 */
-    resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
+    async openDetail(row) {
+      this.detailVisible = true
+      this.detail = null
+      try {
+        const res = await getJst_channel_auth_apply(row.applyId)
+        this.detail = res.data
+      } catch (_) { this.detail = row }
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.applyId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加渠道认证申请"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const applyId = row.applyId || this.ids
-      getJst_channel_auth_apply(applyId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改渠道认证申请"
-      })
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.applyId != null) {
-            updateJst_channel_auth_apply(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_channel_auth_apply(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
-      })
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const applyIds = row.applyId || this.ids
-      this.$modal.confirm('是否确认删除渠道认证申请编号为"' + applyIds + '"的数据项？').then(function() {
-        return delJst_channel_auth_apply(applyIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_channel_auth_apply/export', {
-        ...this.queryParams
-      }, `jst_channel_auth_apply_${new Date().getTime()}.xlsx`)
-    }
+    statusLabel(s) { return (STATUS_META[s] && STATUS_META[s].label) || s || '--' },
+    statusType(s) { return (STATUS_META[s] && STATUS_META[s].type) || 'info' },
+    channelTypeLabel(t) { return { teacher: '教师', organization: '机构', individual: '个人' }[t] || t || '--' },
+    isImage(url) { return url && /\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i.test(url) }
   }
 }
 </script>
+
+<style scoped>
+.enhanced-page { background: #f6f8fb; min-height: calc(100vh - 84px); }
+.page-hero { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px; margin-bottom: 18px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.hero-eyebrow { margin: 0 0 8px; color: #2f6fec; font-size: 13px; font-weight: 600; }
+.page-hero h2 { margin: 0; font-size: 24px; font-weight: 700; color: #172033; }
+.hero-desc { margin: 8px 0 0; color: #6f7b8f; }
+.query-panel { padding: 16px 16px 0; margin-bottom: 16px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.drawer-body { padding: 20px; }
+.material-item { margin-bottom: 12px; padding: 8px; background: #f6f8fb; border-radius: 6px; }
+.material-link { color: #2f6fec; margin-left: 8px; }
+.mobile-list { min-height: 180px; }
+.mobile-card { padding: 16px; margin-bottom: 12px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.mobile-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.mobile-title { font-weight: 700; color: #172033; }
+.mobile-sub { margin-top: 4px; font-size: 12px; color: #7a8495; }
+.mobile-info-row { margin-top: 8px; font-size: 13px; color: #7a8495; display: flex; align-items: center; gap: 8px; }
+.mobile-actions { margin-top: 12px; border-top: 1px solid #f0f2f5; padding-top: 12px; }
+@media (max-width: 768px) {
+  .enhanced-page { padding: 12px; }
+  .page-hero { display: block; padding: 18px; }
+  .page-hero .el-button { width: 100%; min-height: 44px; margin-top: 16px; }
+  .page-hero h2 { font-size: 20px; }
+  .query-panel { padding-bottom: 8px; }
+  .query-panel ::v-deep .el-form-item { display: block; margin-right: 0; }
+  .query-panel ::v-deep .el-form-item__content, .query-panel ::v-deep .el-select, .query-panel ::v-deep .el-input { width: 100%; }
+}
+</style>

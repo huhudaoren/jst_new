@@ -1,380 +1,408 @@
-<template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="团队预约主ID" prop="teamAppointmentId">
+﻿<template>
+  <div class="app-container team-member-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">预约中心</p>
+        <h2>团队预约成员管理</h2>
+        <p class="hero-desc">支持团队/成员名智能检索，展示签到状态，支持详情抽屉查看成员信息。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="88px" class="query-panel">
+      <el-form-item label="团队关键词">
         <el-input
-          v-model="queryParams.teamAppointmentId"
-          placeholder="请输入团队预约主ID"
+          v-model="queryParams.teamKeyword"
+          placeholder="团队名/团队ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="正式用户ID" prop="userId">
+      <el-form-item label="成员关键词">
         <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入正式用户ID"
+          v-model="queryParams.memberKeyword"
+          placeholder="成员名/成员编号/ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="参赛人ID" prop="participantId">
-        <el-input
-          v-model="queryParams.participantId"
-          placeholder="请输入参赛人ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="成员编号" prop="memberNo">
-        <el-input
-          v-model="queryParams.memberNo"
-          placeholder="请输入成员编号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="姓名快照" prop="nameSnapshot">
-        <el-input
-          v-model="queryParams.nameSnapshot"
-          placeholder="请输入姓名快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="手机快照" prop="mobileSnapshot">
-        <el-input
-          v-model="queryParams.mobileSnapshot"
-          placeholder="请输入手机快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="个人子订单ID" prop="subOrderId">
-        <el-input
-          v-model="queryParams.subOrderId"
-          placeholder="请输入个人子订单ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="签到状态">
+        <el-select v-model="queryParams.writeoffStatus" placeholder="全部" clearable>
+          <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_team_appointment_member:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_team_appointment_member:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_team_appointment_member:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_team_appointment_member:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
+    <div v-if="isMobile" v-loading="loading" class="mobile-list">
+      <div v-if="list.length">
+        <div v-for="row in list" :key="row.memberId" class="mobile-card">
+          <div class="mobile-card-top">
+            <div>
+              <div class="mobile-title">{{ memberNameText(row) }}</div>
+              <div class="mobile-sub">{{ teamText(row) }}</div>
+            </div>
+            <el-tag size="small" :type="statusType(row.writeoffStatus)">{{ statusLabel(row.writeoffStatus) }}</el-tag>
+          </div>
+          <div class="mobile-info-row">
+            <span>成员编号 {{ row.memberNo || '--' }}</span>
+            <span>{{ row.mobileSnapshot || '--' }}</span>
+          </div>
+          <div class="mobile-info-row">
+            <span>签到时间 {{ signTimeText(row) }}</span>
+          </div>
+          <div class="mobile-actions">
+            <el-button type="text" @click="openDetail(row)">查看详情</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无成员记录" :image-size="96" />
+    </div>
 
-    <el-table v-loading="loading" :data="jst_team_appointment_memberList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="成员明细ID" align="center" prop="memberId" />
-      <el-table-column label="团队预约主ID" align="center" prop="teamAppointmentId" />
-      <el-table-column label="正式用户ID" align="center" prop="userId" />
-      <el-table-column label="参赛人ID" align="center" prop="participantId" />
-      <el-table-column label="成员编号" align="center" prop="memberNo" />
-      <el-table-column label="姓名快照" align="center" prop="nameSnapshot" />
-      <el-table-column label="手机快照" align="center" prop="mobileSnapshot" />
-      <el-table-column label="个人子订单ID" align="center" prop="subOrderId" />
-      <el-table-column label="核销状态：unused/used/expired/voided" align="center" prop="writeoffStatus" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="成员编号" prop="memberNo" min-width="130" show-overflow-tooltip />
+      <el-table-column label="成员姓名" min-width="120" show-overflow-tooltip>
+        <template slot-scope="scope">{{ memberNameText(scope.row) }}</template>
+      </el-table-column>
+      <el-table-column label="手机号" prop="mobileSnapshot" min-width="130" show-overflow-tooltip />
+      <el-table-column label="团队" min-width="170" show-overflow-tooltip>
+        <template slot-scope="scope">{{ teamText(scope.row) }}</template>
+      </el-table-column>
+      <el-table-column label="参赛人ID" prop="participantId" min-width="110" />
+      <el-table-column label="子订单ID" prop="subOrderId" min-width="110" />
+      <el-table-column label="签到状态" min-width="120">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_team_appointment_member:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_team_appointment_member:remove']"
-          >删除</el-button>
+          <el-tag size="small" :type="statusType(scope.row.writeoffStatus)">{{ statusLabel(scope.row.writeoffStatus) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="签到时间" min-width="160">
+        <template slot-scope="scope">{{ signTimeText(scope.row) }}</template>
+      </el-table-column>
+      <el-table-column label="操作" width="120" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
 
-    <!-- 添加或修改团队预约成员明细对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="团队预约主ID" prop="teamAppointmentId">
-              <el-input v-model="form.teamAppointmentId" placeholder="请输入团队预约主ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="正式用户ID" prop="userId">
-              <el-input v-model="form.userId" placeholder="请输入正式用户ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="参赛人ID" prop="participantId">
-              <el-input v-model="form.participantId" placeholder="请输入参赛人ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="成员编号" prop="memberNo">
-              <el-input v-model="form.memberNo" placeholder="请输入成员编号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="姓名快照" prop="nameSnapshot">
-              <el-input v-model="form.nameSnapshot" placeholder="请输入姓名快照" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="手机快照" prop="mobileSnapshot">
-              <el-input v-model="form.mobileSnapshot" placeholder="请输入手机快照" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="个人子订单ID" prop="subOrderId">
-              <el-input v-model="form.subOrderId" placeholder="请输入个人子订单ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <el-drawer :visible.sync="detailVisible" :size="isMobile ? '100%' : '680px'" title="成员详情" append-to-body>
+      <div v-loading="detailLoading" class="drawer-body">
+        <el-descriptions v-if="detail" :column="isMobile ? 1 : 2" border>
+          <el-descriptions-item label="成员ID">{{ detail.memberId }}</el-descriptions-item>
+          <el-descriptions-item label="成员编号">{{ detail.memberNo || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="成员姓名">{{ memberNameText(detail) }}</el-descriptions-item>
+          <el-descriptions-item label="手机号">{{ detail.mobileSnapshot || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="团队">{{ teamText(detail) }}</el-descriptions-item>
+          <el-descriptions-item label="团队ID">{{ detail.teamAppointmentId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="正式用户ID">{{ detail.userId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="参赛人ID">{{ detail.participantId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="子订单ID">{{ detail.subOrderId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="签到状态">
+            <el-tag size="small" :type="statusType(detail.writeoffStatus)">{{ statusLabel(detail.writeoffStatus) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="签到时间">{{ signTimeText(detail) }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ parseTime(detail.createTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="更新时间">{{ parseTime(detail.updateTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="备注" :span="isMobile ? 1 : 2">{{ detail.remark || '--' }}</el-descriptions-item>
+        </el-descriptions>
+        <el-empty v-else description="暂无详情数据" :image-size="96" />
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_team_appointment_member, getJst_team_appointment_member, delJst_team_appointment_member, addJst_team_appointment_member, updateJst_team_appointment_member } from "@/api/jst/order/jst_team_appointment_member"
+import { listJst_team_appointment_member, getJst_team_appointment_member } from '@/api/jst/order/jst_team_appointment_member'
+
+const MEMBER_STATUS_MAP = {
+  unused: { label: '未签到', type: 'info' },
+  used: { label: '已签到', type: 'success' },
+  expired: { label: '已过期', type: 'warning' },
+  voided: { label: '已作废', type: 'danger' }
+}
 
 export default {
-  name: "Jst_team_appointment_member",
+  name: 'JstTeamAppointmentMemberManage',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
+      loading: false,
+      detailLoading: false,
+      isMobile: false,
+      list: [],
       total: 0,
-      // 团队预约成员明细表格数据
-      jst_team_appointment_memberList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
+      detailVisible: false,
+      detail: null,
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        teamAppointmentId: null,
-        userId: null,
-        participantId: null,
-        memberNo: null,
-        nameSnapshot: null,
-        mobileSnapshot: null,
-        subOrderId: null,
-        writeoffStatus: null,
+        teamKeyword: '',
+        memberKeyword: '',
+        writeoffStatus: undefined
       },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        teamAppointmentId: [
-          { required: true, message: "团队预约主ID不能为空", trigger: "blur" }
-        ],
-        participantId: [
-          { required: true, message: "参赛人ID不能为空", trigger: "blur" }
-        ],
-        memberNo: [
-          { required: true, message: "成员编号不能为空", trigger: "blur" }
-        ],
-        nameSnapshot: [
-          { required: true, message: "姓名快照不能为空", trigger: "blur" }
-        ],
-        writeoffStatus: [
-          { required: true, message: "核销状态：unused/used/expired/voided不能为空", trigger: "change" }
-        ],
-      }
+      statusOptions: Object.keys(MEMBER_STATUS_MAP).map(key => ({
+        value: key,
+        label: MEMBER_STATUS_MAP[key].label
+      }))
     }
   },
   created() {
+    this.updateViewport()
+    window.addEventListener('resize', this.updateViewport)
     this.getList()
   },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.updateViewport)
+  },
   methods: {
-    /** 查询团队预约成员明细列表 */
-    getList() {
+    updateViewport() {
+      this.isMobile = window.innerWidth <= 768
+    },
+    isNumericKeyword(value) {
+      return /^\d+$/.test(String(value || '').trim())
+    },
+    async getList() {
       this.loading = true
-      listJst_team_appointment_member(this.queryParams).then(response => {
-        this.jst_team_appointment_memberList = response.rows
-        this.total = response.total
+      try {
+        const teamKeyword = String(this.queryParams.teamKeyword || '').trim()
+        const memberKeyword = String(this.queryParams.memberKeyword || '').trim()
+        const params = {
+          pageNum: this.queryParams.pageNum,
+          pageSize: this.queryParams.pageSize,
+          writeoffStatus: this.queryParams.writeoffStatus || undefined
+        }
+
+        if (teamKeyword && this.isNumericKeyword(teamKeyword)) {
+          params.teamAppointmentId = Number(teamKeyword)
+        }
+
+        if (memberKeyword) {
+          params.nameSnapshot = memberKeyword
+          if (this.isNumericKeyword(memberKeyword)) {
+            params.participantId = Number(memberKeyword)
+          }
+        }
+
+        const res = await listJst_team_appointment_member(params)
+        const rows = res.rows || []
+        const needLocalTeam = !!teamKeyword
+        const needLocalMember = !!memberKeyword
+
+        if (needLocalTeam || needLocalMember) {
+          const teamLower = teamKeyword.toLowerCase()
+          const memberLower = memberKeyword.toLowerCase()
+          this.list = rows.filter(row => {
+            const teamMatch = !needLocalTeam || this.teamText(row).toLowerCase().indexOf(teamLower) > -1
+            const memberMatch = !needLocalMember || this.memberSearchText(row).toLowerCase().indexOf(memberLower) > -1
+            return teamMatch && memberMatch
+          })
+          this.total = this.list.length
+        } else {
+          this.list = rows
+          this.total = res.total || 0
+        }
+      } finally {
         this.loading = false
-      })
-    },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        memberId: null,
-        teamAppointmentId: null,
-        userId: null,
-        participantId: null,
-        memberNo: null,
-        nameSnapshot: null,
-        mobileSnapshot: null,
-        subOrderId: null,
-        writeoffStatus: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
       }
-      this.resetForm("form")
     },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
+      this.queryParams = {
+        pageNum: 1,
+        pageSize: 10,
+        teamKeyword: '',
+        memberKeyword: '',
+        writeoffStatus: undefined
+      }
+      this.getList()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.memberId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
+    async openDetail(row) {
+      const id = row && row.memberId ? row.memberId : null
+      if (!id) return
+      this.detailVisible = true
+      this.detailLoading = true
+      try {
+        const res = await getJst_team_appointment_member(id)
+        this.detail = res.data || null
+      } finally {
+        this.detailLoading = false
+      }
     },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加团队预约成员明细"
+    memberNameText(row) {
+      return row.nameSnapshot || (row.participantId ? '成员 #' + row.participantId : '--')
     },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const memberId = row.memberId || this.ids
-      getJst_team_appointment_member(memberId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改团队预约成员明细"
-      })
+    teamText(row) {
+      return row.teamName || (row.teamAppointmentId ? '团队 #' + row.teamAppointmentId : '--')
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.memberId != null) {
-            updateJst_team_appointment_member(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_team_appointment_member(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
-      })
+    memberSearchText(row) {
+      return [
+        row.nameSnapshot,
+        row.memberNo,
+        row.mobileSnapshot,
+        row.participantId,
+        row.userId,
+        row.subOrderId
+      ]
+        .filter(Boolean)
+        .join(' ')
     },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const memberIds = row.memberId || this.ids
-      this.$modal.confirm('是否确认删除团队预约成员明细编号为"' + memberIds + '"的数据项？').then(function() {
-        return delJst_team_appointment_member(memberIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
+    signTimeText(row) {
+      return this.parseTime(row.writeoffTime || row.signInTime || row.updateTime) || '--'
     },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_team_appointment_member/export', {
-        ...this.queryParams
-      }, `jst_team_appointment_member_${new Date().getTime()}.xlsx`)
+    statusLabel(value) {
+      return (MEMBER_STATUS_MAP[value] && MEMBER_STATUS_MAP[value].label) || value || '--'
+    },
+    statusType(value) {
+      return (MEMBER_STATUS_MAP[value] && MEMBER_STATUS_MAP[value].type) || 'info'
     }
   }
 }
 </script>
+
+<style scoped>
+.team-member-page {
+  background: #f6f8fb;
+  min-height: calc(100vh - 84px);
+}
+
+.page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  margin-bottom: 18px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.hero-eyebrow {
+  margin: 0 0 8px;
+  color: #2f6fec;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.page-hero h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.hero-desc {
+  margin: 8px 0 0;
+  color: #6f7b8f;
+}
+
+.query-panel {
+  padding: 16px 16px 0;
+  margin-bottom: 16px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.drawer-body {
+  padding: 0 24px 24px;
+}
+
+.mobile-list {
+  min-height: 180px;
+}
+
+.mobile-card {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.mobile-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mobile-title {
+  font-weight: 700;
+  color: #172033;
+}
+
+.mobile-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #7a8495;
+}
+
+.mobile-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #7a8495;
+}
+
+.mobile-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .team-member-page {
+    padding: 12px;
+  }
+
+  .page-hero {
+    display: block;
+    padding: 18px;
+  }
+
+  .page-hero .el-button {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 16px;
+  }
+
+  .page-hero h2 {
+    font-size: 20px;
+  }
+
+  .query-panel {
+    padding-bottom: 8px;
+  }
+
+  .query-panel ::v-deep .el-form-item {
+    display: block;
+    margin-right: 0;
+  }
+
+  .query-panel ::v-deep .el-form-item__content,
+  .query-panel ::v-deep .el-select,
+  .query-panel ::v-deep .el-input {
+    width: 100%;
+  }
+
+  .mobile-actions .el-button {
+    min-height: 44px;
+  }
+}
+</style>

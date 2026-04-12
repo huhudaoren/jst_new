@@ -2,6 +2,7 @@ package com.ruoyi.jst.finance.mapper;
 
 import java.util.List;
 import com.ruoyi.jst.finance.domain.JstContractRecord;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 合同记录Mapper接口
@@ -58,4 +59,25 @@ public interface JstContractRecordMapper
      * @return 结果
      */
     public int deleteJstContractRecordByContractIds(Long[] contractIds);
+
+    /**
+     * 按对象归属查询合同列表（小程序端）。
+     *
+     * @param targetType 对象类型(channel/partner)
+     * @param targetId   对象ID
+     * @return 合同记录集合
+     */
+    List<JstContractRecord> selectByTarget(@Param("targetType") String targetType, @Param("targetId") Long targetId);
+
+    /**
+     * 按合同ID+对象归属查询详情（小程序端）。
+     *
+     * @param contractId 合同ID
+     * @param targetType 对象类型(channel/partner)
+     * @param targetId   对象ID
+     * @return 合同记录
+     */
+    JstContractRecord selectByIdAndTarget(@Param("contractId") Long contractId,
+                                          @Param("targetType") String targetType,
+                                          @Param("targetId") Long targetId);
 }

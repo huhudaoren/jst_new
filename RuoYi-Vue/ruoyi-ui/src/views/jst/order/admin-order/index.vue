@@ -1,10 +1,10 @@
-<template>
+﻿<template>
   <div class="app-container admin-order-page">
     <div class="page-hero">
       <div>
         <p class="hero-eyebrow">订单中心</p>
         <h2>订单管理</h2>
-        <p class="hero-desc">查看平台全部订单，支持按订单号、状态筛选，可查看详情和发起特批退款。</p>
+        <p class="hero-desc">支持按订单号、状态筛选，查看订单详情，并可发起特批退款。</p>
       </div>
       <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
     </div>
@@ -46,13 +46,12 @@
       </el-form-item>
     </el-form>
 
-    <!-- 手机端卡片 -->
     <div v-if="isMobile" v-loading="loading" class="mobile-list">
       <div v-if="list.length">
         <div v-for="row in list" :key="row.orderId" class="mobile-card">
           <div class="mobile-card-top">
             <div>
-              <div class="mobile-title">{{ row.orderNo }}</div>
+              <div class="mobile-title">{{ row.orderNo || '--' }}</div>
               <div class="mobile-sub">{{ row.contestName || '--' }}</div>
             </div>
             <el-tag size="small" :type="orderStatusType(row.orderStatus)">{{ orderStatusLabel(row.orderStatus) }}</el-tag>
@@ -61,20 +60,25 @@
           <div class="mobile-info-row">
             <span>标价 {{ formatMoney(row.listAmount) }}</span>
             <span v-if="row.refundStatus && row.refundStatus !== 'none'">
-              退款: <el-tag size="mini" :type="refundStatusType(row.refundStatus)">{{ refundStatusLabel(row.refundStatus) }}</el-tag>
+              退款 <el-tag size="mini" :type="refundStatusType(row.refundStatus)">{{ refundStatusLabel(row.refundStatus) }}</el-tag>
             </span>
           </div>
           <div class="mobile-info-row">{{ parseTime(row.createTime) || '--' }}</div>
           <div class="mobile-actions">
             <el-button type="text" @click="openDetail(row)">查看详情</el-button>
-            <el-button v-if="canSpecialRefund(row)" type="text" class="danger-text" v-hasPermi="['jst:order:refund:special']" @click="openSpecialRefund(row)">特批退款</el-button>
+            <el-button
+              v-if="canSpecialRefund(row)"
+              type="text"
+              class="danger-text"
+              v-hasPermi="['jst:order:refund:special']"
+              @click="openSpecialRefund(row)"
+            >特批退款</el-button>
           </div>
         </div>
       </div>
       <el-empty v-else description="暂无订单" :image-size="96" />
     </div>
 
-    <!-- PC 端表格 -->
     <el-table v-else v-loading="loading" :data="list">
       <el-table-column label="订单号" prop="orderNo" min-width="180" show-overflow-tooltip />
       <el-table-column label="用户" prop="userName" min-width="120" show-overflow-tooltip />
@@ -94,7 +98,11 @@
       </el-table-column>
       <el-table-column label="退款状态" min-width="110">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.refundStatus && scope.row.refundStatus !== 'none'" size="small" :type="refundStatusType(scope.row.refundStatus)">{{ refundStatusLabel(scope.row.refundStatus) }}</el-tag>
+          <el-tag
+            v-if="scope.row.refundStatus && scope.row.refundStatus !== 'none'"
+            size="small"
+            :type="refundStatusType(scope.row.refundStatus)"
+          >{{ refundStatusLabel(scope.row.refundStatus) }}</el-tag>
           <span v-else>--</span>
         </template>
       </el-table-column>
@@ -104,19 +112,24 @@
       <el-table-column label="操作" width="180" fixed="right">
         <template slot-scope="scope">
           <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
-          <el-button v-if="canSpecialRefund(scope.row)" type="text" class="danger-text" v-hasPermi="['jst:order:refund:special']" @click="openSpecialRefund(scope.row)">特批退款</el-button>
+          <el-button
+            v-if="canSpecialRefund(scope.row)"
+            type="text"
+            class="danger-text"
+            v-hasPermi="['jst:order:refund:special']"
+            @click="openSpecialRefund(scope.row)"
+          >特批退款</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
 
-    <!-- 详情抽屉 -->
     <el-drawer :visible.sync="detailVisible" :size="isMobile ? '100%' : '720px'" title="订单详情" append-to-body>
       <div v-loading="detailLoading" class="drawer-body">
         <template v-if="detail">
           <el-descriptions :column="isMobile ? 1 : 2" border>
-            <el-descriptions-item label="订单号">{{ detail.orderNo }}</el-descriptions-item>
+            <el-descriptions-item label="订单号">{{ detail.orderNo || '--' }}</el-descriptions-item>
             <el-descriptions-item label="用户">{{ detail.userName || '--' }}</el-descriptions-item>
             <el-descriptions-item label="赛事">{{ detail.contestName || '--' }}</el-descriptions-item>
             <el-descriptions-item label="订单状态">
@@ -176,15 +189,27 @@
       </div>
     </el-drawer>
 
-    <!-- 特批退款弹窗 -->
     <el-dialog title="特批退款" :visible.sync="specialRefundVisible" width="460px" append-to-body>
-      <el-alert title="特批退款将直接发起全额退款，无需赛事方审核。请谨慎操作。" type="warning" show-icon :closable="false" class="mb12" />
+      <el-alert
+        title="特批退款将直接发起全额退款，无需赛事方审核。请谨慎操作。"
+        type="warning"
+        show-icon
+        :closable="false"
+        class="mb12"
+      />
       <el-form ref="specialRefundForm" :model="specialRefundForm" :rules="specialRefundRules" label-width="88px">
         <el-form-item label="订单号">
           <span>{{ currentRow && currentRow.orderNo }}</span>
         </el-form-item>
         <el-form-item label="退款原因" prop="reason">
-          <el-input v-model="specialRefundForm.reason" type="textarea" :rows="4" maxlength="255" show-word-limit placeholder="请填写特批退款原因" />
+          <el-input
+            v-model="specialRefundForm.reason"
+            type="textarea"
+            :rows="4"
+            maxlength="255"
+            show-word-limit
+            placeholder="请填写特批退款原因"
+          />
         </el-form-item>
       </el-form>
       <div slot="footer">
@@ -228,6 +253,7 @@ export default {
       specialRefundVisible: false,
       currentRow: null,
       dateRange: [],
+      lastAutoOpenKey: '',
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -241,6 +267,14 @@ export default {
       },
       orderStatusOptions: Object.entries(ORDER_STATUS).map(([value, { label }]) => ({ value, label })),
       refundStatusOptions: Object.entries(REFUND_STATUS).map(([value, { label }]) => ({ value, label }))
+    }
+  },
+  watch: {
+    '$route.query': {
+      handler() {
+        this.tryAutoOpenFromRoute()
+      },
+      deep: true
     }
   },
   created() {
@@ -268,6 +302,7 @@ export default {
         this.total = res.total || 0
       } finally {
         this.loading = false
+        this.tryAutoOpenFromRoute()
       }
     },
     handleQuery() {
@@ -276,18 +311,36 @@ export default {
     },
     resetQuery() {
       this.dateRange = []
-      this.queryParams = { pageNum: 1, pageSize: 10, orderNo: undefined, orderStatus: undefined, refundStatus: undefined }
+      this.queryParams = {
+        pageNum: 1,
+        pageSize: 10,
+        orderNo: undefined,
+        orderStatus: undefined,
+        refundStatus: undefined
+      }
       this.getList()
     },
     async openDetail(row) {
+      const orderId = Number(row && row.orderId)
+      if (!orderId) return
       this.detailVisible = true
       this.detailLoading = true
       try {
-        const res = await getOrderDetail(row.orderId)
-        this.detail = res.data
+        const res = await getOrderDetail(orderId)
+        this.detail = res.data || null
       } finally {
         this.detailLoading = false
       }
+    },
+    tryAutoOpenFromRoute() {
+      const query = this.$route.query || {}
+      const autoOpen = query.autoOpen
+      const orderId = Number(query.orderId)
+      if (autoOpen !== '1' || !orderId) return
+      const key = autoOpen + '-' + orderId
+      if (this.lastAutoOpenKey === key) return
+      this.lastAutoOpenKey = key
+      this.openDetail({ orderId })
     },
     canSpecialRefund(row) {
       return row.orderStatus === 'paid' && (!row.refundStatus || row.refundStatus === 'none')
@@ -325,7 +378,7 @@ export default {
     },
     formatMoney(value) {
       const n = Number(value || 0)
-      return '\u00a5' + n.toFixed(2)
+      return '\u00A5' + (n / 100).toFixed(2)
     }
   }
 }
@@ -399,7 +452,6 @@ export default {
   color: #172033;
 }
 
-/* Mobile */
 .mobile-list {
   min-height: 180px;
 }

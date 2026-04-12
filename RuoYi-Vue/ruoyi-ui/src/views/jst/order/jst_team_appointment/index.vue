@@ -1,455 +1,509 @@
-<template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="团队预约号" prop="teamNo">
+﻿<template>
+  <div class="app-container team-appointment-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">预约中心</p>
+        <h2>团队预约管理</h2>
+        <p class="hero-desc">支持团队名/赛事智能检索，展示成员数与预约状态，可在详情中查看团队成员签到信息。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="88px" class="query-panel">
+      <el-form-item label="团队关键词">
         <el-input
-          v-model="queryParams.teamNo"
-          placeholder="请输入团队预约号"
+          v-model="queryParams.teamKeyword"
+          placeholder="团队名/团队号/团队ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="关联活动ID" prop="contestId">
+      <el-form-item label="赛事关键词">
         <el-input
-          v-model="queryParams.contestId"
-          placeholder="请输入关联活动ID"
+          v-model="queryParams.contestKeyword"
+          placeholder="赛事名/赛事ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="渠道方ID" prop="channelId">
-        <el-input
-          v-model="queryParams.channelId"
-          placeholder="请输入渠道方ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="预约状态">
+        <el-select v-model="queryParams.status" placeholder="全部" clearable>
+          <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="团队/批次名称" prop="teamName">
-        <el-input
-          v-model="queryParams.teamName"
-          placeholder="请输入团队/批次名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="预约日期" prop="appointmentDate">
-        <el-date-picker clearable
-          v-model="queryParams.appointmentDate"
-          type="date"
+      <el-form-item label="预约日期">
+        <el-date-picker
+          v-model="dateRange"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始"
+          end-placeholder="结束"
           value-format="yyyy-MM-dd"
-          placeholder="请选择预约日期">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="场次/时段编码" prop="sessionCode">
-        <el-input
-          v-model="queryParams.sessionCode"
-          placeholder="请输入场次/时段编码"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="预约总人数" prop="totalPersons">
-        <el-input
-          v-model="queryParams.totalPersons"
-          placeholder="请输入预约总人数"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="正式成员人数" prop="memberPersons">
-        <el-input
-          v-model="queryParams.memberPersons"
-          placeholder="请输入正式成员人数"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="额外人数" prop="extraPersons">
-        <el-input
-          v-model="queryParams.extraPersons"
-          placeholder="请输入额外人数"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="已核销人数" prop="writeoffPersons">
-        <el-input
-          v-model="queryParams.writeoffPersons"
-          placeholder="请输入已核销人数"
-          clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_team_appointment:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_team_appointment:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_team_appointment:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_team_appointment:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
+    <div v-if="isMobile" v-loading="loading" class="mobile-list">
+      <div v-if="list.length">
+        <div v-for="row in list" :key="row.teamAppointmentId" class="mobile-card">
+          <div class="mobile-card-top">
+            <div>
+              <div class="mobile-title">{{ teamNameText(row) }}</div>
+              <div class="mobile-sub">{{ teamNoText(row) }}</div>
+            </div>
+            <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+          </div>
+          <div class="mobile-info-row">
+            <span>{{ contestText(row) }}</span>
+            <span>{{ row.appointmentDate || '--' }}</span>
+          </div>
+          <div class="mobile-info-row">
+            <span>成员 {{ row.memberPersons || 0 }}/{{ row.totalPersons || 0 }}</span>
+            <span>已核销 {{ row.writeoffPersons || 0 }}</span>
+          </div>
+          <div class="mobile-actions">
+            <el-button type="text" @click="openDetail(row)">查看详情</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无团队预约" :image-size="96" />
+    </div>
 
-    <el-table v-loading="loading" :data="jst_team_appointmentList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="团队预约ID" align="center" prop="teamAppointmentId" />
-      <el-table-column label="团队预约号" align="center" prop="teamNo" />
-      <el-table-column label="关联活动ID" align="center" prop="contestId" />
-      <el-table-column label="渠道方ID" align="center" prop="channelId" />
-      <el-table-column label="团队/批次名称" align="center" prop="teamName" />
-      <el-table-column label="预约日期" align="center" prop="appointmentDate" width="180">
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="团队预约号" min-width="170" show-overflow-tooltip>
+        <template slot-scope="scope">{{ teamNoText(scope.row) }}</template>
+      </el-table-column>
+      <el-table-column label="团队名称" min-width="180" show-overflow-tooltip>
+        <template slot-scope="scope">{{ teamNameText(scope.row) }}</template>
+      </el-table-column>
+      <el-table-column label="赛事" min-width="180" show-overflow-tooltip>
+        <template slot-scope="scope">{{ contestText(scope.row) }}</template>
+      </el-table-column>
+      <el-table-column label="预约日期" prop="appointmentDate" min-width="120" />
+      <el-table-column label="场次/时段" prop="sessionCode" min-width="130" show-overflow-tooltip />
+      <el-table-column label="成员数" min-width="110" align="center">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.appointmentDate, '{y}-{m}-{d}') }}</span>
+          <span class="member-count">{{ scope.row.memberPersons || 0 }}/{{ scope.row.totalPersons || 0 }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="场次/时段编码" align="center" prop="sessionCode" />
-      <el-table-column label="预约总人数" align="center" prop="totalPersons" />
-      <el-table-column label="正式成员人数" align="center" prop="memberPersons" />
-      <el-table-column label="额外人数" align="center" prop="extraPersons" />
-      <el-table-column label="额外名单JSON" align="center" prop="extraListJson" />
-      <el-table-column label="已核销人数" align="center" prop="writeoffPersons" />
-      <el-table-column label="团队预约状态：booked/partial_writeoff/fully_writeoff/partial_writeoff_ended/no_show/cancelled/expired" align="center" prop="status" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="已核销" prop="writeoffPersons" min-width="90" align="center" />
+      <el-table-column label="状态" min-width="140">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_team_appointment:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_team_appointment:remove']"
-          >删除</el-button>
+          <el-tag size="small" :type="statusType(scope.row.status)">{{ statusLabel(scope.row.status) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="120" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
 
-    <!-- 添加或修改团队预约主记录对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="团队预约号" prop="teamNo">
-              <el-input v-model="form.teamNo" placeholder="请输入团队预约号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="关联活动ID" prop="contestId">
-              <el-input v-model="form.contestId" placeholder="请输入关联活动ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="渠道方ID" prop="channelId">
-              <el-input v-model="form.channelId" placeholder="请输入渠道方ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="团队/批次名称" prop="teamName">
-              <el-input v-model="form.teamName" placeholder="请输入团队/批次名称" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="预约日期" prop="appointmentDate">
-              <el-date-picker clearable
-                v-model="form.appointmentDate"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择预约日期">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="场次/时段编码" prop="sessionCode">
-              <el-input v-model="form.sessionCode" placeholder="请输入场次/时段编码" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="预约总人数" prop="totalPersons">
-              <el-input v-model="form.totalPersons" placeholder="请输入预约总人数" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="正式成员人数" prop="memberPersons">
-              <el-input v-model="form.memberPersons" placeholder="请输入正式成员人数" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="额外人数" prop="extraPersons">
-              <el-input v-model="form.extraPersons" placeholder="请输入额外人数" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="已核销人数" prop="writeoffPersons">
-              <el-input v-model="form.writeoffPersons" placeholder="请输入已核销人数" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <el-drawer :visible.sync="detailVisible" :size="isMobile ? '100%' : '760px'" title="团队预约详情" append-to-body>
+      <div v-loading="detailLoading" class="drawer-body">
+        <el-descriptions v-if="detail" :column="isMobile ? 1 : 2" border>
+          <el-descriptions-item label="团队预约ID">{{ detail.teamAppointmentId }}</el-descriptions-item>
+          <el-descriptions-item label="团队预约号">{{ teamNoText(detail) }}</el-descriptions-item>
+          <el-descriptions-item label="团队名称">{{ teamNameText(detail) }}</el-descriptions-item>
+          <el-descriptions-item label="关联赛事">{{ contestText(detail) }}</el-descriptions-item>
+          <el-descriptions-item label="预约日期">{{ detail.appointmentDate || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="场次/时段">{{ detail.sessionCode || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="渠道ID">{{ detail.channelId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag size="small" :type="statusType(detail.status)">{{ statusLabel(detail.status) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="成员数">{{ detail.memberPersons || 0 }}/{{ detail.totalPersons || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="额外人数">{{ detail.extraPersons || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="已核销人数">{{ detail.writeoffPersons || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="额外名单">{{ extraListText(detail) }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ parseTime(detail.createTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="更新时间">{{ parseTime(detail.updateTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="备注" :span="isMobile ? 1 : 2">{{ detail.remark || '--' }}</el-descriptions-item>
+        </el-descriptions>
+        <el-empty v-else description="暂无详情数据" :image-size="96" />
+
+        <div class="section-title">团队成员</div>
+        <el-table v-loading="memberLoading" :data="memberList" size="small" max-height="320">
+          <el-table-column label="姓名" prop="nameSnapshot" min-width="120" show-overflow-tooltip />
+          <el-table-column label="手机号" prop="mobileSnapshot" min-width="130" show-overflow-tooltip />
+          <el-table-column label="签到状态" min-width="120">
+            <template slot-scope="scope">
+              <el-tag size="small" :type="memberStatusType(scope.row.writeoffStatus)">{{ memberStatusLabel(scope.row.writeoffStatus) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="签到时间" min-width="160">
+            <template slot-scope="scope">{{ memberSignTime(scope.row) }}</template>
+          </el-table-column>
+        </el-table>
+        <el-empty v-if="!memberLoading && !memberList.length" description="暂无团队成员" :image-size="80" />
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_team_appointment, getJst_team_appointment, delJst_team_appointment, addJst_team_appointment, updateJst_team_appointment } from "@/api/jst/order/jst_team_appointment"
+import { listJst_team_appointment, getJst_team_appointment } from '@/api/jst/order/jst_team_appointment'
+import { listJst_team_appointment_member } from '@/api/jst/order/jst_team_appointment_member'
+
+const TEAM_STATUS_MAP = {
+  booked: { label: '已预约', type: 'primary' },
+  partial_writeoff: { label: '部分核销中', type: 'warning' },
+  fully_writeoff: { label: '已全部核销', type: 'success' },
+  partial_writeoff_ended: { label: '部分核销结束', type: 'warning' },
+  no_show: { label: '未到场', type: 'danger' },
+  cancelled: { label: '已取消', type: 'info' },
+  expired: { label: '已过期', type: 'info' }
+}
+
+const MEMBER_STATUS_MAP = {
+  unused: { label: '未签到', type: 'info' },
+  used: { label: '已签到', type: 'success' },
+  expired: { label: '已过期', type: 'warning' },
+  voided: { label: '已作废', type: 'danger' }
+}
 
 export default {
-  name: "Jst_team_appointment",
+  name: 'JstTeamAppointmentManage',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
+      loading: false,
+      detailLoading: false,
+      memberLoading: false,
+      isMobile: false,
+      list: [],
       total: 0,
-      // 团队预约主记录表格数据
-      jst_team_appointmentList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
+      dateRange: [],
+      detailVisible: false,
+      detail: null,
+      memberList: [],
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        teamNo: null,
-        contestId: null,
-        channelId: null,
-        teamName: null,
-        appointmentDate: null,
-        sessionCode: null,
-        totalPersons: null,
-        memberPersons: null,
-        extraPersons: null,
-        extraListJson: null,
-        writeoffPersons: null,
-        status: null,
+        teamKeyword: '',
+        contestKeyword: '',
+        status: undefined
       },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        teamNo: [
-          { required: true, message: "团队预约号不能为空", trigger: "blur" }
-        ],
-        contestId: [
-          { required: true, message: "关联活动ID不能为空", trigger: "blur" }
-        ],
-        channelId: [
-          { required: true, message: "渠道方ID不能为空", trigger: "blur" }
-        ],
-        teamName: [
-          { required: true, message: "团队/批次名称不能为空", trigger: "blur" }
-        ],
-        appointmentDate: [
-          { required: true, message: "预约日期不能为空", trigger: "blur" }
-        ],
-        totalPersons: [
-          { required: true, message: "预约总人数不能为空", trigger: "blur" }
-        ],
-        memberPersons: [
-          { required: true, message: "正式成员人数不能为空", trigger: "blur" }
-        ],
-        extraPersons: [
-          { required: true, message: "额外人数不能为空", trigger: "blur" }
-        ],
-        writeoffPersons: [
-          { required: true, message: "已核销人数不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "团队预约状态：booked/partial_writeoff/fully_writeoff/partial_writeoff_ended/no_show/cancelled/expired不能为空", trigger: "change" }
-        ],
-      }
+      statusOptions: Object.keys(TEAM_STATUS_MAP).map(key => ({
+        value: key,
+        label: TEAM_STATUS_MAP[key].label
+      }))
     }
   },
   created() {
+    this.updateViewport()
+    window.addEventListener('resize', this.updateViewport)
     this.getList()
   },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.updateViewport)
+  },
   methods: {
-    /** 查询团队预约主记录列表 */
-    getList() {
+    updateViewport() {
+      this.isMobile = window.innerWidth <= 768
+    },
+    isNumericKeyword(value) {
+      return /^\d+$/.test(String(value || '').trim())
+    },
+    async getList() {
       this.loading = true
-      listJst_team_appointment(this.queryParams).then(response => {
-        this.jst_team_appointmentList = response.rows
-        this.total = response.total
+      try {
+        const teamKeyword = String(this.queryParams.teamKeyword || '').trim()
+        const contestKeyword = String(this.queryParams.contestKeyword || '').trim()
+        const params = {
+          pageNum: this.queryParams.pageNum,
+          pageSize: this.queryParams.pageSize,
+          status: this.queryParams.status || undefined
+        }
+
+        if (teamKeyword) {
+          params.teamName = teamKeyword
+          if (this.isNumericKeyword(teamKeyword)) {
+            params.teamAppointmentId = Number(teamKeyword)
+          }
+        }
+
+        if (this.isNumericKeyword(contestKeyword)) {
+          params.contestId = Number(contestKeyword)
+        }
+
+        if (this.dateRange && this.dateRange.length === 2) {
+          params.beginAppointmentDate = this.dateRange[0]
+          params.endAppointmentDate = this.dateRange[1]
+        }
+
+        const res = await listJst_team_appointment(params)
+        const rows = res.rows || []
+        const needLocalTeam = !!teamKeyword
+        const needLocalContest = contestKeyword && !this.isNumericKeyword(contestKeyword)
+        const needLocalDate = this.dateRange && this.dateRange.length === 2
+
+        if (needLocalTeam || needLocalContest || needLocalDate) {
+          const teamLower = teamKeyword.toLowerCase()
+          const contestLower = contestKeyword.toLowerCase()
+          this.list = rows.filter(row => {
+            const teamMatch = !needLocalTeam || this.teamSearchText(row).toLowerCase().indexOf(teamLower) > -1
+            const contestMatch = !needLocalContest || this.contestText(row).toLowerCase().indexOf(contestLower) > -1
+            const dateMatch = this.matchDateRange(row.appointmentDate, this.dateRange)
+            return teamMatch && contestMatch && dateMatch
+          })
+          this.total = this.list.length
+        } else {
+          this.list = rows
+          this.total = res.total || 0
+        }
+      } finally {
         this.loading = false
-      })
-    },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        teamAppointmentId: null,
-        teamNo: null,
-        contestId: null,
-        channelId: null,
-        teamName: null,
-        appointmentDate: null,
-        sessionCode: null,
-        totalPersons: null,
-        memberPersons: null,
-        extraPersons: null,
-        extraListJson: null,
-        writeoffPersons: null,
-        status: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
       }
-      this.resetForm("form")
     },
-    /** 搜索按钮操作 */
+    matchDateRange(value, range) {
+      if (!range || range.length !== 2) return true
+      if (!value) return false
+      const begin = new Date(range[0] + ' 00:00:00').getTime()
+      const end = new Date(range[1] + ' 23:59:59').getTime()
+      const current = new Date(value + ' 12:00:00').getTime()
+      if (Number.isNaN(current)) return false
+      return current >= begin && current <= end
+    },
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
+      this.dateRange = []
+      this.queryParams = {
+        pageNum: 1,
+        pageSize: 10,
+        teamKeyword: '',
+        contestKeyword: '',
+        status: undefined
+      }
+      this.getList()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.teamAppointmentId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
+    async openDetail(row) {
+      const id = row && row.teamAppointmentId ? row.teamAppointmentId : null
+      if (!id) return
+      this.detailVisible = true
+      this.detailLoading = true
+      this.memberLoading = true
+      try {
+        const [detailRes, memberRes] = await Promise.all([
+          getJst_team_appointment(id),
+          listJst_team_appointment_member({ pageNum: 1, pageSize: 200, teamAppointmentId: id })
+        ])
+        this.detail = detailRes.data || null
+        this.memberList = memberRes.rows || []
+      } finally {
+        this.detailLoading = false
+        this.memberLoading = false
+      }
     },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加团队预约主记录"
+    teamNoText(row) {
+      return row.teamNo || (row.teamAppointmentId ? 'TEAM-' + row.teamAppointmentId : '--')
     },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const teamAppointmentId = row.teamAppointmentId || this.ids
-      getJst_team_appointment(teamAppointmentId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改团队预约主记录"
-      })
+    teamNameText(row) {
+      return row.teamName || row.batchName || (row.teamAppointmentId ? '团队 #' + row.teamAppointmentId : '--')
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.teamAppointmentId != null) {
-            updateJst_team_appointment(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_team_appointment(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
+    teamSearchText(row) {
+      return [
+        this.teamNoText(row),
+        this.teamNameText(row),
+        row.teamAppointmentId,
+        row.channelId
+      ]
+        .filter(Boolean)
+        .join(' ')
+    },
+    contestText(row) {
+      return row.contestName || row.contestTitle || (row.contestId ? '赛事 #' + row.contestId : '--')
+    },
+    extraListText(row) {
+      const raw = row && row.extraListJson
+      if (!raw) return '--'
+      if (Array.isArray(raw)) return raw.join('、')
+      if (typeof raw === 'string') {
+        try {
+          const parsed = JSON.parse(raw)
+          if (Array.isArray(parsed)) return parsed.join('、')
+        } catch (e) {
+          // keep original string when parse failed
         }
-      })
+        return raw
+      }
+      return '--'
     },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const teamAppointmentIds = row.teamAppointmentId || this.ids
-      this.$modal.confirm('是否确认删除团队预约主记录编号为"' + teamAppointmentIds + '"的数据项？').then(function() {
-        return delJst_team_appointment(teamAppointmentIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
+    statusLabel(value) {
+      return (TEAM_STATUS_MAP[value] && TEAM_STATUS_MAP[value].label) || value || '--'
     },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_team_appointment/export', {
-        ...this.queryParams
-      }, `jst_team_appointment_${new Date().getTime()}.xlsx`)
+    statusType(value) {
+      return (TEAM_STATUS_MAP[value] && TEAM_STATUS_MAP[value].type) || 'info'
+    },
+    memberStatusLabel(value) {
+      return (MEMBER_STATUS_MAP[value] && MEMBER_STATUS_MAP[value].label) || value || '--'
+    },
+    memberStatusType(value) {
+      return (MEMBER_STATUS_MAP[value] && MEMBER_STATUS_MAP[value].type) || 'info'
+    },
+    memberSignTime(row) {
+      return this.parseTime(row.writeoffTime || row.signInTime || row.updateTime) || '--'
     }
   }
 }
 </script>
+
+<style scoped>
+.team-appointment-page {
+  background: #f6f8fb;
+  min-height: calc(100vh - 84px);
+}
+
+.page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  margin-bottom: 18px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.hero-eyebrow {
+  margin: 0 0 8px;
+  color: #2f6fec;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.page-hero h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.hero-desc {
+  margin: 8px 0 0;
+  color: #6f7b8f;
+}
+
+.query-panel {
+  padding: 16px 16px 0;
+  margin-bottom: 16px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.member-count {
+  font-weight: 700;
+}
+
+.drawer-body {
+  padding: 0 24px 24px;
+}
+
+.section-title {
+  margin: 18px 0 10px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.mobile-list {
+  min-height: 180px;
+}
+
+.mobile-card {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.mobile-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mobile-title {
+  font-weight: 700;
+  color: #172033;
+}
+
+.mobile-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #7a8495;
+}
+
+.mobile-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #7a8495;
+}
+
+.mobile-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .team-appointment-page {
+    padding: 12px;
+  }
+
+  .page-hero {
+    display: block;
+    padding: 18px;
+  }
+
+  .page-hero .el-button {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 16px;
+  }
+
+  .page-hero h2 {
+    font-size: 20px;
+  }
+
+  .query-panel {
+    padding-bottom: 8px;
+  }
+
+  .query-panel ::v-deep .el-form-item {
+    display: block;
+    margin-right: 0;
+  }
+
+  .query-panel ::v-deep .el-form-item__content,
+  .query-panel ::v-deep .el-select,
+  .query-panel ::v-deep .el-input,
+  .query-panel ::v-deep .el-date-editor {
+    width: 100%;
+  }
+
+  .mobile-actions .el-button {
+    min-height: 44px;
+  }
+}
+</style>

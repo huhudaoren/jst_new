@@ -1,53 +1,21 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
       <el-form-item label="商品名称" prop="goodsName">
-        <el-input
-          v-model="queryParams.goodsName"
-          placeholder="请输入商品名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.goodsName" placeholder="请输入商品名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="所需积分" prop="pointsPrice">
-        <el-input
-          v-model="queryParams.pointsPrice"
-          placeholder="请输入所需积分"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="商品类型" prop="goodsType">
+        <el-select v-model="queryParams.goodsType" placeholder="全部" clearable>
+          <el-option label="虚拟商品" value="virtual" />
+          <el-option label="实物商品" value="physical" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="现金补差金额" prop="cashPrice">
-        <el-input
-          v-model="queryParams.cashPrice"
-          placeholder="请输入现金补差金额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="库存" prop="stock">
-        <el-input
-          v-model="queryParams.stock"
-          placeholder="请输入库存"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="预警阈值" prop="stockWarning">
-        <el-input
-          v-model="queryParams.stockWarning"
-          placeholder="请输入预警阈值"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="角色限制：student/channel/both" prop="roleLimit">
-        <el-input
-          v-model="queryParams.roleLimit"
-          placeholder="请输入角色限制：student/channel/both"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="全部" clearable>
+          <el-option label="上架" value="on" />
+          <el-option label="下架" value="off" />
+          <el-option label="草稿" value="draft" />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -57,334 +25,352 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_mall_goods:add']"
-        >新增</el-button>
+        <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAdd" v-hasPermi="['jst:points:mall_goods:add']">新增</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_mall_goods:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_mall_goods:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_mall_goods:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="jst_mall_goodsList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="商品ID" align="center" prop="goodsId" />
-      <el-table-column label="商品名称" align="center" prop="goodsName" />
-      <el-table-column label="类型：virtual虚拟 / physical实物" align="center" prop="goodsType" />
-      <el-table-column label="主图" align="center" prop="coverImage" width="100">
-        <template slot-scope="scope">
-          <image-preview :src="scope.row.coverImage" :width="50" :height="50"/>
+    <div v-if="isMobile" v-loading="loading">
+      <div v-if="list.length" class="mobile-card-list">
+        <div v-for="row in list" :key="row.goodsId" class="mobile-card">
+          <div class="mobile-card__head">
+            <span class="mobile-card__title">{{ row.goodsName }}</span>
+            <el-tag size="mini" :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+          </div>
+          <div class="mobile-card__meta">
+            <span>{{ row.goodsType === 'virtual' ? '虚拟' : '实物' }}</span>
+            <span>{{ row.pointsPrice || 0 }} 积分</span>
+            <span class="amount-cell">¥ {{ formatAmount(row.cashPrice) }}</span>
+            <span>
+              库存：
+              <el-tag v-if="Number(row.stock || 0) < 10" size="mini" type="danger">{{ row.stock || 0 }}</el-tag>
+              <span v-else>{{ row.stock || 0 }}</span>
+            </span>
+          </div>
+          <div class="mobile-card__actions">
+            <el-button type="text" size="mini" @click="handleEdit(row)" v-hasPermi="['jst:points:mall_goods:edit']">编辑</el-button>
+            <el-button v-if="!isOnSale(row.status)" type="text" size="mini" @click="handleToggle(row, 'on')" v-hasPermi="['jst:points:mall_goods:edit']">上架</el-button>
+            <el-button v-if="isOnSale(row.status)" type="text" size="mini" @click="handleToggle(row, 'off')" v-hasPermi="['jst:points:mall_goods:edit']">下架</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无商城商品" />
+    </div>
+
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="商品ID" prop="goodsId" width="90" />
+      <el-table-column label="商品名称" prop="goodsName" min-width="160" show-overflow-tooltip />
+      <el-table-column label="类型" width="90">
+        <template slot-scope="{ row }">{{ row.goodsType === 'virtual' ? '虚拟' : '实物' }}</template>
+      </el-table-column>
+      <el-table-column label="积分价" prop="pointsPrice" min-width="90" align="right" />
+      <el-table-column label="现金补差" min-width="100" align="right">
+        <template slot-scope="{ row }">
+          <span class="amount-cell">¥ {{ formatAmount(row.cashPrice) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="描述" align="center" prop="description" />
-      <el-table-column label="所需积分" align="center" prop="pointsPrice" />
-      <el-table-column label="现金补差金额" align="center" prop="cashPrice" />
-      <el-table-column label="库存" align="center" prop="stock" />
-      <el-table-column label="预警阈值" align="center" prop="stockWarning" />
-      <el-table-column label="角色限制：student/channel/both" align="center" prop="roleLimit" />
-      <el-table-column label="状态：on/off/draft" align="center" prop="status" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_mall_goods:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_mall_goods:remove']"
-          >删除</el-button>
+      <el-table-column label="库存" min-width="90" align="center">
+        <template slot-scope="{ row }">
+          <el-tag v-if="Number(row.stock || 0) < 10" size="small" type="danger">{{ row.stock || 0 }}</el-tag>
+          <span v-else>{{ row.stock || 0 }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" width="90">
+        <template slot-scope="{ row }">
+          <el-tag size="small" :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="更新时间" min-width="160">
+        <template slot-scope="{ row }">{{ parseTime(row.updateTime) }}</template>
+      </el-table-column>
+      <el-table-column label="操作" fixed="right" width="170">
+        <template slot-scope="{ row }">
+          <el-button type="text" size="mini" @click="handleEdit(row)" v-hasPermi="['jst:points:mall_goods:edit']">编辑</el-button>
+          <el-button v-if="!isOnSale(row.status)" type="text" size="mini" @click="handleToggle(row, 'on')" v-hasPermi="['jst:points:mall_goods:edit']">上架</el-button>
+          <el-button v-if="isOnSale(row.status)" type="text" size="mini" @click="handleToggle(row, 'off')" v-hasPermi="['jst:points:mall_goods:edit']">下架</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改积分商城商品对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="商品名称" prop="goodsName">
-              <el-input v-model="form.goodsName" placeholder="请输入商品名称" />
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" :width="isMobile ? '100%' : '660px'" :fullscreen="isMobile" append-to-body>
+      <el-form ref="form" :model="form" :rules="formRules" :label-width="isMobile ? '84px' : '100px'">
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input v-model="form.goodsName" placeholder="请输入商品名称" />
+        </el-form-item>
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="商品类型" prop="goodsType">
+              <el-select v-model="form.goodsType" placeholder="请选择">
+                <el-option label="虚拟商品" value="virtual" />
+                <el-option label="实物商品" value="physical" />
+              </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="24">
-            <el-form-item label="主图" prop="coverImage">
-              <image-upload v-model="form.coverImage"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="描述" prop="description">
-              <el-input v-model="form.description" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="所需积分" prop="pointsPrice">
-              <el-input v-model="form.pointsPrice" placeholder="请输入所需积分" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="现金补差金额" prop="cashPrice">
-              <el-input v-model="form.cashPrice" placeholder="请输入现金补差金额" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="库存" prop="stock">
-              <el-input v-model="form.stock" placeholder="请输入库存" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="预警阈值" prop="stockWarning">
-              <el-input v-model="form.stockWarning" placeholder="请输入预警阈值" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="角色限制：student/channel/both" prop="roleLimit">
-              <el-input v-model="form.roleLimit" placeholder="请输入角色限制：student/channel/both" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="角色限制" prop="roleLimit">
+              <el-select v-model="form.roleLimit" placeholder="请选择">
+                <el-option label="学生" value="student" />
+                <el-option label="渠道" value="channel" />
+                <el-option label="全部" value="both" />
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
+        <el-form-item label="封面图">
+          <image-upload v-model="form.coverImage" :limit="1" />
+        </el-form-item>
+        <el-form-item label="商品描述">
+          <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入商品描述" />
+        </el-form-item>
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="积分价格" prop="pointsPrice">
+              <el-input-number v-model="form.pointsPrice" :min="0" controls-position="right" style="width:100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="现金补差" prop="cashPrice">
+              <el-input-number v-model="form.cashPrice" :min="0" :precision="2" controls-position="right" style="width:100%" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="库存" prop="stock">
+              <el-input-number v-model="form.stock" :min="0" controls-position="right" style="width:100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="预警阈值" prop="stockWarning">
+              <el-input-number v-model="form.stockWarning" :min="0" controls-position="right" style="width:100%" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="商品状态">
+          <el-select v-model="form.status" placeholder="请选择">
+            <el-option label="上架" value="on" />
+            <el-option label="下架" value="off" />
+            <el-option label="草稿" value="draft" />
+          </el-select>
+        </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+      <div slot="footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listJst_mall_goods, getJst_mall_goods, delJst_mall_goods, addJst_mall_goods, updateJst_mall_goods } from "@/api/jst/points/jst_mall_goods"
+import { parseTime } from '@/utils/ruoyi'
+import { listJst_mall_goods, getJst_mall_goods, addJst_mall_goods, updateJst_mall_goods } from '@/api/jst/points/jst_mall_goods'
 
 export default {
-  name: "Jst_mall_goods",
+  name: 'JstMallGoodsAdmin',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
+      loading: false,
+      submitLoading: false,
       showSearch: true,
-      // 总条数
+      list: [],
       total: 0,
-      // 积分商城商品表格数据
-      jst_mall_goodsList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
         goodsName: null,
         goodsType: null,
-        coverImage: null,
-        description: null,
-        pointsPrice: null,
-        cashPrice: null,
-        stock: null,
-        stockWarning: null,
-        roleLimit: null,
-        status: null,
+        status: null
       },
-      // 表单参数
+      dialogVisible: false,
+      dialogTitle: '',
       form: {},
-      // 表单校验
-      rules: {
-        goodsName: [
-          { required: true, message: "商品名称不能为空", trigger: "blur" }
-        ],
-        goodsType: [
-          { required: true, message: "类型：virtual虚拟 / physical实物不能为空", trigger: "change" }
-        ],
-        pointsPrice: [
-          { required: true, message: "所需积分不能为空", trigger: "blur" }
-        ],
-        cashPrice: [
-          { required: true, message: "现金补差金额不能为空", trigger: "blur" }
-        ],
-        stock: [
-          { required: true, message: "库存不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "状态：on/off/draft不能为空", trigger: "change" }
-        ],
+      formRules: {
+        goodsName: [{ required: true, message: '商品名称不能为空', trigger: 'blur' }],
+        goodsType: [{ required: true, message: '请选择商品类型', trigger: 'change' }],
+        roleLimit: [{ required: true, message: '请选择角色限制', trigger: 'change' }],
+        pointsPrice: [{ required: true, message: '积分价格不能为空', trigger: 'blur' }],
+        cashPrice: [{ required: true, message: '现金补差不能为空', trigger: 'blur' }],
+        stock: [{ required: true, message: '库存不能为空', trigger: 'blur' }]
       }
+    }
+  },
+  computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     }
   },
   created() {
     this.getList()
   },
   methods: {
-    /** 查询积分商城商品列表 */
+    parseTime,
+    isOnSale(status) {
+      return status === 'on' || status === 'on_sale'
+    },
+    statusTagType(status) {
+      if (status === 'on' || status === 'on_sale') {
+        return 'success'
+      }
+      if (status === 'off' || status === 'off_sale') {
+        return 'info'
+      }
+      return 'warning'
+    },
+    statusLabel(status) {
+      if (status === 'on' || status === 'on_sale') {
+        return '上架'
+      }
+      if (status === 'off' || status === 'off_sale') {
+        return '下架'
+      }
+      return '草稿'
+    },
+    normalizeStatus(status) {
+      if (status === 'on_sale') {
+        return 'on'
+      }
+      if (status === 'off_sale') {
+        return 'off'
+      }
+      return status
+    },
+    formatAmount(value) {
+      if (value === null || value === undefined || value === '') {
+        return '0.00'
+      }
+      const num = Number(value)
+      if (Number.isNaN(num)) {
+        return value
+      }
+      const displayNum = Number.isInteger(num) ? num / 100 : num
+      return displayNum.toFixed(2)
+    },
     getList() {
       this.loading = true
-      listJst_mall_goods(this.queryParams).then(response => {
-        this.jst_mall_goodsList = response.rows
-        this.total = response.total
+      listJst_mall_goods(this.queryParams).then(res => {
+        this.list = res.rows || []
+        this.total = res.total || 0
+      }).finally(() => {
         this.loading = false
       })
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        goodsId: null,
-        goodsName: null,
-        goodsType: null,
-        coverImage: null,
-        description: null,
-        pointsPrice: null,
-        cashPrice: null,
-        stock: null,
-        stockWarning: null,
-        roleLimit: null,
-        status: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
+      this.$refs.queryForm && this.$refs.queryForm.resetFields()
       this.handleQuery()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.goodsId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
+    initForm() {
+      return {
+        goodsId: null,
+        goodsName: '',
+        goodsType: 'virtual',
+        coverImage: '',
+        description: '',
+        pointsPrice: 0,
+        cashPrice: 0,
+        stock: 0,
+        stockWarning: 10,
+        roleLimit: 'both',
+        status: 'draft',
+        remark: ''
+      }
     },
-    /** 新增按钮操作 */
     handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加积分商城商品"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const goodsId = row.goodsId || this.ids
-      getJst_mall_goods(goodsId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改积分商城商品"
+      this.form = this.initForm()
+      this.dialogTitle = '新增商品'
+      this.dialogVisible = true
+      this.$nextTick(() => {
+        this.$refs.form && this.$refs.form.clearValidate()
       })
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.goodsId != null) {
-            updateJst_mall_goods(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_mall_goods(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
+    handleEdit(row) {
+      getJst_mall_goods(row.goodsId).then(res => {
+        const data = res.data || res || row
+        this.form = { ...this.initForm(), ...data, status: this.normalizeStatus(data.status) }
+        this.dialogTitle = '编辑商品'
+        this.dialogVisible = true
       })
     },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const goodsIds = row.goodsId || this.ids
-      this.$modal.confirm('是否确认删除积分商城商品编号为"' + goodsIds + '"的数据项？').then(function() {
-        return delJst_mall_goods(goodsIds)
-      }).then(() => {
+    handleToggle(row, targetStatus) {
+      const text = targetStatus === 'on' ? '上架' : '下架'
+      updateJst_mall_goods({ ...row, status: targetStatus }).then(() => {
+        this.$modal.msgSuccess(text + '成功')
         this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
+      })
     },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_mall_goods/export', {
-        ...this.queryParams
-      }, `jst_mall_goods_${new Date().getTime()}.xlsx`)
+    handleSubmit() {
+      this.$refs.form.validate(valid => {
+        if (!valid) {
+          return
+        }
+        this.submitLoading = true
+        const payload = { ...this.form, status: this.normalizeStatus(this.form.status) }
+        const api = payload.goodsId ? updateJst_mall_goods : addJst_mall_goods
+        api(payload).then(() => {
+          this.$modal.msgSuccess(payload.goodsId ? '修改成功' : '新增成功')
+          this.dialogVisible = false
+          this.getList()
+        }).finally(() => {
+          this.submitLoading = false
+        })
+      })
     }
   }
 }
 </script>
+
+<style scoped>
+.amount-cell {
+  text-align: right;
+  display: inline-block;
+  min-width: 68px;
+}
+
+.mobile-card-list {
+  padding: 0 4px;
+}
+
+.mobile-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.mobile-card__title {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65%;
+}
+
+.mobile-card__meta {
+  font-size: 12px;
+  color: #909399;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.mobile-card__actions {
+  display: flex;
+  gap: 6px;
+}
+</style>

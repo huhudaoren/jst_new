@@ -1,53 +1,21 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="账户ID" prop="accountId">
-        <el-input
-          v-model="queryParams.accountId"
-          placeholder="请输入账户ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
       <el-form-item label="持有者ID" prop="ownerId">
-        <el-input
-          v-model="queryParams.ownerId"
-          placeholder="请输入持有者ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.ownerId" placeholder="请输入持有者ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="来源单据ID" prop="sourceRefId">
-        <el-input
-          v-model="queryParams.sourceRefId"
-          placeholder="请输入来源单据ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="变更类型" prop="changeType">
+        <el-select v-model="queryParams.changeType" placeholder="全部" clearable>
+          <el-option v-for="item in changeTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="积分变化" prop="pointsChange">
-        <el-input
-          v-model="queryParams.pointsChange"
-          placeholder="请输入积分变化"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="业务来源" prop="sourceType">
+        <el-select v-model="queryParams.sourceType" placeholder="全部" clearable>
+          <el-option v-for="item in sourceTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="变更后余额" prop="balanceAfter">
-        <el-input
-          v-model="queryParams.balanceAfter"
-          placeholder="请输入变更后余额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="操作人" prop="operatorId">
-        <el-input
-          v-model="queryParams.operatorId"
-          placeholder="请输入操作人"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="来源单据" prop="sourceRefId">
+        <el-input v-model="queryParams.sourceRefId" placeholder="请输入来源单据ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -56,321 +24,264 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_points_ledger:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_points_ledger:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_points_ledger:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_points_ledger:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="jst_points_ledgerList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="流水ID" align="center" prop="ledgerId" />
-      <el-table-column label="账户ID" align="center" prop="accountId" />
-      <el-table-column label="持有者类型：student/channel" align="center" prop="ownerType" />
-      <el-table-column label="持有者ID" align="center" prop="ownerId" />
-      <el-table-column label="变更类型：earn/spend/freeze/unfreeze/adjust/rollback" align="center" prop="changeType" />
-      <el-table-column label="来源：enroll/course/sign/invite/learn/award/exchange/manual/refund" align="center" prop="sourceType" />
-      <el-table-column label="来源单据ID" align="center" prop="sourceRefId" />
-      <el-table-column label="积分变化" align="center" prop="pointsChange" />
-      <el-table-column label="变更后余额" align="center" prop="balanceAfter" />
-      <el-table-column label="操作人" align="center" prop="operatorId" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_points_ledger:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_points_ledger:remove']"
-          >删除</el-button>
+    <div v-if="isMobile" v-loading="loading">
+      <div v-if="list.length" class="mobile-card-list">
+        <div v-for="row in list" :key="row.ledgerId" class="mobile-card">
+          <div class="mobile-card__head">
+            <span class="mobile-card__title">流水 #{{ row.ledgerId }}</span>
+            <el-tag size="mini" :type="directionType(row.pointsChange)">
+              {{ Number(row.pointsChange) >= 0 ? '收入' : '支出' }}
+            </el-tag>
+          </div>
+          <div class="mobile-card__meta">
+            <span>用户：{{ row.ownerId || '--' }}</span>
+            <span>{{ changeTypeLabel(row.changeType) }}</span>
+            <span :class="Number(row.pointsChange) >= 0 ? 'points-positive' : 'points-negative'">
+              {{ Number(row.pointsChange) >= 0 ? '+' : '' }}{{ row.pointsChange || 0 }}
+            </span>
+            <span>余额：{{ row.balanceAfter || 0 }}</span>
+          </div>
+          <div class="mobile-card__actions">
+            <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
+            <el-button type="text" size="mini" @click="handleBusinessJump(row)">关联业务</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无积分流水" />
+    </div>
+
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="流水ID" prop="ledgerId" width="90" />
+      <el-table-column label="持有者ID" prop="ownerId" min-width="110" />
+      <el-table-column label="变更类型" min-width="110">
+        <template slot-scope="{ row }">{{ changeTypeLabel(row.changeType) }}</template>
+      </el-table-column>
+      <el-table-column label="业务来源" min-width="120">
+        <template slot-scope="{ row }">{{ sourceTypeLabel(row.sourceType) }}</template>
+      </el-table-column>
+      <el-table-column label="来源单据ID" prop="sourceRefId" min-width="130" />
+      <el-table-column label="积分变化" min-width="100" align="right">
+        <template slot-scope="{ row }">
+          <span :class="Number(row.pointsChange) >= 0 ? 'points-positive' : 'points-negative'">
+            {{ Number(row.pointsChange) >= 0 ? '+' : '' }}{{ row.pointsChange || 0 }}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column label="变更后余额" prop="balanceAfter" min-width="100" align="right" />
+      <el-table-column label="操作人" prop="operatorId" min-width="100" />
+      <el-table-column label="创建时间" min-width="160">
+        <template slot-scope="{ row }">{{ parseTime(row.createTime) }}</template>
+      </el-table-column>
+      <el-table-column label="操作" fixed="right" width="140">
+        <template slot-scope="{ row }">
+          <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
+          <el-button type="text" size="mini" @click="handleBusinessJump(row)">关联业务</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改积分流水对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="账户ID" prop="accountId">
-              <el-input v-model="form.accountId" placeholder="请输入账户ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="持有者ID" prop="ownerId">
-              <el-input v-model="form.ownerId" placeholder="请输入持有者ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="来源单据ID" prop="sourceRefId">
-              <el-input v-model="form.sourceRefId" placeholder="请输入来源单据ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="积分变化" prop="pointsChange">
-              <el-input v-model="form.pointsChange" placeholder="请输入积分变化" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="变更后余额" prop="balanceAfter">
-              <el-input v-model="form.balanceAfter" placeholder="请输入变更后余额" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="操作人" prop="operatorId">
-              <el-input v-model="form.operatorId" placeholder="请输入操作人" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <el-drawer :title="'积分流水详情 #' + (detailData.ledgerId || '')" :visible.sync="detailVisible" :size="isMobile ? '100%' : '500px'" append-to-body>
+      <div class="detail-body">
+        <el-descriptions :column="1" border size="small">
+          <el-descriptions-item label="流水ID">{{ detailData.ledgerId }}</el-descriptions-item>
+          <el-descriptions-item label="账户ID">{{ detailData.accountId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="持有者">{{ detailData.ownerType || '--' }} / {{ detailData.ownerId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="变更类型">{{ changeTypeLabel(detailData.changeType) }}</el-descriptions-item>
+          <el-descriptions-item label="业务来源">{{ sourceTypeLabel(detailData.sourceType) }}</el-descriptions-item>
+          <el-descriptions-item label="来源单据ID">{{ detailData.sourceRefId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="积分变化">
+            <span :class="Number(detailData.pointsChange) >= 0 ? 'points-positive' : 'points-negative'">
+              {{ Number(detailData.pointsChange) >= 0 ? '+' : '' }}{{ detailData.pointsChange || 0 }}
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="变更后余额">{{ detailData.balanceAfter || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="操作人">{{ detailData.operatorId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ parseTime(detailData.createTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="备注">{{ detailData.remark || '--' }}</el-descriptions-item>
+        </el-descriptions>
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_points_ledger, getJst_points_ledger, delJst_points_ledger, addJst_points_ledger, updateJst_points_ledger } from "@/api/jst/points/jst_points_ledger"
+import { parseTime } from '@/utils/ruoyi'
+import { listJst_points_ledger, getJst_points_ledger } from '@/api/jst/points/jst_points_ledger'
+
+const CHANGE_TYPE_OPTIONS = [
+  { label: '获取', value: 'earn' },
+  { label: '消耗', value: 'spend' },
+  { label: '冻结', value: 'freeze' },
+  { label: '解冻', value: 'unfreeze' },
+  { label: '调整', value: 'adjust' },
+  { label: '回滚', value: 'rollback' },
+  { label: '售后返还', value: 'aftersale_refund' }
+]
+
+const SOURCE_TYPE_OPTIONS = [
+  { label: '报名', value: 'enroll' },
+  { label: '课程', value: 'course' },
+  { label: '签到', value: 'sign' },
+  { label: '邀请', value: 'invite' },
+  { label: '学习', value: 'learn' },
+  { label: '获奖', value: 'award' },
+  { label: '兑换', value: 'exchange' },
+  { label: '手工调整', value: 'manual' },
+  { label: '退款', value: 'refund' },
+  { label: '售后', value: 'mall_aftersale' }
+]
+
+const BIZ_ROUTE_MAP = {
+  enroll: '/jst/enroll',
+  course: '/jst/course',
+  exchange: '/jst/mall/exchange',
+  refund: '/jst/refund'
+}
 
 export default {
-  name: "Jst_points_ledger",
+  name: 'JstPointsLedger',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
+      loading: false,
       showSearch: true,
-      // 总条数
+      list: [],
       total: 0,
-      // 积分流水表格数据
-      jst_points_ledgerList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        accountId: null,
-        ownerType: null,
         ownerId: null,
         changeType: null,
         sourceType: null,
-        sourceRefId: null,
-        pointsChange: null,
-        balanceAfter: null,
-        operatorId: null,
+        sourceRefId: null
       },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        accountId: [
-          { required: true, message: "账户ID不能为空", trigger: "blur" }
-        ],
-        ownerType: [
-          { required: true, message: "持有者类型：student/channel不能为空", trigger: "change" }
-        ],
-        ownerId: [
-          { required: true, message: "持有者ID不能为空", trigger: "blur" }
-        ],
-        changeType: [
-          { required: true, message: "变更类型：earn/spend/freeze/unfreeze/adjust/rollback不能为空", trigger: "change" }
-        ],
-        sourceType: [
-          { required: true, message: "来源：enroll/course/sign/invite/learn/award/exchange/manual/refund不能为空", trigger: "change" }
-        ],
-        pointsChange: [
-          { required: true, message: "积分变化不能为空", trigger: "blur" }
-        ],
-        balanceAfter: [
-          { required: true, message: "变更后余额不能为空", trigger: "blur" }
-        ],
-      }
+      detailVisible: false,
+      detailData: {},
+      changeTypeOptions: CHANGE_TYPE_OPTIONS,
+      sourceTypeOptions: SOURCE_TYPE_OPTIONS
+    }
+  },
+  computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     }
   },
   created() {
     this.getList()
   },
   methods: {
-    /** 查询积分流水列表 */
+    parseTime,
+    directionType(pointsChange) {
+      return Number(pointsChange) >= 0 ? 'success' : 'danger'
+    },
+    changeTypeLabel(changeType) {
+      const match = CHANGE_TYPE_OPTIONS.find(item => item.value === changeType)
+      return match ? match.label : changeType || '--'
+    },
+    sourceTypeLabel(sourceType) {
+      const match = SOURCE_TYPE_OPTIONS.find(item => item.value === sourceType)
+      return match ? match.label : sourceType || '--'
+    },
     getList() {
       this.loading = true
-      listJst_points_ledger(this.queryParams).then(response => {
-        this.jst_points_ledgerList = response.rows
-        this.total = response.total
+      listJst_points_ledger(this.queryParams).then(res => {
+        this.list = res.rows || []
+        this.total = res.total || 0
+      }).finally(() => {
         this.loading = false
       })
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        ledgerId: null,
-        accountId: null,
-        ownerType: null,
-        ownerId: null,
-        changeType: null,
-        sourceType: null,
-        sourceRefId: null,
-        pointsChange: null,
-        balanceAfter: null,
-        operatorId: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
+      this.$refs.queryForm && this.$refs.queryForm.resetFields()
       this.handleQuery()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.ledgerId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加积分流水"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const ledgerId = row.ledgerId || this.ids
-      getJst_points_ledger(ledgerId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改积分流水"
+    handleDetail(row) {
+      getJst_points_ledger(row.ledgerId).then(res => {
+        this.detailData = res.data || res || row
+        this.detailVisible = true
       })
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.ledgerId != null) {
-            updateJst_points_ledger(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_points_ledger(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
-      })
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const ledgerIds = row.ledgerId || this.ids
-      this.$modal.confirm('是否确认删除积分流水编号为"' + ledgerIds + '"的数据项？').then(function() {
-        return delJst_points_ledger(ledgerIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
+    handleBusinessJump(row) {
+      if (!row.sourceRefId) {
+        this.$modal.msgWarning('该流水未关联业务单据')
+        return
+      }
+      const routePath = BIZ_ROUTE_MAP[row.sourceType]
+      if (!routePath) {
+        this.$modal.msgWarning('当前来源类型暂未配置跳转')
+        return
+      }
+      this.$router.push({
+        path: routePath,
+        query: { refId: row.sourceRefId }
       }).catch(() => {})
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_points_ledger/export', {
-        ...this.queryParams
-      }, `jst_points_ledger_${new Date().getTime()}.xlsx`)
     }
   }
 }
 </script>
+
+<style scoped>
+.points-positive {
+  color: #67c23a;
+  font-weight: 600;
+}
+
+.points-negative {
+  color: #f56c6c;
+  font-weight: 600;
+}
+
+.detail-body {
+  padding: 0 16px 16px;
+}
+
+.mobile-card-list {
+  padding: 0 4px;
+}
+
+.mobile-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.mobile-card__title {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65%;
+}
+
+.mobile-card__meta {
+  font-size: 12px;
+  color: #909399;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.mobile-card__actions {
+  display: flex;
+  gap: 6px;
+}
+</style>

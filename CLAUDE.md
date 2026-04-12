@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次更新：2026-04-10（阶段 E 全部完成 + FIX-1~5 已修复，阶段 F 四任务并行执行中）
+> 会话恢复文件。上次更新：2026-04-12（阶段 F 全部完成 + FEAT 9 卡 + UI-REFRESH 4 批 + WEB-ADMIN 4 卡，进入 P1/P2 扩展阶段）
 
 ---
 
@@ -107,7 +107,10 @@ D:\coding\jst_v1\
 │       ├── (E 阶段) E0-1, E1-CH-1~7, E2-PA-1~9
 │       ├── (修复) FIX-1~5, TEST-ROUND1
 │       ├── (F 阶段) MSG-TRIGGER, PARTNER-WRAPPER, QUARTZ-TASKS, ADMIN-SCAFFOLD, TEST-ROUND2
+│       ├── (FEAT) FEAT-CONTEST-DETAIL, FEAT-COURSE-DETAIL, FEAT-INDEX-ENRICH, FEAT-FILTER, FEAT-MY-ENROLL-FIX (各 BE/FE)
 │       ├── (UI 刷新) UI-INFRA, UI-REFRESH-1~4
+│       ├── (Web管理) WEB-ADMIN-1~4
+│       ├── (编译修复) FIX-COMPILE
 │       └── 任务报告\              # 子 Agent 完成报告
 ├── test\
 │   ├── wx-tests.http             # ⭐ 小程序端接口测试（用这个）
@@ -173,10 +176,20 @@ D:\coding\jst_v1\
 | F-PARTNER-WRAPPER | 赛事方接口包装层（3 Controller + PW-1~7 全绿） | ✅ 完成 |
 | F-QUARTZ-TASKS | 4 个定时任务（订单超时/退款关闭/返点计提/预约过期） | ✅ 完成 |
 | F-ADMIN-SCAFFOLD | ruoyi-ui 脚手架（后端菜单驱动/responsive/公共组件） | ✅ 完成 |
-| **TEST-ROUND2** | 第二轮全量测试 | ⏳ 待派发（SQL 已执行+后端已重启） |
-| **UI-INFRA** | uView 2.0 + Design Token + 组件升级 | ⏳ 待派发 |
-| **UI-REFRESH-1** | 核心 5 页刷新（首页/赛事/我的/公告/课程） | ⏳ 等 UI-INFRA |
-| **E-4-WEB Web 后台** | 65 菜单 PC + 手机响应式（承担 H5 审核端职能） | ⏸️ 等测试收尾后启动 |
+| **TEST-ROUND2** | 第二轮全量测试 | ✅ 完成（admin 93% / wx 98%） |
+| **FEAT 9 卡** | 赛事详情/课程详情/首页丰富/筛选/报名修复（BE+FE 各拆分） | ✅ 完成 |
+| **FIX-COMPILE** | HBuilderX 编译修复（中文引号/模板语法/iOS Date/import 缺失） | ✅ 完成 |
+| **UI-INFRA** | uView 2.0 + Design Token 65+ 变量 + 动画库 | ✅ 完成 |
+| **UI-REFRESH-1** | 核心 5 页刷新（首页/赛事/我的/公告/课程） | ✅ 完成 |
+| **UI-REFRESH-2** | 交易与个人中心 23 页刷新 | ✅ 完成 |
+| **UI-REFRESH-3** | 渠道与预约 23 页刷新 | ✅ 完成 |
+| **UI-REFRESH-4** | 商城/公开页/剩余 21 页刷新 + 全量一致性扫描 | ✅ 完成（全局零硬编码） |
+| **WEB-ADMIN-1** | 用户/参赛档案/赛事/报名/入驻管理（8 页 + JSON 可视化编辑器） | ✅ 完成 |
+| **WEB-ADMIN-2** | 订单/退款/提现/返点/结算管理 | ✅ 完成 |
+| **WEB-ADMIN-3** | 公告/课程/表单模板/优惠券/权益/商城管理 | ✅ 完成 |
+| **WEB-ADMIN-4** | 渠道认证/渠道/绑定/预约/数据看板 + 菜单 SQL | ✅ 完成 |
+| **断链修复** | 19 处断链全部修复（toast占位/API 404/路径不一致） | ✅ 完成 |
+| **E-4-WEB 扩展** | 65 菜单全覆盖（当前 28 页，还需扩展） | ⏳ P1 待规划 |
 
 ---
 
@@ -224,40 +237,30 @@ D:\coding\jst_v1\
 
 ## 六、已知问题与待办
 
-> 最后更新：2026-04-10 阶段 F 并行派发
+> 最后更新：2026-04-12 全量完成，进入扩展阶段
 
-### 阶段 E 总结（✅ 已收尾）
+### 已完成总览
 
-阶段 E 全部 17 张任务卡 + 菜单 SQL + 入口修复已完成。第一轮测试审计发现 10 个失败点，FIX-1~5 已全部修复。
-
-### 阶段 F 当前进度
-
-**🏃 执行中（4 任务并行 + 1 UI Agent）**：
-
-| 任务 | Agent | 说明 |
+| 批次 | 内容 | 产出 |
 |---|---|---|
-| MSG-TRIGGER | Backend Agent 1 | Spring Event 消息触发（6 监听器 + jst-message 事件驱动） |
-| PARTNER-WRAPPER | Backend Agent 2 | 赛事方接口包装层（/jst/partner/* + PartnerDataScope 数据隔离） |
-| QUARTZ-TASKS | Backend Agent 3 | 4 个定时任务（订单超时取消/退款关闭/返点计提/预约过期） |
-| ADMIN-SCAFFOLD | Web Admin Agent | ruoyi-ui 脚手架（后端菜单驱动/responsive.scss/公共组件） |
-| POLISH-FULL | UI Polish Agent | 视觉对齐（用户直接监督，不走任务卡） |
+| A~E | 架构 + 51 表 + 18 模块后端 + 74 页小程序 + 17 张 E 阶段卡 | 全部 ✅ |
+| F 后端 | MSG-TRIGGER / PARTNER-WRAPPER / QUARTZ-TASKS / ADMIN-SCAFFOLD | 全部 ✅ |
+| FEAT | 9 卡（赛事详情/课程详情/首页丰富/筛选/报名修复） | 全部 ✅ |
+| UI-REFRESH | 4 批 74 页全量刷新（uView 2.0 + Design Token，全局零硬编码） | 全部 ✅ |
+| WEB-ADMIN | 4 卡 28 页管理端（用户/赛事/订单/渠道/公告/课程/商城） | 全部 ✅ |
+| 修复 | FIX-1~5 + FIX-COMPILE + 19 处断链 | 全部 ✅ |
+| 测试 | TEST-ROUND1 (81%/95%) → TEST-ROUND2 (93%/98%) | 全部 ✅ |
 
-**⏳ 等待派发**：
-- **TEST-ROUND2**：等 MSG-TRIGGER + PARTNER-WRAPPER 完成 → 重启后端 → 派发第二轮全量测试
+### 当前待办（按优先级）
 
-### F 阶段完成后的下一步
-
-1. **TEST-ROUND2 收尾** → 确认健康度基线 ≥95%
-2. **E-4-WEB Web 后台开始** → 65 菜单 Vue 2 + 响应式（已有 WEB_ADMIN_AGENT_PROMPT.md）
-3. **剩余 F-2 批次**（按优先级排列）：
-
-| 项 | 状态 | 说明 |
-|---|---|---|
-| **E-4-WEB Web 后台** | ⏸️ 等 F 收尾 | 65 菜单 Vue 2 + 响应式（承担 H5 审核端职能） |
-| **F-AI-MAIC** | ⏸️ 缺外部文档 | OpenMAIC API 文档 + 测试账号待确认 |
-| **F-ANALYSIS** | ⏸️ F-2 批次 | 经营分析 2 页 |
-| **F-CONTRACT-INVOICE** | ⏸️ F-2 批次 | 合同开票 |
-| **F-RISK** | ⏸️ P3 | 风控完整化 |
+| 优先级 | 项 | 状态 | 说明 |
+|---|---|---|---|
+| **P1** | **E-4-WEB 扩展** | ⏳ 待规划 | 当前 28 页，目标 65 菜单全覆盖 |
+| **P2** | **F-ANALYSIS** | ⏸️ | 经营分析 2 页（渠道+平台） |
+| **P2** | **F-CONTRACT-INVOICE** | ⏸️ | 合同开票功能 |
+| **P2** | **F-AI-MAIC** | ⏸️ 缺外部文档 | OpenMAIC API 文档 + 测试账号待确认 |
+| **P3** | **F-RISK** | ⏸️ | 风控完整化 |
+| **P3** | **TEST-ROUND3** | ⏳ 等 P1/P2 完成 | FEAT + WEB-ADMIN 全量回归 |
 
 ### 技术债
 
@@ -296,6 +299,10 @@ D:\coding\jst_v1\
 | 98-migration-phase-e-prep.sql | E 阶段 DDL（reject_count/allow_appointment_refund/新角色） |
 | 99-migration-partner-menus.sql | ⭐ 赛事方菜单树（9700-9799 段，8 菜单 + 22 按钮） |
 | 99-migration-quartz-jobs.sql | ⭐ 定时任务注册（QUARTZ-TASKS 产出） |
+| 99-migration-jst-message.sql | jst_message 建表（MSG-TRIGGER 产出） |
+| 99-migration-contest-detail-fields.sql | jst_contest 追加 schedule_json/awards_json/faq_json/recommend_tags |
+| 99-migration-course-detail-fields.sql | jst_course 追加 chapters_json/teacher 等字段 |
+| 99-migration-admin-menus.sql | ⭐ Web 管理端菜单注册（9900-9999 段） |
 | 99-test-fixtures.sql | 测试数据 |
 
 ---
@@ -367,9 +374,9 @@ D:\coding\jst_v1\
 
 1. 读取此 CLAUDE.md
 2. `git log --oneline -20` 查看最近代码变更
-3. 检查 §六 当前进度，确认哪些任务还在执行中
+3. 检查 §六 当前待办，确认优先级
 4. 查看 `subagent/tasks/任务报告/` 是否有新报告需要 review
-5. 根据当前阶段继续推进（F 阶段 → TEST-ROUND2 → E-4-WEB）
+5. 当前阶段：P1 E-4-WEB 扩展 → P2 F-ANALYSIS/CONTRACT → TEST-ROUND3
 
 ## 十、PRD 版本规则
 

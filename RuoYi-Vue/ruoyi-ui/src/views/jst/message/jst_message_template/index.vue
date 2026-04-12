@@ -1,37 +1,22 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
       <el-form-item label="模板编码" prop="templateCode">
-        <el-input
-          v-model="queryParams.templateCode"
-          placeholder="请输入模板编码"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.templateCode" placeholder="请输入模板编码" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="模板名" prop="templateName">
-        <el-input
-          v-model="queryParams.templateName"
-          placeholder="请输入模板名"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="模板名称" prop="templateName">
+        <el-input v-model="queryParams.templateName" placeholder="请输入模板名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="通道：inner站内/sms短信/wechat_template微信模板消息" prop="channel">
-        <el-input
-          v-model="queryParams.channel"
-          placeholder="请输入通道：inner站内/sms短信/wechat_template微信模板消息"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="发送渠道" prop="channel">
+        <el-select v-model="queryParams.channel" placeholder="全部" clearable>
+          <el-option v-for="item in channelOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="场景：auth_result/withdraw_result/settle_result/points_change/ship/aftersale" prop="scene">
-        <el-input
-          v-model="queryParams.scene"
-          placeholder="请输入场景：auth_result/withdraw_result/settle_result/points_change/ship/aftersale"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="全部" clearable>
+          <el-option label="启用" :value="1" />
+          <el-option label="停用" :value="0" />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -41,303 +26,300 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_message_template:add']"
-        >新增</el-button>
+        <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAdd" v-hasPermi="['jst:message:message_template:add']">新增</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_message_template:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_message_template:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_message_template:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="jst_message_templateList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="模板ID" align="center" prop="templateId" />
-      <el-table-column label="模板编码" align="center" prop="templateCode" />
-      <el-table-column label="模板名" align="center" prop="templateName" />
-      <el-table-column label="通道：inner站内/sms短信/wechat_template微信模板消息" align="center" prop="channel" />
-      <el-table-column label="场景：auth_result/withdraw_result/settle_result/points_change/ship/aftersale" align="center" prop="scene" />
-      <el-table-column label="模板内容" align="center" prop="content" />
-      <el-table-column label="启停：0停 1启" align="center" prop="status" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_message_template:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_message_template:remove']"
-          >删除</el-button>
+    <div v-if="isMobile" v-loading="loading">
+      <div v-if="list.length" class="mobile-card-list">
+        <div v-for="row in list" :key="row.templateId" class="mobile-card">
+          <div class="mobile-card__head">
+            <span class="mobile-card__title">{{ row.templateName }}</span>
+            <el-tag size="mini" :type="row.status === 1 ? 'success' : 'info'">{{ row.status === 1 ? '启用' : '停用' }}</el-tag>
+          </div>
+          <div class="mobile-card__meta">
+            <span>{{ row.templateCode }}</span>
+            <span>{{ channelLabel(row.channel) }}</span>
+            <span>{{ sceneLabel(row.scene) }}</span>
+          </div>
+          <div class="mobile-card__actions">
+            <el-button type="text" size="mini" @click="handleEdit(row)" v-hasPermi="['jst:message:message_template:edit']">编辑</el-button>
+            <el-button type="text" size="mini" @click="handleToggle(row)" v-hasPermi="['jst:message:message_template:edit']">
+              {{ row.status === 1 ? '停用' : '启用' }}
+            </el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无消息模板" />
+    </div>
+
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="模板ID" prop="templateId" width="90" />
+      <el-table-column label="模板编码" prop="templateCode" min-width="140" />
+      <el-table-column label="模板名称" prop="templateName" min-width="140" show-overflow-tooltip />
+      <el-table-column label="发送渠道" min-width="120">
+        <template slot-scope="{ row }">{{ channelLabel(row.channel) }}</template>
+      </el-table-column>
+      <el-table-column label="业务场景" min-width="140">
+        <template slot-scope="{ row }">{{ sceneLabel(row.scene) }}</template>
+      </el-table-column>
+      <el-table-column label="模板内容" prop="content" min-width="220" show-overflow-tooltip />
+      <el-table-column label="状态" width="90">
+        <template slot-scope="{ row }">
+          <el-switch
+            v-model="row.status"
+            :active-value="1"
+            :inactive-value="0"
+            @change="handleStatusChange(row)"
+            v-hasPermi="['jst:message:message_template:edit']"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" fixed="right" width="90">
+        <template slot-scope="{ row }">
+          <el-button type="text" size="mini" @click="handleEdit(row)" v-hasPermi="['jst:message:message_template:edit']">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改消息模板对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" :width="isMobile ? '100%' : '680px'" :fullscreen="isMobile" append-to-body>
+      <el-form ref="form" :model="form" :rules="formRules" :label-width="isMobile ? '84px' : '100px'">
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="模板编码" prop="templateCode">
-              <el-input v-model="form.templateCode" placeholder="请输入模板编码" />
+              <el-input v-model="form.templateCode" placeholder="例如：POINTS_CHANGE" />
             </el-form-item>
           </el-col>
-          <el-col :span="24">
-            <el-form-item label="模板名" prop="templateName">
-              <el-input v-model="form.templateName" placeholder="请输入模板名" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="通道：inner站内/sms短信/wechat_template微信模板消息" prop="channel">
-              <el-input v-model="form.channel" placeholder="请输入通道：inner站内/sms短信/wechat_template微信模板消息" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="场景：auth_result/withdraw_result/settle_result/points_change/ship/aftersale" prop="scene">
-              <el-input v-model="form.scene" placeholder="请输入场景：auth_result/withdraw_result/settle_result/points_change/ship/aftersale" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="模板内容">
-              <editor v-model="form.content" :min-height="192"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="模板名称" prop="templateName">
+              <el-input v-model="form.templateName" placeholder="请输入模板名称" />
             </el-form-item>
           </el-col>
         </el-row>
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="发送渠道" prop="channel">
+              <el-select v-model="form.channel" placeholder="请选择">
+                <el-option v-for="item in channelOptions" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="业务场景" prop="scene">
+              <el-select v-model="form.scene" placeholder="请选择">
+                <el-option v-for="item in sceneOptions" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="模板内容" prop="content">
+          <el-input v-model="form.content" type="textarea" :rows="5" placeholder="请输入模板内容" />
+        </el-form-item>
+        <el-alert title="变量占位符示例：${userName}、${pointsChange}、${orderNo}" type="info" :closable="false" />
+        <el-form-item label="备注" style="margin-top: 12px;">
+          <el-input v-model="form.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
+        </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+      <div slot="footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listJst_message_template, getJst_message_template, delJst_message_template, addJst_message_template, updateJst_message_template } from "@/api/jst/message/jst_message_template"
+import { listJst_message_template, getJst_message_template, addJst_message_template, updateJst_message_template } from '@/api/jst/message/jst_message_template'
+
+const CHANNEL_OPTIONS = [
+  { label: '站内信', value: 'inner' },
+  { label: '短信', value: 'sms' },
+  { label: '微信模板消息', value: 'wechat_template' },
+  { label: '微信订阅消息', value: 'wechat' }
+]
+
+const SCENE_OPTIONS = [
+  { label: '认证结果', value: 'auth_result' },
+  { label: '提现结果', value: 'withdraw_result' },
+  { label: '结算结果', value: 'settle_result' },
+  { label: '积分变动', value: 'points_change' },
+  { label: '发货通知', value: 'ship' },
+  { label: '售后通知', value: 'aftersale' }
+]
 
 export default {
-  name: "Jst_message_template",
+  name: 'JstMessageTemplate',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
+      loading: false,
+      submitLoading: false,
       showSearch: true,
-      // 总条数
+      list: [],
       total: 0,
-      // 消息模板表格数据
-      jst_message_templateList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
         templateCode: null,
         templateName: null,
         channel: null,
-        scene: null,
-        content: null,
-        status: null,
+        status: null
       },
-      // 表单参数
+      channelOptions: CHANNEL_OPTIONS,
+      sceneOptions: SCENE_OPTIONS,
+      dialogVisible: false,
+      dialogTitle: '',
       form: {},
-      // 表单校验
-      rules: {
-        templateCode: [
-          { required: true, message: "模板编码不能为空", trigger: "blur" }
-        ],
-        templateName: [
-          { required: true, message: "模板名不能为空", trigger: "blur" }
-        ],
-        channel: [
-          { required: true, message: "通道：inner站内/sms短信/wechat_template微信模板消息不能为空", trigger: "blur" }
-        ],
-        scene: [
-          { required: true, message: "场景：auth_result/withdraw_result/settle_result/points_change/ship/aftersale不能为空", trigger: "blur" }
-        ],
-        content: [
-          { required: true, message: "模板内容不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "启停：0停 1启不能为空", trigger: "change" }
-        ],
+      formRules: {
+        templateCode: [{ required: true, message: '模板编码不能为空', trigger: 'blur' }],
+        templateName: [{ required: true, message: '模板名称不能为空', trigger: 'blur' }],
+        channel: [{ required: true, message: '请选择发送渠道', trigger: 'change' }],
+        scene: [{ required: true, message: '请选择业务场景', trigger: 'change' }],
+        content: [{ required: true, message: '模板内容不能为空', trigger: 'blur' }]
       }
+    }
+  },
+  computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     }
   },
   created() {
     this.getList()
   },
   methods: {
-    /** 查询消息模板列表 */
+    channelLabel(channel) {
+      const match = CHANNEL_OPTIONS.find(item => item.value === channel)
+      return match ? match.label : channel || '--'
+    },
+    sceneLabel(scene) {
+      const match = SCENE_OPTIONS.find(item => item.value === scene)
+      return match ? match.label : scene || '--'
+    },
     getList() {
       this.loading = true
-      listJst_message_template(this.queryParams).then(response => {
-        this.jst_message_templateList = response.rows
-        this.total = response.total
+      listJst_message_template(this.queryParams).then(res => {
+        this.list = res.rows || []
+        this.total = res.total || 0
+      }).finally(() => {
         this.loading = false
       })
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        templateId: null,
-        templateCode: null,
-        templateName: null,
-        channel: null,
-        scene: null,
-        content: null,
-        status: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
+      this.$refs.queryForm && this.$refs.queryForm.resetFields()
       this.handleQuery()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.templateId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
+    initForm() {
+      return {
+        templateId: null,
+        templateCode: '',
+        templateName: '',
+        channel: 'inner',
+        scene: 'points_change',
+        content: '',
+        status: 1,
+        remark: ''
+      }
     },
-    /** 新增按钮操作 */
     handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加消息模板"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const templateId = row.templateId || this.ids
-      getJst_message_template(templateId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改消息模板"
+      this.form = this.initForm()
+      this.dialogTitle = '新增消息模板'
+      this.dialogVisible = true
+      this.$nextTick(() => {
+        this.$refs.form && this.$refs.form.clearValidate()
       })
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.templateId != null) {
-            updateJst_message_template(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_message_template(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
+    handleEdit(row) {
+      getJst_message_template(row.templateId).then(res => {
+        this.form = { ...this.initForm(), ...(res.data || res || row) }
+        this.dialogTitle = '编辑消息模板'
+        this.dialogVisible = true
       })
     },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const templateIds = row.templateId || this.ids
-      this.$modal.confirm('是否确认删除消息模板编号为"' + templateIds + '"的数据项？').then(function() {
-        return delJst_message_template(templateIds)
-      }).then(() => {
+    handleToggle(row) {
+      const status = row.status === 1 ? 0 : 1
+      this.updateStatus({ ...row, status })
+    },
+    handleStatusChange(row) {
+      this.updateStatus(row)
+    },
+    updateStatus(payload) {
+      updateJst_message_template(payload).then(() => {
+        this.$modal.msgSuccess('状态更新成功')
         this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
+      }).catch(() => {
+        this.getList()
+      })
     },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_message_template/export', {
-        ...this.queryParams
-      }, `jst_message_template_${new Date().getTime()}.xlsx`)
+    handleSubmit() {
+      this.$refs.form.validate(valid => {
+        if (!valid) {
+          return
+        }
+        this.submitLoading = true
+        const api = this.form.templateId ? updateJst_message_template : addJst_message_template
+        api(this.form).then(() => {
+          this.$modal.msgSuccess(this.form.templateId ? '修改成功' : '新增成功')
+          this.dialogVisible = false
+          this.getList()
+        }).finally(() => {
+          this.submitLoading = false
+        })
+      })
     }
   }
 }
 </script>
+
+<style scoped>
+.mobile-card-list {
+  padding: 0 4px;
+}
+
+.mobile-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.mobile-card__title {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65%;
+}
+
+.mobile-card__meta {
+  font-size: 12px;
+  color: #909399;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.mobile-card__actions {
+  display: flex;
+  gap: 6px;
+}
+</style>

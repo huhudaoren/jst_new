@@ -2051,3 +2051,95 @@ client.test("QT-5 run 预约过期自动取消成功", function() {
   client.assert(response.body.code === 200);
 });
 %}
+
+### =====================================================================
+### F-ANALYSIS Admin Dashboard 聚合接口 (ruoyi-admin)
+### 前置: A1 admin 登录成功, admin_token 可用
+### =====================================================================
+
+### FA-BE-1. 运营总览
+GET {{baseUrl}}/jst/admin/dashboard/overview
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("FA-BE-1 overview success", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.todayOrderCount !== undefined);
+  client.assert(response.body.data.todayRevenue !== undefined);
+  client.assert(response.body.data.monthRevenue !== undefined);
+});
+%}
+
+### FA-BE-2. 近 7 天趋势
+GET {{baseUrl}}/jst/admin/dashboard/trend?days=7
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("FA-BE-2 trend 7d success", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+  client.assert(response.body.data.length === 7);
+});
+%}
+
+### FA-BE-3. 近 30 天趋势
+GET {{baseUrl}}/jst/admin/dashboard/trend?days=30
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("FA-BE-3 trend 30d success", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+  client.assert(response.body.data.length === 30);
+});
+%}
+
+### FA-BE-4. Top 赛事
+GET {{baseUrl}}/jst/admin/dashboard/top-contests?limit=5
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("FA-BE-4 top contests success", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### FA-BE-5. Top 渠道
+GET {{baseUrl}}/jst/admin/dashboard/top-channels?limit=5
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("FA-BE-5 top channels success", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### FA-BE-6. 待办计数
+GET {{baseUrl}}/jst/admin/dashboard/todo
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("FA-BE-6 todo success", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.pendingContestAudit !== undefined);
+  client.assert(response.body.data.pendingChannelAuth !== undefined);
+});
+%}
+
+### FA-BE-7. 非法 days 参数应失败
+GET {{baseUrl}}/jst/admin/dashboard/trend?days=15
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("FA-BE-7 invalid days should fail", function() {
+  client.assert(response.status !== 200 || response.body.code !== 200);
+});
+%}

@@ -295,7 +295,11 @@
         { "path": "student-cert", "style": { "navigationBarTitleText": "学生证书", "navigationStyle": "custom" } },
         { "path": "batch-enroll", "style": { "navigationBarTitleText": "批量报名", "navigationStyle": "custom" } },
         { "path": "participants", "style": { "navigationBarTitleText": "临时档案", "navigationStyle": "custom" } },
-        { "path": "appointment", "style": { "navigationBarTitleText": "团队预约", "navigationStyle": "custom" } }
+        { "path": "appointment", "style": { "navigationBarTitleText": "团队预约", "navigationStyle": "custom" } },
+        { "path": "contract-list", "style": { "navigationBarTitleText": "合同中心", "navigationStyle": "custom" } },
+        { "path": "contract-detail", "style": { "navigationBarTitleText": "合同详情", "navigationStyle": "custom" } },
+        { "path": "invoice-list", "style": { "navigationBarTitleText": "开票中心", "navigationStyle": "custom" } },
+        { "path": "invoice-apply", "style": { "navigationBarTitleText": "申请开票", "navigationStyle": "custom" } }
       ]
     },
     {

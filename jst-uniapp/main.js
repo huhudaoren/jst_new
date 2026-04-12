@@ -3,7 +3,8 @@
 import Vue from 'vue'
 import App from './App'
 import uView from 'uview-ui'
-import { createPinia, PiniaVuePlugin } from 'pinia'
+import { PiniaVuePlugin } from 'pinia'
+import { pinia } from '@/store/index'
 import { navBarMixin } from '@/utils/navbar'
 
 Vue.config.productionTip = false
@@ -12,8 +13,6 @@ Vue.use(uView)
 Vue.mixin(navBarMixin)
 
 App.mpType = 'app'
-
-const pinia = createPinia()
 
 const app = new Vue({
     pinia,

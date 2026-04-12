@@ -1,61 +1,24 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
       <el-form-item label="模板编码" prop="templateCode">
-        <el-input
-          v-model="queryParams.templateCode"
-          placeholder="请输入模板编码"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.templateCode" placeholder="请输入模板编码" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="通道：inner/sms/wechat" prop="channel">
-        <el-input
-          v-model="queryParams.channel"
-          placeholder="请输入通道：inner/sms/wechat"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="发送渠道" prop="channel">
+        <el-select v-model="queryParams.channel" placeholder="全部" clearable>
+          <el-option v-for="item in channelOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="接收用户ID" prop="targetUserId">
-        <el-input
-          v-model="queryParams.targetUserId"
-          placeholder="请输入接收用户ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="发送状态" prop="sendStatus">
+        <el-select v-model="queryParams.sendStatus" placeholder="全部" clearable>
+          <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="接收手机" prop="targetMobile">
-        <el-input
-          v-model="queryParams.targetMobile"
-          placeholder="请输入接收手机"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="触发来源" prop="triggerSource">
-        <el-input
-          v-model="queryParams.triggerSource"
-          placeholder="请输入触发来源"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="失败原因" prop="failReason">
-        <el-input
-          v-model="queryParams.failReason"
-          placeholder="请输入失败原因"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="用户ID" prop="targetUserId">
+        <el-input v-model="queryParams.targetUserId" placeholder="请输入用户ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="发送时间" prop="sendTime">
-        <el-date-picker clearable
-          v-model="queryParams.sendTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择发送时间">
-        </el-date-picker>
+        <el-date-picker v-model="queryParams.sendTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="精确时间" clearable style="width:190px" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -64,328 +27,223 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_message_log:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_message_log:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_message_log:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_message_log:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="jst_message_logList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="日志ID" align="center" prop="logId" />
-      <el-table-column label="模板编码" align="center" prop="templateCode" />
-      <el-table-column label="通道：inner/sms/wechat" align="center" prop="channel" />
-      <el-table-column label="接收用户ID" align="center" prop="targetUserId" />
-      <el-table-column label="接收手机" align="center" prop="targetMobile" />
-      <el-table-column label="触发来源" align="center" prop="triggerSource" />
-      <el-table-column label="渲染后的实际内容" align="center" prop="content" />
-      <el-table-column label="发送状态：pending/success/failed" align="center" prop="sendStatus" />
-      <el-table-column label="失败原因" align="center" prop="failReason" />
-      <el-table-column label="发送时间" align="center" prop="sendTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.sendTime, '{y}-{m}-{d}') }}</span>
+    <div v-if="isMobile" v-loading="loading">
+      <div v-if="list.length" class="mobile-card-list">
+        <div v-for="row in list" :key="row.logId" class="mobile-card">
+          <div class="mobile-card__head">
+            <span class="mobile-card__title">{{ row.templateCode }}</span>
+            <el-tag size="mini" :type="statusType(row.sendStatus)">{{ statusLabel(row.sendStatus) }}</el-tag>
+          </div>
+          <div class="mobile-card__meta">
+            <span>{{ channelLabel(row.channel) }}</span>
+            <span>用户：{{ row.targetUserId || '--' }}</span>
+            <span>手机号：{{ row.targetMobile || '--' }}</span>
+            <span>{{ parseTime(row.sendTime) || '--' }}</span>
+          </div>
+          <div class="mobile-card__actions">
+            <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无消息日志" />
+    </div>
+
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="日志ID" prop="logId" width="90" />
+      <el-table-column label="模板编码" prop="templateCode" min-width="130" />
+      <el-table-column label="发送渠道" min-width="110">
+        <template slot-scope="{ row }">{{ channelLabel(row.channel) }}</template>
+      </el-table-column>
+      <el-table-column label="用户ID" prop="targetUserId" min-width="90" />
+      <el-table-column label="手机号" prop="targetMobile" min-width="120" />
+      <el-table-column label="触发来源" prop="triggerSource" min-width="140" show-overflow-tooltip />
+      <el-table-column label="发送状态" width="100">
+        <template slot-scope="{ row }">
+          <el-tag size="small" :type="statusType(row.sendStatus)">{{ statusLabel(row.sendStatus) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_message_log:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_message_log:remove']"
-          >删除</el-button>
+      <el-table-column label="发送时间" min-width="160">
+        <template slot-scope="{ row }">{{ parseTime(row.sendTime) || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="操作" fixed="right" width="90">
+        <template slot-scope="{ row }">
+          <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改消息发送日志对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="模板编码" prop="templateCode">
-              <el-input v-model="form.templateCode" placeholder="请输入模板编码" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="通道：inner/sms/wechat" prop="channel">
-              <el-input v-model="form.channel" placeholder="请输入通道：inner/sms/wechat" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="接收用户ID" prop="targetUserId">
-              <el-input v-model="form.targetUserId" placeholder="请输入接收用户ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="接收手机" prop="targetMobile">
-              <el-input v-model="form.targetMobile" placeholder="请输入接收手机" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="触发来源" prop="triggerSource">
-              <el-input v-model="form.triggerSource" placeholder="请输入触发来源" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="渲染后的实际内容">
-              <editor v-model="form.content" :min-height="192"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="失败原因" prop="failReason">
-              <el-input v-model="form.failReason" placeholder="请输入失败原因" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="发送时间" prop="sendTime">
-              <el-date-picker clearable
-                v-model="form.sendTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择发送时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <el-drawer :title="'消息日志详情 #' + (detailData.logId || '')" :visible.sync="detailVisible" :size="isMobile ? '100%' : '560px'" append-to-body>
+      <div class="detail-body">
+        <el-descriptions :column="1" border size="small">
+          <el-descriptions-item label="日志ID">{{ detailData.logId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="模板编码">{{ detailData.templateCode || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="发送渠道">{{ channelLabel(detailData.channel) }}</el-descriptions-item>
+          <el-descriptions-item label="用户ID">{{ detailData.targetUserId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="手机号">{{ detailData.targetMobile || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="触发来源">{{ detailData.triggerSource || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="发送状态">
+            <el-tag size="small" :type="statusType(detailData.sendStatus)">{{ statusLabel(detailData.sendStatus) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="发送时间">{{ parseTime(detailData.sendTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="失败原因">{{ detailData.failReason || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="消息内容">
+            <pre class="content-block">{{ detailData.content || '--' }}</pre>
+          </el-descriptions-item>
+        </el-descriptions>
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_message_log, getJst_message_log, delJst_message_log, addJst_message_log, updateJst_message_log } from "@/api/jst/message/jst_message_log"
+import { parseTime } from '@/utils/ruoyi'
+import { listJst_message_log, getJst_message_log } from '@/api/jst/message/jst_message_log'
+
+const CHANNEL_OPTIONS = [
+  { label: '站内信', value: 'inner' },
+  { label: '短信', value: 'sms' },
+  { label: '微信消息', value: 'wechat' },
+  { label: '微信模板消息', value: 'wechat_template' }
+]
+
+const STATUS_META = {
+  pending: { label: '待发送', type: 'warning' },
+  sent: { label: '发送成功', type: 'success' },
+  success: { label: '发送成功', type: 'success' },
+  failed: { label: '发送失败', type: 'danger' }
+}
 
 export default {
-  name: "Jst_message_log",
+  name: 'JstMessageLog',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
+      loading: false,
       showSearch: true,
-      // 总条数
+      list: [],
       total: 0,
-      // 消息发送日志表格数据
-      jst_message_logList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
         templateCode: null,
         channel: null,
-        targetUserId: null,
-        targetMobile: null,
-        triggerSource: null,
-        content: null,
         sendStatus: null,
-        failReason: null,
-        sendTime: null,
+        targetUserId: null,
+        sendTime: null
       },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        templateCode: [
-          { required: true, message: "模板编码不能为空", trigger: "blur" }
-        ],
-        channel: [
-          { required: true, message: "通道：inner/sms/wechat不能为空", trigger: "blur" }
-        ],
-        sendStatus: [
-          { required: true, message: "发送状态：pending/success/failed不能为空", trigger: "change" }
-        ],
-      }
+      detailVisible: false,
+      detailData: {},
+      channelOptions: CHANNEL_OPTIONS,
+      statusOptions: [
+        { label: '待发送', value: 'pending' },
+        { label: '发送成功', value: 'success' },
+        { label: '发送失败', value: 'failed' }
+      ]
+    }
+  },
+  computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     }
   },
   created() {
     this.getList()
   },
   methods: {
-    /** 查询消息发送日志列表 */
+    parseTime,
+    channelLabel(channel) {
+      const match = CHANNEL_OPTIONS.find(item => item.value === channel)
+      return match ? match.label : channel || '--'
+    },
+    statusType(status) {
+      return (STATUS_META[status] || {}).type || 'info'
+    },
+    statusLabel(status) {
+      return (STATUS_META[status] || {}).label || status || '--'
+    },
     getList() {
       this.loading = true
-      listJst_message_log(this.queryParams).then(response => {
-        this.jst_message_logList = response.rows
-        this.total = response.total
+      listJst_message_log(this.queryParams).then(res => {
+        this.list = res.rows || []
+        this.total = res.total || 0
+      }).finally(() => {
         this.loading = false
       })
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        logId: null,
-        templateCode: null,
-        channel: null,
-        targetUserId: null,
-        targetMobile: null,
-        triggerSource: null,
-        content: null,
-        sendStatus: null,
-        failReason: null,
-        sendTime: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
+      this.$refs.queryForm && this.$refs.queryForm.resetFields()
       this.handleQuery()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.logId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加消息发送日志"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const logId = row.logId || this.ids
-      getJst_message_log(logId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改消息发送日志"
+    handleDetail(row) {
+      getJst_message_log(row.logId).then(res => {
+        this.detailData = res.data || res || row
+        this.detailVisible = true
       })
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.logId != null) {
-            updateJst_message_log(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_message_log(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
-      })
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const logIds = row.logId || this.ids
-      this.$modal.confirm('是否确认删除消息发送日志编号为"' + logIds + '"的数据项？').then(function() {
-        return delJst_message_log(logIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_message_log/export', {
-        ...this.queryParams
-      }, `jst_message_log_${new Date().getTime()}.xlsx`)
     }
   }
 }
 </script>
+
+<style scoped>
+.detail-body {
+  padding: 0 16px 16px;
+}
+
+.content-block {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.mobile-card-list {
+  padding: 0 4px;
+}
+
+.mobile-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.mobile-card__title {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65%;
+}
+
+.mobile-card__meta {
+  font-size: 12px;
+  color: #909399;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.mobile-card__actions {
+  display: flex;
+  gap: 6px;
+}
+</style>

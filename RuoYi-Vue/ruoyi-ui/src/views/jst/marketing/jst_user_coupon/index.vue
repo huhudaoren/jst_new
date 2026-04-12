@@ -1,69 +1,16 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="模板ID" prop="couponTemplateId">
-        <el-input
-          v-model="queryParams.couponTemplateId"
-          placeholder="请输入模板ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
       <el-form-item label="用户ID" prop="userId">
-        <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入用户ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.userId" placeholder="请输入用户ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="发券批次号" prop="issueBatchNo">
-        <el-input
-          v-model="queryParams.issueBatchNo"
-          placeholder="请输入发券批次号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="模板ID" prop="couponTemplateId">
+        <el-input v-model="queryParams.couponTemplateId" placeholder="请输入券模板ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="发券来源：platform/campaign/manual" prop="issueSource">
-        <el-input
-          v-model="queryParams.issueSource"
-          placeholder="请输入发券来源：platform/campaign/manual"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="生效时间" prop="validStart">
-        <el-date-picker clearable
-          v-model="queryParams.validStart"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择生效时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="失效时间" prop="validEnd">
-        <el-date-picker clearable
-          v-model="queryParams.validEnd"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择失效时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="使用订单ID" prop="orderId">
-        <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入使用订单ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="使用时间" prop="useTime">
-        <el-date-picker clearable
-          v-model="queryParams.useTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择使用时间">
-        </el-date-picker>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="全部" clearable>
+          <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -72,355 +19,214 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:jst_user_coupon:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:jst_user_coupon:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:jst_user_coupon:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:jst_user_coupon:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="jst_user_couponList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="用户券ID" align="center" prop="userCouponId" />
-      <el-table-column label="模板ID" align="center" prop="couponTemplateId" />
-      <el-table-column label="用户ID" align="center" prop="userId" />
-      <el-table-column label="发券批次号" align="center" prop="issueBatchNo" />
-      <el-table-column label="发券来源：platform/campaign/manual" align="center" prop="issueSource" />
-      <el-table-column label="状态：unused/locked/used/expired/refunded" align="center" prop="status" />
-      <el-table-column label="生效时间" align="center" prop="validStart" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.validStart, '{y}-{m}-{d}') }}</span>
+    <div v-if="isMobile" v-loading="loading">
+      <div v-if="list.length" class="mobile-card-list">
+        <div v-for="row in list" :key="row.userCouponId" class="mobile-card">
+          <div class="mobile-card__head">
+            <span class="mobile-card__title">用户券 #{{ row.userCouponId }}</span>
+            <el-tag size="mini" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+          </div>
+          <div class="mobile-card__meta">
+            <span>用户：{{ row.userId || '--' }}</span>
+            <span>模板：{{ row.couponTemplateId || '--' }}</span>
+            <span>有效期至：{{ parseTime(row.validEnd, '{y}-{m}-{d}') || '--' }}</span>
+            <span>订单：{{ row.orderId || '--' }}</span>
+          </div>
+          <div class="mobile-card__actions">
+            <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
+            <el-button v-if="row.orderId" type="text" size="mini" @click="openOrder(row.orderId)">关联订单</el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无用户优惠券" />
+    </div>
+
+    <el-table v-else v-loading="loading" :data="list">
+      <el-table-column label="用户券ID" prop="userCouponId" width="100" />
+      <el-table-column label="用户ID" prop="userId" min-width="100" />
+      <el-table-column label="模板ID" prop="couponTemplateId" min-width="100" />
+      <el-table-column label="发券来源" prop="issueSource" min-width="100" />
+      <el-table-column label="状态" width="100">
+        <template slot-scope="{ row }">
+          <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="失效时间" align="center" prop="validEnd" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.validEnd, '{y}-{m}-{d}') }}</span>
+      <el-table-column label="生效时间" min-width="160">
+        <template slot-scope="{ row }">{{ parseTime(row.validStart) || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="失效时间" min-width="160">
+        <template slot-scope="{ row }">{{ parseTime(row.validEnd) || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="使用订单ID" min-width="110">
+        <template slot-scope="{ row }">
+          <el-button v-if="row.orderId" type="text" size="mini" @click="openOrder(row.orderId)">{{ row.orderId }}</el-button>
+          <span v-else>--</span>
         </template>
       </el-table-column>
-      <el-table-column label="使用订单ID" align="center" prop="orderId" />
-      <el-table-column label="使用时间" align="center" prop="useTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.useTime, '{y}-{m}-{d}') }}</span>
-        </template>
+      <el-table-column label="使用时间" min-width="160">
+        <template slot-scope="{ row }">{{ parseTime(row.useTime) || '--' }}</template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:jst_user_coupon:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:jst_user_coupon:remove']"
-          >删除</el-button>
+      <el-table-column label="操作" fixed="right" width="90">
+        <template slot-scope="{ row }">
+          <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
-    <!-- 添加或修改用户持有优惠券对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="模板ID" prop="couponTemplateId">
-              <el-input v-model="form.couponTemplateId" placeholder="请输入模板ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="用户ID" prop="userId">
-              <el-input v-model="form.userId" placeholder="请输入用户ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="发券批次号" prop="issueBatchNo">
-              <el-input v-model="form.issueBatchNo" placeholder="请输入发券批次号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="发券来源：platform/campaign/manual" prop="issueSource">
-              <el-input v-model="form.issueSource" placeholder="请输入发券来源：platform/campaign/manual" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="生效时间" prop="validStart">
-              <el-date-picker clearable
-                v-model="form.validStart"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择生效时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="失效时间" prop="validEnd">
-              <el-date-picker clearable
-                v-model="form.validEnd"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择失效时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="使用订单ID" prop="orderId">
-              <el-input v-model="form.orderId" placeholder="请输入使用订单ID" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="使用时间" prop="useTime">
-              <el-date-picker clearable
-                v-model="form.useTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择使用时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="逻辑删除：0存在 2删除" prop="delFlag">
-              <el-input v-model="form.delFlag" placeholder="请输入逻辑删除：0存在 2删除" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+
+    <el-drawer :title="'用户券详情 #' + (detailData.userCouponId || '')" :visible.sync="detailVisible" :size="isMobile ? '100%' : '500px'" append-to-body>
+      <div class="detail-body">
+        <el-descriptions :column="1" border size="small">
+          <el-descriptions-item label="用户券ID">{{ detailData.userCouponId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="用户ID">{{ detailData.userId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="模板ID">{{ detailData.couponTemplateId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="批次号">{{ detailData.issueBatchNo || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="发券来源">{{ detailData.issueSource || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag size="small" :type="statusType(detailData.status)">{{ statusLabel(detailData.status) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="生效时间">{{ parseTime(detailData.validStart) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="失效时间">{{ parseTime(detailData.validEnd) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="使用订单">{{ detailData.orderId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="使用时间">{{ parseTime(detailData.useTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="备注">{{ detailData.remark || '--' }}</el-descriptions-item>
+        </el-descriptions>
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { listJst_user_coupon, getJst_user_coupon, delJst_user_coupon, addJst_user_coupon, updateJst_user_coupon } from "@/api/jst/marketing/jst_user_coupon"
+import { parseTime } from '@/utils/ruoyi'
+import { listJst_user_coupon, getJst_user_coupon } from '@/api/jst/marketing/jst_user_coupon'
+
+const STATUS_META = {
+  unused: { label: '未使用', type: 'info' },
+  locked: { label: '已锁定', type: 'warning' },
+  used: { label: '已使用', type: 'success' },
+  expired: { label: '已过期', type: 'info' },
+  refunded: { label: '已退回', type: 'danger' }
+}
 
 export default {
-  name: "Jst_user_coupon",
+  name: 'JstUserCoupon',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
+      loading: false,
       showSearch: true,
-      // 总条数
+      list: [],
       total: 0,
-      // 用户持有优惠券表格数据
-      jst_user_couponList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        couponTemplateId: null,
         userId: null,
-        issueBatchNo: null,
-        issueSource: null,
-        status: null,
-        validStart: null,
-        validEnd: null,
-        orderId: null,
-        useTime: null,
+        couponTemplateId: null,
+        status: null
       },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        couponTemplateId: [
-          { required: true, message: "模板ID不能为空", trigger: "blur" }
-        ],
-        userId: [
-          { required: true, message: "用户ID不能为空", trigger: "blur" }
-        ],
-        issueSource: [
-          { required: true, message: "发券来源：platform/campaign/manual不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "状态：unused/locked/used/expired/refunded不能为空", trigger: "change" }
-        ],
-        validStart: [
-          { required: true, message: "生效时间不能为空", trigger: "blur" }
-        ],
-        validEnd: [
-          { required: true, message: "失效时间不能为空", trigger: "blur" }
-        ],
-      }
+      detailVisible: false,
+      detailData: {},
+      statusOptions: Object.keys(STATUS_META).map(key => ({ value: key, label: STATUS_META[key].label }))
+    }
+  },
+  computed: {
+    isMobile() {
+      return this.$store.state.app.device === 'mobile'
     }
   },
   created() {
     this.getList()
   },
   methods: {
-    /** 查询用户持有优惠券列表 */
+    parseTime,
+    statusType(status) {
+      return (STATUS_META[status] || {}).type || 'info'
+    },
+    statusLabel(status) {
+      return (STATUS_META[status] || {}).label || status || '--'
+    },
     getList() {
       this.loading = true
-      listJst_user_coupon(this.queryParams).then(response => {
-        this.jst_user_couponList = response.rows
-        this.total = response.total
+      listJst_user_coupon(this.queryParams).then(res => {
+        this.list = res.rows || []
+        this.total = res.total || 0
+      }).finally(() => {
         this.loading = false
       })
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        userCouponId: null,
-        couponTemplateId: null,
-        userId: null,
-        issueBatchNo: null,
-        issueSource: null,
-        status: null,
-        validStart: null,
-        validEnd: null,
-        orderId: null,
-        useTime: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
+      this.$refs.queryForm && this.$refs.queryForm.resetFields()
       this.handleQuery()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.userCouponId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加用户持有优惠券"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const userCouponId = row.userCouponId || this.ids
-      getJst_user_coupon(userCouponId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改用户持有优惠券"
+    handleDetail(row) {
+      getJst_user_coupon(row.userCouponId).then(res => {
+        this.detailData = res.data || res || row
+        this.detailVisible = true
       })
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.userCouponId != null) {
-            updateJst_user_coupon(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addJst_user_coupon(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
-        }
+    openOrder(orderId) {
+      this.$router.push({
+        path: '/jst/order/main',
+        query: { orderId: orderId }
+      }).catch(() => {
+        this.$modal.msgWarning('订单页面暂未配置路由')
       })
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const userCouponIds = row.userCouponId || this.ids
-      this.$modal.confirm('是否确认删除用户持有优惠券编号为"' + userCouponIds + '"的数据项？').then(function() {
-        return delJst_user_coupon(userCouponIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('system/jst_user_coupon/export', {
-        ...this.queryParams
-      }, `jst_user_coupon_${new Date().getTime()}.xlsx`)
     }
   }
 }
 </script>
+
+<style scoped>
+.detail-body {
+  padding: 0 16px 16px;
+}
+
+.mobile-card-list {
+  padding: 0 4px;
+}
+
+.mobile-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.mobile-card__title {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65%;
+}
+
+.mobile-card__meta {
+  font-size: 12px;
+  color: #909399;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.mobile-card__actions {
+  display: flex;
+  gap: 6px;
+}
+</style>

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.jst.AdminDashboardMapper">
+
+    <resultMap id="OverviewResultMap" type="com.ruoyi.web.controller.jst.vo.OverviewVO">
+        <result property="todayOrderCount" column="today_order_count"/>
+        <result property="todayRevenue" column="today_revenue"/>
+        <result property="monthRevenue" column="month_revenue"/>
+        <result property="totalUserCount" column="total_user_count"/>
+        <result property="totalContestCount" column="total_contest_count"/>
+        <result property="totalEnrollCount" column="total_enroll_count"/>
+    </resultMap>
+
+    <resultMap id="TrendPointResultMap" type="com.ruoyi.web.controller.jst.vo.TrendPointVO">
+        <result property="date" column="stat_date"/>
+        <result property="orderCount" column="order_count"/>
+        <result property="revenue" column="revenue"/>
+        <result property="enrollCount" column="enroll_count"/>
+    </resultMap>
+
+    <resultMap id="ContestRankResultMap" type="com.ruoyi.web.controller.jst.vo.ContestRankVO">
+        <result property="contestId" column="contest_id"/>
+        <result property="contestName" column="contest_name"/>
+        <result property="enrollCount" column="enroll_count"/>
+        <result property="totalRevenue" column="total_revenue"/>
+    </resultMap>
+
+    <resultMap id="ChannelRankResultMap" type="com.ruoyi.web.controller.jst.vo.ChannelRankVO">
+        <result property="channelId" column="channel_id"/>
+        <result property="channelName" column="channel_name"/>
+        <result property="studentCount" column="student_count"/>
+        <result property="totalRebate" column="total_rebate"/>
+    </resultMap>
+
+    <resultMap id="TodoResultMap" type="com.ruoyi.web.controller.jst.vo.TodoVO">
+        <result property="pendingContestAudit" column="pending_contest_audit"/>
+        <result property="pendingEnrollAudit" column="pending_enroll_audit"/>
+        <result property="pendingRefund" column="pending_refund"/>
+        <result property="pendingWithdraw" column="pending_withdraw"/>
+        <result property="pendingPartnerApply" column="pending_partner_apply"/>
+        <result property="pendingChannelAuth" column="pending_channel_auth"/>
+    </resultMap>
+
+    <select id="selectOverview" resultMap="OverviewResultMap">
+        select
+            (
+                select count(1)
+                from jst_order_main
+                where create_time <![CDATA[ >= ]]> #{todayStart}
+                  and create_time <![CDATA[ < ]]> #{todayEnd}
+                  and order_status != 'cancelled'
+                  and del_flag = '0'
+            ) as today_order_count,
+            (
+                select coalesce(sum(net_pay_amount), 0.00)
+                from jst_order_main
+                where pay_time <![CDATA[ >= ]]> #{todayStart}
+                  and pay_time <![CDATA[ < ]]> #{todayEnd}
+                  and order_status in ('paid', 'reviewing', 'in_service', 'aftersale', 'completed', 'closed')
+                  and del_flag = '0'
+            ) as today_revenue,
+            (
+                (
+                    select coalesce(sum(net_pay_amount), 0.00)
+                    from jst_order_main
+                    where pay_time <![CDATA[ >= ]]> #{monthStart}
+                      and pay_time <![CDATA[ < ]]> #{monthEnd}
+                      and order_status in ('paid', 'reviewing', 'in_service', 'aftersale', 'completed', 'closed')
+                      and del_flag = '0'
+                ) -
+                (
+                    select coalesce(sum(actual_cash), 0.00)
+                    from jst_refund_record
+                    where complete_time <![CDATA[ >= ]]> #{monthStart}
+                      and complete_time <![CDATA[ < ]]> #{monthEnd}
+                      and status = 'completed'
+                      and del_flag = '0'
+                )
+            ) as month_revenue,
+            (
+                select count(1)
+                from jst_user
+                where del_flag = '0'
+            ) as total_user_count,
+            (
+                select count(1)
+                from jst_contest
+                where del_flag = '0'
+            ) as total_contest_count,
+            (
+                select count(1)
+                from jst_enroll_record
+                where del_flag = '0'
+            ) as total_enroll_count
+    </select>
+
+    <select id="selectOrderTrend" resultMap="TrendPointResultMap">
+        select date_format(create_time, '%Y-%m-%d') as stat_date,
+               count(1) as order_count
+        from jst_order_main
+        where create_time <![CDATA[ >= ]]> #{startTime}
+          and create_time <![CDATA[ < ]]> #{endTime}
+          and order_status != 'cancelled'
+          and del_flag = '0'
+        group by date_format(create_time, '%Y-%m-%d')
+        order by stat_date asc
+    </select>
+
+    <select id="selectRevenueTrend" resultMap="TrendPointResultMap">
+        select date_format(pay_time, '%Y-%m-%d') as stat_date,
+               coalesce(sum(net_pay_amount), 0.00) as revenue
+        from jst_order_main
+        where pay_time <![CDATA[ >= ]]> #{startTime}
+          and pay_time <![CDATA[ < ]]> #{endTime}
+          and order_status in ('paid', 'reviewing', 'in_service', 'aftersale', 'completed', 'closed')
+          and del_flag = '0'
+        group by date_format(pay_time, '%Y-%m-%d')
+        order by stat_date asc
+    </select>
+
+    <select id="selectEnrollTrend" resultMap="TrendPointResultMap">
+        select date_format(create_time, '%Y-%m-%d') as stat_date,
+               count(1) as enroll_count
+        from jst_enroll_record
+        where create_time <![CDATA[ >= ]]> #{startTime}
+          and create_time <![CDATA[ < ]]> #{endTime}
+          and del_flag = '0'
+        group by date_format(create_time, '%Y-%m-%d')
+        order by stat_date asc
+    </select>
+
+    <select id="selectTopContests" resultMap="ContestRankResultMap">
+        select c.contest_id,
+               c.contest_name,
+               count(e.enroll_id) as enroll_count,
+               coalesce(o.total_revenue, 0.00) as total_revenue
+        from jst_contest c
+                 left join jst_enroll_record e
+                           on e.contest_id = c.contest_id
+                               and e.del_flag = '0'
+                 left join (
+            select contest_id,
+                   coalesce(sum(net_pay_amount), 0.00) as total_revenue
+            from jst_order_main
+            where order_status in ('paid', 'reviewing', 'in_service', 'aftersale', 'completed', 'closed')
+              and del_flag = '0'
+            group by contest_id
+        ) o on o.contest_id = c.contest_id
+        where c.del_flag = '0'
+        group by c.contest_id, c.contest_name, o.total_revenue
+        having count(e.enroll_id) > 0 or coalesce(o.total_revenue, 0.00) > 0
+        order by enroll_count desc, total_revenue desc, c.contest_id asc
+        limit #{limit}
+    </select>
+
+    <select id="selectTopChannels" resultMap="ChannelRankResultMap">
+        select c.channel_id,
+               c.channel_name,
+               coalesce(b.student_count, 0) as student_count,
+               coalesce(l.total_rebate, 0.00) as total_rebate
+        from jst_channel c
+                 left join (
+            select channel_id,
+                   count(1) as student_count
+            from jst_student_channel_binding
+            where status = 'active'
+              and del_flag = '0'
+            group by channel_id
+        ) b on b.channel_id = c.channel_id
+                 left join (
+            select channel_id,
+                   coalesce(sum(rebate_amount), 0.00) as total_rebate
+            from jst_rebate_ledger
+            where status != 'rolled_back'
+              and del_flag = '0'
+            group by channel_id
+        ) l on l.channel_id = c.channel_id
+        where c.del_flag = '0'
+          and (coalesce(b.student_count, 0) > 0 or coalesce(l.total_rebate, 0.00) != 0)
+        order by total_rebate desc, c.channel_id asc
+        limit #{limit}
+    </select>
+
+    <select id="selectTodo" resultMap="TodoResultMap">
+        select
+            (
+                select count(1)
+                from jst_contest
+                where audit_status = 'pending'
+                  and del_flag = '0'
+            ) as pending_contest_audit,
+            (
+                select count(1)
+                from jst_enroll_record
+                where audit_status = 'pending'
+                  and del_flag = '0'
+            ) as pending_enroll_audit,
+            (
+                select count(1)
+                from jst_refund_record
+                where status = 'pending'
+                  and del_flag = '0'
+            ) as pending_refund,
+            (
+                select count(1)
+                from jst_rebate_settlement
+                where status = 'pending'
+                  and del_flag = '0'
+            ) as pending_withdraw,
+            (
+                select count(1)
+                from jst_event_partner_apply
+                where apply_status = 'pending'
+                  and del_flag = '0'
+            ) as pending_partner_apply,
+            (
+                select count(1)
+                from jst_channel_auth_apply
+                where apply_status = 'pending'
+                  and del_flag = '0'
+            ) as pending_channel_auth
+    </select>
+
+</mapper>
