@@ -2,38 +2,38 @@
   <div class="app-container order-item-page">
     <div class="page-hero">
       <div>
-        <p class="hero-eyebrow">璁㈠崟涓績</p>
-        <h2>璁㈠崟鏄庣粏琛岀鐞?/h2>
-        <p class="hero-desc">鏀寔鎸夎鍗曞彿涓庡晢鍝佸悕绉版绱紝鏌ョ湅鍒嗘憡閲戦涓庨€€娆剧疮璁★紝鏀寔鍏宠仈璺宠浆璁㈠崟璇︽儏銆?/p>
+        <p class="hero-eyebrow">订单中心</p>
+        <h2>订单明细行管理</h2>
+        <p class="hero-desc">支持按订单号与商品名称检索，查看分摊金额与退款累计，支持关联跳转订单详情。</p>
       </div>
-      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">鍒锋柊</el-button>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
     </div>
 
     <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="88px" class="query-panel">
-      <el-form-item label="璁㈠崟鍙?ID">
+      <el-form-item label="订单号/ID">
         <el-input
           v-model="queryParams.orderKeyword"
-          placeholder="璇疯緭鍏ヨ鍗曞彿鎴栬鍗旾D"
+          placeholder="请输入订单号或订单ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="鍟嗗搧鍚嶇О">
+      <el-form-item label="商品名称">
         <el-input
           v-model="queryParams.itemName"
-          placeholder="璇疯緭鍏ュ晢鍝?椤圭洰鍚嶇О"
+          placeholder="请输入商品/项目名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="鏄庣粏绫诲瀷">
-        <el-select v-model="queryParams.skuType" placeholder="鍏ㄩ儴" clearable>
+      <el-form-item label="明细类型">
+        <el-select v-model="queryParams.skuType" placeholder="全部" clearable>
           <el-option v-for="item in skuTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" @click="handleQuery">鎼滅储</el-button>
-        <el-button icon="el-icon-refresh-left" @click="resetQuery">閲嶇疆</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -45,7 +45,7 @@
               <div class="mobile-title">{{ row.itemName || '--' }}</div>
               <div class="mobile-sub">
                 <el-link type="primary" :underline="false" @click="goOrder(row)">
-                  璁㈠崟 {{ row.orderNo || row.orderId || '--' }}
+                  订单 {{ row.orderNo || row.orderId || '--' }}
                 </el-link>
               </div>
             </div>
@@ -53,58 +53,58 @@
           </div>
           <div class="mobile-amount">{{ formatMoney(row.netPayShare) }}</div>
           <div class="mobile-info-row">
-            <span>鏍囦环 {{ formatMoney(row.listAmount) }}</span>
-            <span class="amount-negative">宸查€€ {{ formatMoney(row.refundAmount) }}</span>
+            <span>标价 {{ formatMoney(row.listAmount) }}</span>
+            <span class="amount-negative">已退 {{ formatMoney(row.refundAmount) }}</span>
           </div>
           <div class="mobile-info-row">
-            <span>鏁伴噺 {{ row.quantity || 0 }}</span>
+            <span>数量 {{ row.quantity || 0 }}</span>
             <span>{{ parseTime(row.createTime) || '--' }}</span>
           </div>
           <div class="mobile-actions">
-            <el-button type="text" @click="openDetail(row)">鏌ョ湅璇︽儏</el-button>
-            <el-button type="text" @click="goOrder(row)">鍏宠仈璁㈠崟</el-button>
+            <el-button type="text" @click="openDetail(row)">查看详情</el-button>
+            <el-button type="text" @click="goOrder(row)">关联订单</el-button>
           </div>
         </div>
       </div>
-      <el-empty v-else description="鏆傛棤璁㈠崟鏄庣粏" :image-size="96" />
+      <el-empty v-else description="暂无订单明细" :image-size="96" />
     </div>
 
     <el-table v-else v-loading="loading" :data="list">
-      <el-table-column label="鏄庣粏ID" prop="itemId" min-width="90" />
-      <el-table-column label="璁㈠崟鍙?ID" min-width="170" show-overflow-tooltip>
+      <el-table-column label="明细ID" prop="itemId" min-width="90" />
+      <el-table-column label="订单号/ID" min-width="170" show-overflow-tooltip>
         <template slot-scope="scope">
           <el-link type="primary" :underline="false" @click="goOrder(scope.row)">
             {{ scope.row.orderNo || scope.row.orderId || '--' }}
           </el-link>
         </template>
       </el-table-column>
-      <el-table-column label="鍟嗗搧/椤圭洰鍚嶇О" prop="itemName" min-width="190" show-overflow-tooltip />
-      <el-table-column label="绫诲瀷" min-width="130">
+      <el-table-column label="商品/项目名称" prop="itemName" min-width="190" show-overflow-tooltip />
+      <el-table-column label="类型" min-width="130">
         <template slot-scope="scope">
           <el-tag size="small" type="info">{{ skuTypeLabel(scope.row.skuType) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="鏁伴噺" prop="quantity" min-width="80" align="center" />
-      <el-table-column label="鏍囦环閲戦" min-width="120" align="right">
+      <el-table-column label="数量" prop="quantity" min-width="80" align="center" />
+      <el-table-column label="标价金额" min-width="120" align="right">
         <template slot-scope="scope">{{ formatMoney(scope.row.listAmount) }}</template>
       </el-table-column>
-      <el-table-column label="鍑€瀹炰粯" min-width="120" align="right">
+      <el-table-column label="净实付" min-width="120" align="right">
         <template slot-scope="scope">
           <span class="amount-strong">{{ formatMoney(scope.row.netPayShare) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="宸查€€鐜伴噾" min-width="120" align="right">
+      <el-table-column label="已退现金" min-width="120" align="right">
         <template slot-scope="scope">
           <span class="amount-negative">{{ formatMoney(scope.row.refundAmount) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="鍒涘缓鏃堕棿" min-width="160">
+      <el-table-column label="创建时间" min-width="160">
         <template slot-scope="scope">{{ parseTime(scope.row.createTime) || '--' }}</template>
       </el-table-column>
-      <el-table-column label="鎿嶄綔" width="140" fixed="right">
+      <el-table-column label="操作" width="140" fixed="right">
         <template slot-scope="scope">
-          <el-button type="text" @click="openDetail(scope.row)">璇︽儏</el-button>
-          <el-button type="text" @click="goOrder(scope.row)">璁㈠崟</el-button>
+          <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
+          <el-button type="text" @click="goOrder(scope.row)">订单</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -117,32 +117,32 @@
       @pagination="getList"
     />
 
-    <el-drawer :visible.sync="detailVisible" :size="isMobile ? '100%' : '680px'" title="璁㈠崟鏄庣粏璇︽儏" append-to-body>
+    <el-drawer :visible.sync="detailVisible" :size="isMobile ? '100%' : '680px'" title="订单明细详情" append-to-body>
       <div v-loading="detailLoading" class="drawer-body">
         <el-descriptions v-if="detail" :column="isMobile ? 1 : 2" border>
-          <el-descriptions-item label="鏄庣粏ID">{{ detail.itemId }}</el-descriptions-item>
-          <el-descriptions-item label="璁㈠崟鍙?ID">{{ detail.orderNo || detail.orderId || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="绫诲瀷">{{ skuTypeLabel(detail.skuType) }}</el-descriptions-item>
-          <el-descriptions-item label="鍟嗗搧/椤圭洰">{{ detail.itemName || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="鏁伴噺">{{ detail.quantity || 0 }}</el-descriptions-item>
-          <el-descriptions-item label="寮曠敤涓氬姟ID">{{ detail.refId || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="鏍囦环閲戦">{{ formatMoney(detail.listAmount) }}</el-descriptions-item>
-          <el-descriptions-item label="浼樻儬鍒稿垎鎽?>{{ formatMoney(detail.couponShare) }}</el-descriptions-item>
-          <el-descriptions-item label="绉垎鍒嗘憡">{{ formatMoney(detail.pointsShare) }}</el-descriptions-item>
-          <el-descriptions-item label="鍑€瀹炰粯鍒嗘憡">
+          <el-descriptions-item label="明细ID">{{ detail.itemId }}</el-descriptions-item>
+          <el-descriptions-item label="订单号/ID">{{ detail.orderNo || detail.orderId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="类型">{{ skuTypeLabel(detail.skuType) }}</el-descriptions-item>
+          <el-descriptions-item label="商品/项目">{{ detail.itemName || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="数量">{{ detail.quantity || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="引用业务ID">{{ detail.refId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="标价金额">{{ formatMoney(detail.listAmount) }}</el-descriptions-item>
+          <el-descriptions-item label="优惠券分摊>{{ formatMoney(detail.couponShare) }}</el-descriptions-item>
+          <el-descriptions-item label="积分分摊">{{ formatMoney(detail.pointsShare) }}</el-descriptions-item>
+          <el-descriptions-item label="净实付分摊">
             <span class="amount-strong">{{ formatMoney(detail.netPayShare) }}</span>
           </el-descriptions-item>
-          <el-descriptions-item label="鏈嶅姟璐瑰垎鎽?>{{ formatMoney(detail.serviceFeeShare) }}</el-descriptions-item>
-          <el-descriptions-item label="娓犻亾杩旂偣鍒嗘憡">{{ formatMoney(detail.rebateShare) }}</el-descriptions-item>
-          <el-descriptions-item label="宸查€€鐜伴噾绱">
+          <el-descriptions-item label="服务费分摊>{{ formatMoney(detail.serviceFeeShare) }}</el-descriptions-item>
+          <el-descriptions-item label="渠道返点分摊">{{ formatMoney(detail.rebateShare) }}</el-descriptions-item>
+          <el-descriptions-item label="已退现金累计">
             <span class="amount-negative">{{ formatMoney(detail.refundAmount) }}</span>
           </el-descriptions-item>
           <el-descriptions-item label="宸插洖閫€绉垎">{{ detail.refundPoints || 0 }}</el-descriptions-item>
-          <el-descriptions-item label="鍒涘缓鏃堕棿">{{ parseTime(detail.createTime) || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="鏇存柊鏃堕棿">{{ parseTime(detail.updateTime) || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="澶囨敞" :span="isMobile ? 1 : 2">{{ detail.remark || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ parseTime(detail.createTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="更新时间">{{ parseTime(detail.updateTime) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="备注" :span="isMobile ? 1 : 2">{{ detail.remark || '--' }}</el-descriptions-item>
         </el-descriptions>
-        <el-empty v-else description="鏆傛棤璇︽儏鏁版嵁" :image-size="96" />
+        <el-empty v-else description="鏆傛棤详情鏁版嵁" :image-size="96" />
       </div>
     </el-drawer>
   </div>
@@ -152,10 +152,10 @@
 import { listJst_order_item, getJst_order_item } from '@/api/jst/order/jst_order_item'
 
 const SKU_TYPE_MAP = {
-  enroll: '鎶ュ悕',
-  appointment_member: '棰勭害鎴愬憳',
-  goods: '鍟嗗煄鍟嗗搧',
-  course: '璇剧▼'
+  enroll: '报名',
+  appointment_member: '预约成员',
+  goods: '商城商品',
+  course: '课程'
 }
 
 export default {
