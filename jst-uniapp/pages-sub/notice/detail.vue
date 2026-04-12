@@ -164,8 +164,8 @@ export default {
 @import '@/styles/design-tokens.scss';
 .notice-detail {
   min-height: 100vh;
-  padding: 24rpx 24rpx 180rpx;
-  background: #F7F8FA;
+  padding: $jst-space-lg $jst-space-lg 180rpx;
+  background: $jst-bg-page;
 }
 
 .notice-detail__header {
@@ -182,8 +182,8 @@ export default {
   height: 72rpx;
   border-radius: 22rpx;
   background: $jst-bg-card;
-  box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04);
-  font-size: 30rpx;
+  box-shadow: $jst-shadow-sm;
+  font-size: $jst-font-md;
   color: $jst-text-primary;
   padding: 0;
   border: none;
@@ -193,19 +193,19 @@ export default {
 
 .notice-detail__header-title {
   flex: 1;
-  margin: 0 16rpx;
-  font-size: 32rpx;
-  font-weight: 600;
+  margin: 0 $jst-space-md;
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-semibold;
   color: $jst-text-primary;
   text-align: center;
 }
 
 .notice-detail__article {
   overflow: hidden;
-  margin-top: 24rpx;
-  border-radius: 32rpx;
+  margin-top: $jst-space-lg;
+  border-radius: $jst-radius-xl;
   background: $jst-bg-card;
-  box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04);
+  box-shadow: $jst-shadow-sm;
 }
 
 .notice-detail__cover {
@@ -215,34 +215,34 @@ export default {
 }
 
 .notice-detail__article-body {
-  padding: 32rpx 28rpx;
+  padding: $jst-space-xl 28rpx;
 }
 
 .notice-detail__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 12rpx;
+  gap: $jst-space-sm;
 }
 
 .notice-detail__tag {
-  padding: 6rpx 16rpx;
-  border-radius: 999rpx;
-  background: #EAF4FC;
+  padding: 6rpx $jst-space-md;
+  border-radius: $jst-radius-round;
+  background: $jst-brand-light;
   font-size: 22rpx;
-  font-weight: 500;
-  color: #283593;
+  font-weight: $jst-weight-medium;
+  color: $jst-indigo;
 }
 
 .notice-detail__tag--top {
-  background: #FFF3EE;
-  color: #ff6b35;
+  background: $jst-danger-light;
+  color: $jst-danger;
 }
 
 .notice-detail__title {
   display: block;
-  margin-top: 20rpx;
+  margin-top: $jst-space-md;
   font-size: 40rpx;
-  font-weight: 600;
+  font-weight: $jst-weight-semibold;
   line-height: 1.45;
   color: $jst-text-primary;
 }
@@ -250,33 +250,33 @@ export default {
 .notice-detail__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 24rpx;
-  margin-top: 18rpx;
+  gap: $jst-space-lg;
+  margin-top: $jst-space-md;
 }
 
 .notice-detail__meta-item {
-  font-size: 22rpx;
+  font-size: $jst-font-xs;
   color: $jst-text-secondary;
 }
 
 .notice-detail__content {
-  margin-top: 28rpx;
-  font-size: 28rpx;
+  margin-top: $jst-space-xl;
+  font-size: $jst-font-base;
   line-height: 1.85;
   color: $jst-text-regular;
 }
 
 .notice-detail__bottom {
   position: fixed;
-  left: 24rpx;
-  right: 24rpx;
-  bottom: 24rpx;
+  left: $jst-space-lg;
+  right: $jst-space-lg;
+  bottom: $jst-space-lg;
   display: flex;
-  gap: 16rpx;
+  gap: $jst-space-md;
   padding: 18rpx;
-  border-radius: 32rpx;
+  border-radius: $jst-radius-xl;
   background: $jst-bg-card;
-  box-shadow: 0 4rpx 16rpx rgba(20, 30, 60, 0.06);
+  box-shadow: $jst-shadow-md;
 }
 
 .notice-detail__button {
@@ -286,8 +286,13 @@ export default {
   flex: 1;
   height: 84rpx;
   border-radius: $jst-radius-xl;
-  font-size: 28rpx;
-  font-weight: 600;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  transition: transform $jst-duration-fast $jst-easing;
+
+  &:active {
+    transform: scale(0.97);
+  }
 }
 
 .notice-detail__button--secondary {
@@ -297,8 +302,8 @@ export default {
 }
 
 .notice-detail__button--primary {
-  color: #fff;
-  background: linear-gradient(135deg, #283593, #3949AB);
+  color: $jst-text-inverse;
+  background: $jst-indigo-gradient;
   box-shadow: 0 4rpx 12rpx rgba(40, 53, 147, 0.2);
 }
 </style>

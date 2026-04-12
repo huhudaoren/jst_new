@@ -318,7 +318,7 @@ export default {
 
 .course-list-page__hero {
   padding: 88rpx $jst-space-xl 60rpx;
-  background: linear-gradient(150deg, #1565C0 0%, #1E88E5 60%, #42A5F5 100%);
+  background: linear-gradient(150deg, $jst-brand-dark 0%, $jst-brand 60%, lighten($jst-brand, 12%) 100%);
   border-bottom-left-radius: $jst-radius-xl;
   border-bottom-right-radius: $jst-radius-xl;
   position: relative;

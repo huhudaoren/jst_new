@@ -303,7 +303,7 @@ export default {
 .help-page {
   min-height: 100vh;
   padding-bottom: 40rpx;
-  background: #f5f6fa;
+  background: $jst-bg-page;
 }
 
 .help-page__nav {
@@ -312,7 +312,7 @@ export default {
   height: 96rpx;
   padding: 0 24rpx;
   background: $jst-bg-card;
-  border-bottom: 2rpx solid #eef1f6;
+  border-bottom: 2rpx solid $jst-border;
 }
 
 .help-page__back,
@@ -341,7 +341,7 @@ export default {
   padding: 0 20rpx;
   height: 76rpx;
   border-radius: $jst-radius-round;
-  background: #eff2f7;
+  background: $jst-bg-grey;
 }
 
 .help-page__search-icon {
@@ -367,8 +367,8 @@ export default {
   margin: 18rpx 24rpx 0;
   padding: 26rpx 24rpx;
   border-radius: 24rpx;
-  background: linear-gradient(150deg, #1A237E 0%, #283593 100%);
-  box-shadow: 0 4rpx 16rpx rgba(26, 35, 126, 0.12);
+  background: linear-gradient(150deg, $jst-indigo 0%, $jst-indigo-light 100%);
+  box-shadow: $jst-shadow-md;
 }
 
 .help-page__hero-icon {
@@ -444,19 +444,19 @@ export default {
 }
 
 .help-page__contact-icon-wrap--phone {
-  background: #fff1f2;
+  background: $jst-danger-light;
 }
 
 .help-page__contact-icon-wrap--wechat {
-  background: #f4f0ff;
+  background: $jst-info-light;
 }
 
 .help-page__contact-icon-wrap--mail {
-  background: #eef4ff;
+  background: $jst-brand-light;
 }
 
 .help-page__contact-icon-wrap--notice {
-  background: #fff5eb;
+  background: $jst-warning-light;
 }
 
 .help-page__contact-icon {
@@ -521,7 +521,7 @@ export default {
   flex-shrink: 0;
   padding: 10rpx 20rpx;
   border-radius: $jst-radius-round;
-  background: #f3f5fa;
+  background: $jst-bg-grey;
   font-size: 20rpx;
   color: $jst-text-regular;
 }
@@ -643,7 +643,7 @@ export default {
   height: 84rpx;
   margin-top: 18rpx;
   border-radius: $jst-radius-round;
-  background: linear-gradient(135deg, #ff6b35, #ff8c61);
+  background: $jst-amber-gradient;
   font-size: 26rpx;
   font-weight: 600;
   color: $jst-bg-card;

@@ -22,14 +22,27 @@
       >{{ tab.label }}</view>
     </scroll-view>
 
-    <view class="ml-grid">
+    <!-- 骨架屏 -->
+    <view v-if="loading && !list.length" class="ml-grid">
+      <view v-for="i in 4" :key="'sk'+i" class="ml-card">
+        <u-skeleton rows="0" loading :title="false">
+          <view class="ml-card__img ml-card__img--placeholder"></view>
+        </u-skeleton>
+        <view class="ml-card__body">
+          <u-skeleton rows="2" rowsWidth="['80%','50%']" loading :title="false"></u-skeleton>
+        </view>
+      </view>
+    </view>
+
+    <view v-else class="ml-grid">
       <view
-        v-for="item in list"
+        v-for="(item, idx) in list"
         :key="item.goodsId"
-        class="ml-card"
+        class="ml-card jst-anim-slide-up"
+        :class="'jst-anim-stagger-' + Math.min(idx % 4 + 1, 8)"
         @tap="goDetail(item.goodsId)"
       >
-        <image v-if="item.coverImage" class="ml-card__img" :src="item.coverImage" mode="aspectFill" />
+        <image v-if="item.coverImage" class="ml-card__img jst-anim-fade-in" :src="item.coverImage" mode="aspectFill" />
         <view v-else class="ml-card__img ml-card__img--placeholder"><text>暂无图片</text></view>
         <view class="ml-card__body">
           <text class="ml-card__name">{{ item.goodsName || '--' }}</text>
@@ -40,12 +53,12 @@
           <text class="ml-card__stock">库存 {{ item.stock != null ? item.stock : '--' }}</text>
         </view>
       </view>
-      <view v-if="!list.length && !loading" class="ml-empty">暂无商品</view>
-      <view v-if="loading" class="ml-empty">加载中...</view>
-      <view v-if="!hasMore && list.length" class="ml-empty ml-empty--end">没有更多了</view>
     </view>
 
-    <view class="ml-fab" @tap="goMyExchanges">🎁</view>
+    <u-empty v-if="!list.length && !loading" mode="data" text="暂无商品" />
+    <u-loadmore v-if="list.length" :status="hasMore ? (loading ? 'loading' : 'loadmore') : 'nomore'" />
+
+    <view class="ml-fab jst-anim-scale-in" @tap="goMyExchanges">🎁</view>
   </view>
 </template>
 
@@ -112,30 +125,30 @@ export default {
 
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
-.ml-page { min-height: 100vh; background: #F7F8FA; padding-bottom: 80rpx; }
-.ml-hero { display: flex; align-items: center; justify-content: space-between; padding: 72rpx 32rpx 40rpx; background: linear-gradient(135deg, #F5A623, #FF9800); color: #fff; }
+.ml-page { min-height: 100vh; background: $jst-bg-page; padding-bottom: 80rpx; }
+.ml-hero { display: flex; align-items: center; justify-content: space-between; padding: 72rpx $jst-space-xl 40rpx; background: $jst-amber-gradient; color: $jst-text-inverse; }
 .ml-hero__left { display: flex; flex-direction: column; }
-.ml-hero__label { font-size: 24rpx; color: rgba(255,255,255,0.76); }
-.ml-hero__num { margin-top: 8rpx; font-size: 56rpx; font-weight: 600; color: #fff; }
-.ml-hero__right { padding: 12rpx 24rpx; border-radius: $jst-radius-round; background: rgba(255,255,255,0.18); font-size: 24rpx; color: #fff; }
+.ml-hero__label { font-size: $jst-font-sm; color: rgba(255,255,255,0.76); }
+.ml-hero__num { margin-top: $jst-space-xs; font-size: 56rpx; font-weight: $jst-weight-semibold; color: $jst-text-inverse; }
+.ml-hero__right { padding: $jst-space-sm $jst-space-lg; border-radius: $jst-radius-round; background: rgba(255,255,255,0.18); font-size: $jst-font-sm; color: $jst-text-inverse; }
 
 .ml-tabs { white-space: nowrap; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
-.ml-tabs__item { display: inline-block; padding: 0 40rpx; height: 88rpx; line-height: 88rpx; font-size: 26rpx; color: $jst-text-secondary; position: relative; }
-.ml-tabs__item--active { color: #F5A623; font-weight: 600; }
-.ml-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 24rpx; right: 24rpx; height: 4rpx; background: #F5A623; border-radius: 2rpx; }
+.ml-tabs__item { display: inline-block; padding: 0 40rpx; height: 88rpx; line-height: 88rpx; font-size: $jst-font-base; color: $jst-text-secondary; position: relative; }
+.ml-tabs__item--active { color: $jst-amber; font-weight: $jst-weight-semibold; }
+.ml-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: $jst-space-lg; right: $jst-space-lg; height: 4rpx; background: $jst-amber; border-radius: 2rpx; }
 
-.ml-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24rpx; padding: 24rpx 24rpx 48rpx; }
-.ml-card { background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); overflow: hidden; }
-.ml-card__img { width: 100%; height: 320rpx; background: #F7F8FA; }
-.ml-card__img--placeholder { display: flex; align-items: center; justify-content: center; font-size: 24rpx; color: $jst-text-secondary; }
-.ml-card__body { padding: 20rpx 24rpx; }
-.ml-card__name { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; min-height: 68rpx; }
-.ml-card__price { display: flex; align-items: baseline; gap: 12rpx; margin-top: 10rpx; }
-.ml-card__points { font-size: 30rpx; font-weight: 600; color: #F5A623; }
-.ml-card__cash { font-size: 22rpx; color: $jst-text-secondary; }
-.ml-card__stock { display: block; margin-top: 6rpx; font-size: 20rpx; color: $jst-text-secondary; }
-.ml-empty { grid-column: 1 / -1; padding: 80rpx; text-align: center; font-size: 24rpx; color: $jst-text-secondary; }
-.ml-empty--end { padding: 40rpx; }
+.ml-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: $jst-space-lg; padding: $jst-space-lg $jst-space-lg $jst-space-xxl; }
+.ml-card { background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: $jst-shadow-sm; overflow: hidden; transition: transform $jst-duration-fast $jst-easing; }
+.ml-card:active { transform: scale(0.97); }
+.ml-card__img { width: 100%; height: 320rpx; background: $jst-bg-grey; }
+.ml-card__img--placeholder { display: flex; align-items: center; justify-content: center; font-size: $jst-font-sm; color: $jst-text-secondary; }
+.ml-card__body { padding: $jst-space-md $jst-space-lg; }
+.ml-card__name { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; min-height: 68rpx; }
+.ml-card__price { display: flex; align-items: baseline; gap: $jst-space-sm; margin-top: $jst-space-sm; }
+.ml-card__points { font-size: $jst-font-md; font-weight: $jst-weight-semibold; color: $jst-amber; }
+.ml-card__cash { font-size: $jst-font-xs; color: $jst-text-secondary; }
+.ml-card__stock { display: block; margin-top: $jst-space-xs; font-size: $jst-font-xs; color: $jst-text-secondary; }
 
-.ml-fab { position: fixed; right: 32rpx; bottom: calc(64rpx + env(safe-area-inset-bottom)); width: 96rpx; height: 96rpx; border-radius: 50%; background: linear-gradient(135deg, #F5A623, #FF9800); color: #fff; font-size: 44rpx; display: flex; align-items: center; justify-content: center; box-shadow: 0 12rpx 32rpx rgba(245,166,35,0.4); }
+.ml-fab { position: fixed; right: $jst-space-xl; bottom: calc(64rpx + env(safe-area-inset-bottom)); width: 96rpx; height: 96rpx; border-radius: 50%; background: $jst-amber-gradient; color: $jst-text-inverse; font-size: $jst-font-xxl; display: flex; align-items: center; justify-content: center; box-shadow: $jst-shadow-lg; transition: transform $jst-duration-fast $jst-easing; }
+.ml-fab:active { transform: scale(0.9); }
 </style>

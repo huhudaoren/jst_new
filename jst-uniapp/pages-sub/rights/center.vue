@@ -30,9 +30,9 @@
         </view>
         <button v-if="item.status === 'available' && !item.expired" class="rc-card__btn" @tap.stop="goApply(item.userRightsId)">立即使用</button>
       </view>
-      <view v-if="!list.length && !loading" class="rc-empty">暂无权益</view>
-      <view v-if="loading" class="rc-empty">加载中...</view>
-      <view v-if="!hasMore && list.length" class="rc-empty rc-empty--end">没有更多了</view>
+      <u-empty v-if="!list.length && !loading" mode="data" text="暂无权益" />
+      <u-loadmore v-if="loading" status="loading" />
+      <u-loadmore v-if="!hasMore && list.length" status="nomore" />
     </view>
   </view>
 </template>
@@ -87,27 +87,25 @@ export default {
 
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
-.rc-page { min-height: 100vh; background: #F7F8FA; padding-bottom: 48rpx; }
-.rc-hero { display: flex; padding: 72rpx 32rpx 56rpx; background: linear-gradient(135deg, #1B5E20, #2E7D32); color: #fff; border-bottom-left-radius: 40rpx; border-bottom-right-radius: 40rpx; }
+.rc-page { min-height: 100vh; background: $jst-bg-page; padding-bottom: $jst-space-xxl; }
+.rc-hero { display: flex; padding: 72rpx $jst-space-xl 56rpx; background: linear-gradient(135deg, darken($jst-success, 15%), $jst-success); color: $jst-text-inverse; border-bottom-left-radius: 40rpx; border-bottom-right-radius: 40rpx; }
 .rc-hero__cell { flex: 1; text-align: center; }
-.rc-hero__num { display: block; font-size: 48rpx; font-weight: 600; }
-.rc-hero__lbl { display: block; margin-top: 6rpx; font-size: 22rpx; color: rgba(255,255,255,0.76); }
+.rc-hero__num { display: block; font-size: $jst-font-xxl; font-weight: $jst-weight-semibold; }
+.rc-hero__lbl { display: block; margin-top: 6rpx; font-size: $jst-font-xs; color: rgba(255,255,255,0.76); }
 
-.rc-tabs { white-space: nowrap; margin-top: 16rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
-.rc-tabs__item { display: inline-block; padding: 0 40rpx; height: 88rpx; line-height: 88rpx; font-size: 26rpx; color: $jst-text-secondary; position: relative; }
-.rc-tabs__item--active { color: #1B5E20; font-weight: 600; }
-.rc-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 20rpx; right: 20rpx; height: 4rpx; background: #1B5E20; border-radius: 2rpx; }
+.rc-tabs { white-space: nowrap; margin-top: $jst-space-md; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
+.rc-tabs__item { display: inline-block; padding: 0 40rpx; height: 88rpx; line-height: 88rpx; font-size: $jst-font-sm; color: $jst-text-secondary; position: relative; }
+.rc-tabs__item--active { color: $jst-success; font-weight: $jst-weight-semibold; }
+.rc-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 20rpx; right: 20rpx; height: 4rpx; background: $jst-success; border-radius: 2rpx; }
 
-.rc-list { padding: 8rpx 0 32rpx; }
-.rc-card { margin: 20rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
-.rc-card__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
-.rc-card__name { font-size: 28rpx; font-weight: 600; color: $jst-text-primary; flex: 1; min-width: 0; }
-.rc-card__status { padding: 4rpx 16rpx; border-radius: $jst-radius-round; font-size: 22rpx; background: $jst-success-light; color: #1B5E20; }
+.rc-list { padding: $jst-space-xs 0 $jst-space-xl; }
+.rc-card { margin: 20rpx $jst-space-xl 0; padding: $jst-space-lg $jst-space-xl; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: $jst-shadow-sm; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
+.rc-card__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: $jst-space-md; }
+.rc-card__name { font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; flex: 1; min-width: 0; }
+.rc-card__status { padding: $jst-space-xs $jst-space-md; border-radius: $jst-radius-round; font-size: $jst-font-xs; background: $jst-success-light; color: $jst-success; }
 .rc-card__status--applying { background: $jst-warning-light; color: $jst-warning; }
 .rc-card__status--used, .rc-card__status--expired { background: $jst-bg-grey; color: $jst-text-secondary; }
-.rc-card__meta { display: flex; flex-wrap: wrap; gap: 12rpx; }
-.rc-card__m { padding: 6rpx 14rpx; border-radius: $jst-radius-round; background: #F7F8FA; font-size: 22rpx; color: $jst-text-regular; }
-.rc-card__btn { margin-top: 20rpx; align-self: flex-end; height: 72rpx; line-height: 72rpx; border-radius: $jst-radius-round; background: linear-gradient(135deg, #1B5E20, #2E7D32); color: #fff; font-size: 26rpx; font-weight: 600; border: none; }
-.rc-empty { padding: 80rpx; text-align: center; font-size: 24rpx; color: $jst-text-secondary; }
-.rc-empty--end { padding: 40rpx; }
+.rc-card__meta { display: flex; flex-wrap: wrap; gap: $jst-space-sm; }
+.rc-card__m { padding: 6rpx 14rpx; border-radius: $jst-radius-round; background: $jst-bg-page; font-size: $jst-font-xs; color: $jst-text-regular; }
+.rc-card__btn { margin-top: 20rpx; align-self: flex-end; height: 72rpx; line-height: 72rpx; border-radius: $jst-radius-round; background: linear-gradient(135deg, darken($jst-success, 15%), $jst-success); color: $jst-text-inverse; font-size: $jst-font-sm; font-weight: $jst-weight-semibold; border: none; }
 </style>

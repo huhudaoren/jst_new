@@ -31,7 +31,7 @@
 
     <view class="rd-section">
       <text class="rd-section__title">核销历史</text>
-      <view v-if="!(detail.writeoffHistory || []).length" class="rd-empty">暂无核销记录</view>
+      <u-empty v-if="!(detail.writeoffHistory || []).length" mode="list" text="暂无核销记录" />
       <view v-else class="rd-timeline">
         <view v-for="h in detail.writeoffHistory" :key="h.recordId" class="rd-timeline__item rd-timeline__item--done">
           <view class="rd-timeline__dot"></view>
@@ -69,30 +69,29 @@ export default {
 
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
-.rd-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: #F7F8FA; }
-.rd-hero { padding: 72rpx 32rpx 56rpx; background: linear-gradient(135deg, #1B5E20, #2E7D32); color: #fff; }
-.rd-hero__name { display: block; font-size: 40rpx; font-weight: 600; }
-.rd-hero__status { display: inline-block; margin-top: 12rpx; padding: 6rpx 20rpx; border-radius: $jst-radius-round; background: rgba(255,255,255,0.18); font-size: 22rpx; font-weight: 600; }
-.rd-hero__meta { display: flex; margin-top: 32rpx; padding: 24rpx; background: rgba(255,255,255,0.18); border-radius: $jst-radius-xl; }
+.rd-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
+.rd-hero { padding: 72rpx $jst-space-xl 56rpx; background: linear-gradient(135deg, darken($jst-success, 15%), $jst-success); color: $jst-text-inverse; }
+.rd-hero__name { display: block; font-size: 40rpx; font-weight: $jst-weight-semibold; }
+.rd-hero__status { display: inline-block; margin-top: $jst-space-sm; padding: 6rpx 20rpx; border-radius: $jst-radius-round; background: rgba(255,255,255,0.18); font-size: $jst-font-xs; font-weight: $jst-weight-semibold; }
+.rd-hero__meta { display: flex; margin-top: $jst-space-xl; padding: $jst-space-lg; background: rgba(255,255,255,0.18); border-radius: $jst-radius-xl; }
 .rd-hero__cell { flex: 1; text-align: center; }
-.rd-hero__num { display: block; font-size: 40rpx; font-weight: 600; color: #FFD54F; }
-.rd-hero__lbl { display: block; margin-top: 6rpx; font-size: 22rpx; color: rgba(255,255,255,0.76); }
+.rd-hero__num { display: block; font-size: 40rpx; font-weight: $jst-weight-semibold; color: $jst-gold; }
+.rd-hero__lbl { display: block; margin-top: 6rpx; font-size: $jst-font-xs; color: rgba(255,255,255,0.76); }
 
-.rd-section { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
-.rd-section__title { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 16rpx; }
-.rd-section__desc { font-size: 24rpx; line-height: 1.7; color: $jst-text-regular; white-space: pre-wrap; }
-.rd-kv { display: flex; padding: 10rpx 0; font-size: 26rpx; }
+.rd-section { margin: $jst-space-lg $jst-space-xl 0; padding: $jst-space-lg $jst-space-xl; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: $jst-shadow-sm; }
+.rd-section__title { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; margin-bottom: $jst-space-md; }
+.rd-section__desc { font-size: $jst-font-sm; line-height: 1.7; color: $jst-text-regular; white-space: pre-wrap; }
+.rd-kv { display: flex; padding: 10rpx 0; font-size: $jst-font-sm; }
 .rd-kv__k { width: 120rpx; color: $jst-text-secondary; }
 .rd-kv__v { flex: 1; color: $jst-text-primary; }
 
-.rd-timeline__item { display: flex; gap: 20rpx; padding: 16rpx 0; position: relative; }
-.rd-timeline__item + .rd-timeline__item::before { content: ''; position: absolute; left: 14rpx; top: -16rpx; width: 2rpx; height: 32rpx; background: $jst-border; }
-.rd-timeline__dot { width: 28rpx; height: 28rpx; border-radius: 50%; background: #1B5E20; margin-top: 8rpx; }
+.rd-timeline__item { display: flex; gap: 20rpx; padding: $jst-space-md 0; position: relative; }
+.rd-timeline__item + .rd-timeline__item::before { content: ''; position: absolute; left: 14rpx; top: -$jst-space-md; width: 2rpx; height: $jst-space-xl; background: $jst-border; }
+.rd-timeline__dot { width: 28rpx; height: 28rpx; border-radius: 50%; background: $jst-success; margin-top: $jst-space-xs; }
 .rd-timeline__body { flex: 1; }
-.rd-timeline__title { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; }
-.rd-timeline__sub { display: block; margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; }
-.rd-empty { padding: 40rpx; text-align: center; font-size: 24rpx; color: $jst-text-secondary; }
+.rd-timeline__title { display: block; font-size: $jst-font-sm; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.rd-timeline__sub { display: block; margin-top: $jst-space-xs; font-size: $jst-font-xs; color: $jst-text-secondary; }
 
-.rd-footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: $jst-bg-card; box-shadow: 0 -2rpx 8rpx rgba(20, 30, 60, 0.04); }
-.rd-footer__btn { height: 88rpx; line-height: 88rpx; border-radius: $jst-radius-xl; background: linear-gradient(135deg, #1B5E20, #2E7D32); color: #fff; font-size: 30rpx; font-weight: 600; border: none; }
+.rd-footer { position: fixed; left: 0; right: 0; bottom: 0; padding: $jst-space-lg $jst-space-xl calc(#{$jst-space-lg} + env(safe-area-inset-bottom)); background: $jst-bg-card; box-shadow: 0 -2rpx 8rpx rgba(20, 30, 60, 0.04); }
+.rd-footer__btn { height: 88rpx; line-height: 88rpx; border-radius: $jst-radius-xl; background: linear-gradient(135deg, darken($jst-success, 15%), $jst-success); color: $jst-text-inverse; font-size: $jst-font-md; font-weight: $jst-weight-semibold; border: none; transition: opacity $jst-duration-fast $jst-easing; &:active { opacity: 0.85; } }
 </style>

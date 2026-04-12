@@ -83,24 +83,24 @@ export default {
 
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
-.cg-page { min-height: 100vh; background: #F7F8FA; padding-bottom: 48rpx; }
+.cg-page { min-height: 100vh; background: $jst-bg-page; padding-bottom: $jst-space-xxl; }
 .cg-banner { width: 100%; height: 420rpx; background: $jst-brand-light; }
-.cg-hero { margin: -48rpx 32rpx 0; padding: 32rpx; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); position: relative; }
-.cg-hero__title { display: block; font-size: 36rpx; font-weight: 600; color: $jst-text-primary; }
-.cg-hero__desc { display: block; margin-top: 10rpx; font-size: 24rpx; color: $jst-text-regular; line-height: 1.7; }
-.cg-hero__countdown { margin-top: 16rpx; display: inline-block; padding: 8rpx 20rpx; border-radius: $jst-radius-round; background: $jst-danger-light; color: $jst-danger; font-size: 22rpx; font-weight: 600; }
+.cg-hero { margin: -$jst-space-xxl $jst-space-xl 0; padding: $jst-space-xl; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: $jst-shadow-sm; position: relative; }
+.cg-hero__title { display: block; font-size: $jst-font-xl; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.cg-hero__desc { display: block; margin-top: $jst-space-sm; font-size: $jst-font-sm; color: $jst-text-regular; line-height: 1.7; }
+.cg-hero__countdown { margin-top: $jst-space-md; display: inline-block; padding: $jst-space-xs 20rpx; border-radius: $jst-radius-round; background: $jst-danger-light; color: $jst-danger; font-size: 22rpx; font-weight: $jst-weight-semibold; }
 
-.cg-section { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
-.cg-section__title { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 16rpx; }
+.cg-section { margin: $jst-space-lg $jst-space-xl 0; padding: 28rpx $jst-space-xl; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: $jst-shadow-sm; }
+.cg-section__title { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; margin-bottom: $jst-space-md; }
 .cg-card { display: flex; align-items: center; padding: 20rpx 0; border-bottom: 2rpx solid $jst-border; }
 .cg-card:last-child { border-bottom: none; }
-.cg-card__left { min-width: 180rpx; text-align: center; color: #F4511E; }
-.cg-card__big { font-size: 36rpx; font-weight: 600; }
-.cg-card__th { display: block; margin-top: 4rpx; font-size: 20rpx; color: $jst-text-secondary; }
+.cg-card__left { min-width: 180rpx; text-align: center; color: $jst-danger; }
+.cg-card__big { font-size: $jst-font-xl; font-weight: $jst-weight-semibold; }
+.cg-card__th { display: block; margin-top: 4rpx; font-size: $jst-font-xs; color: $jst-text-secondary; }
 .cg-card__body { flex: 1; min-width: 0; }
-.cg-card__name { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; }
+.cg-card__name { display: block; font-size: $jst-font-sm; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
 .cg-card__range { display: block; margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; }
-.cg-card__btn { height: 64rpx; line-height: 64rpx; padding: 0 24rpx; border-radius: $jst-radius-round; background: #F4511E; color: #fff; font-size: 22rpx; font-weight: 600; border: none; }
+.cg-card__btn { height: 64rpx; line-height: 64rpx; padding: 0 $jst-space-lg; border-radius: $jst-radius-round; background: $jst-danger; color: $jst-text-inverse; font-size: 22rpx; font-weight: $jst-weight-semibold; border: none; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.95); } }
 .cg-card__btn[disabled] { opacity: 0.5; }
-.cg-empty { display: block; padding: 32rpx; text-align: center; font-size: 22rpx; color: $jst-text-secondary; }
+.cg-empty { display: block; padding: $jst-space-xl; text-align: center; font-size: 22rpx; color: $jst-text-secondary; }
 </style>

@@ -349,7 +349,7 @@ export default {
 .cd-skeleton {
   &__hero {
     height: 400rpx;
-    background: linear-gradient(90deg, #EEF1F5 0%, #F6F8FB 50%, #EEF1F5 100%);
+    background: linear-gradient(90deg, $jst-border 0%, $jst-bg-grey 50%, $jst-border 100%);
     background-size: 200% 100%;
     animation: cd-shimmer 1.2s ease-in-out infinite;
   }
@@ -359,7 +359,7 @@ export default {
   }
 
   &__bar {
-    background: linear-gradient(90deg, #EEF1F5 0%, #F6F8FB 50%, #EEF1F5 100%);
+    background: linear-gradient(90deg, $jst-border 0%, $jst-bg-grey 50%, $jst-border 100%);
     background-size: 200% 100%;
     animation: cd-shimmer 1.2s ease-in-out infinite;
     border-radius: $jst-radius-md;
@@ -378,7 +378,7 @@ export default {
   position: relative;
   height: 400rpx;
   overflow: hidden;
-  background: linear-gradient(150deg, #1565C0 0%, #1976D2 50%, #42A5F5 100%);
+  background: $jst-indigo-gradient;
 
   &__image {
     width: 100%;
@@ -425,8 +425,8 @@ export default {
     width: 72rpx;
     height: 72rpx;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    border: 2rpx solid rgba(255, 255, 255, 0.3);
+    background: rgba($jst-bg-card, 0.2);
+    border: 2rpx solid rgba($jst-bg-card, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -518,6 +518,11 @@ export default {
   gap: $jst-space-lg;
   align-items: center;
   margin-bottom: $jst-space-lg;
+  transition: transform $jst-duration-fast $jst-easing;
+
+  &:active {
+    transform: scale(0.98);
+  }
 
   &__avatar-wrap {
     flex-shrink: 0;
@@ -527,7 +532,7 @@ export default {
     width: 100rpx;
     height: 100rpx;
     border-radius: 50%;
-    border: 4rpx solid rgba(255, 255, 255, 0.8);
+    border: 4rpx solid rgba($jst-bg-card, 0.8);
     box-shadow: $jst-shadow-sm;
   }
 
@@ -535,11 +540,11 @@ export default {
     width: 100rpx;
     height: 100rpx;
     border-radius: 50%;
-    background: linear-gradient(135deg, #FFD54F, #FF8A65);
+    background: linear-gradient(135deg, $jst-gold, $jst-warning);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 4rpx solid rgba(255, 255, 255, 0.8);
+    border: 4rpx solid rgba($jst-bg-card, 0.8);
     box-shadow: $jst-shadow-sm;
   }
 
@@ -739,7 +744,7 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.97);
+  background: rgba($jst-bg-card, 0.97);
   backdrop-filter: blur(16rpx);
   border-top: 2rpx solid $jst-border;
   padding: $jst-space-lg $jst-page-padding;

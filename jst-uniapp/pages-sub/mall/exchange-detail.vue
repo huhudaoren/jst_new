@@ -104,34 +104,36 @@ export default {
 
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
-.ed-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: #F7F8FA; }
-.ed-header { padding: 64rpx 32rpx 48rpx; background: linear-gradient(135deg, #F5A623, #FF9800); color: #fff; }
-.ed-header__no { display: block; font-size: 24rpx; color: rgba(255,255,255,0.76); }
-.ed-header__status { display: inline-block; margin-top: 12rpx; padding: 6rpx 20rpx; border-radius: $jst-radius-round; background: rgba(255,255,255,0.18); color: #fff; font-size: 22rpx; font-weight: 600; }
+.ed-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
+.ed-header { padding: 64rpx $jst-space-xl $jst-space-xxl; background: $jst-amber-gradient; color: $jst-text-inverse; }
+.ed-header__no { display: block; font-size: $jst-font-sm; color: rgba(255,255,255,0.76); }
+.ed-header__status { display: inline-block; margin-top: $jst-space-sm; padding: $jst-space-xs $jst-space-md; border-radius: $jst-radius-round; background: rgba(255,255,255,0.18); color: $jst-text-inverse; font-size: $jst-font-xs; font-weight: $jst-weight-semibold; }
 
-.ed-section { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
-.ed-section__title { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 16rpx; }
+.ed-section { margin: $jst-space-lg $jst-space-xl 0; padding: $jst-space-lg $jst-space-xl; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: $jst-shadow-sm; }
+.ed-section__title { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; margin-bottom: $jst-space-md; }
 
-.ed-goods { display: flex; gap: 20rpx; }
-.ed-goods__img { width: 160rpx; height: 160rpx; border-radius: $jst-radius-lg; background: #F7F8FA; }
+.ed-goods { display: flex; gap: $jst-space-md; }
+.ed-goods__img { width: 160rpx; height: 160rpx; border-radius: $jst-radius-lg; background: $jst-bg-grey; }
 .ed-goods__info { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.ed-goods__name { font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
-.ed-goods__qty { margin-top: 6rpx; font-size: 22rpx; color: $jst-text-secondary; }
-.ed-goods__price { margin-top: auto; display: flex; align-items: baseline; gap: 12rpx; }
-.ed-goods__points { font-size: 30rpx; font-weight: 600; color: #F5A623; }
-.ed-goods__cash { font-size: 22rpx; color: $jst-text-secondary; }
+.ed-goods__name { font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.ed-goods__qty { margin-top: $jst-space-xs; font-size: $jst-font-xs; color: $jst-text-secondary; }
+.ed-goods__price { margin-top: auto; display: flex; align-items: baseline; gap: $jst-space-sm; }
+.ed-goods__points { font-size: $jst-font-md; font-weight: $jst-weight-semibold; color: $jst-amber; }
+.ed-goods__cash { font-size: $jst-font-xs; color: $jst-text-secondary; }
 
-.ed-addr__name { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
-.ed-addr__detail { display: block; margin-top: 6rpx; font-size: 24rpx; color: $jst-text-regular; }
+.ed-addr__name { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.ed-addr__detail { display: block; margin-top: $jst-space-xs; font-size: $jst-font-sm; color: $jst-text-regular; }
 
-.ed-timeline__item { display: flex; align-items: flex-start; gap: 20rpx; padding: 16rpx 0; position: relative; }
+.ed-timeline__item { display: flex; align-items: flex-start; gap: $jst-space-md; padding: $jst-space-md 0; position: relative; }
 .ed-timeline__item + .ed-timeline__item::before { content: ''; position: absolute; left: 14rpx; top: -16rpx; width: 2rpx; height: 32rpx; background: $jst-border; }
-.ed-timeline__dot { width: 28rpx; height: 28rpx; border-radius: 50%; background: $jst-border; margin-top: 8rpx; }
-.ed-timeline__item--done .ed-timeline__dot { background: #F5A623; }
-.ed-timeline__body { flex: 1; display: flex; flex-direction: column; font-size: 26rpx; color: $jst-text-primary; }
-.ed-timeline__time { margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; }
+.ed-timeline__dot { width: 28rpx; height: 28rpx; border-radius: 50%; background: $jst-border; margin-top: $jst-space-xs; transition: background $jst-duration-normal $jst-easing; }
+.ed-timeline__item--done .ed-timeline__dot { background: $jst-amber; }
+.ed-timeline__body { flex: 1; display: flex; flex-direction: column; font-size: $jst-font-base; color: $jst-text-primary; }
+.ed-timeline__time { margin-top: $jst-space-xs; font-size: $jst-font-xs; color: $jst-text-secondary; }
 
-.ed-footer { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 20rpx; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: $jst-bg-card; box-shadow: 0 -2rpx 8rpx rgba(20, 30, 60, 0.04); }
-.ed-footer__primary { flex: 1; height: 88rpx; line-height: 88rpx; border-radius: $jst-radius-xl; background: linear-gradient(135deg, #F5A623, #FF9800); color: #fff; font-size: 30rpx; font-weight: 600; border: none; }
-.ed-footer__danger { flex: 1; height: 88rpx; line-height: 88rpx; border-radius: $jst-radius-xl; background: $jst-danger-light; color: $jst-danger; font-size: 30rpx; font-weight: 600; border: none; }
+.ed-footer { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: $jst-space-md; padding: $jst-space-lg $jst-space-xl calc(#{$jst-space-lg} + env(safe-area-inset-bottom)); background: $jst-bg-card; box-shadow: $jst-shadow-sm; }
+.ed-footer__primary { flex: 1; height: 88rpx; line-height: 88rpx; border-radius: $jst-radius-xl; background: $jst-amber-gradient; color: $jst-text-inverse; font-size: $jst-font-md; font-weight: $jst-weight-semibold; border: none; transition: opacity $jst-duration-fast $jst-easing; }
+.ed-footer__primary:active { opacity: 0.85; }
+.ed-footer__danger { flex: 1; height: 88rpx; line-height: 88rpx; border-radius: $jst-radius-xl; background: $jst-danger-light; color: $jst-danger; font-size: $jst-font-md; font-weight: $jst-weight-semibold; border: none; transition: opacity $jst-duration-fast $jst-easing; }
+.ed-footer__danger:active { opacity: 0.85; }
 </style>

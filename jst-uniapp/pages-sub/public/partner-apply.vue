@@ -331,15 +331,15 @@ export default {
 .partner-apply-page {
   min-height: 100vh;
   padding-bottom: calc(128rpx + env(safe-area-inset-bottom));
-  background: #f5f6fa;
+  background: $jst-bg-page;
 }
 
 .partner-apply-page__nav {
   display: flex;
   align-items: center;
   height: 100rpx;
-  padding: 0 24rpx;
-  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+  padding: 0 $jst-page-padding;
+  background: linear-gradient(135deg, $jst-success 0%, lighten($jst-success, 8%) 100%);
 }
 
 .partner-apply-page__back,
@@ -374,7 +374,7 @@ export default {
   margin: 0;
   padding: 20rpx 12rpx 18rpx;
   background: $jst-bg-card;
-  border-bottom: 2rpx solid #eef1f6;
+  border-bottom: 2rpx solid $jst-border;
 }
 
 .partner-apply-page__step {
@@ -394,7 +394,7 @@ export default {
   width: calc(100% - 56rpx);
   height: 4rpx;
   border-radius: 999rpx;
-  background: #e7ebf3;
+  background: $jst-border;
 }
 
 .partner-apply-page__step--active::after {
@@ -410,11 +410,11 @@ export default {
   width: 48rpx;
   height: 48rpx;
   border-radius: 50%;
-  border: 4rpx solid #d8deea;
+  border: 4rpx solid $jst-border;
   background: $jst-bg-card;
-  font-size: 22rpx;
-  font-weight: 600;
-  color: #8f98ab;
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-secondary;
 }
 
 .partner-apply-page__step--active .partner-apply-page__step-circle {
@@ -423,8 +423,8 @@ export default {
 }
 
 .partner-apply-page__step-label {
-  font-size: 20rpx;
-  color: #8f98ab;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
 }
 
 .partner-apply-page__step--active .partner-apply-page__step-label {
@@ -449,7 +449,7 @@ export default {
   align-items: center;
   font-size: 30rpx;
   font-weight: 600;
-  color: #2c3448;
+  color: $jst-text-primary;
 }
 
 .partner-apply-page__card-title::before {
@@ -470,7 +470,7 @@ export default {
   margin-top: 8rpx;
   font-size: 20rpx;
   line-height: 1.6;
-  color: #8d97aa;
+  color: $jst-text-secondary;
 }
 
 .partner-apply-page__field + .partner-apply-page__field {
@@ -482,7 +482,7 @@ export default {
   margin-bottom: 10rpx;
   font-size: 22rpx;
   font-weight: 600;
-  color: #677489;
+  color: $jst-text-regular;
 }
 
 .partner-apply-page__label::after {
@@ -500,11 +500,11 @@ export default {
 .partner-apply-page__textarea {
   width: 100%;
   padding: 22rpx 24rpx;
-  border: 2rpx solid #e7ebf3;
-  border-radius: 20rpx;
-  background: #fbfcff;
-  font-size: 26rpx;
-  color: #2c3448;
+  border: 2rpx solid $jst-border;
+  border-radius: $jst-radius-xl;
+  background: $jst-bg-grey;
+  font-size: $jst-font-base;
+  color: $jst-text-primary;
 }
 
 .partner-apply-page__textarea {
@@ -513,7 +513,7 @@ export default {
 }
 
 .partner-apply-page__placeholder {
-  color: #a3acbc;
+  color: $jst-text-placeholder;
 }
 
 .partner-apply-page__upload {
@@ -522,9 +522,9 @@ export default {
   align-items: center;
   justify-content: center;
   padding: 38rpx 24rpx;
-  border: 2rpx dashed #dce3ef;
-  border-radius: 20rpx;
-  background: #f8fafc;
+  border: 2rpx dashed $jst-border;
+  border-radius: $jst-radius-xl;
+  background: $jst-bg-grey;
 }
 
 .partner-apply-page__upload-icon {
@@ -536,13 +536,13 @@ export default {
   margin-top: 14rpx;
   font-size: 26rpx;
   font-weight: 600;
-  color: #2c3448;
+  color: $jst-text-primary;
 }
 
 .partner-apply-page__upload-desc {
-  margin-top: 10rpx;
-  font-size: 20rpx;
-  color: #8d97aa;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
 }
 
 .partner-apply-page__file-list {
@@ -608,7 +608,7 @@ export default {
   width: 36rpx;
   height: 36rpx;
   margin-top: 4rpx;
-  border: 2rpx solid #d8deea;
+  border: 2rpx solid $jst-border;
   border-radius: 10rpx;
   background: $jst-bg-card;
   font-size: 20rpx;
@@ -625,20 +625,20 @@ export default {
   flex: 1;
   font-size: 22rpx;
   line-height: 1.7;
-  color: #677489;
+  color: $jst-text-regular;
 }
 
 .partner-apply-page__status-link {
   display: block;
   margin: 20rpx 6rpx 0;
   font-size: 22rpx;
-  color: #2e7d32;
+  color: $jst-success;
 }
 
 .partner-apply-page__last-apply {
   margin: 14rpx 6rpx 0;
   font-size: 22rpx;
-  color: #7c879c;
+  color: $jst-text-secondary;
 }
 
 .partner-apply-page__footer {
@@ -663,14 +663,15 @@ export default {
 
 .partner-apply-page__footer-secondary {
   width: 30%;
-  background: #eff2f7;
-  color: #4f5d78;
+  background: $jst-bg-grey;
+  color: $jst-text-regular;
 }
 
 .partner-apply-page__submit {
   flex: 1;
-  background: linear-gradient(135deg, #1b5e20 0%, #43a047 100%);
-  color: $jst-bg-card;
+  background: linear-gradient(135deg, $jst-success 0%, lighten($jst-success, 10%) 100%);
+  color: $jst-text-inverse;
+  transition: opacity $jst-duration-fast $jst-easing;
 }
 
 .partner-apply-page__submit[disabled] {

@@ -25,9 +25,8 @@
           <text class="pd-card__balance">余额 {{ item.balanceAfter != null ? item.balanceAfter : '--' }}</text>
         </view>
       </view>
-      <view v-if="!list.length && !loading" class="pd-empty">暂无流水</view>
-      <view v-if="loading" class="pd-empty">加载中...</view>
-      <view v-if="!hasMore && list.length" class="pd-empty pd-empty--end">没有更多了</view>
+      <u-empty v-if="!list.length && !loading" mode="data" text="暂无流水" />
+      <u-loadmore v-if="list.length || loading" :status="hasMore ? (loading ? 'loading' : 'loadmore') : 'nomore'" />
     </view>
   </view>
 </template>
@@ -73,22 +72,20 @@ export default {
 
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
-.pd-page { min-height: 100vh; background: #F7F8FA; }
+.pd-page { min-height: 100vh; background: $jst-bg-page; }
 .pd-tabs { display: flex; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
-.pd-tabs__item { flex: 1; height: 88rpx; line-height: 88rpx; text-align: center; font-size: 28rpx; color: $jst-text-secondary; position: relative; }
-.pd-tabs__item--active { color: #7B1FA2; font-weight: 600; }
-.pd-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 30%; right: 30%; height: 4rpx; background: #7B1FA2; border-radius: 2rpx; }
+.pd-tabs__item { flex: 1; height: 88rpx; line-height: 88rpx; text-align: center; font-size: $jst-font-base; color: $jst-text-secondary; position: relative; }
+.pd-tabs__item--active { color: $jst-brand; font-weight: $jst-weight-semibold; }
+.pd-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 30%; right: 30%; height: 4rpx; background: $jst-brand; border-radius: 2rpx; }
 
-.pd-list { padding: 16rpx 0 32rpx; }
-.pd-card { display: flex; justify-content: space-between; align-items: center; margin: 16rpx 32rpx 0; padding: 24rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
+.pd-list { padding: $jst-space-md 0 $jst-space-xl; }
+.pd-card { display: flex; justify-content: space-between; align-items: center; margin: $jst-space-md $jst-space-xl 0; padding: $jst-space-lg $jst-space-xl; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: $jst-shadow-sm; }
 .pd-card__main { flex: 1; min-width: 0; }
-.pd-card__name { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; }
-.pd-card__time { display: block; margin-top: 6rpx; font-size: 22rpx; color: $jst-text-secondary; }
+.pd-card__name { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.pd-card__time { display: block; margin-top: $jst-space-xs; font-size: $jst-font-xs; color: $jst-text-secondary; }
 .pd-card__amount { text-align: right; }
-.pd-card__num { display: block; font-size: 32rpx; font-weight: 600; }
+.pd-card__num { display: block; font-size: $jst-font-lg; font-weight: $jst-weight-semibold; }
 .pd-card__num--pos { color: $jst-success; }
 .pd-card__num--neg { color: $jst-danger; }
-.pd-card__balance { display: block; margin-top: 4rpx; font-size: 20rpx; color: $jst-text-secondary; }
-.pd-empty { padding: 80rpx; text-align: center; font-size: 24rpx; color: $jst-text-secondary; }
-.pd-empty--end { padding: 40rpx; }
+.pd-card__balance { display: block; margin-top: $jst-space-xs; font-size: $jst-font-xs; color: $jst-text-secondary; }
 </style>

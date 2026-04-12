@@ -152,33 +152,35 @@ export default {
 
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
-.md-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: #F7F8FA; }
-.md-swiper { height: 600rpx; background: #F7F8FA; }
+.md-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
+.md-swiper { height: 600rpx; background: $jst-bg-grey; }
 .md-swiper__img { width: 100%; height: 100%; }
-.md-body { background: $jst-bg-card; padding: 32rpx; }
-.md-name { display: block; font-size: 36rpx; font-weight: 600; color: $jst-text-primary; }
-.md-price { display: flex; align-items: baseline; gap: 16rpx; margin-top: 16rpx; }
-.md-price__points { font-size: 48rpx; font-weight: 600; color: #F5A623; }
-.md-price__cash { font-size: 26rpx; color: $jst-text-regular; }
-.md-stock { display: block; margin-top: 12rpx; font-size: 22rpx; color: $jst-text-secondary; }
+.md-body { background: $jst-bg-card; padding: $jst-space-xl; }
+.md-name { display: block; font-size: $jst-font-xl; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.md-price { display: flex; align-items: baseline; gap: $jst-space-md; margin-top: $jst-space-md; }
+.md-price__points { font-size: $jst-font-xxl; font-weight: $jst-weight-semibold; color: $jst-amber; }
+.md-price__cash { font-size: $jst-font-base; color: $jst-text-regular; }
+.md-stock { display: block; margin-top: $jst-space-sm; font-size: $jst-font-xs; color: $jst-text-secondary; }
 
-.md-section { margin-top: 32rpx; padding-top: 24rpx; border-top: 2rpx solid $jst-border; }
-.md-section__title { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 16rpx; }
-.md-stepper { display: flex; align-items: center; gap: 24rpx; }
-.md-stepper__btn { width: 64rpx; height: 64rpx; line-height: 64rpx; text-align: center; border-radius: $jst-radius-lg; background: #F7F8FA; font-size: 36rpx; color: $jst-text-primary; }
-.md-stepper__val { font-size: 30rpx; font-weight: 600; color: $jst-text-primary; min-width: 64rpx; text-align: center; }
+.md-section { margin-top: $jst-space-xl; padding-top: $jst-space-lg; border-top: 2rpx solid $jst-border; }
+.md-section__title { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; margin-bottom: $jst-space-md; }
+.md-stepper { display: flex; align-items: center; gap: $jst-space-lg; }
+.md-stepper__btn { width: 64rpx; height: 64rpx; line-height: 64rpx; text-align: center; border-radius: $jst-radius-lg; background: $jst-bg-grey; font-size: $jst-font-xl; color: $jst-text-primary; transition: background $jst-duration-fast $jst-easing; }
+.md-stepper__btn:active { background: $jst-border; }
+.md-stepper__val { font-size: $jst-font-md; font-weight: $jst-weight-semibold; color: $jst-text-primary; min-width: 64rpx; text-align: center; }
 
-.md-address { padding: 20rpx 24rpx; border-radius: $jst-radius-lg; background: #F7F8FA; }
-.md-address__name { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
-.md-address__detail { display: block; margin-top: 6rpx; font-size: 24rpx; color: $jst-text-regular; }
-.md-address__empty { font-size: 26rpx; color: $jst-brand; }
-.md-desc { display: block; font-size: 24rpx; line-height: 1.7; color: $jst-text-regular; white-space: pre-wrap; }
+.md-address { padding: $jst-space-md $jst-space-lg; border-radius: $jst-radius-lg; background: $jst-bg-grey; }
+.md-address__name { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.md-address__detail { display: block; margin-top: $jst-space-xs; font-size: $jst-font-sm; color: $jst-text-regular; }
+.md-address__empty { font-size: $jst-font-base; color: $jst-brand; }
+.md-desc { display: block; font-size: $jst-font-sm; line-height: 1.7; color: $jst-text-regular; white-space: pre-wrap; }
 
-.md-footer { position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 20rpx; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: $jst-bg-card; box-shadow: 0 -2rpx 8rpx rgba(20, 30, 60, 0.04); }
+.md-footer { position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: $jst-space-md; padding: $jst-space-lg $jst-space-xl calc(#{$jst-space-lg} + env(safe-area-inset-bottom)); background: $jst-bg-card; box-shadow: $jst-shadow-sm; }
 .md-footer__info { flex: 1; }
-.md-footer__label { display: block; font-size: 22rpx; color: $jst-text-secondary; }
-.md-footer__amount { display: block; font-size: 36rpx; font-weight: 600; color: #F5A623; }
-.md-footer__cash { font-size: 22rpx; color: $jst-text-regular; font-weight: 500; }
-.md-footer__btn { flex: 1; height: 96rpx; line-height: 96rpx; border-radius: $jst-radius-xl; background: linear-gradient(135deg, #F5A623, #FF9800); color: #fff; font-size: 30rpx; font-weight: 600; border: none; }
+.md-footer__label { display: block; font-size: $jst-font-xs; color: $jst-text-secondary; }
+.md-footer__amount { display: block; font-size: $jst-font-xl; font-weight: $jst-weight-semibold; color: $jst-amber; }
+.md-footer__cash { font-size: $jst-font-xs; color: $jst-text-regular; font-weight: $jst-weight-medium; }
+.md-footer__btn { flex: 1; height: 96rpx; line-height: 96rpx; border-radius: $jst-radius-xl; background: $jst-amber-gradient; color: $jst-text-inverse; font-size: $jst-font-md; font-weight: $jst-weight-semibold; border: none; transition: opacity $jst-duration-fast $jst-easing; }
+.md-footer__btn:active { opacity: 0.85; }
 .md-footer__btn[disabled] { opacity: 0.5; }
 </style>

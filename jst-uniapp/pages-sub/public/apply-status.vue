@@ -194,15 +194,15 @@ export default {
 @import '@/styles/design-tokens.scss';
 .apply-status-page {
   min-height: 100vh;
-  background: #f4f6fb;
+  background: $jst-bg-page;
 }
 
 .apply-status-page__nav {
   display: flex;
   align-items: center;
   height: 100rpx;
-  padding: 0 24rpx;
-  background: linear-gradient(180deg, #25328f 0%, #29379b 100%);
+  padding: 0 $jst-page-padding;
+  background: $jst-indigo-gradient;
 }
 
 .apply-status-page__back,
@@ -217,86 +217,91 @@ export default {
   justify-content: center;
   width: 56rpx;
   height: 56rpx;
-  border-radius: 16rpx;
+  border-radius: $jst-radius-lg;
   background: rgba(255, 255, 255, 0.12);
-  font-size: 30rpx;
-  color: $jst-bg-card;
+  font-size: $jst-font-md;
+  color: $jst-text-inverse;
 }
 
 .apply-status-page__nav-title {
   flex: 1;
   text-align: center;
-  font-size: 32rpx;
-  font-weight: 600;
-  color: $jst-bg-card;
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-inverse;
 }
 
 .apply-status-page__hero {
-  padding: 24rpx;
+  padding: $jst-page-padding;
 }
 
 .apply-status-page__hero-title {
   display: block;
   font-size: 34rpx;
-  font-weight: 600;
-  color: #2c3448;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
 }
 
 .apply-status-page__hero-subtitle {
   display: block;
-  margin-top: 10rpx;
-  font-size: 22rpx;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-xs;
   line-height: 1.6;
-  color: #7c879c;
+  color: $jst-text-secondary;
 }
 
 .apply-status-page__body {
-  padding: 0 24rpx 40rpx;
+  padding: 0 $jst-page-padding 40rpx;
 }
 
 .apply-status-page__panel,
 .apply-status-page__result,
 .apply-status-page__history {
-  margin-bottom: 20rpx;
-  padding: 28rpx;
-  border-radius: 20rpx;
+  margin-bottom: $jst-space-md;
+  padding: $jst-space-lg;
+  border-radius: $jst-radius-xl;
   background: $jst-bg-card;
-  box-shadow: 0 10rpx 24rpx rgba(35, 52, 116, 0.06);
+  box-shadow: $jst-shadow-md;
 }
 
 .apply-status-page__label,
 .apply-status-page__result-title,
 .apply-status-page__history-title {
   display: block;
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #2c3448;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
 }
 
 .apply-status-page__input {
   width: 100%;
-  margin-top: 18rpx;
-  padding: 22rpx 24rpx;
-  border: 2rpx solid #e7ebf3;
-  border-radius: 20rpx;
-  background: #fbfcff;
-  font-size: 26rpx;
-  color: #2c3448;
+  margin-top: $jst-space-md;
+  padding: $jst-space-lg $jst-page-padding;
+  border: 2rpx solid $jst-border;
+  border-radius: $jst-radius-xl;
+  background: $jst-bg-grey;
+  font-size: $jst-font-base;
+  color: $jst-text-primary;
 }
 
 .apply-status-page__placeholder {
-  color: #a3acbc;
+  color: $jst-text-placeholder;
 }
 
 .apply-status-page__query {
   width: 100%;
   height: 88rpx;
-  margin-top: 20rpx;
-  border-radius: 20rpx;
-  background: linear-gradient(135deg, #25328f 0%, #3553c4 100%);
-  font-size: 28rpx;
-  font-weight: 600;
-  color: $jst-bg-card;
+  margin-top: $jst-space-md;
+  border-radius: $jst-radius-xl;
+  background: $jst-indigo-gradient;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-inverse;
+  transition: opacity $jst-duration-fast $jst-easing;
+}
+
+.apply-status-page__query:active {
+  opacity: 0.85;
 }
 
 .apply-status-page__query[disabled] {
@@ -311,97 +316,97 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16rpx;
+  gap: $jst-space-md;
 }
 
 .apply-status-page__result-no {
-  font-size: 22rpx;
-  color: #7c879c;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
 }
 
 .apply-status-page__status-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 18rpx;
-  padding: 10rpx 18rpx;
-  border-radius: 999rpx;
-  font-size: 22rpx;
-  font-weight: 600;
+  margin-top: $jst-space-md;
+  padding: $jst-space-sm $jst-space-md;
+  border-radius: $jst-radius-round;
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-semibold;
 }
 
 .apply-status-page__status-chip--draft,
 .apply-status-page__status-chip--pending {
-  background: #fff4d6;
-  color: #d5961f;
+  background: $jst-warning-light;
+  color: $jst-warning;
 }
 
 .apply-status-page__status-chip--approved {
-  background: #e9f9ef;
-  color: #2bbb63;
+  background: $jst-success-light;
+  color: $jst-success;
 }
 
 .apply-status-page__status-chip--rejected {
-  background: #fff0ee;
-  color: #ed6d59;
+  background: $jst-danger-light;
+  color: $jst-danger;
 }
 
 .apply-status-page__status-chip--supplement {
-  background: #eff3ff;
-  color: #3553c4;
+  background: $jst-brand-light;
+  color: $jst-indigo-light;
 }
 
 .apply-status-page__info-row {
-  padding: 22rpx 0;
-  border-bottom: 2rpx solid #eef1f6;
+  padding: $jst-space-lg 0;
+  border-bottom: 2rpx solid $jst-border;
 }
 
 .apply-status-page__info-key {
-  font-size: 22rpx;
-  color: #8d97aa;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
 }
 
 .apply-status-page__info-value {
   flex: 1;
   text-align: right;
-  font-size: 24rpx;
-  color: #2c3448;
+  font-size: $jst-font-sm;
+  color: $jst-text-primary;
 }
 
 .apply-status-page__remark {
-  margin-top: 22rpx;
-  padding: 22rpx;
-  border-radius: 20rpx;
-  background: #f7f9fd;
+  margin-top: $jst-space-lg;
+  padding: $jst-space-lg;
+  border-radius: $jst-radius-xl;
+  background: $jst-bg-grey;
 }
 
 .apply-status-page__remark-label {
   display: block;
-  font-size: 22rpx;
-  font-weight: 600;
-  color: #4f5d78;
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-regular;
 }
 
 .apply-status-page__remark-text {
   display: block;
-  margin-top: 12rpx;
-  font-size: 22rpx;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-xs;
   line-height: 1.7;
-  color: #677489;
+  color: $jst-text-secondary;
 }
 
 .apply-status-page__history-clear {
-  font-size: 22rpx;
-  color: #3553c4;
+  font-size: $jst-font-xs;
+  color: $jst-brand;
 }
 
 .apply-status-page__history-list {
-  margin-top: 18rpx;
+  margin-top: $jst-space-md;
 }
 
 .apply-status-page__history-item {
-  padding: 20rpx 0;
-  border-bottom: 2rpx solid #eef1f6;
+  padding: $jst-space-md 0;
+  border-bottom: 2rpx solid $jst-border;
 }
 
 .apply-status-page__history-item:last-child {
@@ -410,21 +415,21 @@ export default {
 
 .apply-status-page__history-no {
   display: block;
-  font-size: 24rpx;
-  font-weight: 600;
-  color: #2c3448;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
 }
 
 .apply-status-page__history-time {
   display: block;
-  margin-top: 8rpx;
-  font-size: 20rpx;
-  color: #8d97aa;
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
 }
 
 .apply-status-page__history-status {
-  font-size: 22rpx;
-  font-weight: 600;
-  color: #3553c4;
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-semibold;
+  color: $jst-brand;
 }
 </style>

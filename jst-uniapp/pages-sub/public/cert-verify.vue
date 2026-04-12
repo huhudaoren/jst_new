@@ -130,10 +130,10 @@ export default {
 
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
-.cert-verify-page { min-height: 100vh; padding-bottom: 60rpx; background: #F7F8FA; }
+.cert-verify-page { min-height: 100vh; padding-bottom: 60rpx; background: $jst-bg-page; }
 
-.cert-verify-page__header { display: flex; align-items: center; padding: 24rpx; background: $jst-bg-card; }
-.cert-verify-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: #F7F8FA; font-size: 30rpx; color: $jst-text-primary; }
+.cert-verify-page__header { display: flex; align-items: center; padding: $jst-page-padding; background: $jst-bg-card; }
+.cert-verify-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: $jst-radius-xl; background: $jst-bg-grey; font-size: $jst-font-md; color: $jst-text-primary; }
 .cert-verify-page__header-title { flex: 1; text-align: center; margin-right: 72rpx; font-size: 34rpx; font-weight: 600; color: $jst-text-primary; }
 
 /* 验真成功 */
@@ -162,7 +162,8 @@ export default {
 .cert-verify-page__manual-label { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 12rpx; }
 .cert-verify-page__manual-row { display: flex; gap: 16rpx; }
 .cert-verify-page__manual-input { flex: 1; height: 88rpx; padding: 0 24rpx; border-radius: $jst-radius-xl; background: $jst-bg-card; border: 2rpx solid $jst-border; font-size: 28rpx; }
-.cert-verify-page__manual-btn { display: flex; align-items: center; justify-content: center; height: 88rpx; padding: 0 32rpx; border-radius: $jst-radius-xl; background: $jst-success; color: #fff; font-size: 28rpx; font-weight: 600; flex-shrink: 0; }
+.cert-verify-page__manual-btn { display: flex; align-items: center; justify-content: center; height: 88rpx; padding: 0 $jst-space-xl; border-radius: $jst-radius-xl; background: $jst-success; color: $jst-text-inverse; font-size: $jst-font-base; font-weight: $jst-weight-semibold; flex-shrink: 0; transition: opacity $jst-duration-fast $jst-easing; }
+.cert-verify-page__manual-btn:active { opacity: 0.85; }
 
 /* 返回首页 */
 .cert-verify-page__footer-btn { margin: 24rpx; height: 88rpx; display: flex; align-items: center; justify-content: center; border-radius: $jst-radius-xl; border: 2rpx solid $jst-border; font-size: 28rpx; font-weight: 600; color: $jst-text-regular; }

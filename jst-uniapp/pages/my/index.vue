@@ -366,12 +366,12 @@ export default {
 .my-page { min-height: 100vh; padding-bottom: calc(60rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
 
 /* === 骨架屏 === */
-.my-page__skeleton-hero { height: 280rpx; background: linear-gradient(150deg, #1A237E 0%, #283593 40%, #3949AB 100%); border-bottom-left-radius: $jst-radius-xl; border-bottom-right-radius: $jst-radius-xl; }
+.my-page__skeleton-hero { height: 280rpx; background: linear-gradient(150deg, $jst-indigo 0%, $jst-indigo-light 40%, lighten($jst-indigo-light, 10%) 100%); border-bottom-left-radius: $jst-radius-xl; border-bottom-right-radius: $jst-radius-xl; }
 .my-page__skeleton-summary { margin: -64rpx $jst-space-xl 0; padding: $jst-space-lg; border-radius: $jst-radius-lg; background: $jst-bg-card; box-shadow: $jst-shadow-sm; }
 .my-page__skeleton-section { margin: $jst-space-lg $jst-space-xl 0; padding: $jst-space-lg; border-radius: $jst-radius-lg; background: $jst-bg-card; }
 
 /* === Hero === */
-.my-page__hero { position: relative; padding: 80rpx $jst-space-xl 120rpx; background: linear-gradient(150deg, #1A237E 0%, #283593 40%, #3949AB 100%); border-bottom-left-radius: $jst-radius-xl; border-bottom-right-radius: $jst-radius-xl; overflow: hidden; }
+.my-page__hero { position: relative; padding: 80rpx $jst-space-xl 120rpx; background: linear-gradient(150deg, $jst-indigo 0%, $jst-indigo-light 40%, lighten($jst-indigo-light, 10%) 100%); border-bottom-left-radius: $jst-radius-xl; border-bottom-right-radius: $jst-radius-xl; overflow: hidden; }
 .my-page__hero-orb { position: absolute; top: -100rpx; right: -60rpx; width: 300rpx; height: 300rpx; border-radius: 50%; background: rgba(255, 255, 255, 0.06); }
 .my-page__hero-inner { position: relative; z-index: 1; }
 .my-page__profile-row { display: flex; align-items: center; }
@@ -395,14 +395,14 @@ export default {
 .my-page__summary-label { display: block; margin-top: $jst-space-xs; font-size: $jst-font-xs; color: $jst-text-secondary; }
 
 /* === 等级卡 === */
-.my-page__level-card { margin: $jst-space-lg $jst-space-xl 0; padding: $jst-space-lg; border-radius: $jst-radius-lg; background: linear-gradient(135deg, #1A237E 0%, #303F9F 50%, #5C6BC0 100%); transition: transform $jst-duration-fast $jst-easing; }
+.my-page__level-card { margin: $jst-space-lg $jst-space-xl 0; padding: $jst-space-lg; border-radius: $jst-radius-lg; background: linear-gradient(135deg, $jst-indigo 0%, $jst-indigo-light 50%, lighten($jst-indigo-light, 15%) 100%); transition: transform $jst-duration-fast $jst-easing; }
 .my-page__level-card:active { transform: scale(0.99); }
 .my-page__level-header { display: flex; align-items: flex-start; gap: $jst-space-lg; }
-.my-page__level-badge { flex-shrink: 0; padding: $jst-space-xs $jst-space-lg; border-radius: $jst-radius-round; background: rgba(255, 200, 100, 0.25); font-size: $jst-font-sm; font-weight: $jst-weight-semibold; color: #FFD54F; }
+.my-page__level-badge { flex-shrink: 0; padding: $jst-space-xs $jst-space-lg; border-radius: $jst-radius-round; background: rgba(255, 200, 100, 0.25); font-size: $jst-font-sm; font-weight: $jst-weight-semibold; color: $jst-gold; }
 .my-page__level-progress { flex: 1; }
 .my-page__level-progress-text { display: block; font-size: $jst-font-xs; color: rgba(255, 255, 255, 0.7); margin-bottom: $jst-space-sm; }
 .my-page__level-bar { height: 10rpx; border-radius: 5rpx; background: rgba(255, 255, 255, 0.18); overflow: hidden; }
-.my-page__level-bar-fill { height: 100%; border-radius: 5rpx; background: linear-gradient(90deg, #FFD54F, #FFB300); transition: width 0.8s $jst-easing; }
+.my-page__level-bar-fill { height: 100%; border-radius: 5rpx; background: linear-gradient(90deg, $jst-gold, darken($jst-gold, 10%)); transition: width 0.8s $jst-easing; }
 .my-page__level-stats { display: flex; margin-top: $jst-space-lg; padding-top: $jst-space-lg; border-top: 2rpx solid rgba(255, 255, 255, 0.1); }
 .my-page__level-stat { flex: 1; text-align: center; }
 .my-page__level-stat-num { display: block; font-size: $jst-font-xl; font-weight: $jst-weight-semibold; color: $jst-text-inverse; font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }

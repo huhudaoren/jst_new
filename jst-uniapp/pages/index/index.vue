@@ -660,7 +660,7 @@ export default {
 // 骨架屏
 .home-page__skeleton-hero {
   height: 320rpx;
-  background: linear-gradient(150deg, #4A0E8F 0%, #9C27B0 55%, #1A5FB0 100%);
+  background: linear-gradient(150deg, $jst-purple-dark 0%, $jst-purple 55%, $jst-brand 100%);
   border-bottom-left-radius: $jst-radius-xl;
   border-bottom-right-radius: $jst-radius-xl;
 }
@@ -687,7 +687,7 @@ export default {
   position: relative;
   overflow: hidden;
   padding: $jst-space-lg $jst-space-xl 160rpx;
-  background: linear-gradient(150deg, #4A0E8F 0%, #9C27B0 55%, #1A5FB0 100%);
+  background: linear-gradient(150deg, $jst-purple-dark 0%, $jst-purple 55%, $jst-brand 100%);
   border-bottom-left-radius: $jst-radius-xl;
   border-bottom-right-radius: $jst-radius-xl;
 }
@@ -974,7 +974,7 @@ export default {
   margin-bottom: $jst-space-md;
   padding: $jst-space-lg;
   border-radius: $jst-radius-lg;
-  background: linear-gradient(90deg, #4A0072, #7B1FA2);
+  background: linear-gradient(90deg, $jst-purple-dark, $jst-purple);
   overflow: hidden;
   transition: transform $jst-duration-fast $jst-easing;
 }

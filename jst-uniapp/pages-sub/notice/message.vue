@@ -154,34 +154,34 @@ export default {
 
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
-.notice-msg-page { min-height: 100vh; padding-bottom: 60rpx; background: #F7F8FA; }
+.notice-msg-page { min-height: 100vh; padding-bottom: 60rpx; background: $jst-bg-page; }
 
-.notice-msg-page__header { display: flex; align-items: center; padding: 24rpx; background: $jst-bg-card; }
-.notice-msg-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: #F7F8FA; font-size: 30rpx; color: $jst-text-primary; }
-.notice-msg-page__header-title { flex: 1; margin-left: 16rpx; font-size: 34rpx; font-weight: 600; color: $jst-text-primary; }
-.notice-msg-page__read-all { font-size: 26rpx; font-weight: 600; color: $jst-brand; }
+.notice-msg-page__header { display: flex; align-items: center; padding: $jst-space-lg; background: $jst-bg-card; }
+.notice-msg-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: $jst-bg-page; font-size: $jst-font-md; color: $jst-text-primary; }
+.notice-msg-page__header-title { flex: 1; margin-left: $jst-space-md; font-size: 34rpx; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.notice-msg-page__read-all { font-size: $jst-font-sm; font-weight: $jst-weight-semibold; color: $jst-brand; }
 
 /* Tabs */
-.notice-msg-page__tabs { margin-top: 16rpx; padding: 0 24rpx; }
-.notice-msg-page__tabs-inner { display: inline-flex; gap: 16rpx; }
-.notice-msg-page__tab { padding: 12rpx 24rpx; border-radius: $jst-radius-round; background: $jst-bg-card; font-size: 24rpx; color: $jst-text-regular; white-space: nowrap; }
-.notice-msg-page__tab--active { background: $jst-brand-light; color: $jst-brand; font-weight: 600; }
+.notice-msg-page__tabs { margin-top: $jst-space-md; padding: 0 $jst-space-lg; }
+.notice-msg-page__tabs-inner { display: inline-flex; gap: $jst-space-md; }
+.notice-msg-page__tab { padding: $jst-space-sm $jst-space-lg; border-radius: $jst-radius-round; background: $jst-bg-card; font-size: $jst-font-sm; color: $jst-text-regular; white-space: nowrap; transition: background $jst-duration-fast, color $jst-duration-fast; }
+.notice-msg-page__tab--active { background: $jst-brand-light; color: $jst-brand; font-weight: $jst-weight-semibold; }
 
 /* 列表 */
-.notice-msg-page__list { padding: 24rpx; }
-.notice-msg-page__item { display: flex; gap: 16rpx; padding: 24rpx; border-radius: 32rpx; background: $jst-bg-card; margin-bottom: 16rpx; box-shadow: 0 2rpx 8rpx rgba(20,30,60,0.04); }
+.notice-msg-page__list { padding: $jst-space-lg; }
+.notice-msg-page__item { display: flex; gap: $jst-space-md; padding: $jst-space-lg; border-radius: $jst-radius-xl; background: $jst-bg-card; margin-bottom: $jst-space-md; box-shadow: $jst-shadow-sm; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
 
-.notice-msg-page__item-tag { display: flex; align-items: center; justify-content: center; padding: 8rpx 16rpx; border-radius: $jst-radius-round; font-size: 20rpx; font-weight: 600; flex-shrink: 0; align-self: flex-start; margin-top: 4rpx; }
+.notice-msg-page__item-tag { display: flex; align-items: center; justify-content: center; padding: $jst-space-xs $jst-space-md; border-radius: $jst-radius-round; font-size: $jst-font-xs; font-weight: $jst-weight-semibold; flex-shrink: 0; align-self: flex-start; margin-top: 4rpx; }
 .notice-msg-page__item-tag--blue { background: $jst-brand-light; color: $jst-brand; }
 .notice-msg-page__item-tag--red { background: $jst-danger-light; color: $jst-danger; }
 .notice-msg-page__item-tag--gold { background: $jst-warning-light; color: $jst-warning; }
 .notice-msg-page__item-tag--green { background: $jst-success-light; color: $jst-success; }
-.notice-msg-page__item-tag--gray { background: #F7F8FA; color: $jst-text-secondary; }
+.notice-msg-page__item-tag--gray { background: $jst-bg-page; color: $jst-text-secondary; }
 
 .notice-msg-page__item-body { flex: 1; min-width: 0; }
-.notice-msg-page__item-title { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; line-height: 1.4; }
-.notice-msg-page__item-summary { display: block; margin-top: 8rpx; font-size: 24rpx; color: $jst-text-regular; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.notice-msg-page__item-title { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; line-height: 1.4; }
+.notice-msg-page__item-summary { display: block; margin-top: $jst-space-xs; font-size: $jst-font-sm; color: $jst-text-regular; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .notice-msg-page__item-time { font-size: 22rpx; color: $jst-text-secondary; flex-shrink: 0; white-space: nowrap; }
 
-.notice-msg-page__load-more { padding: 28rpx 0; text-align: center; font-size: 24rpx; color: $jst-brand; }
+.notice-msg-page__load-more { padding: $jst-space-xl 0; text-align: center; font-size: $jst-font-sm; color: $jst-brand; }
 </style>
