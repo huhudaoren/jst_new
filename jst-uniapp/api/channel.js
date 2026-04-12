@@ -4,7 +4,7 @@
  * 契约来源: test/wx-tests.http § C5a + RuoYi-Vue/jst-channel/**\/vo,dto
  * 约束: 必须经 @/api/request 统一封装, 禁止裸 uni.request
  */
-import request from '@/api/request'
+import request, { BASE_URL } from '@/api/request'
 
 /** 返点中心 4 KPI: withdrawableAmount / reviewingAmount / paidAmount / rolledBackAmount */
 export function getRebateSummary() {
@@ -175,7 +175,7 @@ export function batchEnroll(body) {
 export function batchImportParticipants(filePath, token) {
   return new Promise((resolve, reject) => {
     uni.uploadFile({
-      url: 'http://127.0.0.1:8080/jst/wx/channel/participant/batch-create',
+      url: BASE_URL + '/jst/wx/channel/participant/batch-create',
       filePath,
       name: 'file',
       header: token ? { Authorization: `Bearer ${token}` } : {},
