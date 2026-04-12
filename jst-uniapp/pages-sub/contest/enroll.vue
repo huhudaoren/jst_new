@@ -1,6 +1,7 @@
 <template>
   <view class="enroll-page">
     <jst-loading :loading="pageLoading" text="报名信息加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="enroll-page__nav">
       <view class="enroll-page__back" @tap="handleBack"><</view>
@@ -9,7 +10,7 @@
     </view>
 
     <view class="enroll-page__hero">
-      <text class="enroll-page__hero-tag">赛事报名</text>
+      <u-tag text="赛事报名" type="primary" plain shape="circle" size="mini" />
       <text class="enroll-page__hero-title">{{ contestInfo.contestName || '正在准备报名信息' }}</text>
       <text class="enroll-page__hero-desc">先填写报名资料，本期提交后仅进入审核，不直接创建订单。</text>
     </view>
@@ -55,7 +56,7 @@
 
         <view v-else class="enroll-page__participant-empty">
           <text class="enroll-page__participant-empty-text">还没有可用的参赛档案，请先到“我的档案”完成认领。</text>
-          <button class="enroll-page__participant-empty-btn" @tap="navigateParticipant">去认领档案</button>
+          <u-button class="enroll-page__participant-empty-btn" @click="navigateParticipant">去认领档案</u-button>
         </view>
       </view>
 
@@ -88,20 +89,20 @@
     </view>
 
     <view class="enroll-page__bottom">
-      <button
+      <u-button
         class="enroll-page__bottom-btn enroll-page__bottom-btn--ghost"
         :loading="draftLoading"
-        @tap="handleDraft"
+        @click="handleDraft"
       >
         暂存草稿
-      </button>
-      <button
+      </u-button>
+      <u-button
         class="enroll-page__bottom-btn enroll-page__bottom-btn--primary"
         :loading="submitLoading"
-        @tap="handleSubmit"
+        @click="handleSubmit"
       >
         {{ submitButtonText }}
-      </button>
+      </u-button>
     </view>
   </view>
 </template>
@@ -526,10 +527,16 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .enroll-page {
   min-height: 100vh;
   padding-bottom: calc(164rpx + env(safe-area-inset-bottom));
-  background: #f4f7fc;
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg;
 }
 
 .enroll-page__nav {
@@ -540,7 +547,7 @@ export default {
   align-items: center;
   height: 96rpx;
   padding: 0 24rpx;
-  background: #0c3d6b;
+  background: $jst-brand-dark;
 }
 
 .enroll-page__back,
@@ -551,7 +558,7 @@ export default {
 
 .enroll-page__back {
   font-size: 34rpx;
-  color: rgba(255, 255, 255, 0.96);
+  color: rgba($jst-text-inverse, 0.96);
 }
 
 .enroll-page__nav-title {
@@ -559,22 +566,12 @@ export default {
   text-align: center;
   font-size: 30rpx;
   font-weight: 700;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .enroll-page__hero {
   padding: 28rpx 24rpx 180rpx;
-  background: linear-gradient(180deg, #0c3d6b 0%, #2f7de1 100%);
-}
-
-.enroll-page__hero-tag {
-  display: inline-flex;
-  padding: 10rpx 18rpx;
-  border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 20rpx;
-  font-weight: 600;
+  background: linear-gradient(180deg, $jst-brand-dark 0%, $jst-brand 100%);
 }
 
 .enroll-page__hero-title {
@@ -583,7 +580,7 @@ export default {
   font-size: 40rpx;
   font-weight: 800;
   line-height: 1.4;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .enroll-page__hero-desc {
@@ -591,7 +588,7 @@ export default {
   margin-top: 14rpx;
   font-size: 24rpx;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba($jst-text-inverse, 0.78);
 }
 
 .enroll-page__content {
@@ -603,8 +600,8 @@ export default {
   margin-bottom: 20rpx;
   padding: 28rpx 24rpx;
   border-radius: 32rpx;
-  background: #ffffff;
-  box-shadow: 0 14rpx 36rpx rgba(14, 58, 113, 0.08);
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
 }
 
 .enroll-page__card--summary {
@@ -620,7 +617,7 @@ export default {
   width: 180rpx;
   height: 180rpx;
   border-radius: 50%;
-  background: rgba(47, 125, 225, 0.08);
+  background: rgba($jst-brand, 0.08);
 }
 
 .enroll-page__card-header {
@@ -633,13 +630,13 @@ export default {
 .enroll-page__card-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .enroll-page__card-subtitle,
 .enroll-page__summary-status {
   font-size: 22rpx;
-  color: #2f7de1;
+  color: $jst-brand;
 }
 
 .enroll-page__summary-name {
@@ -650,7 +647,7 @@ export default {
   font-size: 34rpx;
   font-weight: 800;
   line-height: 1.45;
-  color: #12263f;
+  color: $jst-text-primary;
 }
 
 .enroll-page__summary-meta {
@@ -663,7 +660,7 @@ export default {
   display: block;
   font-size: 24rpx;
   line-height: 1.8;
-  color: #6c7a92;
+  color: $jst-text-secondary;
 }
 
 .enroll-page__participant-list {
@@ -677,9 +674,9 @@ export default {
   min-height: 108rpx;
   margin-bottom: 14rpx;
   padding: 0 22rpx;
-  border: 2rpx solid #dce6f7;
+  border: 2rpx solid $jst-border;
   border-radius: 24rpx;
-  background: #ffffff;
+  background: $jst-bg-card;
 }
 
 .enroll-page__participant:last-child {
@@ -687,20 +684,20 @@ export default {
 }
 
 .enroll-page__participant--active {
-  border-color: #2f7de1;
-  background: #eef4ff;
+  border-color: $jst-brand;
+  background: $jst-brand-light;
 }
 
 .enroll-page__participant-radio {
   width: 32rpx;
   height: 32rpx;
-  border: 4rpx solid #c0d4f4;
+  border: 4rpx solid $jst-border;
   border-radius: 50%;
 }
 
 .enroll-page__participant--active .enroll-page__participant-radio {
-  border-color: #2f7de1;
-  background: radial-gradient(circle, #2f7de1 0, #2f7de1 44%, transparent 46%);
+  border-color: $jst-brand;
+  background: radial-gradient(circle, $jst-brand 0, $jst-brand 44%, transparent 46%);
 }
 
 .enroll-page__participant-main {
@@ -712,7 +709,7 @@ export default {
   display: block;
   font-size: 28rpx;
   font-weight: 700;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .enroll-page__participant-desc {
@@ -720,14 +717,14 @@ export default {
   margin-top: 8rpx;
   font-size: 22rpx;
   line-height: 1.6;
-  color: #7d8ba3;
+  color: $jst-text-secondary;
 }
 
 .enroll-page__participant-empty {
   margin-top: 18rpx;
   padding: 24rpx;
   border-radius: 24rpx;
-  background: #f7faff;
+  background: $jst-bg-grey;
 }
 
 .enroll-page__participant-empty-text,
@@ -735,14 +732,14 @@ export default {
   display: block;
   font-size: 24rpx;
   line-height: 1.7;
-  color: #6c7a92;
+  color: $jst-text-secondary;
 }
 
 .enroll-page__participant-empty-btn {
   margin-top: 18rpx;
   border-radius: 999rpx;
-  background: #2f7de1;
-  color: #ffffff;
+  background: $jst-brand;
+  color: $jst-text-inverse;
   font-size: 26rpx;
   font-weight: 700;
 }
@@ -751,7 +748,7 @@ export default {
   display: block;
   font-size: 28rpx;
   font-weight: 700;
-  color: #12263f;
+  color: $jst-text-primary;
 }
 
 .enroll-page__bottom {
@@ -762,8 +759,8 @@ export default {
   display: flex;
   gap: 18rpx;
   padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 -14rpx 28rpx rgba(14, 58, 113, 0.08);
+  background: rgba($jst-bg-card, 0.98);
+  box-shadow: $jst-shadow-md;
 }
 
 .enroll-page__bottom-btn {
@@ -775,13 +772,19 @@ export default {
 }
 
 .enroll-page__bottom-btn--ghost {
-  border: 2rpx solid #cfe0fb;
-  background: #ffffff;
-  color: #2f7de1;
+  border: 2rpx solid $jst-border;
+  background: $jst-bg-card;
+  color: $jst-brand;
 }
 
 .enroll-page__bottom-btn--primary {
-  background: linear-gradient(135deg, #ff6a3d 0%, #ff8a3d 100%);
-  color: #ffffff;
+  background: $jst-brand-gradient;
+  color: $jst-text-inverse;
+}
+
+::v-deep .enroll-page__bottom-btn.u-button,
+::v-deep .enroll-page__participant-empty-btn.u-button {
+  min-height: 92rpx;
+  border: none;
 }
 </style>

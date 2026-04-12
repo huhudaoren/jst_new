@@ -1,6 +1,7 @@
 <template>
   <view class="refund-list-page">
     <jst-loading :loading="pageLoading" text="退款记录加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="refund-list-page__nav">
       <view class="refund-list-page__back" @tap="handleBack"><</view>
@@ -58,22 +59,20 @@
         </view>
 
         <view class="refund-list-page__actions">
-          <button
+          <u-button
             v-if="item.status === 'pending'"
             class="refund-list-page__action refund-list-page__action--ghost"
-            @tap="handleCancel(item)"
+            @click="handleCancel(item)"
           >
             撤销申请
-          </button>
-          <button class="refund-list-page__action refund-list-page__action--primary" @tap="openDetail(item)">
+          </u-button>
+          <u-button class="refund-list-page__action refund-list-page__action--primary" @click="openDetail(item)">
             查看详情
-          </button>
+          </u-button>
         </view>
       </view>
 
-      <view class="refund-list-page__loadmore">
-        <text class="refund-list-page__loadmore-text">{{ loadMoreText }}</text>
-      </view>
+      <u-loadmore :status="loadMoreText === '加载中...' ? 'loading' : loadMoreText === '上拉加载更多' ? 'loadmore' : 'nomore'" />
     </view>
 
     <jst-empty
@@ -263,9 +262,15 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .refund-list-page {
   min-height: 100vh;
-  background: #f4f7fc;
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg;
 }
 
 .refund-list-page__nav {
@@ -273,7 +278,7 @@ export default {
   align-items: center;
   height: 96rpx;
   padding: 0 24rpx;
-  background: linear-gradient(135deg, #0c3d6b 0%, #2f7de1 100%);
+  background: linear-gradient(135deg, $jst-brand-dark 0%, $jst-brand 100%);
 }
 
 .refund-list-page__back,
@@ -284,7 +289,7 @@ export default {
 
 .refund-list-page__back {
   font-size: 34rpx;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .refund-list-page__nav-title {
@@ -292,13 +297,13 @@ export default {
   text-align: center;
   font-size: 30rpx;
   font-weight: 700;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .refund-list-page__tabs {
   white-space: nowrap;
-  background: #ffffff;
-  box-shadow: 0 10rpx 24rpx rgba(14, 58, 113, 0.05);
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .refund-list-page__tabs-inner {
@@ -315,14 +320,14 @@ export default {
   margin-right: 12rpx;
   padding: 0 24rpx;
   border-radius: 999rpx;
-  background: #f4f7fc;
+  background: $jst-bg-page;
   font-size: 24rpx;
-  color: #72809a;
+  color: $jst-text-secondary;
 }
 
 .refund-list-page__tab--active {
-  background: #eef4ff;
-  color: #2f7de1;
+  background: $jst-brand-light;
+  color: $jst-brand;
   font-weight: 700;
 }
 
@@ -333,8 +338,8 @@ export default {
 .refund-list-page__card {
   margin-bottom: 20rpx;
   border-radius: 28rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 28rpx rgba(14, 58, 113, 0.06);
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
   overflow: hidden;
 }
 
@@ -356,7 +361,7 @@ export default {
   font-size: 30rpx;
   font-weight: 700;
   line-height: 1.5;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .refund-list-page__card-subtitle {
@@ -364,7 +369,7 @@ export default {
   margin-top: 10rpx;
   font-size: 22rpx;
   line-height: 1.6;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .refund-list-page__meta {
@@ -385,28 +390,28 @@ export default {
 }
 
 .refund-list-page__meta-key {
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .refund-list-page__meta-value {
-  color: #1f2937;
+  color: $jst-text-primary;
   text-align: right;
 }
 
 .refund-list-page__meta-value--price {
   font-size: 30rpx;
   font-weight: 800;
-  color: #ff6a3d;
+  color: $jst-warning;
 }
 
 .refund-list-page__remark {
   margin: 0 24rpx;
   padding: 16rpx 20rpx;
   border-radius: 20rpx;
-  background: #fff1f1;
+  background: $jst-danger-light;
   font-size: 22rpx;
   line-height: 1.6;
-  color: #eb5757;
+  color: $jst-danger;
 }
 
 .refund-list-page__actions {
@@ -427,14 +432,14 @@ export default {
 }
 
 .refund-list-page__action--ghost {
-  border: 2rpx solid #d6e4fb;
-  background: #ffffff;
-  color: #2f7de1;
+  border: 2rpx solid $jst-border;
+  background: $jst-bg-card;
+  color: $jst-brand;
 }
 
 .refund-list-page__action--primary {
-  background: #2f7de1;
-  color: #ffffff;
+  background: $jst-brand;
+  color: $jst-text-inverse;
 }
 
 .refund-list-page__loadmore {
@@ -444,38 +449,11 @@ export default {
 
 .refund-list-page__loadmore-text {
   font-size: 22rpx;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
-:deep(.jst-status-badge--pending) {
-  background: rgba(255, 138, 0, 0.14);
-}
-
-:deep(.jst-status-badge--pending .jst-status-badge__text) {
-  color: #ff8a00;
-}
-
-:deep(.jst-status-badge--active) {
-  background: rgba(46, 125, 255, 0.14);
-}
-
-:deep(.jst-status-badge--active .jst-status-badge__text) {
-  color: #2e7dff;
-}
-
-:deep(.jst-status-badge--refund) {
-  background: rgba(139, 92, 246, 0.14);
-}
-
-:deep(.jst-status-badge--refund .jst-status-badge__text) {
-  color: #8b5cf6;
-}
-
-:deep(.jst-status-badge--success) {
-  background: rgba(82, 196, 26, 0.14);
-}
-
-:deep(.jst-status-badge--success .jst-status-badge__text) {
-  color: #52c41a;
+::v-deep .refund-list-page__action.u-button {
+  min-height: 76rpx;
+  border: none;
 }
 </style>

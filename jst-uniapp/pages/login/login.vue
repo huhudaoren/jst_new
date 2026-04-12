@@ -1,5 +1,6 @@
 <template>
   <view class="login-page">
+    <u-skeleton v-if="submitting" :loading="true" :rows="6" title :avatar="false" class="jst-page-skeleton" />
     <view class="login-page__orb login-page__orb--top"></view>
     <view class="login-page__orb login-page__orb--bottom"></view>
 
@@ -25,13 +26,13 @@
       <text class="login-page__card-title">欢迎登录</text>
       <text class="login-page__card-desc">Mock 按钮用于联调测试账号；微信登录按钮保留生产占位。</text>
 
-      <button class="login-page__button login-page__button--primary" :loading="submitting" @tap="handleMockLogin">
+      <u-button class="login-page__button login-page__button--primary" :loading="submitting" @click="handleMockLogin">
         Mock 登录（测试账号）
-      </button>
+      </u-button>
 
-      <button class="login-page__button login-page__button--secondary" @tap="handleWxLogin">
+      <u-button class="login-page__button login-page__button--secondary" @click="handleWxLogin">
         微信登录（待生产开通）
-      </button>
+      </u-button>
 
       <text v-if="message" class="login-page__message">{{ message }}</text>
     </view>
@@ -131,6 +132,10 @@ export default {
   border-radius: 50%;
   opacity: 0.9;
   pointer-events: none;
+}
+
+.jst-page-skeleton {
+  margin-bottom: 24rpx;
 }
 
 .login-page__orb--top {
@@ -282,6 +287,11 @@ export default {
   border: 2rpx solid var(--jst-color-border);
   background: var(--jst-color-card-bg);
   color: var(--jst-color-text-secondary);
+}
+
+::v-deep .login-page__button.u-button {
+  min-height: 88rpx;
+  border: 0;
 }
 
 .login-page__message {

@@ -2,7 +2,7 @@
      数据来源: GET /jst/wx/channel/students/{id}/cert -->
 <template>
   <view class="cert-page">
-    <view class="cert-header">
+    <view class="cert-header" :style="{ paddingTop: navPaddingTop }">
       <view class="cert-header__back" @tap="goBack">←</view>
       <text class="cert-header__title">{{ studentName }} 的证书</text>
     </view>
@@ -10,21 +10,19 @@
     <view v-for="item in list" :key="item.certId" class="cert-card">
       <view class="cert-card__top">
         <text class="cert-card__name">{{ item.certName || item.contestName || '--' }}</text>
-        <text class="cert-card__level">{{ item.awardLevel || '' }}</text>
+        <u-tag :text="item.awardLevel || '未分级'" type="warning" size="mini" plain shape="circle"></u-tag>
       </view>
       <view class="cert-card__bottom">
         <text class="cert-card__no">证书编号：{{ item.certNo || '--' }}</text>
         <text class="cert-card__date">{{ formatDate(item.issueDate) }}</text>
       </view>
       <view v-if="item.certUrl" class="cert-card__download" @tap="downloadCert(item.certUrl)">
-        <text>📥 下载证书</text>
+        <u-button text="下载证书" type="primary" plain size="mini" shape="circle" icon="download"></u-button>
       </view>
     </view>
 
-    <view v-if="!list.length && !loading" class="cert-empty">
-      <text class="cert-empty__icon">🏅</text>
-      <text class="cert-empty__text">暂无证书</text>
-    </view>
+    <u-loadmore v-if="list.length" :status="loading ? 'loading' : 'nomore'" />
+    <u-empty v-if="!list.length && !loading" mode="data" text="暂无证书"></u-empty>
   </view>
 </template>
 
@@ -33,7 +31,7 @@ import { getStudentCert } from '@/api/channel'
 
 export default {
   data() {
-    return { loading: false, list: [], studentName: '', studentId: '' }
+    return { loading: false, list: [], studentName: '', studentId: '', skeletonShow: true /* [visual-effect] */ }
   },
   onLoad(opts) {
     this.studentId = opts.studentId || ''
@@ -73,19 +71,17 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.cert-page { min-height: 100vh; padding-bottom: 48rpx; background: var(--jst-color-page-bg); }
-.cert-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: #fff; border-bottom: 2rpx solid var(--jst-color-border); }
-.cert-header__back { width: 72rpx; height: 72rpx; border-radius: var(--jst-radius-sm); background: var(--jst-color-page-bg); display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
-.cert-header__title { flex: 1; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
-.cert-card { margin: 24rpx 32rpx 0; padding: 28rpx; background: #fff; border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); }
-.cert-card__top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12rpx; }
-.cert-card__name { font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); flex: 1; }
-.cert-card__level { font-size: 24rpx; color: #F5A623; font-weight: 700; flex-shrink: 0; padding: 4rpx 16rpx; background: #FEF9EC; border-radius: var(--jst-radius-full); }
+@import '@/styles/design-tokens.scss';
+
+.cert-page { min-height: 100vh; padding-bottom: $jst-space-xxl; background: $jst-bg-page; }
+.cert-header { display: flex; align-items: center; padding: 0 $jst-space-xl; height: 112rpx; padding-top: 88rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
+.cert-header__back { width: 72rpx; height: 72rpx; border-radius: $jst-radius-sm; background: $jst-bg-page; display: flex; align-items: center; justify-content: center; font-size: $jst-font-xl; margin-right: $jst-space-lg; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
+.cert-header__title { flex: 1; font-size: 34rpx; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.cert-card { margin: $jst-space-lg $jst-space-xl 0; padding: 28rpx; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; }
+.cert-card__top { display: flex; justify-content: space-between; align-items: center; margin-bottom: $jst-space-sm; }
+.cert-card__name { font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; flex: 1; }
 .cert-card__bottom { display: flex; justify-content: space-between; align-items: center; }
-.cert-card__no { font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.cert-card__date { font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.cert-card__download { margin-top: 16rpx; padding-top: 16rpx; border-top: 2rpx solid var(--jst-color-border); text-align: center; font-size: 26rpx; color: #3F51B5; font-weight: 600; }
-.cert-empty { text-align: center; padding: 120rpx 48rpx; }
-.cert-empty__icon { display: block; font-size: 80rpx; margin-bottom: 24rpx; }
-.cert-empty__text { font-size: 28rpx; color: var(--jst-color-text-tertiary); }
+.cert-card__no { font-size: 22rpx; color: $jst-text-secondary; }
+.cert-card__date { font-size: 22rpx; color: $jst-text-secondary; }
+.cert-card__download { margin-top: $jst-space-md; padding-top: $jst-space-md; border-top: 2rpx solid $jst-border; display: flex; justify-content: center; }
 </style>

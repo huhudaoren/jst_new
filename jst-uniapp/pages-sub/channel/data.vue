@@ -5,7 +5,7 @@
 <template>
   <view class="data-page">
     <!-- 导航 -->
-    <view class="data-header">
+    <view class="data-header" :style="{ paddingTop: navPaddingTop }">
       <view class="data-header__back" @tap="goBack">←</view>
       <text class="data-header__title">报名数据</text>
       <text class="data-header__sub">{{ channelName }}</text>
@@ -30,17 +30,17 @@
       </view>
       <view class="data-kpi__card">
         <text class="data-kpi__label">累计支付金额</text>
-        <text class="data-kpi__num" style="color: #3F51B5;">¥{{ formatK(stats.totalPaidAmount) }}</text>
+        <text class="data-kpi__num data-kpi__num--brand">¥{{ formatK(stats.totalPaidAmount) }}</text>
         <text class="data-kpi__sub">本月 ¥{{ stats.monthlyPaid || 0 }}</text>
       </view>
       <view class="data-kpi__card">
         <text class="data-kpi__label">退款金额</text>
-        <text class="data-kpi__num" style="color: #E74C3C;">¥{{ stats.refundAmount || 0 }}</text>
+        <text class="data-kpi__num data-kpi__num--danger">¥{{ stats.refundAmount || 0 }}</text>
         <text class="data-kpi__sub">退款 {{ stats.refundCount || 0 }} 笔</text>
       </view>
       <view class="data-kpi__card">
         <text class="data-kpi__label">返点金额</text>
-        <text class="data-kpi__num" style="color: #F5A623;">¥{{ stats.rebateTotal || 0 }}</text>
+        <text class="data-kpi__num data-kpi__num--gold">¥{{ stats.rebateTotal || 0 }}</text>
         <text class="data-kpi__sub">待结算 ¥{{ stats.rebatePending || 0 }}</text>
       </view>
     </view>
@@ -53,15 +53,15 @@
       </view>
       <view class="data-status-grid">
         <view class="data-status-item">
-          <text class="data-status-num" style="color: #27AE60;">{{ stats.enrolledCount || 0 }}</text>
+          <text class="data-status-num data-status-num--success">{{ stats.enrolledCount || 0 }}</text>
           <text class="data-status-label">已报名</text>
         </view>
         <view class="data-status-item">
-          <text class="data-status-num" style="color: #F39C12;">{{ stats.pendingPayCount || 0 }}</text>
+          <text class="data-status-num data-status-num--warning">{{ stats.pendingPayCount || 0 }}</text>
           <text class="data-status-label">待支付</text>
         </view>
         <view class="data-status-item">
-          <text class="data-status-num" style="color: #3498DB;">{{ stats.reviewingCount || 0 }}</text>
+          <text class="data-status-num data-status-num--primary">{{ stats.reviewingCount || 0 }}</text>
           <text class="data-status-label">审核中</text>
         </view>
       </view>
@@ -79,7 +79,7 @@
         </view>
         <text class="data-bar-val">{{ bar.count }} 人</text>
       </view>
-      <view v-if="!subjectBars.length" class="data-empty-hint">暂无数据</view>
+      <u-empty v-if="!subjectBars.length" mode="data" text="暂无数据"></u-empty>
     </view>
 
     <!-- D. 排行榜 -->
@@ -88,15 +88,15 @@
         <text class="data-section__title">报名热门赛事 TOP5</text>
         <text class="data-section__more" @tap="goContestList">浏览全部 ›</text>
       </view>
-      <view v-for="(item, idx) in topContests" :key="item.contestId || idx" class="data-rank-item" @tap="goContestDetail(item.contestId)">
-        <view class="data-rank-num" :style="{ background: rankColors[idx] || '#C5CAE9' }">{{ idx + 1 }}</view>
+      <view v-for="(item, idx) in topContests" :key="idx" class="data-rank-item" @tap="goContestDetail(item.contestId)">
+        <view class="data-rank-num" :class="'data-rank-num--' + (idx + 1)">{{ idx + 1 }}</view>
         <view class="data-rank-info">
           <text class="data-rank-name">{{ item.contestName || '--' }}</text>
           <text class="data-rank-sub">{{ item.category || '' }}</text>
         </view>
         <text class="data-rank-cnt">{{ item.enrollCount || 0 }}人</text>
       </view>
-      <view v-if="!topContests.length" class="data-empty-hint">暂无数据</view>
+      <u-empty v-if="!topContests.length" mode="data" text="暂无数据"></u-empty>
     </view>
 
     <!-- 近期报名记录 -->
@@ -105,7 +105,7 @@
         <text class="data-section__title">近期报名记录</text>
         <text class="data-section__more" @tap="goOrders">全部订单 ›</text>
       </view>
-      <view v-for="item in recentEnrolls" :key="item.enrollId || item.orderId" class="data-enroll-item" @tap="goOrderDetail(item.orderId)">
+      <view v-for="item in recentEnrolls" :key="item.enrollId" class="data-enroll-item" @tap="goOrderDetail(item.orderId)">
         <view class="data-enroll-avatar" :style="{ background: getAvatarColor(item.studentName) }">
           <text>{{ (item.studentName || '').slice(0, 1) }}</text>
         </view>
@@ -115,7 +115,7 @@
         </view>
         <text class="data-enroll-time">{{ formatRelative(item.createTime) }}</text>
       </view>
-      <view v-if="!recentEnrolls.length" class="data-empty-hint">暂无记录</view>
+      <u-empty v-if="!recentEnrolls.length" mode="data" text="暂无记录"></u-empty>
     </view>
 
     <!-- E. 底部深度分析引导 -->
@@ -137,7 +137,7 @@ import { getChannelStats, getTopContests, getTopStudents, getChannelOrders } fro
 import { useUserStore } from '@/store/user'
 
 const AVATAR_COLORS = [
-  'linear-gradient(135deg, #3F51B5, #5C6BC0)',
+  'linear-gradient(135deg, #283593, #3949AB)',
   'linear-gradient(135deg, #E65100, #FF7043)',
   'linear-gradient(135deg, #1B5E20, #66BB6A)',
   'linear-gradient(135deg, #880E4F, #F06292)',
@@ -147,6 +147,7 @@ const AVATAR_COLORS = [
 export default {
   data() {
     return {
+      skeletonShow: true, // [visual-effect]
       channelName: '',
       activePeriod: 'all',
       periods: [
@@ -160,12 +161,12 @@ export default {
       topContests: [],
       recentEnrolls: [],
       barColors: [
-        'linear-gradient(90deg, #3F51B5, #5C6BC0)',
-        'linear-gradient(90deg, #5C6BC0, #7986CB)',
+        'linear-gradient(90deg, #283593, #3949AB)',
+        'linear-gradient(90deg, #3949AB, #7986CB)',
         'linear-gradient(90deg, #7986CB, #9FA8DA)',
         'linear-gradient(90deg, #9FA8DA, #C5CAE9)'
       ],
-      rankColors: ['#3F51B5', '#5C6BC0', '#7986CB', '#9FA8DA', '#C5CAE9']
+      rankColors: ['#283593', '#3949AB', '#7986CB', '#9FA8DA', '#C5CAE9']
     }
   },
   onShow() { this.initChannel(); this.loadAll() },
@@ -235,7 +236,7 @@ export default {
     formatRelative(v) {
       if (!v) return '--'
       const now = Date.now()
-      const d = new Date(String(v).replace('T', ' ')).getTime()
+      const d = new Date(String(v).replace(/ /g, 'T')).getTime()
       const diff = now - d
       if (diff < 86400000) return '今天'
       if (diff < 172800000) return '昨天'
@@ -259,81 +260,92 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.data-page { min-height: 100vh; padding-bottom: 48rpx; background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
 
-.data-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: #fff; border-bottom: 2rpx solid var(--jst-color-border); position: sticky; top: 0; z-index: 40; }
-.data-header__back { width: 72rpx; height: 72rpx; border-radius: var(--jst-radius-sm); background: var(--jst-color-page-bg); display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
-.data-header__title { flex: 1; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
-.data-header__sub { font-size: 26rpx; color: var(--jst-color-text-tertiary); }
+.data-page { min-height: 100vh; padding-bottom: $jst-space-xxl; background: $jst-bg-page; }
+
+.data-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; position: sticky; top: 0; z-index: 40; }
+.data-header__back { width: 72rpx; height: 72rpx; border-radius: $jst-radius-sm; background: $jst-bg-page; display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
+.data-header__title { flex: 1; font-size: 34rpx; font-weight: 600; color: $jst-text-primary; }
+.data-header__sub { font-size: 26rpx; color: $jst-text-secondary; }
 
 /* 时间选择器 */
-.data-time { padding: 20rpx 32rpx; background: #fff; border-bottom: 2rpx solid var(--jst-color-border); position: sticky; top: 200rpx; z-index: 39; }
+.data-time { padding: 20rpx 32rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; position: sticky; top: 200rpx; z-index: 39; }
 .data-time__chips { display: flex; gap: 12rpx; overflow-x: auto; }
 .data-time__chips::-webkit-scrollbar { display: none; }
-.data-time__chip { flex-shrink: 0; height: 60rpx; padding: 0 28rpx; border-radius: var(--jst-radius-full); border: 3rpx solid var(--jst-color-border); background: var(--jst-color-page-bg); font-size: 24rpx; font-weight: 500; color: var(--jst-color-text-secondary); display: flex; align-items: center; white-space: nowrap; }
-.data-time__chip--active { border-color: #3F51B5; background: #EEF0FF; color: #3F51B5; font-weight: 700; }
+.data-time__chip { flex-shrink: 0; height: 60rpx; padding: 0 28rpx; border-radius: $jst-radius-round; border: 3rpx solid $jst-border; background: $jst-bg-page; font-size: 24rpx; font-weight: 500; color: $jst-text-regular; display: flex; align-items: center; white-space: nowrap; }
+.data-time__chip--active { border-color: $jst-brand; background: $jst-brand-light; color: $jst-brand; font-weight: 600; }
 
 /* 4 KPI */
 .data-kpi { display: grid; grid-template-columns: 1fr 1fr; gap: 20rpx; padding: 28rpx 32rpx 0; }
-.data-kpi__card { background: #fff; border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); padding: 32rpx; }
-.data-kpi__card--accent { background: linear-gradient(145deg, #3F51B5, #5C6BC0); box-shadow: 0 8rpx 32rpx rgba(63,81,181,0.3); }
-.data-kpi__label { display: block; font-size: 24rpx; color: var(--jst-color-text-tertiary); margin-bottom: 16rpx; }
-.data-kpi__card--accent .data-kpi__label { color: rgba(255,255,255,0.7); }
-.data-kpi__num { display: block; font-size: 60rpx; font-weight: 900; color: var(--jst-color-text); line-height: 1; letter-spacing: -2rpx; }
-.data-kpi__card--accent .data-kpi__num { color: #fff; }
-.data-kpi__sub { display: block; margin-top: 12rpx; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.data-kpi__card--accent .data-kpi__sub { color: rgba(255,255,255,0.6); }
+.data-kpi__card { background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; padding: 32rpx; }
+.data-kpi__card--accent { background: linear-gradient(145deg, $jst-indigo, $jst-indigo-light); box-shadow: $jst-shadow-md; }
+.data-kpi__label { display: block; font-size: 24rpx; color: $jst-text-secondary; margin-bottom: 16rpx; }
+.data-kpi__card--accent .data-kpi__label { color: rgba($jst-text-inverse, 0.7); }
+.data-kpi__num { display: block; font-size: 60rpx; font-weight: 600; color: $jst-text-primary; line-height: 1; letter-spacing: -2rpx; }
+.data-kpi__num--brand { color: $jst-brand; }
+.data-kpi__num--danger { color: $jst-danger; }
+.data-kpi__num--gold { color: $jst-warning; }
+.data-kpi__card--accent .data-kpi__num { color: $jst-text-inverse; }
+.data-kpi__sub { display: block; margin-top: 12rpx; font-size: 24rpx; color: $jst-text-secondary; }
+.data-kpi__card--accent .data-kpi__sub { color: rgba($jst-text-inverse, 0.6); }
 .data-kpi__trend { display: block; margin-top: 12rpx; font-size: 22rpx; font-weight: 600; }
-.data-kpi__trend--up { color: #27AE60; }
-.data-kpi__card--accent .data-kpi__trend--up { color: #A5D6A7; }
+.data-kpi__trend--up { color: $jst-success; }
+.data-kpi__card--accent .data-kpi__trend--up { color: $jst-success-light; }
 
 /* 通用 section */
-.data-section { margin: 24rpx 32rpx 0; background: #fff; border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); overflow: hidden; }
-.data-section__header { display: flex; align-items: center; justify-content: space-between; padding: 28rpx 32rpx 20rpx; border-bottom: 2rpx solid var(--jst-color-border); }
-.data-section__title { font-size: 30rpx; font-weight: 700; color: var(--jst-color-text); display: flex; align-items: center; gap: 12rpx; }
-.data-section__title::before { content: ''; width: 6rpx; height: 30rpx; background: #3F51B5; border-radius: 4rpx; }
-.data-section__more { font-size: 26rpx; color: #3F51B5; font-weight: 500; }
+.data-section { margin: 24rpx 32rpx 0; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; overflow: hidden; }
+.data-section__header { display: flex; align-items: center; justify-content: space-between; padding: 28rpx 32rpx 20rpx; border-bottom: 2rpx solid $jst-border; }
+.data-section__title { font-size: 30rpx; font-weight: 600; color: $jst-text-primary; display: flex; align-items: center; gap: 12rpx; }
+.data-section__title::before { content: ''; width: 6rpx; height: 30rpx; background: $jst-brand; border-radius: $jst-radius-xs; }
+.data-section__more { font-size: 26rpx; color: $jst-brand; font-weight: 500; }
 
 /* 状态分布 */
 .data-status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; padding: 8rpx 0; }
-.data-status-item { padding: 28rpx 16rpx; text-align: center; border-right: 2rpx solid var(--jst-color-border); }
+.data-status-item { padding: 28rpx 16rpx; text-align: center; border-right: 2rpx solid $jst-border; }
 .data-status-item:last-child { border-right: none; }
-.data-status-num { display: block; font-size: 44rpx; font-weight: 900; line-height: 1; margin-bottom: 8rpx; }
-.data-status-label { display: block; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.data-status-num { display: block; font-size: 44rpx; font-weight: 600; line-height: 1; margin-bottom: 8rpx; }
+.data-status-num--success { color: $jst-success; }
+.data-status-num--warning { color: $jst-warning; }
+.data-status-num--primary { color: $jst-brand; }
+.data-status-label { display: block; font-size: 22rpx; color: $jst-text-secondary; }
 
 /* 横向进度条 */
-.data-bar-row { display: flex; align-items: center; gap: 20rpx; padding: 20rpx 32rpx; border-bottom: 2rpx solid var(--jst-color-border); }
+.data-bar-row { display: flex; align-items: center; gap: 20rpx; padding: 20rpx 32rpx; border-bottom: 2rpx solid $jst-border; }
 .data-bar-row:last-child { border-bottom: none; }
-.data-bar-label { font-size: 26rpx; color: var(--jst-color-text-secondary); width: 128rpx; flex-shrink: 0; }
-.data-bar-track { flex: 1; height: 16rpx; background: var(--jst-color-border); border-radius: 8rpx; overflow: hidden; }
+.data-bar-label { font-size: 26rpx; color: $jst-text-regular; width: 128rpx; flex-shrink: 0; }
+.data-bar-track { flex: 1; height: 16rpx; background: $jst-border; border-radius: 8rpx; overflow: hidden; }
 .data-bar-fill { height: 100%; border-radius: 8rpx; transition: width 0.8s ease; }
-.data-bar-val { font-size: 24rpx; font-weight: 700; color: var(--jst-color-text-secondary); width: 80rpx; text-align: right; flex-shrink: 0; }
+.data-bar-val { font-size: 24rpx; font-weight: 600; color: $jst-text-regular; width: 80rpx; text-align: right; flex-shrink: 0; }
 
 /* 排行榜 */
-.data-rank-item { display: flex; align-items: center; gap: 24rpx; padding: 24rpx 32rpx; border-bottom: 2rpx solid var(--jst-color-border); }
+.data-rank-item { display: flex; align-items: center; gap: 24rpx; padding: 24rpx 32rpx; border-bottom: 2rpx solid $jst-border; }
 .data-rank-item:last-child { border-bottom: none; }
-.data-rank-num { width: 48rpx; height: 48rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24rpx; font-weight: 700; color: #fff; flex-shrink: 0; }
+.data-rank-num { width: 48rpx; height: 48rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24rpx; font-weight: 600; color: $jst-text-inverse; flex-shrink: 0; background: rgba($jst-brand, 0.35); }
+.data-rank-num--1 { background: $jst-brand-dark; }
+.data-rank-num--2 { background: $jst-brand; }
+.data-rank-num--3 { background: rgba($jst-brand, 0.75); }
+.data-rank-num--4 { background: rgba($jst-brand, 0.55); }
+.data-rank-num--5 { background: rgba($jst-brand, 0.45); }
 .data-rank-info { flex: 1; min-width: 0; }
-.data-rank-name { display: block; font-size: 26rpx; font-weight: 600; color: var(--jst-color-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.data-rank-sub { display: block; margin-top: 4rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.data-rank-cnt { font-size: 32rpx; font-weight: 800; color: #3F51B5; flex-shrink: 0; }
+.data-rank-name { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.data-rank-sub { display: block; margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; }
+.data-rank-cnt { font-size: 32rpx; font-weight: 600; color: $jst-brand; flex-shrink: 0; }
 
 /* 近期报名 */
-.data-enroll-item { display: flex; align-items: center; gap: 20rpx; padding: 22rpx 32rpx; border-bottom: 2rpx solid var(--jst-color-border); }
+.data-enroll-item { display: flex; align-items: center; gap: 20rpx; padding: 22rpx 32rpx; border-bottom: 2rpx solid $jst-border; }
 .data-enroll-item:last-child { border-bottom: none; }
-.data-enroll-avatar { width: 72rpx; height: 72rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32rpx; font-weight: 700; color: #fff; flex-shrink: 0; }
+.data-enroll-avatar { width: 72rpx; height: 72rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32rpx; font-weight: 600; color: $jst-text-inverse; flex-shrink: 0; }
 .data-enroll-info { flex: 1; min-width: 0; }
-.data-enroll-name { display: block; font-size: 26rpx; font-weight: 700; color: var(--jst-color-text); }
-.data-enroll-contest { display: block; margin-top: 4rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.data-enroll-time { font-size: 22rpx; color: #ccc; flex-shrink: 0; }
-
-.data-empty-hint { padding: 40rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.data-enroll-name { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; }
+.data-enroll-contest { display: block; margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.data-enroll-time { font-size: 22rpx; color: $jst-text-placeholder; flex-shrink: 0; }
 
 /* 深度分析引导 */
-.data-analysis-entry { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: linear-gradient(90deg, #EBF4FC, #fff); border: 2rpx solid rgba(63,81,181,0.15); border-radius: var(--jst-radius-lg); display: flex; align-items: center; gap: 24rpx; opacity: 0.7; }
+.data-analysis-entry { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: linear-gradient(90deg, $jst-brand-light, $jst-bg-card); border: 2rpx solid rgba($jst-brand, 0.15); border-radius: $jst-radius-lg; display: flex; align-items: center; gap: 24rpx; opacity: 0.85; }
 .data-analysis-icon { font-size: 56rpx; flex-shrink: 0; }
 .data-analysis-info { flex: 1; }
-.data-analysis-title { display: block; font-size: 28rpx; font-weight: 700; color: #3F51B5; }
-.data-analysis-desc { display: block; margin-top: 4rpx; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.data-analysis-badge { padding: 8rpx 20rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-border); font-size: 22rpx; color: var(--jst-color-text-tertiary); font-weight: 600; flex-shrink: 0; }
+.data-analysis-title { display: block; font-size: 28rpx; font-weight: 600; color: $jst-brand; }
+.data-analysis-desc { display: block; margin-top: 4rpx; font-size: 24rpx; color: $jst-text-secondary; }
+.data-analysis-badge { padding: 8rpx 20rpx; border-radius: $jst-radius-round; background: $jst-border; font-size: 22rpx; color: $jst-text-secondary; font-weight: 600; flex-shrink: 0; }
 </style>

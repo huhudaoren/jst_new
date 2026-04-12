@@ -5,7 +5,7 @@
      ⚠️ 若后端 VO 缺字段, 前端用 '--' 占位, 不编造假数据 -->
 <template>
   <view class="od-page">
-    <view class="od-header">
+    <view class="od-header" :style="{ paddingTop: navPaddingTop }">
       <view class="od-header__back" @tap="goBack">←</view>
       <text class="od-header__title">订单详情</text>
     </view>
@@ -42,13 +42,16 @@
       </view>
       <view class="od-info-row">
         <text class="od-info-label">订单状态</text>
-        <view class="od-status-badge" :class="'od-status-badge--' + getStatusType(detail.orderStatus)">
-          {{ detail.statusText || getStatusText(detail.orderStatus) }}
-        </view>
+        <u-tag
+          :text="detail.statusText || getStatusText(detail.orderStatus)"
+          :type="getStatusType(detail.orderStatus) === 'gray' ? 'info' : getStatusType(detail.orderStatus)"
+          size="mini"
+          shape="circle"
+        ></u-tag>
       </view>
       <view v-if="detail.refundStatus" class="od-info-row">
         <text class="od-info-label">退款状态</text>
-        <text class="od-info-val" style="color: #E74C3C;">{{ detail.refundStatusText || detail.refundStatus }}</text>
+        <text class="od-info-val od-info-val--danger">{{ detail.refundStatusText || detail.refundStatus }}</text>
       </view>
     </view>
 
@@ -90,7 +93,7 @@
           </view>
           <view class="od-fee__row od-fee__row--total">
             <text class="od-fee__label">返点金额</text>
-            <text class="od-fee__val" style="color: #3F51B5; font-weight: 800;">¥{{ detail.rebateAmount || '--' }}</text>
+            <text class="od-fee__val od-fee__val--brand">¥{{ detail.rebateAmount || '--' }}</text>
           </view>
         </template>
       </view>
@@ -123,8 +126,8 @@
 
     <!-- E. 操作区 -->
     <view class="od-actions">
-      <view class="od-action-btn" @tap="copyText(detail.orderNo)">复制订单号</view>
-      <view class="od-action-btn od-action-btn--primary" @tap="goContest">查看赛事详情</view>
+      <u-button text="复制订单号" shape="circle" @click="copyText(detail.orderNo)"></u-button>
+      <u-button text="查看赛事详情" type="primary" shape="circle" @click="goContest"></u-button>
     </view>
   </view>
 </template>
@@ -139,7 +142,7 @@ const STATUS_MAP = {
 
 export default {
   data() {
-    return { detail: {}, timeline: [], originalParticipantName: '' }
+    return { detail: {}, timeline: [], originalParticipantName: '', skeletonShow: true /* [visual-effect] */ }
   },
   onLoad(opts) {
     this.orderId = opts.id || ''
@@ -185,63 +188,59 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.od-page { min-height: 100vh; padding-bottom: calc(48rpx + env(safe-area-inset-bottom)); background: var(--jst-color-page-bg); }
-.od-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: #fff; border-bottom: 2rpx solid var(--jst-color-border); }
-.od-header__back { width: 72rpx; height: 72rpx; border-radius: var(--jst-radius-sm); background: var(--jst-color-page-bg); display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
-.od-header__title { flex: 1; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
+@import '@/styles/design-tokens.scss';
 
-.od-section { margin: 24rpx 32rpx 0; background: #fff; border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); overflow: hidden; }
-.od-section__title { padding: 28rpx 28rpx 16rpx; font-size: 30rpx; font-weight: 700; color: var(--jst-color-text); display: flex; align-items: center; gap: 12rpx; border-bottom: 2rpx solid var(--jst-color-border); }
-.od-section__title::before { content: ''; width: 6rpx; height: 30rpx; background: #3F51B5; border-radius: 4rpx; }
+.od-page { min-height: 100vh; padding-bottom: calc(#{$jst-space-xxl} + env(safe-area-inset-bottom)); background: $jst-bg-page; }
+.od-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
+.od-header__back { width: 72rpx; height: 72rpx; border-radius: $jst-radius-sm; background: $jst-bg-page; display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
+.od-header__title { flex: 1; font-size: 34rpx; font-weight: 600; color: $jst-text-primary; }
+
+.od-section { margin: 24rpx 32rpx 0; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; overflow: hidden; }
+.od-section__title { padding: 28rpx 28rpx 16rpx; font-size: 30rpx; font-weight: 600; color: $jst-text-primary; display: flex; align-items: center; gap: 12rpx; border-bottom: 2rpx solid $jst-border; }
+.od-section__title::before { content: ''; width: 6rpx; height: 30rpx; background: $jst-brand; border-radius: 4rpx; }
 
 /* 信息行 */
-.od-info-row { display: flex; align-items: center; justify-content: space-between; padding: 20rpx 28rpx; border-bottom: 2rpx solid var(--jst-color-border); }
+.od-info-row { display: flex; align-items: center; justify-content: space-between; padding: 20rpx 28rpx; border-bottom: 2rpx solid $jst-border; }
 .od-info-row:last-child { border-bottom: none; }
-.od-info-label { font-size: 26rpx; color: var(--jst-color-text-tertiary); flex-shrink: 0; margin-right: 24rpx; }
-.od-info-val { font-size: 26rpx; color: var(--jst-color-text); text-align: right; flex: 1; }
+.od-info-label { font-size: 26rpx; color: $jst-text-secondary; flex-shrink: 0; margin-right: 24rpx; }
+.od-info-val { font-size: 26rpx; color: $jst-text-primary; text-align: right; flex: 1; }
 .od-info-val--copy { display: flex; align-items: center; justify-content: flex-end; gap: 8rpx; }
-.od-info-val--link { color: #3F51B5; font-weight: 500; }
+.od-info-val--link { color: $jst-brand; font-weight: 500; }
+.od-info-val--danger { color: $jst-danger; }
 .od-copy-icon { font-size: 24rpx; }
-
-.od-status-badge { padding: 6rpx 16rpx; border-radius: var(--jst-radius-full); font-size: 22rpx; font-weight: 600; }
-.od-status-badge--warning { background: var(--jst-color-warning-soft); color: #B26A00; }
-.od-status-badge--success { background: var(--jst-color-success-soft); color: #0F7B3F; }
-.od-status-badge--info { background: var(--jst-color-brand-soft); color: var(--jst-color-brand); }
-.od-status-badge--gray { background: #ECECEC; color: #6B6B6B; }
 
 /* 费用明细 */
 .od-fee { padding: 20rpx 28rpx; }
 .od-fee__row { display: flex; justify-content: space-between; padding: 12rpx 0; }
-.od-fee__row--discount .od-fee__val { color: var(--jst-color-success); }
+.od-fee__row--discount .od-fee__val { color: $jst-success; }
 .od-fee__row--total { padding: 16rpx 0; }
-.od-fee__label { font-size: 26rpx; color: var(--jst-color-text-secondary); }
-.od-fee__val { font-size: 26rpx; color: var(--jst-color-text); font-weight: 500; font-feature-settings: "tnum"; }
-.od-fee__val--accent { font-size: 32rpx; font-weight: 800; color: #FF5722; }
-.od-fee__divider { height: 2rpx; background: var(--jst-color-border); margin: 8rpx 0; }
+.od-fee__label { font-size: 26rpx; color: $jst-text-regular; }
+.od-fee__val { font-size: 26rpx; color: $jst-text-primary; font-weight: 500; font-feature-settings: "tnum"; }
+.od-fee__val--accent { font-size: 32rpx; font-weight: 600; color: $jst-warning; }
+.od-fee__val--brand { color: $jst-brand; font-weight: $jst-weight-semibold; }
+.od-fee__divider { height: 2rpx; background: $jst-border; margin: 8rpx 0; }
 
 /* 归属渠道 */
 .od-channel-owner { display: flex; align-items: center; gap: 16rpx; padding: 24rpx 28rpx 8rpx; }
 .od-channel-owner__icon { font-size: 36rpx; }
-.od-channel-owner__name { font-size: 28rpx; font-weight: 600; color: var(--jst-color-text); }
-.od-channel-owner__hint { display: block; padding: 0 28rpx 24rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.od-channel-owner__name { font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
+.od-channel-owner__hint { display: block; padding: 0 28rpx 24rpx; font-size: 22rpx; color: $jst-text-secondary; }
 
 /* 时间轴 */
 .od-timeline { padding: 24rpx 28rpx; }
 .od-tl-item { display: flex; position: relative; padding-bottom: 24rpx; }
 .od-tl-item:last-child { padding-bottom: 0; }
-.od-tl-dot { width: 16rpx; height: 16rpx; border-radius: 50%; background: var(--jst-color-border); margin-top: 8rpx; flex-shrink: 0; z-index: 1; }
-.od-tl-dot--active { background: #3F51B5; box-shadow: 0 0 0 6rpx rgba(63,81,181,0.2); }
-.od-tl-line { position: absolute; left: 7rpx; top: 28rpx; bottom: 0; width: 2rpx; background: var(--jst-color-border); }
+.od-tl-dot { width: 16rpx; height: 16rpx; border-radius: 50%; background: $jst-border; margin-top: 8rpx; flex-shrink: 0; z-index: 1; }
+.od-tl-dot--active { background: $jst-brand; box-shadow: 0 0 0 6rpx rgba($jst-brand, 0.2); }
+.od-tl-line { position: absolute; left: 7rpx; top: 28rpx; bottom: 0; width: 2rpx; background: $jst-border; }
 .od-tl-content { margin-left: 20rpx; flex: 1; }
-.od-tl-step { display: block; font-size: 26rpx; color: var(--jst-color-text); font-weight: 500; }
-.od-tl-time { display: block; margin-top: 4rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.od-tl-step { display: block; font-size: 26rpx; color: $jst-text-primary; font-weight: 500; }
+.od-tl-time { display: block; margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; }
 
 /* 操作区 */
-.od-actions { display: flex; gap: 20rpx; padding: 32rpx; }
-.od-action-btn { flex: 1; height: 88rpx; border-radius: var(--jst-radius-md); display: flex; align-items: center; justify-content: center; font-size: 28rpx; font-weight: 600; background: var(--jst-color-page-bg); color: var(--jst-color-text-secondary); }
-.od-action-btn--primary { background: #3F51B5; color: #fff; }
+.od-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 20rpx; padding: 32rpx; }
 
 /* Q-03 临时档案标注 */
-.od-merge-tag { margin: 24rpx 32rpx 0; padding: 20rpx 28rpx; background: var(--jst-color-warning-soft); border-radius: var(--jst-radius-md); border-left: 8rpx solid var(--jst-color-warning); }
-.od-merge-tag__text { font-size: 26rpx; color: #B26A00; line-height: 1.6; }
+.od-merge-tag { margin: 24rpx 32rpx 0; padding: 20rpx 28rpx; background: $jst-warning-light; border-radius: $jst-radius-md; border-left: 8rpx solid $jst-warning; }
+.od-merge-tag__text { font-size: 26rpx; color: $jst-warning; line-height: 1.6; }
 </style>

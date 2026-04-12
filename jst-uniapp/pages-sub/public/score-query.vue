@@ -1,7 +1,7 @@
 <!-- 中文注释: 成绩公开查询页；对应原型 小程序原型图/score-query.html；对应接口 GET /jst/public/score/query -->
 <template>
   <view class="score-query-page">
-    <view class="score-query-page__header">
+    <view class="score-query-page__header" :style="{ paddingTop: navPaddingTop }">
       <view class="score-query-page__back" @tap="goBack">←</view>
       <text class="score-query-page__header-title">成绩公开查询</text>
     </view>
@@ -27,7 +27,7 @@
       </view>
 
       <view class="score-query-page__field">
-        <text class="score-query-page__field-label">{{ currentModeLabel }} <text style="color: var(--jst-color-danger);">*</text></text>
+        <text class="score-query-page__field-label">{{ currentModeLabel }} <text style="color: $jst-danger;">*</text></text>
         <input
           class="score-query-page__input"
           v-model="queryValue"
@@ -141,42 +141,43 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.score-query-page { min-height: 100vh; background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
+.score-query-page { min-height: 100vh; background: #F7F8FA; }
 
-.score-query-page__header { display: flex; align-items: center; padding: 24rpx; background: var(--jst-color-card-bg); }
-.score-query-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: var(--jst-color-page-bg); font-size: 30rpx; color: var(--jst-color-text); }
-.score-query-page__header-title { flex: 1; margin-left: 16rpx; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
+.score-query-page__header { display: flex; align-items: center; padding: 24rpx; background: $jst-bg-card; }
+.score-query-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: #F7F8FA; font-size: 30rpx; color: $jst-text-primary; }
+.score-query-page__header-title { flex: 1; margin-left: 16rpx; font-size: 34rpx; font-weight: 600; color: $jst-text-primary; }
 
 /* Hero */
-.score-query-page__hero { padding: 48rpx 32rpx 32rpx; background: linear-gradient(135deg, #1058A0, #0D3F7A); border-bottom-left-radius: var(--jst-radius-lg); border-bottom-right-radius: var(--jst-radius-lg); }
+.score-query-page__hero { padding: 48rpx 32rpx 32rpx; background: linear-gradient(135deg, #1A237E, #283593); border-bottom-left-radius: 32rpx; border-bottom-right-radius: 32rpx; }
 .score-query-page__hero-icon { display: block; font-size: 56rpx; margin-bottom: 16rpx; }
-.score-query-page__hero-title { display: block; font-size: 40rpx; font-weight: 800; color: #fff; }
+.score-query-page__hero-title { display: block; font-size: 40rpx; font-weight: 600; color: #fff; }
 .score-query-page__hero-desc { display: block; margin-top: 12rpx; font-size: 26rpx; color: rgba(255,255,255,0.7); }
 
 /* 表单 */
-.score-query-page__form { margin: 24rpx; padding: 28rpx; border-radius: var(--jst-radius-lg); background: var(--jst-color-card-bg); box-shadow: 0 4rpx 16rpx rgba(20,30,60,0.06); }
+.score-query-page__form { margin: 24rpx; padding: 28rpx; border-radius: 32rpx; background: $jst-bg-card; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
 
 .score-query-page__mode-tabs { display: flex; gap: 12rpx; margin-bottom: 28rpx; }
-.score-query-page__mode-tab { flex: 1; height: 72rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--jst-radius-md); border: 2rpx solid var(--jst-color-border); font-size: 26rpx; color: var(--jst-color-text-secondary); }
-.score-query-page__mode-tab--active { border-color: var(--jst-color-brand); background: var(--jst-color-brand-soft); color: var(--jst-color-brand); font-weight: 600; }
+.score-query-page__mode-tab { flex: 1; height: 72rpx; display: flex; align-items: center; justify-content: center; border-radius: $jst-radius-xl; border: 2rpx solid $jst-border; font-size: 26rpx; color: $jst-text-regular; }
+.score-query-page__mode-tab--active { border-color: $jst-brand; background: $jst-brand-light; color: $jst-brand; font-weight: 600; }
 
 .score-query-page__field { margin-bottom: 24rpx; }
-.score-query-page__field-label { display: block; margin-bottom: 12rpx; font-size: 26rpx; font-weight: 600; color: var(--jst-color-text); }
-.score-query-page__field-optional { font-size: 22rpx; font-weight: 400; color: var(--jst-color-text-tertiary); }
-.score-query-page__input { height: 88rpx; padding: 0 24rpx; border-radius: var(--jst-radius-md); background: var(--jst-color-page-bg); border: 2rpx solid var(--jst-color-border); font-size: 28rpx; }
+.score-query-page__field-label { display: block; margin-bottom: 12rpx; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; }
+.score-query-page__field-optional { font-size: 22rpx; font-weight: 400; color: $jst-text-secondary; }
+.score-query-page__input { height: 88rpx; padding: 0 24rpx; border-radius: $jst-radius-xl; background: #F7F8FA; border: 2rpx solid $jst-border; font-size: 28rpx; }
 
-.score-query-page__submit { display: flex; align-items: center; justify-content: center; height: 96rpx; border-radius: var(--jst-radius-md); background: linear-gradient(135deg, #FF6B35, #FF8C61); font-size: 32rpx; font-weight: 700; color: #fff; margin-top: 8rpx; }
+.score-query-page__submit { display: flex; align-items: center; justify-content: center; height: 96rpx; border-radius: $jst-radius-xl; background: linear-gradient(135deg, #FF6B35, #FF8C61); font-size: 32rpx; font-weight: 600; color: #fff; margin-top: 8rpx; }
 
 /* 提示 */
-.score-query-page__tip { margin: 24rpx; padding: 20rpx 24rpx; border-radius: var(--jst-radius-md); background: var(--jst-color-brand-soft); }
-.score-query-page__tip-text { font-size: 24rpx; color: var(--jst-color-brand); line-height: 1.6; }
+.score-query-page__tip { margin: 24rpx; padding: 20rpx 24rpx; border-radius: $jst-radius-xl; background: $jst-brand-light; }
+.score-query-page__tip-text { font-size: 24rpx; color: $jst-brand; line-height: 1.6; }
 
 /* 结果 */
 .score-query-page__result { margin: 0 24rpx; }
-.score-query-page__result-card { padding: 24rpx; border-radius: var(--jst-radius-lg); background: var(--jst-color-card-bg); box-shadow: 0 4rpx 16rpx rgba(20,30,60,0.06); margin-bottom: 16rpx; }
-.score-query-page__result-name { display: block; font-size: 30rpx; font-weight: 700; color: var(--jst-color-text); margin-bottom: 16rpx; }
-.score-query-page__result-row { display: flex; justify-content: space-between; padding: 10rpx 0; border-bottom: 2rpx solid var(--jst-color-border); font-size: 26rpx; }
+.score-query-page__result-card { padding: 24rpx; border-radius: 32rpx; background: $jst-bg-card; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); margin-bottom: 16rpx; }
+.score-query-page__result-name { display: block; font-size: 30rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 16rpx; }
+.score-query-page__result-row { display: flex; justify-content: space-between; padding: 10rpx 0; border-bottom: 2rpx solid $jst-border; font-size: 26rpx; }
 .score-query-page__result-row:last-child { border-bottom: none; }
-.score-query-page__result-label { color: var(--jst-color-text-tertiary); }
-.score-query-page__result-value { color: var(--jst-color-text); font-weight: 600; }
+.score-query-page__result-label { color: $jst-text-secondary; }
+.score-query-page__result-value { color: $jst-text-primary; font-weight: 600; }
 </style>

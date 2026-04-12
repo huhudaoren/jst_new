@@ -3,7 +3,7 @@
      调用接口: GET /jst/wx/campaign/{id}
                POST /jst/wx/coupon/claim -->
 <template>
-  <view class="cg-page">
+  <view class="cg-page" :style="{ paddingTop: navPaddingTop }">
     <image class="cg-banner" :src="campaign.bannerUrl || ''" mode="aspectFill" />
     <view class="cg-hero">
       <text class="cg-hero__title">{{ campaign.title || '--' }}</text>
@@ -82,24 +82,25 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.cg-page { min-height: 100vh; background: var(--jst-color-page-bg); padding-bottom: 48rpx; }
-.cg-banner { width: 100%; height: 420rpx; background: var(--jst-color-brand-soft); }
-.cg-hero { margin: -48rpx 32rpx 0; padding: 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); position: relative; }
-.cg-hero__title { display: block; font-size: 36rpx; font-weight: 800; color: var(--jst-color-text); }
-.cg-hero__desc { display: block; margin-top: 10rpx; font-size: 24rpx; color: var(--jst-color-text-secondary); line-height: 1.7; }
-.cg-hero__countdown { margin-top: 16rpx; display: inline-block; padding: 8rpx 20rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-danger-soft); color: var(--jst-color-danger); font-size: 22rpx; font-weight: 700; }
+@import '@/styles/design-tokens.scss';
+.cg-page { min-height: 100vh; background: #F7F8FA; padding-bottom: 48rpx; }
+.cg-banner { width: 100%; height: 420rpx; background: $jst-brand-light; }
+.cg-hero { margin: -48rpx 32rpx 0; padding: 32rpx; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); position: relative; }
+.cg-hero__title { display: block; font-size: 36rpx; font-weight: 600; color: $jst-text-primary; }
+.cg-hero__desc { display: block; margin-top: 10rpx; font-size: 24rpx; color: $jst-text-regular; line-height: 1.7; }
+.cg-hero__countdown { margin-top: 16rpx; display: inline-block; padding: 8rpx 20rpx; border-radius: $jst-radius-round; background: $jst-danger-light; color: $jst-danger; font-size: 22rpx; font-weight: 600; }
 
-.cg-section { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); }
-.cg-section__title { display: block; font-size: 28rpx; font-weight: 800; color: var(--jst-color-text); margin-bottom: 16rpx; }
-.cg-card { display: flex; align-items: center; padding: 20rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
+.cg-section { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
+.cg-section__title { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 16rpx; }
+.cg-card { display: flex; align-items: center; padding: 20rpx 0; border-bottom: 2rpx solid $jst-border; }
 .cg-card:last-child { border-bottom: none; }
 .cg-card__left { min-width: 180rpx; text-align: center; color: #F4511E; }
-.cg-card__big { font-size: 36rpx; font-weight: 800; }
-.cg-card__th { display: block; margin-top: 4rpx; font-size: 20rpx; color: var(--jst-color-text-tertiary); }
+.cg-card__big { font-size: 36rpx; font-weight: 600; }
+.cg-card__th { display: block; margin-top: 4rpx; font-size: 20rpx; color: $jst-text-secondary; }
 .cg-card__body { flex: 1; min-width: 0; }
-.cg-card__name { display: block; font-size: 26rpx; font-weight: 700; color: var(--jst-color-text); }
-.cg-card__range { display: block; margin-top: 4rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.cg-card__btn { height: 64rpx; line-height: 64rpx; padding: 0 24rpx; border-radius: var(--jst-radius-full); background: #F4511E; color: #fff; font-size: 22rpx; font-weight: 700; border: none; }
+.cg-card__name { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; }
+.cg-card__range { display: block; margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; }
+.cg-card__btn { height: 64rpx; line-height: 64rpx; padding: 0 24rpx; border-radius: $jst-radius-round; background: #F4511E; color: #fff; font-size: 22rpx; font-weight: 600; border: none; }
 .cg-card__btn[disabled] { opacity: 0.5; }
-.cg-empty { display: block; padding: 32rpx; text-align: center; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.cg-empty { display: block; padding: 32rpx; text-align: center; font-size: 22rpx; color: $jst-text-secondary; }
 </style>

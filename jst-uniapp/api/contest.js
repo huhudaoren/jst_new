@@ -30,6 +30,14 @@ export function getContestHot(limit = 6, options = {}) {
   })
 }
 
+export function getContestRecommend(contestId, options = {}) {
+  return request({
+    url: `/jst/wx/contest/${contestId}/recommend`,
+    method: 'GET',
+    ...options
+  })
+}
+
 export function getContestCategories(options = {}) {
   return request({
     url: '/jst/wx/contest/categories',

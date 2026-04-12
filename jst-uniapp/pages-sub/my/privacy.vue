@@ -2,7 +2,7 @@
 <template>
   <view class="privacy-page">
     <view class="privacy-page__header">
-      <view class="privacy-page__back" @tap="goBack">←</view>
+      <view class="privacy-page__back" @tap="goBack"><u-icon name="arrow-left" class="privacy-page__back-icon" size="26" /></view>
       <text class="privacy-page__header-title">{{ pageTitle }}</text>
     </view>
 
@@ -58,16 +58,70 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.privacy-page { min-height: 100vh; background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
 
-.privacy-page__header { display: flex; align-items: center; padding: 24rpx; background: var(--jst-color-card-bg); }
-.privacy-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: var(--jst-color-page-bg); font-size: 30rpx; color: var(--jst-color-text); }
-.privacy-page__header-title { flex: 1; text-align: center; margin-right: 72rpx; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
+.privacy-page {
+  min-height: 100vh;
+  background: $jst-bg-page;
+}
 
-.privacy-page__content { margin: 24rpx; padding: 32rpx; border-radius: var(--jst-radius-lg); background: var(--jst-color-card-bg); box-shadow: 0 4rpx 16rpx rgba(20,30,60,0.06); }
+.privacy-page__header {
+  display: flex;
+  align-items: center;
+  padding: $jst-space-lg $jst-page-padding;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
+}
 
-.privacy-page__section-title { display: block; margin-top: 32rpx; margin-bottom: 16rpx; font-size: 32rpx; font-weight: 700; color: var(--jst-color-brand); }
-.privacy-page__section-title:first-child { margin-top: 0; }
+.privacy-page__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 22rpx;
+  background: $jst-bg-page;
+}
 
-.privacy-page__text { display: block; margin-bottom: 20rpx; font-size: 28rpx; line-height: 1.8; color: var(--jst-color-text-secondary); }
+.privacy-page__header-title {
+  flex: 1;
+  margin-right: 72rpx;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
+}
+
+.privacy-page__content {
+  margin: $jst-space-lg $jst-page-padding 0;
+  padding: $jst-space-xl;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
+}
+
+.privacy-page__section-title {
+  display: block;
+  margin-top: $jst-space-xl;
+  margin-bottom: $jst-space-md;
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-bold;
+  color: $jst-brand;
+}
+
+.privacy-page__section-title:first-child {
+  margin-top: 0;
+}
+
+.privacy-page__text {
+  display: block;
+  margin-bottom: 20rpx;
+  font-size: $jst-font-base;
+  line-height: 1.8;
+  color: $jst-text-secondary;
+}
+
+::v-deep .privacy-page__back-icon .u-icon__icon {
+  color: $jst-text-primary;
+}
 </style>

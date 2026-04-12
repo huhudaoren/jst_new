@@ -4,7 +4,7 @@
     <view class="message-page__header">
       <view class="message-page__back" @tap="goBack">←</view>
       <text class="message-page__header-title">我的消息</text>
-      <view class="message-page__read-all" @tap="handleReadAll">全部已读</view>
+      <u-button class="message-page__read-all" size="mini" plain @click="handleReadAll">全部已读</u-button>
     </view>
 
     <!-- 跳转提示 -->
@@ -30,6 +30,7 @@
     </scroll-view>
 
     <jst-loading :loading="loading" text="消息加载中..." />
+    <u-skeleton v-if="loading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <!-- 消息列表 -->
     <view v-if="filteredList.length" class="message-page__list">
@@ -182,44 +183,213 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.message-page { min-height: 100vh; padding-bottom: 60rpx; background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
 
-.message-page__header { display: flex; align-items: center; padding: 24rpx; background: var(--jst-color-card-bg); }
-.message-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: var(--jst-color-page-bg); font-size: 30rpx; color: var(--jst-color-text); }
-.message-page__header-title { flex: 1; margin-left: 16rpx; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
-.message-page__read-all { font-size: 26rpx; font-weight: 600; color: var(--jst-color-brand); }
+.message-page {
+  min-height: 100vh;
+  padding-bottom: 60rpx;
+  background: $jst-bg-page;
+}
 
-/* 公告跳转提示 */
-.message-page__notice-tip { display: flex; align-items: center; gap: 16rpx; margin: 24rpx 24rpx 0; padding: 24rpx; border-radius: var(--jst-radius-lg); background: var(--jst-color-brand-soft); }
-.message-page__notice-tip-icon { font-size: 36rpx; flex-shrink: 0; }
-.message-page__notice-tip-text { font-size: 24rpx; color: var(--jst-color-brand); line-height: 1.5; }
+.jst-page-skeleton {
+  margin: 0 $jst-page-padding $jst-space-lg;
+}
 
-/* Tabs */
-.message-page__tabs { margin-top: 24rpx; padding: 0 24rpx; }
-.message-page__tabs-inner { display: inline-flex; gap: 16rpx; }
-.message-page__tab { position: relative; padding: 12rpx 24rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-card-bg); font-size: 24rpx; color: var(--jst-color-text-secondary); white-space: nowrap; }
-.message-page__tab--active { background: var(--jst-color-brand-soft); color: var(--jst-color-brand); font-weight: 700; }
-.message-page__tab-dot { position: absolute; top: 8rpx; right: 8rpx; width: 12rpx; height: 12rpx; border-radius: 50%; background: var(--jst-color-danger); }
+.message-page__header {
+  display: flex;
+  align-items: center;
+  padding: $jst-space-lg $jst-page-padding;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
+}
 
-/* 列表 */
-.message-page__list { padding: 24rpx; }
-.message-page__group { margin-bottom: 24rpx; }
-.message-page__group-date { display: block; font-size: 24rpx; font-weight: 600; color: var(--jst-color-text-tertiary); margin-bottom: 16rpx; }
+.message-page__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 22rpx;
+  background: $jst-bg-page;
+  font-size: $jst-font-md;
+  color: $jst-text-primary;
+}
 
-.message-page__item { display: flex; gap: 20rpx; padding: 24rpx; border-radius: var(--jst-radius-lg); background: var(--jst-color-card-bg); margin-bottom: 16rpx; box-shadow: 0 2rpx 8rpx rgba(20,30,60,0.04); }
-.message-page__item--unread { border-left: 6rpx solid var(--jst-color-brand); }
+.message-page__header-title {
+  flex: 1;
+  margin-left: $jst-space-md;
+  font-size: 34rpx;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
+}
 
-.message-page__item-icon { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 20rpx; font-size: 32rpx; flex-shrink: 0; }
-.message-page__item-icon--blue { background: var(--jst-color-brand-soft); }
-.message-page__item-icon--gold { background: #FFF8E1; }
-.message-page__item-icon--purple { background: var(--jst-color-purple-soft); }
-.message-page__item-icon--teal { background: #E9FBF3; }
-.message-page__item-icon--green { background: var(--jst-color-success-soft); }
-.message-page__item-icon--gray { background: var(--jst-color-page-bg); }
+.message-page__notice-tip {
+  display: flex;
+  align-items: center;
+  gap: $jst-space-md;
+  margin: $jst-space-lg $jst-page-padding 0;
+  padding: $jst-space-lg;
+  border-radius: $jst-radius-lg;
+  background: $jst-brand-light;
+}
 
-.message-page__item-body { flex: 1; min-width: 0; }
-.message-page__item-title { display: block; font-size: 28rpx; font-weight: 600; color: var(--jst-color-text); }
-.message-page__item-content { display: block; margin-top: 8rpx; font-size: 24rpx; color: var(--jst-color-text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.message-page__item-link { display: block; margin-top: 8rpx; font-size: 24rpx; color: var(--jst-color-brand); font-weight: 500; }
-.message-page__item-time { font-size: 22rpx; color: var(--jst-color-text-tertiary); flex-shrink: 0; white-space: nowrap; }
+.message-page__notice-tip-icon {
+  flex-shrink: 0;
+  font-size: $jst-font-xl;
+}
+
+.message-page__notice-tip-text {
+  font-size: $jst-font-sm;
+  line-height: 1.5;
+  color: $jst-brand;
+}
+
+.message-page__tabs {
+  margin-top: $jst-space-lg;
+  padding: 0 $jst-page-padding;
+}
+
+.message-page__tabs-inner {
+  display: inline-flex;
+  gap: $jst-space-md;
+}
+
+.message-page__tab {
+  position: relative;
+  padding: $jst-space-sm $jst-space-lg;
+  border-radius: $jst-radius-round;
+  background: $jst-bg-card;
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
+  white-space: nowrap;
+}
+
+.message-page__tab--active {
+  background: $jst-brand-light;
+  color: $jst-brand;
+  font-weight: $jst-weight-semibold;
+}
+
+.message-page__tab-dot {
+  position: absolute;
+  top: $jst-space-xs;
+  right: $jst-space-xs;
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: $jst-radius-round;
+  background: $jst-danger;
+}
+
+.message-page__list {
+  padding: $jst-space-lg $jst-page-padding 0;
+}
+
+.message-page__group {
+  margin-bottom: $jst-space-lg;
+}
+
+.message-page__group-date {
+  display: block;
+  margin-bottom: $jst-space-md;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-placeholder;
+}
+
+.message-page__item {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: $jst-space-md;
+  padding: $jst-space-lg;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
+}
+
+.message-page__item--unread {
+  border-left: 6rpx solid $jst-brand;
+}
+
+.message-page__item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 20rpx;
+  font-size: $jst-font-lg;
+  flex-shrink: 0;
+}
+
+.message-page__item-icon--blue {
+  background: $jst-brand-light;
+}
+
+.message-page__item-icon--gold {
+  background: $jst-gold-light;
+}
+
+.message-page__item-icon--purple {
+  background: $jst-brand-light;
+}
+
+.message-page__item-icon--teal {
+  background: $jst-success-light;
+}
+
+.message-page__item-icon--green {
+  background: $jst-success-light;
+}
+
+.message-page__item-icon--gray {
+  background: $jst-bg-page;
+}
+
+.message-page__item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.message-page__item-title {
+  display: block;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
+}
+
+.message-page__item-content {
+  display: -webkit-box;
+  margin-top: $jst-space-xs;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: $jst-font-sm;
+  line-height: 1.5;
+  color: $jst-text-secondary;
+}
+
+.message-page__item-link {
+  display: block;
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-medium;
+  color: $jst-brand;
+}
+
+.message-page__item-time {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: $jst-font-xs;
+  color: $jst-text-placeholder;
+}
+
+::v-deep .message-page__read-all.u-button {
+  min-width: 138rpx;
+  height: 58rpx;
+  border-color: $jst-brand;
+  border-radius: $jst-radius-round;
+  color: $jst-brand;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-medium;
+}
 </style>

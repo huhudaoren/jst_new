@@ -1,6 +1,7 @@
 <template>
   <view class="my-enroll-page">
     <jst-loading :loading="pageLoading" text="报名记录加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="my-enroll-page__nav">
       <view class="my-enroll-page__back" @tap="handleBack"><</view>
@@ -59,16 +60,16 @@
         </view>
 
         <view class="my-enroll-page__actions">
-          <button
+          <u-button
             v-if="item.auditStatus === 'supplement'"
             class="my-enroll-page__action my-enroll-page__action--ghost"
-            @tap="goSupplement(item)"
+            @click="goSupplement(item)"
           >
             去补充
-          </button>
-          <button class="my-enroll-page__action my-enroll-page__action--primary" @tap="openDetail(item)">
+          </u-button>
+          <u-button class="my-enroll-page__action my-enroll-page__action--primary" @click="openDetail(item)">
             查看详情
-          </button>
+          </u-button>
         </view>
       </view>
     </view>
@@ -199,9 +200,15 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .my-enroll-page {
   min-height: 100vh;
-  background: #f4f7fc;
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg;
 }
 
 .my-enroll-page__nav {
@@ -209,7 +216,7 @@ export default {
   align-items: center;
   height: 96rpx;
   padding: 0 24rpx;
-  background: linear-gradient(135deg, #0c3d6b 0%, #2f7de1 100%);
+  background: linear-gradient(135deg, $jst-brand-dark 0%, $jst-brand 100%);
 }
 
 .my-enroll-page__back,
@@ -220,7 +227,7 @@ export default {
 
 .my-enroll-page__back {
   font-size: 34rpx;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .my-enroll-page__nav-title {
@@ -228,14 +235,14 @@ export default {
   text-align: center;
   font-size: 30rpx;
   font-weight: 700;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .my-enroll-page__tabs {
   display: flex;
   padding: 16rpx 12rpx 12rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 24rpx rgba(14, 58, 113, 0.05);
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .my-enroll-page__tab {
@@ -246,13 +253,13 @@ export default {
   justify-content: center;
   margin: 0 6rpx;
   border-radius: 999rpx;
-  color: #72809a;
+  color: $jst-text-secondary;
   font-size: 24rpx;
 }
 
 .my-enroll-page__tab--active {
-  background: #eef4ff;
-  color: #2f7de1;
+  background: $jst-brand-light;
+  color: $jst-brand;
   font-weight: 700;
 }
 
@@ -263,8 +270,8 @@ export default {
 .my-enroll-page__card {
   margin-bottom: 20rpx;
   border-radius: 28rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 28rpx rgba(14, 58, 113, 0.06);
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
   overflow: hidden;
 }
 
@@ -286,7 +293,7 @@ export default {
   font-size: 30rpx;
   font-weight: 700;
   line-height: 1.5;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .my-enroll-page__card-subtitle {
@@ -294,7 +301,7 @@ export default {
   margin-top: 10rpx;
   font-size: 22rpx;
   line-height: 1.6;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .my-enroll-page__banner {
@@ -306,13 +313,13 @@ export default {
 }
 
 .my-enroll-page__banner--danger {
-  background: #fff1f1;
-  color: #eb5757;
+  background: $jst-danger-light;
+  color: $jst-danger;
 }
 
 .my-enroll-page__banner--warning {
-  background: #fff6e8;
-  color: #f59a23;
+  background: $jst-warning-light;
+  color: $jst-warning;
 }
 
 .my-enroll-page__meta {
@@ -333,11 +340,11 @@ export default {
 }
 
 .my-enroll-page__meta-key {
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .my-enroll-page__meta-value {
-  color: #1f2937;
+  color: $jst-text-primary;
   text-align: right;
 }
 
@@ -357,13 +364,18 @@ export default {
 }
 
 .my-enroll-page__action--ghost {
-  border: 2rpx solid #d6e4fb;
-  background: #ffffff;
-  color: #2f7de1;
+  border: 2rpx solid $jst-border;
+  background: $jst-bg-card;
+  color: $jst-brand;
 }
 
 .my-enroll-page__action--primary {
-  background: #2f7de1;
-  color: #ffffff;
+  background: $jst-brand;
+  color: $jst-text-inverse;
+}
+
+::v-deep .my-enroll-page__action.u-button {
+  border: none;
+  min-height: 76rpx;
 }
 </style>

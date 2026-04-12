@@ -51,7 +51,11 @@ export function normalizeContestCard(contest = {}) {
     supportAppointment: contest.supportAppointment,
     certRuleJson: contest.certRuleJson || '',
     scoreRuleJson: contest.scoreRuleJson || '',
-    aftersaleDays: contest.aftersaleDays
+    aftersaleDays: contest.aftersaleDays,
+    scheduleJson: contest.scheduleJson || '',
+    awardsJson: contest.awardsJson || '',
+    faqJson: contest.faqJson || '',
+    recommendTags: contest.recommendTags || ''
   }
 }
 
@@ -94,7 +98,7 @@ export function formatContestDate(value) {
     return '--'
   }
 
-  const date = new Date(value)
+  const date = new Date(String(value).replace(/ /g, 'T'))
   if (Number.isNaN(date.getTime())) {
     if (typeof value === 'string') {
       return value.slice(0, 10)

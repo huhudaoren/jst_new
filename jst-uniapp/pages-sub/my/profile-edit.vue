@@ -1,11 +1,12 @@
 <template>
   <view class="profile-edit-page">
     <jst-loading :loading="pageLoading" text="资料加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="profile-edit-page__header">
       <view class="profile-edit-page__back" @tap="handleBack">‹</view>
       <text class="profile-edit-page__title">编辑资料</text>
-      <text class="profile-edit-page__save" @tap="submitProfile">保存</text>
+      <u-button class="profile-edit-page__save" size="mini" shape="circle" plain @click="submitProfile">保存</u-button>
     </view>
 
     <view class="profile-edit-page__avatar-card">
@@ -50,6 +51,7 @@
         <view class="profile-edit-page__row profile-edit-page__row--picker">
           <text class="profile-edit-page__label">性别</text>
           <text class="profile-edit-page__value">{{ getGenderText(form.gender) }}</text>
+          <u-icon name="arrow-right" class="profile-edit-page__arrow" size="22" />
         </view>
       </picker>
 
@@ -57,13 +59,14 @@
         <view class="profile-edit-page__row profile-edit-page__row--picker">
           <text class="profile-edit-page__label">出生日期</text>
           <text class="profile-edit-page__value">{{ form.birthday || '请选择出生日期' }}</text>
+          <u-icon name="arrow-right" class="profile-edit-page__arrow" size="22" />
         </view>
       </picker>
 
       <view class="profile-edit-page__row profile-edit-page__row--readonly">
         <text class="profile-edit-page__label">手机号</text>
         <text class="profile-edit-page__value">{{ profile.mobileMasked || '未绑定手机号' }}</text>
-        <text class="profile-edit-page__badge">不可修改</text>
+        <u-tag class="profile-edit-page__badge" text="不可修改" type="info" size="mini" plain />
       </view>
     </view>
 
@@ -107,7 +110,7 @@
     </view>
 
     <view class="profile-edit-page__bottom">
-      <button class="profile-edit-page__submit" :loading="submitting" @tap="submitProfile">保存资料</button>
+      <u-button class="profile-edit-page__submit" :loading="submitting" @click="submitProfile">保存资料</u-button>
     </view>
   </view>
 </template>
@@ -253,19 +256,25 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .profile-edit-page {
   min-height: 100vh;
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
-  background: var(--jst-color-page-bg);
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg;
 }
 
 .profile-edit-page__header {
   display: flex;
   align-items: center;
   height: 96rpx;
-  padding: 0 24rpx;
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-card);
+  padding: 0 $jst-page-padding;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .profile-edit-page__back {
@@ -274,24 +283,18 @@ export default {
   justify-content: center;
   width: 64rpx;
   height: 64rpx;
-  border-radius: var(--jst-radius-sm);
-  background: var(--jst-color-page-bg);
-  font-size: 36rpx;
-  color: var(--jst-color-text-secondary);
+  border-radius: $jst-radius-sm;
+  background: $jst-bg-page;
+  font-size: $jst-font-xl;
+  color: $jst-text-secondary;
 }
 
 .profile-edit-page__title {
   flex: 1;
-  margin-left: 16rpx;
-  font-size: 32rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
-}
-
-.profile-edit-page__save {
-  font-size: 26rpx;
-  font-weight: 700;
-  color: var(--jst-color-brand);
+  margin-left: $jst-space-md;
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .profile-edit-page__avatar-card {
@@ -301,7 +304,7 @@ export default {
   justify-content: center;
   margin-top: 20rpx;
   padding: 36rpx 0;
-  background: var(--jst-color-card-bg);
+  background: $jst-bg-card;
 }
 
 .profile-edit-page__avatar {
@@ -310,9 +313,9 @@ export default {
   justify-content: center;
   width: 128rpx;
   height: 128rpx;
-  border-radius: 50%;
+  border-radius: $jst-radius-round;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--jst-color-primary) 0%, var(--jst-color-primary-light) 100%);
+  background: $jst-brand-gradient;
 }
 
 .profile-edit-page__avatar-image {
@@ -322,35 +325,36 @@ export default {
 
 .profile-edit-page__avatar-text {
   font-size: 50rpx;
-  font-weight: 700;
-  color: var(--jst-color-card-bg);
+  font-weight: $jst-weight-bold;
+  color: $jst-text-inverse;
 }
 
 .profile-edit-page__avatar-hint {
-  margin-top: 16rpx;
-  font-size: 22rpx;
-  color: var(--jst-color-brand);
+  margin-top: $jst-space-md;
+  font-size: $jst-font-sm;
+  color: $jst-brand;
 }
 
 .profile-edit-page__section {
   margin-top: 20rpx;
-  padding: 0 24rpx 8rpx;
-  background: var(--jst-color-card-bg);
+  padding: 0 $jst-page-padding $jst-space-xs;
+  background: $jst-bg-card;
 }
 
 .profile-edit-page__section-title {
   display: block;
-  padding: 24rpx 0 12rpx;
-  font-size: 24rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
+  padding: $jst-space-lg 0 $jst-space-sm;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
 }
 
 .profile-edit-page__row {
   display: flex;
   align-items: center;
   min-height: 88rpx;
-  border-bottom: 2rpx solid var(--jst-color-border);
+  gap: $jst-space-sm;
+  border-bottom: 2rpx solid $jst-border;
 }
 
 .profile-edit-page__row:last-child {
@@ -359,67 +363,57 @@ export default {
 
 .profile-edit-page__label {
   width: 180rpx;
-  font-size: 24rpx;
-  color: var(--jst-color-text-secondary);
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
 }
 
 .profile-edit-page__input,
 .profile-edit-page__value {
   flex: 1;
   text-align: right;
-  font-size: 24rpx;
-  color: var(--jst-color-text);
+  font-size: $jst-font-sm;
+  color: $jst-text-primary;
 }
 
 .profile-edit-page__placeholder {
-  color: var(--jst-color-text-tertiary);
-}
-
-.profile-edit-page__row--picker::after {
-  content: '>';
-  margin-left: 12rpx;
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-placeholder;
 }
 
 .profile-edit-page__row--readonly {
-  gap: 12rpx;
+  gap: $jst-space-sm;
 }
 
-.profile-edit-page__badge {
-  padding: 4rpx 12rpx;
-  border-radius: var(--jst-radius-full);
-  background: var(--jst-color-gray-soft);
-  font-size: 18rpx;
-  color: var(--jst-color-text-tertiary);
+.profile-edit-page__arrow {
+  flex-shrink: 0;
 }
 
 .profile-edit-page__hint {
   display: block;
   padding: 12rpx 0 8rpx;
-  font-size: 20rpx;
-  color: var(--jst-color-text-tertiary);
+  font-size: $jst-font-xs;
+  color: $jst-text-placeholder;
 }
 
 .profile-edit-page__notice {
-  margin: 20rpx 24rpx 0;
-  padding: 20rpx 24rpx;
-  border-radius: var(--jst-radius-md);
-  background: var(--jst-color-primary-soft);
+  margin: 20rpx $jst-page-padding 0;
+  padding: 20rpx $jst-page-padding;
+  border-radius: $jst-radius-md;
+  background: $jst-brand-light;
 }
 
 .profile-edit-page__notice-title {
   display: block;
-  font-size: 24rpx;
-  font-weight: 700;
-  color: var(--jst-color-brand);
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
+  color: $jst-brand;
 }
 
 .profile-edit-page__notice-text {
   display: block;
   margin-top: 10rpx;
-  font-size: 22rpx;
+  font-size: $jst-font-sm;
   line-height: 1.7;
-  color: var(--jst-color-text-secondary);
+  color: $jst-text-secondary;
 }
 
 .profile-edit-page__bottom {
@@ -427,17 +421,39 @@ export default {
   right: 0;
   bottom: 0;
   left: 0;
-  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 -8rpx 18rpx rgba(15, 52, 96, 0.08);
+  padding: 16rpx $jst-page-padding calc(16rpx + env(safe-area-inset-bottom));
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .profile-edit-page__submit {
   height: 88rpx;
-  border-radius: var(--jst-radius-md);
-  background: linear-gradient(135deg, var(--jst-color-primary) 0%, var(--jst-color-primary-light) 100%);
-  color: var(--jst-color-card-bg);
-  font-size: 28rpx;
-  font-weight: 700;
+  border-radius: $jst-radius-md;
+  background: $jst-brand-gradient;
+  color: $jst-text-inverse;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+}
+
+::v-deep .profile-edit-page__arrow .u-icon__icon {
+  color: $jst-text-placeholder !important;
+}
+
+::v-deep .profile-edit-page__save.u-button {
+  min-width: 128rpx;
+  height: 58rpx;
+  padding: 0 $jst-space-md;
+  border-color: $jst-brand;
+  color: $jst-brand;
+}
+
+::v-deep .profile-edit-page__submit.u-button {
+  min-height: 88rpx;
+  border: none;
+}
+
+::v-deep .profile-edit-page__badge .u-tag {
+  border-color: $jst-info;
+  color: $jst-info;
 }
 </style>

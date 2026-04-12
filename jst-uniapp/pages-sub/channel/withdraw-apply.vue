@@ -4,7 +4,7 @@
                POST /jst/wx/channel/withdraw/apply -->
 <template>
   <view class="apply-page">
-    <view class="apply-hero">
+    <view class="apply-hero" :style="{ paddingTop: navPaddingTop }">
       <text class="apply-hero__label">可提现余额</text>
       <text class="apply-hero__amount">¥{{ formatAmount(totalWithdrawable) }}</text>
       <text class="apply-hero__hint">勾选本次需提现的返点条目，后端将按勾选项金额校验</text>
@@ -16,7 +16,7 @@
         <text class="apply-section__action" @tap="toggleAll">{{ isAllSelected ? '取消全选' : '全选' }}</text>
       </view>
 
-      <view v-if="!ledgerList.length" class="apply-empty">暂无可提现返点</view>
+      <u-empty v-if="!ledgerList.length" mode="data" text="暂无可提现返点"></u-empty>
       <view
         v-for="item in ledgerList"
         :key="item.ledgerId"
@@ -72,9 +72,7 @@
         <text class="apply-footer__label">本次申请</text>
         <text class="apply-footer__amount">¥{{ formatAmount(expectedAmount) }}</text>
       </view>
-      <button class="apply-footer__btn" :disabled="submitting || !canSubmit" @tap="onSubmit">
-        {{ submitting ? '提交中...' : '提交申请' }}
-      </button>
+      <u-button class="apply-footer__btn" type="primary" :loading="submitting" :disabled="submitting || !canSubmit" shape="circle" @click="onSubmit">提交申请</u-button>
     </view>
   </view>
 </template>
@@ -85,6 +83,7 @@ import { getRebateLedgerList, applyWithdraw, getRebateSummary } from '@/api/chan
 export default {
   data() {
     return {
+      skeletonShow: true, // [visual-effect]
       ledgerList: [],
       selectedSet: {}, // { ledgerId: true }
       preselectIds: [], // 上个页面传入的预选
@@ -198,36 +197,35 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.apply-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: #F7F8FA; }
-.apply-hero { padding: 72rpx 32rpx 56rpx; background: linear-gradient(135deg, #1A237E, #1058A0); color: #fff; }
-.apply-hero__label { display: block; font-size: 24rpx; color: var(--jst-color-white-76); }
-.apply-hero__amount { display: block; margin-top: 8rpx; font-size: 64rpx; font-weight: 800; color: #FFD54F; }
-.apply-hero__hint { display: block; margin-top: 16rpx; font-size: 22rpx; color: var(--jst-color-white-72); }
+@import '@/styles/design-tokens.scss';
 
-.apply-section { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
-.apply-section__title { display: flex; align-items: center; justify-content: space-between; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); margin-bottom: 16rpx; }
-.apply-section__action { font-size: 24rpx; color: var(--jst-color-brand); font-weight: 500; }
+.apply-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
+.apply-hero { padding: 72rpx 32rpx 56rpx; background: linear-gradient(135deg, $jst-indigo, $jst-indigo-light); color: $jst-text-inverse; }
+.apply-hero__label { display: block; font-size: 24rpx; color: rgba(255, 255, 255, 0.76); }
+.apply-hero__amount { display: block; margin-top: 8rpx; font-size: 64rpx; font-weight: 600; color: $jst-gold; }
+.apply-hero__hint { display: block; margin-top: 16rpx; font-size: 22rpx; color: rgba(255, 255, 255, 0.72); }
 
-.apply-empty { padding: 40rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.apply-section { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-md; box-shadow: $jst-shadow-sm; }
+.apply-section__title { display: flex; align-items: center; justify-content: space-between; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 16rpx; }
+.apply-section__action { font-size: 24rpx; color: $jst-brand; font-weight: 500; }
 
-.apply-item { display: flex; align-items: center; gap: 20rpx; padding: 24rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
+.apply-item { display: flex; align-items: center; gap: 20rpx; padding: 24rpx 0; border-bottom: 2rpx solid $jst-border; }
 .apply-item:last-child { border-bottom: none; }
-.apply-item__check { width: 40rpx; height: 40rpx; border-radius: 50%; border: 2rpx solid var(--jst-color-border); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 26rpx; flex-shrink: 0; }
-.apply-item--checked .apply-item__check { background: var(--jst-color-brand); border-color: var(--jst-color-brand); }
+.apply-item__check { width: 40rpx; height: 40rpx; border-radius: 50%; border: 2rpx solid $jst-border; display: flex; align-items: center; justify-content: center; color: $jst-text-inverse; font-size: 26rpx; flex-shrink: 0; }
+.apply-item--checked .apply-item__check { background: $jst-brand; border-color: $jst-brand; }
 .apply-item__body { flex: 1; min-width: 0; }
-.apply-item__title { display: block; font-size: 26rpx; font-weight: 700; color: var(--jst-color-text); }
-.apply-item__sub { display: block; margin-top: 4rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.apply-item__amount { font-size: 30rpx; font-weight: 800; color: #F5A623; }
+.apply-item__title { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; }
+.apply-item__sub { display: block; margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; }
+.apply-item__amount { font-size: 30rpx; font-weight: 600; color: $jst-warning; }
 
-.apply-field { display: flex; align-items: center; padding: 20rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
+.apply-field { display: flex; align-items: center; padding: 20rpx 0; border-bottom: 2rpx solid $jst-border; }
 .apply-field:last-child { border-bottom: none; }
-.apply-field__label { width: 160rpx; font-size: 26rpx; color: var(--jst-color-text-secondary); }
-.apply-field__input { flex: 1; font-size: 26rpx; color: var(--jst-color-text); }
+.apply-field__label { width: 160rpx; font-size: 26rpx; color: $jst-text-regular; }
+.apply-field__input { flex: 1; font-size: 26rpx; color: $jst-text-primary; }
 
-.apply-footer { position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 20rpx; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: var(--jst-color-card-bg); box-shadow: 0 -8rpx 24rpx rgba(16,88,160,0.08); }
+.apply-footer { position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 20rpx; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: $jst-bg-card; box-shadow: $jst-shadow-sm; }
 .apply-footer__info { flex: 1; }
-.apply-footer__label { display: block; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.apply-footer__amount { display: block; font-size: 40rpx; font-weight: 800; color: #F5A623; }
-.apply-footer__btn { flex: 1; height: 88rpx; line-height: 88rpx; border-radius: var(--jst-radius-md); background: linear-gradient(135deg, #1A237E, #3949AB); color: #fff; font-size: 30rpx; font-weight: 800; border: none; }
-.apply-footer__btn[disabled] { opacity: 0.5; }
+.apply-footer__label { display: block; font-size: 22rpx; color: $jst-text-secondary; }
+.apply-footer__amount { display: block; font-size: 40rpx; font-weight: 600; color: $jst-warning; }
+::v-deep .apply-footer__btn.u-button { flex: 1; height: 88rpx; font-size: $jst-font-md; font-weight: $jst-weight-semibold; background: linear-gradient(135deg, $jst-indigo, $jst-indigo-light); border: none; }
 </style>

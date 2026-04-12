@@ -7,7 +7,7 @@
 <template>
   <view class="st-page">
     <!-- Tab 栏 -->
-    <scroll-view class="st-tabs" scroll-x>
+    <scroll-view class="st-tabs" scroll-x :style="{ paddingTop: navPaddingTop }">
       <view v-for="tab in tabs" :key="tab.value" :class="['st-tabs__item', activeTab === tab.value && 'st-tabs__item--active']" @tap="onTabChange(tab.value)">{{ tab.label }}</view>
     </scroll-view>
 
@@ -46,7 +46,7 @@
         <view class="st-form__tip">合同/发票功能灰标（F-2 批次）</view>
       </view>
 
-      <button class="st-form__submit" :disabled="applySubmitting || !canApply" @tap="onApply">{{ applySubmitting ? '提交中...' : '提交提现申请' }}</button>
+      <u-button class="st-form__submit" type="primary" :loading="applySubmitting" :disabled="applySubmitting || !canApply" shape="circle" @click="onApply">提交提现申请</u-button>
     </view>
 
     <!-- 结算单列表 -->
@@ -54,16 +54,20 @@
       <view v-for="item in withdrawList" :key="item.settlementId" class="st-card" @tap="goDetail(item.settlementId)">
         <view class="st-card__head">
           <text class="st-card__no">{{ item.settlementNo || '--' }}</text>
-          <text :class="['st-card__status', 'st-card__status--' + item.status]">{{ statusLabel(item.status) }}</text>
+          <u-tag
+            :text="statusLabel(item.status)"
+            :type="item.status === 'paid' ? 'success' : ((item.status === 'pending' || item.status === 'in_review') ? 'warning' : 'info')"
+            size="mini"
+            shape="circle"
+          ></u-tag>
         </view>
         <view class="st-card__body">
           <text class="st-card__amount">¥{{ item.applyAmount || '0.00' }}</text>
           <text class="st-card__time">{{ formatTime(item.applyTime) }}</text>
         </view>
       </view>
-      <view v-if="!withdrawList.length && !wLoading" class="st-empty">暂无结算单</view>
-      <view v-if="wLoading" class="st-empty">加载中...</view>
-      <view v-if="!wHasMore && withdrawList.length" class="st-empty st-empty--end">没有更多了</view>
+      <u-empty v-if="!withdrawList.length && !wLoading" mode="data" text="暂无结算单"></u-empty>
+      <u-loadmore v-if="withdrawList.length || wLoading" :status="wLoading ? 'loading' : (wHasMore ? 'loadmore' : 'nomore')"></u-loadmore>
     </view>
   </view>
 </template>
@@ -85,6 +89,7 @@ const STATUS_LABEL = { pending: '待审核', in_review: '审核中', paid: '已�
 export default {
   data() {
     return {
+      skeletonShow: true, // [visual-effect]
       tabs: TABS, activeTab: '', showApplyForm: false,
       withdrawList: [], wPageNum: 1, wPageSize: 10, wTotal: 0, wLoading: false, wHasMore: true,
       ledgerList: [], selectedSet: {},
@@ -150,47 +155,42 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.st-page { min-height: 100vh; background: #F7F8FA; padding-bottom: 48rpx; }
-.st-tabs { white-space: nowrap; background: var(--jst-color-card-bg); border-bottom: 2rpx solid var(--jst-color-border); }
-.st-tabs__item { display: inline-block; padding: 0 28rpx; height: 88rpx; line-height: 88rpx; font-size: 26rpx; color: var(--jst-color-text-tertiary); position: relative; }
-.st-tabs__item--active { color: var(--jst-color-brand); font-weight: 700; }
-.st-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 20rpx; right: 20rpx; height: 4rpx; background: var(--jst-color-brand); border-radius: 2rpx; }
+@import '@/styles/design-tokens.scss';
 
-.st-create { display: flex; align-items: center; gap: 12rpx; padding: 24rpx 32rpx; margin: 20rpx 32rpx 0; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: 0 2rpx 8rpx rgba(20,30,60,0.04); }
-.st-create__icon { font-size: 24rpx; color: var(--jst-color-brand); }
-.st-create__text { font-size: 28rpx; font-weight: 700; color: var(--jst-color-brand); }
+.st-page { min-height: 100vh; background: $jst-bg-page; padding-bottom: $jst-space-xxl; }
+.st-tabs { white-space: nowrap; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
+.st-tabs__item { display: inline-block; padding: 0 28rpx; height: 88rpx; line-height: 88rpx; font-size: 26rpx; color: $jst-text-secondary; position: relative; }
+.st-tabs__item--active { color: $jst-brand; font-weight: 600; }
+.st-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 20rpx; right: 20rpx; height: 4rpx; background: $jst-brand; border-radius: 2rpx; }
+
+.st-create { display: flex; align-items: center; gap: 12rpx; padding: 24rpx 32rpx; margin: 20rpx 32rpx 0; background: $jst-bg-card; border-radius: $jst-radius-md; box-shadow: $jst-shadow-sm; }
+.st-create__icon { font-size: 24rpx; color: $jst-brand; }
+.st-create__text { font-size: 28rpx; font-weight: 600; color: $jst-brand; }
 
 .st-form { margin: 16rpx 32rpx 0; }
-.st-form__section { padding: 24rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: 0 2rpx 8rpx rgba(20,30,60,0.04); margin-bottom: 16rpx; }
-.st-form__title { display: block; font-size: 26rpx; font-weight: 700; color: var(--jst-color-text); margin-bottom: 16rpx; }
-.st-form__ledger { display: flex; align-items: center; gap: 16rpx; padding: 20rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
+.st-form__section { padding: 24rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-md; box-shadow: $jst-shadow-sm; margin-bottom: 16rpx; }
+.st-form__title { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 16rpx; }
+.st-form__ledger { display: flex; align-items: center; gap: 16rpx; padding: 20rpx 0; border-bottom: 2rpx solid $jst-border; }
 .st-form__ledger:last-child { border-bottom: none; }
-.st-form__check { width: 36rpx; height: 36rpx; border-radius: 50%; border: 2rpx solid var(--jst-color-border); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24rpx; }
-.st-form__ledger--on .st-form__check { background: var(--jst-color-brand); border-color: var(--jst-color-brand); }
+.st-form__check { width: 36rpx; height: 36rpx; border-radius: 50%; border: 2rpx solid $jst-border; display: flex; align-items: center; justify-content: center; color: $jst-text-inverse; font-size: 24rpx; }
+.st-form__ledger--on .st-form__check { background: $jst-brand; border-color: $jst-brand; }
 .st-form__ledger-body { flex: 1; min-width: 0; }
-.st-form__ledger-name { display: block; font-size: 26rpx; font-weight: 600; color: var(--jst-color-text); }
-.st-form__ledger-sub { display: block; margin-top: 4rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.st-form__ledger-amount { font-size: 28rpx; font-weight: 800; color: #F5A623; }
-.st-form__empty { padding: 32rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.st-form__field { display: flex; align-items: center; padding: 20rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
+.st-form__ledger-name { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; }
+.st-form__ledger-sub { display: block; margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; }
+.st-form__ledger-amount { font-size: 28rpx; font-weight: 600; color: $jst-warning; }
+.st-form__empty { padding: 32rpx; text-align: center; font-size: 24rpx; color: $jst-text-secondary; }
+.st-form__field { display: flex; align-items: center; padding: 20rpx 0; border-bottom: 2rpx solid $jst-border; }
 .st-form__field:last-of-type { border-bottom: none; }
-.st-form__label { width: 140rpx; font-size: 26rpx; color: var(--jst-color-text-secondary); }
-.st-form__input { flex: 1; font-size: 26rpx; color: var(--jst-color-text); }
-.st-form__tip { margin-top: 12rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.st-form__submit { margin-top: 16rpx; height: 88rpx; line-height: 88rpx; border-radius: var(--jst-radius-md); background: linear-gradient(135deg, #1A237E, #3949AB); color: #fff; font-size: 30rpx; font-weight: 800; border: none; }
-.st-form__submit[disabled] { opacity: 0.5; }
+.st-form__label { width: 140rpx; font-size: 26rpx; color: $jst-text-regular; }
+.st-form__input { flex: 1; font-size: 26rpx; color: $jst-text-primary; }
+.st-form__tip { margin-top: 12rpx; font-size: 22rpx; color: $jst-text-secondary; }
+::v-deep .st-form__submit.u-button { margin-top: 16rpx; height: 88rpx; font-size: $jst-font-md; font-weight: $jst-weight-semibold; background: linear-gradient(135deg, $jst-indigo, $jst-indigo-light); border: none; }
 
 .st-list { padding: 8rpx 0 32rpx; }
-.st-card { margin: 20rpx 32rpx 0; padding: 28rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: 0 2rpx 8rpx rgba(20,30,60,0.04); }
+.st-card { margin: 20rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-md; box-shadow: $jst-shadow-sm; }
 .st-card__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12rpx; }
-.st-card__no { font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.st-card__status { padding: 4rpx 16rpx; border-radius: var(--jst-radius-full); font-size: 22rpx; background: var(--jst-color-brand-soft); color: var(--jst-color-brand); }
-.st-card__status--pending, .st-card__status--in_review { background: var(--jst-color-warning-soft); color: var(--jst-color-warning); }
-.st-card__status--paid { background: var(--jst-color-success-soft); color: var(--jst-color-success); }
-.st-card__status--rejected, .st-card__status--cancelled { background: var(--jst-color-gray-soft); color: var(--jst-color-text-tertiary); }
+.st-card__no { font-size: 24rpx; color: $jst-text-secondary; }
 .st-card__body { display: flex; justify-content: space-between; align-items: flex-end; }
-.st-card__amount { font-size: 36rpx; font-weight: 800; color: #F5A623; }
-.st-card__time { font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.st-empty { padding: 60rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.st-empty--end { padding: 40rpx; }
+.st-card__amount { font-size: 36rpx; font-weight: 600; color: $jst-warning; }
+.st-card__time { font-size: 22rpx; color: $jst-text-secondary; }
 </style>

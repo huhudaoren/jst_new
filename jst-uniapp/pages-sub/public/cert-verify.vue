@@ -1,7 +1,7 @@
 <!-- 中文注释: 证书公开验真页；对应原型 小程序原型图/cert-verify.html；对应接口 GET /jst/public/cert/verify -->
 <template>
   <view class="cert-verify-page">
-    <view class="cert-verify-page__header">
+    <view class="cert-verify-page__header" :style="{ paddingTop: navPaddingTop }">
       <view class="cert-verify-page__back" @tap="goBack">←</view>
       <text class="cert-verify-page__header-title">证书验真结果</text>
     </view>
@@ -48,7 +48,7 @@
         </view>
         <view class="cert-verify-page__detail-row">
           <text class="cert-verify-page__detail-key">验真状态</text>
-          <text class="cert-verify-page__detail-val" style="color: var(--jst-color-success); font-weight: 700;">真实有效</text>
+          <text class="cert-verify-page__detail-val" style="color: $jst-success; font-weight: 600;">真实有效</text>
         </view>
       </view>
     </view>
@@ -129,40 +129,41 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.cert-verify-page { min-height: 100vh; padding-bottom: 60rpx; background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
+.cert-verify-page { min-height: 100vh; padding-bottom: 60rpx; background: #F7F8FA; }
 
-.cert-verify-page__header { display: flex; align-items: center; padding: 24rpx; background: var(--jst-color-card-bg); }
-.cert-verify-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: var(--jst-color-page-bg); font-size: 30rpx; color: var(--jst-color-text); }
-.cert-verify-page__header-title { flex: 1; text-align: center; margin-right: 72rpx; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
+.cert-verify-page__header { display: flex; align-items: center; padding: 24rpx; background: $jst-bg-card; }
+.cert-verify-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: #F7F8FA; font-size: 30rpx; color: $jst-text-primary; }
+.cert-verify-page__header-title { flex: 1; text-align: center; margin-right: 72rpx; font-size: 34rpx; font-weight: 600; color: $jst-text-primary; }
 
 /* 验真成功 */
 .cert-verify-page__result { margin: 24rpx; text-align: center; }
 .cert-verify-page__result-icon { display: block; font-size: 80rpx; margin-bottom: 16rpx; }
-.cert-verify-page__result-title { display: block; font-size: 36rpx; font-weight: 800; color: var(--jst-color-success); }
-.cert-verify-page__result-desc { display: block; margin-top: 12rpx; font-size: 26rpx; color: var(--jst-color-text-secondary); }
+.cert-verify-page__result-title { display: block; font-size: 36rpx; font-weight: 600; color: $jst-success; }
+.cert-verify-page__result-desc { display: block; margin-top: 12rpx; font-size: 26rpx; color: $jst-text-regular; }
 
 /* 详情卡 */
-.cert-verify-page__detail-card { margin-top: 24rpx; padding: 24rpx; border-radius: var(--jst-radius-lg); background: var(--jst-color-card-bg); box-shadow: 0 4rpx 16rpx rgba(20,30,60,0.06); text-align: left; }
-.cert-verify-page__detail-section { display: block; font-size: 26rpx; font-weight: 700; color: var(--jst-color-text); margin-bottom: 16rpx; padding-bottom: 12rpx; border-bottom: 2rpx solid var(--jst-color-border); }
+.cert-verify-page__detail-card { margin-top: 24rpx; padding: 24rpx; border-radius: 32rpx; background: $jst-bg-card; box-shadow: 0 4rpx 16rpx rgba(20,30,60,0.06); text-align: left; }
+.cert-verify-page__detail-section { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 16rpx; padding-bottom: 12rpx; border-bottom: 2rpx solid $jst-border; }
 .cert-verify-page__detail-row { display: flex; justify-content: space-between; padding: 12rpx 0; font-size: 26rpx; }
-.cert-verify-page__detail-key { color: var(--jst-color-text-tertiary); flex-shrink: 0; width: 160rpx; }
-.cert-verify-page__detail-val { color: var(--jst-color-text); font-weight: 500; text-align: right; flex: 1; }
+.cert-verify-page__detail-key { color: $jst-text-secondary; flex-shrink: 0; width: 160rpx; }
+.cert-verify-page__detail-val { color: $jst-text-primary; font-weight: 500; text-align: right; flex: 1; }
 
 /* 未找到 */
 .cert-verify-page__no-result { margin: 48rpx 24rpx; text-align: center; }
 .cert-verify-page__no-result-icon { display: block; font-size: 80rpx; margin-bottom: 16rpx; }
-.cert-verify-page__no-result-title { display: block; font-size: 32rpx; font-weight: 700; color: var(--jst-color-danger); }
-.cert-verify-page__no-result-desc { display: block; margin-top: 12rpx; font-size: 26rpx; color: var(--jst-color-text-secondary); }
+.cert-verify-page__no-result-title { display: block; font-size: 32rpx; font-weight: 600; color: $jst-danger; }
+.cert-verify-page__no-result-desc { display: block; margin-top: 12rpx; font-size: 26rpx; color: $jst-text-regular; }
 
 /* 手动查询 */
-.cert-verify-page__manual { margin: 24rpx; padding: 28rpx; border-radius: var(--jst-radius-lg); background: var(--jst-color-success-soft); border: 2rpx solid rgba(39,174,96,0.2); }
-.cert-verify-page__manual-title { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-success); margin-bottom: 12rpx; }
-.cert-verify-page__manual-desc { display: block; font-size: 24rpx; color: var(--jst-color-text-secondary); line-height: 1.6; margin-bottom: 24rpx; }
-.cert-verify-page__manual-label { display: block; font-size: 26rpx; font-weight: 600; color: var(--jst-color-text); margin-bottom: 12rpx; }
+.cert-verify-page__manual { margin: 24rpx; padding: 28rpx; border-radius: 32rpx; background: $jst-success-light; border: 2rpx solid rgba(39,174,96,0.2); }
+.cert-verify-page__manual-title { display: block; font-size: 28rpx; font-weight: 600; color: $jst-success; margin-bottom: 12rpx; }
+.cert-verify-page__manual-desc { display: block; font-size: 24rpx; color: $jst-text-regular; line-height: 1.6; margin-bottom: 24rpx; }
+.cert-verify-page__manual-label { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 12rpx; }
 .cert-verify-page__manual-row { display: flex; gap: 16rpx; }
-.cert-verify-page__manual-input { flex: 1; height: 88rpx; padding: 0 24rpx; border-radius: var(--jst-radius-md); background: var(--jst-color-card-bg); border: 2rpx solid var(--jst-color-border); font-size: 28rpx; }
-.cert-verify-page__manual-btn { display: flex; align-items: center; justify-content: center; height: 88rpx; padding: 0 32rpx; border-radius: var(--jst-radius-md); background: var(--jst-color-success); color: #fff; font-size: 28rpx; font-weight: 700; flex-shrink: 0; }
+.cert-verify-page__manual-input { flex: 1; height: 88rpx; padding: 0 24rpx; border-radius: $jst-radius-xl; background: $jst-bg-card; border: 2rpx solid $jst-border; font-size: 28rpx; }
+.cert-verify-page__manual-btn { display: flex; align-items: center; justify-content: center; height: 88rpx; padding: 0 32rpx; border-radius: $jst-radius-xl; background: $jst-success; color: #fff; font-size: 28rpx; font-weight: 600; flex-shrink: 0; }
 
 /* 返回首页 */
-.cert-verify-page__footer-btn { margin: 24rpx; height: 88rpx; display: flex; align-items: center; justify-content: center; border-radius: var(--jst-radius-md); border: 2rpx solid var(--jst-color-border); font-size: 28rpx; font-weight: 600; color: var(--jst-color-text-secondary); }
+.cert-verify-page__footer-btn { margin: 24rpx; height: 88rpx; display: flex; align-items: center; justify-content: center; border-radius: $jst-radius-xl; border: 2rpx solid $jst-border; font-size: 28rpx; font-weight: 600; color: $jst-text-regular; }
 </style>

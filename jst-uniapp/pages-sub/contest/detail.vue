@@ -2,6 +2,7 @@
 <template>
   <view class="contest-detail-page">
     <jst-loading :loading="pageLoading" text="赛事详情加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="contest-detail-page__nav">
       <view class="contest-detail-page__back" @tap="handleBack">←</view>
@@ -25,7 +26,7 @@
       <view class="contest-detail-page__content">
         <view class="contest-detail-page__summary">
           <view class="contest-detail-page__summary-tags">
-            <text v-if="detail.category" class="contest-detail-page__category">{{ detail.category }}</text>
+            <u-tag v-if="detail.category" :text="detail.category" type="primary" plain shape="circle" size="mini" />
             <jst-status-badge :status="detail.status" :enroll-open="detail.enrollOpen" />
           </view>
 
@@ -89,19 +90,19 @@
         </view>
 
         <view class="contest-detail-page__cta-actions">
-          <button
+          <u-button
             v-if="showAppointmentEntry"
             class="contest-detail-page__cta-secondary"
-            @tap="handleAppointmentTap"
-          >我要预约</button>
-          <button
+            @click="handleAppointmentTap"
+          >我要预约</u-button>
+          <u-button
             class="contest-detail-page__cta-button"
             :class="{ 'contest-detail-page__cta-button--disabled': enrollAction.disabled }"
             :disabled="enrollAction.disabled"
-            @tap="handleEnrollTap"
+            @click="handleEnrollTap"
           >
             {{ enrollAction.text }}
-          </button>
+          </u-button>
         </view>
       </view>
     </template>
@@ -227,10 +228,16 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .contest-detail-page {
   min-height: 100vh;
   padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
   background: var(--jst-color-page-bg);
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg;
 }
 
 .contest-detail-page__nav {
@@ -242,7 +249,7 @@ export default {
   height: 96rpx;
   padding: 0 24rpx;
   background: var(--jst-color-card-bg);
-  box-shadow: 0 8rpx 16rpx rgba(16, 88, 160, 0.06);
+  box-shadow: $jst-shadow-sm;
 }
 
 .contest-detail-page__back,
@@ -266,7 +273,7 @@ export default {
 
 .contest-detail-page__hero {
   height: 360rpx;
-  background: linear-gradient(135deg, var(--jst-color-brand) 0%, var(--jst-color-brand-light) 100%);
+  background: $jst-brand-gradient;
 }
 
 .contest-detail-page__hero-image,
@@ -394,7 +401,7 @@ export default {
   gap: 24rpx;
   padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
   background: var(--jst-color-card-bg);
-  box-shadow: 0 -10rpx 24rpx rgba(16, 88, 160, 0.08);
+  box-shadow: $jst-shadow-md;
 }
 
 .contest-detail-page__cta-main {
@@ -423,14 +430,14 @@ export default {
   height: 88rpx;
   padding: 0 32rpx;
   border-radius: var(--jst-radius-full);
-  background: var(--jst-color-primary);
+  background: $jst-brand;
   font-size: 28rpx;
   font-weight: 700;
   color: var(--jst-color-card-bg);
 }
 
 .contest-detail-page__cta-button--disabled {
-  background: var(--jst-color-border);
+  background: $jst-border;
   color: var(--jst-color-text-tertiary);
 }
 
@@ -448,10 +455,17 @@ export default {
   height: 88rpx;
   padding: 0 24rpx;
   border-radius: var(--jst-radius-full);
-  background: var(--jst-color-brand-soft);
-  color: var(--jst-color-brand);
+  background: $jst-brand-light;
+  color: $jst-brand;
   font-size: 26rpx;
   font-weight: 700;
+  border: none;
+}
+
+::v-deep .contest-detail-page__cta-secondary.u-button,
+::v-deep .contest-detail-page__cta-button.u-button {
+  min-height: 88rpx;
+  line-height: 88rpx;
   border: none;
 }
 </style>

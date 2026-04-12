@@ -7,6 +7,7 @@
     </view>
 
     <jst-loading :loading="loading" text="证书加载中..." />
+    <u-skeleton v-if="loading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <!-- 统计 -->
     <view v-if="certList.length" class="cert-page__stats">
@@ -41,17 +42,17 @@
         <view class="cert-page__card-info">
           <text class="cert-page__card-name">{{ item.contestName }} · {{ item.certName || '获奖证书' }}</text>
           <view class="cert-page__card-tags">
-            <text class="cert-page__card-tag cert-page__card-tag--award">{{ getAwardIcon(item.awardLevel) }} {{ item.awardLevel }}</text>
-            <text v-if="item.category" class="cert-page__card-tag">{{ item.category }}</text>
+            <u-tag class="cert-page__card-tag cert-page__card-tag--award" :text="`${getAwardIcon(item.awardLevel)} ${item.awardLevel}`" plain />
+            <u-tag v-if="item.category" class="cert-page__card-tag" :text="item.category" plain />
           </view>
           <text class="cert-page__card-no">证书编号：{{ item.certNo || '—' }} · 发证：{{ formatDate(item.issueDate) }}</text>
         </view>
 
         <!-- 操作 -->
         <view class="cert-page__card-actions">
-          <view class="cert-page__card-action" @tap="verifyCert(item)">🔍 验真</view>
-          <view class="cert-page__card-action" @tap="downloadCert(item)">⬇ 下载</view>
-          <view class="cert-page__card-action cert-page__card-action--primary" @tap="viewCert(item)">查看</view>
+          <u-button class="cert-page__card-action" @click="verifyCert(item)">🔍 验真</u-button>
+          <u-button class="cert-page__card-action" @click="downloadCert(item)">⬇ 下载</u-button>
+          <u-button class="cert-page__card-action cert-page__card-action--primary" @click="viewCert(item)">查看</u-button>
         </view>
       </view>
     </view>
@@ -68,7 +69,7 @@
           v-model="verifyNo"
           placeholder="输入证书编号"
         />
-        <view class="cert-page__verify-btn" @tap="goVerify">验真</view>
+        <u-button class="cert-page__verify-btn" @click="goVerify">验真</u-button>
       </view>
     </view>
   </view>
@@ -155,54 +156,275 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.cert-page { min-height: 100vh; padding-bottom: 60rpx; background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
 
-.cert-page__header { display: flex; align-items: center; padding: 24rpx; background: var(--jst-color-card-bg); }
-.cert-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: var(--jst-color-page-bg); font-size: 30rpx; color: var(--jst-color-text); }
-.cert-page__header-title { flex: 1; margin-left: 16rpx; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
+.cert-page {
+  min-height: 100vh;
+  padding-bottom: 60rpx;
+  background: $jst-bg-page;
+}
 
-/* 统计 */
-.cert-page__stats { display: flex; gap: 16rpx; margin: 24rpx 24rpx 0; }
-.cert-page__stat-item { flex: 1; padding: 24rpx; border-radius: var(--jst-radius-md); background: var(--jst-color-card-bg); box-shadow: 0 4rpx 16rpx rgba(20,30,60,0.06); text-align: center; }
-.cert-page__stat-num { display: block; font-size: 44rpx; font-weight: 900; }
-.cert-page__stat-num--brand { color: var(--jst-color-brand); }
-.cert-page__stat-num--gold { color: #9A6300; }
-.cert-page__stat-num--success { color: var(--jst-color-success); }
-.cert-page__stat-label { display: block; margin-top: 6rpx; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.jst-page-skeleton {
+  margin: 0 $jst-page-padding $jst-space-lg;
+}
 
-/* 证书列表 */
-.cert-page__list { padding: 24rpx; }
-.cert-page__card { background: var(--jst-color-card-bg); border-radius: var(--jst-radius-lg); box-shadow: 0 4rpx 16rpx rgba(20,30,60,0.06); margin-bottom: 28rpx; overflow: hidden; }
+.cert-page__header {
+  display: flex;
+  align-items: center;
+  padding: $jst-space-lg $jst-page-padding;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
+}
 
-/* 预览区 */
-.cert-page__card-preview { height: 320rpx; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.cert-page__card-preview--gold { background: linear-gradient(135deg, #7C4F00 0%, #C8820A 40%, #F5C842 70%, #E8A800 100%); }
-.cert-page__card-preview--silver { background: linear-gradient(135deg, #3A3A3A 0%, #6B6B6B 40%, #B0B0B0 70%, #888 100%); }
-.cert-page__card-preview--blue { background: linear-gradient(135deg, #1058A0 0%, #1A7CD9 100%); }
-.cert-page__card-mock { width: 80%; padding: 28rpx; border-radius: 20rpx; background: rgba(255,255,255,0.12); border: 2rpx solid rgba(255,255,255,0.35); text-align: center; }
-.cert-page__card-mock-title { display: block; font-size: 22rpx; font-weight: 600; color: rgba(255,255,255,0.8); letter-spacing: 3rpx; }
-.cert-page__card-mock-name { display: block; margin-top: 12rpx; font-size: 36rpx; font-weight: 900; color: #fff; letter-spacing: 4rpx; }
-.cert-page__card-mock-contest { display: block; margin-top: 8rpx; font-size: 22rpx; color: rgba(255,255,255,0.75); line-height: 1.5; }
-.cert-page__card-badge { position: absolute; top: 20rpx; right: 24rpx; font-size: 56rpx; opacity: 0.6; }
+.cert-page__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 22rpx;
+  background: $jst-bg-page;
+  font-size: $jst-font-md;
+  color: $jst-text-primary;
+}
 
-/* 信息区 */
-.cert-page__card-info { padding: 28rpx; border-bottom: 2rpx solid var(--jst-color-border); }
-.cert-page__card-name { display: block; font-size: 30rpx; font-weight: 700; color: var(--jst-color-text); line-height: 1.4; }
-.cert-page__card-tags { display: flex; gap: 12rpx; flex-wrap: wrap; margin-top: 16rpx; }
-.cert-page__card-tag { padding: 8rpx 18rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-brand-soft); font-size: 22rpx; color: var(--jst-color-brand); }
-.cert-page__card-tag--award { background: #FFF8E1; color: #9A6300; }
-.cert-page__card-no { display: block; margin-top: 12rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.cert-page__header-title {
+  flex: 1;
+  margin-left: $jst-space-md;
+  font-size: 34rpx;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
+}
 
-/* 操作区 */
-.cert-page__card-actions { display: flex; gap: 16rpx; padding: 20rpx 28rpx; justify-content: flex-end; }
-.cert-page__card-action { padding: 12rpx 24rpx; border-radius: var(--jst-radius-md); border: 2rpx solid var(--jst-color-border); font-size: 24rpx; color: var(--jst-color-text-secondary); }
-.cert-page__card-action--primary { background: var(--jst-color-brand); border-color: var(--jst-color-brand); color: #fff; font-weight: 600; }
+.cert-page__stats {
+  display: flex;
+  gap: $jst-space-md;
+  margin: $jst-space-lg $jst-page-padding 0;
+}
 
-/* 公开验真入口 */
-.cert-page__verify-entry { margin: 24rpx; padding: 28rpx; border-radius: var(--jst-radius-lg); background: var(--jst-color-card-bg); box-shadow: 0 4rpx 16rpx rgba(20,30,60,0.06); }
-.cert-page__verify-title { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); margin-bottom: 16rpx; }
-.cert-page__verify-desc { display: block; font-size: 26rpx; color: var(--jst-color-text-tertiary); line-height: 1.6; margin-bottom: 20rpx; }
-.cert-page__verify-row { display: flex; gap: 16rpx; }
-.cert-page__verify-input { flex: 1; height: 88rpx; padding: 0 24rpx; border-radius: var(--jst-radius-md); background: var(--jst-color-page-bg); border: 2rpx solid var(--jst-color-border); font-size: 28rpx; }
-.cert-page__verify-btn { display: flex; align-items: center; justify-content: center; height: 88rpx; padding: 0 32rpx; border-radius: var(--jst-radius-md); background: var(--jst-color-brand); color: #fff; font-size: 28rpx; font-weight: 700; flex-shrink: 0; }
+.cert-page__stat-item {
+  flex: 1;
+  padding: $jst-space-lg;
+  border-radius: $jst-radius-md;
+  text-align: center;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
+}
+
+.cert-page__stat-num {
+  display: block;
+  font-size: 44rpx;
+  font-weight: $jst-weight-bold;
+}
+
+.cert-page__stat-num--brand {
+  color: $jst-brand;
+}
+
+.cert-page__stat-num--gold {
+  color: $jst-warning;
+}
+
+.cert-page__stat-num--success {
+  color: $jst-success;
+}
+
+.cert-page__stat-label {
+  display: block;
+  margin-top: 6rpx;
+  font-size: $jst-font-sm;
+  color: $jst-text-placeholder;
+}
+
+.cert-page__list {
+  padding: $jst-space-lg $jst-page-padding 0;
+}
+
+.cert-page__card {
+  margin-bottom: 28rpx;
+  border-radius: $jst-radius-lg;
+  overflow: hidden;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
+}
+
+.cert-page__card-preview {
+  position: relative;
+  height: 320rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cert-page__card-preview--gold {
+  background: linear-gradient(135deg, $jst-warning 0%, $jst-gold 55%, $jst-warning-light 100%);
+}
+
+.cert-page__card-preview--silver {
+  background: linear-gradient(135deg, $jst-text-secondary 0%, $jst-info 55%, $jst-info-light 100%);
+}
+
+.cert-page__card-preview--blue {
+  background: linear-gradient(135deg, $jst-brand 0%, $jst-brand-dark 100%);
+}
+
+.cert-page__card-mock {
+  width: 80%;
+  padding: 28rpx;
+  border-radius: $jst-radius-lg;
+  border: 2rpx solid rgba($jst-text-inverse, 0.35);
+  background: rgba($jst-text-inverse, 0.12);
+  text-align: center;
+}
+
+.cert-page__card-mock-title {
+  display: block;
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-semibold;
+  letter-spacing: 3rpx;
+  color: rgba($jst-text-inverse, 0.8);
+}
+
+.cert-page__card-mock-name {
+  display: block;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-xl;
+  font-weight: $jst-weight-bold;
+  letter-spacing: 4rpx;
+  color: $jst-text-inverse;
+}
+
+.cert-page__card-mock-contest {
+  display: block;
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-xs;
+  line-height: 1.5;
+  color: rgba($jst-text-inverse, 0.76);
+}
+
+.cert-page__card-badge {
+  position: absolute;
+  top: 20rpx;
+  right: $jst-page-padding;
+  font-size: 56rpx;
+  opacity: 0.62;
+}
+
+.cert-page__card-info {
+  padding: 28rpx;
+  border-bottom: 2rpx solid $jst-border;
+}
+
+.cert-page__card-name {
+  display: block;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  line-height: 1.4;
+  color: $jst-text-primary;
+}
+
+.cert-page__card-tags {
+  display: flex;
+  gap: $jst-space-sm;
+  flex-wrap: wrap;
+  margin-top: $jst-space-md;
+}
+
+.cert-page__card-no {
+  display: block;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-xs;
+  color: $jst-text-placeholder;
+}
+
+.cert-page__card-actions {
+  display: flex;
+  gap: $jst-space-md;
+  justify-content: flex-end;
+  padding: 20rpx 28rpx;
+}
+
+.cert-page__card-action {
+  min-height: 62rpx;
+  padding: 0 $jst-space-lg;
+  border-radius: $jst-radius-md;
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
+}
+
+.cert-page__verify-entry {
+  margin: $jst-space-lg $jst-page-padding 0;
+  padding: 28rpx;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
+}
+
+.cert-page__verify-title {
+  display: block;
+  margin-bottom: $jst-space-md;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
+}
+
+.cert-page__verify-desc {
+  display: block;
+  margin-bottom: 20rpx;
+  font-size: $jst-font-base;
+  line-height: 1.6;
+  color: $jst-text-placeholder;
+}
+
+.cert-page__verify-row {
+  display: flex;
+  gap: $jst-space-md;
+}
+
+.cert-page__verify-input {
+  flex: 1;
+  height: 88rpx;
+  padding: 0 $jst-page-padding;
+  border-radius: $jst-radius-md;
+  border: 2rpx solid $jst-border;
+  background: $jst-bg-page;
+  font-size: $jst-font-base;
+  color: $jst-text-primary;
+}
+
+::v-deep .cert-page__card-tag .u-tag {
+  border-color: $jst-brand;
+  color: $jst-brand;
+  background: $jst-brand-light;
+}
+
+::v-deep .cert-page__card-tag--award .u-tag {
+  border-color: $jst-warning;
+  color: $jst-warning;
+  background: $jst-gold-light;
+}
+
+::v-deep .cert-page__card-action.u-button {
+  border-color: $jst-border;
+  background: $jst-bg-card;
+  color: $jst-text-secondary;
+}
+
+::v-deep .cert-page__card-action--primary.u-button {
+  border-color: $jst-brand;
+  background: $jst-brand;
+  color: $jst-text-inverse;
+}
+
+::v-deep .cert-page__verify-btn.u-button {
+  height: 88rpx;
+  padding: 0 $jst-space-xl;
+  border: none;
+  border-radius: $jst-radius-md;
+  background: $jst-brand;
+  color: $jst-text-inverse;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+}
 </style>

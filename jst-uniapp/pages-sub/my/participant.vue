@@ -2,11 +2,12 @@
 <template>
   <view class="participant-page">
     <jst-loading :loading="pageLoading" text="档案加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="participant-page__header">
       <view class="participant-page__back" @tap="handleBack">←</view>
       <text class="participant-page__title">我的档案</text>
-      <view class="participant-page__action" @tap="openClaimDialog">+ 认领新档案</view>
+      <u-button class="participant-page__action" size="mini" shape="circle" @click="openClaimDialog">+ 认领新档案</u-button>
     </view>
 
     <view class="participant-page__intro">
@@ -26,7 +27,7 @@
             <text class="participant-page__card-name">{{ item.name || '未命名档案' }}</text>
             <text class="participant-page__card-id">档案编号：{{ item.participantId }}</text>
           </view>
-          <text class="participant-page__card-tag">{{ getClaimMethodText(item.claimMethod) }}</text>
+          <u-tag class="participant-page__card-tag" :text="getClaimMethodText(item.claimMethod)" type="success" plain />
         </view>
 
         <view class="participant-page__meta">
@@ -62,16 +63,10 @@
           placeholder-class="participant-page__placeholder"
         />
         <view class="participant-page__dialog-actions">
-          <button class="participant-page__dialog-button participant-page__dialog-button--ghost" @tap="closeClaimDialog">
+          <u-button class="participant-page__dialog-button participant-page__dialog-button--ghost" @click="closeClaimDialog">
             取消
-          </button>
-          <button
-            class="participant-page__dialog-button participant-page__dialog-button--primary"
-            :loading="claimSubmitting"
-            @tap="submitClaim"
-          >
-            确认认领
-          </button>
+          </u-button>
+          <u-button class="participant-page__dialog-button participant-page__dialog-button--primary" :loading="claimSubmitting" @click="submitClaim">确认认领</u-button>
         </view>
       </view>
     </view>
@@ -106,7 +101,7 @@
             <text class="participant-page__detail-value">{{ getClaimStatusText(detail.claimStatus) }}</text>
           </view>
         </view>
-        <button class="participant-page__detail-close" @tap="closeDetail">关闭</button>
+        <u-button class="participant-page__detail-close" @click="closeDetail">关闭</u-button>
       </view>
     </view>
   </view>
@@ -293,19 +288,25 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .participant-page {
   min-height: 100vh;
-  padding-bottom: 40rpx;
-  background: var(--jst-color-page-bg);
+  padding-bottom: $jst-space-xl;
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg;
 }
 
 .participant-page__header {
   display: flex;
   align-items: center;
   height: 96rpx;
-  padding: 0 24rpx;
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-card);
+  padding: 0 $jst-page-padding;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .participant-page__back {
@@ -314,121 +315,105 @@ export default {
   justify-content: center;
   width: 64rpx;
   height: 64rpx;
-  border-radius: var(--jst-radius-sm);
-  background: var(--jst-color-page-bg);
-  font-size: 32rpx;
-  color: var(--jst-color-text-secondary);
+  border-radius: $jst-radius-sm;
+  background: $jst-bg-page;
+  font-size: $jst-font-lg;
+  color: $jst-text-secondary;
 }
 
 .participant-page__title {
   flex: 1;
-  margin-left: 16rpx;
-  font-size: 32rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
-}
-
-.participant-page__action {
-  padding: 14rpx 24rpx;
-  border-radius: var(--jst-radius-full);
-  background: var(--jst-color-primary-soft);
-  font-size: 24rpx;
-  font-weight: 600;
-  color: var(--jst-color-primary);
+  margin-left: $jst-space-md;
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .participant-page__intro {
-  margin: 24rpx;
-  padding: 28rpx 24rpx;
-  border-radius: var(--jst-radius-md);
-  background: linear-gradient(135deg, var(--jst-color-brand) 0%, var(--jst-color-brand-light) 100%);
-  box-shadow: var(--jst-shadow-card);
+  margin: $jst-space-lg $jst-page-padding;
+  padding: 28rpx $jst-page-padding;
+  border-radius: $jst-radius-lg;
+  background: $jst-brand-gradient;
+  box-shadow: $jst-shadow-md;
 }
 
 .participant-page__intro-title {
   display: block;
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--jst-color-card-bg);
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-inverse;
 }
 
 .participant-page__intro-text {
   display: block;
-  margin-top: 12rpx;
-  font-size: 24rpx;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-sm;
   line-height: 1.7;
-  color: var(--jst-color-white-78);
+  color: $jst-brand-light;
 }
 
 .participant-page__list {
-  padding: 0 24rpx;
+  padding: 0 $jst-page-padding;
 }
 
 .participant-page__card {
-  margin-bottom: 24rpx;
-  padding: 28rpx 24rpx;
-  border-radius: var(--jst-radius-lg);
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-card);
+  margin-bottom: $jst-space-lg;
+  padding: 28rpx $jst-page-padding;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
 }
 
 .participant-page__card-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: $jst-space-md;
 }
 
 .participant-page__card-name {
   display: block;
-  font-size: 32rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .participant-page__card-id {
   display: block;
   margin-top: 10rpx;
-  font-size: 24rpx;
-  color: var(--jst-color-text-tertiary);
-}
-
-.participant-page__card-tag {
-  padding: 10rpx 18rpx;
-  border-radius: var(--jst-radius-full);
-  background: var(--jst-color-success-soft);
-  font-size: 22rpx;
-  color: var(--jst-color-success);
+  font-size: $jst-font-sm;
+  color: $jst-text-placeholder;
 }
 
 .participant-page__meta {
-  margin-top: 24rpx;
+  margin-top: $jst-space-lg;
 }
 
 .participant-page__meta-text {
   display: block;
-  font-size: 26rpx;
+  font-size: $jst-font-base;
   line-height: 1.8;
-  color: var(--jst-color-text-secondary);
+  color: $jst-text-secondary;
 }
 
 .participant-page__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 24rpx;
+  margin-top: $jst-space-lg;
   padding-top: 20rpx;
-  border-top: 2rpx solid var(--jst-color-border);
+  border-top: 2rpx solid $jst-border;
 }
 
 .participant-page__footer-text {
-  font-size: 24rpx;
-  color: var(--jst-color-text-tertiary);
+  font-size: $jst-font-sm;
+  color: $jst-text-placeholder;
 }
 
 .participant-page__footer-link {
-  font-size: 24rpx;
-  font-weight: 600;
-  color: var(--jst-color-brand);
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
+  color: $jst-brand;
 }
 
 .participant-page__mask {
@@ -438,93 +423,80 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24rpx;
-  background: var(--jst-color-mask-dark);
+  padding: $jst-page-padding;
+  background: rgba($jst-text-primary, 0.45);
 }
 
 .participant-page__dialog,
 .participant-page__detail {
   width: 100%;
-  border-radius: var(--jst-radius-lg);
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-strong);
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-float;
 }
 
 .participant-page__dialog {
-  padding: 32rpx 24rpx;
+  padding: $jst-space-xl $jst-page-padding;
 }
 
 .participant-page__dialog-title,
 .participant-page__detail-title {
   display: block;
-  font-size: 32rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .participant-page__dialog-text {
   display: block;
-  margin-top: 16rpx;
-  font-size: 24rpx;
+  margin-top: $jst-space-md;
+  font-size: $jst-font-sm;
   line-height: 1.7;
-  color: var(--jst-color-text-secondary);
+  color: $jst-text-secondary;
 }
 
 .participant-page__dialog-input {
   width: 100%;
   height: 88rpx;
-  margin-top: 24rpx;
-  padding: 0 24rpx;
-  border: 2rpx solid var(--jst-color-border);
-  border-radius: var(--jst-radius-md);
-  font-size: 28rpx;
-  color: var(--jst-color-text);
-  background: var(--jst-color-page-bg);
+  margin-top: $jst-space-lg;
+  padding: 0 $jst-page-padding;
+  border: 2rpx solid $jst-border;
+  border-radius: $jst-radius-md;
+  font-size: $jst-font-base;
+  color: $jst-text-primary;
+  background: $jst-bg-page;
 }
 
 .participant-page__placeholder {
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-placeholder;
 }
 
 .participant-page__dialog-actions {
   display: flex;
-  margin-top: 24rpx;
+  margin-top: $jst-space-lg;
+  gap: $jst-space-md;
 }
 
 .participant-page__dialog-button {
   flex: 1;
   height: 84rpx;
-  border-radius: var(--jst-radius-md);
-  font-size: 28rpx;
-  font-weight: 600;
-}
-
-.participant-page__dialog-button + .participant-page__dialog-button {
-  margin-left: 16rpx;
-}
-
-.participant-page__dialog-button--ghost {
-  background: var(--jst-color-page-bg);
-  color: var(--jst-color-text-secondary);
-}
-
-.participant-page__dialog-button--primary {
-  background: linear-gradient(135deg, var(--jst-color-primary) 0%, var(--jst-color-primary-light) 100%);
-  color: var(--jst-color-card-bg);
+  border-radius: $jst-radius-md;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
 }
 
 .participant-page__detail {
-  padding: 32rpx 24rpx;
+  padding: $jst-space-xl $jst-page-padding;
 }
 
 .participant-page__detail-loading {
-  margin-top: 24rpx;
-  font-size: 26rpx;
-  color: var(--jst-color-text-tertiary);
+  margin-top: $jst-space-lg;
+  font-size: $jst-font-base;
+  color: $jst-text-placeholder;
 }
 
 .participant-page__detail-content {
-  margin-top: 24rpx;
+  margin-top: $jst-space-lg;
 }
 
 .participant-page__detail-row {
@@ -532,33 +504,65 @@ export default {
   justify-content: space-between;
   align-items: center;
   min-height: 76rpx;
-  border-top: 2rpx solid var(--jst-color-border);
+  border-top: 2rpx solid $jst-border;
+  gap: $jst-space-md;
 }
 
 .participant-page__detail-label {
-  font-size: 26rpx;
-  color: var(--jst-color-text-tertiary);
+  font-size: $jst-font-base;
+  color: $jst-text-placeholder;
 }
 
 .participant-page__detail-value {
   max-width: 60%;
-  font-size: 26rpx;
+  font-size: $jst-font-base;
   line-height: 1.6;
-  color: var(--jst-color-text);
+  color: $jst-text-primary;
   text-align: right;
 }
 
 .participant-page__detail-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   height: 84rpx;
-  margin-top: 28rpx;
-  border-radius: var(--jst-radius-md);
-  background: var(--jst-color-brand-soft);
-  font-size: 28rpx;
-  font-weight: 600;
-  color: var(--jst-color-brand);
+  margin-top: $jst-space-xl;
+  border-radius: $jst-radius-md;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+}
+
+::v-deep .participant-page__action.u-button {
+  min-width: 170rpx;
+  height: 62rpx;
+  padding: 0 $jst-space-md;
+  border: none;
+  background: $jst-brand-light;
+  color: $jst-brand;
+}
+
+::v-deep .participant-page__card-tag .u-tag {
+  border-color: $jst-success;
+  color: $jst-success;
+}
+
+::v-deep .participant-page__dialog-button.u-button {
+  min-height: 84rpx;
+}
+
+::v-deep .participant-page__dialog-button--ghost.u-button {
+  border-color: $jst-border;
+  background: $jst-bg-page;
+  color: $jst-text-secondary;
+}
+
+::v-deep .participant-page__dialog-button--primary.u-button {
+  border: none;
+  background: $jst-brand-gradient;
+  color: $jst-text-inverse;
+}
+
+::v-deep .participant-page__detail-close.u-button {
+  border-color: $jst-brand;
+  background: $jst-brand-light;
+  color: $jst-brand;
 }
 </style>

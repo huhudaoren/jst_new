@@ -2,10 +2,14 @@
 // #ifndef VUE3
 import Vue from 'vue'
 import App from './App'
+import uView from 'uview-ui'
 import { createPinia, PiniaVuePlugin } from 'pinia'
+import { navBarMixin } from '@/utils/navbar'
 
 Vue.config.productionTip = false
 Vue.use(PiniaVuePlugin)
+Vue.use(uView)
+Vue.mixin(navBarMixin)
 
 App.mpType = 'app'
 

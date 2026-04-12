@@ -10,12 +10,14 @@
        - 背景 #0D1B2A 沉浸式 -->
 <template>
   <view class="sc-page">
-    <view class="sc-topbar" @tap="showSessionSheet = true">
+    <view class="sc-topbar" :style="{ paddingTop: navPaddingTop }" @tap="showSessionSheet = true">
       <view class="sc-topbar__info">
         <text class="sc-topbar__label">当前活动场次</text>
         <text class="sc-topbar__name">{{ currentSession.name }}</text>
       </view>
-      <text class="sc-topbar__switch">切换 ›</text>
+      <view class="sc-topbar__switch">
+        <u-tag text="切换" type="primary" plain size="mini" shape="circle"></u-tag>
+      </view>
     </view>
 
     <view class="sc-chips">
@@ -99,6 +101,7 @@ const MOCK_SESSIONS = [
 export default {
   data() {
     return {
+      skeletonShow: true, // [visual-effect]
       scanTypes: SCAN_TYPES,
       scanType: 'entry',
       sessionList: MOCK_SESSIONS,
@@ -112,7 +115,7 @@ export default {
   onLoad() {
     // POLISH-D 权限门: jst_partner / jst_platform_op
     const store = useUserStore()
-    const roles = (store.userInfo && store.userInfo.roles) || []
+    const roles = store.roles || []
     const allowed = roles.includes('jst_partner') || roles.includes('jst_platform_op')
     if (!allowed) {
       uni.showToast({ title: '无扫码权限', icon: 'none' })
@@ -181,61 +184,63 @@ export default {
 </script>
 
 <style scoped lang="scss">
-$dark-bg: #0D1B2A;
-$dark-card: #152840;
-$dark-text: #E8F1FF;
-$dark-sub: rgba(232,241,255,0.6);
+@import '@/styles/design-tokens.scss';
+
+$dark-bg: $jst-bg-dark-page;
+$dark-card: $jst-bg-dark-card;
+$dark-text: $jst-text-dark-primary;
+$dark-sub: $jst-text-dark-secondary;
 
 .sc-page { min-height: 100vh; background: $dark-bg; color: $dark-text; padding: 32rpx 32rpx 80rpx; box-sizing: border-box; }
-.sc-topbar { display: flex; align-items: center; padding: 24rpx 28rpx; background: $dark-card; border-radius: var(--jst-radius-md); }
+.sc-topbar { display: flex; align-items: center; padding: 24rpx 28rpx; background: $dark-card; border-radius: $jst-radius-md; }
 .sc-topbar__info { flex: 1; min-width: 0; }
 .sc-topbar__label { display: block; font-size: 22rpx; color: $dark-sub; }
-.sc-topbar__name { display: block; margin-top: 6rpx; font-size: 28rpx; font-weight: 700; color: #FFD54F; }
-.sc-topbar__switch { font-size: 24rpx; color: #64B5F6; }
+.sc-topbar__name { display: block; margin-top: 6rpx; font-size: 28rpx; font-weight: 600; color: $jst-gold; }
+.sc-topbar__switch { display: flex; align-items: center; }
 
 .sc-chips { display: flex; gap: 16rpx; margin-top: 24rpx; }
-.sc-chips__item { flex: 1; padding: 24rpx 0; background: $dark-card; border-radius: var(--jst-radius-sm); text-align: center; border: 2rpx solid transparent; }
-.sc-chips__item--active { border-color: #FFD54F; background: rgba(255,213,79,0.12); }
+.sc-chips__item { flex: 1; padding: 24rpx 0; background: $dark-card; border-radius: $jst-radius-sm; text-align: center; border: 2rpx solid transparent; }
+.sc-chips__item--active { border-color: $jst-gold; background: $jst-gold-light; }
 .sc-chips__icon { display: block; font-size: 44rpx; }
 .sc-chips__label { display: block; margin-top: 6rpx; font-size: 22rpx; color: $dark-sub; }
-.sc-chips__item--active .sc-chips__label { color: #FFD54F; font-weight: 700; }
+.sc-chips__item--active .sc-chips__label { color: $jst-gold; font-weight: 600; }
 
-.sc-stats { display: flex; gap: 16rpx; margin-top: 24rpx; padding: 24rpx; background: $dark-card; border-radius: var(--jst-radius-md); }
+.sc-stats { display: flex; gap: 16rpx; margin-top: 24rpx; padding: 24rpx; background: $dark-card; border-radius: $jst-radius-md; }
 .sc-stats__cell { flex: 1; text-align: center; }
-.sc-stats__num { display: block; font-size: 44rpx; font-weight: 900; color: #FFD54F; }
+.sc-stats__num { display: block; font-size: 44rpx; font-weight: 600; color: $jst-gold; }
 .sc-stats__lbl { display: block; margin-top: 6rpx; font-size: 22rpx; color: $dark-sub; }
 
-.sc-scanbtn { margin-top: 32rpx; padding: 64rpx 0; background: linear-gradient(135deg, #1A237E, #3949AB); border-radius: var(--jst-radius-lg); text-align: center; box-shadow: 0 16rpx 48rpx rgba(26,35,126,0.4); }
+.sc-scanbtn { margin-top: 32rpx; padding: 64rpx 0; background: linear-gradient(135deg, $jst-indigo, $jst-indigo-light); border-radius: $jst-radius-lg; text-align: center; box-shadow: $jst-shadow-float; }
 .sc-scanbtn__icon { display: block; font-size: 96rpx; }
-.sc-scanbtn__text { display: block; margin-top: 16rpx; font-size: 32rpx; font-weight: 800; color: #fff; }
+.sc-scanbtn__text { display: block; margin-top: 16rpx; font-size: 32rpx; font-weight: 600; color: $jst-text-inverse; }
 .sc-scanbtn__sub { display: block; margin-top: 8rpx; font-size: 22rpx; color: rgba(255,255,255,0.7); }
 
-.sc-result { margin-top: 24rpx; padding: 32rpx; border-radius: var(--jst-radius-md); text-align: center; }
-.sc-result--success { background: rgba(39,174,96,0.18); border: 2rpx solid #27AE60; }
-.sc-result--fail { background: rgba(231,76,60,0.18); border: 2rpx solid #E74C3C; }
-.sc-result--used { background: rgba(243,156,18,0.18); border: 2rpx solid #F39C12; }
+.sc-result { margin-top: 24rpx; padding: 32rpx; border-radius: $jst-radius-md; text-align: center; }
+.sc-result--success { background: rgba($jst-success, 0.18); border: 2rpx solid $jst-success; }
+.sc-result--fail { background: rgba($jst-danger, 0.18); border: 2rpx solid $jst-danger; }
+.sc-result--used { background: rgba($jst-warning, 0.18); border: 2rpx solid $jst-warning; }
 .sc-result__icon { display: block; font-size: 64rpx; }
-.sc-result__title { display: block; margin-top: 8rpx; font-size: 32rpx; font-weight: 800; color: $dark-text; }
+.sc-result__title { display: block; margin-top: 8rpx; font-size: 32rpx; font-weight: 600; color: $dark-text; }
 .sc-result__sub { display: block; margin-top: 6rpx; font-size: 22rpx; color: $dark-sub; }
 
-.sc-recent { margin-top: 32rpx; padding: 24rpx; background: $dark-card; border-radius: var(--jst-radius-md); }
-.sc-recent__title { display: block; font-size: 26rpx; font-weight: 700; color: $dark-text; margin-bottom: 16rpx; }
+.sc-recent { margin-top: 32rpx; padding: 24rpx; background: $dark-card; border-radius: $jst-radius-md; }
+.sc-recent__title { display: block; font-size: 26rpx; font-weight: 600; color: $dark-text; margin-bottom: 16rpx; }
 .sc-recent__item { display: flex; align-items: center; gap: 16rpx; padding: 16rpx 0; border-bottom: 2rpx solid rgba(255,255,255,0.06); }
 .sc-recent__item:last-child { border-bottom: none; }
-.sc-recent__dot { width: 16rpx; height: 16rpx; border-radius: 50%; background: #27AE60; }
-.sc-recent__dot--fail { background: #E74C3C; }
-.sc-recent__dot--used { background: #F39C12; }
+.sc-recent__dot { width: 16rpx; height: 16rpx; border-radius: 50%; background: $jst-success; }
+.sc-recent__dot--fail { background: $jst-danger; }
+.sc-recent__dot--used { background: $jst-warning; }
 .sc-recent__body { flex: 1; min-width: 0; }
 .sc-recent__name { display: block; font-size: 24rpx; color: $dark-text; }
 .sc-recent__time { display: block; margin-top: 4rpx; font-size: 20rpx; color: $dark-sub; }
-.sc-recent__type { font-size: 20rpx; color: #FFD54F; }
+.sc-recent__type { font-size: 20rpx; color: $jst-gold; }
 .sc-recent__empty { padding: 24rpx 0; text-align: center; font-size: 22rpx; color: $dark-sub; }
 
 .sc-sheet { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: flex; align-items: flex-end; }
 .sc-sheet__panel { width: 100%; padding: 32rpx 32rpx calc(32rpx + env(safe-area-inset-bottom)); background: $dark-card; border-top-left-radius: 32rpx; border-top-right-radius: 32rpx; }
-.sc-sheet__title { display: block; font-size: 28rpx; font-weight: 800; color: $dark-text; margin-bottom: 20rpx; }
+.sc-sheet__title { display: block; font-size: 28rpx; font-weight: 600; color: $dark-text; margin-bottom: 20rpx; }
 .sc-sheet__item { display: flex; justify-content: space-between; align-items: center; padding: 24rpx 16rpx; font-size: 26rpx; color: $dark-text; border-bottom: 2rpx solid rgba(255,255,255,0.06); }
-.sc-sheet__item--active { color: #FFD54F; font-weight: 700; }
-.sc-sheet__tick { color: #FFD54F; }
+.sc-sheet__item--active { color: $jst-gold; font-weight: 600; }
+.sc-sheet__tick { color: $jst-gold; }
 .sc-sheet__tip { margin-top: 16rpx; font-size: 20rpx; color: $dark-sub; text-align: center; }
 </style>

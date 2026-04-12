@@ -2,8 +2,8 @@
      用途: 展示渠道方二维码、海报、短链，供学生扫码绑定
      依赖: utils/qrcode-wrapper.js (D2-1b 已就绪) -->
 <template>
-  <view v-if="visible" class="inv-mask" @tap.stop="handleClose">
-    <view class="inv-sheet" @tap.stop>
+  <u-popup :show="visible" mode="bottom" round="32" @close="handleClose">
+    <view class="inv-sheet">
       <view class="inv-handle"></view>
 
       <!-- 顶部渠道信息 -->
@@ -49,7 +49,7 @@
         </button>
       </view>
     </view>
-  </view>
+  </u-popup>
 </template>
 
 <script>
@@ -120,36 +120,198 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.inv-mask { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--jst-color-mask-dark); z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
-.inv-sheet { width: 100%; max-height: 85vh; background: var(--jst-color-card-bg); border-radius: 32rpx 32rpx 0 0; overflow-y: auto; animation: inv-slide-up 0.3s ease; }
-@keyframes inv-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.inv-handle { width: 72rpx; height: 8rpx; background: var(--jst-color-border); border-radius: 4rpx; margin: 24rpx auto 0; }
-.inv-header { display: flex; align-items: center; justify-content: space-between; padding: 24rpx 40rpx 16rpx; }
-.inv-header__title { font-size: 32rpx; font-weight: 700; color: var(--jst-color-text); }
-.inv-header__close { width: 56rpx; height: 56rpx; border-radius: 50%; background: var(--jst-color-page-bg); display: flex; align-items: center; justify-content: center; font-size: 28rpx; color: var(--jst-color-text-tertiary); }
+@import '@/styles/design-tokens.scss';
 
-/* 二维码卡片 */
-.inv-qr-card { margin: 16rpx 32rpx 0; padding: 32rpx; background: linear-gradient(145deg, #1A237E 0%, #283593 50%, #3949AB 100%); border-radius: var(--jst-radius-lg); position: relative; overflow: hidden; box-shadow: 0 16rpx 56rpx rgba(26,35,126,0.3); }
-.inv-qr-card::before { content: ''; position: absolute; top: -60rpx; right: -60rpx; width: 280rpx; height: 280rpx; border-radius: 50%; background: rgba(255,255,255,0.06); }
-.inv-qr-card__label { display: block; font-size: 22rpx; color: rgba(255,255,255,0.65); margin-bottom: 8rpx; position: relative; z-index: 1; }
-.inv-qr-card__title { display: block; font-size: 36rpx; font-weight: 900; color: #fff; margin-bottom: 24rpx; position: relative; z-index: 1; }
-.inv-qr-card__content { display: flex; align-items: center; gap: 32rpx; position: relative; z-index: 1; }
-.inv-qr-card__box { width: 200rpx; height: 200rpx; border-radius: var(--jst-radius-md); background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.25); }
-.inv-qr-canvas { width: 180rpx; height: 180rpx; }
-.inv-qr-card__info { flex: 1; }
-.inv-qr-card__name { display: block; font-size: 32rpx; font-weight: 800; color: #fff; }
-.inv-qr-card__school { display: block; margin-top: 8rpx; font-size: 24rpx; color: rgba(255,255,255,0.7); }
+.inv-sheet {
+  width: 100%;
+  max-height: 85vh;
+  background: $jst-bg-card;
+  overflow-y: auto;
+}
+
+.inv-handle {
+  width: 72rpx;
+  height: 8rpx;
+  background: $jst-border;
+  border-radius: $jst-radius-xs;
+  margin: $jst-space-lg auto 0;
+}
+
+.inv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $jst-space-lg 40rpx $jst-space-md;
+}
+
+.inv-header__title {
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
+}
+
+.inv-header__close {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: $jst-bg-page;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $jst-font-base;
+  color: $jst-text-secondary;
+}
+
+/* 二维码卡片 — 设计特例，渐变色保留 */
+.inv-qr-card {
+  margin: $jst-space-md $jst-space-xl 0;
+  padding: $jst-space-xl;
+  background: linear-gradient(145deg, #1A237E 0%, #283593 50%, #3949AB 100%);
+  border-radius: $jst-radius-lg;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16rpx 56rpx rgba(26, 35, 126, 0.3);
+}
+
+.inv-qr-card::before {
+  content: '';
+  position: absolute;
+  top: -60rpx;
+  right: -60rpx;
+  width: 280rpx;
+  height: 280rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.inv-qr-card__label {
+  display: block;
+  font-size: $jst-font-xs;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: $jst-space-xs;
+  position: relative;
+  z-index: 1;
+}
+
+.inv-qr-card__title {
+  display: block;
+  font-size: $jst-font-xl;
+  font-weight: 900;
+  color: $jst-text-inverse;
+  margin-bottom: $jst-space-lg;
+  position: relative;
+  z-index: 1;
+}
+
+.inv-qr-card__content {
+  display: flex;
+  align-items: center;
+  gap: $jst-space-xl;
+  position: relative;
+  z-index: 1;
+}
+
+.inv-qr-card__box {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: $jst-radius-md;
+  background: $jst-bg-card;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 $jst-space-xs $jst-space-xl rgba(0, 0, 0, 0.25);
+}
+
+.inv-qr-canvas {
+  width: 180rpx;
+  height: 180rpx;
+}
+
+.inv-qr-card__info {
+  flex: 1;
+}
+
+.inv-qr-card__name {
+  display: block;
+  font-size: $jst-font-lg;
+  font-weight: 800;
+  color: $jst-text-inverse;
+}
+
+.inv-qr-card__school {
+  display: block;
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-sm;
+  color: rgba(255, 255, 255, 0.7);
+}
 
 /* 绑定码 */
-.inv-bind-code { margin: 24rpx 32rpx 0; padding: 24rpx; background: var(--jst-color-brand-soft); border: 2rpx solid rgba(16,88,160,0.15); border-radius: var(--jst-radius-md); text-align: center; }
-.inv-bind-code__label { display: block; font-size: 22rpx; color: var(--jst-color-text-secondary); margin-bottom: 8rpx; }
-.inv-bind-code__value { display: block; font-size: 36rpx; font-weight: 800; color: var(--jst-color-brand); letter-spacing: 2rpx; }
+.inv-bind-code {
+  margin: $jst-space-lg $jst-space-xl 0;
+  padding: $jst-space-lg;
+  background: $jst-brand-light;
+  border: 2rpx solid rgba(43, 108, 255, 0.15);
+  border-radius: $jst-radius-md;
+  text-align: center;
+}
+
+.inv-bind-code__label {
+  display: block;
+  font-size: $jst-font-xs;
+  color: $jst-text-regular;
+  margin-bottom: $jst-space-xs;
+}
+
+.inv-bind-code__value {
+  display: block;
+  font-size: $jst-font-xl;
+  font-weight: 800;
+  color: $jst-brand;
+  letter-spacing: 2rpx;
+}
 
 /* 操作按钮 */
-.inv-actions { display: flex; gap: 16rpx; padding: 32rpx 32rpx calc(32rpx + env(safe-area-inset-bottom)); }
-.inv-action-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24rpx 0; border-radius: var(--jst-radius-md); background: var(--jst-color-page-bg); border: none; line-height: normal; }
-.inv-action-btn--share { background: var(--jst-color-page-bg); }
-.inv-action-btn::after { display: none; }
-.inv-action-btn__icon { font-size: 36rpx; margin-bottom: 8rpx; }
-.inv-action-btn__text { font-size: 22rpx; color: var(--jst-color-text-secondary); font-weight: 500; }
+.inv-actions {
+  display: flex;
+  gap: $jst-space-md;
+  padding: $jst-space-xl;
+  padding-bottom: calc(#{$jst-space-xl} + env(safe-area-inset-bottom));
+}
+
+.inv-action-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $jst-space-lg 0;
+  border-radius: $jst-radius-md;
+  background: $jst-bg-page;
+  border: none;
+  line-height: normal;
+  transition: transform $jst-duration-fast $jst-easing;
+}
+
+.inv-action-btn:active {
+  transform: scale(0.96);
+}
+
+.inv-action-btn--share {
+  background: $jst-bg-page;
+}
+
+.inv-action-btn::after {
+  display: none;
+}
+
+.inv-action-btn__icon {
+  font-size: $jst-font-xl;
+  margin-bottom: $jst-space-xs;
+}
+
+.inv-action-btn__text {
+  font-size: $jst-font-xs;
+  color: $jst-text-regular;
+  font-weight: $jst-weight-medium;
+}
 </style>

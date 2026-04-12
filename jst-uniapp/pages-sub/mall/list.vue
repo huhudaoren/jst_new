@@ -3,7 +3,7 @@
      调用接口: GET /jst/wx/mall/goods/list -->
 <template>
   <view class="ml-page">
-    <view class="ml-hero">
+    <view class="ml-hero" :style="{ paddingTop: navPaddingTop }">
       <view class="ml-hero__left">
         <text class="ml-hero__label">我的积分</text>
         <text class="ml-hero__num">{{ availablePoints }}</text>
@@ -111,29 +111,30 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.ml-page { min-height: 100vh; background: var(--jst-color-page-bg); padding-bottom: 80rpx; }
+@import '@/styles/design-tokens.scss';
+.ml-page { min-height: 100vh; background: #F7F8FA; padding-bottom: 80rpx; }
 .ml-hero { display: flex; align-items: center; justify-content: space-between; padding: 72rpx 32rpx 40rpx; background: linear-gradient(135deg, #F5A623, #FF9800); color: #fff; }
 .ml-hero__left { display: flex; flex-direction: column; }
-.ml-hero__label { font-size: 24rpx; color: var(--jst-color-white-76); }
-.ml-hero__num { margin-top: 8rpx; font-size: 56rpx; font-weight: 900; color: #fff; }
-.ml-hero__right { padding: 12rpx 24rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-white-18); font-size: 24rpx; color: #fff; }
+.ml-hero__label { font-size: 24rpx; color: rgba(255,255,255,0.76); }
+.ml-hero__num { margin-top: 8rpx; font-size: 56rpx; font-weight: 600; color: #fff; }
+.ml-hero__right { padding: 12rpx 24rpx; border-radius: $jst-radius-round; background: rgba(255,255,255,0.18); font-size: 24rpx; color: #fff; }
 
-.ml-tabs { white-space: nowrap; background: var(--jst-color-card-bg); border-bottom: 2rpx solid var(--jst-color-border); }
-.ml-tabs__item { display: inline-block; padding: 0 40rpx; height: 88rpx; line-height: 88rpx; font-size: 26rpx; color: var(--jst-color-text-tertiary); position: relative; }
-.ml-tabs__item--active { color: #F5A623; font-weight: 700; }
+.ml-tabs { white-space: nowrap; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
+.ml-tabs__item { display: inline-block; padding: 0 40rpx; height: 88rpx; line-height: 88rpx; font-size: 26rpx; color: $jst-text-secondary; position: relative; }
+.ml-tabs__item--active { color: #F5A623; font-weight: 600; }
 .ml-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 24rpx; right: 24rpx; height: 4rpx; background: #F5A623; border-radius: 2rpx; }
 
 .ml-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24rpx; padding: 24rpx 24rpx 48rpx; }
-.ml-card { background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); overflow: hidden; }
-.ml-card__img { width: 100%; height: 320rpx; background: var(--jst-color-page-bg); }
-.ml-card__img--placeholder { display: flex; align-items: center; justify-content: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.ml-card { background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); overflow: hidden; }
+.ml-card__img { width: 100%; height: 320rpx; background: #F7F8FA; }
+.ml-card__img--placeholder { display: flex; align-items: center; justify-content: center; font-size: 24rpx; color: $jst-text-secondary; }
 .ml-card__body { padding: 20rpx 24rpx; }
-.ml-card__name { display: block; font-size: 26rpx; font-weight: 700; color: var(--jst-color-text); min-height: 68rpx; }
+.ml-card__name { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; min-height: 68rpx; }
 .ml-card__price { display: flex; align-items: baseline; gap: 12rpx; margin-top: 10rpx; }
-.ml-card__points { font-size: 30rpx; font-weight: 800; color: #F5A623; }
-.ml-card__cash { font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.ml-card__stock { display: block; margin-top: 6rpx; font-size: 20rpx; color: var(--jst-color-text-tertiary); }
-.ml-empty { grid-column: 1 / -1; padding: 80rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.ml-card__points { font-size: 30rpx; font-weight: 600; color: #F5A623; }
+.ml-card__cash { font-size: 22rpx; color: $jst-text-secondary; }
+.ml-card__stock { display: block; margin-top: 6rpx; font-size: 20rpx; color: $jst-text-secondary; }
+.ml-empty { grid-column: 1 / -1; padding: 80rpx; text-align: center; font-size: 24rpx; color: $jst-text-secondary; }
 .ml-empty--end { padding: 40rpx; }
 
 .ml-fab { position: fixed; right: 32rpx; bottom: calc(64rpx + env(safe-area-inset-bottom)); width: 96rpx; height: 96rpx; border-radius: 50%; background: linear-gradient(135deg, #F5A623, #FF9800); color: #fff; font-size: 44rpx; display: flex; align-items: center; justify-content: center; box-shadow: 0 12rpx 32rpx rgba(245,166,35,0.4); }

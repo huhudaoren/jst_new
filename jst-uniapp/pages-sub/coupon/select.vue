@@ -10,6 +10,7 @@
     </view>
 
     <view class="cs-list">
+      <u-skeleton v-if="loading && !candidates.length" :loading="true" :rows="6" title :avatar="false" class="cs-skeleton" />
       <view
         v-for="item in candidates"
         :key="item.couponId"
@@ -38,12 +39,12 @@
         <view class="cs-card__body"><text class="cs-card__name">不使用优惠券</text></view>
         <view class="cs-card__check"><text v-if="selectedId == null">✓</text></view>
       </view>
-      <view v-if="!candidates.length && !loading" class="cs-empty">暂无可用券</view>
-      <view v-if="loading" class="cs-empty">加载中...</view>
+      <u-empty v-if="!candidates.length && !loading" mode="data" />
+      <u-loadmore v-if="loading && candidates.length" status="loading" />
     </view>
 
     <view class="cs-footer">
-      <button class="cs-footer__btn" @tap="onConfirm">确定</button>
+      <u-button class="cs-footer__btn" @click="onConfirm">确定</u-button>
     </view>
   </view>
 </template>
@@ -98,26 +99,141 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.cs-page { min-height: 100vh; background: var(--jst-color-page-bg); padding-bottom: calc(180rpx + env(safe-area-inset-bottom)); }
-.cs-hero { padding: 72rpx 32rpx 48rpx; background: linear-gradient(135deg, #7C3AED, #A855F7); color: #fff; }
-.cs-hero__label { display: block; font-size: 24rpx; color: var(--jst-color-white-76); }
-.cs-hero__amount { display: block; margin-top: 8rpx; font-size: 56rpx; font-weight: 900; }
+@import '@/styles/design-tokens.scss';
 
-.cs-list { padding: 16rpx 0; }
-.cs-card { display: flex; align-items: center; gap: 20rpx; margin: 16rpx 32rpx 0; padding: 24rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); }
-.cs-card--active { border: 4rpx solid #7C3AED; }
-.cs-card--disabled { opacity: 0.5; }
-.cs-card__left { min-width: 120rpx; text-align: center; color: #7C3AED; }
-.cs-card__big { font-size: 40rpx; font-weight: 900; }
-.cs-card__body { flex: 1; min-width: 0; }
-.cs-card__name { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.cs-card__info { display: block; margin-top: 4rpx; font-size: 22rpx; color: var(--jst-color-text-secondary); }
-.cs-card__reason { display: block; margin-top: 4rpx; font-size: 20rpx; color: var(--jst-color-danger); }
-.cs-card__check { width: 48rpx; height: 48rpx; border-radius: 50%; border: 2rpx solid var(--jst-color-border); display: flex; align-items: center; justify-content: center; color: #7C3AED; font-size: 28rpx; font-weight: 800; }
-.cs-card--active .cs-card__check { background: #7C3AED; color: #fff; border-color: #7C3AED; }
-.cs-card--none { justify-content: space-between; }
-.cs-empty { padding: 60rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.cs-page {
+  min-height: 100vh;
+  padding-bottom: calc(180rpx + env(safe-area-inset-bottom));
+  background: $jst-bg-page;
+}
 
-.cs-footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: var(--jst-color-card-bg); box-shadow: 0 -8rpx 24rpx rgba(16,88,160,0.08); }
-.cs-footer__btn { height: 96rpx; line-height: 96rpx; border-radius: var(--jst-radius-md); background: linear-gradient(135deg, #7C3AED, #A855F7); color: #fff; font-size: 30rpx; font-weight: 800; border: none; }
+.cs-hero {
+  padding: 72rpx $jst-space-xl 48rpx;
+  color: $jst-text-inverse;
+  background: linear-gradient(135deg, $jst-indigo, $jst-indigo-light);
+}
+
+.cs-hero__label {
+  display: block;
+  font-size: $jst-font-sm;
+  color: rgba($jst-text-inverse, 0.76);
+}
+
+.cs-hero__amount {
+  display: block;
+  margin-top: $jst-space-xs;
+  font-size: 56rpx;
+  font-weight: $jst-weight-bold;
+}
+
+.cs-list {
+  padding: $jst-space-md 0;
+}
+
+.cs-skeleton {
+  margin: $jst-space-sm $jst-space-xl 0;
+}
+
+.cs-card {
+  display: flex;
+  align-items: center;
+  gap: $jst-space-lg;
+  margin: $jst-space-md $jst-space-xl 0;
+  padding: $jst-space-lg $jst-space-xl;
+  border-radius: $jst-radius-md;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
+}
+
+.cs-card--active {
+  border: 4rpx solid $jst-indigo;
+}
+
+.cs-card--disabled {
+  opacity: 0.5;
+}
+
+.cs-card__left {
+  min-width: 120rpx;
+  text-align: center;
+  color: $jst-indigo;
+}
+
+.cs-card__big {
+  font-size: 40rpx;
+  font-weight: $jst-weight-bold;
+}
+
+.cs-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.cs-card__name {
+  display: block;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
+}
+
+.cs-card__info {
+  display: block;
+  margin-top: 4rpx;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
+}
+
+.cs-card__reason {
+  display: block;
+  margin-top: 4rpx;
+  font-size: $jst-font-xs;
+  color: $jst-danger;
+}
+
+.cs-card__check {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid $jst-border;
+  border-radius: $jst-radius-round;
+  color: $jst-indigo;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+}
+
+.cs-card--active .cs-card__check {
+  border-color: $jst-indigo;
+  background: $jst-indigo;
+  color: $jst-text-inverse;
+}
+
+.cs-card--none {
+  justify-content: space-between;
+}
+
+.cs-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: $jst-space-lg $jst-space-xl calc($jst-space-lg + env(safe-area-inset-bottom));
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
+}
+
+.cs-footer__btn {
+  height: 96rpx;
+  border-radius: $jst-radius-md;
+  background: linear-gradient(135deg, $jst-indigo, $jst-indigo-light);
+  color: $jst-text-inverse;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+}
+
+::v-deep .cs-footer__btn.u-button {
+  min-height: 96rpx;
+  border: none;
+}
 </style>

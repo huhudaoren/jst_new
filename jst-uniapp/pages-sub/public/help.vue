@@ -1,7 +1,7 @@
 <!-- 中文注释: 客服与帮助中心页；对应原型 小程序原型图/help.html + help.png；静态 FAQ 与联系方式，无直接业务接口 -->
 <template>
   <view class="help-page">
-    <view class="help-page__nav">
+    <view class="help-page__nav" :style="{ paddingTop: navPaddingTop }">
       <view class="help-page__back" @tap="handleBack">←</view>
       <text class="help-page__nav-title">客服与帮助</text>
       <view class="help-page__nav-placeholder"></view>
@@ -299,6 +299,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
 .help-page {
   min-height: 100vh;
   padding-bottom: 40rpx;
@@ -310,7 +311,7 @@ export default {
   align-items: center;
   height: 96rpx;
   padding: 0 24rpx;
-  background: var(--jst-color-card-bg);
+  background: $jst-bg-card;
   border-bottom: 2rpx solid #eef1f6;
 }
 
@@ -322,15 +323,15 @@ export default {
 
 .help-page__back {
   font-size: 36rpx;
-  color: var(--jst-color-text-secondary);
+  color: $jst-text-regular;
 }
 
 .help-page__nav-title {
   flex: 1;
   text-align: center;
   font-size: 30rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
+  font-weight: 600;
+  color: $jst-text-primary;
 }
 
 .help-page__search {
@@ -339,24 +340,24 @@ export default {
   margin: 16rpx 24rpx 0;
   padding: 0 20rpx;
   height: 76rpx;
-  border-radius: var(--jst-radius-full);
+  border-radius: $jst-radius-round;
   background: #eff2f7;
 }
 
 .help-page__search-icon {
   font-size: 26rpx;
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-secondary;
 }
 
 .help-page__search-input {
   flex: 1;
   margin-left: 14rpx;
   font-size: 26rpx;
-  color: var(--jst-color-text);
+  color: $jst-text-primary;
 }
 
 .help-page__placeholder {
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-secondary;
 }
 
 .help-page__hero {
@@ -366,8 +367,8 @@ export default {
   margin: 18rpx 24rpx 0;
   padding: 26rpx 24rpx;
   border-radius: 24rpx;
-  background: linear-gradient(135deg, #0f4d95 0%, #1a5ea8 100%);
-  box-shadow: 0 12rpx 24rpx rgba(15, 77, 149, 0.12);
+  background: linear-gradient(150deg, #1A237E 0%, #283593 100%);
+  box-shadow: 0 4rpx 16rpx rgba(26, 35, 126, 0.12);
 }
 
 .help-page__hero-icon {
@@ -377,7 +378,7 @@ export default {
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background: var(--jst-color-white-18);
+  background: rgba(255,255,255,0.18);
   font-size: 32rpx;
 }
 
@@ -388,15 +389,15 @@ export default {
 .help-page__hero-title {
   display: block;
   font-size: 28rpx;
-  font-weight: 800;
-  color: var(--jst-color-card-bg);
+  font-weight: 600;
+  color: $jst-bg-card;
 }
 
 .help-page__hero-subtitle {
   display: block;
   margin-top: 6rpx;
   font-size: 20rpx;
-  color: var(--jst-color-white-78);
+  color: rgba(255,255,255,0.78);
 }
 
 .help-page__hero-tag {
@@ -404,16 +405,16 @@ export default {
   align-items: center;
   margin-top: 10rpx;
   padding: 6rpx 14rpx;
-  border-radius: var(--jst-radius-full);
+  border-radius: $jst-radius-round;
   background: rgba(39, 174, 96, 0.24);
   font-size: 20rpx;
-  font-weight: 700;
-  color: var(--jst-color-card-bg);
+  font-weight: 600;
+  color: $jst-bg-card;
 }
 
 .help-page__hero-arrow {
   font-size: 34rpx;
-  color: var(--jst-color-white-70);
+  color: rgba(255,255,255,0.7);
 }
 
 .help-page__contact-grid {
@@ -427,8 +428,8 @@ export default {
   width: calc(50% - 8rpx);
   padding: 22rpx 18rpx;
   border-radius: 24rpx;
-  background: var(--jst-color-card-bg);
-  box-shadow: 0 8rpx 18rpx rgba(35, 52, 116, 0.05);
+  background: $jst-bg-card;
+  box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04);
   text-align: center;
 }
 
@@ -467,30 +468,30 @@ export default {
   display: block;
   margin-top: 14rpx;
   font-size: 24rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
+  font-weight: 600;
+  color: $jst-text-primary;
 }
 
 .help-page__contact-value {
   display: block;
   margin-top: 8rpx;
   font-size: 20rpx;
-  color: var(--jst-color-brand);
+  color: $jst-brand;
 }
 
 .help-page__contact-desc {
   display: block;
   margin-top: 8rpx;
   font-size: 18rpx;
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-secondary;
 }
 
 .help-page__section {
   margin: 16rpx 24rpx 0;
   padding: 24rpx;
   border-radius: 24rpx;
-  background: var(--jst-color-card-bg);
-  box-shadow: 0 8rpx 18rpx rgba(35, 52, 116, 0.05);
+  background: $jst-bg-card;
+  box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04);
 }
 
 .help-page__section-head {
@@ -501,8 +502,8 @@ export default {
 
 .help-page__section-title {
   font-size: 28rpx;
-  font-weight: 800;
-  color: var(--jst-color-text);
+  font-weight: 600;
+  color: $jst-text-primary;
 }
 
 .help-page__cats {
@@ -519,16 +520,16 @@ export default {
 .help-page__cat {
   flex-shrink: 0;
   padding: 10rpx 20rpx;
-  border-radius: var(--jst-radius-full);
+  border-radius: $jst-radius-round;
   background: #f3f5fa;
   font-size: 20rpx;
-  color: var(--jst-color-text-secondary);
+  color: $jst-text-regular;
 }
 
 .help-page__cat--active {
-  background: var(--jst-color-brand-soft);
-  color: var(--jst-color-brand);
-  font-weight: 700;
+  background: $jst-brand-light;
+  color: $jst-brand;
+  font-weight: 600;
 }
 
 .help-page__faq-list {
@@ -536,7 +537,7 @@ export default {
 }
 
 .help-page__faq-item {
-  border-bottom: 2rpx solid var(--jst-color-border);
+  border-bottom: 2rpx solid $jst-border;
 }
 
 .help-page__faq-item:last-child {
@@ -556,19 +557,19 @@ export default {
   font-size: 24rpx;
   font-weight: 600;
   line-height: 1.5;
-  color: var(--jst-color-text);
+  color: $jst-text-primary;
 }
 
 .help-page__faq-icon {
   font-size: 24rpx;
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-secondary;
 }
 
 .help-page__faq-answer {
   padding: 0 0 24rpx;
   font-size: 22rpx;
   line-height: 1.8;
-  color: var(--jst-color-text-secondary);
+  color: $jst-text-regular;
 }
 
 .help-page__promise-item {
@@ -592,8 +593,8 @@ export default {
 .help-page__promise-title {
   display: block;
   font-size: 24rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
+  font-weight: 600;
+  color: $jst-text-primary;
 }
 
 .help-page__promise-desc {
@@ -601,7 +602,7 @@ export default {
   margin-top: 8rpx;
   font-size: 22rpx;
   line-height: 1.6;
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-secondary;
 }
 
 .help-page__doc-item {
@@ -609,7 +610,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 24rpx 0;
-  border-bottom: 2rpx solid var(--jst-color-border);
+  border-bottom: 2rpx solid $jst-border;
 }
 
 .help-page__doc-item:last-child {
@@ -618,12 +619,12 @@ export default {
 
 .help-page__doc-name {
   font-size: 26rpx;
-  color: var(--jst-color-text);
+  color: $jst-text-primary;
 }
 
 .help-page__doc-arrow {
   font-size: 28rpx;
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-secondary;
 }
 
 .help-page__footer {
@@ -634,17 +635,17 @@ export default {
 .help-page__footer-text {
   display: block;
   font-size: 24rpx;
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-secondary;
 }
 
 .help-page__footer-button {
   width: 360rpx;
   height: 84rpx;
   margin-top: 18rpx;
-  border-radius: var(--jst-radius-full);
-  background: linear-gradient(135deg, var(--jst-color-primary) 0%, var(--jst-color-primary-light) 100%);
+  border-radius: $jst-radius-round;
+  background: linear-gradient(135deg, #ff6b35, #ff8c61);
   font-size: 26rpx;
-  font-weight: 700;
-  color: var(--jst-color-card-bg);
+  font-weight: 600;
+  color: $jst-bg-card;
 }
 </style>

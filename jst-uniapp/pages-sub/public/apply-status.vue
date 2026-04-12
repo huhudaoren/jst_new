@@ -3,7 +3,7 @@
   <view class="apply-status-page">
     <jst-loading :loading="loading" text="查询中..." />
 
-    <view class="apply-status-page__nav">
+    <view class="apply-status-page__nav" :style="{ paddingTop: navPaddingTop }">
       <view class="apply-status-page__back" @tap="handleBack">←</view>
       <text class="apply-status-page__nav-title">申请状态查询</text>
       <view class="apply-status-page__nav-placeholder"></view>
@@ -140,7 +140,7 @@ export default {
         return '--'
       }
 
-      const date = new Date(value)
+      const date = new Date(String(value).replace(/ /g, 'T'))
       if (Number.isNaN(date.getTime())) {
         return value
       }
@@ -191,6 +191,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
 .apply-status-page {
   min-height: 100vh;
   background: #f4f6fb;
@@ -219,15 +220,15 @@ export default {
   border-radius: 16rpx;
   background: rgba(255, 255, 255, 0.12);
   font-size: 30rpx;
-  color: var(--jst-color-card-bg);
+  color: $jst-bg-card;
 }
 
 .apply-status-page__nav-title {
   flex: 1;
   text-align: center;
   font-size: 32rpx;
-  font-weight: 800;
-  color: var(--jst-color-card-bg);
+  font-weight: 600;
+  color: $jst-bg-card;
 }
 
 .apply-status-page__hero {
@@ -237,7 +238,7 @@ export default {
 .apply-status-page__hero-title {
   display: block;
   font-size: 34rpx;
-  font-weight: 800;
+  font-weight: 600;
   color: #2c3448;
 }
 
@@ -258,8 +259,8 @@ export default {
 .apply-status-page__history {
   margin-bottom: 20rpx;
   padding: 28rpx;
-  border-radius: 28rpx;
-  background: var(--jst-color-card-bg);
+  border-radius: 20rpx;
+  background: $jst-bg-card;
   box-shadow: 0 10rpx 24rpx rgba(35, 52, 116, 0.06);
 }
 
@@ -268,7 +269,7 @@ export default {
 .apply-status-page__history-title {
   display: block;
   font-size: 30rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: #2c3448;
 }
 
@@ -294,13 +295,13 @@ export default {
   border-radius: 20rpx;
   background: linear-gradient(135deg, #25328f 0%, #3553c4 100%);
   font-size: 28rpx;
-  font-weight: 700;
-  color: var(--jst-color-card-bg);
+  font-weight: 600;
+  color: $jst-bg-card;
 }
 
 .apply-status-page__query[disabled] {
-  background: var(--jst-color-border);
-  color: var(--jst-color-text-tertiary);
+  background: $jst-border;
+  color: $jst-text-secondary;
 }
 
 .apply-status-page__result-head,
@@ -326,7 +327,7 @@ export default {
   padding: 10rpx 18rpx;
   border-radius: 999rpx;
   font-size: 22rpx;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .apply-status-page__status-chip--draft,
@@ -377,7 +378,7 @@ export default {
 .apply-status-page__remark-label {
   display: block;
   font-size: 22rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: #4f5d78;
 }
 
@@ -423,7 +424,7 @@ export default {
 
 .apply-status-page__history-status {
   font-size: 22rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: #3553c4;
 }
 </style>

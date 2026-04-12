@@ -8,14 +8,20 @@ export default {
 
 <style lang="scss">
 @import '@/uni_modules/uni-scss/index.scss';
+@import 'uview-ui/index.scss';
 @import '@/static/customicons.css';
-@import '@/styles/variables.scss';
+@import '@/styles/index.scss';
+@import '@/styles/animations.scss';
 
 page {
   background: var(--jst-color-page-bg);
   color: var(--jst-color-text);
   font-family: var(--jst-font-family);
+  font-size: 28rpx;
+  line-height: 1.6;
 }
+
+::-webkit-scrollbar { display: none; }
 
 view,
 text,

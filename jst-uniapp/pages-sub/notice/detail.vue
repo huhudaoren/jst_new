@@ -1,7 +1,7 @@
 <!-- 中文注释: 公告详情页；对应原型 小程序原型图/notice-detail.html；对应接口 GET /jst/wx/notice/{id} -->
 <template>
   <view class="notice-detail">
-    <view class="notice-detail__header">
+    <view class="notice-detail__header" :style="{ paddingTop: navPaddingTop }">
       <view class="notice-detail__back" @tap="goBack">←</view>
       <text class="notice-detail__header-title">公告详情</text>
       <button class="notice-detail__more" open-type="share">⋯</button>
@@ -137,7 +137,7 @@ export default {
         return '--'
       }
 
-      const date = new Date(value)
+      const date = new Date(String(value).replace(/ /g, 'T'))
       if (Number.isNaN(date.getTime())) {
         return value
       }
@@ -161,10 +161,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
 .notice-detail {
   min-height: 100vh;
   padding: 24rpx 24rpx 180rpx;
-  background: var(--jst-color-page-bg);
+  background: #F7F8FA;
 }
 
 .notice-detail__header {
@@ -180,10 +181,10 @@ export default {
   width: 72rpx;
   height: 72rpx;
   border-radius: 22rpx;
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-card);
+  background: $jst-bg-card;
+  box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04);
   font-size: 30rpx;
-  color: var(--jst-color-text);
+  color: $jst-text-primary;
   padding: 0;
   border: none;
   line-height: 72rpx;
@@ -194,23 +195,23 @@ export default {
   flex: 1;
   margin: 0 16rpx;
   font-size: 32rpx;
-  font-weight: 800;
-  color: var(--jst-color-text);
+  font-weight: 600;
+  color: $jst-text-primary;
   text-align: center;
 }
 
 .notice-detail__article {
   overflow: hidden;
   margin-top: 24rpx;
-  border-radius: var(--jst-radius-lg);
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-card);
+  border-radius: 32rpx;
+  background: $jst-bg-card;
+  box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04);
 }
 
 .notice-detail__cover {
   width: 100%;
   height: 320rpx;
-  background: var(--jst-color-border);
+  background: $jst-border;
 }
 
 .notice-detail__article-body {
@@ -224,25 +225,26 @@ export default {
 }
 
 .notice-detail__tag {
-  padding: 8rpx 18rpx;
-  border-radius: var(--jst-radius-full);
-  background: var(--jst-color-brand-soft);
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  background: #EAF4FC;
   font-size: 22rpx;
-  color: var(--jst-color-brand);
+  font-weight: 500;
+  color: #283593;
 }
 
 .notice-detail__tag--top {
-  background: var(--jst-color-primary-soft);
-  color: var(--jst-color-primary);
+  background: #FFF3EE;
+  color: #ff6b35;
 }
 
 .notice-detail__title {
   display: block;
   margin-top: 20rpx;
   font-size: 40rpx;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.45;
-  color: var(--jst-color-text);
+  color: $jst-text-primary;
 }
 
 .notice-detail__meta {
@@ -254,14 +256,14 @@ export default {
 
 .notice-detail__meta-item {
   font-size: 22rpx;
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-secondary;
 }
 
 .notice-detail__content {
   margin-top: 28rpx;
   font-size: 28rpx;
   line-height: 1.85;
-  color: var(--jst-color-text-secondary);
+  color: $jst-text-regular;
 }
 
 .notice-detail__bottom {
@@ -272,9 +274,9 @@ export default {
   display: flex;
   gap: 16rpx;
   padding: 18rpx;
-  border-radius: var(--jst-radius-lg);
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-strong);
+  border-radius: 32rpx;
+  background: $jst-bg-card;
+  box-shadow: 0 4rpx 16rpx rgba(20, 30, 60, 0.06);
 }
 
 .notice-detail__button {
@@ -283,19 +285,20 @@ export default {
   justify-content: center;
   flex: 1;
   height: 84rpx;
-  border-radius: var(--jst-radius-md);
+  border-radius: $jst-radius-xl;
   font-size: 28rpx;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .notice-detail__button--secondary {
-  border: 2rpx solid var(--jst-color-border);
-  color: var(--jst-color-text-secondary);
-  background: var(--jst-color-card-bg);
+  border: 2rpx solid $jst-border;
+  color: $jst-text-regular;
+  background: $jst-bg-card;
 }
 
 .notice-detail__button--primary {
-  color: var(--jst-color-card-bg);
-  background: linear-gradient(135deg, var(--jst-color-primary) 0%, var(--jst-color-primary-light) 100%);
+  color: #fff;
+  background: linear-gradient(135deg, #283593, #3949AB);
+  box-shadow: 0 4rpx 12rpx rgba(40, 53, 147, 0.2);
 }
 </style>

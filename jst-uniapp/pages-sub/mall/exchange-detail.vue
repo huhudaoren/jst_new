@@ -5,7 +5,7 @@
                POST /jst/wx/mall/exchange/{id}/pay/mock-success -->
 <template>
   <view class="ed-page">
-    <view class="ed-header">
+    <view class="ed-header" :style="{ paddingTop: navPaddingTop }">
       <text class="ed-header__no">{{ detail.exchangeNo || '--' }}</text>
       <text :class="['ed-header__status', 'ed-header__status--' + detail.status]">{{ statusLabel(detail.status) }}</text>
     </view>
@@ -103,34 +103,35 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.ed-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
+.ed-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: #F7F8FA; }
 .ed-header { padding: 64rpx 32rpx 48rpx; background: linear-gradient(135deg, #F5A623, #FF9800); color: #fff; }
-.ed-header__no { display: block; font-size: 24rpx; color: var(--jst-color-white-76); }
-.ed-header__status { display: inline-block; margin-top: 12rpx; padding: 6rpx 20rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-white-18); color: #fff; font-size: 22rpx; font-weight: 700; }
+.ed-header__no { display: block; font-size: 24rpx; color: rgba(255,255,255,0.76); }
+.ed-header__status { display: inline-block; margin-top: 12rpx; padding: 6rpx 20rpx; border-radius: $jst-radius-round; background: rgba(255,255,255,0.18); color: #fff; font-size: 22rpx; font-weight: 600; }
 
-.ed-section { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); }
-.ed-section__title { display: block; font-size: 26rpx; font-weight: 700; color: var(--jst-color-text); margin-bottom: 16rpx; }
+.ed-section { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
+.ed-section__title { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 16rpx; }
 
 .ed-goods { display: flex; gap: 20rpx; }
-.ed-goods__img { width: 160rpx; height: 160rpx; border-radius: var(--jst-radius-sm); background: var(--jst-color-page-bg); }
+.ed-goods__img { width: 160rpx; height: 160rpx; border-radius: $jst-radius-lg; background: #F7F8FA; }
 .ed-goods__info { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.ed-goods__name { font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.ed-goods__qty { margin-top: 6rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.ed-goods__name { font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
+.ed-goods__qty { margin-top: 6rpx; font-size: 22rpx; color: $jst-text-secondary; }
 .ed-goods__price { margin-top: auto; display: flex; align-items: baseline; gap: 12rpx; }
-.ed-goods__points { font-size: 30rpx; font-weight: 800; color: #F5A623; }
-.ed-goods__cash { font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.ed-goods__points { font-size: 30rpx; font-weight: 600; color: #F5A623; }
+.ed-goods__cash { font-size: 22rpx; color: $jst-text-secondary; }
 
-.ed-addr__name { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.ed-addr__detail { display: block; margin-top: 6rpx; font-size: 24rpx; color: var(--jst-color-text-secondary); }
+.ed-addr__name { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
+.ed-addr__detail { display: block; margin-top: 6rpx; font-size: 24rpx; color: $jst-text-regular; }
 
 .ed-timeline__item { display: flex; align-items: flex-start; gap: 20rpx; padding: 16rpx 0; position: relative; }
-.ed-timeline__item + .ed-timeline__item::before { content: ''; position: absolute; left: 14rpx; top: -16rpx; width: 2rpx; height: 32rpx; background: var(--jst-color-border); }
-.ed-timeline__dot { width: 28rpx; height: 28rpx; border-radius: 50%; background: var(--jst-color-border); margin-top: 8rpx; }
+.ed-timeline__item + .ed-timeline__item::before { content: ''; position: absolute; left: 14rpx; top: -16rpx; width: 2rpx; height: 32rpx; background: $jst-border; }
+.ed-timeline__dot { width: 28rpx; height: 28rpx; border-radius: 50%; background: $jst-border; margin-top: 8rpx; }
 .ed-timeline__item--done .ed-timeline__dot { background: #F5A623; }
-.ed-timeline__body { flex: 1; display: flex; flex-direction: column; font-size: 26rpx; color: var(--jst-color-text); }
-.ed-timeline__time { margin-top: 4rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.ed-timeline__body { flex: 1; display: flex; flex-direction: column; font-size: 26rpx; color: $jst-text-primary; }
+.ed-timeline__time { margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; }
 
-.ed-footer { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 20rpx; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: var(--jst-color-card-bg); box-shadow: 0 -8rpx 24rpx rgba(16,88,160,0.08); }
-.ed-footer__primary { flex: 1; height: 88rpx; line-height: 88rpx; border-radius: var(--jst-radius-md); background: linear-gradient(135deg, #F5A623, #FF9800); color: #fff; font-size: 30rpx; font-weight: 800; border: none; }
-.ed-footer__danger { flex: 1; height: 88rpx; line-height: 88rpx; border-radius: var(--jst-radius-md); background: var(--jst-color-danger-soft); color: var(--jst-color-danger); font-size: 30rpx; font-weight: 800; border: none; }
+.ed-footer { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 20rpx; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: $jst-bg-card; box-shadow: 0 -2rpx 8rpx rgba(20, 30, 60, 0.04); }
+.ed-footer__primary { flex: 1; height: 88rpx; line-height: 88rpx; border-radius: $jst-radius-xl; background: linear-gradient(135deg, #F5A623, #FF9800); color: #fff; font-size: 30rpx; font-weight: 600; border: none; }
+.ed-footer__danger { flex: 1; height: 88rpx; line-height: 88rpx; border-radius: $jst-radius-xl; background: $jst-danger-light; color: $jst-danger; font-size: 30rpx; font-weight: 600; border: none; }
 </style>

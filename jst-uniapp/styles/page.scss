@@ -1,0 +1,28 @@
+@import './variables.scss';
+@import './mixins.scss';
+
+.jst-page {
+  min-height: 100vh;
+  background: var(--jst-color-page-bg);
+  padding: 0 var(--jst-space-md) calc(env(safe-area-inset-bottom) + var(--jst-space-xl));
+  box-sizing: border-box;
+}
+
+.jst-page--gradient {
+  @include header-gradient(320rpx);
+  min-height: 100vh;
+  padding: 0 var(--jst-space-md) calc(env(safe-area-inset-bottom) + var(--jst-space-xl));
+  box-sizing: border-box;
+}
+
+.jst-page--flat {
+  min-height: 100vh;
+  background: var(--jst-color-card-bg);
+  padding: 0 var(--jst-space-md) calc(env(safe-area-inset-bottom) + var(--jst-space-xl));
+  box-sizing: border-box;
+}
+
+.jst-section      { margin-bottom: var(--jst-space-xxl); }
+.jst-section--sm  { margin-bottom: var(--jst-space-lg); }
+.jst-stack > * + * { margin-top: var(--jst-space-md); }
+.jst-stack-lg > * + * { margin-top: var(--jst-space-lg); }

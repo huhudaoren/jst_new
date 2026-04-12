@@ -3,7 +3,7 @@
   <view class="partner-apply-page">
     <jst-loading :loading="submitting" text="申请提交中..." />
 
-    <view class="partner-apply-page__nav">
+    <view class="partner-apply-page__nav" :style="{ paddingTop: navPaddingTop }">
       <view class="partner-apply-page__back" @tap="handleBack">←</view>
       <text class="partner-apply-page__nav-title">赛事方入驻申请</text>
       <view class="partner-apply-page__nav-placeholder"></view>
@@ -327,6 +327,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
 .partner-apply-page {
   min-height: 100vh;
   padding-bottom: calc(128rpx + env(safe-area-inset-bottom));
@@ -355,7 +356,7 @@ export default {
   height: 56rpx;
   border-radius: 16rpx;
   background: rgba(255, 255, 255, 0.12);
-  color: var(--jst-color-card-bg);
+  color: $jst-bg-card;
   font-size: 30rpx;
 }
 
@@ -363,8 +364,8 @@ export default {
   flex: 1;
   text-align: center;
   font-size: 32rpx;
-  font-weight: 800;
-  color: var(--jst-color-card-bg);
+  font-weight: 600;
+  color: $jst-bg-card;
 }
 
 .partner-apply-page__steps {
@@ -372,7 +373,7 @@ export default {
   gap: 0;
   margin: 0;
   padding: 20rpx 12rpx 18rpx;
-  background: var(--jst-color-card-bg);
+  background: $jst-bg-card;
   border-bottom: 2rpx solid #eef1f6;
 }
 
@@ -410,15 +411,15 @@ export default {
   height: 48rpx;
   border-radius: 50%;
   border: 4rpx solid #d8deea;
-  background: var(--jst-color-card-bg);
+  background: $jst-bg-card;
   font-size: 22rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: #8f98ab;
 }
 
 .partner-apply-page__step--active .partner-apply-page__step-circle {
-  border-color: var(--jst-color-success);
-  color: var(--jst-color-success);
+  border-color: $jst-success;
+  color: $jst-success;
 }
 
 .partner-apply-page__step-label {
@@ -427,8 +428,8 @@ export default {
 }
 
 .partner-apply-page__step--active .partner-apply-page__step-label {
-  font-weight: 700;
-  color: var(--jst-color-success);
+  font-weight: 600;
+  color: $jst-success;
 }
 
 .partner-apply-page__body {
@@ -438,8 +439,8 @@ export default {
 .partner-apply-page__card {
   margin-bottom: 20rpx;
   padding: 28rpx;
-  border-radius: 28rpx;
-  background: var(--jst-color-card-bg);
+  border-radius: 20rpx;
+  background: $jst-bg-card;
   box-shadow: 0 10rpx 24rpx rgba(35, 52, 116, 0.06);
 }
 
@@ -447,7 +448,7 @@ export default {
   display: flex;
   align-items: center;
   font-size: 30rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: #2c3448;
 }
 
@@ -457,7 +458,7 @@ export default {
   height: 28rpx;
   margin-right: 10rpx;
   border-radius: 999rpx;
-  background: var(--jst-color-success);
+  background: $jst-success;
 }
 
 .partner-apply-page__card-head {
@@ -486,12 +487,12 @@ export default {
 
 .partner-apply-page__label::after {
   content: ' *';
-  color: var(--jst-color-danger);
+  color: $jst-danger;
 }
 
 .partner-apply-page__label--optional::after {
   content: '（选填）';
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-secondary;
   font-weight: 400;
 }
 
@@ -528,13 +529,13 @@ export default {
 
 .partner-apply-page__upload-icon {
   font-size: 42rpx;
-  color: var(--jst-color-success);
+  color: $jst-success;
 }
 
 .partner-apply-page__upload-title {
   margin-top: 14rpx;
   font-size: 26rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: #2c3448;
 }
 
@@ -553,7 +554,7 @@ export default {
   align-items: center;
   gap: 18rpx;
   padding: 18rpx 0;
-  border-bottom: 2rpx solid var(--jst-color-border);
+  border-bottom: 2rpx solid $jst-border;
 }
 
 .partner-apply-page__file-item:last-child {
@@ -576,7 +577,7 @@ export default {
   display: block;
   font-size: 24rpx;
   font-weight: 600;
-  color: var(--jst-color-text);
+  color: $jst-text-primary;
 }
 
 .partner-apply-page__file-meta {
@@ -584,13 +585,13 @@ export default {
   margin-top: 8rpx;
   font-size: 20rpx;
   line-height: 1.6;
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-secondary;
   word-break: break-all;
 }
 
 .partner-apply-page__file-delete {
   font-size: 22rpx;
-  color: var(--jst-color-danger);
+  color: $jst-danger;
 }
 
 .partner-apply-page__agreement {
@@ -609,15 +610,15 @@ export default {
   margin-top: 4rpx;
   border: 2rpx solid #d8deea;
   border-radius: 10rpx;
-  background: var(--jst-color-card-bg);
+  background: $jst-bg-card;
   font-size: 20rpx;
-  color: var(--jst-color-card-bg);
+  color: $jst-bg-card;
   flex-shrink: 0;
 }
 
 .partner-apply-page__agreement-check--active {
-  border-color: var(--jst-color-success);
-  background: var(--jst-color-success);
+  border-color: $jst-success;
+  background: $jst-success;
 }
 
 .partner-apply-page__agreement-text {
@@ -648,8 +649,8 @@ export default {
   display: flex;
   gap: 16rpx;
   padding: 18rpx 24rpx calc(18rpx + env(safe-area-inset-bottom));
-  background: var(--jst-color-card-bg);
-  box-shadow: 0 -10rpx 24rpx rgba(35, 52, 116, 0.08);
+  background: $jst-bg-card;
+  box-shadow: 0 -2rpx 8rpx rgba(20, 30, 60, 0.04);
 }
 
 .partner-apply-page__footer-secondary,
@@ -657,7 +658,7 @@ export default {
   height: 88rpx;
   border-radius: 20rpx;
   font-size: 28rpx;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .partner-apply-page__footer-secondary {
@@ -669,11 +670,11 @@ export default {
 .partner-apply-page__submit {
   flex: 1;
   background: linear-gradient(135deg, #1b5e20 0%, #43a047 100%);
-  color: var(--jst-color-card-bg);
+  color: $jst-bg-card;
 }
 
 .partner-apply-page__submit[disabled] {
-  background: var(--jst-color-border);
-  color: var(--jst-color-text-tertiary);
+  background: $jst-border;
+  color: $jst-text-secondary;
 }
 </style>

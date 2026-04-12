@@ -1,11 +1,12 @@
 <template>
   <view class="my-course-page">
     <jst-loading :loading="pageLoading" text="课程列表加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="my-course-page__nav">
       <view class="my-course-page__back" @tap="handleBack"><</view>
       <text class="my-course-page__nav-title">我的课程</text>
-      <view class="my-course-page__nav-action" @tap="goCourseTab">去选课</view>
+      <u-button class="my-course-page__nav-action" size="mini" plain @click="goCourseTab">去选课</u-button>
     </view>
 
     <view class="my-course-page__tabs">
@@ -78,12 +79,12 @@
         </view>
 
         <view class="my-course-page__actions">
-          <button class="my-course-page__action my-course-page__action--ghost" @tap="openDetail(item)">
+          <u-button class="my-course-page__action my-course-page__action--ghost" @click="openDetail(item)">
             查看详情
-          </button>
-          <button class="my-course-page__action my-course-page__action--primary" @tap="openDetail(item)">
+          </u-button>
+          <u-button class="my-course-page__action my-course-page__action--primary" @click="openDetail(item)">
             {{ item.completeStatus === 'completed' ? '重新学习' : '继续学习' }}
-          </button>
+          </u-button>
         </view>
       </view>
     </view>
@@ -223,47 +224,45 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .my-course-page {
   min-height: 100vh;
-  background: #f4f7fc;
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg $jst-page-padding 0;
 }
 
 .my-course-page__nav {
   display: flex;
   align-items: center;
   height: 96rpx;
-  padding: 0 24rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 22rpx rgba(14, 58, 113, 0.05);
+  padding: 0 $jst-page-padding;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .my-course-page__back {
   width: 72rpx;
   flex-shrink: 0;
   font-size: 34rpx;
-  color: #66768f;
+  color: $jst-text-secondary;
 }
 
 .my-course-page__nav-title {
   flex: 1;
   text-align: center;
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.my-course-page__nav-action {
-  width: 100rpx;
-  flex-shrink: 0;
-  font-size: 22rpx;
-  text-align: right;
-  color: #2f7de1;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .my-course-page__tabs {
   display: flex;
-  padding: 12rpx 12rpx 10rpx;
-  background: #ffffff;
+  padding: $jst-space-sm $jst-space-sm 10rpx;
+  background: $jst-bg-card;
 }
 
 .my-course-page__tab {
@@ -273,25 +272,25 @@ export default {
   align-items: center;
   justify-content: center;
   margin: 0 6rpx;
-  border-radius: 999rpx;
-  color: #73829b;
-  font-size: 24rpx;
+  border-radius: $jst-radius-round;
+  color: $jst-text-secondary;
+  font-size: $jst-font-sm;
 }
 
 .my-course-page__tab--active {
-  color: #2f7de1;
-  background: #eef4ff;
-  font-weight: 700;
+  color: $jst-brand;
+  background: $jst-brand-light;
+  font-weight: $jst-weight-semibold;
 }
 
 .my-course-page__summary {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12rpx;
-  margin: 20rpx 24rpx 0;
-  padding: 24rpx 20rpx;
-  border-radius: 28rpx;
-  background: linear-gradient(135deg, #0c3d6b 0%, #2f7de1 100%);
+  gap: $jst-space-sm;
+  margin: $jst-space-lg $jst-page-padding 0;
+  padding: $jst-space-lg 20rpx;
+  border-radius: $jst-radius-lg;
+  background: linear-gradient(135deg, $jst-brand-dark 0%, $jst-brand 100%);
 }
 
 .my-course-page__summary-item {
@@ -301,33 +300,33 @@ export default {
 .my-course-page__summary-num {
   display: block;
   font-size: 34rpx;
-  font-weight: 800;
-  color: #ffffff;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-inverse;
 }
 
 .my-course-page__summary-label {
   display: block;
-  margin-top: 8rpx;
-  font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.74);
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-xs;
+  color: rgba($jst-text-inverse, 0.78);
 }
 
 .my-course-page__list {
-  padding: 20rpx 24rpx 28rpx;
+  padding: $jst-space-lg $jst-page-padding 28rpx;
 }
 
 .my-course-page__card {
-  margin-bottom: 20rpx;
-  border-radius: 28rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 28rpx rgba(14, 58, 113, 0.06);
+  margin-bottom: $jst-space-lg;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
   overflow: hidden;
 }
 
 .my-course-page__card-header {
   display: flex;
-  gap: 16rpx;
-  padding: 24rpx;
+  gap: $jst-space-md;
+  padding: $jst-space-lg;
 }
 
 .my-course-page__cover {
@@ -336,7 +335,7 @@ export default {
   border-radius: 22rpx;
   overflow: hidden;
   flex-shrink: 0;
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
+  background: linear-gradient(135deg, $jst-brand 0%, $jst-brand-dark 100%);
 }
 
 .my-course-page__cover-image,
@@ -352,13 +351,13 @@ export default {
 }
 
 .my-course-page__cover-fallback--completed {
-  background: linear-gradient(135deg, #1ea96b 0%, #52d68a 100%);
+  background: linear-gradient(135deg, $jst-success 0%, $jst-success-light 100%);
 }
 
 .my-course-page__cover-emoji {
   font-size: 46rpx;
-  font-weight: 800;
-  color: #ffffff;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-inverse;
 }
 
 .my-course-page__card-main {
@@ -368,22 +367,22 @@ export default {
 
 .my-course-page__card-title {
   display: block;
-  font-size: 30rpx;
-  font-weight: 700;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
   line-height: 1.5;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .my-course-page__card-meta {
   display: block;
   margin-top: 10rpx;
-  font-size: 22rpx;
+  font-size: $jst-font-xs;
   line-height: 1.6;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .my-course-page__progress {
-  padding: 0 24rpx 24rpx;
+  padding: 0 $jst-page-padding $jst-space-lg;
 }
 
 .my-course-page__progress-header {
@@ -395,65 +394,79 @@ export default {
 .my-course-page__progress-label,
 .my-course-page__progress-num,
 .my-course-page__progress-foot {
-  font-size: 22rpx;
+  font-size: $jst-font-xs;
 }
 
 .my-course-page__progress-label,
 .my-course-page__progress-foot {
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .my-course-page__progress-num {
-  font-weight: 700;
-  color: #2f7de1;
+  font-weight: $jst-weight-semibold;
+  color: $jst-brand;
 }
 
 .my-course-page__progress-bar {
   height: 12rpx;
   margin-top: 14rpx;
-  border-radius: 999rpx;
-  background: #edf2fb;
+  border-radius: $jst-radius-round;
+  background: $jst-border;
   overflow: hidden;
 }
 
 .my-course-page__progress-fill {
   height: 100%;
-  border-radius: 999rpx;
-  background: linear-gradient(90deg, #2f7de1 0%, #4a98ff 100%);
+  border-radius: $jst-radius-round;
+  background: linear-gradient(90deg, $jst-brand 0%, $jst-brand-dark 100%);
 }
 
 .my-course-page__progress-fill--done {
-  background: linear-gradient(90deg, #1ea96b 0%, #52d68a 100%);
+  background: linear-gradient(90deg, $jst-success 0%, $jst-success-light 100%);
 }
 
 .my-course-page__progress-foot {
   display: block;
-  margin-top: 10rpx;
+  margin-top: $jst-space-xs;
   line-height: 1.6;
 }
 
 .my-course-page__actions {
   display: flex;
-  gap: 12rpx;
-  padding: 0 24rpx 24rpx;
+  gap: $jst-space-sm;
+  padding: 0 $jst-page-padding $jst-space-lg;
 }
 
 .my-course-page__action {
   flex: 1;
   height: 76rpx;
-  border-radius: 999rpx;
-  font-size: 24rpx;
-  font-weight: 700;
+  border-radius: $jst-radius-round;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
 }
 
-.my-course-page__action--ghost {
-  border: 2rpx solid #d6e4fb;
-  background: #ffffff;
-  color: #2f7de1;
+::v-deep .my-course-page__nav-action.u-button {
+  min-width: 118rpx;
+  height: 56rpx;
+  border-color: $jst-brand;
+  border-radius: $jst-radius-round;
+  color: $jst-brand;
+  font-size: $jst-font-xs;
 }
 
-.my-course-page__action--primary {
-  background: #2f7de1;
-  color: #ffffff;
+::v-deep .my-course-page__action.u-button {
+  min-height: 76rpx;
+}
+
+::v-deep .my-course-page__action--ghost.u-button {
+  border-color: $jst-border;
+  background: $jst-bg-card;
+  color: $jst-brand;
+}
+
+::v-deep .my-course-page__action--primary.u-button {
+  border: none;
+  background: $jst-brand;
+  color: $jst-text-inverse;
 }
 </style>

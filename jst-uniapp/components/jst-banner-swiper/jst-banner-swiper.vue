@@ -36,7 +36,7 @@
     <view class="banner-swiper__dots">
       <view
         v-for="(item, index) in list"
-        :key="item.id + '-dot'"
+        :key="index"
         class="banner-swiper__dot"
         :class="{ 'banner-swiper__dot--active': current === index }"
       ></view>
@@ -64,22 +64,24 @@ export default {
     },
 
     handleTap(item) {
-      this.$emit('tap', item)
+      this.$emit('item-tap', item)
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .banner-swiper {
   position: relative;
 }
 
 .banner-swiper__inner {
   height: 304rpx;
-  border-radius: var(--jst-radius-lg);
+  border-radius: $jst-radius-xl;
   overflow: hidden;
-  box-shadow: var(--jst-shadow-strong);
+  box-shadow: $jst-shadow-lg;
 }
 
 .banner-swiper__slide {
@@ -91,14 +93,14 @@ export default {
 .banner-swiper__image {
   width: 100%;
   height: 100%;
-  background: var(--jst-color-border);
+  background: $jst-border;
 }
 
 .banner-swiper__image--fallback {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(140deg, var(--jst-color-brand) 0%, var(--jst-color-brand-light) 100%);
+  background: $jst-brand-gradient;
 }
 
 .banner-swiper__fallback-icon {
@@ -111,52 +113,53 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 28rpx;
-  background: linear-gradient(180deg, transparent 0%, var(--jst-color-mask-dark) 100%);
+  padding: $jst-space-lg;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.42) 100%);
 }
 
 .banner-swiper__tag {
   align-self: flex-start;
-  padding: 8rpx 16rpx;
-  border-radius: var(--jst-radius-full);
-  background: var(--jst-color-white-18);
-  font-size: 20rpx;
-  color: var(--jst-color-card-bg);
+  padding: $jst-space-xs $jst-space-md;
+  border-radius: $jst-radius-round;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: $jst-font-xs;
+  color: $jst-text-inverse;
 }
 
 .banner-swiper__title {
   display: block;
-  margin-top: 16rpx;
-  font-size: 36rpx;
+  margin-top: $jst-space-md;
+  font-size: $jst-font-xl;
   font-weight: 800;
   line-height: 1.35;
-  color: var(--jst-color-card-bg);
+  color: $jst-text-inverse;
 }
 
 .banner-swiper__subtitle {
   display: block;
-  margin-top: 10rpx;
-  font-size: 24rpx;
-  color: var(--jst-color-white-78);
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-sm;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .banner-swiper__dots {
   position: absolute;
-  right: 24rpx;
+  right: $jst-space-lg;
   bottom: 22rpx;
   display: flex;
-  gap: 8rpx;
+  gap: $jst-space-xs;
 }
 
 .banner-swiper__dot {
   width: 12rpx;
   height: 12rpx;
-  border-radius: 999rpx;
-  background: var(--jst-color-white-24);
+  border-radius: $jst-radius-round;
+  background: rgba(255, 255, 255, 0.24);
+  transition: width $jst-duration-normal $jst-easing, background $jst-duration-normal $jst-easing;
 }
 
 .banner-swiper__dot--active {
   width: 30rpx;
-  background: var(--jst-color-card-bg);
+  background: $jst-text-inverse;
 }
 </style>

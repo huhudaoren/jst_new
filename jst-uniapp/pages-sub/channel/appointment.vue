@@ -5,7 +5,7 @@
 <template>
   <view class="ta-page">
     <!-- 导航 -->
-    <view class="ta-header">
+    <view class="ta-header" :style="{ paddingTop: navPaddingTop }">
       <view class="ta-header__back" @tap="goBack">←</view>
       <text class="ta-header__title">{{ isDetail ? '团队预约详情' : '团队预约' }}</text>
     </view>
@@ -37,9 +37,14 @@
           </picker>
         </view>
         <view v-if="remaining" class="ta-remaining">
-          <text>剩余名额: </text>
-          <text :class="{ 'ta-remaining--danger': remaining.remainingCount <= 0 }">{{ remaining.remainingCount != null ? remaining.remainingCount : '--' }}</text>
-          <text> / {{ remaining.totalCapacity || '--' }}</text>
+          <text>剩余名额: {{ remaining.remainingCount != null ? remaining.remainingCount : '--' }} / {{ remaining.totalCapacity || '--' }}</text>
+          <u-tag
+            :text="remaining.remainingCount <= 0 ? '已满' : '可预约'"
+            :type="remaining.remainingCount <= 0 ? 'error' : 'success'"
+            size="mini"
+            plain
+            shape="circle"
+          ></u-tag>
         </view>
       </view>
 
@@ -49,16 +54,14 @@
 
         <!-- 从已绑定学生选择 -->
         <view class="ta-subsection-title">从已绑定学生选择</view>
-        <view v-for="stu in boundStudents" :key="stu.bindingId || stu.studentId" class="ta-check-item" @tap="toggleStudent(stu)">
+        <view v-for="stu in boundStudents" :key="stu.bindingId" class="ta-check-item" @tap="toggleStudent(stu)">
           <view :class="['ta-checkbox', isStudentSelected(stu) ? 'ta-checkbox--checked' : '']">
             <text v-if="isStudentSelected(stu)">✓</text>
           </view>
           <text class="ta-check-name">{{ stu.studentName || '--' }}</text>
           <text class="ta-check-meta">{{ stu.schoolName || '' }}</text>
         </view>
-        <view v-if="!boundStudents.length" class="ta-empty-hint">
-          <text>暂无绑定学生</text>
-        </view>
+        <u-empty v-if="!boundStudents.length" mode="data" text="暂无绑定学生"></u-empty>
 
         <!-- 额外人数 -->
         <view class="ta-subsection-title" style="margin-top: 24rpx;">额外参赛人</view>
@@ -80,9 +83,13 @@
 
       <!-- 提交 -->
       <view class="ta-footer">
-        <view class="ta-footer__btn" :class="{ 'ta-footer__btn--disabled': !canSubmit || submitting }" @tap="onSubmit">
-          {{ submitting ? '提交中...' : '确认预约' }}
-        </view>
+        <u-button
+          :text="submitting ? '提交中...' : '确认预约'"
+          type="primary"
+          shape="circle"
+          :disabled="!canSubmit || submitting"
+          @click="onSubmit"
+        ></u-button>
       </view>
     </template>
 
@@ -90,41 +97,23 @@
     <template v-if="isDetail && detailData">
       <view class="ta-section">
         <view class="ta-section__title">预约信息</view>
-        <view class="ta-detail-row">
-          <text class="ta-detail-label">团队名称</text>
-          <text class="ta-detail-val">{{ detailData.teamName || '--' }}</text>
-        </view>
-        <view class="ta-detail-row">
-          <text class="ta-detail-label">预约日期</text>
-          <text class="ta-detail-val">{{ detailData.appointmentDate || '--' }}</text>
-        </view>
-        <view class="ta-detail-row">
-          <text class="ta-detail-label">预约总人数</text>
-          <text class="ta-detail-val">{{ detailData.totalCount || '--' }}</text>
-        </view>
-        <view class="ta-detail-row">
-          <text class="ta-detail-label">成员人数</text>
-          <text class="ta-detail-val">{{ detailData.memberCount || '--' }}</text>
-        </view>
-        <view class="ta-detail-row">
-          <text class="ta-detail-label">额外人数</text>
-          <text class="ta-detail-val">{{ detailData.extraCount || 0 }}</text>
-        </view>
-        <view class="ta-detail-row">
-          <text class="ta-detail-label">已核销</text>
-          <text class="ta-detail-val">{{ detailData.writeoffCount || 0 }} / {{ detailData.totalCount || '--' }}</text>
-        </view>
+        <u-cell-group :border="false">
+          <u-cell title="团队名称" :value="detailData.teamName || '--'" :border="false"></u-cell>
+          <u-cell title="预约日期" :value="detailData.appointmentDate || '--'" :border="false"></u-cell>
+          <u-cell title="预约总人数" :value="String(detailData.totalCount || '--')" :border="false"></u-cell>
+          <u-cell title="成员人数" :value="String(detailData.memberCount || '--')" :border="false"></u-cell>
+          <u-cell title="额外人数" :value="String(detailData.extraCount || 0)" :border="false"></u-cell>
+          <u-cell title="已核销" :value="(detailData.writeoffCount || 0) + ' / ' + (detailData.totalCount || '--')" :border="false"></u-cell>
+        </u-cell-group>
       </view>
 
       <!-- 成员二维码列表 -->
       <view v-if="detailData.members && detailData.members.length" class="ta-section">
         <view class="ta-section__title">成员二维码</view>
-        <view v-for="(m, idx) in detailData.members" :key="'m-' + idx" class="ta-qr-card">
+        <view v-for="(m, idx) in detailData.members" :key="idx" class="ta-qr-card">
           <view class="ta-qr-info">
             <text class="ta-qr-name">{{ m.studentName || '成员 ' + (idx + 1) }}</text>
-            <text class="ta-qr-status" :class="{ 'ta-qr-status--done': m.writeoffTime }">
-              {{ m.writeoffTime ? '已核销' : '待核销' }}
-            </text>
+            <u-tag :text="m.writeoffTime ? '已核销' : '待核销'" :type="m.writeoffTime ? 'success' : 'warning'" size="mini" plain shape="circle"></u-tag>
           </view>
           <canvas v-if="m.qrCode && !m.writeoffTime" :canvas-id="'qr-' + idx" class="ta-qr-canvas"></canvas>
         </view>
@@ -132,8 +121,8 @@
     </template>
 
     <!-- 赛事选择弹窗 -->
-    <view v-if="showContestPicker" class="ta-mask" @tap="showContestPicker = false">
-      <view class="ta-picker" @tap.stop>
+    <u-popup :show="showContestPicker" mode="bottom" :round="16" @close="showContestPicker = false" @open="showContestPicker = true">
+      <view class="ta-picker">
         <view class="ta-picker__header">
           <text class="ta-picker__title">选择活动</text>
           <text class="ta-picker__close" @tap="showContestPicker = false">✕</text>
@@ -142,10 +131,10 @@
           <view v-for="c in contestList" :key="c.contestId" class="ta-picker__item" @tap="selectContest(c)">
             <text class="ta-picker__name">{{ c.contestName }}</text>
           </view>
-          <view v-if="!contestList.length" class="ta-picker__empty">暂无可预约活动</view>
+          <u-empty v-if="!contestList.length" mode="data" text="暂无可预约活动"></u-empty>
         </scroll-view>
       </view>
-    </view>
+    </u-popup>
   </view>
 </template>
 
@@ -164,6 +153,7 @@ const SESSIONS = [
 export default {
   data() {
     return {
+      skeletonShow: true, // [visual-effect]
       isDetail: false,
       detailId: null,
       detailData: null,
@@ -315,74 +305,63 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.ta-page { min-height: 100vh; padding-bottom: calc(140rpx + env(safe-area-inset-bottom)); background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
 
-.ta-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: #fff; border-bottom: 2rpx solid var(--jst-color-border); position: sticky; top: 0; z-index: 40; }
-.ta-header__back { width: 72rpx; height: 72rpx; border-radius: var(--jst-radius-sm); background: var(--jst-color-page-bg); display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
-.ta-header__title { flex: 1; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
+.ta-page { min-height: 100vh; padding-bottom: calc(140rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
 
-.ta-section { margin: 24rpx 32rpx 0; background: #fff; border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); overflow: hidden; padding: 28rpx; }
-.ta-section__title { font-size: 30rpx; font-weight: 700; color: var(--jst-color-text); margin-bottom: 20rpx; display: flex; align-items: center; gap: 12rpx; }
-.ta-section__title::before { content: ''; width: 6rpx; height: 30rpx; background: #3F51B5; border-radius: 4rpx; }
+.ta-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; position: sticky; top: 0; z-index: 40; }
+.ta-header__back { width: 72rpx; height: 72rpx; border-radius: $jst-radius-sm; background: $jst-bg-page; display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
+.ta-header__title { flex: 1; font-size: 34rpx; font-weight: 600; color: $jst-text-primary; }
+
+.ta-section { margin: 24rpx 32rpx 0; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; overflow: hidden; padding: 28rpx; }
+.ta-section__title { font-size: 30rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 20rpx; display: flex; align-items: center; gap: 12rpx; }
+.ta-section__title::before { content: ''; width: 6rpx; height: 30rpx; background: $jst-brand; border-radius: 4rpx; }
 
 /* 赛事选择 */
-.ta-contest { padding: 20rpx; background: var(--jst-color-page-bg); border-radius: var(--jst-radius-md); }
-.ta-contest__name { font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.ta-contest__placeholder { font-size: 28rpx; color: var(--jst-color-text-tertiary); }
+.ta-contest { padding: 20rpx; background: $jst-bg-page; border-radius: $jst-radius-md; }
+.ta-contest__name { font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
+.ta-contest__placeholder { font-size: 28rpx; color: $jst-text-secondary; }
 
 /* 表单 */
 .ta-field { display: flex; align-items: center; margin-bottom: 16rpx; }
-.ta-field__label { width: 160rpx; font-size: 26rpx; color: var(--jst-color-text-secondary); flex-shrink: 0; }
-.ta-field__value { flex: 1; height: 64rpx; padding: 0 16rpx; background: var(--jst-color-page-bg); border-radius: var(--jst-radius-sm); font-size: 26rpx; color: var(--jst-color-text); display: flex; align-items: center; }
-.ta-field__input { flex: 1; height: 64rpx; padding: 0 16rpx; background: var(--jst-color-page-bg); border-radius: var(--jst-radius-sm); font-size: 26rpx; color: var(--jst-color-text); }
-.ta-field__textarea { flex: 1; min-height: 120rpx; padding: 16rpx; background: var(--jst-color-page-bg); border-radius: var(--jst-radius-sm); font-size: 26rpx; color: var(--jst-color-text); }
+.ta-field__label { width: 160rpx; font-size: 26rpx; color: $jst-text-regular; flex-shrink: 0; }
+.ta-field__value { flex: 1; height: 64rpx; padding: 0 16rpx; background: $jst-bg-page; border-radius: $jst-radius-sm; font-size: 26rpx; color: $jst-text-primary; display: flex; align-items: center; }
+.ta-field__input { flex: 1; height: 64rpx; padding: 0 16rpx; background: $jst-bg-page; border-radius: $jst-radius-sm; font-size: 26rpx; color: $jst-text-primary; }
+.ta-field__textarea { flex: 1; min-height: 120rpx; padding: 16rpx; background: $jst-bg-page; border-radius: $jst-radius-sm; font-size: 26rpx; color: $jst-text-primary; }
 
-.ta-remaining { padding: 12rpx 16rpx; background: var(--jst-color-brand-soft); border-radius: var(--jst-radius-sm); font-size: 24rpx; color: var(--jst-color-brand); margin-top: 8rpx; }
-.ta-remaining--danger { color: var(--jst-color-danger); font-weight: 700; }
+.ta-remaining { display: flex; align-items: center; justify-content: space-between; gap: $jst-space-sm; padding: 12rpx 16rpx; background: $jst-brand-light; border-radius: $jst-radius-sm; font-size: 24rpx; color: $jst-brand; margin-top: 8rpx; }
 
-.ta-subsection-title { font-size: 26rpx; font-weight: 600; color: var(--jst-color-text-secondary); margin-bottom: 12rpx; }
+.ta-subsection-title { font-size: 26rpx; font-weight: 600; color: $jst-text-regular; margin-bottom: 12rpx; }
 
 /* 学生勾选 */
-.ta-check-item { display: flex; align-items: center; gap: 16rpx; padding: 16rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
+.ta-check-item { display: flex; align-items: center; gap: 16rpx; padding: 16rpx 0; border-bottom: 2rpx solid $jst-border; }
 .ta-check-item:last-child { border-bottom: none; }
-.ta-checkbox { width: 40rpx; height: 40rpx; border: 3rpx solid var(--jst-color-border); border-radius: var(--jst-radius-sm); display: flex; align-items: center; justify-content: center; font-size: 24rpx; color: #fff; flex-shrink: 0; }
-.ta-checkbox--checked { background: #3F51B5; border-color: #3F51B5; }
-.ta-check-name { font-size: 28rpx; font-weight: 600; color: var(--jst-color-text); }
-.ta-check-meta { flex: 1; font-size: 22rpx; color: var(--jst-color-text-tertiary); text-align: right; }
+.ta-checkbox { width: 40rpx; height: 40rpx; border: 3rpx solid $jst-border; border-radius: $jst-radius-sm; display: flex; align-items: center; justify-content: center; font-size: 24rpx; color: $jst-text-inverse; flex-shrink: 0; }
+.ta-checkbox--checked { background: $jst-brand; border-color: $jst-brand; }
+.ta-check-name { font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
+.ta-check-meta { flex: 1; font-size: 22rpx; color: $jst-text-secondary; text-align: right; }
 
-.ta-empty-hint { padding: 24rpx; text-align: center; font-size: 26rpx; color: var(--jst-color-text-tertiary); }
-
-.ta-total-count { margin-top: 16rpx; padding: 16rpx; background: var(--jst-color-brand-soft); border-radius: var(--jst-radius-sm); font-size: 28rpx; color: var(--jst-color-brand); }
-.ta-total-count__num { font-size: 36rpx; font-weight: 800; }
+.ta-total-count { margin-top: 16rpx; padding: 16rpx; background: $jst-brand-light; border-radius: $jst-radius-sm; font-size: 28rpx; color: $jst-brand; }
+.ta-total-count__num { font-size: 36rpx; font-weight: 600; }
 
 /* 提交 */
-.ta-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.97); border-top: 2rpx solid var(--jst-color-border); padding: 24rpx 32rpx; padding-bottom: calc(24rpx + env(safe-area-inset-bottom)); z-index: 50; }
-.ta-footer__btn { height: 96rpx; background: #3F51B5; border-radius: var(--jst-radius-md); color: #fff; font-size: 32rpx; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-.ta-footer__btn--disabled { opacity: 0.5; }
+.ta-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba($jst-bg-card, 0.97); border-top: 2rpx solid $jst-border; padding: 24rpx 32rpx; padding-bottom: calc(24rpx + env(safe-area-inset-bottom)); z-index: 50; }
+::v-deep .ta-footer .u-button { height: 96rpx; }
 
 /* 详情 */
-.ta-detail-row { display: flex; justify-content: space-between; padding: 16rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
-.ta-detail-row:last-child { border-bottom: none; }
-.ta-detail-label { font-size: 26rpx; color: var(--jst-color-text-tertiary); }
-.ta-detail-val { font-size: 26rpx; color: var(--jst-color-text); font-weight: 600; }
-
 /* QR */
-.ta-qr-card { display: flex; align-items: center; justify-content: space-between; padding: 20rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
+.ta-qr-card { display: flex; align-items: center; justify-content: space-between; padding: 20rpx 0; border-bottom: 2rpx solid $jst-border; }
 .ta-qr-card:last-child { border-bottom: none; }
 .ta-qr-info { flex: 1; }
-.ta-qr-name { display: block; font-size: 28rpx; font-weight: 600; color: var(--jst-color-text); }
-.ta-qr-status { display: block; margin-top: 8rpx; font-size: 24rpx; color: var(--jst-color-warning); font-weight: 600; }
-.ta-qr-status--done { color: var(--jst-color-success); }
+.ta-qr-name { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
 .ta-qr-canvas { width: 180rpx; height: 180rpx; flex-shrink: 0; }
 
 /* 弹窗 */
-.ta-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: flex-end; }
-.ta-picker { width: 100%; max-height: 70vh; background: #fff; border-radius: var(--jst-radius-lg) var(--jst-radius-lg) 0 0; overflow: hidden; }
-.ta-picker__header { display: flex; align-items: center; justify-content: space-between; padding: 28rpx 32rpx; border-bottom: 2rpx solid var(--jst-color-border); }
-.ta-picker__title { font-size: 32rpx; font-weight: 700; color: var(--jst-color-text); }
-.ta-picker__close { font-size: 36rpx; color: var(--jst-color-text-tertiary); padding: 8rpx; }
+.ta-picker { width: 100%; max-height: 70vh; background: $jst-bg-card; border-radius: $jst-radius-lg $jst-radius-lg 0 0; overflow: hidden; }
+.ta-picker__header { display: flex; align-items: center; justify-content: space-between; padding: 28rpx 32rpx; border-bottom: 2rpx solid $jst-border; }
+.ta-picker__title { font-size: 32rpx; font-weight: 600; color: $jst-text-primary; }
+.ta-picker__close { font-size: 36rpx; color: $jst-text-secondary; padding: 8rpx; }
 .ta-picker__body { max-height: 60vh; padding: 0 32rpx; }
-.ta-picker__item { padding: 28rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
-.ta-picker__name { font-size: 28rpx; font-weight: 600; color: var(--jst-color-text); }
-.ta-picker__empty { padding: 64rpx; text-align: center; font-size: 28rpx; color: var(--jst-color-text-tertiary); }
+.ta-picker__item { padding: 28rpx 0; border-bottom: 2rpx solid $jst-border; }
+.ta-picker__name { font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
 </style>

@@ -36,7 +36,7 @@
             <template v-if="isUploadType(field.type)">
               <view
                 v-for="(item, index) in normalizeAssetList(getFieldValue(field))"
-                :key="`${getFieldKey(field)}-${index}`"
+                :key="index"
                 class="jst-form-render__asset jst-form-render__asset--readonly"
               >
                 <text class="jst-form-render__asset-text">{{ item }}</text>
@@ -75,7 +75,7 @@
             <view v-else-if="field.type === 'radio'" class="jst-form-render__option-list">
               <view
                 v-for="option in getFieldOptions(field)"
-                :key="`${getFieldKey(field)}-${option.value}`"
+                :key="option.value"
                 class="jst-form-render__option"
                 :class="{ 'jst-form-render__option--active': getFieldValue(field) === option.value }"
                 @tap="emitFieldInput(field, option.value)"
@@ -87,7 +87,7 @@
             <view v-else-if="field.type === 'checkbox'" class="jst-form-render__option-list">
               <view
                 v-for="option in getFieldOptions(field)"
-                :key="`${getFieldKey(field)}-${option.value}`"
+                :key="option.value"
                 class="jst-form-render__option"
                 :class="{ 'jst-form-render__option--active': normalizeCheckboxValue(getFieldValue(field)).includes(option.value) }"
                 @tap="toggleCheckbox(field, option.value)"
@@ -130,7 +130,7 @@
             <view v-else-if="isUploadType(field.type)" class="jst-form-render__upload">
               <view
                 v-for="(item, index) in normalizeAssetList(getFieldValue(field))"
-                :key="`${getFieldKey(field)}-${index}`"
+                :key="index"
                 class="jst-form-render__asset"
               >
                 <text class="jst-form-render__asset-text">{{ item }}</text>
@@ -406,32 +406,34 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .jst-form-render__group {
-  margin-bottom: 24rpx;
+  margin-bottom: $jst-space-lg;
 }
 
 .jst-form-render__group-header {
-  margin-bottom: 18rpx;
+  margin-bottom: $jst-space-md;
 }
 
 .jst-form-render__group-title {
   display: block;
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .jst-form-render__group-desc,
 .jst-form-render__desc {
   display: block;
-  margin-top: 8rpx;
-  font-size: 22rpx;
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-xs;
   line-height: 1.6;
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-secondary;
 }
 
 .jst-form-render__field {
-  margin-bottom: 24rpx;
+  margin-bottom: $jst-space-lg;
 }
 
 .jst-form-render__field:last-child {
@@ -442,23 +444,23 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16rpx;
+  gap: $jst-space-md;
 }
 
 .jst-form-render__label {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: var(--jst-color-text);
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
 }
 
 .jst-form-render__required {
   margin-right: 6rpx;
-  color: #eb5757;
+  color: $jst-danger;
 }
 
 .jst-form-render__tip {
-  font-size: 22rpx;
-  color: var(--jst-color-primary);
+  font-size: $jst-font-xs;
+  color: $jst-brand;
 }
 
 .jst-form-render__input,
@@ -467,11 +469,11 @@ export default {
 .jst-form-render__readonly {
   box-sizing: border-box;
   width: 100%;
-  margin-top: 16rpx;
-  padding: 0 24rpx;
-  border: 2rpx solid #dce6f7;
-  border-radius: 24rpx;
-  background: #ffffff;
+  margin-top: $jst-space-md;
+  padding: 0 $jst-space-lg;
+  border: 2rpx solid $jst-border;
+  border-radius: $jst-radius-xl;
+  background: $jst-bg-card;
 }
 
 .jst-form-render__input,
@@ -484,90 +486,91 @@ export default {
 
 .jst-form-render__textarea {
   min-height: 220rpx;
-  padding: 24rpx;
-  font-size: 28rpx;
+  padding: $jst-space-lg;
+  font-size: $jst-font-base;
   line-height: 1.7;
-  color: var(--jst-color-text);
+  color: $jst-text-primary;
 }
 
 .jst-form-render__readonly-text,
 .jst-form-render__picker-text {
   flex: 1;
-  font-size: 28rpx;
+  font-size: $jst-font-base;
   line-height: 1.7;
-  color: var(--jst-color-text);
+  color: $jst-text-primary;
 }
 
 .jst-form-render__placeholder {
-  color: #a2afc6;
-  font-size: 28rpx;
+  color: $jst-text-placeholder;
+  font-size: $jst-font-base;
 }
 
 .jst-form-render__picker-arrow {
-  margin-left: 12rpx;
-  color: #9aa8bf;
-  font-size: 24rpx;
+  margin-left: $jst-space-sm;
+  color: $jst-text-placeholder;
+  font-size: $jst-font-sm;
 }
 
 .jst-form-render__option-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 16rpx;
-  margin-top: 16rpx;
+  gap: $jst-space-md;
+  margin-top: $jst-space-md;
 }
 
 .jst-form-render__option {
   min-width: 176rpx;
-  padding: 22rpx 24rpx;
-  border: 2rpx solid #dce6f7;
-  border-radius: 24rpx;
-  background: #ffffff;
+  padding: 22rpx $jst-space-lg;
+  border: 2rpx solid $jst-border;
+  border-radius: $jst-radius-xl;
+  background: $jst-bg-card;
+  transition: border-color $jst-duration-fast $jst-easing, background $jst-duration-fast $jst-easing;
 }
 
 .jst-form-render__option--active {
-  border-color: #2f7de1;
-  background: #eef4ff;
-  box-shadow: 0 8rpx 18rpx rgba(47, 125, 225, 0.12);
+  border-color: $jst-brand;
+  background: $jst-brand-light;
+  box-shadow: 0 $jst-space-xs 18rpx rgba(43, 108, 255, 0.12);
 }
 
 .jst-form-render__option-text {
-  font-size: 26rpx;
+  font-size: $jst-font-sm;
   line-height: 1.5;
-  color: var(--jst-color-text);
+  color: $jst-text-primary;
 }
 
 .jst-form-render__upload {
-  margin-top: 16rpx;
+  margin-top: $jst-space-md;
 }
 
 .jst-form-render__asset {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16rpx;
+  gap: $jst-space-md;
   min-height: 84rpx;
-  margin-bottom: 12rpx;
-  padding: 0 24rpx;
-  border-radius: 20rpx;
-  background: #f5f8ff;
+  margin-bottom: $jst-space-sm;
+  padding: 0 $jst-space-lg;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-grey;
 }
 
 .jst-form-render__asset--readonly {
-  margin-top: 12rpx;
+  margin-top: $jst-space-sm;
   margin-bottom: 0;
 }
 
 .jst-form-render__asset-text {
   flex: 1;
-  font-size: 24rpx;
+  font-size: $jst-font-sm;
   line-height: 1.6;
-  color: var(--jst-color-text-secondary);
+  color: $jst-text-regular;
   word-break: break-all;
 }
 
 .jst-form-render__asset-remove {
-  font-size: 24rpx;
-  color: #ff6a3d;
+  font-size: $jst-font-sm;
+  color: $jst-danger;
 }
 
 .jst-form-render__upload-action {
@@ -576,20 +579,21 @@ export default {
   align-items: center;
   justify-content: center;
   min-height: 120rpx;
-  border: 2rpx dashed #bcd2f5;
-  border-radius: 24rpx;
-  background: #f8fbff;
+  border: 2rpx dashed $jst-border;
+  border-radius: $jst-radius-xl;
+  background: $jst-bg-grey;
+  transition: border-color $jst-duration-fast $jst-easing;
 }
 
 .jst-form-render__upload-action-text {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #2f7de1;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-brand;
 }
 
 .jst-form-render__upload-action-sub {
-  margin-top: 8rpx;
-  font-size: 22rpx;
-  color: #95a4bf;
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
 }
 </style>

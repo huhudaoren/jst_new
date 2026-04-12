@@ -4,7 +4,7 @@
                POST /jst/wx/appointment/apply -->
 <template>
   <view class="ap-page">
-    <view class="ap-hero">
+    <view class="ap-hero" :style="{ paddingTop: navPaddingTop }">
       <text class="ap-hero__label">我要预约</text>
       <text class="ap-hero__title">{{ contestName || '赛事预约' }}</text>
     </view>
@@ -37,9 +37,9 @@
     </view>
 
     <view class="ap-footer">
-      <button class="ap-footer__btn" :disabled="submitting || !canSubmit" @tap="onSubmit">
-        {{ submitting ? '提交中...' : '提交预约' }}
-      </button>
+      <u-button class="ap-footer__btn" type="primary" :loading="submitting" :disabled="submitting || !canSubmit" shape="circle" @click="onSubmit">
+        提交预约
+      </u-button>
     </view>
   </view>
 </template>
@@ -56,6 +56,7 @@ const SESSIONS = [
 export default {
   data() {
     return {
+      skeletonShow: true, // [visual-effect]
       contestId: null,
       contestName: '',
       sessionList: SESSIONS,
@@ -135,21 +136,28 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.ap-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: var(--jst-color-page-bg); }
-.ap-hero { padding: 72rpx 32rpx 56rpx; background: linear-gradient(135deg, var(--jst-color-brand), var(--jst-color-brand-light)); color: #fff; }
-.ap-hero__label { display: block; font-size: 24rpx; color: var(--jst-color-white-76); }
-.ap-hero__title { display: block; margin-top: 12rpx; font-size: 40rpx; font-weight: 800; }
-.ap-section { margin: 24rpx 32rpx 0; padding: 16rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); }
-.ap-field { display: flex; align-items: center; padding: 28rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
+@import '@/styles/design-tokens.scss';
+
+.ap-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
+.ap-hero { padding: 72rpx 32rpx 56rpx; background: linear-gradient(135deg, $jst-brand, $jst-brand-light); color: $jst-text-inverse; }
+.ap-hero__label { display: block; font-size: 24rpx; color: rgba(255, 255, 255, 0.76); }
+.ap-hero__title { display: block; margin-top: 12rpx; font-size: 40rpx; font-weight: 600; }
+.ap-section { margin: 24rpx 32rpx 0; padding: 16rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-md; box-shadow: $jst-shadow-sm; }
+.ap-field { display: flex; align-items: center; padding: 28rpx 0; border-bottom: 2rpx solid $jst-border; }
 .ap-field:last-child { border-bottom: none; }
-.ap-field__label { width: 180rpx; font-size: 26rpx; color: var(--jst-color-text-secondary); }
-.ap-field__value { flex: 1; font-size: 28rpx; color: var(--jst-color-text); }
-.ap-remaining { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); display: flex; align-items: baseline; gap: 12rpx; }
-.ap-remaining__label { font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.ap-remaining__num { font-size: 48rpx; font-weight: 800; color: var(--jst-color-success); }
-.ap-remaining__num--danger { color: var(--jst-color-danger); }
-.ap-remaining__total { font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.ap-footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: var(--jst-color-card-bg); box-shadow: 0 -8rpx 24rpx rgba(16,88,160,0.08); }
-.ap-footer__btn { height: 96rpx; line-height: 96rpx; border-radius: var(--jst-radius-md); background: linear-gradient(135deg, var(--jst-color-brand), var(--jst-color-brand-light)); color: #fff; font-size: 30rpx; font-weight: 800; border: none; }
-.ap-footer__btn[disabled] { opacity: 0.5; }
+.ap-field__label { width: 180rpx; font-size: 26rpx; color: $jst-text-regular; }
+.ap-field__value { flex: 1; font-size: 28rpx; color: $jst-text-primary; }
+.ap-remaining { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-md; box-shadow: $jst-shadow-sm; display: flex; align-items: baseline; gap: 12rpx; }
+.ap-remaining__label { font-size: 24rpx; color: $jst-text-secondary; }
+.ap-remaining__num { font-size: 48rpx; font-weight: 600; color: $jst-success; }
+.ap-remaining__num--danger { color: $jst-danger; }
+.ap-remaining__total { font-size: 24rpx; color: $jst-text-secondary; }
+.ap-footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: $jst-bg-card; box-shadow: $jst-shadow-sm; }
+::v-deep .ap-footer__btn.u-button {
+  height: 96rpx;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-semibold;
+  background: linear-gradient(135deg, $jst-brand, $jst-brand-dark);
+  border: none;
+}
 </style>

@@ -1,49 +1,81 @@
-<!-- 中文注释: 渠道认证 · 材料填写表单
+﻿<!-- 中文注释: 渠道认证 · 材料填写表单
      调用接口: POST /jst/wx/channel/auth/apply 或 /resubmit/{id}
      后端入参: { channelType, applyName, materialsJson(JSON字符串) } -->
 <template>
   <view class="af-page">
-    <view class="af-hero">
+    <view class="af-hero" :style="{ paddingTop: navPaddingTop }">
       <text class="af-hero__title">{{ typeLabel }}认证</text>
     </view>
 
     <view class="af-section">
       <text class="af-section__title">基本信息</text>
-      <view class="af-field"><text class="af-field__label">真实姓名 *</text><input class="af-field__input" v-model="form.applyName" placeholder="请输入真实姓名" maxlength="128" /></view>
-      <view class="af-field"><text class="af-field__label">手机号 *</text><input class="af-field__input" v-model="form.mobile" type="number" placeholder="请输入手机号" maxlength="11" /></view>
-      <view class="af-field"><text class="af-field__label">身份证号</text><input class="af-field__input" v-model="form.idCard" placeholder="选填" maxlength="18" /></view>
+      <u--form labelPosition="left" :borderBottom="false" customClass="af-form">
+        <u-form-item label="真实姓名 *" customClass="af-field">
+          <u--input class="af-field__input" v-model="form.applyName" placeholder="请输入真实姓名" maxlength="128" border="none"></u--input>
+        </u-form-item>
+        <u-form-item label="手机号 *" customClass="af-field">
+          <u--input class="af-field__input" v-model="form.mobile" type="number" placeholder="请输入手机号" maxlength="11" border="none"></u--input>
+        </u-form-item>
+        <u-form-item label="身份证号" customClass="af-field">
+          <u--input class="af-field__input" v-model="form.idCard" placeholder="选填" maxlength="18" border="none"></u--input>
+        </u-form-item>
+      </u--form>
     </view>
 
     <view v-if="channelType === 'teacher'" class="af-section">
       <text class="af-section__title">教师材料</text>
-      <view class="af-field"><text class="af-field__label">任教学校 *</text><input class="af-field__input" v-model="materials.schoolName" placeholder="请输入学校名称" maxlength="128" /></view>
-      <view class="af-field"><text class="af-field__label">教师资格证</text><input class="af-field__input" v-model="materials.teacherCertUrl" placeholder="OSS URL (模拟上传)" /></view>
+      <u--form labelPosition="left" :borderBottom="false" customClass="af-form">
+        <u-form-item label="任教学校 *" customClass="af-field">
+          <u--input class="af-field__input" v-model="materials.schoolName" placeholder="请输入学校名称" maxlength="128" border="none"></u--input>
+        </u-form-item>
+        <u-form-item label="教师资格证" customClass="af-field">
+          <u--input class="af-field__input" v-model="materials.teacherCertUrl" placeholder="OSS URL (模拟上传)" border="none"></u--input>
+        </u-form-item>
+      </u--form>
     </view>
 
     <view v-if="channelType === 'organization'" class="af-section">
       <text class="af-section__title">机构材料</text>
-      <view class="af-field"><text class="af-field__label">机构名称 *</text><input class="af-field__input" v-model="materials.orgName" placeholder="请输入机构名称" maxlength="128" /></view>
-      <view class="af-field"><text class="af-field__label">营业执照号 *</text><input class="af-field__input" v-model="materials.businessLicenseNo" placeholder="请输入营业执照号" maxlength="64" /></view>
-      <view class="af-field"><text class="af-field__label">营业执照照片</text><input class="af-field__input" v-model="materials.businessLicenseUrl" placeholder="OSS URL (模拟上传)" /></view>
-      <view class="af-field"><text class="af-field__label">法人姓名</text><input class="af-field__input" v-model="materials.legalPersonName" placeholder="请输入法人姓名" maxlength="64" /></view>
+      <u--form labelPosition="left" :borderBottom="false" customClass="af-form">
+        <u-form-item label="机构名称 *" customClass="af-field">
+          <u--input class="af-field__input" v-model="materials.orgName" placeholder="请输入机构名称" maxlength="128" border="none"></u--input>
+        </u-form-item>
+        <u-form-item label="营业执照号 *" customClass="af-field">
+          <u--input class="af-field__input" v-model="materials.businessLicenseNo" placeholder="请输入营业执照号" maxlength="64" border="none"></u--input>
+        </u-form-item>
+        <u-form-item label="营业执照照片" customClass="af-field">
+          <u--input class="af-field__input" v-model="materials.businessLicenseUrl" placeholder="OSS URL (模拟上传)" border="none"></u--input>
+        </u-form-item>
+        <u-form-item label="法人姓名" customClass="af-field">
+          <u--input class="af-field__input" v-model="materials.legalPersonName" placeholder="请输入法人姓名" maxlength="64" border="none"></u--input>
+        </u-form-item>
+      </u--form>
     </view>
 
     <view v-if="channelType === 'individual'" class="af-section">
       <text class="af-section__title">个人材料</text>
-      <view class="af-field"><text class="af-field__label">身份证正面</text><input class="af-field__input" v-model="materials.idCardFrontUrl" placeholder="OSS URL (模拟上传)" /></view>
-      <view class="af-field"><text class="af-field__label">身份证反面</text><input class="af-field__input" v-model="materials.idCardBackUrl" placeholder="OSS URL (模拟上传)" /></view>
-      <view class="af-field af-field--textarea"><text class="af-field__label">个人简介</text><textarea class="af-field__textarea" v-model="materials.personalDesc" placeholder="选填 (500字内)" maxlength="500" /></view>
+      <u--form labelPosition="left" :borderBottom="false" customClass="af-form">
+        <u-form-item label="身份证正面" customClass="af-field">
+          <u--input class="af-field__input" v-model="materials.idCardFrontUrl" placeholder="OSS URL (模拟上传)" border="none"></u--input>
+        </u-form-item>
+        <u-form-item label="身份证反面" customClass="af-field">
+          <u--input class="af-field__input" v-model="materials.idCardBackUrl" placeholder="OSS URL (模拟上传)" border="none"></u--input>
+        </u-form-item>
+        <u-form-item label="个人简介" customClass="af-field af-field--textarea">
+          <u--textarea class="af-field__textarea" v-model="materials.personalDesc" placeholder="选填 (500字内)" maxlength="500" border="none" count></u--textarea>
+        </u-form-item>
+      </u--form>
     </view>
 
     <view class="af-agree" @tap="agreed = !agreed">
-      <view :class="['af-agree__check', agreed && 'af-agree__check--on']">{{ agreed ? '✓' : '' }}</view>
+      <u-icon :name="agreed ? 'checkmark-circle-fill' : 'checkmark-circle'" size="40rpx" :class="agreed ? 'af-agree__icon--on' : 'af-agree__icon--off'"></u-icon>
       <text class="af-agree__text">我已阅读并同意《渠道方服务协议》</text>
     </view>
 
     <view class="af-footer">
-      <button class="af-footer__btn" :disabled="submitting || !canSubmit" @tap="onSubmit">
-        {{ submitting ? '提交中...' : '提交申请' }}
-      </button>
+      <u-button class="af-footer__btn" type="primary" :disabled="submitting || !canSubmit" :loading="submitting" shape="circle" @click="onSubmit">
+        提交申请
+      </u-button>
     </view>
   </view>
 </template>
@@ -56,6 +88,7 @@ const TYPE_LABEL = { teacher: '老师', organization: '机构', individual: '个
 export default {
   data() {
     return {
+      skeletonShow: true, // [visual-effect]
       channelType: 'teacher',
       resubmitId: null,
       form: { applyName: '', mobile: '', idCard: '' },
@@ -94,22 +127,49 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.af-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: #F7F8FA; }
-.af-hero { padding: 72rpx 32rpx 48rpx; background: linear-gradient(135deg, var(--jst-color-brand), var(--jst-color-brand-light)); color: #fff; }
-.af-hero__title { display: block; font-size: 40rpx; font-weight: 800; }
-.af-section { margin: 24rpx 32rpx 0; padding: 16rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: 0 2rpx 8rpx rgba(20,30,60,0.04); }
-.af-section__title { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); padding: 20rpx 0 8rpx; }
-.af-field { display: flex; align-items: center; padding: 24rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
-.af-field:last-child { border-bottom: none; }
-.af-field--textarea { align-items: flex-start; }
-.af-field__label { width: 200rpx; font-size: 26rpx; color: var(--jst-color-text-secondary); flex-shrink: 0; }
-.af-field__input { flex: 1; font-size: 28rpx; color: var(--jst-color-text); }
-.af-field__textarea { flex: 1; height: 200rpx; font-size: 26rpx; color: var(--jst-color-text); }
-.af-agree { display: flex; align-items: center; gap: 16rpx; margin: 32rpx 32rpx 0; }
-.af-agree__check { width: 40rpx; height: 40rpx; border-radius: 50%; border: 2rpx solid var(--jst-color-border); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 26rpx; }
-.af-agree__check--on { background: var(--jst-color-brand); border-color: var(--jst-color-brand); }
-.af-agree__text { font-size: 24rpx; color: var(--jst-color-text-secondary); }
-.af-footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: var(--jst-color-card-bg); box-shadow: 0 -8rpx 24rpx rgba(16,88,160,0.08); }
-.af-footer__btn { height: 96rpx; line-height: 96rpx; border-radius: var(--jst-radius-md); background: linear-gradient(135deg, var(--jst-color-brand), var(--jst-color-brand-light)); color: #fff; font-size: 30rpx; font-weight: 800; border: none; }
-.af-footer__btn[disabled] { opacity: 0.5; }
+@import '@/styles/design-tokens.scss';
+
+.af-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
+.af-hero { padding: 72rpx $jst-space-xl $jst-space-xxl; background: linear-gradient(135deg, $jst-brand, $jst-brand-dark); color: $jst-text-inverse; }
+.af-hero__title { display: block; font-size: $jst-font-xxl; font-weight: $jst-weight-semibold; }
+.af-section { margin: $jst-space-lg $jst-space-xl 0; padding: $jst-space-md $jst-space-xl; background: $jst-bg-card; border-radius: $jst-radius-md; box-shadow: $jst-shadow-sm; }
+.af-section__title { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; padding: 20rpx 0 $jst-space-xs; }
+
+::v-deep .af-form .u-form-item {
+  padding: $jst-space-md 0;
+  border-bottom: 2rpx solid $jst-border;
+}
+
+::v-deep .af-form .u-form-item:last-child {
+  border-bottom: none;
+}
+
+::v-deep .af-form .u-form-item__body__left__content__label {
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
+}
+
+::v-deep .af-field__input .u-input__content__field {
+  font-size: $jst-font-base;
+  color: $jst-text-primary;
+}
+
+::v-deep .af-field__textarea .u-textarea__field {
+  font-size: $jst-font-base;
+  color: $jst-text-primary;
+}
+
+.af-agree { display: flex; align-items: center; gap: $jst-space-md; margin: $jst-space-xl $jst-space-xl 0; }
+.af-agree__icon--on { color: $jst-brand; }
+.af-agree__icon--off { color: $jst-text-placeholder; }
+.af-agree__text { font-size: $jst-font-sm; color: $jst-text-secondary; }
+.af-footer { position: fixed; left: 0; right: 0; bottom: 0; padding: $jst-space-lg $jst-space-xl calc(#{$jst-space-lg} + env(safe-area-inset-bottom)); background: $jst-bg-card; box-shadow: $jst-shadow-sm; }
+
+::v-deep .af-footer__btn.u-button {
+  height: 96rpx;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-semibold;
+  background: linear-gradient(135deg, $jst-brand, $jst-brand-dark);
+  border: none;
+}
 </style>

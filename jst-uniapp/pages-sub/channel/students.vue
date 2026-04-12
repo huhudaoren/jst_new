@@ -5,7 +5,7 @@
 <template>
   <view class="stu-page">
     <!-- 顶部导航 -->
-    <view class="stu-header">
+    <view class="stu-header" :style="{ paddingTop: navPaddingTop }">
       <view class="stu-header__back" @tap="goBack">←</view>
       <text class="stu-header__title">学生管理</text>
       <text class="stu-header__action" @tap="showInvite = true">手动绑定</text>
@@ -13,10 +13,14 @@
 
     <!-- 搜索栏 -->
     <view class="stu-search">
-      <view class="stu-search__bar">
-        <text class="stu-search__icon">🔍</text>
-        <input class="stu-search__input" type="text" placeholder="搜索学生姓名、手机号..." v-model="keyword" @confirm="search" />
-      </view>
+      <u-search
+        v-model="keyword"
+        placeholder="搜索学生姓名、手机号..."
+        searchIconSize="30rpx"
+        :showAction="false"
+        bgColor="transparent"
+        @search="search"
+      ></u-search>
     </view>
 
     <!-- 绑定二维码卡片 -->
@@ -57,9 +61,7 @@
             <text class="stu-card__meta">{{ stu.schoolName || '' }} · {{ stu.gradeName || '' }} · {{ stu.mobileMasked || '' }}</text>
             <text class="stu-card__time">绑定于 {{ formatDate(stu.bindTime) }} · 共报名 {{ stu.enrollCount || 0 }} 次</text>
           </view>
-          <view v-if="stu.statusTag" class="stu-card__tag" :class="'stu-card__tag--' + stu.statusTag.type">
-            {{ stu.statusTag.text }}
-          </view>
+          <u-tag v-if="stu.statusTag" :text="stu.statusTag.text" :type="stu.statusTag.type || 'info'" size="mini" shape="circle"></u-tag>
         </view>
         <view class="stu-card__actions">
           <view class="stu-card__action stu-card__action--primary" @tap="goEnroll(stu)">📋 代报名</view>
@@ -69,14 +71,8 @@
         </view>
       </view>
 
-      <view v-if="hasMore" class="stu-loadmore" @tap="loadMore">
-        <text>加载更多</text>
-      </view>
-      <view v-if="!list.length && !loading" class="stu-empty">
-        <text class="stu-empty__icon">👥</text>
-        <text class="stu-empty__title">暂无绑定学生</text>
-        <text class="stu-empty__desc">邀请学生扫码绑定，即可为其代报名</text>
-      </view>
+      <u-loadmore v-if="list.length" :status="loading ? 'loading' : (hasMore ? 'loadmore' : 'nomore')" @loadmore="loadMore" />
+      <u-empty v-if="!list.length && !loading" mode="data" text="暂无绑定学生"></u-empty>
     </view>
 
     <!-- 底部统计 -->
@@ -109,7 +105,7 @@ import { getChannelStudents, unbindStudent, getMyChannelApply } from '@/api/chan
 import { useUserStore } from '@/store/user'
 
 const AVATAR_COLORS = [
-  'linear-gradient(135deg, #3F51B5, #5C6BC0)',
+  'linear-gradient(135deg, #283593, #5C6BC0)',
   'linear-gradient(135deg, #E65100, #FF7043)',
   'linear-gradient(135deg, #1B5E20, #66BB6A)',
   'linear-gradient(135deg, #880E4F, #F06292)',
@@ -119,6 +115,7 @@ const AVATAR_COLORS = [
 export default {
   data() {
     return {
+      skeletonShow: true, // [visual-effect]
       loading: false,
       keyword: '',
       activeTab: 'all',
@@ -234,67 +231,57 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.stu-page { min-height: 100vh; padding-bottom: calc(120rpx + env(safe-area-inset-bottom)); background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
+
+.stu-page { min-height: 100vh; padding-bottom: calc(120rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
 
 /* 导航 */
-.stu-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: #fff; border-bottom: 2rpx solid var(--jst-color-border); position: sticky; top: 0; z-index: 40; }
-.stu-header__back { width: 72rpx; height: 72rpx; border-radius: var(--jst-radius-sm); background: var(--jst-color-page-bg); display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
-.stu-header__title { flex: 1; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
-.stu-header__action { font-size: 26rpx; color: #3F51B5; font-weight: 600; padding: 12rpx 0 12rpx 24rpx; }
+.stu-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; position: sticky; top: 0; z-index: 40; }
+.stu-header__back { width: 72rpx; height: 72rpx; border-radius: $jst-radius-sm; background: $jst-bg-page; display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
+.stu-header__title { flex: 1; font-size: 34rpx; font-weight: 600; color: $jst-text-primary; }
+.stu-header__action { font-size: 26rpx; color: $jst-brand; font-weight: 600; padding: 12rpx 0 12rpx 24rpx; }
 
 /* 搜索 */
-.stu-search { padding: 24rpx 32rpx; background: #fff; border-bottom: 2rpx solid var(--jst-color-border); }
-.stu-search__bar { display: flex; align-items: center; padding: 0 24rpx; height: 72rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-page-bg); }
-.stu-search__icon { font-size: 28rpx; margin-right: 12rpx; }
-.stu-search__input { flex: 1; font-size: 26rpx; color: var(--jst-color-text); }
+.stu-search { padding: 24rpx 32rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
+::v-deep .stu-search .u-search__content { background-color: $jst-bg-page !important; }
 
 /* 二维码卡片 */
 .stu-qr { padding: 28rpx 32rpx 0; }
-.stu-qr__card { background: linear-gradient(145deg, #1A237E 0%, #283593 50%, #3949AB 100%); border-radius: var(--jst-radius-lg); padding: 32rpx; position: relative; overflow: hidden; box-shadow: 0 16rpx 56rpx rgba(26,35,126,0.3); }
-.stu-qr__card::before { content: ''; position: absolute; top: -60rpx; right: -60rpx; width: 280rpx; height: 280rpx; border-radius: 50%; background: rgba(255,255,255,0.06); }
-.stu-qr__label { display: block; font-size: 22rpx; color: rgba(255,255,255,0.65); position: relative; z-index: 1; }
-.stu-qr__title { display: block; font-size: 36rpx; font-weight: 900; color: #fff; margin: 8rpx 0 24rpx; position: relative; z-index: 1; }
+.stu-qr__card { background: linear-gradient(145deg, $jst-indigo 0%, $jst-brand-dark 50%, $jst-indigo-light 100%); border-radius: $jst-radius-lg; padding: 32rpx; position: relative; overflow: hidden; box-shadow: $jst-shadow-md; }
+.stu-qr__card::before { content: ''; position: absolute; top: -60rpx; right: -60rpx; width: 280rpx; height: 280rpx; border-radius: 50%; background: rgba($jst-text-inverse, 0.06); }
+.stu-qr__label { display: block; font-size: 22rpx; color: rgba($jst-text-inverse, 0.65); position: relative; z-index: 1; }
+.stu-qr__title { display: block; font-size: 36rpx; font-weight: 600; color: $jst-text-inverse; margin: 8rpx 0 24rpx; position: relative; z-index: 1; }
 .stu-qr__content { display: flex; align-items: center; gap: 32rpx; position: relative; z-index: 1; }
-.stu-qr__box { width: 200rpx; height: 200rpx; border-radius: var(--jst-radius-md); background: #fff; display: flex; align-items: center; justify-content: center; font-size: 120rpx; box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.25); }
+.stu-qr__box { width: 200rpx; height: 200rpx; border-radius: $jst-radius-md; background: $jst-bg-card; display: flex; align-items: center; justify-content: center; font-size: 120rpx; box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.25); }
 .stu-qr__info { flex: 1; }
-.stu-qr__name { display: block; font-size: 32rpx; font-weight: 800; color: #fff; }
-.stu-qr__school { display: block; margin-top: 8rpx; font-size: 24rpx; color: rgba(255,255,255,0.7); }
+.stu-qr__name { display: block; font-size: 32rpx; font-weight: 600; color: $jst-text-inverse; }
+.stu-qr__school { display: block; margin-top: 8rpx; font-size: 24rpx; color: rgba($jst-text-inverse, 0.7); }
 .stu-qr__btns { display: flex; gap: 16rpx; margin-top: 20rpx; }
-.stu-qr__btn { flex: 1; height: 68rpx; background: rgba(255,255,255,0.18); border: 2rpx solid rgba(255,255,255,0.25); border-radius: var(--jst-radius-sm); color: #fff; font-size: 24rpx; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8rpx; }
+.stu-qr__btn { flex: 1; height: 68rpx; background: rgba($jst-text-inverse, 0.18); border: 2rpx solid rgba($jst-text-inverse, 0.25); border-radius: $jst-radius-sm; color: $jst-text-inverse; font-size: 24rpx; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8rpx; }
 
 /* Tab */
 .stu-tabs { display: flex; gap: 16rpx; padding: 28rpx 32rpx 0; overflow-x: auto; }
-.stu-tab { flex-shrink: 0; height: 64rpx; padding: 0 28rpx; border: 3rpx solid var(--jst-color-border); border-radius: var(--jst-radius-full); background: #fff; font-size: 26rpx; font-weight: 500; color: var(--jst-color-text-secondary); display: flex; align-items: center; white-space: nowrap; }
-.stu-tab--active { border-color: #3F51B5; background: #EEF0FF; color: #3F51B5; font-weight: 700; }
+.stu-tab { flex-shrink: 0; height: 64rpx; padding: 0 28rpx; border: 3rpx solid $jst-border; border-radius: $jst-radius-round; background: $jst-bg-card; font-size: 26rpx; font-weight: 500; color: $jst-text-regular; display: flex; align-items: center; white-space: nowrap; }
+.stu-tab--active { border-color: $jst-brand; background: $jst-brand-light; color: $jst-brand; font-weight: 600; }
 
 /* 学生列表 */
 .stu-list { padding: 28rpx 32rpx 0; }
-.stu-card { background: #fff; border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); margin-bottom: 20rpx; overflow: hidden; }
+.stu-card { background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; margin-bottom: 20rpx; overflow: hidden; }
 .stu-card__main { display: flex; align-items: center; gap: 24rpx; padding: 28rpx 28rpx 20rpx; }
 .stu-card__avatar { width: 88rpx; height: 88rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.stu-card__avatar-text { font-size: 40rpx; font-weight: 700; color: #fff; }
+.stu-card__avatar-text { font-size: 40rpx; font-weight: 600; color: $jst-text-inverse; }
 .stu-card__info { flex: 1; min-width: 0; }
-.stu-card__name { display: block; font-size: 30rpx; font-weight: 700; color: var(--jst-color-text); }
-.stu-card__meta { display: block; margin-top: 4rpx; font-size: 24rpx; color: var(--jst-color-text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.stu-card__time { display: block; margin-top: 6rpx; font-size: 22rpx; color: #ccc; }
-.stu-card__tag { flex-shrink: 0; padding: 6rpx 16rpx; border-radius: var(--jst-radius-full); font-size: 22rpx; font-weight: 600; }
-.stu-card__tag--warning { background: var(--jst-color-warning-soft); color: #B26A00; }
-.stu-card__tag--success { background: var(--jst-color-success-soft); color: #0F7B3F; }
-.stu-card__tag--info { background: var(--jst-color-brand-soft); color: var(--jst-color-brand); }
-.stu-card__actions { display: flex; border-top: 2rpx solid var(--jst-color-border); }
-.stu-card__action { flex: 1; height: 80rpx; display: flex; align-items: center; justify-content: center; gap: 8rpx; font-size: 24rpx; font-weight: 600; color: var(--jst-color-text-secondary); border-right: 2rpx solid var(--jst-color-border); }
+.stu-card__name { display: block; font-size: 30rpx; font-weight: 600; color: $jst-text-primary; }
+.stu-card__meta { display: block; margin-top: 4rpx; font-size: 24rpx; color: $jst-text-secondary; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stu-card__time { display: block; margin-top: 6rpx; font-size: 22rpx; color: $jst-text-placeholder; }
+.stu-card__actions { display: flex; border-top: 2rpx solid $jst-border; }
+.stu-card__action { flex: 1; height: 80rpx; display: flex; align-items: center; justify-content: center; gap: 8rpx; font-size: 24rpx; font-weight: 600; color: $jst-text-regular; border-right: 2rpx solid $jst-border; }
 .stu-card__action:last-child { border-right: none; }
-.stu-card__action--primary { color: #3F51B5; }
-.stu-card__action--danger { color: var(--jst-color-danger); }
-
-.stu-loadmore { padding: 32rpx; text-align: center; font-size: 26rpx; color: #3F51B5; font-weight: 600; }
-.stu-empty { text-align: center; padding: 96rpx 48rpx; }
-.stu-empty__icon { display: block; font-size: 112rpx; margin-bottom: 32rpx; opacity: 0.6; }
-.stu-empty__title { display: block; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text-secondary); }
-.stu-empty__desc { display: block; margin-top: 16rpx; font-size: 28rpx; color: var(--jst-color-text-tertiary); }
+.stu-card__action--primary { color: $jst-brand; }
+.stu-card__action--danger { color: $jst-danger; }
 
 /* 底部统计 */
-.stu-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.97); border-top: 2rpx solid var(--jst-color-border); padding: 24rpx 32rpx; padding-bottom: calc(24rpx + env(safe-area-inset-bottom)); box-shadow: 0 -8rpx 40rpx rgba(12,61,107,0.08); display: flex; align-items: center; z-index: 50; }
-.stu-footer__info { font-size: 26rpx; color: var(--jst-color-text-tertiary); }
-.stu-footer__bold { font-weight: 700; color: var(--jst-color-text); }
+.stu-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba($jst-bg-card, 0.97); border-top: 2rpx solid $jst-border; padding: 24rpx 32rpx; padding-bottom: calc(24rpx + env(safe-area-inset-bottom)); box-shadow: $jst-shadow-sm; display: flex; align-items: center; z-index: 50; }
+.stu-footer__info { font-size: 26rpx; color: $jst-text-secondary; }
+.stu-footer__bold { font-weight: 600; color: $jst-text-primary; }
 </style>

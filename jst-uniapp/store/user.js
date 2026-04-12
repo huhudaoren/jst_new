@@ -10,6 +10,7 @@ export const useUserStore = defineStore('user', {
   state: () => ({
     token: getToken(),
     userInfo: null,    // { userId, nickname, avatar, mobileMasked, ... }
+    roles: [],         // 角色列表 ['jst_student', 'jst_channel', ...]
     isNewUser: false
   }),
 
@@ -22,6 +23,7 @@ export const useUserStore = defineStore('user', {
       const res = await wxLogin(code)
       this.token = res.token
       this.userInfo = res.userInfo
+      this.roles = res.roles || []
       this.isNewUser = res.isNewUser
       setToken(res.token)
       return res
@@ -39,6 +41,7 @@ export const useUserStore = defineStore('user', {
       try { await logout() } catch (e) {}
       this.token = ''
       this.userInfo = null
+      this.roles = []
       clearToken()
     }
   }

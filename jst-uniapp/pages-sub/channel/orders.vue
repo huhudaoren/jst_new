@@ -5,7 +5,7 @@
 <template>
   <view class="ord-page">
     <!-- 导航 -->
-    <view class="ord-header">
+    <view class="ord-header" :style="{ paddingTop: navPaddingTop }">
       <view class="ord-header__back" @tap="goBack">←</view>
       <text class="ord-header__title">代报名订单</text>
     </view>
@@ -17,11 +17,11 @@
         <text class="ord-stats__label">全部订单</text>
       </view>
       <view class="ord-stats__cell" @tap="switchTab('pending_pay')">
-        <text class="ord-stats__num" style="color: #FF5722;">{{ stats.pendingPay || 0 }}</text>
+        <text class="ord-stats__num ord-stats__num--warning">{{ stats.pendingPay || 0 }}</text>
         <text class="ord-stats__label">待支付</text>
       </view>
       <view class="ord-stats__cell" @tap="switchTab('paid')">
-        <text class="ord-stats__num" style="color: #27AE60;">{{ stats.paid || 0 }}</text>
+        <text class="ord-stats__num ord-stats__num--success">{{ stats.paid || 0 }}</text>
         <text class="ord-stats__label">已支付</text>
       </view>
       <view class="ord-stats__cell">
@@ -40,10 +40,13 @@
 
     <!-- 搜索 + 筛选 -->
     <view class="ord-filter">
-      <view class="ord-filter__search">
-        <text class="ord-filter__icon">🔍</text>
-        <input class="ord-filter__input" type="text" placeholder="搜索学生姓名/订单号" v-model="keyword" @confirm="search" />
-      </view>
+      <u-search
+        v-model="keyword"
+        placeholder="搜索学生姓名/订单号"
+        :showAction="false"
+        bgColor="transparent"
+        @search="search"
+      ></u-search>
     </view>
 
     <!-- 订单列表 -->
@@ -51,9 +54,12 @@
       <view v-for="item in list" :key="item.orderId" class="ord-card" @tap="goDetail(item.orderId)">
         <view class="ord-card__header">
           <text class="ord-card__contest">{{ item.contestName || '--' }}</text>
-          <view class="ord-card__status" :class="'ord-card__status--' + getStatusType(item.orderStatus)">
-            {{ item.statusText || getStatusText(item.orderStatus) }}
-          </view>
+          <u-tag
+            :text="item.statusText || getStatusText(item.orderStatus)"
+            :type="getStatusType(item.orderStatus) === 'gray' ? 'info' : getStatusType(item.orderStatus)"
+            size="mini"
+            shape="circle"
+          ></u-tag>
         </view>
 
         <!-- 学生行 -->
@@ -63,7 +69,7 @@
           </view>
           <text class="ord-card__sname">{{ item.studentName || '--' }}</text>
           <text class="ord-card__school">{{ item.schoolName || '' }}</text>
-          <text class="ord-card__amount" :style="{ color: item.payAmount > 0 ? '#FF5722' : '#27AE60' }">
+          <text :class="['ord-card__amount', item.payAmount > 0 ? 'ord-card__amount--pay' : 'ord-card__amount--free']">
             {{ item.payAmount > 0 ? '¥' + item.payAmount : '免费' }}
           </text>
         </view>
@@ -80,14 +86,8 @@
         </view>
       </view>
 
-      <view v-if="hasMore" class="ord-loadmore" @tap="loadMore">
-        <text>加载更多订单</text>
-      </view>
-
-      <view v-if="!list.length && !loading" class="ord-empty">
-        <text class="ord-empty__icon">🧾</text>
-        <text class="ord-empty__text">暂无订单</text>
-      </view>
+      <u-loadmore v-if="list.length" :status="loading ? 'loading' : (hasMore ? 'loadmore' : 'nomore')" @loadmore="loadMore" />
+      <u-empty v-if="!list.length && !loading" mode="order" text="暂无订单"></u-empty>
     </view>
   </view>
 </template>
@@ -96,7 +96,7 @@
 import { getChannelOrders, getChannelDashboardStats } from '@/api/channel'
 
 const AVATAR_COLORS = [
-  'linear-gradient(135deg, #3F51B5, #5C6BC0)',
+  'linear-gradient(135deg, #283593, #3949AB)',
   'linear-gradient(135deg, #E65100, #FF7043)',
   'linear-gradient(135deg, #1B5E20, #66BB6A)',
   'linear-gradient(135deg, #880E4F, #F06292)',
@@ -114,6 +114,7 @@ const STATUS_MAP = {
 export default {
   data() {
     return {
+      skeletonShow: true, // [visual-effect]
       loading: false,
       keyword: '',
       activeStatus: '',
@@ -201,58 +202,53 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.ord-page { min-height: 100vh; padding-bottom: 48rpx; background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
 
-.ord-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: #fff; border-bottom: 2rpx solid var(--jst-color-border); position: sticky; top: 0; z-index: 40; }
-.ord-header__back { width: 72rpx; height: 72rpx; border-radius: var(--jst-radius-sm); background: var(--jst-color-page-bg); display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
-.ord-header__title { flex: 1; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
+.ord-page { min-height: 100vh; padding-bottom: $jst-space-xxl; background: $jst-bg-page; }
+
+.ord-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; position: sticky; top: 0; z-index: 40; }
+.ord-header__back { width: 72rpx; height: 72rpx; border-radius: $jst-radius-sm; background: $jst-bg-page; display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
+.ord-header__title { flex: 1; font-size: 34rpx; font-weight: 600; color: $jst-text-primary; }
 
 /* 统计横条 */
-.ord-stats { display: grid; grid-template-columns: repeat(4, 1fr); margin: 24rpx 32rpx 0; background: #fff; border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); overflow: hidden; }
-.ord-stats__cell { padding: 28rpx 12rpx; text-align: center; border-right: 2rpx solid var(--jst-color-border); }
+.ord-stats { display: grid; grid-template-columns: repeat(4, 1fr); margin: 24rpx 32rpx 0; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; overflow: hidden; }
+.ord-stats__cell { padding: 28rpx 12rpx; text-align: center; border-right: 2rpx solid $jst-border; }
 .ord-stats__cell:last-child { border-right: none; }
-.ord-stats__num { display: block; font-size: 40rpx; font-weight: 900; color: var(--jst-color-text); line-height: 1; margin-bottom: 8rpx; }
-.ord-stats__label { display: block; font-size: 20rpx; color: var(--jst-color-text-tertiary); }
+.ord-stats__num { display: block; font-size: 40rpx; font-weight: 600; color: $jst-text-primary; line-height: 1; margin-bottom: 8rpx; }
+.ord-stats__num--warning { color: $jst-warning; }
+.ord-stats__num--success { color: $jst-success; }
+.ord-stats__label { display: block; font-size: 20rpx; color: $jst-text-secondary; }
 
 /* Tab */
-.ord-tabs { display: flex; overflow-x: auto; background: #fff; border-bottom: 2rpx solid var(--jst-color-border); position: sticky; top: 200rpx; z-index: 30; }
+.ord-tabs { display: flex; overflow-x: auto; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; position: sticky; top: 200rpx; z-index: 30; }
 .ord-tabs::-webkit-scrollbar { display: none; }
-.ord-tab { flex-shrink: 0; padding: 0 36rpx; height: 88rpx; display: flex; align-items: center; gap: 10rpx; font-size: 28rpx; font-weight: 500; color: var(--jst-color-text-tertiary); white-space: nowrap; position: relative; }
-.ord-tab--active { color: #3F51B5; font-weight: 700; }
-.ord-tab--active::after { content: ''; position: absolute; bottom: 0; left: 28rpx; right: 28rpx; height: 4rpx; background: #3F51B5; border-radius: 2rpx; }
-.ord-tab__badge { font-size: 20rpx; font-weight: 700; background: #FF5722; color: #fff; padding: 2rpx 10rpx; border-radius: var(--jst-radius-full); line-height: 1.4; }
+.ord-tab { flex-shrink: 0; padding: 0 36rpx; height: 88rpx; display: flex; align-items: center; gap: 10rpx; font-size: 28rpx; font-weight: 500; color: $jst-text-secondary; white-space: nowrap; position: relative; }
+.ord-tab--active { color: $jst-brand; font-weight: 600; }
+.ord-tab--active::after { content: ''; position: absolute; bottom: 0; left: 28rpx; right: 28rpx; height: 4rpx; background: $jst-brand; border-radius: 2rpx; }
+.ord-tab__badge { font-size: 20rpx; font-weight: 600; background: $jst-warning; color: $jst-text-inverse; padding: 2rpx 10rpx; border-radius: $jst-radius-round; line-height: 1.4; }
 
 /* 搜索 */
-.ord-filter { padding: 20rpx 32rpx; background: #fff; }
-.ord-filter__search { display: flex; align-items: center; padding: 0 24rpx; height: 72rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-page-bg); }
-.ord-filter__icon { font-size: 28rpx; margin-right: 12rpx; }
-.ord-filter__input { flex: 1; font-size: 26rpx; color: var(--jst-color-text); }
+.ord-filter { padding: 20rpx 32rpx; background: $jst-bg-card; }
+::v-deep .ord-filter .u-search__content { background-color: $jst-bg-page !important; }
 
 /* 订单列表 */
 .ord-list { padding: 24rpx 32rpx 0; }
-.ord-card { background: #fff; border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); margin-bottom: 20rpx; overflow: hidden; }
-.ord-card__header { display: flex; align-items: center; gap: 16rpx; padding: 24rpx 28rpx 20rpx; border-bottom: 2rpx solid var(--jst-color-border); }
-.ord-card__contest { flex: 1; font-size: 26rpx; font-weight: 700; color: var(--jst-color-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ord-card__status { flex-shrink: 0; padding: 6rpx 16rpx; border-radius: var(--jst-radius-full); font-size: 22rpx; font-weight: 600; }
-.ord-card__status--warning { background: var(--jst-color-warning-soft); color: #B26A00; }
-.ord-card__status--success { background: var(--jst-color-success-soft); color: #0F7B3F; }
-.ord-card__status--info { background: var(--jst-color-brand-soft); color: var(--jst-color-brand); }
-.ord-card__status--gray { background: #ECECEC; color: #6B6B6B; }
-.ord-card__student { display: flex; align-items: center; gap: 20rpx; padding: 22rpx 28rpx; border-bottom: 2rpx solid var(--jst-color-border); }
+.ord-card { background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; margin-bottom: 20rpx; overflow: hidden; }
+.ord-card__header { display: flex; align-items: center; gap: 16rpx; padding: 24rpx 28rpx 20rpx; border-bottom: 2rpx solid $jst-border; }
+.ord-card__contest { flex: 1; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ord-card__student { display: flex; align-items: center; gap: 20rpx; padding: 22rpx 28rpx; border-bottom: 2rpx solid $jst-border; }
 .ord-card__student:last-of-type { border-bottom: none; }
-.ord-card__avatar { width: 64rpx; height: 64rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28rpx; font-weight: 700; color: #fff; flex-shrink: 0; }
-.ord-card__sname { font-size: 26rpx; font-weight: 600; color: var(--jst-color-text); min-width: 96rpx; }
-.ord-card__school { flex: 1; font-size: 22rpx; color: var(--jst-color-text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: 8rpx; }
-.ord-card__amount { font-size: 28rpx; font-weight: 700; flex-shrink: 0; }
-.ord-card__footer { display: flex; align-items: center; justify-content: space-between; padding: 20rpx 28rpx; background: var(--jst-color-page-bg); }
-.ord-card__total { font-size: 26rpx; color: var(--jst-color-text-secondary); }
-.ord-card__total-val { font-weight: 900; color: #FF5722; font-size: 32rpx; }
+.ord-card__avatar { width: 64rpx; height: 64rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28rpx; font-weight: 600; color: $jst-text-inverse; flex-shrink: 0; }
+.ord-card__sname { font-size: 26rpx; font-weight: 600; color: $jst-text-primary; min-width: 96rpx; }
+.ord-card__school { flex: 1; font-size: 22rpx; color: $jst-text-secondary; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: 8rpx; }
+.ord-card__amount { font-size: 28rpx; font-weight: 600; flex-shrink: 0; }
+.ord-card__amount--pay { color: $jst-warning; }
+.ord-card__amount--free { color: $jst-success; }
+.ord-card__footer { display: flex; align-items: center; justify-content: space-between; padding: 20rpx 28rpx; background: $jst-bg-page; }
+.ord-card__total { font-size: 26rpx; color: $jst-text-regular; }
+.ord-card__total-val { font-weight: 600; color: $jst-warning; font-size: 32rpx; }
 .ord-card__actions { display: flex; gap: 16rpx; }
-.ord-card__btn { height: 64rpx; padding: 0 24rpx; border-radius: var(--jst-radius-sm); font-size: 24rpx; font-weight: 600; display: flex; align-items: center; gap: 6rpx; }
-.ord-card__btn--outline { background: transparent; color: #3F51B5; border: 3rpx solid rgba(63,81,181,0.3); }
+.ord-card__btn { height: 64rpx; padding: 0 24rpx; border-radius: $jst-radius-sm; font-size: 24rpx; font-weight: 600; display: flex; align-items: center; gap: 6rpx; }
+.ord-card__btn--outline { background: transparent; color: $jst-brand; border: 3rpx solid rgba(63,81,181,0.3); }
 
-.ord-loadmore { padding: 32rpx; text-align: center; font-size: 26rpx; color: #3F51B5; font-weight: 600; }
-.ord-empty { text-align: center; padding: 96rpx 48rpx; }
-.ord-empty__icon { display: block; font-size: 80rpx; margin-bottom: 24rpx; }
-.ord-empty__text { font-size: 28rpx; color: var(--jst-color-text-tertiary); }
 </style>

@@ -3,7 +3,7 @@
      调用接口: GET /jst/wx/rights/{id} + POST /jst/wx/rights/{id}/apply-writeoff -->
 <template>
   <view class="wa-page">
-    <view class="wa-hero">
+    <view class="wa-hero" :style="{ paddingTop: navPaddingTop }">
       <text class="wa-hero__label">申请核销</text>
       <text class="wa-hero__name">{{ detail.rightsName || '--' }}</text>
       <text class="wa-hero__remain">
@@ -75,28 +75,29 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.wa-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
+.wa-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: #F7F8FA; }
 .wa-hero { padding: 72rpx 32rpx 48rpx; background: linear-gradient(135deg, #1B5E20, #2E7D32); color: #fff; }
-.wa-hero__label { display: block; font-size: 24rpx; color: var(--jst-color-white-76); }
-.wa-hero__name { display: block; margin-top: 10rpx; font-size: 36rpx; font-weight: 800; }
-.wa-hero__remain { display: block; margin-top: 16rpx; font-size: 26rpx; color: #FFD54F; font-weight: 700; }
+.wa-hero__label { display: block; font-size: 24rpx; color: rgba(255,255,255,0.76); }
+.wa-hero__name { display: block; margin-top: 10rpx; font-size: 36rpx; font-weight: 600; }
+.wa-hero__remain { display: block; margin-top: 16rpx; font-size: 26rpx; color: #FFD54F; font-weight: 600; }
 
-.wa-section { margin: 24rpx 32rpx 0; padding: 16rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); }
-.wa-field { display: flex; align-items: center; padding: 28rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
+.wa-section { margin: 24rpx 32rpx 0; padding: 16rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
+.wa-field { display: flex; align-items: center; padding: 28rpx 0; border-bottom: 2rpx solid $jst-border; }
 .wa-field:last-child { border-bottom: none; }
 .wa-field--textarea { align-items: flex-start; }
-.wa-field__label { width: 200rpx; font-size: 26rpx; color: var(--jst-color-text-secondary); }
-.wa-field__input { flex: 1; font-size: 28rpx; color: var(--jst-color-text); }
-.wa-field__textarea { flex: 1; height: 160rpx; font-size: 26rpx; color: var(--jst-color-text); }
+.wa-field__label { width: 200rpx; font-size: 26rpx; color: $jst-text-regular; }
+.wa-field__input { flex: 1; font-size: 28rpx; color: $jst-text-primary; }
+.wa-field__textarea { flex: 1; height: 160rpx; font-size: 26rpx; color: $jst-text-primary; }
 .wa-stepper { display: flex; align-items: center; gap: 24rpx; }
-.wa-stepper__btn { width: 64rpx; height: 64rpx; line-height: 64rpx; text-align: center; border-radius: var(--jst-radius-sm); background: var(--jst-color-page-bg); font-size: 36rpx; }
-.wa-stepper__val { font-size: 30rpx; font-weight: 700; min-width: 64rpx; text-align: center; }
+.wa-stepper__btn { width: 64rpx; height: 64rpx; line-height: 64rpx; text-align: center; border-radius: $jst-radius-lg; background: #F7F8FA; font-size: 36rpx; }
+.wa-stepper__val { font-size: 30rpx; font-weight: 600; min-width: 64rpx; text-align: center; }
 
-.wa-tip { margin: 24rpx 32rpx 0; padding: 24rpx 32rpx; background: var(--jst-color-success-soft); border-radius: var(--jst-radius-md); }
-.wa-tip__title { display: block; font-size: 24rpx; font-weight: 700; color: #1B5E20; margin-bottom: 8rpx; }
-.wa-tip__text { font-size: 22rpx; line-height: 1.7; color: var(--jst-color-text-secondary); }
+.wa-tip { margin: 24rpx 32rpx 0; padding: 24rpx 32rpx; background: $jst-success-light; border-radius: $jst-radius-xl; }
+.wa-tip__title { display: block; font-size: 24rpx; font-weight: 600; color: #1B5E20; margin-bottom: 8rpx; }
+.wa-tip__text { font-size: 22rpx; line-height: 1.7; color: $jst-text-regular; }
 
-.wa-footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: var(--jst-color-card-bg); box-shadow: 0 -8rpx 24rpx rgba(16,88,160,0.08); }
-.wa-footer__btn { height: 96rpx; line-height: 96rpx; border-radius: var(--jst-radius-md); background: linear-gradient(135deg, #1B5E20, #2E7D32); color: #fff; font-size: 30rpx; font-weight: 800; border: none; }
+.wa-footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: $jst-bg-card; box-shadow: 0 -2rpx 8rpx rgba(20, 30, 60, 0.04); }
+.wa-footer__btn { height: 96rpx; line-height: 96rpx; border-radius: $jst-radius-xl; background: linear-gradient(135deg, #1B5E20, #2E7D32); color: #fff; font-size: 30rpx; font-weight: 600; border: none; }
 .wa-footer__btn[disabled] { opacity: 0.5; }
 </style>

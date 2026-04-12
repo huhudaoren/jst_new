@@ -1,0 +1,109 @@
+// ═══════════════════════════════════════════
+// 竞赛通 全局动画 Class
+// 用法: 在 template 上加对应 class 即可触发动画
+// ═══════════════════════════════════════════
+
+@import './design-tokens.scss';
+
+// ── 淡入 ──
+.jst-anim-fade-in {
+  animation: jstFadeIn $jst-duration-normal $jst-easing both;
+}
+
+@keyframes jstFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+// ── 从下方滑入 ──
+.jst-anim-slide-up {
+  animation: jstSlideUp $jst-duration-normal $jst-easing both;
+}
+
+@keyframes jstSlideUp {
+  from { opacity: 0; transform: translateY(40rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// ── 从上方滑入 ──
+.jst-anim-slide-down {
+  animation: jstSlideDown $jst-duration-normal $jst-easing both;
+}
+
+@keyframes jstSlideDown {
+  from { opacity: 0; transform: translateY(-40rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// ── 缩放弹入 ──
+.jst-anim-scale-in {
+  animation: jstScaleIn $jst-duration-normal $jst-easing both;
+}
+
+@keyframes jstScaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+// ── 从左滑入 ──
+.jst-anim-slide-left {
+  animation: jstSlideLeft $jst-duration-normal $jst-easing both;
+}
+
+@keyframes jstSlideLeft {
+  from { opacity: 0; transform: translateX(-40rpx); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+// ── 列表交错延迟 class (1~8) ──
+// 用法: v-for 列表中 :class="'jst-anim-stagger-' + (index + 1)"
+.jst-anim-stagger-1 { animation-delay: 50ms; }
+.jst-anim-stagger-2 { animation-delay: 100ms; }
+.jst-anim-stagger-3 { animation-delay: 150ms; }
+.jst-anim-stagger-4 { animation-delay: 200ms; }
+.jst-anim-stagger-5 { animation-delay: 250ms; }
+.jst-anim-stagger-6 { animation-delay: 300ms; }
+.jst-anim-stagger-7 { animation-delay: 350ms; }
+.jst-anim-stagger-8 { animation-delay: 400ms; }
+
+// ── 按压反馈（通用） ──
+.jst-anim-press {
+  transition: transform $jst-duration-fast $jst-easing, box-shadow $jst-duration-fast $jst-easing;
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+// ── 呼吸脉冲（用于 loading 占位等） ──
+.jst-anim-pulse {
+  animation: jstPulse 1.5s $jst-easing infinite;
+}
+
+@keyframes jstPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+// ── 扫码引导线（暗色扫码场景） ──
+.jst-anim-scan-line {
+  position: relative;
+  overflow: hidden;
+}
+
+.jst-anim-scan-line::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  height: 4rpx;
+  top: 0;
+  background: linear-gradient(90deg, transparent, $jst-brand, transparent);
+  animation: jstScanLine 1.8s linear infinite;
+}
+
+@keyframes jstScanLine {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(460rpx); opacity: 0; }
+}

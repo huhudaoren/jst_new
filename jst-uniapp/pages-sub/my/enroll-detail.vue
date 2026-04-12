@@ -1,6 +1,7 @@
 <template>
   <view class="enroll-detail-page">
     <jst-loading :loading="pageLoading" text="报名详情加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="enroll-detail-page__nav">
       <view class="enroll-detail-page__back" @tap="handleBack"><</view>
@@ -91,9 +92,9 @@
     </view>
 
     <view v-if="actionButton" class="enroll-detail-page__bottom">
-      <button class="enroll-detail-page__bottom-btn" @tap="handleAction">
+      <u-button class="enroll-detail-page__bottom-btn" @click="handleAction">
         {{ actionButton.text }}
-      </button>
+      </u-button>
     </view>
   </view>
 </template>
@@ -321,10 +322,16 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .enroll-detail-page {
   min-height: 100vh;
   padding-bottom: calc(132rpx + env(safe-area-inset-bottom));
-  background: #f4f7fc;
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg;
 }
 
 .enroll-detail-page__nav {
@@ -332,8 +339,8 @@ export default {
   align-items: center;
   height: 96rpx;
   padding: 0 24rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 22rpx rgba(14, 58, 113, 0.05);
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .enroll-detail-page__back,
@@ -344,7 +351,7 @@ export default {
 
 .enroll-detail-page__back {
   font-size: 34rpx;
-  color: #66768f;
+  color: $jst-text-secondary;
 }
 
 .enroll-detail-page__nav-title {
@@ -352,7 +359,7 @@ export default {
   text-align: center;
   font-size: 30rpx;
   font-weight: 700;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .enroll-detail-page__status-card,
@@ -360,12 +367,12 @@ export default {
   margin: 20rpx 24rpx 0;
   padding: 28rpx 24rpx;
   border-radius: 28rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 28rpx rgba(14, 58, 113, 0.06);
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
 }
 
 .enroll-detail-page__status-card {
-  background: linear-gradient(135deg, #0c3d6b 0%, #2f7de1 100%);
+  background: linear-gradient(135deg, $jst-brand-dark 0%, $jst-brand 100%);
 }
 
 .enroll-detail-page__status-title {
@@ -374,7 +381,7 @@ export default {
   font-size: 34rpx;
   font-weight: 800;
   line-height: 1.45;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .enroll-detail-page__status-desc,
@@ -383,7 +390,7 @@ export default {
   margin-top: 10rpx;
   font-size: 24rpx;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba($jst-text-inverse, 0.78);
 }
 
 .enroll-detail-page__card-title {
@@ -391,7 +398,7 @@ export default {
   margin-bottom: 18rpx;
   font-size: 30rpx;
   font-weight: 700;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .enroll-detail-page__info-row {
@@ -399,7 +406,7 @@ export default {
   justify-content: space-between;
   gap: 24rpx;
   padding: 18rpx 0;
-  border-top: 2rpx solid #edf1f7;
+  border-top: 2rpx solid $jst-border;
 }
 
 .enroll-detail-page__info-row:first-of-type {
@@ -414,13 +421,13 @@ export default {
 }
 
 .enroll-detail-page__info-key {
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .enroll-detail-page__info-value {
   flex: 1;
   text-align: right;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .enroll-detail-page__attachment {
@@ -430,13 +437,13 @@ export default {
   margin-top: 12rpx;
   padding: 0 22rpx;
   border-radius: 20rpx;
-  background: #f6f9ff;
+  background: $jst-bg-grey;
 }
 
 .enroll-detail-page__attachment-text {
   font-size: 24rpx;
   line-height: 1.6;
-  color: #5c6b84;
+  color: $jst-text-secondary;
   word-break: break-all;
 }
 
@@ -446,17 +453,21 @@ export default {
   right: 0;
   bottom: 0;
   padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 -12rpx 28rpx rgba(14, 58, 113, 0.08);
+  background: rgba($jst-bg-card, 0.98);
+  box-shadow: $jst-shadow-md;
 }
 
 .enroll-detail-page__bottom-btn {
   width: 100%;
   height: 88rpx;
   border-radius: 28rpx;
-  background: linear-gradient(135deg, #ff6a3d 0%, #ff8a3d 100%);
-  color: #ffffff;
+  background: $jst-brand-gradient;
+  color: $jst-text-inverse;
   font-size: 28rpx;
   font-weight: 700;
+}
+
+::v-deep .enroll-detail-page__bottom-btn.u-button {
+  border: none;
 }
 </style>

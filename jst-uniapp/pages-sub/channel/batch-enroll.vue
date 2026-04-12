@@ -5,7 +5,7 @@
 <template>
   <view class="be-page">
     <!-- 导航 -->
-    <view class="be-header">
+    <view class="be-header" :style="{ paddingTop: navPaddingTop }">
       <view class="be-header__back" @tap="goBack">←</view>
       <text class="be-header__title">批量报名</text>
     </view>
@@ -31,10 +31,8 @@
 
     <!-- Tab A: 从已绑定学生选择 -->
     <view v-if="activeTab === 'bound'" class="be-section">
-      <view v-if="!boundStudents.length && !loadingStudents" class="be-empty">
-        <text>暂无绑定学生，请先邀请学生绑定</text>
-      </view>
-      <view v-for="stu in boundStudents" :key="stu.bindingId || stu.studentId" class="be-check-item" @tap="toggleStudent(stu)">
+      <u-empty v-if="!boundStudents.length && !loadingStudents" mode="data" text="暂无绑定学生，请先邀请学生绑定"></u-empty>
+      <view v-for="stu in boundStudents" :key="stu.bindingId" class="be-check-item" @tap="toggleStudent(stu)">
         <view :class="['be-checkbox', isStudentSelected(stu) ? 'be-checkbox--checked' : '']">
           <text v-if="isStudentSelected(stu)">✓</text>
         </view>
@@ -95,9 +93,7 @@
           <input class="be-field__input" v-model="item.idNo" placeholder="请输入证件号码" />
         </view>
       </view>
-      <view class="be-add-btn" @tap="addManual">
-        <text>+ 新增一行参赛人</text>
-      </view>
+      <u-button text="+ 新增一行参赛人" shape="circle" plain @click="addManual"></u-button>
     </view>
 
     <!-- Tab C: Excel 导入 -->
@@ -107,12 +103,8 @@
         <text class="be-excel-tip__desc">1. 下载模板 → 2. 填写信息 → 3. 上传文件</text>
       </view>
       <view class="be-excel-actions">
-        <view class="be-excel-btn" @tap="downloadTemplate">
-          <text>📥 下载模板</text>
-        </view>
-        <view class="be-excel-btn be-excel-btn--primary" @tap="chooseFile">
-          <text>📤 上传 Excel</text>
-        </view>
+        <u-button text="下载模板" icon="download" plain shape="circle" @click="downloadTemplate"></u-button>
+        <u-button text="上传 Excel" icon="upload" type="primary" shape="circle" @click="chooseFile"></u-button>
       </view>
       <view v-if="importResult" class="be-import-result">
         <text class="be-import-result__text">
@@ -125,13 +117,19 @@
     <!-- 已选参赛人列表 -->
     <view v-if="selectedParticipants.length" class="be-section">
       <view class="be-section__title">已选参赛人 ({{ selectedParticipants.length }}人)</view>
-      <view v-for="(p, idx) in selectedParticipants" :key="'sp-' + idx" class="be-selected-item">
+      <view v-for="(p, idx) in selectedParticipants" :key="idx" class="be-selected-item">
         <view class="be-selected-avatar" :style="{ background: getAvatarColor(p.name || p.studentName) }">
           <text>{{ ((p.name || p.studentName || '').slice(0, 1)) }}</text>
         </view>
         <view class="be-selected-info">
           <text class="be-selected-name">{{ p.name || p.studentName }}</text>
-          <text class="be-selected-source">{{ p.source === 'bound' ? '已绑定' : p.source === 'manual' ? '临时档案' : '导入' }}</text>
+          <u-tag
+            :text="p.source === 'bound' ? '已绑定' : p.source === 'manual' ? '临时档案' : '导入'"
+            :type="p.source === 'bound' ? 'success' : (p.source === 'manual' ? 'warning' : 'primary')"
+            size="mini"
+            plain
+            shape="circle"
+          ></u-tag>
         </view>
         <text class="be-selected-remove" @tap="removeParticipant(idx)">✕</text>
       </view>
@@ -143,14 +141,18 @@
         <text class="be-footer__count">{{ selectedParticipants.length }} 人</text>
         <text class="be-footer__total">合计: ¥{{ totalAmount }}</text>
       </view>
-      <view class="be-footer__btn" :class="{ 'be-footer__btn--disabled': !canSubmit || submitting }" @tap="onSubmit">
-        {{ submitting ? '提交中...' : '提交报名' }}
-      </view>
+      <u-button
+        :text="submitting ? '提交中...' : '提交报名'"
+        type="primary"
+        shape="circle"
+        :disabled="!canSubmit || submitting"
+        @click="onSubmit"
+      ></u-button>
     </view>
 
     <!-- 赛事选择弹窗 -->
-    <view v-if="showContestPicker" class="be-mask" @tap="showContestPicker = false">
-      <view class="be-picker" @tap.stop>
+    <u-popup :show="showContestPicker" mode="bottom" :round="16" @close="showContestPicker = false" @open="showContestPicker = true">
+      <view class="be-picker">
         <view class="be-picker__header">
           <text class="be-picker__title">选择赛事</text>
           <text class="be-picker__close" @tap="showContestPicker = false">✕</text>
@@ -165,7 +167,7 @@
           </view>
         </scroll-view>
       </view>
-    </view>
+    </u-popup>
   </view>
 </template>
 
@@ -175,7 +177,7 @@ import { getContestList } from '@/api/contest'
 import { getToken } from '@/api/request'
 
 const AVATAR_COLORS = [
-  'linear-gradient(135deg, #3F51B5, #5C6BC0)',
+  'linear-gradient(135deg, #283593, #3949AB)',
   'linear-gradient(135deg, #E65100, #FF7043)',
   'linear-gradient(135deg, #1B5E20, #66BB6A)',
   'linear-gradient(135deg, #880E4F, #F06292)',
@@ -185,6 +187,7 @@ const AVATAR_COLORS = [
 export default {
   data() {
     return {
+      skeletonShow: true, // [visual-effect]
       activeTab: 'bound',
       addTabs: [
         { key: 'bound', label: '已绑定学生' },
@@ -432,86 +435,83 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.be-page { min-height: 100vh; padding-bottom: calc(160rpx + env(safe-area-inset-bottom)); background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
 
-.be-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: #fff; border-bottom: 2rpx solid var(--jst-color-border); position: sticky; top: 0; z-index: 40; }
-.be-header__back { width: 72rpx; height: 72rpx; border-radius: var(--jst-radius-sm); background: var(--jst-color-page-bg); display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
-.be-header__title { flex: 1; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
+.be-page { min-height: 100vh; padding-bottom: calc(160rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
 
-.be-section { margin: 24rpx 32rpx 0; background: #fff; border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); overflow: hidden; padding: 28rpx; }
-.be-section__title { font-size: 30rpx; font-weight: 700; color: var(--jst-color-text); margin-bottom: 20rpx; display: flex; align-items: center; gap: 12rpx; }
-.be-section__title::before { content: ''; width: 6rpx; height: 30rpx; background: #3F51B5; border-radius: 4rpx; }
+.be-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; position: sticky; top: 0; z-index: 40; }
+.be-header__back { width: 72rpx; height: 72rpx; border-radius: $jst-radius-sm; background: $jst-bg-page; display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
+.be-header__title { flex: 1; font-size: 34rpx; font-weight: 600; color: $jst-text-primary; }
+
+.be-section { margin: 24rpx 32rpx 0; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; overflow: hidden; padding: 28rpx; }
+.be-section__title { font-size: 30rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 20rpx; display: flex; align-items: center; gap: 12rpx; }
+.be-section__title::before { content: ''; width: 6rpx; height: 30rpx; background: $jst-brand; border-radius: 4rpx; }
 
 /* 赛事选择 */
-.be-contest { padding: 20rpx; background: var(--jst-color-page-bg); border-radius: var(--jst-radius-md); }
-.be-contest__name { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.be-contest__price { display: block; margin-top: 8rpx; font-size: 24rpx; color: #FF5722; font-weight: 600; }
-.be-contest__placeholder { font-size: 28rpx; color: var(--jst-color-text-tertiary); }
+.be-contest { padding: 20rpx; background: $jst-bg-page; border-radius: $jst-radius-md; }
+.be-contest__name { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
+.be-contest__price { display: block; margin-top: 8rpx; font-size: 24rpx; color: $jst-warning; font-weight: 600; }
+.be-contest__placeholder { font-size: 28rpx; color: $jst-text-secondary; }
 
 /* Tab */
 .be-tabs { display: flex; gap: 16rpx; padding: 24rpx 32rpx 0; }
-.be-tab { flex: 1; height: 72rpx; border: 3rpx solid var(--jst-color-border); border-radius: var(--jst-radius-full); background: #fff; font-size: 26rpx; font-weight: 500; color: var(--jst-color-text-secondary); display: flex; align-items: center; justify-content: center; }
-.be-tab--active { border-color: #3F51B5; background: #EEF0FF; color: #3F51B5; font-weight: 700; }
+.be-tab { flex: 1; height: 72rpx; border: 3rpx solid $jst-border; border-radius: $jst-radius-round; background: $jst-bg-card; font-size: 26rpx; font-weight: 500; color: $jst-text-regular; display: flex; align-items: center; justify-content: center; }
+.be-tab--active { border-color: $jst-brand; background: $jst-brand-light; color: $jst-brand; font-weight: 600; }
 
 /* Tab A 勾选 */
-.be-check-item { display: flex; align-items: center; gap: 20rpx; padding: 20rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
+.be-check-item { display: flex; align-items: center; gap: 20rpx; padding: 20rpx 0; border-bottom: 2rpx solid $jst-border; }
 .be-check-item:last-child { border-bottom: none; }
-.be-checkbox { width: 44rpx; height: 44rpx; border: 3rpx solid var(--jst-color-border); border-radius: var(--jst-radius-sm); display: flex; align-items: center; justify-content: center; font-size: 28rpx; color: #fff; flex-shrink: 0; }
-.be-checkbox--checked { background: #3F51B5; border-color: #3F51B5; }
+.be-checkbox { width: 44rpx; height: 44rpx; border: 3rpx solid $jst-border; border-radius: $jst-radius-sm; display: flex; align-items: center; justify-content: center; font-size: 28rpx; color: $jst-text-inverse; flex-shrink: 0; }
+.be-checkbox--checked { background: $jst-brand; border-color: $jst-brand; }
 .be-check-info { flex: 1; min-width: 0; }
-.be-check-name { display: block; font-size: 28rpx; font-weight: 600; color: var(--jst-color-text); }
-.be-check-meta { display: block; font-size: 22rpx; color: var(--jst-color-text-tertiary); margin-top: 4rpx; }
+.be-check-name { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
+.be-check-meta { display: block; font-size: 22rpx; color: $jst-text-secondary; margin-top: 4rpx; }
 
 /* Tab B 手动 */
-.be-manual-card { padding: 24rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
+.be-manual-card { padding: 24rpx 0; border-bottom: 2rpx solid $jst-border; }
 .be-manual-card:last-child { border-bottom: none; }
 .be-manual-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
-.be-manual-idx { font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.be-manual-remove { font-size: 24rpx; color: var(--jst-color-danger); font-weight: 600; }
+.be-manual-idx { font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
+.be-manual-remove { font-size: 24rpx; color: $jst-danger; font-weight: 600; }
 .be-field { display: flex; align-items: center; margin-bottom: 16rpx; }
-.be-field__label { width: 180rpx; font-size: 26rpx; color: var(--jst-color-text-secondary); flex-shrink: 0; }
-.be-field__input { flex: 1; height: 64rpx; padding: 0 16rpx; background: var(--jst-color-page-bg); border-radius: var(--jst-radius-sm); font-size: 26rpx; color: var(--jst-color-text); display: flex; align-items: center; }
-.be-add-btn { padding: 24rpx; text-align: center; font-size: 28rpx; color: #3F51B5; font-weight: 600; border: 3rpx dashed rgba(63,81,181,0.3); border-radius: var(--jst-radius-md); margin-top: 16rpx; }
+.be-field__label { width: 180rpx; font-size: 26rpx; color: $jst-text-regular; flex-shrink: 0; }
+.be-field__input { flex: 1; height: 64rpx; padding: 0 16rpx; background: $jst-bg-page; border-radius: $jst-radius-sm; font-size: 26rpx; color: $jst-text-primary; display: flex; align-items: center; }
 
 /* Tab C Excel */
 .be-excel-tip { margin-bottom: 24rpx; }
-.be-excel-tip__title { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.be-excel-tip__desc { display: block; margin-top: 8rpx; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.be-excel-tip__title { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
+.be-excel-tip__desc { display: block; margin-top: 8rpx; font-size: 24rpx; color: $jst-text-secondary; }
 .be-excel-actions { display: flex; gap: 20rpx; }
-.be-excel-btn { flex: 1; height: 80rpx; border: 3rpx solid var(--jst-color-border); border-radius: var(--jst-radius-md); display: flex; align-items: center; justify-content: center; font-size: 26rpx; font-weight: 600; color: var(--jst-color-text-secondary); }
-.be-excel-btn--primary { background: #3F51B5; border-color: #3F51B5; color: #fff; }
-.be-import-result { margin-top: 20rpx; padding: 16rpx; background: var(--jst-color-success-soft); border-radius: var(--jst-radius-sm); }
-.be-import-result__text { font-size: 26rpx; color: #0F7B3F; }
+::v-deep .be-excel-actions .u-button { flex: 1; }
+.be-import-result { margin-top: 20rpx; padding: 16rpx; background: $jst-success-light; border-radius: $jst-radius-sm; }
+.be-import-result__text { font-size: 26rpx; color: $jst-success; }
 
 /* 已选列表 */
-.be-selected-item { display: flex; align-items: center; gap: 20rpx; padding: 16rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
+.be-selected-item { display: flex; align-items: center; gap: 20rpx; padding: 16rpx 0; border-bottom: 2rpx solid $jst-border; }
 .be-selected-item:last-child { border-bottom: none; }
-.be-selected-avatar { width: 64rpx; height: 64rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28rpx; font-weight: 700; color: #fff; flex-shrink: 0; }
+.be-selected-avatar { width: 64rpx; height: 64rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28rpx; font-weight: 600; color: $jst-text-inverse; flex-shrink: 0; }
 .be-selected-info { flex: 1; min-width: 0; }
-.be-selected-name { display: block; font-size: 28rpx; font-weight: 600; color: var(--jst-color-text); }
-.be-selected-source { display: block; font-size: 22rpx; color: var(--jst-color-text-tertiary); margin-top: 4rpx; }
-.be-selected-remove { width: 48rpx; height: 48rpx; display: flex; align-items: center; justify-content: center; font-size: 28rpx; color: var(--jst-color-text-tertiary); flex-shrink: 0; }
+.be-selected-name { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
+.be-selected-remove { width: 48rpx; height: 48rpx; display: flex; align-items: center; justify-content: center; font-size: 28rpx; color: $jst-text-secondary; flex-shrink: 0; }
 
 /* 底部 */
-.be-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.97); border-top: 2rpx solid var(--jst-color-border); padding: 20rpx 32rpx; padding-bottom: calc(20rpx + env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; gap: 24rpx; z-index: 50; box-shadow: 0 -8rpx 40rpx rgba(12,61,107,0.08); }
+.be-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba($jst-bg-card, 0.97); border-top: 2rpx solid $jst-border; padding: 20rpx 32rpx; padding-bottom: calc(20rpx + env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; gap: 24rpx; z-index: 50; box-shadow: $jst-shadow-sm; }
 .be-footer__summary { flex: 1; }
-.be-footer__count { display: block; font-size: 26rpx; color: var(--jst-color-text-secondary); }
-.be-footer__total { display: block; font-size: 32rpx; font-weight: 800; color: #FF5722; margin-top: 4rpx; }
-.be-footer__btn { width: 280rpx; height: 88rpx; background: #3F51B5; border-radius: var(--jst-radius-md); color: #fff; font-size: 30rpx; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.be-footer__btn--disabled { opacity: 0.5; }
+.be-footer__count { display: block; font-size: 26rpx; color: $jst-text-regular; }
+.be-footer__total { display: block; font-size: 32rpx; font-weight: 600; color: $jst-warning; margin-top: 4rpx; }
+::v-deep .be-footer .u-button { width: 280rpx; height: 88rpx; flex-shrink: 0; }
 
 /* 空状态 */
-.be-empty { padding: 48rpx; text-align: center; font-size: 28rpx; color: var(--jst-color-text-tertiary); }
+.be-empty { padding: 48rpx; text-align: center; font-size: 28rpx; color: $jst-text-secondary; }
 
 /* 弹窗 */
-.be-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: flex-end; }
-.be-picker { width: 100%; max-height: 70vh; background: #fff; border-radius: var(--jst-radius-lg) var(--jst-radius-lg) 0 0; overflow: hidden; }
-.be-picker__header { display: flex; align-items: center; justify-content: space-between; padding: 28rpx 32rpx; border-bottom: 2rpx solid var(--jst-color-border); }
-.be-picker__title { font-size: 32rpx; font-weight: 700; color: var(--jst-color-text); }
-.be-picker__close { font-size: 36rpx; color: var(--jst-color-text-tertiary); padding: 8rpx; }
+.be-picker { width: 100%; max-height: 70vh; background: $jst-bg-card; border-radius: $jst-radius-lg $jst-radius-lg 0 0; overflow: hidden; }
+.be-picker__header { display: flex; align-items: center; justify-content: space-between; padding: 28rpx 32rpx; border-bottom: 2rpx solid $jst-border; }
+.be-picker__title { font-size: 32rpx; font-weight: 600; color: $jst-text-primary; }
+.be-picker__close { font-size: 36rpx; color: $jst-text-secondary; padding: 8rpx; }
 .be-picker__body { max-height: 60vh; padding: 0 32rpx; }
-.be-picker__item { display: flex; align-items: center; justify-content: space-between; padding: 28rpx 0; border-bottom: 2rpx solid var(--jst-color-border); }
-.be-picker__name { flex: 1; font-size: 28rpx; font-weight: 600; color: var(--jst-color-text); }
-.be-picker__price { font-size: 26rpx; color: #FF5722; font-weight: 700; flex-shrink: 0; }
-.be-picker__empty { padding: 64rpx; text-align: center; font-size: 28rpx; color: var(--jst-color-text-tertiary); }
+.be-picker__item { display: flex; align-items: center; justify-content: space-between; padding: 28rpx 0; border-bottom: 2rpx solid $jst-border; }
+.be-picker__name { flex: 1; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
+.be-picker__price { font-size: 26rpx; color: $jst-warning; font-weight: 600; flex-shrink: 0; }
+.be-picker__empty { padding: 64rpx; text-align: center; font-size: 28rpx; color: $jst-text-secondary; }
 </style>

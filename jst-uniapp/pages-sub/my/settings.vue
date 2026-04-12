@@ -10,18 +10,18 @@
     <view class="settings-page__group">
       <text class="settings-page__group-title">隐私保护</text>
       <view class="settings-page__cell" @tap="navigatePrivacy">
-        <view class="settings-page__cell-icon" style="background: var(--jst-color-page-bg);">📄</view>
+        <view class="settings-page__cell-icon settings-page__cell-icon--neutral">📄</view>
         <view class="settings-page__cell-body">
           <text class="settings-page__cell-name">隐私保护政策</text>
         </view>
-        <text class="settings-page__cell-arrow">›</text>
+        <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
       </view>
       <view class="settings-page__cell" @tap="navigateAgreement">
-        <view class="settings-page__cell-icon" style="background: var(--jst-color-page-bg);">📋</view>
+        <view class="settings-page__cell-icon settings-page__cell-icon--neutral">📋</view>
         <view class="settings-page__cell-body">
           <text class="settings-page__cell-name">用户服务协议</text>
         </view>
-        <text class="settings-page__cell-arrow">›</text>
+        <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
       </view>
     </view>
 
@@ -29,12 +29,12 @@
     <view class="settings-page__group">
       <text class="settings-page__group-title">账号安全</text>
       <view class="settings-page__cell" @tap="navigateBinding">
-        <view class="settings-page__cell-icon" style="background: var(--jst-color-brand-soft);">🔗</view>
+        <view class="settings-page__cell-icon settings-page__cell-icon--brand">🔗</view>
         <view class="settings-page__cell-body">
           <text class="settings-page__cell-name">绑定关系管理</text>
           <text class="settings-page__cell-desc">查看或解除与老师/机构的绑定</text>
         </view>
-        <text class="settings-page__cell-arrow">›</text>
+        <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
       </view>
     </view>
 
@@ -42,37 +42,37 @@
     <view class="settings-page__group">
       <text class="settings-page__group-title">通用</text>
       <view class="settings-page__cell">
-        <view class="settings-page__cell-icon" style="background: var(--jst-color-page-bg);">🌐</view>
+        <view class="settings-page__cell-icon settings-page__cell-icon--neutral">🌐</view>
         <view class="settings-page__cell-body">
           <text class="settings-page__cell-name">语言</text>
         </view>
         <text class="settings-page__cell-value">简体中文</text>
-        <text class="settings-page__cell-arrow">›</text>
+        <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
       </view>
       <view class="settings-page__cell" @tap="clearCache">
-        <view class="settings-page__cell-icon" style="background: var(--jst-color-page-bg);">🗑️</view>
+        <view class="settings-page__cell-icon settings-page__cell-icon--neutral">🗑️</view>
         <view class="settings-page__cell-body">
           <text class="settings-page__cell-name">清除缓存</text>
           <text class="settings-page__cell-desc">{{ cacheText }}</text>
         </view>
         <text class="settings-page__cell-value">清除</text>
-        <text class="settings-page__cell-arrow">›</text>
+        <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
       </view>
       <view class="settings-page__cell" @tap="navigateHelp">
-        <view class="settings-page__cell-icon" style="background: var(--jst-color-success-soft);">💬</view>
+        <view class="settings-page__cell-icon settings-page__cell-icon--success">💬</view>
         <view class="settings-page__cell-body">
           <text class="settings-page__cell-name">客服与帮助</text>
           <text class="settings-page__cell-desc">FAQ、在线客服、联系方式</text>
         </view>
-        <text class="settings-page__cell-arrow">›</text>
+        <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
       </view>
       <view class="settings-page__cell">
-        <view class="settings-page__cell-icon" style="background: var(--jst-color-brand-soft);">🔄</view>
+        <view class="settings-page__cell-icon settings-page__cell-icon--brand">🔄</view>
         <view class="settings-page__cell-body">
           <text class="settings-page__cell-name">检查更新</text>
           <text class="settings-page__cell-desc">当前版本 v1.0.0</text>
         </view>
-        <text class="settings-page__cell-tag">最新</text>
+        <u-tag class="settings-page__cell-tag" text="最新" type="success" plain size="mini" />
       </view>
     </view>
 
@@ -85,7 +85,7 @@
       </view>
     </view>
 
-    <button class="settings-page__logout" @tap="handleLogout">退出登录</button>
+    <u-button class="settings-page__logout" @click="handleLogout">退出登录</u-button>
   </view>
 </template>
 
@@ -155,33 +155,178 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.settings-page { min-height: 100vh; padding-bottom: 60rpx; background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
 
-.settings-page__header { display: flex; align-items: center; padding: 24rpx; background: var(--jst-color-card-bg); }
-.settings-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: var(--jst-color-page-bg); font-size: 30rpx; color: var(--jst-color-text); }
-.settings-page__header-title { flex: 1; margin-left: 16rpx; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
+.settings-page {
+  min-height: 100vh;
+  padding-bottom: 60rpx;
+  background: $jst-bg-page;
+}
 
-/* 分组 */
-.settings-page__group { margin: 24rpx 24rpx 0; border-radius: var(--jst-radius-lg); background: var(--jst-color-card-bg); box-shadow: 0 4rpx 16rpx rgba(20,30,60,0.06); overflow: hidden; }
-.settings-page__group-title { display: block; padding: 24rpx 28rpx 16rpx; font-size: 24rpx; font-weight: 700; color: var(--jst-color-text-tertiary); letter-spacing: 1rpx; border-bottom: 2rpx solid var(--jst-color-border); }
+.settings-page__header {
+  display: flex;
+  align-items: center;
+  padding: $jst-space-lg $jst-page-padding;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
+}
 
-/* Cell */
-.settings-page__cell { display: flex; align-items: center; padding: 28rpx; border-bottom: 2rpx solid var(--jst-color-border); }
-.settings-page__cell:last-child { border-bottom: none; }
-.settings-page__cell-icon { display: flex; align-items: center; justify-content: center; width: 68rpx; height: 68rpx; border-radius: var(--jst-radius-sm); font-size: 34rpx; flex-shrink: 0; margin-right: 24rpx; }
-.settings-page__cell-body { flex: 1; min-width: 0; }
-.settings-page__cell-name { display: block; font-size: 28rpx; font-weight: 500; color: var(--jst-color-text); }
-.settings-page__cell-desc { display: block; margin-top: 4rpx; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.settings-page__cell-value { font-size: 26rpx; color: var(--jst-color-text-tertiary); margin-right: 12rpx; white-space: nowrap; }
-.settings-page__cell-arrow { font-size: 28rpx; color: var(--jst-color-text-tertiary); flex-shrink: 0; }
-.settings-page__cell-tag { padding: 6rpx 14rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-success-soft); font-size: 20rpx; font-weight: 600; color: var(--jst-color-success); flex-shrink: 0; }
+.settings-page__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 22rpx;
+  background: $jst-bg-page;
+  font-size: $jst-font-md;
+  color: $jst-text-primary;
+}
 
-/* 版本 */
-.settings-page__version { display: flex; align-items: center; gap: 24rpx; margin: 24rpx 24rpx 0; padding: 28rpx; border-radius: var(--jst-radius-lg); background: var(--jst-color-card-bg); box-shadow: 0 4rpx 16rpx rgba(20,30,60,0.06); }
-.settings-page__version-icon { display: flex; align-items: center; justify-content: center; width: 88rpx; height: 88rpx; border-radius: var(--jst-radius-md); background: linear-gradient(135deg, #1058A0, #0D3F7A); font-size: 48rpx; flex-shrink: 0; }
-.settings-page__version-name { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.settings-page__version-text { display: block; margin-top: 4rpx; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.settings-page__header-title {
+  flex: 1;
+  margin-left: $jst-space-md;
+  font-size: 34rpx;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
+}
 
-/* 退出 */
-.settings-page__logout { margin: 28rpx 24rpx 0; height: 88rpx; border-radius: var(--jst-radius-md); background: transparent; border: 2rpx solid rgba(231,76,60,0.2); color: #E74C3C; font-size: 28rpx; font-weight: 600; }
+.settings-page__group {
+  margin: $jst-space-lg $jst-page-padding 0;
+  border-radius: $jst-radius-lg;
+  overflow: hidden;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
+}
+
+.settings-page__group-title {
+  display: block;
+  padding: $jst-space-lg 28rpx $jst-space-md;
+  border-bottom: 2rpx solid $jst-border;
+  letter-spacing: 1rpx;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-placeholder;
+}
+
+.settings-page__cell {
+  display: flex;
+  align-items: center;
+  padding: 28rpx;
+  border-bottom: 2rpx solid $jst-border;
+  gap: $jst-space-lg;
+}
+
+.settings-page__cell:last-child {
+  border-bottom: none;
+}
+
+.settings-page__cell-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: $jst-radius-sm;
+  font-size: $jst-font-lg;
+  flex-shrink: 0;
+}
+
+.settings-page__cell-icon--neutral {
+  background: $jst-bg-page;
+}
+
+.settings-page__cell-icon--brand {
+  background: $jst-brand-light;
+}
+
+.settings-page__cell-icon--success {
+  background: $jst-success-light;
+}
+
+.settings-page__cell-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-page__cell-name {
+  display: block;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-medium;
+  color: $jst-text-primary;
+}
+
+.settings-page__cell-desc {
+  display: block;
+  margin-top: 4rpx;
+  font-size: $jst-font-sm;
+  color: $jst-text-placeholder;
+}
+
+.settings-page__cell-value {
+  margin-right: $jst-space-sm;
+  white-space: nowrap;
+  font-size: $jst-font-base;
+  color: $jst-text-placeholder;
+}
+
+.settings-page__version {
+  display: flex;
+  align-items: center;
+  gap: $jst-space-lg;
+  margin: $jst-space-lg $jst-page-padding 0;
+  padding: 28rpx;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
+}
+
+.settings-page__version-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: $jst-radius-md;
+  font-size: 48rpx;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, $jst-brand 0%, $jst-brand-dark 100%);
+}
+
+.settings-page__version-name {
+  display: block;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
+}
+
+.settings-page__version-text {
+  display: block;
+  margin-top: 4rpx;
+  font-size: $jst-font-sm;
+  color: $jst-text-placeholder;
+}
+
+.settings-page__logout {
+  margin: $jst-space-xl $jst-page-padding 0;
+  height: 88rpx;
+  border-radius: $jst-radius-md;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+}
+
+::v-deep .settings-page__cell-arrow .u-icon__icon {
+  color: $jst-text-placeholder;
+}
+
+::v-deep .settings-page__cell-tag .u-tag {
+  border-color: $jst-success;
+  color: $jst-success;
+}
+
+::v-deep .settings-page__logout.u-button {
+  border-color: $jst-danger;
+  background: $jst-danger-light;
+  color: $jst-danger;
+}
 </style>

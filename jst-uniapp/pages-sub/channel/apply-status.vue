@@ -1,8 +1,8 @@
-<!-- 中文注释: 渠道认证 · 状态查询
+﻿<!-- 中文注释: 渠道认证 · 状态查询
      调用接口: GET /jst/wx/channel/auth/my
                POST /jst/wx/channel/auth/cancel/{id} -->
 <template>
-  <view class="as-page">
+  <view class="as-page" :style="{ paddingTop: navPaddingTop }">
     <view v-if="apply" class="as-hero" :class="'as-hero--' + apply.applyStatus">
       <text class="as-hero__icon">{{ statusIcon }}</text>
       <text class="as-hero__title">{{ statusTitle }}</text>
@@ -11,23 +11,33 @@
     </view>
 
     <view v-if="apply" class="as-section">
-      <text class="as-section__title">申请信息</text>
-      <view class="as-kv"><text class="as-kv__k">申请编号</text><text class="as-kv__v">{{ apply.applyNo || '--' }}</text></view>
-      <view class="as-kv"><text class="as-kv__k">认证类型</text><text class="as-kv__v">{{ typeLabel }}</text></view>
-      <view class="as-kv"><text class="as-kv__k">申请名称</text><text class="as-kv__v">{{ apply.applyName || '--' }}</text></view>
-      <view class="as-kv"><text class="as-kv__k">提交时间</text><text class="as-kv__v">{{ formatTime(apply.submitTime) }}</text></view>
-      <view class="as-kv"><text class="as-kv__k">审核时间</text><text class="as-kv__v">{{ formatTime(apply.auditTime) }}</text></view>
-      <view class="as-kv"><text class="as-kv__k">驳回次数</text><text class="as-kv__v">{{ apply.rejectCount || 0 }} / 3</text></view>
+      <view class="as-section__head">
+        <text class="as-section__title">申请信息</text>
+        <u-tag
+          :text="statusTitle"
+          :type="!apply ? 'info' : (apply.applyStatus === 'pending' ? 'warning' : (apply.applyStatus === 'approved' ? 'success' : ((apply.applyStatus === 'rejected' || apply.applyStatus === 'locked_for_manual') ? 'error' : 'info')))"
+          size="mini"
+          shape="circle"
+        ></u-tag>
+      </view>
+      <u-cell-group :border="false">
+        <u-cell title="申请编号" :value="apply.applyNo || '--'" :border="false"></u-cell>
+        <u-cell title="认证类型" :value="typeLabel" :border="false"></u-cell>
+        <u-cell title="申请名称" :value="apply.applyName || '--'" :border="false"></u-cell>
+        <u-cell title="提交时间" :value="formatTime(apply.submitTime)" :border="false"></u-cell>
+        <u-cell title="审核时间" :value="formatTime(apply.auditTime)" :border="false"></u-cell>
+        <u-cell title="驳回次数" :value="(apply.rejectCount || 0) + ' / 3'" :border="false"></u-cell>
+      </u-cell-group>
     </view>
 
     <view v-if="apply" class="as-actions">
-      <button v-if="apply.applyStatus === 'pending'" class="as-actions__btn as-actions__btn--outline" @tap="onCancel">撤回申请</button>
-      <button v-if="apply.applyStatus === 'rejected' && !isLocked" class="as-actions__btn" @tap="onResubmit">修改重新提交</button>
-      <button v-if="isLocked" class="as-actions__btn as-actions__btn--disabled" disabled>请联系客服</button>
-      <button v-if="apply.applyStatus === 'approved'" class="as-actions__btn" @tap="goChannelHome">进入渠道工作台</button>
+      <u-button v-if="apply.applyStatus === 'pending'" class="as-actions__btn" type="primary" plain @click="onCancel">撤回申请</u-button>
+      <u-button v-if="apply.applyStatus === 'rejected' && !isLocked" class="as-actions__btn" type="primary" @click="onResubmit">修改重新提交</u-button>
+      <u-button v-if="isLocked" class="as-actions__btn" type="info" :disabled="true">请联系客服</u-button>
+      <u-button v-if="apply.applyStatus === 'approved'" class="as-actions__btn" type="success" @click="goChannelHome">进入渠道工作台</u-button>
     </view>
 
-    <view v-if="!apply && !loading" class="as-empty">暂无认证申请记录</view>
+    <u-empty v-if="!apply && !loading" mode="data" text="暂无认证申请记录" class="as-empty"></u-empty>
   </view>
 </template>
 
@@ -39,7 +49,7 @@ const STATUS_ICON = { pending: '⏳', approved: '✅', rejected: '❌', locked_f
 const STATUS_TITLE = { pending: '审核中', approved: '认证通过', rejected: '认证被驳回', locked_for_manual: '已锁定', cancelled: '已撤回' }
 
 export default {
-  data() { return { apply: null, loading: false } },
+  data() { return { apply: null, loading: false, skeletonShow: true /* [visual-effect] */ } },
   computed: {
     typeLabel() { return (this.apply && TYPE_LABEL[this.apply.channelType]) || '--' },
     statusIcon() { return (this.apply && STATUS_ICON[this.apply.applyStatus]) || '❓' },
@@ -77,26 +87,28 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.as-page { min-height: 100vh; background: #F7F8FA; padding-bottom: 48rpx; }
-.as-hero { padding: 96rpx 32rpx 64rpx; text-align: center; color: #fff; border-bottom-left-radius: 40rpx; border-bottom-right-radius: 40rpx; }
-.as-hero--pending { background: linear-gradient(135deg, #F39C12, #F5A623); }
-.as-hero--approved { background: linear-gradient(135deg, #1B5E20, #27AE60); }
-.as-hero--rejected, .as-hero--locked_for_manual { background: linear-gradient(135deg, #B71C1C, #E53935); }
-.as-hero--cancelled { background: linear-gradient(135deg, #37474F, #607D8B); }
+@import '@/styles/design-tokens.scss';
+
+.as-page { min-height: 100vh; background: $jst-bg-page; padding-bottom: $jst-space-xxl; }
+.as-hero { padding: 96rpx $jst-space-xl 64rpx; text-align: center; color: $jst-text-inverse; border-bottom-left-radius: 40rpx; border-bottom-right-radius: 40rpx; }
+.as-hero--pending { background: linear-gradient(135deg, $jst-warning, darken($jst-warning, 5%)); }
+.as-hero--approved { background: linear-gradient(135deg, darken($jst-success, 15%), $jst-success); }
+.as-hero--rejected, .as-hero--locked_for_manual { background: linear-gradient(135deg, darken($jst-danger, 20%), $jst-danger); }
+.as-hero--cancelled { background: linear-gradient(135deg, darken($jst-info, 20%), $jst-info); }
 .as-hero__icon { display: block; font-size: 96rpx; }
-.as-hero__title { display: block; margin-top: 16rpx; font-size: 36rpx; font-weight: 800; }
-.as-hero__reason { display: block; margin-top: 16rpx; font-size: 24rpx; color: var(--jst-color-white-76); padding: 16rpx 24rpx; background: var(--jst-color-white-18); border-radius: var(--jst-radius-md); }
+.as-hero__title { display: block; margin-top: $jst-space-md; font-size: $jst-font-xl; font-weight: $jst-weight-semibold; }
+.as-hero__reason { display: block; margin-top: $jst-space-md; font-size: $jst-font-sm; color: rgba(255, 255, 255, 0.76); padding: $jst-space-md $jst-space-lg; background: rgba(255, 255, 255, 0.18); border-radius: $jst-radius-md; }
 
-.as-section { margin: 32rpx 32rpx 0; padding: 28rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: 0 2rpx 8rpx rgba(20,30,60,0.04); }
-.as-section__title { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); margin-bottom: 16rpx; }
-.as-kv { display: flex; justify-content: space-between; padding: 14rpx 0; font-size: 26rpx; border-bottom: 2rpx solid var(--jst-color-border); }
-.as-kv:last-child { border-bottom: none; }
-.as-kv__k { color: var(--jst-color-text-tertiary); }
-.as-kv__v { color: var(--jst-color-text); }
+.as-section { margin: $jst-space-xl $jst-space-xl 0; padding: $jst-space-lg; background: $jst-bg-card; border-radius: $jst-radius-md; box-shadow: $jst-shadow-sm; }
+.as-section__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: $jst-space-xs; }
+.as-section__title { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
 
-.as-actions { margin: 32rpx 32rpx 0; display: flex; flex-direction: column; gap: 20rpx; }
-.as-actions__btn { height: 96rpx; line-height: 96rpx; border-radius: var(--jst-radius-md); background: linear-gradient(135deg, var(--jst-color-brand), var(--jst-color-brand-light)); color: #fff; font-size: 30rpx; font-weight: 800; border: none; }
-.as-actions__btn--outline { background: #fff; color: var(--jst-color-brand); border: 2rpx solid var(--jst-color-brand); }
-.as-actions__btn--disabled { background: var(--jst-color-border); color: var(--jst-color-text-tertiary); }
-.as-empty { padding: 120rpx; text-align: center; font-size: 28rpx; color: var(--jst-color-text-tertiary); }
+::v-deep .as-section .u-cell {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.as-actions { margin: $jst-space-xl $jst-space-xl 0; display: flex; flex-direction: column; gap: 20rpx; }
+.as-actions__btn { width: 100%; }
+.as-empty { margin-top: 120rpx; }
 </style>

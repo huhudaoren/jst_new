@@ -2,8 +2,8 @@
      用途: 渠道方解绑学生时的5秒倒计时确认，防止误操作
      接口: props.visible / props.studentName / emit('confirm') / emit('cancel') -->
 <template>
-  <view v-if="visible" class="cdm-mask" @tap.stop="handleCancel">
-    <view class="cdm-sheet" @tap.stop>
+  <u-popup :show="visible" mode="bottom" round="32" @close="handleCancel">
+    <view class="cdm-sheet">
       <view class="cdm-handle"></view>
 
       <view class="cdm-header">
@@ -26,13 +26,22 @@
       </view>
 
       <view class="cdm-footer">
-        <view class="cdm-btn cdm-btn--cancel" @tap="handleCancel">取消</view>
-        <view :class="['cdm-btn', countdown > 0 ? 'cdm-btn--disabled' : 'cdm-btn--danger']" @tap="handleConfirm">
-          {{ countdown > 0 ? '确认解绑（' + countdown + '）' : '确认解绑' }}
-        </view>
+        <u-button
+          type="info"
+          text="取消"
+          :custom-style="{ flex: 1 }"
+          @click="handleCancel"
+        />
+        <u-button
+          type="error"
+          :text="countdown > 0 ? '确认解绑（' + countdown + '）' : '确认解绑'"
+          :disabled="countdown > 0"
+          :custom-style="{ flex: 1 }"
+          @click="handleConfirm"
+        />
       </view>
     </view>
-  </view>
+  </u-popup>
 </template>
 
 <script>
@@ -87,19 +96,60 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.cdm-mask { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--jst-color-mask-dark); z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
-.cdm-sheet { width: 100%; background: var(--jst-color-card-bg); border-radius: 32rpx 32rpx 0 0; overflow: hidden; animation: cdm-slide-up 0.3s ease; }
-@keyframes cdm-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.cdm-handle { width: 72rpx; height: 8rpx; background: var(--jst-color-border); border-radius: 4rpx; margin: 24rpx auto 0; }
-.cdm-header { padding: 32rpx 40rpx 16rpx; }
-.cdm-title { font-size: 32rpx; font-weight: 700; color: var(--jst-color-text); line-height: 1.5; }
-.cdm-body { padding: 0 40rpx 24rpx; }
-.cdm-warn-item { display: flex; align-items: flex-start; gap: 12rpx; padding: 12rpx 0; }
-.cdm-warn-icon { font-size: 28rpx; flex-shrink: 0; line-height: 1.6; }
-.cdm-warn-text { font-size: 26rpx; color: var(--jst-color-text-secondary); line-height: 1.6; }
-.cdm-footer { display: flex; gap: 20rpx; padding: 24rpx 40rpx calc(24rpx + env(safe-area-inset-bottom)); }
-.cdm-btn { flex: 1; height: 88rpx; border-radius: var(--jst-radius-md); display: flex; align-items: center; justify-content: center; font-size: 28rpx; font-weight: 700; }
-.cdm-btn--cancel { background: var(--jst-color-page-bg); color: var(--jst-color-text-secondary); }
-.cdm-btn--disabled { background: var(--jst-color-border); color: var(--jst-color-text-tertiary); }
-.cdm-btn--danger { background: var(--jst-color-danger); color: #fff; }
+@import '@/styles/design-tokens.scss';
+
+.cdm-sheet {
+  width: 100%;
+  background: $jst-bg-card;
+  overflow: hidden;
+}
+
+.cdm-handle {
+  width: 72rpx;
+  height: 8rpx;
+  background: $jst-border;
+  border-radius: $jst-radius-xs;
+  margin: $jst-space-lg auto 0;
+}
+
+.cdm-header {
+  padding: $jst-space-xl 40rpx $jst-space-md;
+}
+
+.cdm-title {
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
+  line-height: 1.5;
+}
+
+.cdm-body {
+  padding: 0 40rpx $jst-space-lg;
+}
+
+.cdm-warn-item {
+  display: flex;
+  align-items: flex-start;
+  gap: $jst-space-sm;
+  padding: $jst-space-sm 0;
+}
+
+.cdm-warn-icon {
+  font-size: $jst-font-base;
+  flex-shrink: 0;
+  line-height: 1.6;
+}
+
+.cdm-warn-text {
+  font-size: $jst-font-sm;
+  color: $jst-text-regular;
+  line-height: 1.6;
+}
+
+.cdm-footer {
+  display: flex;
+  gap: 20rpx;
+  padding: $jst-space-lg 40rpx;
+  padding-bottom: calc(#{$jst-space-lg} + env(safe-area-inset-bottom));
+}
 </style>

@@ -1,11 +1,12 @@
 <template>
   <view class="address-page">
     <jst-loading :loading="pageLoading" text="地址加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="7" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="address-page__header">
       <view class="address-page__back" @tap="handleBack"><</view>
       <text class="address-page__title">{{ pickMode ? '选择收货地址' : '收货地址' }}</text>
-      <text class="address-page__header-btn" @tap="goCreate">新增</text>
+      <u-button class="address-page__header-btn" size="mini" plain @click="goCreate">新增</u-button>
     </view>
 
     <view class="address-page__body">
@@ -24,23 +25,17 @@
             <text class="address-page__name">{{ item.receiverName }}</text>
             <text class="address-page__mobile">{{ item.receiverMobileMasked || maskMobile(item.receiverMobile) }}</text>
           </view>
-          <text v-if="item.isDefault === 1" class="address-page__badge">默认</text>
+          <u-tag v-if="item.isDefault === 1" class="address-page__badge" text="默认" type="primary" plain size="mini" />
         </view>
 
         <text class="address-page__detail">{{ formatAddress(item) }}</text>
 
         <view class="address-page__actions">
-          <text class="address-page__action" @tap.stop="goEdit(item.addressId)">编辑</text>
-          <text
-            v-if="item.isDefault !== 1"
-            class="address-page__action address-page__action--primary"
-            @tap.stop="handleSetDefault(item)"
-          >
-            设为默认
-          </text>
-          <text class="address-page__action address-page__action--danger" @tap.stop="confirmDelete(item)">
+          <u-button class="address-page__action" plain @click.stop="goEdit(item.addressId)">编辑</u-button>
+          <u-button v-if="item.isDefault !== 1" class="address-page__action address-page__action--primary" plain @click.stop="handleSetDefault(item)">设为默认</u-button>
+          <u-button class="address-page__action address-page__action--danger" plain @click.stop="confirmDelete(item)">
             删除
-          </text>
+          </u-button>
         </view>
       </view>
 
@@ -52,7 +47,7 @@
     </view>
 
     <view class="address-page__footer">
-      <button class="address-page__submit" @tap="goCreate">新增收货地址</button>
+      <u-button class="address-page__submit" @click="goCreate">新增收货地址</u-button>
     </view>
   </view>
 </template>
@@ -149,125 +144,110 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .address-page {
   min-height: 100vh;
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
-  background: var(--jst-color-page-bg);
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg $jst-page-padding 0;
 }
 
 .address-page__header {
   display: flex;
   align-items: center;
   height: 96rpx;
-  padding: 0 24rpx;
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-card);
-}
-
-.address-page__back,
-.address-page__header-btn {
-  width: 88rpx;
-  font-size: 28rpx;
-  color: var(--jst-color-brand);
+  padding: 0 $jst-page-padding;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .address-page__back {
+  width: 88rpx;
   font-size: 34rpx;
-  color: var(--jst-color-text-secondary);
+  color: $jst-text-secondary;
 }
 
 .address-page__title {
   flex: 1;
   text-align: center;
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .address-page__body {
-  padding: 20rpx 24rpx 0;
+  padding: $jst-space-lg $jst-page-padding 0;
 }
 
 .address-page__tip {
-  margin-bottom: 20rpx;
+  margin-bottom: $jst-space-lg;
   padding: 18rpx 20rpx;
-  border-radius: var(--jst-radius-md);
-  background: var(--jst-color-primary-soft);
-  font-size: 22rpx;
+  border-radius: $jst-radius-md;
+  background: $jst-brand-light;
+  font-size: $jst-font-xs;
   line-height: 1.7;
-  color: var(--jst-color-text-secondary);
+  color: $jst-text-secondary;
 }
 
 .address-page__card {
-  margin-bottom: 20rpx;
-  padding: 24rpx;
-  border-radius: var(--jst-radius-lg);
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-card);
+  margin-bottom: $jst-space-lg;
+  padding: $jst-space-lg;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
 }
 
 .address-page__card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16rpx;
+  gap: $jst-space-md;
 }
 
 .address-page__identity {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16rpx;
+  gap: $jst-space-md;
 }
 
 .address-page__name {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .address-page__mobile {
-  font-size: 24rpx;
-  color: var(--jst-color-text-secondary);
-}
-
-.address-page__badge {
-  padding: 6rpx 14rpx;
-  border-radius: 999rpx;
-  background: var(--jst-color-brand-soft);
-  font-size: 20rpx;
-  font-weight: 700;
-  color: var(--jst-color-brand);
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
 }
 
 .address-page__detail {
   display: block;
   margin-top: 18rpx;
-  font-size: 24rpx;
+  font-size: $jst-font-sm;
   line-height: 1.7;
-  color: var(--jst-color-text-secondary);
+  color: $jst-text-secondary;
 }
 
 .address-page__actions {
   display: flex;
-  gap: 28rpx;
+  gap: $jst-space-sm;
   margin-top: 22rpx;
-  padding-top: 20rpx;
-  border-top: 2rpx solid var(--jst-color-border);
+  padding-top: $jst-space-md;
+  border-top: 2rpx solid $jst-border;
 }
 
 .address-page__action {
-  font-size: 24rpx;
-  color: var(--jst-color-text-secondary);
-}
-
-.address-page__action--primary {
-  color: var(--jst-color-brand);
-  font-weight: 700;
-}
-
-.address-page__action--danger {
-  color: var(--jst-color-danger);
+  min-height: 58rpx;
+  padding: 0 $jst-space-sm;
+  border-radius: $jst-radius-md;
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
 }
 
 .address-page__footer {
@@ -275,17 +255,51 @@ export default {
   right: 0;
   bottom: 0;
   left: 0;
-  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 -8rpx 18rpx rgba(15, 52, 96, 0.08);
+  padding: 16rpx $jst-page-padding calc(16rpx + env(safe-area-inset-bottom));
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .address-page__submit {
   height: 88rpx;
-  border-radius: var(--jst-radius-md);
-  background: linear-gradient(135deg, var(--jst-color-primary) 0%, var(--jst-color-primary-light) 100%);
-  color: var(--jst-color-card-bg);
-  font-size: 28rpx;
-  font-weight: 700;
+  border-radius: $jst-radius-md;
+  background: $jst-brand-gradient;
+  color: $jst-text-inverse;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+}
+
+::v-deep .address-page__header-btn.u-button {
+  min-width: 98rpx;
+  height: 56rpx;
+  border-color: $jst-brand;
+  border-radius: $jst-radius-round;
+  color: $jst-brand;
+  font-size: $jst-font-sm;
+}
+
+::v-deep .address-page__badge .u-tag {
+  border-color: $jst-brand;
+  color: $jst-brand;
+}
+
+::v-deep .address-page__action.u-button {
+  border-color: $jst-border;
+  background: $jst-bg-card;
+}
+
+::v-deep .address-page__action--primary.u-button {
+  border-color: $jst-brand;
+  color: $jst-brand;
+}
+
+::v-deep .address-page__action--danger.u-button {
+  border-color: $jst-danger;
+  color: $jst-danger;
+}
+
+::v-deep .address-page__submit.u-button {
+  border: none;
+  min-height: 88rpx;
 }
 </style>

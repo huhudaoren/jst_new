@@ -2,9 +2,9 @@
      对应原型: 小程序原型图/writeoff-record.png
      调用接口: GET /jst/wx/writeoff/records?pageNum=&pageSize= -->
 <template>
-  <view class="wr-page">
+  <view class="wr-page" :style="{ paddingTop: navPaddingTop }">
     <view class="wr-list">
-      <view v-for="item in list" :key="item.writeoffItemId || item.id" class="wr-card">
+      <view v-for="item in list" :key="item.writeoffItemId" class="wr-card">
         <view class="wr-card__head">
           <text class="wr-card__title">{{ item.itemName || item.contestName || '——' }}</text>
           <text class="wr-card__time">{{ formatTime(item.writeoffTime || item.createTime) }}</text>
@@ -18,9 +18,8 @@
           <text class="wr-card__v">{{ item.contestName || '--' }}</text>
         </view>
       </view>
-      <view v-if="!list.length && !loading" class="wr-empty">暂无核销记录</view>
-      <view v-if="loading" class="wr-empty">加载中...</view>
-      <view v-if="!hasMore && list.length" class="wr-empty wr-empty--end">没有更多了</view>
+      <u-empty v-if="!list.length && !loading" mode="data" text="暂无核销记录"></u-empty>
+      <u-loadmore v-if="list.length || loading" :status="loading ? 'loading' : (hasMore ? 'loadmore' : 'nomore')"></u-loadmore>
     </view>
   </view>
 </template>
@@ -30,11 +29,11 @@ import { getWriteoffRecords } from '@/api/appointment'
 import { useUserStore } from '@/store/user'
 
 export default {
-  data() { return { list: [], pageNum: 1, pageSize: 10, total: 0, loading: false, hasMore: true } },
+  data() { return { skeletonShow: true, /* [visual-effect] */ list: [], pageNum: 1, pageSize: 10, total: 0, loading: false, hasMore: true } },
   onLoad() {
     // POLISH-D 权限门: jst_partner / jst_platform_op
     const store = useUserStore()
-    const roles = (store.userInfo && store.userInfo.roles) || []
+    const roles = store.roles || []
     const allowed = roles.includes('jst_partner') || roles.includes('jst_platform_op')
     if (!allowed) {
       uni.showToast({ title: '无查看权限', icon: 'none' })
@@ -65,14 +64,14 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.wr-page { min-height: 100vh; background: var(--jst-color-page-bg); padding: 16rpx 0 32rpx; }
-.wr-card { margin: 20rpx 32rpx 0; padding: 28rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); }
+@import '@/styles/design-tokens.scss';
+
+.wr-page { min-height: 100vh; background: $jst-bg-page; padding: $jst-space-md 0 $jst-space-xl; }
+.wr-card { margin: 20rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-md; box-shadow: $jst-shadow-sm; }
 .wr-card__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12rpx; }
-.wr-card__title { font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); flex: 1; min-width: 0; }
-.wr-card__time { font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.wr-card__title { font-size: 28rpx; font-weight: 600; color: $jst-text-primary; flex: 1; min-width: 0; }
+.wr-card__time { font-size: 22rpx; color: $jst-text-secondary; }
 .wr-card__row { display: flex; padding: 6rpx 0; font-size: 24rpx; }
-.wr-card__k { width: 140rpx; color: var(--jst-color-text-tertiary); }
-.wr-card__v { flex: 1; color: var(--jst-color-text); }
-.wr-empty { padding: 80rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.wr-empty--end { padding: 40rpx; }
+.wr-card__k { width: 140rpx; color: $jst-text-secondary; }
+.wr-card__v { flex: 1; color: $jst-text-primary; }
 </style>

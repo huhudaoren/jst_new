@@ -3,7 +3,7 @@
      调用接口: GET /jst/wx/mall/goods/{id}
                POST /jst/wx/mall/exchange/apply -->
 <template>
-  <view class="md-page">
+  <view class="md-page" :style="{ paddingTop: navPaddingTop }">
     <swiper class="md-swiper" :indicator-dots="(goods.images || []).length > 1" autoplay circular>
       <swiper-item v-for="(img, idx) in galleryImages" :key="idx">
         <image class="md-swiper__img" :src="img" mode="aspectFill" />
@@ -151,33 +151,34 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.md-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: var(--jst-color-page-bg); }
-.md-swiper { height: 600rpx; background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
+.md-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: #F7F8FA; }
+.md-swiper { height: 600rpx; background: #F7F8FA; }
 .md-swiper__img { width: 100%; height: 100%; }
-.md-body { background: var(--jst-color-card-bg); padding: 32rpx; }
-.md-name { display: block; font-size: 36rpx; font-weight: 800; color: var(--jst-color-text); }
+.md-body { background: $jst-bg-card; padding: 32rpx; }
+.md-name { display: block; font-size: 36rpx; font-weight: 600; color: $jst-text-primary; }
 .md-price { display: flex; align-items: baseline; gap: 16rpx; margin-top: 16rpx; }
-.md-price__points { font-size: 48rpx; font-weight: 900; color: #F5A623; }
-.md-price__cash { font-size: 26rpx; color: var(--jst-color-text-secondary); }
-.md-stock { display: block; margin-top: 12rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.md-price__points { font-size: 48rpx; font-weight: 600; color: #F5A623; }
+.md-price__cash { font-size: 26rpx; color: $jst-text-regular; }
+.md-stock { display: block; margin-top: 12rpx; font-size: 22rpx; color: $jst-text-secondary; }
 
-.md-section { margin-top: 32rpx; padding-top: 24rpx; border-top: 2rpx solid var(--jst-color-border); }
-.md-section__title { display: block; font-size: 26rpx; font-weight: 700; color: var(--jst-color-text); margin-bottom: 16rpx; }
+.md-section { margin-top: 32rpx; padding-top: 24rpx; border-top: 2rpx solid $jst-border; }
+.md-section__title { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 16rpx; }
 .md-stepper { display: flex; align-items: center; gap: 24rpx; }
-.md-stepper__btn { width: 64rpx; height: 64rpx; line-height: 64rpx; text-align: center; border-radius: var(--jst-radius-sm); background: var(--jst-color-page-bg); font-size: 36rpx; color: var(--jst-color-text); }
-.md-stepper__val { font-size: 30rpx; font-weight: 700; color: var(--jst-color-text); min-width: 64rpx; text-align: center; }
+.md-stepper__btn { width: 64rpx; height: 64rpx; line-height: 64rpx; text-align: center; border-radius: $jst-radius-lg; background: #F7F8FA; font-size: 36rpx; color: $jst-text-primary; }
+.md-stepper__val { font-size: 30rpx; font-weight: 600; color: $jst-text-primary; min-width: 64rpx; text-align: center; }
 
-.md-address { padding: 20rpx 24rpx; border-radius: var(--jst-radius-sm); background: var(--jst-color-page-bg); }
-.md-address__name { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.md-address__detail { display: block; margin-top: 6rpx; font-size: 24rpx; color: var(--jst-color-text-secondary); }
-.md-address__empty { font-size: 26rpx; color: var(--jst-color-brand); }
-.md-desc { display: block; font-size: 24rpx; line-height: 1.7; color: var(--jst-color-text-secondary); white-space: pre-wrap; }
+.md-address { padding: 20rpx 24rpx; border-radius: $jst-radius-lg; background: #F7F8FA; }
+.md-address__name { display: block; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; }
+.md-address__detail { display: block; margin-top: 6rpx; font-size: 24rpx; color: $jst-text-regular; }
+.md-address__empty { font-size: 26rpx; color: $jst-brand; }
+.md-desc { display: block; font-size: 24rpx; line-height: 1.7; color: $jst-text-regular; white-space: pre-wrap; }
 
-.md-footer { position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 20rpx; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: var(--jst-color-card-bg); box-shadow: 0 -8rpx 24rpx rgba(16,88,160,0.08); }
+.md-footer { position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 20rpx; padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom)); background: $jst-bg-card; box-shadow: 0 -2rpx 8rpx rgba(20, 30, 60, 0.04); }
 .md-footer__info { flex: 1; }
-.md-footer__label { display: block; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.md-footer__amount { display: block; font-size: 36rpx; font-weight: 800; color: #F5A623; }
-.md-footer__cash { font-size: 22rpx; color: var(--jst-color-text-secondary); font-weight: 500; }
-.md-footer__btn { flex: 1; height: 96rpx; line-height: 96rpx; border-radius: var(--jst-radius-md); background: linear-gradient(135deg, #F5A623, #FF9800); color: #fff; font-size: 30rpx; font-weight: 800; border: none; }
+.md-footer__label { display: block; font-size: 22rpx; color: $jst-text-secondary; }
+.md-footer__amount { display: block; font-size: 36rpx; font-weight: 600; color: #F5A623; }
+.md-footer__cash { font-size: 22rpx; color: $jst-text-regular; font-weight: 500; }
+.md-footer__btn { flex: 1; height: 96rpx; line-height: 96rpx; border-radius: $jst-radius-xl; background: linear-gradient(135deg, #F5A623, #FF9800); color: #fff; font-size: 30rpx; font-weight: 600; border: none; }
 .md-footer__btn[disabled] { opacity: 0.5; }
 </style>

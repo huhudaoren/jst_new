@@ -1,47 +1,78 @@
 <template>
-  <view class="notice-page">
-    <view class="notice-page__header">
-      <view>
-        <text class="notice-page__title">公告资讯</text>
-        <text class="notice-page__subtitle">平台公告、赛事通知与成绩发布</text>
+  <view class="notice-page" :style="{ paddingTop: navPaddingTop }">
+    <!-- 骨架屏 -->
+    <view v-if="skeletonShow" class="notice-page__skeleton">
+      <view class="notice-page__skeleton-header">
+        <u-skeleton rows="1" rows-width="200rpx" rows-height="36rpx" :loading="true" :animate="true"></u-skeleton>
+        <u-skeleton rows="1" rows-width="160rpx" rows-height="24rpx" :loading="true" :animate="true"></u-skeleton>
       </view>
-      <view class="notice-page__search" @tap="toggleSearch">🔍</view>
-    </view>
-
-    <!-- 搜索栏 -->
-    <view v-if="showSearch" class="notice-page__search-bar">
-      <input
-        class="notice-page__search-input"
-        v-model="searchKeyword"
-        placeholder="搜索公告标题..."
-        confirm-type="search"
-        focus
-        @confirm="onSearchConfirm"
-      />
-      <text class="notice-page__search-cancel" @tap="cancelSearch">取消</text>
-    </view>
-
-    <scroll-view class="notice-page__tabs" scroll-x show-scrollbar="false">
-      <view class="notice-page__tabs-inner">
-        <view v-for="(tab, idx) in categoryTabs" :key="idx" class="notice-page__tab" :class="{ 'notice-page__tab--active': currentCategory === tab.value }" @tap="handleCategoryChange(tab)">{{ tab.label }}</view>
+      <view class="notice-page__skeleton-tabs">
+        <u-skeleton rows="1" rows-width="100%" rows-height="40rpx" :loading="true" :animate="true"></u-skeleton>
       </view>
-    </scroll-view>
-
-    <view v-if="topNotice && !currentCategory" class="notice-page__top" @tap="openNotice(topNotice)">
-      <view class="notice-page__top-icon">📌</view>
-      <view class="notice-page__top-body">
-        <text class="notice-page__top-title">{{ topNotice.title }}</text>
-        <text class="notice-page__top-desc">{{ topNotice.summary || '点击查看置顶公告详情' }}</text>
+      <view v-for="i in 4" :key="i" class="notice-page__skeleton-card">
+        <u-skeleton rows="3" :loading="true" :animate="true"></u-skeleton>
       </view>
-      <text class="notice-page__top-tag">置顶</text>
     </view>
 
-    <view class="notice-page__list">
-      <jst-loading :loading="firstLoading" text="公告加载中..." />
-      <jst-notice-card v-for="notice in noticeList" :key="notice.noticeId" class="notice-page__card" :notice="notice" @item-tap="openNotice" />
-      <jst-empty v-if="!firstLoading && !noticeList.length" text="暂无公告数据" icon="📭" />
-      <view v-if="noticeList.length" class="notice-page__load-more" @tap="handleLoadMore">{{ loadMoreText }}</view>
-    </view>
+    <template v-else>
+      <view class="notice-page__header">
+        <view>
+          <text class="notice-page__title">公告资讯</text>
+          <text class="notice-page__subtitle">平台公告、赛事通知与成绩发布</text>
+        </view>
+        <view class="notice-page__search" @tap="toggleSearch">
+          <u-icon name="search" :size="20" :color="textSecondary"></u-icon>
+        </view>
+      </view>
+
+      <!-- 搜索栏 -->
+      <view v-if="showSearch" class="notice-page__search-bar">
+        <u-search
+          v-model="searchKeyword"
+          placeholder="搜索公告标题..."
+          shape="round"
+          :show-action="true"
+          action-text="取消"
+          :animation="true"
+          @search="onSearchConfirm"
+          @custom="cancelSearch"
+        ></u-search>
+      </view>
+
+      <scroll-view class="notice-page__tabs" scroll-x show-scrollbar="false">
+        <view class="notice-page__tabs-inner">
+          <view v-for="(tab, idx) in categoryTabs" :key="idx" class="notice-page__tab" :class="{ 'notice-page__tab--active': currentCategory === tab.value }" @tap="handleCategoryChange(tab)">{{ tab.label }}</view>
+        </view>
+      </scroll-view>
+
+      <view v-if="topNotice && !currentCategory" class="notice-page__top" @tap="openNotice(topNotice)">
+        <view class="notice-page__top-icon">📌</view>
+        <view class="notice-page__top-body">
+          <text class="notice-page__top-title">{{ topNotice.title }}</text>
+          <text class="notice-page__top-desc">{{ topNotice.summary || '点击查看置顶公告详情' }}</text>
+        </view>
+        <u-tag text="置顶" type="error" plain :plain-fill="true" size="mini" shape="circle" />
+      </view>
+
+      <view class="notice-page__list">
+        <jst-loading :loading="firstLoading" text="公告加载中..." />
+
+        <view v-for="(notice, nIdx) in noticeList" :key="notice.noticeId" class="jst-anim-slide-up" :style="{ animationDelay: getStaggerDelay(nIdx) }">
+          <jst-notice-card class="notice-page__card" :notice="notice" @item-tap="openNotice" />
+        </view>
+
+        <jst-empty v-if="!firstLoading && !noticeList.length" text="暂无公告数据" icon="📭" />
+
+        <u-loadmore
+          v-if="noticeList.length"
+          :status="loadMoreState"
+          :loading-text="'加载中...'"
+          :loadmore-text="'点击加载更多'"
+          :nomore-text="'没有更多公告了'"
+          @loadmore="handleLoadMore"
+        />
+      </view>
+    </template>
   </view>
 </template>
 
@@ -50,6 +81,8 @@ import { getDict, getNoticeList } from '@/api/notice'
 import JstNoticeCard from '@/components/jst-notice-card/jst-notice-card.vue'
 import JstEmpty from '@/components/jst-empty/jst-empty.vue'
 import JstLoading from '@/components/jst-loading/jst-loading.vue'
+// [visual-effect]
+import { staggerDelay } from '@/utils/visual-effects'
 
 const FALLBACK_CATEGORY_TABS = [
   { label: '全部', value: '' },
@@ -74,10 +107,18 @@ export default {
       loadingMore: false,
       loadedOnce: false,
       showSearch: false,
-      searchKeyword: ''
+      searchKeyword: '',
+      skeletonShow: true, // [visual-effect]
+      textSecondary: '#8A8A8A' // [visual-effect] u-icon color prop
     }
   },
   computed: {
+    // [visual-effect] u-loadmore 状态映射
+    loadMoreState() {
+      if (this.loadingMore) return 'loading'
+      if (this.noticeList.length >= this.total && this.total > 0) return 'nomore'
+      return 'loadmore'
+    },
     loadMoreText() {
       if (this.loadingMore) return '加载中...'
       if (this.noticeList.length >= this.total && this.total > 0) return '没有更多公告了'
@@ -88,7 +129,7 @@ export default {
   onShow() { if (this.loadedOnce) this.refreshList() },
   onReachBottom() { this.handleLoadMore() },
   methods: {
-    async initPage() { await Promise.allSettled([this.loadCategories(), this.refreshList()]) },
+    async initPage() { await Promise.allSettled([this.loadCategories(), this.refreshList()]); this.skeletonShow = false /* [visual-effect] */ },
     async loadCategories() {
       try {
         const list = await getDict('jst_notice_category')
@@ -132,30 +173,141 @@ export default {
     onSearchConfirm() {
       // 后端若不支持 keyword，做前端本地 filter 兜底
       this.refreshList()
+    },
+    // [visual-effect]
+    getStaggerDelay(index) {
+      return 'animation-delay:' + staggerDelay(index)
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
-.notice-page { min-height: 100vh; padding: 24rpx 24rpx 140rpx; background: var(--jst-color-page-bg); }
-.notice-page__header { display: flex; justify-content: space-between; align-items: center; }
-.notice-page__title { display: block; font-size: 40rpx; font-weight: 800; color: var(--jst-color-text); }
-.notice-page__subtitle { display: block; margin-top: 10rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.notice-page__search { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: var(--jst-color-card-bg); box-shadow: var(--jst-shadow-card); font-size: 28rpx; }
-.notice-page__search-bar { display: flex; align-items: center; gap: 16rpx; margin-top: 20rpx; }
-.notice-page__search-input { flex: 1; height: 80rpx; padding: 0 24rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-card-bg); border: 2rpx solid var(--jst-color-border); font-size: 26rpx; }
-.notice-page__search-cancel { font-size: 26rpx; color: var(--jst-color-brand); font-weight: 600; flex-shrink: 0; }
-.notice-page__tabs { margin-top: 24rpx; }
-.notice-page__tabs-inner { display: inline-flex; gap: 16rpx; }
-.notice-page__tab { padding: 12rpx 24rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-card-bg); color: var(--jst-color-text-secondary); font-size: 24rpx; }
-.notice-page__tab--active { background: var(--jst-color-brand-soft); color: var(--jst-color-brand); font-weight: 700; }
-.notice-page__top { display: flex; gap: 16rpx; margin-top: 24rpx; padding: 24rpx; border-radius: var(--jst-radius-lg); background: linear-gradient(135deg, var(--jst-color-primary-soft) 0%, #fff7f0 100%); }
-.notice-page__top-body { flex: 1; }
-.notice-page__top-title { display: block; font-size: 28rpx; font-weight: 700; line-height: 1.5; color: var(--jst-color-text); }
-.notice-page__top-desc { display: block; margin-top: 10rpx; font-size: 22rpx; line-height: 1.6; color: var(--jst-color-text-secondary); }
-.notice-page__top-tag { align-self: flex-start; padding: 6rpx 16rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-primary); color: var(--jst-color-card-bg); font-size: 20rpx; }
-.notice-page__list { margin-top: 24rpx; }
-.notice-page__card + .notice-page__card { margin-top: 20rpx; }
-.notice-page__load-more { padding: 28rpx 0 0; text-align: center; font-size: 24rpx; color: var(--jst-color-brand); }
+@import '@/styles/design-tokens.scss';
+
+.notice-page {
+  min-height: 100vh;
+  padding: $jst-space-lg $jst-space-lg 140rpx;
+  background: $jst-bg-page;
+}
+
+// 骨架屏
+.notice-page__skeleton {
+  padding-top: $jst-space-lg;
+}
+.notice-page__skeleton-header {
+  margin-bottom: $jst-space-lg;
+}
+.notice-page__skeleton-tabs {
+  margin-bottom: $jst-space-lg;
+}
+.notice-page__skeleton-card {
+  margin-bottom: $jst-space-md;
+  padding: $jst-space-lg;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+}
+
+.notice-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notice-page__title {
+  display: block;
+  font-size: $jst-font-xl;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
+}
+
+.notice-page__subtitle {
+  display: block;
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
+}
+
+.notice-page__search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
+}
+
+.notice-page__search-bar {
+  margin-top: $jst-space-lg;
+}
+
+.notice-page__tabs {
+  margin-top: $jst-space-lg;
+}
+
+.notice-page__tabs-inner {
+  display: inline-flex;
+  gap: $jst-space-sm;
+}
+
+.notice-page__tab {
+  padding: $jst-space-sm $jst-space-lg;
+  border-radius: $jst-radius-round;
+  background: $jst-bg-card;
+  color: $jst-text-secondary;
+  font-size: $jst-font-sm;
+  transition: background $jst-duration-fast $jst-easing, color $jst-duration-fast $jst-easing;
+}
+
+.notice-page__tab--active {
+  background: $jst-brand-light;
+  color: $jst-brand;
+  font-weight: $jst-weight-semibold;
+}
+
+.notice-page__top {
+  display: flex;
+  gap: $jst-space-md;
+  margin-top: $jst-space-lg;
+  padding: $jst-space-lg;
+  border-radius: $jst-radius-lg;
+  background: linear-gradient(135deg, $jst-warning-light 0%, lighten($jst-warning-light, 2%) 100%);
+  transition: transform $jst-duration-fast $jst-easing;
+}
+.notice-page__top:active { transform: scale(0.99); }
+
+.notice-page__top-icon {
+  font-size: $jst-font-lg;
+  flex-shrink: 0;
+}
+
+.notice-page__top-body {
+  flex: 1;
+}
+
+.notice-page__top-title {
+  display: block;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  line-height: 1.5;
+  color: $jst-text-primary;
+}
+
+.notice-page__top-desc {
+  display: block;
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-xs;
+  line-height: 1.6;
+  color: $jst-text-secondary;
+}
+
+.notice-page__list {
+  margin-top: $jst-space-lg;
+}
+
+.notice-page__card + .notice-page__card {
+  margin-top: $jst-space-md;
+}
 </style>

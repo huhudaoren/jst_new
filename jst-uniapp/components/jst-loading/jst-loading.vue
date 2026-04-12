@@ -3,7 +3,7 @@
   <view v-if="loading" class="jst-loading">
     <view class="jst-loading__mask"></view>
     <view class="jst-loading__panel">
-      <view class="jst-loading__spinner"></view>
+      <u-loading-icon mode="circle" :color="brandColor" size="44" />
       <text class="jst-loading__text">{{ text }}</text>
     </view>
   </view>
@@ -21,11 +21,18 @@ export default {
       type: String,
       default: '加载中...'
     }
+  },
+  data() {
+    return {
+      brandColor: '#2B6CFF'
+    }
   }
 }
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .jst-loading {
   position: fixed;
   inset: 0;
@@ -38,7 +45,7 @@ export default {
 .jst-loading__mask {
   position: absolute;
   inset: 0;
-  background: var(--jst-color-white-72);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .jst-loading__panel {
@@ -50,34 +57,15 @@ export default {
   justify-content: center;
   width: 220rpx;
   min-height: 180rpx;
-  padding: 32rpx 24rpx;
-  border-radius: var(--jst-radius-md);
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-strong);
-}
-
-.jst-loading__spinner {
-  width: 60rpx;
-  height: 60rpx;
-  border: 6rpx solid var(--jst-color-brand-soft);
-  border-top-color: var(--jst-color-primary);
-  border-radius: 50%;
-  animation: jst-loading-spin 0.9s linear infinite;
+  padding: $jst-space-xl $jst-space-lg;
+  border-radius: $jst-radius-md;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-lg;
 }
 
 .jst-loading__text {
-  margin-top: 24rpx;
-  font-size: 26rpx;
-  color: var(--jst-color-text-secondary);
-}
-
-@keyframes jst-loading-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
+  margin-top: $jst-space-lg;
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
 }
 </style>

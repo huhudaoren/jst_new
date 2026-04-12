@@ -1,6 +1,7 @@
 <template>
   <view class="binding-page">
     <jst-loading :loading="pageLoading" text="绑定关系加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="binding-page__nav">
       <view class="binding-page__back" @tap="handleBack"><</view>
@@ -21,12 +22,12 @@
         </view>
 
         <view class="binding-page__hero-actions">
-          <button class="binding-page__hero-btn binding-page__hero-btn--ghost" @tap="openSwitchDialog">
+          <u-button class="binding-page__hero-btn binding-page__hero-btn--ghost" @click="openSwitchDialog">
             更换渠道方
-          </button>
-          <button class="binding-page__hero-btn binding-page__hero-btn--danger" @tap="confirmUnbind">
+          </u-button>
+          <u-button class="binding-page__hero-btn binding-page__hero-btn--danger" @click="confirmUnbind">
             解除绑定
-          </button>
+          </u-button>
         </view>
       </view>
 
@@ -34,7 +35,7 @@
         <text class="binding-page__empty-icon">🔗</text>
         <text class="binding-page__empty-title">当前还没有绑定渠道方</text>
         <text class="binding-page__empty-desc">绑定后，新的报名可以自动归属到老师/机构侧服务链路。</text>
-        <button class="binding-page__empty-btn" @tap="openSwitchDialog">绑定新老师</button>
+        <u-button class="binding-page__empty-btn" @click="openSwitchDialog">绑定新老师</u-button>
       </view>
 
       <view class="binding-page__card">
@@ -96,14 +97,8 @@
         />
 
         <view class="binding-page__dialog-actions">
-          <button class="binding-page__dialog-btn binding-page__dialog-btn--ghost" @tap="closeSwitchDialog">取消</button>
-          <button
-            class="binding-page__dialog-btn binding-page__dialog-btn--primary"
-            :loading="submitLoading"
-            @tap="submitSwitch"
-          >
-            确认绑定
-          </button>
+          <u-button class="binding-page__dialog-btn binding-page__dialog-btn--ghost" @click="closeSwitchDialog">取消</u-button>
+          <u-button class="binding-page__dialog-btn binding-page__dialog-btn--primary" :loading="submitLoading" @click="submitSwitch">确认绑定</u-button>
         </view>
       </view>
     </view>
@@ -277,18 +272,24 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .binding-page {
   min-height: 100vh;
-  background: #f4f7fc;
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg;
 }
 
 .binding-page__nav {
   display: flex;
   align-items: center;
   height: 96rpx;
-  padding: 0 24rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 22rpx rgba(14, 58, 113, 0.05);
+  padding: 0 $jst-page-padding;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .binding-page__back,
@@ -299,39 +300,39 @@ export default {
 
 .binding-page__back {
   font-size: 34rpx;
-  color: #66768f;
+  color: $jst-text-secondary;
 }
 
 .binding-page__nav-title {
   flex: 1;
   text-align: center;
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .binding-page__content {
-  padding: 20rpx 24rpx 32rpx;
+  padding: $jst-space-lg $jst-page-padding $jst-space-xl;
 }
 
 .binding-page__hero,
 .binding-page__empty,
 .binding-page__card {
-  margin-bottom: 20rpx;
-  padding: 28rpx 24rpx;
-  border-radius: 28rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 28rpx rgba(14, 58, 113, 0.06);
+  margin-bottom: $jst-space-lg;
+  padding: 28rpx $jst-page-padding;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
 }
 
 .binding-page__hero {
-  background: linear-gradient(145deg, #0c3d6b 0%, #2f7de1 100%);
+  background: linear-gradient(145deg, $jst-brand-dark 0%, $jst-brand 100%);
 }
 
 .binding-page__hero-label {
   display: block;
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.68);
+  font-size: $jst-font-xs;
+  color: rgba($jst-text-inverse, 0.72);
 }
 
 .binding-page__hero-row {
@@ -346,17 +347,17 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  font-weight: 800;
+  border-radius: $jst-radius-round;
+  font-weight: $jst-weight-bold;
 }
 
 .binding-page__avatar {
   width: 96rpx;
   height: 96rpx;
-  background: linear-gradient(135deg, #ffd54f, #ff8a65);
-  color: #ffffff;
-  font-size: 34rpx;
-  border: 4rpx solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(135deg, $jst-warning, $jst-danger);
+  color: $jst-text-inverse;
+  font-size: $jst-font-lg;
+  border: 4rpx solid rgba($jst-text-inverse, 0.28);
 }
 
 .binding-page__hero-main {
@@ -366,41 +367,30 @@ export default {
 .binding-page__hero-name {
   display: block;
   font-size: 34rpx;
-  font-weight: 800;
-  color: #ffffff;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-inverse;
 }
 
 .binding-page__hero-subtitle,
 .binding-page__hero-time {
   display: block;
   margin-top: 10rpx;
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.76);
+  font-size: $jst-font-xs;
+  color: rgba($jst-text-inverse, 0.82);
 }
 
 .binding-page__hero-actions {
   display: flex;
-  gap: 14rpx;
-  margin-top: 28rpx;
+  gap: $jst-space-sm;
+  margin-top: $jst-space-xl;
 }
 
 .binding-page__hero-btn {
   flex: 1;
   height: 80rpx;
-  border-radius: 999rpx;
-  font-size: 24rpx;
-  font-weight: 700;
-}
-
-.binding-page__hero-btn--ghost {
-  border: 2rpx solid rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.14);
-  color: #ffffff;
-}
-
-.binding-page__hero-btn--danger {
-  background: linear-gradient(135deg, #ff6a3d 0%, #ff4e4e 100%);
-  color: #ffffff;
+  border-radius: $jst-radius-round;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
 }
 
 .binding-page__empty {
@@ -415,60 +405,58 @@ export default {
 .binding-page__empty-title {
   display: block;
   margin-top: 18rpx;
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .binding-page__empty-desc {
   display: block;
-  margin-top: 12rpx;
-  font-size: 24rpx;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-sm;
   line-height: 1.7;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .binding-page__empty-btn {
-  margin-top: 20rpx;
-  border-radius: 999rpx;
-  background: #2f7de1;
-  color: #ffffff;
-  font-size: 26rpx;
-  font-weight: 700;
+  margin-top: $jst-space-lg;
+  border-radius: $jst-radius-round;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
 }
 
 .binding-page__card-title {
   display: block;
   margin-bottom: 18rpx;
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .binding-page__rule,
 .binding-page__faq-desc {
   display: block;
-  margin-top: 12rpx;
-  font-size: 24rpx;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-sm;
   line-height: 1.7;
-  color: #6d7a92;
+  color: $jst-text-secondary;
 }
 
 .binding-page__history-item {
   display: flex;
   align-items: center;
-  gap: 16rpx;
+  gap: $jst-space-md;
   min-height: 104rpx;
   padding: 18rpx 0;
-  border-top: 2rpx solid #edf1f7;
+  border-top: 2rpx solid $jst-border;
 }
 
 .binding-page__history-avatar {
   width: 72rpx;
   height: 72rpx;
-  background: linear-gradient(135deg, #3f51b5, #5c6bc0);
-  color: #ffffff;
-  font-size: 28rpx;
+  background: linear-gradient(135deg, $jst-indigo, $jst-indigo-light);
+  color: $jst-text-inverse;
+  font-size: $jst-font-base;
 }
 
 .binding-page__history-main {
@@ -477,23 +465,23 @@ export default {
 
 .binding-page__history-name {
   display: block;
-  font-size: 26rpx;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
 }
 
 .binding-page__history-desc,
 .binding-page__faq-title {
   display: block;
-  margin-top: 8rpx;
-  font-size: 22rpx;
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-xs;
   line-height: 1.6;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .binding-page__faq {
   padding: 18rpx 0;
-  border-top: 2rpx solid #edf1f7;
+  border-top: 2rpx solid $jst-border;
 }
 
 .binding-page__faq:first-of-type {
@@ -502,9 +490,9 @@ export default {
 }
 
 .binding-page__faq-title {
-  font-size: 26rpx;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
 }
 
 .binding-page__mask {
@@ -513,69 +501,97 @@ export default {
   z-index: 99;
   display: flex;
   align-items: flex-end;
-  background: rgba(18, 30, 49, 0.46);
+  background: rgba($jst-text-primary, 0.46);
 }
 
 .binding-page__dialog {
   width: 100%;
-  padding: 32rpx 24rpx calc(24rpx + env(safe-area-inset-bottom));
+  padding: $jst-space-xl $jst-page-padding calc($jst-space-lg + env(safe-area-inset-bottom));
   border-radius: 32rpx 32rpx 0 0;
-  background: #ffffff;
+  background: $jst-bg-card;
 }
 
 .binding-page__dialog-title {
   display: block;
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .binding-page__dialog-desc {
   display: block;
-  margin-top: 12rpx;
-  font-size: 24rpx;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-sm;
   line-height: 1.7;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .binding-page__dialog-input {
   width: 100%;
   height: 92rpx;
   margin-top: 22rpx;
-  padding: 0 24rpx;
-  border: 2rpx solid #dbe5f5;
-  border-radius: 24rpx;
-  font-size: 28rpx;
-  color: #1f2937;
-  background: #f8fbff;
+  padding: 0 $jst-page-padding;
+  border: 2rpx solid $jst-border;
+  border-radius: $jst-radius-xl;
+  font-size: $jst-font-base;
+  color: $jst-text-primary;
+  background: $jst-bg-page;
   box-sizing: border-box;
 }
 
 .binding-page__placeholder {
-  color: #a2afc6;
+  color: $jst-text-placeholder;
 }
 
 .binding-page__dialog-actions {
   display: flex;
-  gap: 14rpx;
-  margin-top: 24rpx;
+  gap: $jst-space-sm;
+  margin-top: $jst-space-lg;
 }
 
 .binding-page__dialog-btn {
   flex: 1;
   height: 84rpx;
-  border-radius: 24rpx;
-  font-size: 28rpx;
-  font-weight: 700;
+  border-radius: $jst-radius-xl;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
 }
 
-.binding-page__dialog-btn--ghost {
-  background: #f1f5fb;
-  color: #6d7a92;
+::v-deep .binding-page__hero-btn.u-button {
+  min-height: 80rpx;
 }
 
-.binding-page__dialog-btn--primary {
-  background: #2f7de1;
-  color: #ffffff;
+::v-deep .binding-page__hero-btn--ghost.u-button {
+  border-color: rgba($jst-text-inverse, 0.45);
+  background: rgba($jst-text-inverse, 0.14);
+  color: $jst-text-inverse;
+}
+
+::v-deep .binding-page__hero-btn--danger.u-button {
+  border: none;
+  background: linear-gradient(135deg, $jst-danger 0%, $jst-warning 100%);
+  color: $jst-text-inverse;
+}
+
+::v-deep .binding-page__empty-btn.u-button {
+  border: none;
+  background: $jst-brand;
+  color: $jst-text-inverse;
+}
+
+::v-deep .binding-page__dialog-btn.u-button {
+  min-height: 84rpx;
+}
+
+::v-deep .binding-page__dialog-btn--ghost.u-button {
+  border-color: $jst-border;
+  background: $jst-bg-grey;
+  color: $jst-text-secondary;
+}
+
+::v-deep .binding-page__dialog-btn--primary.u-button {
+  border: none;
+  background: $jst-brand;
+  color: $jst-text-inverse;
 }
 </style>

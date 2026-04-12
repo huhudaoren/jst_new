@@ -1,6 +1,7 @@
 <template>
   <view class="refund-detail-page">
     <jst-loading :loading="pageLoading" text="退款详情加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="refund-detail-page__nav">
       <view class="refund-detail-page__back" @tap="handleBack"><</view>
@@ -115,7 +116,7 @@
     />
 
     <view v-if="detail.status === 'pending'" class="refund-detail-page__bottom">
-      <button class="refund-detail-page__bottom-btn" @tap="handleCancel">撤销申请</button>
+      <u-button class="refund-detail-page__bottom-btn" @click="handleCancel">撤销申请</u-button>
     </view>
   </view>
 </template>
@@ -302,10 +303,16 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .refund-detail-page {
   min-height: 100vh;
   padding-bottom: calc(132rpx + env(safe-area-inset-bottom));
-  background: #f4f7fc;
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg;
 }
 
 .refund-detail-page__nav {
@@ -313,8 +320,8 @@ export default {
   align-items: center;
   height: 96rpx;
   padding: 0 24rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 22rpx rgba(14, 58, 113, 0.05);
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .refund-detail-page__back,
@@ -325,7 +332,7 @@ export default {
 
 .refund-detail-page__back {
   font-size: 34rpx;
-  color: #66768f;
+  color: $jst-text-secondary;
 }
 
 .refund-detail-page__nav-title {
@@ -333,7 +340,7 @@ export default {
   text-align: center;
   font-size: 30rpx;
   font-weight: 700;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .refund-detail-page__hero,
@@ -341,12 +348,12 @@ export default {
   margin: 20rpx 24rpx 0;
   padding: 28rpx 24rpx;
   border-radius: 28rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 28rpx rgba(14, 58, 113, 0.06);
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
 }
 
 .refund-detail-page__hero {
-  background: linear-gradient(135deg, #14284f 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, $jst-brand-dark 0%, $jst-brand 100%);
 }
 
 .refund-detail-page__hero-title {
@@ -355,7 +362,7 @@ export default {
   font-size: 34rpx;
   font-weight: 800;
   line-height: 1.45;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .refund-detail-page__hero-amount {
@@ -364,7 +371,7 @@ export default {
   font-size: 56rpx;
   font-weight: 800;
   line-height: 1;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .refund-detail-page__hero-subtitle {
@@ -372,7 +379,7 @@ export default {
   margin-top: 12rpx;
   font-size: 24rpx;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba($jst-text-inverse, 0.8);
 }
 
 .refund-detail-page__card-title {
@@ -380,7 +387,7 @@ export default {
   margin-bottom: 18rpx;
   font-size: 30rpx;
   font-weight: 700;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .refund-detail-page__info-row {
@@ -388,7 +395,7 @@ export default {
   justify-content: space-between;
   gap: 24rpx;
   padding: 18rpx 0;
-  border-top: 2rpx solid #edf1f7;
+  border-top: 2rpx solid $jst-border;
 }
 
 .refund-detail-page__info-row:first-of-type {
@@ -403,19 +410,19 @@ export default {
 }
 
 .refund-detail-page__info-key {
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .refund-detail-page__info-value {
   flex: 1;
   text-align: right;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .refund-detail-page__info-value--price {
   font-size: 30rpx;
   font-weight: 800;
-  color: #ff6a3d;
+  color: $jst-warning;
 }
 
 .refund-detail-page__info-value--multiline {
@@ -444,7 +451,7 @@ export default {
   top: 26rpx;
   bottom: 0;
   width: 2rpx;
-  background: #dbe5f5;
+  background: $jst-border;
 }
 
 .refund-detail-page__timeline-dot {
@@ -454,7 +461,7 @@ export default {
   height: 18rpx;
   margin-top: 6rpx;
   border-radius: 50%;
-  background: #8b5cf6;
+  background: $jst-brand;
 }
 
 .refund-detail-page__timeline-main {
@@ -465,14 +472,14 @@ export default {
   display: block;
   font-size: 26rpx;
   font-weight: 700;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .refund-detail-page__timeline-time {
   display: block;
   margin-top: 10rpx;
   font-size: 22rpx;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .refund-detail-page__bottom {
@@ -481,49 +488,21 @@ export default {
   right: 0;
   bottom: 0;
   padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 -12rpx 28rpx rgba(14, 58, 113, 0.08);
+  background: rgba($jst-bg-card, 0.98);
+  box-shadow: $jst-shadow-md;
 }
 
 .refund-detail-page__bottom-btn {
   width: 100%;
   height: 88rpx;
   border-radius: 28rpx;
-  background: #2f7de1;
-  color: #ffffff;
+  background: $jst-brand;
+  color: $jst-text-inverse;
   font-size: 28rpx;
   font-weight: 700;
 }
 
-:deep(.jst-status-badge--pending) {
-  background: rgba(255, 138, 0, 0.18);
-}
-
-:deep(.jst-status-badge--pending .jst-status-badge__text) {
-  color: #ff8a00;
-}
-
-:deep(.jst-status-badge--active) {
-  background: rgba(46, 125, 255, 0.18);
-}
-
-:deep(.jst-status-badge--active .jst-status-badge__text) {
-  color: #2e7dff;
-}
-
-:deep(.jst-status-badge--refund) {
-  background: rgba(139, 92, 246, 0.18);
-}
-
-:deep(.jst-status-badge--refund .jst-status-badge__text) {
-  color: #8b5cf6;
-}
-
-:deep(.jst-status-badge--success) {
-  background: rgba(82, 196, 26, 0.18);
-}
-
-:deep(.jst-status-badge--success .jst-status-badge__text) {
-  color: #52c41a;
+::v-deep .refund-detail-page__bottom-btn.u-button {
+  border: none;
 }
 </style>

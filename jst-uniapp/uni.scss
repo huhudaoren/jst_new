@@ -1,1 +1,12 @@
 @import '@/uni_modules/uni-scss/variables.scss';
+@import 'uview-ui/theme.scss';
+
+// 覆盖 uView 主题变量，对齐品牌色
+$u-primary: #2B6CFF;
+$u-success: #18B566;
+$u-warning: #FF9500;
+$u-error: #FF4D4F;
+$u-info: #909399;
+$u-main-color: #1A1A1A;
+$u-content-color: #4A4A4A;
+$u-tips-color: #8A8A8A;

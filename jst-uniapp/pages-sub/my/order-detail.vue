@@ -1,6 +1,7 @@
 <template>
   <view class="order-detail-page">
     <jst-loading :loading="pageLoading" text="订单详情加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="order-detail-page__nav">
       <view class="order-detail-page__back" @tap="handleBack"><</view>
@@ -106,27 +107,27 @@
     />
 
     <view v-if="showActions" class="order-detail-page__bottom">
-      <button
+      <u-button
         v-if="canCancel"
         class="order-detail-page__bottom-btn order-detail-page__bottom-btn--ghost"
-        @tap="handleCancel"
+        @click="handleCancel"
       >
         取消订单
-      </button>
-      <button
+      </u-button>
+      <u-button
         v-if="canApplyRefund"
         class="order-detail-page__bottom-btn order-detail-page__bottom-btn--ghost"
-        @tap="openRefundPopup"
+        @click="openRefundPopup"
       >
         申请退款
-      </button>
-      <button
+      </u-button>
+      <u-button
         v-if="canPay"
         class="order-detail-page__bottom-btn order-detail-page__bottom-btn--primary"
-        @tap="handlePay"
+        @click="handlePay"
       >
         去支付
-      </button>
+      </u-button>
     </view>
 
     <view v-if="refundPopupVisible" class="order-detail-page__popup-mask" @tap="closeRefundPopup">
@@ -145,12 +146,12 @@
         </view>
 
         <view class="order-detail-page__popup-actions">
-          <button class="order-detail-page__popup-btn order-detail-page__popup-btn--ghost" @tap="closeRefundPopup">
+          <u-button class="order-detail-page__popup-btn order-detail-page__popup-btn--ghost" @click="closeRefundPopup">
             取消
-          </button>
-          <button class="order-detail-page__popup-btn order-detail-page__popup-btn--primary" @tap="submitRefund">
+          </u-button>
+          <u-button class="order-detail-page__popup-btn order-detail-page__popup-btn--primary" @click="submitRefund">
             提交申请
-          </button>
+          </u-button>
         </view>
       </view>
     </view>
@@ -441,19 +442,25 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .order-detail-page {
   min-height: 100vh;
   padding-bottom: calc(132rpx + env(safe-area-inset-bottom));
-  background: #f4f7fc;
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg;
 }
 
 .order-detail-page__nav {
   display: flex;
   align-items: center;
   height: 96rpx;
-  padding: 0 24rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 22rpx rgba(14, 58, 113, 0.05);
+  padding: 0 $jst-page-padding;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .order-detail-page__back,
@@ -464,70 +471,70 @@ export default {
 
 .order-detail-page__back {
   font-size: 34rpx;
-  color: #66768f;
+  color: $jst-text-secondary;
 }
 
 .order-detail-page__nav-title {
   flex: 1;
   text-align: center;
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .order-detail-page__hero,
 .order-detail-page__card {
-  margin: 20rpx 24rpx 0;
-  padding: 28rpx 24rpx;
-  border-radius: 28rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 28rpx rgba(14, 58, 113, 0.06);
+  margin: $jst-space-lg $jst-page-padding 0;
+  padding: 28rpx $jst-page-padding;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
 }
 
 .order-detail-page__hero {
-  background: linear-gradient(135deg, #0c3d6b 0%, #2f7de1 100%);
+  background: linear-gradient(135deg, $jst-brand-dark 0%, $jst-brand 100%);
 }
 
 .order-detail-page__hero-title {
   display: block;
   margin-top: 18rpx;
   font-size: 34rpx;
-  font-weight: 800;
+  font-weight: $jst-weight-bold;
   line-height: 1.45;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .order-detail-page__hero-amount {
   display: block;
   margin-top: 18rpx;
   font-size: 56rpx;
-  font-weight: 800;
+  font-weight: $jst-weight-bold;
   line-height: 1;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .order-detail-page__hero-subtitle {
   display: block;
-  margin-top: 12rpx;
-  font-size: 24rpx;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-sm;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba($jst-text-inverse, 0.8);
 }
 
 .order-detail-page__card-title {
   display: block;
   margin-bottom: 18rpx;
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
 }
 
 .order-detail-page__info-row {
   display: flex;
   justify-content: space-between;
-  gap: 24rpx;
+  gap: $jst-space-lg;
   padding: 18rpx 0;
-  border-top: 2rpx solid #edf1f7;
+  border-top: 2rpx solid $jst-border;
 }
 
 .order-detail-page__info-row:first-of-type {
@@ -537,56 +544,56 @@ export default {
 
 .order-detail-page__info-key,
 .order-detail-page__info-value {
-  font-size: 24rpx;
+  font-size: $jst-font-sm;
   line-height: 1.6;
 }
 
 .order-detail-page__info-key {
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .order-detail-page__info-value {
   flex: 1;
   text-align: right;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .order-detail-page__info-value--highlight {
-  color: #ff6a3d;
+  color: $jst-warning;
 }
 
 .order-detail-page__info-value--price {
-  font-size: 32rpx;
-  font-weight: 800;
-  color: #ff6a3d;
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-bold;
+  color: $jst-warning;
 }
 
 .order-detail-page__link-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20rpx;
+  gap: $jst-space-md;
 }
 
 .order-detail-page__link-text {
-  font-size: 24rpx;
-  font-weight: 700;
-  color: #2f7de1;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
+  color: $jst-brand;
 }
 
 .order-detail-page__link-desc {
   display: block;
-  margin-top: 10rpx;
-  font-size: 22rpx;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-xs;
   line-height: 1.7;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .order-detail-page__timeline-item {
   position: relative;
   display: flex;
-  gap: 18rpx;
-  padding: 0 0 24rpx 4rpx;
+  gap: $jst-space-sm;
+  padding: 0 0 $jst-space-lg 4rpx;
 }
 
 .order-detail-page__timeline-item:last-child {
@@ -604,7 +611,7 @@ export default {
   top: 26rpx;
   bottom: 0;
   width: 2rpx;
-  background: #dbe5f5;
+  background: $jst-border;
 }
 
 .order-detail-page__timeline-dot {
@@ -613,8 +620,8 @@ export default {
   width: 18rpx;
   height: 18rpx;
   margin-top: 6rpx;
-  border-radius: 50%;
-  background: #2f7de1;
+  border-radius: $jst-radius-round;
+  background: $jst-brand;
 }
 
 .order-detail-page__timeline-main {
@@ -623,16 +630,16 @@ export default {
 
 .order-detail-page__timeline-label {
   display: block;
-  font-size: 26rpx;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
 }
 
 .order-detail-page__timeline-time {
   display: block;
-  margin-top: 10rpx;
-  font-size: 22rpx;
-  color: #7a869d;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
 }
 
 .order-detail-page__bottom {
@@ -642,160 +649,165 @@ export default {
   bottom: 0;
   display: flex;
   justify-content: flex-end;
-  gap: 12rpx;
-  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 -12rpx 28rpx rgba(14, 58, 113, 0.08);
+  gap: $jst-space-sm;
+  padding: 20rpx $jst-page-padding calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba($jst-bg-card, 0.98);
+  box-shadow: $jst-shadow-sm;
 }
 
 .order-detail-page__bottom-btn {
   min-width: 200rpx;
   height: 88rpx;
   padding: 0 28rpx;
-  border-radius: 28rpx;
-  font-size: 28rpx;
-  font-weight: 700;
+  border-radius: $jst-radius-lg;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
   line-height: 88rpx;
 }
 
 .order-detail-page__bottom-btn--ghost {
-  border: 2rpx solid #d6e4fb;
-  background: #ffffff;
-  color: #2f7de1;
+  border: 2rpx solid $jst-border;
+  background: $jst-bg-card;
+  color: $jst-brand;
 }
 
 .order-detail-page__bottom-btn--primary {
-  background: linear-gradient(135deg, #2f7de1 0%, #0c3d6b 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, $jst-brand 0%, $jst-brand-dark 100%);
+  color: $jst-text-inverse;
 }
 
 .order-detail-page__popup-mask {
   position: fixed;
   inset: 0;
+  z-index: 99;
   display: flex;
   align-items: flex-end;
-  background: rgba(15, 23, 42, 0.42);
-  z-index: 99;
+  background: rgba($jst-text-primary, 0.42);
 }
 
 .order-detail-page__popup {
   width: 100%;
-  padding: 32rpx 24rpx calc(24rpx + env(safe-area-inset-bottom));
+  padding: $jst-space-xl $jst-page-padding calc($jst-space-lg + env(safe-area-inset-bottom));
   border-top-left-radius: 32rpx;
   border-top-right-radius: 32rpx;
-  background: #ffffff;
+  background: $jst-bg-card;
 }
 
 .order-detail-page__popup-title {
   display: block;
-  font-size: 32rpx;
-  font-weight: 800;
-  color: #1f2937;
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .order-detail-page__popup-desc {
   display: block;
-  margin-top: 12rpx;
-  font-size: 24rpx;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-sm;
   line-height: 1.7;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .order-detail-page__popup-field {
-  margin-top: 24rpx;
+  margin-top: $jst-space-lg;
 }
 
 .order-detail-page__popup-label {
   display: block;
-  margin-bottom: 12rpx;
-  font-size: 24rpx;
-  font-weight: 700;
-  color: #1f2937;
+  margin-bottom: $jst-space-sm;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
 }
 
 .order-detail-page__popup-textarea {
   width: 100%;
   min-height: 220rpx;
-  padding: 24rpx;
-  border-radius: 24rpx;
-  background: #f6f9ff;
-  font-size: 24rpx;
-  line-height: 1.7;
-  color: #1f2937;
+  padding: $jst-page-padding;
   box-sizing: border-box;
+  border-radius: $jst-radius-xl;
+  background: $jst-bg-page;
+  font-size: $jst-font-sm;
+  line-height: 1.7;
+  color: $jst-text-primary;
 }
 
 .order-detail-page__popup-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12rpx;
-  margin-top: 24rpx;
+  gap: $jst-space-sm;
+  margin-top: $jst-space-lg;
 }
 
 .order-detail-page__popup-btn {
   min-width: 180rpx;
   height: 80rpx;
-  padding: 0 24rpx;
-  border-radius: 999rpx;
-  font-size: 24rpx;
-  font-weight: 700;
+  padding: 0 $jst-page-padding;
+  border-radius: $jst-radius-round;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
   line-height: 80rpx;
 }
 
 .order-detail-page__popup-btn--ghost {
-  border: 2rpx solid #d6e4fb;
-  background: #ffffff;
-  color: #2f7de1;
+  border: 2rpx solid $jst-border;
+  background: $jst-bg-card;
+  color: $jst-brand;
 }
 
 .order-detail-page__popup-btn--primary {
-  background: #2f7de1;
-  color: #ffffff;
+  background: $jst-brand;
+  color: $jst-text-inverse;
 }
 
 :deep(.jst-status-badge--pending) {
-  background: rgba(255, 138, 0, 0.18);
+  background: rgba($jst-warning, 0.18);
 }
 
 :deep(.jst-status-badge--pending .jst-status-badge__text) {
-  color: #ff8a00;
+  color: $jst-warning;
 }
 
 :deep(.jst-status-badge--active) {
-  background: rgba(46, 125, 255, 0.18);
+  background: rgba($jst-brand, 0.18);
 }
 
 :deep(.jst-status-badge--active .jst-status-badge__text) {
-  color: #2e7dff;
+  color: $jst-brand;
 }
 
 :deep(.jst-status-badge--refund) {
-  background: rgba(139, 92, 246, 0.18);
+  background: rgba($jst-indigo, 0.18);
 }
 
 :deep(.jst-status-badge--refund .jst-status-badge__text) {
-  color: #8b5cf6;
-}
-
-/* Q-03 临时档案标注 */
-.order-detail-page__merge-tag {
-  margin: 20rpx 24rpx 0;
-  padding: 20rpx 24rpx;
-  background: #fff8ec;
-  border-radius: 28rpx;
-  border-left: 8rpx solid #f39c12;
-}
-.order-detail-page__merge-tag-text {
-  font-size: 24rpx;
-  color: #b26a00;
-  line-height: 1.6;
+  color: $jst-indigo;
 }
 
 :deep(.jst-status-badge--success) {
-  background: rgba(82, 196, 26, 0.18);
+  background: rgba($jst-success, 0.18);
 }
 
 :deep(.jst-status-badge--success .jst-status-badge__text) {
-  color: #52c41a;
+  color: $jst-success;
+}
+
+.order-detail-page__merge-tag {
+  margin: $jst-space-lg $jst-page-padding 0;
+  padding: 20rpx $jst-page-padding;
+  border-left: 8rpx solid $jst-warning;
+  border-radius: $jst-radius-lg;
+  background: $jst-warning-light;
+}
+
+.order-detail-page__merge-tag-text {
+  font-size: $jst-font-sm;
+  line-height: 1.6;
+  color: $jst-warning;
+}
+
+::v-deep .order-detail-page__bottom-btn.u-button,
+::v-deep .order-detail-page__popup-btn.u-button {
+  border: none;
 }
 </style>

@@ -42,7 +42,23 @@ $jst-shadow-card: 0 12rpx 32rpx rgba(16, 88, 160, 0.08);
 $jst-shadow-strong: 0 20rpx 48rpx rgba(16, 88, 160, 0.14);
 $jst-font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 
+// ===== Batch-A 追加 =====
+$jst-fw-regular: 400;
+$jst-fw-bold: 600;
+$jst-gradient-primary: linear-gradient(135deg, #ff6b35 0%, #ff8c61 100%);
+$jst-gradient-brand: linear-gradient(135deg, #1058a0 0%, #1a7cd9 100%);
+
+// 状态 chip 配色（鲜明）
+$jst-chip-pending-fg:   #B26A00; $jst-chip-pending-bg:   #FFF4CC;
+$jst-chip-paid-fg:      #0F7B3F; $jst-chip-paid-bg:      #DFF7E6;
+$jst-chip-done-fg:      #0A52B8; $jst-chip-done-bg:      #DCEBFF;
+$jst-chip-cancelled-fg: #6B6B6B; $jst-chip-cancelled-bg: #ECECEC;
+$jst-chip-refunding-fg: #B84A00; $jst-chip-refunding-bg: #FFE4CC;
+$jst-chip-refunded-fg:  #3A3A3A; $jst-chip-refunded-bg:  #D6D6D6;
+
 :root {
+  --jst-gradient-primary: #{$jst-gradient-primary};
+  --jst-gradient-brand: #{$jst-gradient-brand};
   --jst-color-primary: #{$jst-color-primary};
   --jst-color-primary-light: #{$jst-color-primary-light};
   --jst-color-primary-soft: #{$jst-color-primary-soft};

@@ -2,27 +2,27 @@
      数据来源: GET /jst/wx/channel/students/{id}/score -->
 <template>
   <view class="score-page">
-    <view class="score-header">
+    <view class="score-header" :style="{ paddingTop: navPaddingTop }">
       <view class="score-header__back" @tap="goBack">←</view>
       <text class="score-header__title">{{ studentName }} 的成绩</text>
     </view>
 
-    <view v-for="item in list" :key="item.scoreId" class="score-card">
-      <view class="score-card__top">
-        <text class="score-card__contest">{{ item.contestName || '--' }}</text>
-        <text class="score-card__time">{{ formatDate(item.publishTime) }}</text>
-      </view>
-      <view class="score-card__bottom">
-        <text class="score-card__rank">{{ item.rank || '--' }}</text>
-        <text class="score-card__award">{{ item.awardLevel || '暂无' }}</text>
-        <text class="score-card__score">{{ item.score != null ? item.score + '分' : '--' }}</text>
+    <view class="score-list">
+      <view v-for="item in list" :key="item.scoreId" class="score-card">
+        <view class="score-card__top">
+          <text class="score-card__contest">{{ item.contestName || '--' }}</text>
+          <u-tag :text="formatDate(item.publishTime)" type="info" size="mini" plain shape="circle"></u-tag>
+        </view>
+        <view class="score-card__bottom">
+          <u-tag :text="'排名 ' + (item.rank || '--')" type="primary" size="mini" plain shape="circle"></u-tag>
+          <u-tag :text="item.awardLevel || '暂无奖项'" type="warning" size="mini" plain shape="circle"></u-tag>
+          <u-tag :text="item.score != null ? item.score + '分' : '--'" type="success" size="mini" plain shape="circle"></u-tag>
+        </view>
       </view>
     </view>
 
-    <view v-if="!list.length && !loading" class="score-empty">
-      <text class="score-empty__icon">🎯</text>
-      <text class="score-empty__text">暂无已发布成绩</text>
-    </view>
+    <u-loadmore v-if="list.length" :status="loading ? 'loading' : 'nomore'" />
+    <u-empty v-if="!list.length && !loading" mode="data" text="暂无已发布成绩"></u-empty>
   </view>
 </template>
 
@@ -31,7 +31,7 @@ import { getStudentScore } from '@/api/channel'
 
 export default {
   data() {
-    return { loading: false, list: [], studentName: '', studentId: '' }
+    return { loading: false, list: [], studentName: '', studentId: '', skeletonShow: true /* [visual-effect] */ }
   },
   onLoad(opts) {
     this.studentId = opts.studentId || ''
@@ -57,19 +57,16 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.score-page { min-height: 100vh; padding-bottom: 48rpx; background: var(--jst-color-page-bg); }
-.score-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: #fff; border-bottom: 2rpx solid var(--jst-color-border); }
-.score-header__back { width: 72rpx; height: 72rpx; border-radius: var(--jst-radius-sm); background: var(--jst-color-page-bg); display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
-.score-header__title { flex: 1; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
-.score-card { margin: 24rpx 32rpx 0; padding: 28rpx; background: #fff; border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); }
-.score-card__top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
-.score-card__contest { font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); flex: 1; }
-.score-card__time { font-size: 22rpx; color: var(--jst-color-text-tertiary); flex-shrink: 0; }
-.score-card__bottom { display: flex; gap: 32rpx; }
-.score-card__rank { font-size: 26rpx; color: #3F51B5; font-weight: 600; }
-.score-card__award { font-size: 26rpx; color: #F5A623; font-weight: 600; }
-.score-card__score { font-size: 26rpx; color: var(--jst-color-text-secondary); }
-.score-empty { text-align: center; padding: 120rpx 48rpx; }
-.score-empty__icon { display: block; font-size: 80rpx; margin-bottom: 24rpx; }
-.score-empty__text { font-size: 28rpx; color: var(--jst-color-text-tertiary); }
+@import '@/styles/design-tokens.scss';
+
+.score-page { min-height: 100vh; padding-bottom: $jst-space-xxl; background: $jst-bg-page; }
+.score-header { display: flex; align-items: center; padding: 0 $jst-space-xl; height: 112rpx; padding-top: 88rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
+.score-header__back { width: 72rpx; height: 72rpx; border-radius: $jst-radius-sm; background: $jst-bg-page; display: flex; align-items: center; justify-content: center; font-size: $jst-font-xl; margin-right: $jst-space-lg; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
+.score-header__title { flex: 1; font-size: 34rpx; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+
+.score-list { padding: $jst-space-lg $jst-space-xl 0; }
+.score-card { margin-bottom: $jst-space-lg; padding: $jst-space-lg; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; }
+.score-card__top { display: flex; align-items: center; justify-content: space-between; gap: $jst-space-md; }
+.score-card__contest { flex: 1; min-width: 0; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.score-card__bottom { margin-top: $jst-space-md; display: flex; flex-wrap: wrap; gap: $jst-space-sm; }
 </style>

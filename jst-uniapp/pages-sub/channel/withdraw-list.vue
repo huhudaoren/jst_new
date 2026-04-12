@@ -2,7 +2,7 @@
      调用接口: GET /jst/wx/channel/withdraw/list?status=&pageNum=&pageSize= -->
 <template>
   <view class="wl-page">
-    <scroll-view class="wl-tabs" scroll-x>
+    <scroll-view class="wl-tabs" scroll-x :style="{ paddingTop: navPaddingTop }">
       <view
         v-for="tab in tabs"
         :key="tab.value"
@@ -15,7 +15,12 @@
       <view v-for="item in list" :key="item.settlementId" class="wl-card" @tap="goDetail(item)">
         <view class="wl-card__head">
           <text class="wl-card__no">{{ item.settlementNo }}</text>
-          <text :class="['wl-card__status', 'wl-card__status--' + item.status]">{{ statusLabel(item.status) }}</text>
+          <u-tag
+            :text="statusLabel(item.status)"
+            :type="item.status === 'paid' ? 'success' : ((item.status === 'pending' || item.status === 'in_review') ? 'warning' : 'info')"
+            size="mini"
+            shape="circle"
+          ></u-tag>
         </view>
         <view class="wl-card__body">
           <view class="wl-card__money">
@@ -25,9 +30,8 @@
           <text class="wl-card__time">{{ formatTime(item.applyTime) }}</text>
         </view>
       </view>
-      <view v-if="!list.length && !loading" class="wl-empty">暂无提现记录</view>
-      <view v-if="loading" class="wl-empty">加载中...</view>
-      <view v-if="!hasMore && list.length" class="wl-empty wl-empty--end">没有更多了</view>
+      <u-empty v-if="!list.length && !loading" mode="data" text="暂无提现记录"></u-empty>
+      <u-loadmore v-if="list.length || loading" :status="loading ? 'loading' : (hasMore ? 'loadmore' : 'nomore')"></u-loadmore>
     </view>
   </view>
 </template>
@@ -47,7 +51,7 @@ const STATUS_LABEL = { pending: '待审核', in_review: '审核中', paid: '已�
 
 export default {
   data() {
-    return { tabs: TABS, activeStatus: '', list: [], pageNum: 1, pageSize: 10, total: 0, loading: false, hasMore: true }
+    return { skeletonShow: true, /* [visual-effect] */ tabs: TABS, activeStatus: '', list: [], pageNum: 1, pageSize: 10, total: 0, loading: false, hasMore: true }
   },
   onLoad() { this.load(true) },
   onShow() {
@@ -84,26 +88,21 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.wl-page { min-height: 100vh; background: var(--jst-color-page-bg); }
-.wl-tabs { white-space: nowrap; background: var(--jst-color-card-bg); border-bottom: 2rpx solid var(--jst-color-border); }
-.wl-tabs__item { display: inline-block; padding: 0 32rpx; height: 88rpx; line-height: 88rpx; font-size: 26rpx; color: var(--jst-color-text-tertiary); position: relative; }
-.wl-tabs__item--active { color: var(--jst-color-brand); font-weight: 700; }
-.wl-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 24rpx; right: 24rpx; height: 4rpx; background: var(--jst-color-brand); border-radius: 2rpx; }
+@import '@/styles/design-tokens.scss';
+
+.wl-page { min-height: 100vh; background: $jst-bg-page; }
+.wl-tabs { white-space: nowrap; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
+.wl-tabs__item { display: inline-block; padding: 0 32rpx; height: 88rpx; line-height: 88rpx; font-size: 26rpx; color: $jst-text-secondary; position: relative; }
+.wl-tabs__item--active { color: $jst-brand; font-weight: 600; }
+.wl-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 24rpx; right: 24rpx; height: 4rpx; background: $jst-brand; border-radius: 2rpx; }
 
 .wl-list { padding: 8rpx 0 32rpx; }
-.wl-card { margin: 20rpx 32rpx 0; padding: 28rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); }
+.wl-card { margin: 20rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-md; box-shadow: $jst-shadow-sm; }
 .wl-card__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
-.wl-card__no { font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.wl-card__status { padding: 4rpx 16rpx; border-radius: var(--jst-radius-full); font-size: 22rpx; background: var(--jst-color-brand-soft); color: var(--jst-color-brand); }
-.wl-card__status--pending, .wl-card__status--in_review { background: var(--jst-color-warning-soft); color: var(--jst-color-warning); }
-.wl-card__status--paid { background: var(--jst-color-success-soft); color: var(--jst-color-success); }
-.wl-card__status--rejected, .wl-card__status--cancelled { background: var(--jst-color-gray-soft); color: var(--jst-color-text-tertiary); }
+.wl-card__no { font-size: 24rpx; color: $jst-text-secondary; }
 .wl-card__body { display: flex; justify-content: space-between; align-items: flex-end; }
 .wl-card__money { display: flex; flex-direction: column; }
-.wl-card__amount { font-size: 40rpx; font-weight: 800; color: #F5A623; }
-.wl-card__sub { margin-top: 4rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.wl-card__time { font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-
-.wl-empty { padding: 60rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.wl-empty--end { padding: 40rpx; }
+.wl-card__amount { font-size: 40rpx; font-weight: 600; color: $jst-warning; }
+.wl-card__sub { margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; }
+.wl-card__time { font-size: 22rpx; color: $jst-text-secondary; }
 </style>

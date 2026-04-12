@@ -1,0 +1,91 @@
+@import './variables.scss';
+@import './mixins.scss';
+
+// ===== 卡片 =====
+.jst-card        { @include card; }
+.jst-card--tight { @include card(24rpx); }
+.jst-card--flat  { background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); padding: 32rpx; }
+
+// ===== 按钮 =====
+.jst-btn              { @include btn-base; }
+.jst-btn--primary     { @include btn-primary; }
+.jst-btn--secondary   { @include btn-secondary; }
+.jst-btn--ghost       { @include btn-ghost; }
+.jst-btn--block       { display: flex; width: 100%; }
+.jst-btn--lg          { height: 96rpx; font-size: 30rpx; border-radius: 20rpx; }
+.jst-btn--sm          { height: 56rpx; padding: 0 24rpx; font-size: 24rpx; border-radius: 12rpx; }
+
+// ===== Chip =====
+.jst-chip              { @include chip-base; color: var(--jst-color-text-secondary); background: #F0F0F0; }
+.jst-chip--pending     { @include chip(pending); }
+.jst-chip--paid        { @include chip(paid); }
+.jst-chip--done        { @include chip(done); }
+.jst-chip--cancelled   { @include chip(cancelled); }
+.jst-chip--refunding   { @include chip(refunding); }
+.jst-chip--refunded    { @include chip(refunded); }
+
+// ===== 空状态 =====
+.jst-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 96rpx 48rpx;
+  .jst-empty__img   { width: 240rpx; height: 240rpx; margin-bottom: 32rpx; opacity: 0.9; }
+  .jst-empty__title { font-size: 28rpx; color: var(--jst-color-text-secondary); font-weight: 600; }
+  .jst-empty__desc  { margin-top: 12rpx; font-size: 24rpx; color: var(--jst-color-text-tertiary); text-align: center; }
+  .jst-empty__action { margin-top: 32rpx; }
+}
+
+// ===== 骨架屏 =====
+.jst-skeleton      { @include skeleton-bar; }
+.jst-skeleton--bar { @include skeleton-bar; height: 28rpx; }
+.jst-skeleton--title { @include skeleton-bar; height: 40rpx; width: 60%; }
+.jst-skeleton--avatar { @include skeleton-bar; width: 96rpx; height: 96rpx; border-radius: 50%; }
+.jst-skeleton--thumb { @include skeleton-bar; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--jst-radius-md); }
+
+// ===== Section 标题 =====
+.jst-section-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--jst-color-text);
+  margin: 0 0 24rpx;
+  .jst-section-title__more {
+    font-size: 24rpx;
+    font-weight: 400;
+    color: var(--jst-color-text-tertiary);
+  }
+}
+
+// ===== 金额排版 =====
+.jst-amount {
+  @include tabular-num;
+  display: inline-flex;
+  align-items: baseline;
+  color: var(--jst-color-primary);
+  font-weight: 600;
+  .jst-amount__symbol { font-size: 24rpx; margin-right: 4rpx; }
+  .jst-amount__int    { font-size: 44rpx; line-height: 1; }
+  .jst-amount__dot    { font-size: 28rpx; }
+  .jst-amount__frac   { font-size: 28rpx; }
+}
+.jst-amount--sm .jst-amount__int { font-size: 32rpx; }
+.jst-amount--lg .jst-amount__int { font-size: 56rpx; }
+
+// ===== "查看更多" 统一样式 =====
+.jst-more-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  font-size: 24rpx;
+  font-weight: 400;
+  color: var(--jst-color-text-tertiary, #999);
+}
+
+// ===== 工具类 =====
+.jst-tnum   { @include tabular-num; }
+.jst-ell-1  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jst-ell-2  { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

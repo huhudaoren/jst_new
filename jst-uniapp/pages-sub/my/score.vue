@@ -19,7 +19,7 @@
           placeholder-class="score-page__query-placeholder"
           @confirm="doPublicQuery"
         />
-        <view class="score-page__query-btn" @tap="doPublicQuery">查询</view>
+        <u-button class="score-page__query-btn" @click="doPublicQuery">查询</u-button>
       </view>
       <view class="score-page__query-tips">
         <text class="score-page__query-tip">支持手机号查询</text>
@@ -35,6 +35,7 @@
     </view>
 
     <jst-loading :loading="loading" text="成绩加载中..." />
+    <u-skeleton v-if="loading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view v-if="scoreList.length" class="score-page__list">
       <view
@@ -74,7 +75,7 @@
         <!-- 证书入口 -->
         <view v-if="item.hasCert" class="score-page__card-footer">
           <text class="score-page__card-cert-tag">✓ 证书已生成</text>
-          <view class="score-page__card-cert-btn" @tap.stop="viewCert(item)">查看证书</view>
+          <u-button class="score-page__card-cert-btn" @click.stop="viewCert(item)">查看证书</u-button>
         </view>
       </view>
     </view>
@@ -190,75 +191,380 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.score-page { min-height: 100vh; padding-bottom: 60rpx; background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
 
-.score-page__header { display: flex; align-items: center; padding: 24rpx; background: var(--jst-color-card-bg); }
-.score-page__back { display: flex; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: var(--jst-color-page-bg); font-size: 30rpx; color: var(--jst-color-text); }
-.score-page__header-title { flex: 1; margin-left: 16rpx; font-size: 34rpx; font-weight: 700; color: var(--jst-color-text); }
+.score-page {
+  min-height: 100vh;
+  padding-bottom: 60rpx;
+  background: $jst-bg-page;
+}
 
-/* 查询卡 */
-.score-page__query-card { position: relative; margin: 24rpx 24rpx 0; padding: 32rpx; border-radius: var(--jst-radius-lg); background: linear-gradient(135deg, #1058A0 0%, #0D3F7A 100%); overflow: hidden; }
-.score-page__query-orb { position: absolute; right: -40rpx; top: -40rpx; width: 200rpx; height: 200rpx; border-radius: 50%; background: rgba(255,255,255,0.06); }
-.score-page__query-title { display: block; font-size: 30rpx; font-weight: 700; color: #fff; margin-bottom: 20rpx; }
-.score-page__query-row { display: flex; gap: 16rpx; }
-.score-page__query-input { flex: 1; height: 88rpx; padding: 0 24rpx; border-radius: var(--jst-radius-md); background: rgba(255,255,255,0.15); border: 2rpx solid rgba(255,255,255,0.3); font-size: 28rpx; color: #fff; }
-.score-page__query-placeholder { color: rgba(255,255,255,0.5); }
-.score-page__query-btn { display: flex; align-items: center; justify-content: center; height: 88rpx; padding: 0 32rpx; border-radius: var(--jst-radius-md); background: #fff; font-size: 28rpx; font-weight: 700; color: #0D3F7A; flex-shrink: 0; }
-.score-page__query-tips { display: flex; gap: 12rpx; flex-wrap: wrap; margin-top: 16rpx; }
-.score-page__query-tip { font-size: 22rpx; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.1); padding: 6rpx 16rpx; border-radius: var(--jst-radius-full); }
+.jst-page-skeleton {
+  margin: 0 $jst-page-padding $jst-space-lg;
+}
 
-/* section bar */
-.score-page__section-bar { display: flex; justify-content: space-between; align-items: center; margin: 32rpx 24rpx 20rpx; }
-.score-page__section-title { font-size: 32rpx; font-weight: 700; color: var(--jst-color-text); display: flex; align-items: center; gap: 12rpx; }
-.score-page__section-title::before { content: ''; display: inline-block; width: 8rpx; height: 32rpx; background: var(--jst-color-brand); border-radius: 4rpx; }
-.score-page__section-count { font-size: 24rpx; color: var(--jst-color-text-tertiary); padding: 6rpx 16rpx; background: var(--jst-color-page-bg); border-radius: var(--jst-radius-full); }
+.score-page__header {
+  display: flex;
+  align-items: center;
+  padding: $jst-space-lg $jst-page-padding;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
+}
 
-/* 成绩卡片 */
-.score-page__list { padding: 0 24rpx; }
-.score-page__card { background: var(--jst-color-card-bg); border-radius: var(--jst-radius-lg); box-shadow: 0 4rpx 16rpx rgba(20,30,60,0.06); margin-bottom: 24rpx; overflow: hidden; }
-.score-page__card-header { display: flex; align-items: flex-start; gap: 20rpx; padding: 28rpx 28rpx 20rpx; border-bottom: 2rpx solid var(--jst-color-border); }
-.score-page__card-icon { display: flex; align-items: center; justify-content: center; width: 88rpx; height: 88rpx; border-radius: var(--jst-radius-md); background: linear-gradient(135deg, #1058A0, #0D3F7A); font-size: 44rpx; flex-shrink: 0; }
-.score-page__card-info { flex: 1; min-width: 0; }
-.score-page__card-name { display: block; font-size: 30rpx; font-weight: 700; color: var(--jst-color-text); line-height: 1.4; }
-.score-page__card-meta { display: block; margin-top: 8rpx; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.score-page__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 22rpx;
+  background: $jst-bg-page;
+  font-size: $jst-font-md;
+  color: $jst-text-primary;
+}
 
-/* 成绩展示 */
-.score-page__card-display { display: flex; align-items: center; justify-content: space-between; padding: 28rpx; }
-.score-page__card-main { display: flex; flex-direction: column; gap: 8rpx; }
-.score-page__card-label { font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.score-page__card-value { font-size: 64rpx; font-weight: 900; color: var(--jst-color-brand); line-height: 1; letter-spacing: -2rpx; }
-.score-page__card-rank { font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.score-page__header-title {
+  flex: 1;
+  margin-left: $jst-space-md;
+  font-size: 34rpx;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
+}
 
-/* 奖项徽章 */
-.score-page__card-award { display: flex; flex-direction: column; align-items: center; padding: 20rpx 32rpx; border-radius: var(--jst-radius-md); gap: 6rpx; }
-.score-page__card-award--gold { background: #FFF8E1; }
-.score-page__card-award--silver { background: var(--jst-color-page-bg); }
-.score-page__card-award--bronze { background: #FFF5EE; }
-.score-page__card-award--normal { background: var(--jst-color-brand-soft); }
-.score-page__card-award-icon { font-size: 56rpx; }
-.score-page__card-award-text { font-size: 26rpx; font-weight: 800; color: var(--jst-color-text); }
+.score-page__query-card {
+  position: relative;
+  margin: $jst-space-lg $jst-page-padding 0;
+  padding: $jst-space-xl;
+  border-radius: $jst-radius-lg;
+  background: linear-gradient(135deg, $jst-brand 0%, $jst-brand-dark 100%);
+  overflow: hidden;
+}
 
-/* 待公布 */
-.score-page__card-pending { padding: 28rpx; text-align: center; background: var(--jst-color-page-bg); margin: 20rpx; border-radius: var(--jst-radius-md); }
-.score-page__card-pending-icon { display: block; font-size: 72rpx; margin-bottom: 16rpx; }
-.score-page__card-pending-text { display: block; font-size: 28rpx; font-weight: 600; color: var(--jst-color-text-secondary); }
-.score-page__card-pending-sub { display: block; margin-top: 8rpx; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.score-page__query-orb {
+  position: absolute;
+  right: -40rpx;
+  top: -40rpx;
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: $jst-radius-round;
+  background: rgba($jst-text-inverse, 0.08);
+}
 
-/* 证书入口 */
-.score-page__card-footer { display: flex; justify-content: space-between; align-items: center; padding: 20rpx 28rpx; border-top: 2rpx solid var(--jst-color-border); }
-.score-page__card-cert-tag { font-size: 24rpx; color: var(--jst-color-success); }
-.score-page__card-cert-btn { padding: 12rpx 24rpx; border-radius: var(--jst-radius-md); border: 2rpx solid var(--jst-color-brand); font-size: 24rpx; font-weight: 600; color: var(--jst-color-brand); }
+.score-page__query-title {
+  display: block;
+  margin-bottom: 20rpx;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-inverse;
+}
 
-/* 统计汇总 */
-.score-page__summary { margin: 32rpx 24rpx 0; padding: 28rpx; border-radius: var(--jst-radius-lg); background: var(--jst-color-card-bg); box-shadow: 0 4rpx 16rpx rgba(20,30,60,0.06); }
-.score-page__summary-title { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); margin-bottom: 24rpx; }
-.score-page__summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16rpx; }
-.score-page__summary-item { text-align: center; padding: 20rpx 8rpx; border-radius: var(--jst-radius-md); }
-.score-page__summary-item--brand { background: var(--jst-color-brand-soft); }
-.score-page__summary-item--gold { background: #FFF8E1; }
-.score-page__summary-item--success { background: var(--jst-color-success-soft); }
-.score-page__summary-num { display: block; font-size: 40rpx; font-weight: 900; color: var(--jst-color-brand); }
-.score-page__summary-item--gold .score-page__summary-num { color: #9A6300; }
-.score-page__summary-item--success .score-page__summary-num { color: var(--jst-color-success); }
-.score-page__summary-label { display: block; margin-top: 4rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.score-page__query-row {
+  display: flex;
+  gap: $jst-space-md;
+}
+
+.score-page__query-input {
+  flex: 1;
+  height: 88rpx;
+  padding: 0 $jst-page-padding;
+  border-radius: $jst-radius-md;
+  border: 2rpx solid rgba($jst-text-inverse, 0.34);
+  background: rgba($jst-text-inverse, 0.16);
+  font-size: $jst-font-base;
+  color: $jst-text-inverse;
+}
+
+.score-page__query-placeholder {
+  color: rgba($jst-text-inverse, 0.58);
+}
+
+.score-page__query-tips {
+  display: flex;
+  gap: $jst-space-sm;
+  flex-wrap: wrap;
+  margin-top: $jst-space-md;
+}
+
+.score-page__query-tip {
+  padding: 6rpx 16rpx;
+  border-radius: $jst-radius-round;
+  font-size: $jst-font-xs;
+  color: rgba($jst-text-inverse, 0.72);
+  background: rgba($jst-text-inverse, 0.14);
+}
+
+.score-page__section-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: $jst-space-xl $jst-page-padding $jst-space-lg;
+}
+
+.score-page__section-title {
+  display: flex;
+  align-items: center;
+  gap: $jst-space-sm;
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
+}
+
+.score-page__section-title::before {
+  content: '';
+  display: inline-block;
+  width: 8rpx;
+  height: 32rpx;
+  border-radius: $jst-radius-xs;
+  background: $jst-brand;
+}
+
+.score-page__section-count {
+  padding: 6rpx 16rpx;
+  border-radius: $jst-radius-round;
+  font-size: $jst-font-sm;
+  color: $jst-text-placeholder;
+  background: $jst-bg-grey;
+}
+
+.score-page__list {
+  padding: 0 $jst-page-padding;
+}
+
+.score-page__card {
+  margin-bottom: $jst-space-lg;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
+  overflow: hidden;
+}
+
+.score-page__card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+  padding: 28rpx 28rpx 20rpx;
+  border-bottom: 2rpx solid $jst-border;
+}
+
+.score-page__card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: $jst-radius-md;
+  background: linear-gradient(135deg, $jst-brand, $jst-brand-dark);
+  font-size: 44rpx;
+  flex-shrink: 0;
+}
+
+.score-page__card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.score-page__card-name {
+  display: block;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  line-height: 1.4;
+  color: $jst-text-primary;
+}
+
+.score-page__card-meta {
+  display: block;
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-sm;
+  color: $jst-text-placeholder;
+}
+
+.score-page__card-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx;
+}
+
+.score-page__card-main {
+  display: flex;
+  flex-direction: column;
+  gap: $jst-space-xs;
+}
+
+.score-page__card-label {
+  font-size: $jst-font-sm;
+  color: $jst-text-placeholder;
+}
+
+.score-page__card-value {
+  font-size: 64rpx;
+  line-height: 1;
+  letter-spacing: -2rpx;
+  font-weight: $jst-weight-bold;
+  color: $jst-brand;
+}
+
+.score-page__card-rank {
+  font-size: $jst-font-sm;
+  color: $jst-text-placeholder;
+}
+
+.score-page__card-award {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+  padding: 20rpx 32rpx;
+  border-radius: $jst-radius-md;
+}
+
+.score-page__card-award--gold {
+  background: $jst-gold-light;
+}
+
+.score-page__card-award--silver {
+  background: $jst-bg-page;
+}
+
+.score-page__card-award--bronze {
+  background: $jst-warning-light;
+}
+
+.score-page__card-award--normal {
+  background: $jst-brand-light;
+}
+
+.score-page__card-award-icon {
+  font-size: 56rpx;
+}
+
+.score-page__card-award-text {
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
+}
+
+.score-page__card-pending {
+  margin: 20rpx;
+  padding: 28rpx;
+  border-radius: $jst-radius-md;
+  text-align: center;
+  background: $jst-bg-page;
+}
+
+.score-page__card-pending-icon {
+  display: block;
+  margin-bottom: $jst-space-md;
+  font-size: 72rpx;
+}
+
+.score-page__card-pending-text {
+  display: block;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-secondary;
+}
+
+.score-page__card-pending-sub {
+  display: block;
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-sm;
+  color: $jst-text-placeholder;
+}
+
+.score-page__card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 28rpx;
+  border-top: 2rpx solid $jst-border;
+}
+
+.score-page__card-cert-tag {
+  font-size: $jst-font-sm;
+  color: $jst-success;
+}
+
+.score-page__summary {
+  margin: $jst-space-xl $jst-page-padding 0;
+  padding: 28rpx;
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
+}
+
+.score-page__summary-title {
+  display: block;
+  margin-bottom: $jst-space-lg;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
+}
+
+.score-page__summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $jst-space-md;
+}
+
+.score-page__summary-item {
+  padding: 20rpx 8rpx;
+  border-radius: $jst-radius-md;
+  text-align: center;
+}
+
+.score-page__summary-item--brand {
+  background: $jst-brand-light;
+}
+
+.score-page__summary-item--gold {
+  background: $jst-gold-light;
+}
+
+.score-page__summary-item--success {
+  background: $jst-success-light;
+}
+
+.score-page__summary-num {
+  display: block;
+  font-size: 40rpx;
+  font-weight: $jst-weight-bold;
+  color: $jst-brand;
+}
+
+.score-page__summary-item--gold .score-page__summary-num {
+  color: $jst-warning;
+}
+
+.score-page__summary-item--success .score-page__summary-num {
+  color: $jst-success;
+}
+
+.score-page__summary-label {
+  display: block;
+  margin-top: 4rpx;
+  font-size: $jst-font-xs;
+  color: $jst-text-placeholder;
+}
+
+::v-deep .score-page__query-btn.u-button {
+  height: 88rpx;
+  padding: 0 $jst-space-xl;
+  border: none;
+  border-radius: $jst-radius-md;
+  background: $jst-bg-card;
+  color: $jst-brand-dark;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+}
+
+::v-deep .score-page__card-cert-btn.u-button {
+  min-height: 62rpx;
+  padding: 0 $jst-space-lg;
+  border-color: $jst-brand;
+  border-radius: $jst-radius-md;
+  color: $jst-brand;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
+}
 </style>

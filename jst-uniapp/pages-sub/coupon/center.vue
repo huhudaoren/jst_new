@@ -15,10 +15,11 @@
           <text v-if="tab.value === 'unused' && unusedCount > 0" class="cc-tabs__badge">{{ unusedCount }}</text>
         </view>
       </scroll-view>
-      <view class="cc-header__cta" @tap="goClaimable">去领券 ›</view>
+      <u-button class="cc-header__cta" size="mini" plain @click="goClaimable">去领券 ›</u-button>
     </view>
 
     <view class="cc-list">
+      <u-skeleton v-if="loading && !list.length" :loading="true" :rows="6" title :avatar="false" class="cc-skeleton" />
       <view
         v-for="item in list"
         :key="item.userCouponId"
@@ -34,13 +35,12 @@
         <view class="cc-card__right">
           <text class="cc-card__name">{{ item.couponName || '--' }}</text>
           <text class="cc-card__valid">有效期 {{ formatDate(item.validStart) }} ~ {{ formatDate(item.validEnd) }}</text>
-          <button v-if="item.status === 'unused'" class="cc-card__btn" @tap="goUse(item)">去使用</button>
+          <u-button v-if="item.status === 'unused'" class="cc-card__btn" @click="goUse(item)">去使用</u-button>
           <text v-else class="cc-card__status">{{ statusLabel(item.status) }}</text>
         </view>
       </view>
-      <view v-if="!list.length && !loading" class="cc-empty">暂无券</view>
-      <view v-if="loading" class="cc-empty">加载中...</view>
-      <view v-if="!hasMore && list.length" class="cc-empty cc-empty--end">没有更多了</view>
+      <u-empty v-if="!list.length && !loading" mode="data" />
+      <u-loadmore v-else :status="loading ? 'loading' : (hasMore ? 'loadmore' : 'nomore')" />
     </view>
   </view>
 </template>
@@ -88,31 +88,178 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.cc-page { min-height: 100vh; background: var(--jst-color-page-bg); }
-.cc-header { display: flex; align-items: center; background: var(--jst-color-card-bg); border-bottom: 2rpx solid var(--jst-color-border); }
-.cc-tabs { flex: 1; white-space: nowrap; }
-.cc-tabs__item { display: inline-flex; align-items: center; padding: 0 32rpx; height: 88rpx; font-size: 26rpx; color: var(--jst-color-text-tertiary); position: relative; }
-.cc-tabs__item--active { color: #F4511E; font-weight: 700; }
-.cc-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 20rpx; right: 20rpx; height: 4rpx; background: #F4511E; border-radius: 2rpx; }
-.cc-tabs__badge { margin-left: 8rpx; padding: 0 12rpx; height: 32rpx; line-height: 32rpx; border-radius: 16rpx; background: #F4511E; color: #fff; font-size: 20rpx; }
-.cc-header__cta { padding: 0 32rpx; font-size: 24rpx; color: #F4511E; font-weight: 700; }
+@import '@/styles/design-tokens.scss';
 
-.cc-list { padding: 16rpx 0 32rpx; }
-.cc-card { display: flex; margin: 20rpx 32rpx 0; border-radius: var(--jst-radius-md); overflow: hidden; box-shadow: var(--jst-shadow-card); background: var(--jst-color-card-bg); }
-.cc-card__left { width: 220rpx; padding: 32rpx 16rpx; text-align: center; color: #fff; background: #F4511E; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.cc-card--discount .cc-card__left { background: #7C3AED; }
-.cc-card--direct_reduction .cc-card__left { background: #F5A623; }
-.cc-card--disabled .cc-card__left { background: var(--jst-color-text-tertiary); }
-.cc-card__amount { font-size: 32rpx; font-weight: 800; }
-.cc-card__big { font-size: 56rpx; }
-.cc-card__unit { font-size: 28rpx; margin-left: 4rpx; }
-.cc-card__threshold { display: block; margin-top: 10rpx; font-size: 20rpx; opacity: 0.9; }
-.cc-card__right { flex: 1; padding: 24rpx; display: flex; flex-direction: column; position: relative; }
-.cc-card__name { font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.cc-card__range { margin-top: 6rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.cc-card__valid { margin-top: 6rpx; font-size: 20rpx; color: var(--jst-color-text-tertiary); }
-.cc-card__btn { margin-top: auto; align-self: flex-end; height: 56rpx; line-height: 56rpx; padding: 0 24rpx; border-radius: var(--jst-radius-full); background: #F4511E; color: #fff; font-size: 22rpx; font-weight: 700; border: none; }
-.cc-card__status { margin-top: auto; align-self: flex-end; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
-.cc-empty { padding: 80rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
-.cc-empty--end { padding: 40rpx; }
+.cc-page {
+  min-height: 100vh;
+  background: $jst-bg-page;
+}
+
+.cc-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 2rpx solid $jst-border;
+  background: $jst-bg-card;
+}
+
+.cc-tabs {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.cc-tabs__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 $jst-space-xl;
+  font-size: $jst-font-sm;
+  color: $jst-text-placeholder;
+}
+
+.cc-tabs__item--active {
+  color: $jst-warning;
+  font-weight: $jst-weight-semibold;
+}
+
+.cc-tabs__item--active::after {
+  content: '';
+  position: absolute;
+  left: 20rpx;
+  right: 20rpx;
+  bottom: 0;
+  height: 4rpx;
+  border-radius: $jst-radius-xs;
+  background: $jst-warning;
+}
+
+.cc-tabs__badge {
+  margin-left: $jst-space-xs;
+  padding: 0 $jst-space-sm;
+  height: 32rpx;
+  line-height: 32rpx;
+  border-radius: $jst-radius-round;
+  background: $jst-warning;
+  color: $jst-text-inverse;
+  font-size: $jst-font-xs;
+}
+
+.cc-list {
+  padding: $jst-space-md 0 $jst-space-xl;
+}
+
+.cc-skeleton {
+  margin: $jst-space-sm $jst-space-xl 0;
+}
+
+.cc-card {
+  display: flex;
+  margin: $jst-space-lg $jst-space-xl 0;
+  border-radius: $jst-radius-md;
+  overflow: hidden;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
+}
+
+.cc-card__left {
+  width: 220rpx;
+  padding: $jst-space-xl $jst-space-md;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: $jst-text-inverse;
+  background: $jst-warning;
+}
+
+.cc-card--discount .cc-card__left {
+  background: $jst-indigo;
+}
+
+.cc-card--direct_reduction .cc-card__left {
+  background: $jst-gold;
+}
+
+.cc-card--disabled .cc-card__left {
+  background: $jst-text-placeholder;
+}
+
+.cc-card__amount {
+  font-size: $jst-font-lg;
+  font-weight: $jst-weight-bold;
+}
+
+.cc-card__big {
+  font-size: 56rpx;
+}
+
+.cc-card__unit {
+  margin-left: 4rpx;
+  font-size: $jst-font-base;
+}
+
+.cc-card__threshold {
+  display: block;
+  margin-top: 10rpx;
+  opacity: 0.9;
+  font-size: $jst-font-xs;
+}
+
+.cc-card__right {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: $jst-space-lg;
+}
+
+.cc-card__name {
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
+}
+
+.cc-card__range {
+  margin-top: 6rpx;
+  font-size: $jst-font-sm;
+  color: $jst-text-placeholder;
+}
+
+.cc-card__valid {
+  margin-top: 6rpx;
+  font-size: $jst-font-xs;
+  color: $jst-text-placeholder;
+}
+
+.cc-card__status {
+  margin-top: auto;
+  align-self: flex-end;
+  font-size: $jst-font-xs;
+  color: $jst-text-placeholder;
+}
+
+::v-deep .cc-header__cta.u-button {
+  margin-right: $jst-space-lg;
+  min-width: 120rpx;
+  height: 56rpx;
+  border-color: $jst-warning;
+  border-radius: $jst-radius-round;
+  color: $jst-warning;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
+}
+
+::v-deep .cc-card__btn.u-button {
+  margin-top: auto;
+  align-self: flex-end;
+  min-height: 56rpx;
+  padding: 0 $jst-space-lg;
+  border: none;
+  border-radius: $jst-radius-round;
+  background: $jst-warning;
+  color: $jst-text-inverse;
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-semibold;
+}
 </style>

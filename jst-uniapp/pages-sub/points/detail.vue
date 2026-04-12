@@ -3,7 +3,7 @@
      调用接口: GET /jst/wx/points/ledger + /jst/wx/points/growth/ledger -->
 <template>
   <view class="pd-page">
-    <view class="pd-tabs">
+    <view class="pd-tabs" :style="{ paddingTop: navPaddingTop }">
       <view
         v-for="tab in tabs"
         :key="tab.value"
@@ -13,7 +13,7 @@
     </view>
 
     <view class="pd-list">
-      <view v-for="(item, idx) in list" :key="item.ledgerId || idx" class="pd-card">
+      <view v-for="(item, idx) in list" :key="idx" class="pd-card">
         <view class="pd-card__main">
           <text class="pd-card__name">{{ item.remark || item.sourceType || '变动' }}</text>
           <text class="pd-card__time">{{ formatTime(item.createTime) }}</text>
@@ -72,22 +72,23 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.pd-page { min-height: 100vh; background: var(--jst-color-page-bg); }
-.pd-tabs { display: flex; background: var(--jst-color-card-bg); border-bottom: 2rpx solid var(--jst-color-border); }
-.pd-tabs__item { flex: 1; height: 88rpx; line-height: 88rpx; text-align: center; font-size: 28rpx; color: var(--jst-color-text-tertiary); position: relative; }
-.pd-tabs__item--active { color: #7B1FA2; font-weight: 700; }
+@import '@/styles/design-tokens.scss';
+.pd-page { min-height: 100vh; background: #F7F8FA; }
+.pd-tabs { display: flex; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
+.pd-tabs__item { flex: 1; height: 88rpx; line-height: 88rpx; text-align: center; font-size: 28rpx; color: $jst-text-secondary; position: relative; }
+.pd-tabs__item--active { color: #7B1FA2; font-weight: 600; }
 .pd-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 30%; right: 30%; height: 4rpx; background: #7B1FA2; border-radius: 2rpx; }
 
 .pd-list { padding: 16rpx 0 32rpx; }
-.pd-card { display: flex; justify-content: space-between; align-items: center; margin: 16rpx 32rpx 0; padding: 24rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); }
+.pd-card { display: flex; justify-content: space-between; align-items: center; margin: 16rpx 32rpx 0; padding: 24rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
 .pd-card__main { flex: 1; min-width: 0; }
-.pd-card__name { display: block; font-size: 26rpx; font-weight: 700; color: var(--jst-color-text); }
-.pd-card__time { display: block; margin-top: 6rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.pd-card__name { display: block; font-size: 26rpx; font-weight: 600; color: $jst-text-primary; }
+.pd-card__time { display: block; margin-top: 6rpx; font-size: 22rpx; color: $jst-text-secondary; }
 .pd-card__amount { text-align: right; }
-.pd-card__num { display: block; font-size: 32rpx; font-weight: 800; }
-.pd-card__num--pos { color: var(--jst-color-success); }
-.pd-card__num--neg { color: var(--jst-color-danger); }
-.pd-card__balance { display: block; margin-top: 4rpx; font-size: 20rpx; color: var(--jst-color-text-tertiary); }
-.pd-empty { padding: 80rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.pd-card__num { display: block; font-size: 32rpx; font-weight: 600; }
+.pd-card__num--pos { color: $jst-success; }
+.pd-card__num--neg { color: $jst-danger; }
+.pd-card__balance { display: block; margin-top: 4rpx; font-size: 20rpx; color: $jst-text-secondary; }
+.pd-empty { padding: 80rpx; text-align: center; font-size: 24rpx; color: $jst-text-secondary; }
 .pd-empty--end { padding: 40rpx; }
 </style>

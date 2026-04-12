@@ -8,8 +8,23 @@
 
       <view class="notice-card__content">
         <view class="notice-card__tags">
-          <text v-if="notice.topFlag" class="notice-card__tag notice-card__tag--top">置顶</text>
-          <text class="notice-card__tag">{{ notice.categoryLabel || '公告资讯' }}</text>
+          <u-tag
+            v-if="notice.topFlag"
+            text="置顶"
+            type="error"
+            plain
+            :plain-fill="true"
+            size="mini"
+            shape="circle"
+          />
+          <u-tag
+            :text="notice.categoryLabel || '公告资讯'"
+            type="primary"
+            plain
+            :plain-fill="true"
+            size="mini"
+            shape="circle"
+          />
         </view>
         <text class="notice-card__title">{{ notice.title }}</text>
         <text class="notice-card__summary">{{ notice.summary || '点击查看公告详情' }}</text>
@@ -34,13 +49,13 @@ export default {
   },
   methods: {
     handleTap() {
-      this.$emit('tap', this.notice)
+      this.$emit('item-tap', this.notice)
     },
     formatDate(value) {
       if (!value) {
         return '--'
       }
-      const date = new Date(value)
+      const date = new Date(String(value).replace(/ /g, 'T'))
       if (Number.isNaN(date.getTime())) {
         return value
       }
@@ -54,32 +69,36 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .notice-card {
   overflow: hidden;
-  border-radius: var(--jst-radius-md);
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-card);
+  border-radius: $jst-radius-lg;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
+  transition: transform $jst-duration-fast $jst-easing;
 }
+.notice-card:active { transform: scale(0.99); }
 
 .notice-card__header {
   display: flex;
   align-items: flex-start;
-  padding: 24rpx;
+  padding: $jst-space-lg;
 }
 
 .notice-card__cover {
   flex-shrink: 0;
   width: 132rpx;
   height: 132rpx;
-  border-radius: 20rpx;
-  background: var(--jst-color-border);
+  border-radius: $jst-radius-lg;
+  background: $jst-border;
 }
 
 .notice-card__cover--fallback {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(140deg, var(--jst-color-primary) 0%, var(--jst-color-primary-light) 100%);
+  background: $jst-brand-gradient;
 }
 
 .notice-card__cover-icon {
@@ -89,61 +108,48 @@ export default {
 .notice-card__content {
   flex: 1;
   min-width: 0;
-  margin-left: 20rpx;
+  margin-left: $jst-space-lg;
 }
 
 .notice-card__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 10rpx;
-}
-
-.notice-card__tag {
-  padding: 6rpx 14rpx;
-  border-radius: var(--jst-radius-full);
-  background: var(--jst-color-brand-soft);
-  font-size: 20rpx;
-  color: var(--jst-color-brand);
-}
-
-.notice-card__tag--top {
-  background: var(--jst-color-primary-soft);
-  color: var(--jst-color-primary);
+  gap: $jst-space-xs;
 }
 
 .notice-card__title {
   display: block;
-  margin-top: 16rpx;
-  font-size: 28rpx;
-  font-weight: 700;
+  margin-top: $jst-space-md;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-bold;
   line-height: 1.5;
-  color: var(--jst-color-text);
+  color: $jst-text-primary;
 }
 
 .notice-card__summary {
   display: block;
-  margin-top: 12rpx;
-  font-size: 22rpx;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-xs;
   line-height: 1.7;
-  color: var(--jst-color-text-secondary);
+  color: $jst-text-regular;
 }
 
 .notice-card__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20rpx 24rpx;
-  border-top: 2rpx solid var(--jst-color-border);
+  padding: $jst-space-lg;
+  border-top: 1rpx solid $jst-border;
 }
 
 .notice-card__time {
-  font-size: 22rpx;
-  color: var(--jst-color-text-tertiary);
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
 }
 
 .notice-card__arrow {
-  font-size: 22rpx;
-  font-weight: 600;
-  color: var(--jst-color-brand);
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-semibold;
+  color: $jst-brand;
 }
 </style>

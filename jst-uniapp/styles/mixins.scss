@@ -1,0 +1,162 @@
+@import './design-tokens.scss';
+@import './variables.scss';
+
+// ===== 文字截断 =====
+@mixin text-ellipsis($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: $lines;
+    overflow: hidden;
+  }
+}
+
+// ===== 安全区域底部 =====
+@mixin safe-area-bottom {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+// ===== 卡片基础样式 =====
+@mixin card-base {
+  background: $jst-bg-card;
+  border-radius: $jst-radius-lg;
+  box-shadow: $jst-shadow-md;
+  padding: $jst-space-lg;
+}
+
+// ===== 按压反馈 =====
+@mixin press-effect {
+  transition: transform $jst-duration-fast $jst-easing, box-shadow $jst-duration-fast $jst-easing;
+  &:active {
+    transform: scale(0.97);
+    box-shadow: $jst-shadow-sm;
+  }
+}
+
+// ===== flex 居中 =====
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ===== flex 两端对齐 =====
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// ===== 页面容器 =====
+@mixin page-container {
+  min-height: 100vh;
+  background: $jst-bg-page;
+  padding: $jst-page-padding;
+}
+
+// ===== 分割线 =====
+@mixin divider {
+  border-bottom: 1rpx solid $jst-border;
+}
+
+// ===== 保留原有 mixin（向后兼容，页面仍在用）=====
+
+@mixin card($pad: 32rpx) {
+  background: var(--jst-color-card-bg);
+  border-radius: var(--jst-radius-md);
+  box-shadow: var(--jst-shadow-card);
+  padding: $pad;
+}
+
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  padding: 0 40rpx;
+  border-radius: $jst-radius-lg;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  line-height: 1;
+  transition: transform $jst-duration-fast ease-out, opacity $jst-duration-fast ease-out;
+  &:active { transform: scale(0.98); opacity: 0.92; }
+  &[disabled], &.is-disabled { opacity: 0.45; pointer-events: none; }
+}
+
+@mixin btn-primary {
+  @include btn-base;
+  color: $jst-text-inverse;
+  background: var(--jst-gradient-primary);
+  box-shadow: 0 8rpx 20rpx var(--jst-color-primary-shadow);
+}
+
+@mixin btn-secondary {
+  @include btn-base;
+  color: var(--jst-color-brand);
+  background: var(--jst-color-brand-soft);
+}
+
+@mixin btn-ghost {
+  @include btn-base;
+  color: $jst-text-secondary;
+  background: transparent;
+  border: 2rpx solid $jst-border;
+}
+
+@mixin chip-base {
+  display: inline-flex;
+  align-items: center;
+  height: 40rpx;
+  padding: 0 20rpx;
+  border-radius: $jst-radius-round;
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-semibold;
+  line-height: 1;
+}
+
+@mixin chip($status) {
+  @include chip-base;
+  @if $status == pending   { color: $jst-chip-pending-fg; background: $jst-chip-pending-bg; }
+  @else if $status == paid      { color: $jst-chip-paid-fg; background: $jst-chip-paid-bg; }
+  @else if $status == done      { color: $jst-chip-done-fg; background: $jst-chip-done-bg; }
+  @else if $status == cancelled { color: $jst-chip-cancelled-fg; background: $jst-chip-cancelled-bg; }
+  @else if $status == refunding { color: $jst-chip-refunding-fg; background: $jst-chip-refunding-bg; }
+  @else if $status == refunded  { color: $jst-chip-refunded-fg; background: $jst-chip-refunded-bg; }
+  @else                         { color: $jst-text-secondary; background: $jst-info-light; }
+}
+
+@mixin skeleton-bar {
+  background: linear-gradient(90deg, #EEF1F5 0%, #F6F8FB 50%, #EEF1F5 100%);
+  background-size: 200% 100%;
+  animation: jst-skeleton 1.2s ease-in-out infinite;
+  border-radius: $jst-radius-md;
+}
+
+@keyframes jst-skeleton {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@mixin tabular-num {
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+@mixin header-gradient($h: 320rpx) {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: $h;
+    background: var(--jst-gradient-primary);
+    z-index: 0;
+    pointer-events: none;
+  }
+  > * { position: relative; z-index: 1; }
+}

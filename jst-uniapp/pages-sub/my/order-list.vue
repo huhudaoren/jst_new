@@ -1,6 +1,7 @@
 <template>
   <view class="order-list-page">
     <jst-loading :loading="pageLoading" text="订单加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="order-list-page__nav">
       <view class="order-list-page__back" @tap="handleBack"><</view>
@@ -58,29 +59,25 @@
           </view>
 
           <view class="order-list-page__actions">
-            <button
+            <u-button
               v-if="canCancel(item)"
               class="order-list-page__action order-list-page__action--ghost"
-              @tap="handleCancel(item)"
+              @click="handleCancel(item)"
             >
               取消订单
-            </button>
-            <button
+            </u-button>
+            <u-button
               v-if="showPrimaryAction(item)"
               class="order-list-page__action order-list-page__action--primary"
-              @tap="handlePrimary(item)"
+              @click="handlePrimary(item)"
             >
               {{ getPrimaryActionText(item) }}
-            </button>
+            </u-button>
           </view>
         </view>
       </view>
 
-      <view class="order-list-page__loadmore">
-        <text class="order-list-page__loadmore-text">
-          {{ loadMoreText }}
-        </text>
-      </view>
+      <u-loadmore :status="loadMoreText === '加载中...' ? 'loading' : loadMoreText === '上拉加载更多' ? 'loadmore' : 'nomore'" />
     </view>
 
     <jst-empty
@@ -340,9 +337,15 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .order-list-page {
   min-height: 100vh;
-  background: #f4f7fc;
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg;
 }
 
 .order-list-page__nav {
@@ -350,7 +353,7 @@ export default {
   align-items: center;
   height: 96rpx;
   padding: 0 24rpx;
-  background: linear-gradient(135deg, #0c3d6b 0%, #2f7de1 100%);
+  background: linear-gradient(135deg, $jst-brand-dark 0%, $jst-brand 100%);
 }
 
 .order-list-page__back,
@@ -361,7 +364,7 @@ export default {
 
 .order-list-page__back {
   font-size: 34rpx;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .order-list-page__nav-title {
@@ -369,13 +372,13 @@ export default {
   text-align: center;
   font-size: 30rpx;
   font-weight: 700;
-  color: #ffffff;
+  color: $jst-text-inverse;
 }
 
 .order-list-page__tabs {
   white-space: nowrap;
-  background: #ffffff;
-  box-shadow: 0 10rpx 24rpx rgba(14, 58, 113, 0.05);
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .order-list-page__tabs-inner {
@@ -392,14 +395,14 @@ export default {
   margin-right: 12rpx;
   padding: 0 24rpx;
   border-radius: 999rpx;
-  background: #f4f7fc;
+  background: $jst-bg-page;
   font-size: 24rpx;
-  color: #72809a;
+  color: $jst-text-secondary;
 }
 
 .order-list-page__tab--active {
-  background: #eef4ff;
-  color: #2f7de1;
+  background: $jst-brand-light;
+  color: $jst-brand;
   font-weight: 700;
 }
 
@@ -410,8 +413,8 @@ export default {
 .order-list-page__card {
   margin-bottom: 20rpx;
   border-radius: 28rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 28rpx rgba(14, 58, 113, 0.06);
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-md;
   overflow: hidden;
 }
 
@@ -433,7 +436,7 @@ export default {
   font-size: 30rpx;
   font-weight: 700;
   line-height: 1.5;
-  color: #1f2937;
+  color: $jst-text-primary;
 }
 
 .order-list-page__card-subtitle {
@@ -441,7 +444,7 @@ export default {
   margin-top: 10rpx;
   font-size: 22rpx;
   line-height: 1.6;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .order-list-page__meta {
@@ -462,11 +465,11 @@ export default {
 }
 
 .order-list-page__meta-key {
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .order-list-page__meta-value {
-  color: #1f2937;
+  color: $jst-text-primary;
   text-align: right;
 }
 
@@ -476,7 +479,7 @@ export default {
   justify-content: space-between;
   gap: 16rpx;
   padding: 20rpx 24rpx 24rpx;
-  border-top: 2rpx solid #edf1f7;
+  border-top: 2rpx solid $jst-border;
 }
 
 .order-list-page__amount {
@@ -486,14 +489,14 @@ export default {
 
 .order-list-page__amount-label {
   font-size: 22rpx;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
 .order-list-page__amount-value {
   margin-top: 8rpx;
   font-size: 34rpx;
   font-weight: 800;
-  color: #ff6a3d;
+  color: $jst-warning;
 }
 
 .order-list-page__actions {
@@ -513,14 +516,14 @@ export default {
 }
 
 .order-list-page__action--ghost {
-  border: 2rpx solid #d6e4fb;
-  background: #ffffff;
-  color: #2f7de1;
+  border: 2rpx solid $jst-border;
+  background: $jst-bg-card;
+  color: $jst-brand;
 }
 
 .order-list-page__action--primary {
-  background: #2f7de1;
-  color: #ffffff;
+  background: $jst-brand;
+  color: $jst-text-inverse;
 }
 
 .order-list-page__loadmore {
@@ -530,30 +533,11 @@ export default {
 
 .order-list-page__loadmore-text {
   font-size: 22rpx;
-  color: #7a869d;
+  color: $jst-text-secondary;
 }
 
-:deep(.jst-status-badge--pending) {
-  background: rgba(255, 138, 0, 0.14);
-}
-
-:deep(.jst-status-badge--pending .jst-status-badge__text) {
-  color: #ff8a00;
-}
-
-:deep(.jst-status-badge--active) {
-  background: rgba(46, 125, 255, 0.14);
-}
-
-:deep(.jst-status-badge--active .jst-status-badge__text) {
-  color: #2e7dff;
-}
-
-:deep(.jst-status-badge--refund) {
-  background: rgba(139, 92, 246, 0.14);
-}
-
-:deep(.jst-status-badge--refund .jst-status-badge__text) {
-  color: #8b5cf6;
+::v-deep .order-list-page__action.u-button {
+  min-height: 76rpx;
+  border: none;
 }
 </style>

@@ -6,7 +6,7 @@
   <view class="ch-home">
     <!-- A. Hero 区域 -->
     <view class="ch-hero">
-      <view class="ch-hero__nav">
+      <view class="ch-hero__nav" :style="{ paddingTop: navPaddingTop }">
         <view class="ch-hero__back" @tap="goBack">←</view>
         <text class="ch-hero__title">渠道方工作台</text>
         <view class="ch-hero__msg" @tap="goNotice">🔔</view>
@@ -18,9 +18,9 @@
         <view class="ch-hero__info">
           <text class="ch-hero__name">{{ channelName }}</text>
           <view class="ch-hero__badges">
-            <text v-if="authStatus === 'approved'" class="ch-hero__badge ch-hero__badge--verified">✅ 已认证</text>
-            <text v-else-if="authStatus === 'pending'" class="ch-hero__badge ch-hero__badge--pending">⏳ 审核中</text>
-            <text v-if="channelType" class="ch-hero__badge">{{ channelType }}</text>
+            <u-tag v-if="authStatus === 'approved'" text="已认证" type="success" size="mini" plain shape="circle"></u-tag>
+            <u-tag v-else-if="authStatus === 'pending'" text="审核中" type="warning" size="mini" plain shape="circle"></u-tag>
+            <u-tag v-if="channelType" :text="channelType" type="info" size="mini" plain shape="circle"></u-tag>
           </view>
           <text class="ch-hero__sub">{{ schoolInfo }}</text>
         </view>
@@ -28,8 +28,8 @@
 
       <!-- 视角切换 -->
       <view class="ch-hero__switch">
-        <view class="ch-hero__switch-btn ch-hero__switch-btn--active">渠道方视角</view>
-        <view class="ch-hero__switch-btn" @tap="goMyPage">返回个人中心</view>
+        <u-tag text="渠道方视角" type="primary" size="mini" shape="circle"></u-tag>
+        <u-button text="返回个人中心" size="mini" shape="circle" @click="goMyPage"></u-button>
       </view>
     </view>
 
@@ -39,8 +39,8 @@
         <text class="ch-home__block-icon">🔒</text>
         <text class="ch-home__block-title">{{ authStatus === 'pending' ? '认证审核中' : '请先申请成为渠道方' }}</text>
         <text class="ch-home__block-desc">{{ authStatus === 'pending' ? '您的认证申请正在审核中，通过后即可使用工作台全部功能' : '完成渠道方认证后，即可使用绑定学生、代报名等功能' }}</text>
-        <view v-if="authStatus !== 'pending'" class="ch-home__block-btn" @tap="goApply">立即申请</view>
-        <view v-else class="ch-home__block-btn ch-home__block-btn--outline" @tap="goApplyStatus">查看进度</view>
+        <u-button v-if="authStatus !== 'pending'" text="立即申请" type="primary" shape="circle" @click="goApply"></u-button>
+        <u-button v-else text="查看进度" shape="circle" plain @click="goApplyStatus"></u-button>
       </view>
     </view>
 
@@ -49,19 +49,19 @@
       <!-- A. 4格 Hero KPI -->
       <view class="ch-stats">
         <view class="ch-stats__cell" @tap="goStudents">
-          <text class="ch-stats__num">{{ monthly.bindStudents || 0 }}</text>
-          <text class="ch-stats__label">绑定学生</text>
+          <text class="ch-stats__num">{{ monthly.newStudentCount || 0 }}</text>
+          <text class="ch-stats__label">新增学生</text>
         </view>
         <view class="ch-stats__cell" @tap="goOrders">
-          <text class="ch-stats__num">{{ monthly.enrollTotal || 0 }}</text>
-          <text class="ch-stats__label">代报名总数</text>
+          <text class="ch-stats__num">{{ monthly.orderCount || 0 }}</text>
+          <text class="ch-stats__label">订单数</text>
+        </view>
+        <view class="ch-stats__cell" @tap="goRebate">
+          <text class="ch-stats__num">¥{{ formatK(monthly.rebateEstimatedAmount) }}</text>
+          <text class="ch-stats__label">预估返点</text>
         </view>
         <view class="ch-stats__cell" @tap="goOrders">
-          <text class="ch-stats__num" style="color: #FF5722;">{{ monthly.pendingPay || 0 }}</text>
-          <text class="ch-stats__label">待付款</text>
-        </view>
-        <view class="ch-stats__cell" @tap="goOrders">
-          <text class="ch-stats__num">¥{{ formatK(monthly.totalPaid) }}</text>
+          <text class="ch-stats__num">¥{{ formatK(monthly.orderPaidAmount) }}</text>
           <text class="ch-stats__label">累计支付</text>
         </view>
       </view>
@@ -98,39 +98,39 @@
       <!-- C. 功能宫格 -->
       <view class="ch-func-grid">
         <view class="ch-func-item" @tap="goStudents">
-          <view class="ch-func-icon" style="background: #EEF0FF;">👨‍🎓</view>
+          <view class="ch-func-icon ch-func-icon--students">👨‍🎓</view>
           <text class="ch-func-label">学生管理</text>
         </view>
         <view class="ch-func-item" @tap="goBatchEnroll">
-          <view class="ch-func-icon" style="background: #EBF4FC;">📋</view>
+          <view class="ch-func-icon ch-func-icon--enroll">📋</view>
           <text class="ch-func-label">代报名</text>
         </view>
         <view class="ch-func-item" @tap="goOrders">
-          <view class="ch-func-icon" style="background: #FFF3EE;">🧾</view>
+          <view class="ch-func-icon ch-func-icon--orders">🧾</view>
           <text class="ch-func-label">订单管理</text>
         </view>
         <view class="ch-func-item" @tap="goRebate">
-          <view class="ch-func-icon" style="background: #FEF9EC;">💰</view>
+          <view class="ch-func-icon ch-func-icon--rebate">💰</view>
           <text class="ch-func-label">返点中心</text>
         </view>
         <view class="ch-func-item" @tap="goSettlement">
-          <view class="ch-func-icon" style="background: #F5EEF8;">📄</view>
+          <view class="ch-func-icon ch-func-icon--settlement">📄</view>
           <text class="ch-func-label">提现结算</text>
         </view>
         <view class="ch-func-item" @tap="goData">
-          <view class="ch-func-icon" style="background: #EAFAF1;">📊</view>
+          <view class="ch-func-icon ch-func-icon--data">📊</view>
           <text class="ch-func-label">报名数据</text>
         </view>
         <view class="ch-func-item" @tap="goData">
-          <view class="ch-func-icon" style="background: #E8EAF6;">📈</view>
+          <view class="ch-func-icon ch-func-icon--analysis">📈</view>
           <text class="ch-func-label">经营分析</text>
         </view>
         <view class="ch-func-item" @tap="goAppointment">
-          <view class="ch-func-icon" style="background: #E0F7FA;">📅</view>
+          <view class="ch-func-icon ch-func-icon--appointment">📅</view>
           <text class="ch-func-label">团队预约</text>
         </view>
         <view class="ch-func-item" @tap="showComingSoon">
-          <view class="ch-func-icon" style="background: #F3E8FF;">🤖</view>
+          <view class="ch-func-icon ch-func-icon--ai">🤖</view>
           <text class="ch-func-label">AI 课程</text>
         </view>
       </view>
@@ -166,10 +166,10 @@
           </view>
           <view class="ch-order-item__right">
             <text class="ch-order-item__amount">{{ item.payAmount > 0 ? '¥' + item.payAmount : '免费' }}</text>
-            <text class="ch-order-item__status">{{ item.statusText || '' }}</text>
+            <u-tag :text="item.statusText || ''" type="warning" size="mini" plain shape="circle"></u-tag>
           </view>
         </view>
-        <view v-if="!recentOrders.length" class="ch-empty">暂无待支付订单</view>
+        <u-empty v-if="!recentOrders.length" mode="data" text="暂无待支付订单"></u-empty>
       </view>
 
       <!-- 学生概览 -->
@@ -187,7 +187,7 @@
             <text class="ch-student-item__meta">{{ item.schoolName || '' }} · {{ item.gradeName || '' }}</text>
           </view>
         </view>
-        <view v-if="!recentStudents.length" class="ch-empty">暂无绑定学生</view>
+        <u-empty v-if="!recentStudents.length" mode="data" text="暂无绑定学生"></u-empty>
       </view>
 
       <view style="height: 48rpx;"></view>
@@ -201,7 +201,7 @@ import { useUserStore } from '@/store/user'
 
 // 头像渐变色池
 const AVATAR_COLORS = [
-  'linear-gradient(135deg, #3F51B5, #5C6BC0)',
+  'linear-gradient(135deg, #283593, #3949AB)',
   'linear-gradient(135deg, #E65100, #FF7043)',
   'linear-gradient(135deg, #1B5E20, #66BB6A)',
   'linear-gradient(135deg, #880E4F, #F06292)',
@@ -211,6 +211,7 @@ const AVATAR_COLORS = [
 export default {
   data() {
     return {
+      skeletonShow: true, // [visual-effect]
       pageLoading: true,
       authStatus: '', // '' | 'pending' | 'approved' | 'rejected'
       channelName: '渠道方',
@@ -236,7 +237,7 @@ export default {
       try {
         const apply = await getMyChannelApply()
         if (apply) {
-          this.authStatus = apply.status || ''
+          this.authStatus = apply.applyStatus || ''
           this.channelName = apply.applyName || (store.userInfo && store.userInfo.nickname) || '渠道方'
           this.channelType = apply.channelType || ''
           this.schoolInfo = apply.school || ''
@@ -244,7 +245,7 @@ export default {
       } catch (e) {
         // 未申请过
         const info = store.userInfo || {}
-        const roles = info.roles || []
+        const roles = store.roles || []
         if (roles.includes('jst_channel')) {
           this.authStatus = 'approved'
           this.channelName = info.nickname || info.channelName || '渠道方'
@@ -320,105 +321,108 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.ch-home { min-height: 100vh; padding-bottom: calc(48rpx + env(safe-area-inset-bottom)); background: var(--jst-color-page-bg); }
+@import '@/styles/design-tokens.scss';
+
+.ch-home { min-height: 100vh; padding-bottom: calc(#{$jst-space-xxl} + env(safe-area-inset-bottom)); background: $jst-bg-page; }
 
 /* Hero */
-.ch-hero { background: linear-gradient(150deg, #1A237E 0%, #283593 45%, #3949AB 100%); padding: 88rpx 32rpx 48rpx; position: relative; overflow: hidden; border-bottom-left-radius: 48rpx; border-bottom-right-radius: 48rpx; }
-.ch-hero::before { content: ''; position: absolute; top: -60rpx; right: -40rpx; width: 280rpx; height: 280rpx; border-radius: 50%; background: rgba(255,255,255,0.06); }
-.ch-hero__nav { display: flex; align-items: center; margin-bottom: 32rpx; position: relative; z-index: 1; }
-.ch-hero__back { width: 72rpx; height: 72rpx; border-radius: var(--jst-radius-sm); background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 36rpx; color: #fff; margin-right: 24rpx; }
-.ch-hero__title { flex: 1; font-size: 34rpx; font-weight: 700; color: #fff; }
-.ch-hero__msg { width: 68rpx; height: 68rpx; border-radius: 50%; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 32rpx; }
-.ch-hero__identity { display: flex; align-items: center; gap: 28rpx; margin-bottom: 32rpx; position: relative; z-index: 1; }
-.ch-hero__avatar { width: 112rpx; height: 112rpx; border-radius: 50%; background: linear-gradient(135deg, #FFD54F, #FF8A65); display: flex; align-items: center; justify-content: center; font-size: 52rpx; border: 6rpx solid rgba(255,255,255,0.3); }
+.ch-hero { background: linear-gradient(150deg, $jst-brand-dark 0%, $jst-brand 45%, lighten($jst-brand, 8%) 100%); padding: 88rpx $jst-space-xl $jst-space-xxl; position: relative; overflow: hidden; border-bottom-left-radius: $jst-radius-xl; border-bottom-right-radius: $jst-radius-xl; }
+.ch-hero::before { content: ''; position: absolute; top: -60rpx; right: -40rpx; width: 280rpx; height: 280rpx; border-radius: 50%; background: rgba($jst-text-inverse, 0.06); }
+.ch-hero__nav { display: flex; align-items: center; margin-bottom: $jst-space-xl; position: relative; z-index: 1; }
+.ch-hero__back { width: 72rpx; height: 72rpx; border-radius: $jst-radius-sm; background: rgba($jst-text-inverse, 0.15); display: flex; align-items: center; justify-content: center; font-size: $jst-font-xl; color: $jst-text-inverse; margin-right: $jst-space-lg; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
+.ch-hero__title { flex: 1; font-size: 34rpx; font-weight: $jst-weight-semibold; color: $jst-text-inverse; }
+.ch-hero__msg { width: 68rpx; height: 68rpx; border-radius: 50%; background: rgba($jst-text-inverse, 0.12); display: flex; align-items: center; justify-content: center; font-size: $jst-font-lg; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
+.ch-hero__identity { display: flex; align-items: center; gap: 28rpx; margin-bottom: $jst-space-xl; position: relative; z-index: 1; }
+.ch-hero__avatar { width: 112rpx; height: 112rpx; border-radius: 50%; background: linear-gradient(135deg, $jst-gold, $jst-warning); display: flex; align-items: center; justify-content: center; font-size: 52rpx; border: 6rpx solid rgba($jst-text-inverse, 0.3); }
 .ch-hero__info { flex: 1; }
-.ch-hero__name { display: block; font-size: 36rpx; font-weight: 800; color: #fff; }
-.ch-hero__badges { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 12rpx; }
-.ch-hero__badge { display: inline-flex; padding: 6rpx 20rpx; border-radius: var(--jst-radius-full); background: rgba(255,255,255,0.18); border: 2rpx solid rgba(255,255,255,0.25); font-size: 22rpx; font-weight: 700; color: rgba(255,255,255,0.95); }
-.ch-hero__badge--verified { background: rgba(39,174,96,0.3); border-color: rgba(39,174,96,0.5); }
-.ch-hero__badge--pending { background: rgba(255,193,7,0.3); border-color: rgba(255,193,7,0.5); }
-.ch-hero__sub { display: block; margin-top: 8rpx; font-size: 24rpx; color: rgba(255,255,255,0.65); }
-.ch-hero__switch { display: inline-flex; padding: 6rpx; border-radius: var(--jst-radius-full); background: rgba(255,255,255,0.12); position: relative; z-index: 1; }
-.ch-hero__switch-btn { padding: 10rpx 32rpx; border-radius: var(--jst-radius-full); font-size: 24rpx; font-weight: 600; color: rgba(255,255,255,0.65); }
-.ch-hero__switch-btn--active { background: #fff; color: #3F51B5; }
+.ch-hero__name { display: block; font-size: $jst-font-xl; font-weight: $jst-weight-semibold; color: $jst-text-inverse; }
+.ch-hero__badges { display: flex; flex-wrap: wrap; gap: $jst-space-sm; margin-top: $jst-space-sm; }
+.ch-hero__sub { display: block; margin-top: $jst-space-xs; font-size: $jst-font-sm; color: rgba($jst-text-inverse, 0.65); }
+.ch-hero__switch { display: flex; align-items: center; gap: $jst-space-sm; position: relative; z-index: 1; }
 
 /* 未认证拦截 */
-.ch-home__block { padding: 80rpx 32rpx; }
-.ch-home__block-card { padding: 56rpx 40rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); text-align: center; }
+.ch-home__block { padding: 80rpx $jst-space-xl; }
+.ch-home__block-card { display: flex; flex-direction: column; gap: $jst-space-md; padding: 56rpx 40rpx; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; text-align: center; }
 .ch-home__block-icon { display: block; font-size: 72rpx; margin-bottom: 20rpx; }
-.ch-home__block-title { display: block; font-size: 32rpx; font-weight: 700; color: var(--jst-color-text); }
-.ch-home__block-desc { display: block; margin-top: 16rpx; font-size: 24rpx; color: var(--jst-color-text-tertiary); line-height: 1.6; }
-.ch-home__block-btn { margin-top: 32rpx; height: 80rpx; line-height: 80rpx; border-radius: var(--jst-radius-md); background: #3F51B5; color: #fff; font-size: 28rpx; font-weight: 700; text-align: center; }
-.ch-home__block-btn--outline { background: transparent; border: 2rpx solid #3F51B5; color: #3F51B5; }
+.ch-home__block-title { display: block; font-size: $jst-font-lg; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.ch-home__block-desc { display: block; font-size: $jst-font-sm; color: $jst-text-secondary; line-height: 1.6; }
 
 /* 4格 KPI */
-.ch-stats { display: grid; grid-template-columns: repeat(4, 1fr); margin: 24rpx 32rpx 0; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); overflow: hidden; }
-.ch-stats__cell { padding: 28rpx 16rpx; text-align: center; border-right: 2rpx solid var(--jst-color-border); }
+.ch-stats { display: grid; grid-template-columns: repeat(4, 1fr); margin: $jst-space-lg $jst-space-xl 0; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; overflow: hidden; }
+.ch-stats__cell { padding: 28rpx $jst-space-md; text-align: center; border-right: 2rpx solid $jst-border; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
 .ch-stats__cell:last-child { border-right: none; }
-.ch-stats__num { display: block; font-size: 44rpx; font-weight: 900; color: #3F51B5; line-height: 1; margin-bottom: 8rpx; }
-.ch-stats__label { display: block; font-size: 20rpx; color: var(--jst-color-text-tertiary); }
+.ch-stats__num { display: block; font-size: $jst-font-xxl; font-weight: $jst-weight-semibold; color: $jst-brand; line-height: 1; margin-bottom: $jst-space-xs; }
+.ch-stats__label { display: block; font-size: $jst-font-xs; color: $jst-text-secondary; }
 
 /* 返点横幅 */
-.ch-rebate-banner { display: flex; align-items: center; margin: 24rpx 32rpx 0; padding: 28rpx 24rpx; background: linear-gradient(135deg, #3F51B5, #5C6BC0); border-radius: var(--jst-radius-lg); box-shadow: 0 12rpx 32rpx rgba(63,81,181,0.3); }
+.ch-rebate-banner { display: flex; align-items: center; margin: $jst-space-lg $jst-space-xl 0; padding: 28rpx $jst-space-lg; background: linear-gradient(135deg, $jst-brand, $jst-brand-dark); border-radius: $jst-radius-lg; box-shadow: $jst-shadow-md; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
 .ch-rebate-banner__item { flex: 1; text-align: center; }
-.ch-rebate-banner__num { display: block; font-size: 28rpx; font-weight: 800; color: #fff; }
-.ch-rebate-banner__num--gold { color: #FFD54F; font-size: 32rpx; }
-.ch-rebate-banner__label { display: block; margin-top: 6rpx; font-size: 20rpx; color: rgba(255,255,255,0.7); }
-.ch-rebate-banner__divider { width: 2rpx; height: 48rpx; background: rgba(255,255,255,0.2); }
-.ch-rebate-banner__arrow { font-size: 36rpx; color: rgba(255,255,255,0.6); margin-left: 12rpx; }
+.ch-rebate-banner__num { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-inverse; }
+.ch-rebate-banner__num--gold { color: $jst-gold; font-size: $jst-font-lg; }
+.ch-rebate-banner__label { display: block; margin-top: 6rpx; font-size: $jst-font-xs; color: rgba($jst-text-inverse, 0.7); }
+.ch-rebate-banner__divider { width: 2rpx; height: $jst-space-xxl; background: rgba($jst-text-inverse, 0.2); }
+.ch-rebate-banner__arrow { font-size: $jst-font-xl; color: rgba($jst-text-inverse, 0.6); margin-left: $jst-space-sm; }
 
 /* 二维码入口 */
-.ch-qr-entry { display: flex; align-items: center; gap: 28rpx; margin: 24rpx 32rpx 0; padding: 32rpx; background: linear-gradient(135deg, #3F51B5 0%, #5C6BC0 100%); border-radius: var(--jst-radius-lg); box-shadow: 0 12rpx 40rpx rgba(63,81,181,0.35); position: relative; overflow: hidden; }
-.ch-qr-entry::before { content: ''; position: absolute; top: -40rpx; right: -40rpx; width: 200rpx; height: 200rpx; border-radius: 50%; background: rgba(255,255,255,0.06); }
-.ch-qr-entry__icon { width: 104rpx; height: 104rpx; border-radius: var(--jst-radius-md); background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 56rpx; }
+.ch-qr-entry { display: flex; align-items: center; gap: 28rpx; margin: $jst-space-lg $jst-space-xl 0; padding: $jst-space-xl; background: linear-gradient(135deg, $jst-brand 0%, $jst-brand-dark 100%); border-radius: $jst-radius-lg; box-shadow: $jst-shadow-md; position: relative; overflow: hidden; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
+.ch-qr-entry::before { content: ''; position: absolute; top: -40rpx; right: -40rpx; width: 200rpx; height: 200rpx; border-radius: 50%; background: rgba($jst-text-inverse, 0.06); }
+.ch-qr-entry__icon { width: 104rpx; height: 104rpx; border-radius: $jst-radius-md; background: rgba($jst-text-inverse, 0.18); display: flex; align-items: center; justify-content: center; font-size: 56rpx; }
 .ch-qr-entry__info { flex: 1; }
-.ch-qr-entry__title { display: block; font-size: 32rpx; font-weight: 800; color: #fff; }
-.ch-qr-entry__desc { display: block; margin-top: 8rpx; font-size: 24rpx; color: rgba(255,255,255,0.75); line-height: 1.5; }
-.ch-qr-entry__arrow { font-size: 44rpx; color: rgba(255,255,255,0.6); }
+.ch-qr-entry__title { display: block; font-size: $jst-font-lg; font-weight: $jst-weight-semibold; color: $jst-text-inverse; }
+.ch-qr-entry__desc { display: block; margin-top: $jst-space-xs; font-size: $jst-font-sm; color: rgba($jst-text-inverse, 0.75); line-height: 1.5; }
+.ch-qr-entry__arrow { font-size: $jst-font-xxl; color: rgba($jst-text-inverse, 0.6); }
 
 /* 功能宫格 */
-.ch-func-grid { display: grid; grid-template-columns: repeat(3, 1fr); margin: 24rpx 32rpx 0; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); overflow: hidden; }
-.ch-func-item { padding: 32rpx 16rpx; text-align: center; border-right: 2rpx solid var(--jst-color-border); border-bottom: 2rpx solid var(--jst-color-border); }
+.ch-func-grid { display: grid; grid-template-columns: repeat(3, 1fr); margin: $jst-space-lg $jst-space-xl 0; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; overflow: hidden; }
+.ch-func-item { padding: $jst-space-xl $jst-space-md; text-align: center; border-right: 2rpx solid $jst-border; border-bottom: 2rpx solid $jst-border; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
 .ch-func-item:nth-child(3n) { border-right: none; }
 .ch-func-item:nth-last-child(-n+3) { border-bottom: none; }
-.ch-func-icon { width: 88rpx; height: 88rpx; border-radius: var(--jst-radius-md); display: flex; align-items: center; justify-content: center; font-size: 44rpx; margin: 0 auto 16rpx; }
-.ch-func-label { font-size: 24rpx; font-weight: 500; color: var(--jst-color-text-secondary); }
+.ch-func-icon { width: 88rpx; height: 88rpx; border-radius: $jst-radius-md; display: flex; align-items: center; justify-content: center; font-size: $jst-font-xxl; margin: 0 auto $jst-space-md; }
+.ch-func-icon--students { background: $jst-brand-light; }
+.ch-func-icon--enroll { background: rgba($jst-brand, 0.12); }
+.ch-func-icon--orders { background: $jst-warning-light; }
+.ch-func-icon--rebate { background: $jst-gold-light; }
+.ch-func-icon--settlement { background: rgba($jst-indigo-light, 0.12); }
+.ch-func-icon--data { background: rgba($jst-success, 0.12); }
+.ch-func-icon--analysis { background: rgba($jst-indigo, 0.12); }
+.ch-func-icon--appointment { background: rgba($jst-info, 0.15); }
+.ch-func-icon--ai { background: rgba($jst-brand-dark, 0.12); }
+.ch-func-label { font-size: $jst-font-sm; font-weight: $jst-weight-medium; color: $jst-text-regular; }
 
 /* 通用 section */
-.ch-section { margin: 24rpx 32rpx 0; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-lg); box-shadow: var(--jst-shadow-card); overflow: hidden; }
-.ch-section__header { display: flex; align-items: center; justify-content: space-between; padding: 28rpx 32rpx 20rpx; border-bottom: 2rpx solid var(--jst-color-border); }
-.ch-section__title { font-size: 30rpx; font-weight: 700; color: var(--jst-color-text); display: flex; align-items: center; gap: 12rpx; }
-.ch-section__title::before { content: ''; width: 6rpx; height: 30rpx; background: #3F51B5; border-radius: 4rpx; }
-.ch-section__more { font-size: 26rpx; color: #3F51B5; font-weight: 500; }
+.ch-section { margin: $jst-space-lg $jst-space-xl 0; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; overflow: hidden; }
+.ch-section__header { display: flex; align-items: center; justify-content: space-between; padding: 28rpx $jst-space-xl 20rpx; border-bottom: 2rpx solid $jst-border; }
+.ch-section__title { font-size: $jst-font-md; font-weight: $jst-weight-semibold; color: $jst-text-primary; display: flex; align-items: center; gap: $jst-space-sm; }
+.ch-section__title::before { content: ''; width: 6rpx; height: 30rpx; background: $jst-brand; border-radius: $jst-radius-xs; }
+.ch-section__more { font-size: 26rpx; color: $jst-brand; font-weight: $jst-weight-medium; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
 
 /* 权益区 */
 .ch-rights-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; }
-.ch-rights-item { display: flex; flex-direction: column; align-items: center; padding: 28rpx 16rpx; border-right: 2rpx solid var(--jst-color-border); border-bottom: 2rpx solid var(--jst-color-border); }
+.ch-rights-item { display: flex; flex-direction: column; align-items: center; padding: 28rpx $jst-space-md; border-right: 2rpx solid $jst-border; border-bottom: 2rpx solid $jst-border; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
 .ch-rights-item:nth-child(2n) { border-right: none; }
 .ch-rights-item:nth-last-child(-n+2) { border-bottom: none; }
-.ch-rights-item__icon { font-size: 40rpx; margin-bottom: 8rpx; }
-.ch-rights-item__name { font-size: 24rpx; font-weight: 600; color: var(--jst-color-text); }
-.ch-rights-item__quota { font-size: 22rpx; color: var(--jst-color-text-tertiary); margin-top: 4rpx; }
+.ch-rights-item__icon { font-size: 40rpx; margin-bottom: $jst-space-xs; }
+.ch-rights-item__name { font-size: $jst-font-sm; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.ch-rights-item__quota { font-size: 22rpx; color: $jst-text-secondary; margin-top: 4rpx; }
 
 /* 最近订单 */
-.ch-order-item { display: flex; align-items: center; gap: 24rpx; padding: 24rpx 32rpx; border-bottom: 2rpx solid var(--jst-color-border); }
+.ch-order-item { display: flex; align-items: center; gap: $jst-space-lg; padding: $jst-space-lg $jst-space-xl; border-bottom: 2rpx solid $jst-border; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
 .ch-order-item:last-child { border-bottom: none; }
 .ch-order-item__avatar { width: 76rpx; height: 76rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.ch-order-item__avatar-text { font-size: 32rpx; font-weight: 700; color: #fff; }
+.ch-order-item__avatar-text { font-size: $jst-font-lg; font-weight: $jst-weight-semibold; color: $jst-text-inverse; }
 .ch-order-item__info { flex: 1; min-width: 0; }
-.ch-order-item__name { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.ch-order-item__contest { display: block; margin-top: 4rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch-order-item__name { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.ch-order-item__contest { display: block; margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ch-order-item__right { text-align: right; flex-shrink: 0; }
-.ch-order-item__amount { display: block; font-size: 30rpx; font-weight: 800; color: #FF5722; }
-.ch-order-item__status { display: block; margin-top: 4rpx; font-size: 20rpx; color: var(--jst-color-text-tertiary); }
+.ch-order-item__amount { display: block; font-size: $jst-font-md; font-weight: $jst-weight-semibold; color: $jst-warning; }
+.ch-order-item__status { display: block; margin-top: 4rpx; font-size: $jst-font-xs; color: $jst-text-secondary; }
 
 /* 学生概览 */
-.ch-student-item { display: flex; align-items: center; gap: 24rpx; padding: 24rpx 32rpx; border-bottom: 2rpx solid var(--jst-color-border); }
+.ch-student-item { display: flex; align-items: center; gap: $jst-space-lg; padding: $jst-space-lg $jst-space-xl; border-bottom: 2rpx solid $jst-border; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }
 .ch-student-item:last-child { border-bottom: none; }
-.ch-student-item__avatar { width: 76rpx; height: 76rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32rpx; font-weight: 700; color: #fff; }
+.ch-student-item__avatar { width: 76rpx; height: 76rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: $jst-font-lg; font-weight: $jst-weight-semibold; color: $jst-text-inverse; }
 .ch-student-item__info { flex: 1; }
-.ch-student-item__name { display: block; font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); }
-.ch-student-item__meta { display: block; margin-top: 4rpx; font-size: 22rpx; color: var(--jst-color-text-tertiary); }
+.ch-student-item__name { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
+.ch-student-item__meta { display: block; margin-top: 4rpx; font-size: 22rpx; color: $jst-text-secondary; }
 
-.ch-empty { padding: 40rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
 </style>

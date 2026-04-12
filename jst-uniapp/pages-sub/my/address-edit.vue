@@ -1,11 +1,12 @@
 <template>
   <view class="address-edit-page">
     <jst-loading :loading="pageLoading" text="地址加载中..." />
+    <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="address-edit-page__header">
       <view class="address-edit-page__back" @tap="handleBack"><</view>
       <text class="address-edit-page__title">{{ addressId ? '编辑地址' : '新增地址' }}</text>
-      <text class="address-edit-page__save" @tap="submitForm">保存</text>
+      <u-button class="address-edit-page__save" size="mini" shape="circle" plain @click="submitForm">保存</u-button>
     </view>
 
     <view class="address-edit-page__section">
@@ -38,6 +39,7 @@
         <view class="address-edit-page__row address-edit-page__row--picker">
           <text class="address-edit-page__label">省份</text>
           <text class="address-edit-page__value">{{ form.province }}</text>
+          <u-icon name="arrow-right" class="address-edit-page__arrow" size="22" />
         </view>
       </picker>
 
@@ -45,6 +47,7 @@
         <view class="address-edit-page__row address-edit-page__row--picker">
           <text class="address-edit-page__label">城市</text>
           <text class="address-edit-page__value">{{ form.city }}</text>
+          <u-icon name="arrow-right" class="address-edit-page__arrow" size="22" />
         </view>
       </picker>
 
@@ -52,6 +55,7 @@
         <view class="address-edit-page__row address-edit-page__row--picker">
           <text class="address-edit-page__label">区县</text>
           <text class="address-edit-page__value">{{ form.district }}</text>
+          <u-icon name="arrow-right" class="address-edit-page__arrow" size="22" />
         </view>
       </picker>
 
@@ -84,12 +88,12 @@
           <text class="address-edit-page__switch-title">设为默认地址</text>
           <text class="address-edit-page__switch-desc">商城兑换实物商品时将优先使用</text>
         </view>
-        <switch :checked="form.isDefault === 1" color="#ff8a35" @change="handleDefaultChange" />
+        <switch :checked="form.isDefault === 1" color="var(--jst-warning)" @change="handleDefaultChange" />
       </view>
     </view>
 
     <view class="address-edit-page__footer">
-      <button class="address-edit-page__submit" :loading="submitting" @tap="submitForm">保存地址</button>
+      <u-button class="address-edit-page__submit" :loading="submitting" @click="submitForm">保存地址</u-button>
     </view>
   </view>
 </template>
@@ -269,116 +273,107 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .address-edit-page {
   min-height: 100vh;
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
-  background: var(--jst-color-page-bg);
+  background: $jst-bg-page;
+}
+
+.jst-page-skeleton {
+  margin: $jst-space-lg $jst-page-padding 0;
 }
 
 .address-edit-page__header {
   display: flex;
   align-items: center;
   height: 96rpx;
-  padding: 0 24rpx;
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-card);
-}
-
-.address-edit-page__back,
-.address-edit-page__save {
-  width: 88rpx;
-  font-size: 28rpx;
+  padding: 0 $jst-page-padding;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .address-edit-page__back {
+  width: 88rpx;
   font-size: 34rpx;
-  color: var(--jst-color-text-secondary);
-}
-
-.address-edit-page__save {
-  color: var(--jst-color-brand);
-  text-align: right;
+  color: $jst-text-secondary;
 }
 
 .address-edit-page__title {
   flex: 1;
   text-align: center;
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .address-edit-page__section {
-  margin-top: 20rpx;
-  padding: 0 24rpx;
-  background: var(--jst-color-card-bg);
+  margin-top: $jst-space-lg;
+  padding: 0 $jst-page-padding;
+  background: $jst-bg-card;
 }
 
 .address-edit-page__row {
   display: flex;
   align-items: center;
   min-height: 92rpx;
-  border-bottom: 2rpx solid var(--jst-color-border);
+  gap: $jst-space-sm;
+  border-bottom: 2rpx solid $jst-border;
 }
 
 .address-edit-page__row:last-child {
   border-bottom: none;
 }
 
-.address-edit-page__row--picker::after {
-  content: '>';
-  margin-left: 12rpx;
-  color: var(--jst-color-text-tertiary);
-}
-
 .address-edit-page__row--textarea {
   align-items: flex-start;
-  padding: 24rpx 0;
+  padding: $jst-space-lg 0;
 }
 
 .address-edit-page__row--switch {
   justify-content: space-between;
-  padding: 8rpx 0;
+  padding: $jst-space-xs 0;
 }
 
 .address-edit-page__label {
   width: 180rpx;
-  font-size: 24rpx;
-  color: var(--jst-color-text-secondary);
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
 }
 
 .address-edit-page__input,
 .address-edit-page__value {
   flex: 1;
   text-align: right;
-  font-size: 24rpx;
-  color: var(--jst-color-text);
+  font-size: $jst-font-sm;
+  color: $jst-text-primary;
 }
 
 .address-edit-page__textarea {
   flex: 1;
   height: 180rpx;
-  font-size: 24rpx;
+  font-size: $jst-font-sm;
   line-height: 1.7;
-  color: var(--jst-color-text);
+  color: $jst-text-primary;
 }
 
 .address-edit-page__placeholder {
-  color: var(--jst-color-text-tertiary);
+  color: $jst-text-placeholder;
 }
 
 .address-edit-page__switch-title {
   display: block;
-  font-size: 26rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
 }
 
 .address-edit-page__switch-desc {
   display: block;
-  margin-top: 8rpx;
-  font-size: 22rpx;
-  color: var(--jst-color-text-tertiary);
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-xs;
+  color: $jst-text-placeholder;
 }
 
 .address-edit-page__footer {
@@ -386,17 +381,39 @@ export default {
   right: 0;
   bottom: 0;
   left: 0;
-  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 -8rpx 18rpx rgba(15, 52, 96, 0.08);
+  padding: 16rpx $jst-page-padding calc(16rpx + env(safe-area-inset-bottom));
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-sm;
 }
 
 .address-edit-page__submit {
   height: 88rpx;
-  border-radius: var(--jst-radius-md);
-  background: linear-gradient(135deg, var(--jst-color-primary) 0%, var(--jst-color-primary-light) 100%);
-  color: var(--jst-color-card-bg);
-  font-size: 28rpx;
-  font-weight: 700;
+  border-radius: $jst-radius-md;
+  background: $jst-brand-gradient;
+  color: $jst-text-inverse;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+}
+
+.address-edit-page__arrow {
+  flex-shrink: 0;
+}
+
+::v-deep .address-edit-page__arrow .u-icon__icon {
+  color: $jst-text-placeholder;
+}
+
+::v-deep .address-edit-page__save.u-button {
+  min-width: 118rpx;
+  height: 56rpx;
+  border-color: $jst-brand;
+  border-radius: $jst-radius-round;
+  color: $jst-brand;
+  font-size: $jst-font-sm;
+}
+
+::v-deep .address-edit-page__submit.u-button {
+  min-height: 88rpx;
+  border: none;
 }
 </style>

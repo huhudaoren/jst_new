@@ -1,0 +1,82 @@
+// ═══════════════════════════════════════════
+// 竞赛通 Design Token — 唯一视觉真理来源
+// ═══════════════════════════════════════════
+
+// ── 品牌色 ──
+$jst-brand: #2B6CFF;
+$jst-brand-light: #E8F0FF;
+$jst-brand-dark: #1A4FCC;
+$jst-brand-gradient: linear-gradient(135deg, #4A90D9 0%, #2B6CFF 100%);
+
+// ── 功能色 ──
+$jst-success: #18B566;
+$jst-success-light: #E8F8EF;
+$jst-warning: #FF9500;
+$jst-warning-light: #FFF5E6;
+$jst-danger: #FF4D4F;
+$jst-danger-light: #FFF0F0;
+$jst-info: #909399;
+$jst-info-light: #F4F4F5;
+$jst-gold: #FFD54F;
+$jst-gold-light: #FFF7DB;
+$jst-indigo: #1A237E;
+$jst-indigo-light: #3949AB;
+
+// ── 中性色 ──
+$jst-text-primary: #1A1A1A;
+$jst-text-regular: #4A4A4A;
+$jst-text-secondary: #8A8A8A;
+$jst-text-placeholder: #C0C4CC;
+$jst-text-inverse: #FFFFFF;
+$jst-border: #EBEDF0;
+$jst-bg-page: #F5F7FA;
+$jst-bg-card: #FFFFFF;
+$jst-bg-grey: #F8F9FB;
+$jst-bg-dark-page: #0D1B2A;
+$jst-bg-dark-card: #152840;
+$jst-text-dark-primary: #E8F1FF;
+$jst-text-dark-secondary: rgba(232, 241, 255, 0.6);
+
+// ── 字号 ──
+$jst-font-xs: 20rpx;
+$jst-font-sm: 24rpx;
+$jst-font-base: 28rpx;
+$jst-font-md: 30rpx;
+$jst-font-lg: 32rpx;
+$jst-font-xl: 36rpx;
+$jst-font-xxl: 44rpx;
+
+// ── 字重 ──
+$jst-weight-regular: 400;
+$jst-weight-medium: 500;
+$jst-weight-semibold: 600;
+$jst-weight-bold: 700;
+
+// ── 间距（8rpx 基数）──
+$jst-space-xs: 8rpx;
+$jst-space-sm: 12rpx;
+$jst-space-md: 16rpx;
+$jst-space-lg: 24rpx;
+$jst-space-xl: 32rpx;
+$jst-space-xxl: 48rpx;
+$jst-page-padding: 24rpx;
+
+// ── 圆角 ──
+$jst-radius-xs: 4rpx;
+$jst-radius-sm: 8rpx;
+$jst-radius-md: 12rpx;
+$jst-radius-lg: 16rpx;
+$jst-radius-xl: 24rpx;
+$jst-radius-round: 999rpx;
+
+// ── 阴影 ──
+$jst-shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+$jst-shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+$jst-shadow-lg: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+$jst-shadow-float: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+
+// ── 动效 ──
+$jst-duration-fast: 150ms;
+$jst-duration-normal: 300ms;
+$jst-duration-slow: 500ms;
+$jst-easing: cubic-bezier(0.4, 0, 0.2, 1);

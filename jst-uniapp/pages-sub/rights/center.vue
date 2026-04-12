@@ -3,7 +3,7 @@
      调用接口: GET /jst/wx/rights/my?status= -->
 <template>
   <view class="rc-page">
-    <view class="rc-hero">
+    <view class="rc-hero" :style="{ paddingTop: navPaddingTop }">
       <view class="rc-hero__cell"><text class="rc-hero__num">{{ stats.available || 0 }}</text><text class="rc-hero__lbl">可用权益</text></view>
       <view class="rc-hero__cell"><text class="rc-hero__num">{{ stats.applying || 0 }}</text><text class="rc-hero__lbl">申请中</text></view>
       <view class="rc-hero__cell"><text class="rc-hero__num">{{ stats.used || 0 }}</text><text class="rc-hero__lbl">已使用</text></view>
@@ -86,27 +86,28 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.rc-page { min-height: 100vh; background: var(--jst-color-page-bg); padding-bottom: 48rpx; }
+@import '@/styles/design-tokens.scss';
+.rc-page { min-height: 100vh; background: #F7F8FA; padding-bottom: 48rpx; }
 .rc-hero { display: flex; padding: 72rpx 32rpx 56rpx; background: linear-gradient(135deg, #1B5E20, #2E7D32); color: #fff; border-bottom-left-radius: 40rpx; border-bottom-right-radius: 40rpx; }
 .rc-hero__cell { flex: 1; text-align: center; }
-.rc-hero__num { display: block; font-size: 48rpx; font-weight: 900; }
-.rc-hero__lbl { display: block; margin-top: 6rpx; font-size: 22rpx; color: var(--jst-color-white-76); }
+.rc-hero__num { display: block; font-size: 48rpx; font-weight: 600; }
+.rc-hero__lbl { display: block; margin-top: 6rpx; font-size: 22rpx; color: rgba(255,255,255,0.76); }
 
-.rc-tabs { white-space: nowrap; margin-top: 16rpx; background: var(--jst-color-card-bg); border-bottom: 2rpx solid var(--jst-color-border); }
-.rc-tabs__item { display: inline-block; padding: 0 40rpx; height: 88rpx; line-height: 88rpx; font-size: 26rpx; color: var(--jst-color-text-tertiary); position: relative; }
-.rc-tabs__item--active { color: #1B5E20; font-weight: 700; }
+.rc-tabs { white-space: nowrap; margin-top: 16rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; }
+.rc-tabs__item { display: inline-block; padding: 0 40rpx; height: 88rpx; line-height: 88rpx; font-size: 26rpx; color: $jst-text-secondary; position: relative; }
+.rc-tabs__item--active { color: #1B5E20; font-weight: 600; }
 .rc-tabs__item--active::after { content: ''; position: absolute; bottom: 0; left: 20rpx; right: 20rpx; height: 4rpx; background: #1B5E20; border-radius: 2rpx; }
 
 .rc-list { padding: 8rpx 0 32rpx; }
-.rc-card { margin: 20rpx 32rpx 0; padding: 28rpx 32rpx; background: var(--jst-color-card-bg); border-radius: var(--jst-radius-md); box-shadow: var(--jst-shadow-card); }
+.rc-card { margin: 20rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: 0 2rpx 8rpx rgba(20, 30, 60, 0.04); }
 .rc-card__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
-.rc-card__name { font-size: 28rpx; font-weight: 700; color: var(--jst-color-text); flex: 1; min-width: 0; }
-.rc-card__status { padding: 4rpx 16rpx; border-radius: var(--jst-radius-full); font-size: 22rpx; background: var(--jst-color-success-soft); color: #1B5E20; }
-.rc-card__status--applying { background: var(--jst-color-warning-soft); color: var(--jst-color-warning); }
-.rc-card__status--used, .rc-card__status--expired { background: var(--jst-color-gray-soft); color: var(--jst-color-text-tertiary); }
+.rc-card__name { font-size: 28rpx; font-weight: 600; color: $jst-text-primary; flex: 1; min-width: 0; }
+.rc-card__status { padding: 4rpx 16rpx; border-radius: $jst-radius-round; font-size: 22rpx; background: $jst-success-light; color: #1B5E20; }
+.rc-card__status--applying { background: $jst-warning-light; color: $jst-warning; }
+.rc-card__status--used, .rc-card__status--expired { background: $jst-bg-grey; color: $jst-text-secondary; }
 .rc-card__meta { display: flex; flex-wrap: wrap; gap: 12rpx; }
-.rc-card__m { padding: 6rpx 14rpx; border-radius: var(--jst-radius-full); background: var(--jst-color-page-bg); font-size: 22rpx; color: var(--jst-color-text-secondary); }
-.rc-card__btn { margin-top: 20rpx; align-self: flex-end; height: 72rpx; line-height: 72rpx; border-radius: var(--jst-radius-full); background: linear-gradient(135deg, #1B5E20, #2E7D32); color: #fff; font-size: 26rpx; font-weight: 700; border: none; }
-.rc-empty { padding: 80rpx; text-align: center; font-size: 24rpx; color: var(--jst-color-text-tertiary); }
+.rc-card__m { padding: 6rpx 14rpx; border-radius: $jst-radius-round; background: #F7F8FA; font-size: 22rpx; color: $jst-text-regular; }
+.rc-card__btn { margin-top: 20rpx; align-self: flex-end; height: 72rpx; line-height: 72rpx; border-radius: $jst-radius-round; background: linear-gradient(135deg, #1B5E20, #2E7D32); color: #fff; font-size: 26rpx; font-weight: 600; border: none; }
+.rc-empty { padding: 80rpx; text-align: center; font-size: 24rpx; color: $jst-text-secondary; }
 .rc-empty--end { padding: 40rpx; }
 </style>
