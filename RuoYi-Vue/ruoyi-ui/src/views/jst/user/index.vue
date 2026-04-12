@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="app-container jst-admin-user-page">
     <div class="page-hero">
       <div>

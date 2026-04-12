@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <el-drawer
     title="用户详情"
     :visible.sync="drawerVisible"

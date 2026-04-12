@@ -143,6 +143,13 @@ export function delXxx(id) {
 
 ## 五、硬性约束
 
+### ⚠️ 文件编码规范（重要）
+- 所有文件必须 **UTF-8 无 BOM** 编码保存
+- 禁止写入 UTF-8 BOM 头（`EF BB BF`）
+- 中文字符串必须直接写中文，禁止写 Unicode 转义（如 `\u7ade\u8d5b` → 应写 `竞赛`）
+- 写入文件前确认内容无乱码、无 mojibake（如 `é¢å¤§` 是错误的）
+- Windows 环境下 LF/CRLF 不做强制要求，但同一文件内必须统一
+
 ### ❌ 不许做
 1. 不许改后端 Java 代码
 2. 不许改 `jst-uniapp/` 小程序前端
@@ -151,6 +158,7 @@ export function delXxx(id) {
 5. 不许改 `src/utils/request.js` 核心拦截逻辑
 6. 不许硬编码角色判断（用 `v-hasPermi` / `v-hasRole`）
 7. 不许跳过响应式适配
+8. 不许写入 UTF-8 BOM 头或使用非 UTF-8 编码
 
 ### ✅ 必须做
 1. 每个页面都用 `app-container` class 包裹

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="app-container order-item-page">
     <div class="page-hero">
       <div>

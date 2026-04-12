@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="app-container team-appointment-page">
     <div class="page-hero">
       <div>

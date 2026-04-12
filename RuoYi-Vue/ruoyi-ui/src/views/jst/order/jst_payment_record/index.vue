@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="app-container payment-record-page">
     <div class="page-hero">
       <div>
