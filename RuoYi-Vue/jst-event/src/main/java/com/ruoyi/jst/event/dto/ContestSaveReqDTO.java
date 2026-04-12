@@ -78,9 +78,22 @@ public class ContestSaveReqDTO {
     @Max(value = 1, message = "是否允许重复预约取值非法")
     private Integer allowRepeatAppointment = 0;
 
+    @Min(value = 0, message = "是否允许预约退款取值非法")
+    @Max(value = 1, message = "是否允许预约退款取值非法")
+    private Integer allowAppointmentRefund = 0;
+
     private String certRuleJson;
 
     private String scoreRuleJson;
+
+    private String scheduleJson;
+
+    private String awardsJson;
+
+    private String faqJson;
+
+    @Size(max = 500, message = "推荐标签长度不能超过500")
+    private String recommendTags;
 
     private Long formTemplateId;
 
@@ -232,6 +245,14 @@ public class ContestSaveReqDTO {
         this.allowRepeatAppointment = allowRepeatAppointment;
     }
 
+    public Integer getAllowAppointmentRefund() {
+        return allowAppointmentRefund;
+    }
+
+    public void setAllowAppointmentRefund(Integer allowAppointmentRefund) {
+        this.allowAppointmentRefund = allowAppointmentRefund;
+    }
+
     public String getCertRuleJson() {
         return certRuleJson;
     }
@@ -246,6 +267,38 @@ public class ContestSaveReqDTO {
 
     public void setScoreRuleJson(String scoreRuleJson) {
         this.scoreRuleJson = scoreRuleJson;
+    }
+
+    public String getScheduleJson() {
+        return scheduleJson;
+    }
+
+    public void setScheduleJson(String scheduleJson) {
+        this.scheduleJson = scheduleJson;
+    }
+
+    public String getAwardsJson() {
+        return awardsJson;
+    }
+
+    public void setAwardsJson(String awardsJson) {
+        this.awardsJson = awardsJson;
+    }
+
+    public String getFaqJson() {
+        return faqJson;
+    }
+
+    public void setFaqJson(String faqJson) {
+        this.faqJson = faqJson;
+    }
+
+    public String getRecommendTags() {
+        return recommendTags;
+    }
+
+    public void setRecommendTags(String recommendTags) {
+        this.recommendTags = recommendTags;
     }
 
     public Long getFormTemplateId() {

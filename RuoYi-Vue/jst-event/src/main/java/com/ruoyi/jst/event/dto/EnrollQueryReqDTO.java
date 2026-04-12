@@ -1,5 +1,6 @@
 package com.ruoyi.jst.event.dto;
 
+import com.ruoyi.common.core.domain.BaseEntity;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -9,7 +10,7 @@ import jakarta.validation.constraints.Size;
  * @author jst
  * @since 1.0.0
  */
-public class EnrollQueryReqDTO {
+public class EnrollQueryReqDTO extends BaseEntity {
 
     private Long contestId;
 

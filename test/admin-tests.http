@@ -1772,3 +1772,282 @@ client.test("PA6-6 unpublished score rejected", function() {
   client.assert(response.body.code !== 200);
 });
 %}
+
+### =====================================================================
+### PW. PARTNER-WRAPPER 赛事方独立接口包装层 (jst-event)
+### Preconditions:
+###   - 99-test-fixtures.sql 已导入
+###   - partner_f7_a / partner_f7_b 可登录
+### =====================================================================
+
+### PW-1. partner A login
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_a",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("pw_partner_a_token", response.body.token);
+client.test("PW-1 partner A login success", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+});
+%}
+
+### PW-1B. partner B login
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_b",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("pw_partner_b_token", response.body.token);
+client.test("PW-1B partner B login success", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+});
+%}
+
+### PW-2. GET /jst/partner/contest/list should only return partner A contests
+GET {{baseUrl}}/jst/partner/contest/list?pageNum=1&pageSize=20
+Authorization: Bearer {{pw_partner_a_token}}
+
+> {%
+client.test("PW-2 partner contest list data scope", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.rows));
+  client.assert(response.body.rows.every(function(row) {
+    return row.partnerId === 8101;
+  }));
+});
+%}
+
+### PW-3. GET /jst/partner/contest/{id} detail
+GET {{baseUrl}}/jst/partner/contest/8201
+Authorization: Bearer {{pw_partner_a_token}}
+
+> {%
+client.test("PW-3 partner contest detail success", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.contestId === 8201);
+  client.assert(response.body.data.partnerId === 8101);
+});
+%}
+
+### PW-4. PUT /jst/partner/contest/{id}/submit (create draft then submit)
+POST {{baseUrl}}/jst/partner/contest
+Content-Type: {{contentType}}
+Authorization: Bearer {{pw_partner_a_token}}
+
+{
+  "contestName": "PW wrapper draft contest",
+  "category": "art",
+  "groupLevels": "小学组",
+  "coverImage": "https://fixture.example.com/pw/contest-cover.jpg",
+  "description": "PW wrapper create and submit flow",
+  "enrollStartTime": "2026-04-01 09:00:00",
+  "enrollEndTime": "2026-05-01 18:00:00",
+  "eventStartTime": "2026-05-10 09:00:00",
+  "eventEndTime": "2026-05-20 18:00:00",
+  "price": 99.00,
+  "supportChannelEnroll": 1,
+  "supportPointsDeduct": 1,
+  "supportAppointment": 0,
+  "appointmentCapacity": 0,
+  "writeoffConfig": "{}",
+  "allowRepeatAppointment": 0,
+  "allowAppointmentRefund": 0,
+  "certRuleJson": "{}",
+  "scoreRuleJson": "{}",
+  "formTemplateId": 8801,
+  "aftersaleDays": 7
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("pw_contest_id", response.body.data.contestId);
+}
+client.test("PW-4A create draft contest success", function() {
+  client.assert(response.body.code === 200);
+  client.assert(client.global.get("pw_contest_id"), "pw_contest_id should be set");
+});
+%}
+
+PUT {{baseUrl}}/jst/partner/contest/{{pw_contest_id}}/submit
+Authorization: Bearer {{pw_partner_a_token}}
+
+> {%
+client.test("PW-4B submit contest success", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### PW-5. GET /jst/partner/enroll/list should only return partner A contest enrolls
+GET {{baseUrl}}/jst/partner/enroll/list?contestId=8201&pageNum=1&pageSize=20
+Authorization: Bearer {{pw_partner_a_token}}
+
+> {%
+client.test("PW-5 partner enroll list data scope", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.rows));
+  client.assert(response.body.rows.every(function(row) {
+    return row.contestId === 8201;
+  }));
+});
+%}
+
+### PW-6. PUT /jst/partner/enroll/batch-audit batch approve
+PUT {{baseUrl}}/jst/partner/enroll/batch-audit
+Content-Type: {{contentType}}
+Authorization: Bearer {{pw_partner_a_token}}
+
+{
+  "enrollIds": [8901],
+  "result": "approved",
+  "auditRemark": "PW batch approve"
+}
+
+> {%
+client.test("PW-6 partner batch audit success", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.successCount >= 1);
+});
+%}
+
+### PW-7. partner B cannot access partner A contest
+GET {{baseUrl}}/jst/partner/contest/8201
+Authorization: Bearer {{pw_partner_b_token}}
+
+> {%
+client.test("PW-7 cross-partner access should be rejected", function() {
+  client.assert(response.status === 403 || response.body.code !== 200);
+});
+%}
+
+### =====================================================================
+### QT. QUARTZ-TASKS 定时任务触发验证 (/monitor/job/run)
+### 前置: 已执行 99-migration-quartz-jobs.sql，4 条 JST_TASK 任务已注册
+### =====================================================================
+
+### QT-0. admin 登录
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("qt_admin_token", response.body.token);
+client.test("QT-0 admin 登录成功", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+});
+%}
+
+### QT-1. 查询 JST_TASK 任务并提取 4 个 jobId
+GET {{baseUrl}}/monitor/job/list?jobGroup=JST_TASK&pageNum=1&pageSize=100
+Authorization: Bearer {{qt_admin_token}}
+
+> {%
+client.test("QT-1 查询任务列表成功", function() {
+  client.assert(response.status === 200);
+  client.assert(Array.isArray(response.body.rows));
+});
+var rows = response.body.rows || [];
+function findJobId(target) {
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i].invokeTarget === target) {
+      return rows[i].jobId;
+    }
+  }
+  return null;
+}
+client.global.set("qt_order_job_id", findJobId("orderTimeoutCancelTask.execute()"));
+client.global.set("qt_refund_job_id", findJobId("refundTimeoutCloseTask.execute()"));
+client.global.set("qt_rebate_job_id", findJobId("rebateAutoSettleTask.execute()"));
+client.global.set("qt_appointment_job_id", findJobId("appointmentExpireTask.execute()"));
+client.test("QT-1 四个任务均已注册", function() {
+  client.assert(client.global.get("qt_order_job_id"));
+  client.assert(client.global.get("qt_refund_job_id"));
+  client.assert(client.global.get("qt_rebate_job_id"));
+  client.assert(client.global.get("qt_appointment_job_id"));
+});
+%}
+
+### QT-2. 立即执行 订单超时自动取消
+PUT {{baseUrl}}/monitor/job/run
+Content-Type: {{contentType}}
+Authorization: Bearer {{qt_admin_token}}
+
+{
+  "jobId": {{qt_order_job_id}},
+  "jobGroup": "JST_TASK"
+}
+
+> {%
+client.test("QT-2 run 订单超时自动取消成功", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### QT-3. 立即执行 退款超时自动关闭
+PUT {{baseUrl}}/monitor/job/run
+Content-Type: {{contentType}}
+Authorization: Bearer {{qt_admin_token}}
+
+{
+  "jobId": {{qt_refund_job_id}},
+  "jobGroup": "JST_TASK"
+}
+
+> {%
+client.test("QT-3 run 退款超时自动关闭成功", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### QT-4. 立即执行 返点售后期自动计提
+PUT {{baseUrl}}/monitor/job/run
+Content-Type: {{contentType}}
+Authorization: Bearer {{qt_admin_token}}
+
+{
+  "jobId": {{qt_rebate_job_id}},
+  "jobGroup": "JST_TASK"
+}
+
+> {%
+client.test("QT-4 run 返点售后期自动计提成功", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### QT-5. 立即执行 预约过期自动取消
+PUT {{baseUrl}}/monitor/job/run
+Content-Type: {{contentType}}
+Authorization: Bearer {{qt_admin_token}}
+
+{
+  "jobId": {{qt_appointment_job_id}},
+  "jobGroup": "JST_TASK"
+}
+
+> {%
+client.test("QT-5 run 预约过期自动取消成功", function() {
+  client.assert(response.body.code === 200);
+});
+%}

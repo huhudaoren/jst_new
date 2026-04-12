@@ -109,6 +109,22 @@ public class JstContest extends BaseEntity
     @Excel(name = "成绩规则JSON")
     private String scoreRuleJson;
 
+    /** 赛程JSON */
+    @Excel(name = "赛程JSON")
+    private String scheduleJson;
+
+    /** 奖项JSON */
+    @Excel(name = "奖项JSON")
+    private String awardsJson;
+
+    /** 常见问题JSON */
+    @Excel(name = "常见问题JSON")
+    private String faqJson;
+
+    /** 推荐标签 */
+    @Excel(name = "推荐标签")
+    private String recommendTags;
+
     /** 默认报名表单模板ID，FK→jst_enroll_form_template */
     @Excel(name = "默认报名表单模板ID，FK→jst_enroll_form_template")
     private Long formTemplateId;
@@ -350,6 +366,46 @@ public class JstContest extends BaseEntity
         return scoreRuleJson;
     }
 
+    public void setScheduleJson(String scheduleJson)
+    {
+        this.scheduleJson = scheduleJson;
+    }
+
+    public String getScheduleJson()
+    {
+        return scheduleJson;
+    }
+
+    public void setAwardsJson(String awardsJson)
+    {
+        this.awardsJson = awardsJson;
+    }
+
+    public String getAwardsJson()
+    {
+        return awardsJson;
+    }
+
+    public void setFaqJson(String faqJson)
+    {
+        this.faqJson = faqJson;
+    }
+
+    public String getFaqJson()
+    {
+        return faqJson;
+    }
+
+    public void setRecommendTags(String recommendTags)
+    {
+        this.recommendTags = recommendTags;
+    }
+
+    public String getRecommendTags()
+    {
+        return recommendTags;
+    }
+
     public void setFormTemplateId(Long formTemplateId) 
     {
         this.formTemplateId = formTemplateId;
@@ -435,6 +491,10 @@ public class JstContest extends BaseEntity
             .append("allowAppointmentRefund", getAllowAppointmentRefund())
             .append("certRuleJson", getCertRuleJson())
             .append("scoreRuleJson", getScoreRuleJson())
+            .append("scheduleJson", getScheduleJson())
+            .append("awardsJson", getAwardsJson())
+            .append("faqJson", getFaqJson())
+            .append("recommendTags", getRecommendTags())
             .append("formTemplateId", getFormTemplateId())
             .append("aftersaleDays", getAftersaleDays())
             .append("auditStatus", getAuditStatus())

@@ -27,6 +27,14 @@ public interface OrderService {
 
     void cancel(Long orderId);
 
+    /**
+     * 系统任务触发超时取消。
+     *
+     * @param orderId 订单ID
+     * @param reason  取消原因（用于日志审计）
+     */
+    void cancelTimeoutOrder(Long orderId, String reason);
+
     OrderDetailVO getWxDetail(Long orderId);
 
     List<OrderListVO> selectMyList(OrderQueryReqDTO query);

@@ -24,8 +24,13 @@
         <result property="appointmentCapacity" column="appointment_capacity"/>
         <result property="writeoffConfig" column="writeoff_config"/>
         <result property="allowRepeatAppointment" column="allow_repeat_appointment"/>
+        <result property="allowAppointmentRefund" column="allow_appointment_refund"/>
         <result property="certRuleJson" column="cert_rule_json"/>
         <result property="scoreRuleJson" column="score_rule_json"/>
+        <result property="scheduleJson" column="schedule_json"/>
+        <result property="awardsJson" column="awards_json"/>
+        <result property="faqJson" column="faq_json"/>
+        <result property="recommendTags" column="recommend_tags"/>
         <result property="formTemplateId" column="form_template_id"/>
         <result property="aftersaleDays" column="aftersale_days"/>
         <result property="auditStatus" column="audit_status"/>
@@ -59,8 +64,13 @@
         c.appointment_capacity,
         c.writeoff_config,
         c.allow_repeat_appointment,
+        c.allow_appointment_refund,
         c.cert_rule_json,
         c.score_rule_json,
+        c.schedule_json,
+        c.awards_json,
+        c.faq_json,
+        c.recommend_tags,
         c.form_template_id,
         c.aftersale_days,
         c.audit_status,
@@ -119,8 +129,13 @@
             appointment_capacity,
             writeoff_config,
             allow_repeat_appointment,
+            allow_appointment_refund,
             cert_rule_json,
             score_rule_json,
+            schedule_json,
+            awards_json,
+            faq_json,
+            recommend_tags,
             form_template_id,
             aftersale_days,
             audit_status,
@@ -148,8 +163,13 @@
             #{contest.appointmentCapacity},
             #{contest.writeoffConfig},
             #{contest.allowRepeatAppointment},
+            #{contest.allowAppointmentRefund},
             #{contest.certRuleJson},
             #{contest.scoreRuleJson},
+            #{contest.scheduleJson},
+            #{contest.awardsJson},
+            #{contest.faqJson},
+            #{contest.recommendTags},
             #{contest.formTemplateId},
             #{contest.aftersaleDays},
             #{contest.auditStatus},
@@ -179,8 +199,13 @@
             appointment_capacity = #{contest.appointmentCapacity},
             writeoff_config = #{contest.writeoffConfig},
             allow_repeat_appointment = #{contest.allowRepeatAppointment},
+            allow_appointment_refund = #{contest.allowAppointmentRefund},
             cert_rule_json = #{contest.certRuleJson},
             score_rule_json = #{contest.scoreRuleJson},
+            schedule_json = #{contest.scheduleJson},
+            awards_json = #{contest.awardsJson},
+            faq_json = #{contest.faqJson},
+            recommend_tags = #{contest.recommendTags},
             form_template_id = #{contest.formTemplateId},
             aftersale_days = #{contest.aftersaleDays},
             update_by = #{contest.updateBy},
@@ -215,6 +240,16 @@
           and del_flag = '0'
     </update>
 
+    <update id="logicalDeleteByExpectedAudit">
+        update jst_contest
+        set del_flag = '2',
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where contest_id = #{contestId}
+          and audit_status = #{expectedAuditStatus}
+          and del_flag = '0'
+    </update>
+
     <select id="selectAdminList" resultType="com.ruoyi.jst.event.vo.ContestListVO">
         select
         c.contest_id AS contestId,
@@ -225,10 +260,20 @@
         c.price AS price,
         c.enroll_start_time AS enrollStartTime,
         c.enroll_end_time AS enrollEndTime,
+        c.event_start_time AS eventStartTime,
+        c.event_end_time AS eventEndTime,
+        (
+            select count(1)
+            from jst_enroll_record er
+            where er.contest_id = c.contest_id
+              and er.del_flag = '0'
+        ) AS enrollCount,
         c.audit_status AS auditStatus,
+        c.remark AS auditRemark,
         c.status AS status,
         c.partner_id AS partnerId,
-        p.partner_name AS partnerName
+        p.partner_name AS partnerName,
+        c.recommend_tags AS recommendTags
         from jst_contest c
         left join jst_event_partner p on p.partner_id = c.partner_id and p.del_flag = '0'
         <where>
@@ -253,6 +298,9 @@
             </if>
             <if test="query != null and query.endCreateTime != null">
                 and c.create_time <![CDATA[ <= ]]> #{query.endCreateTime}
+            </if>
+            <if test="query != null and query.params != null and query.params.dataScope != null and query.params.dataScope != ''">
+                ${query.params.dataScope}
             </if>
         </where>
         order by c.create_time desc, c.contest_id desc
@@ -280,11 +328,17 @@
         c.appointment_capacity AS appointmentCapacity,
         c.writeoff_config AS writeoffConfig,
         c.allow_repeat_appointment AS allowRepeatAppointment,
+        c.allow_appointment_refund AS allowAppointmentRefund,
         c.cert_rule_json AS certRuleJson,
         c.score_rule_json AS scoreRuleJson,
+        c.schedule_json AS scheduleJson,
+        c.awards_json AS awardsJson,
+        c.faq_json AS faqJson,
+        c.recommend_tags AS recommendTags,
         c.form_template_id AS formTemplateId,
         c.aftersale_days AS aftersaleDays,
         c.audit_status AS auditStatus,
+        c.remark AS auditRemark,
         c.status AS status,
         c.created_user_id AS createdUserId
         from jst_contest c
@@ -299,20 +353,58 @@
         <include refid="WxCardColumns"/>
         from jst_contest c
         left join jst_event_partner p on p.partner_id = c.partner_id and p.del_flag = '0'
+        left join (
+            select contest_id, count(1) AS enroll_count
+            from jst_enroll_record
+            where del_flag = '0'
+            group by contest_id
+        ) ec on ec.contest_id = c.contest_id
         <where>
             c.del_flag = '0'
             and c.audit_status = 'online'
             <if test="query != null and query.category != null and query.category != ''">
                 and c.category = #{query.category}
             </if>
+            <if test="query != null and query.eventType != null and query.eventType != ''">
+                <choose>
+                    <when test="query.eventType == 'online'">
+                        and ifnull(c.support_appointment, 0) = 0
+                    </when>
+                    <when test="query.eventType == 'offline'">
+                        and ifnull(c.support_appointment, 0) = 1
+                        and ifnull(c.support_channel_enroll, 0) = 0
+                    </when>
+                    <when test="query.eventType == 'mixed'">
+                        and ifnull(c.support_appointment, 0) = 1
+                        and ifnull(c.support_channel_enroll, 0) = 1
+                    </when>
+                </choose>
+            </if>
             <if test="query != null and query.groupLevel != null and query.groupLevel != ''">
                 and find_in_set(#{query.groupLevel}, c.group_levels)
+            </if>
+            <if test="query != null and query.tag != null and query.tag != ''">
+                and c.recommend_tags is not null
+                and c.recommend_tags like concat('%', #{query.tag}, '%')
             </if>
             <if test="query != null and query.keyword != null and query.keyword != ''">
                 and c.contest_name like concat('%', #{query.keyword}, '%')
             </if>
         </where>
-        order by c.enroll_start_time desc, c.contest_id desc
+        <choose>
+            <when test="query != null and query.sortBy == 'hot'">
+                order by ifnull(ec.enroll_count, 0) desc, c.create_time desc, c.contest_id desc
+            </when>
+            <when test="query != null and query.sortBy == 'newest'">
+                order by c.create_time desc, c.contest_id desc
+            </when>
+            <when test="query != null and query.sortBy == 'deadline'">
+                order by c.enroll_end_time asc, c.contest_id desc
+            </when>
+            <otherwise>
+                order by c.enroll_start_time desc, c.contest_id desc
+            </otherwise>
+        </choose>
     </select>
 
     <select id="selectWxDetail" resultType="com.ruoyi.jst.event.vo.WxContestDetailVO">
@@ -340,6 +432,10 @@
         c.appointment_capacity AS appointmentCapacity,
         c.writeoff_config AS writeoffConfig,
         c.allow_repeat_appointment AS allowRepeatAppointment,
+        c.schedule_json AS scheduleJson,
+        c.awards_json AS awardsJson,
+        c.faq_json AS faqJson,
+        c.recommend_tags AS recommendTags,
         c.cert_rule_json AS certRuleJson,
         c.score_rule_json AS scoreRuleJson,
         c.aftersale_days AS aftersaleDays
@@ -359,6 +455,87 @@
         where c.del_flag = '0'
           and c.audit_status = 'online'
         order by c.create_time desc, c.contest_id desc
+        limit #{limit}
+    </select>
+
+    <select id="selectRelatedContests" resultType="com.ruoyi.jst.event.vo.ContestListVO">
+        select
+        c.contest_id AS contestId,
+        c.contest_name AS contestName,
+        c.category AS category,
+        c.group_levels AS groupLevels,
+        c.cover_image AS coverImage,
+        c.price AS price,
+        c.enroll_start_time AS enrollStartTime,
+        c.enroll_end_time AS enrollEndTime,
+        c.event_start_time AS eventStartTime,
+        c.event_end_time AS eventEndTime,
+        c.audit_status AS auditStatus,
+        c.remark AS auditRemark,
+        c.status AS status,
+        c.partner_id AS partnerId,
+        p.partner_name AS partnerName,
+        c.recommend_tags AS recommendTags
+        from jst_contest c
+        left join jst_event_partner p on p.partner_id = c.partner_id and p.del_flag = '0'
+        where c.del_flag = '0'
+          and c.audit_status = 'online'
+          and c.contest_id != #{contestId}
+          <if test="category != null and category != ''">
+              and c.category = #{category}
+          </if>
+        order by c.enroll_start_time desc, c.contest_id desc
+        limit #{limit}
+    </select>
+
+    <select id="selectRelatedCoursesByTags" resultType="com.ruoyi.jst.event.vo.ContestRecommendCourseVO">
+        select
+        c.course_id AS courseId,
+        c.course_name AS courseName,
+        c.cover_image AS coverImage,
+        c.price AS price,
+        ifnull(l.learner_count, 0) AS learnerCount
+        from jst_course c
+        left join (
+            select course_id, count(1) AS learner_count
+            from jst_course_learn_record
+            where del_flag = '0'
+            group by course_id
+        ) l on l.course_id = c.course_id
+        where c.del_flag = '0'
+          and c.audit_status = 'approved'
+          and c.status = 'on'
+          and (
+            <foreach collection="tags" item="tag" separator=" OR ">
+                (
+                    c.course_name like concat('%', #{tag}, '%')
+                    or c.description like concat('%', #{tag}, '%')
+                    or c.remark like concat('%', #{tag}, '%')
+                )
+            </foreach>
+          )
+        order by learnerCount desc, c.update_time desc, c.course_id desc
+        limit #{limit}
+    </select>
+
+    <select id="selectHotCourses" resultType="com.ruoyi.jst.event.vo.ContestRecommendCourseVO">
+        select
+        c.course_id AS courseId,
+        c.course_name AS courseName,
+        c.cover_image AS coverImage,
+        c.price AS price,
+        ifnull(l.learner_count, 0) AS learnerCount
+        from jst_course c
+        left join (
+            select course_id, count(1) AS learner_count
+            from jst_course_learn_record
+            where del_flag = '0'
+            group by course_id
+        ) l on l.course_id = c.course_id
+        where c.del_flag = '0'
+          and c.audit_status = 'approved'
+          and c.status = 'on'
+        order by learnerCount desc, c.update_time desc, c.course_id desc
         limit #{limit}
     </select>
 

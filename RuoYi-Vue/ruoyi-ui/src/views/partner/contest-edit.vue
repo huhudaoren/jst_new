@@ -16,7 +16,7 @@
     </div>
 
     <el-alert
-      title="当前前端桥接 F7 /jst/event/contest 接口；任务卡要求的 /jst/partner/contest 包装路由及部分字段缺口已写入 ui-feedback。"
+      title="当前页面已切换至 /jst/partner/contest 包装路由；若仍有字段缺口，请按 ui-feedback 文档跟进。"
       type="info"
       show-icon
       :closable="false"

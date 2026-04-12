@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.HomeMapperExt">
+
+    <select id="selectRecommendContests" resultType="com.ruoyi.jst.event.vo.ContestListVO">
+        select
+            c.contest_id AS contestId,
+            c.contest_name AS contestName,
+            c.category AS category,
+            c.group_levels AS groupLevels,
+            c.cover_image AS coverImage,
+            c.price AS price,
+            c.enroll_start_time AS enrollStartTime,
+            c.enroll_end_time AS enrollEndTime,
+            c.event_start_time AS eventStartTime,
+            c.event_end_time AS eventEndTime,
+            ifnull(er.enroll_count, 0) AS enrollCount,
+            c.audit_status AS auditStatus,
+            null AS auditRemark,
+            c.status AS status,
+            c.partner_id AS partnerId,
+            p.partner_name AS partnerName,
+            null AS recommendTags
+        from jst_contest c
+        left join jst_event_partner p on p.partner_id = c.partner_id and p.del_flag = '0'
+        left join (
+            select contest_id, count(1) AS enroll_count
+            from jst_enroll_record
+            where del_flag = '0'
+            group by contest_id
+        ) er on er.contest_id = c.contest_id
+        where c.del_flag = '0'
+          and c.audit_status = 'online'
+          and c.enroll_end_time > now()
+        order by enrollCount desc, c.enroll_end_time asc, c.contest_id desc
+        limit #{limit}
+    </select>
+
+    <select id="selectRecommendCourses" resultType="com.ruoyi.jst.event.vo.CourseListVO">
+        select
+            c.course_id AS courseId,
+            c.course_name AS courseName,
+            c.course_type AS courseType,
+            c.cover_image AS coverImage,
+            c.price AS price,
+            c.points_price AS pointsPrice,
+            null AS lessonCount,
+            ifnull(l.learner_count, 0) AS learnerCount,
+            c.creator_type AS creatorType,
+            c.creator_id AS creatorId,
+            c.audit_status AS auditStatus,
+            c.status AS status,
+            c.create_time AS createTime,
+            c.update_time AS updateTime
+        from jst_course c
+        left join (
+            select course_id, count(1) AS learner_count
+            from jst_course_learn_record
+            where del_flag = '0'
+            group by course_id
+        ) l on l.course_id = c.course_id
+        where c.del_flag = '0'
+          and c.audit_status = 'approved'
+          and c.status = 'on'
+        order by learnerCount desc, c.update_time desc, c.course_id desc
+        limit #{limit}
+    </select>
+
+    <select id="selectHotTagSources" resultType="com.ruoyi.jst.event.vo.HomeTagSourceVO">
+        select
+            null AS recommendTags,
+            c.category AS category
+        from jst_contest c
+        where c.del_flag = '0'
+          and c.audit_status = 'online'
+          and c.enroll_end_time > now()
+        order by c.update_time desc, c.contest_id desc
+        limit #{limit}
+    </select>
+
+    <select id="selectTopics" resultType="com.ruoyi.jst.event.vo.HomeTopicVO">
+        select
+            n.notice_id AS noticeId,
+            n.title AS title,
+            n.cover_image AS coverImage,
+            n.content AS description,
+            n.remark AS linkUrl,
+            n.publish_time AS publishTime
+        from jst_notice n
+        where n.del_flag = '0'
+          and n.status = 'published'
+          and n.category = 'topic'
+        order by n.top_flag desc, n.publish_time desc, n.notice_id desc
+        limit #{limit}
+    </select>
+
+</mapper>

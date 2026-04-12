@@ -42,6 +42,35 @@
         order by update_time desc, template_id desc
     </select>
 
+    <select id="selectPartnerAvailableList" resultMap="FormTemplateListResult">
+        select template_id, template_name, template_version, owner_type, owner_id,
+               audit_status, status, effective_time, create_time, update_time
+        from jst_enroll_form_template
+        <where>
+            del_flag = '0'
+            <if test="query != null and query.templateName != null and query.templateName != ''">
+                and template_name like concat('%', #{query.templateName}, '%')
+            </if>
+            <if test="query != null and query.auditStatus != null and query.auditStatus != ''">
+                and audit_status = #{query.auditStatus}
+            </if>
+            <if test="query != null and query.status != null">
+                and status = #{query.status}
+            </if>
+            and (
+                (owner_type = 'platform' and audit_status = 'approved' and status = 1)
+                or (owner_type = 'partner' and owner_id = #{partnerId})
+            )
+        </where>
+        order by
+            case
+                when owner_type = 'partner' and owner_id = #{partnerId} then 0
+                else 1
+            end asc,
+            update_time desc,
+            template_id desc
+    </select>
+
     <update id="updateAfterSave">
         update jst_enroll_form_template
         set template_name = #{template.templateName},

@@ -38,4 +38,8 @@ public interface AppointmentRecordMapperExt {
     int countBookedIndividuals(@Param("contestId") Long contestId,
                                @Param("appointmentDate") Date appointmentDate,
                                @Param("sessionCode") String sessionCode);
+
+    List<Long> selectExpiredBookedAppointmentIds(@Param("cutoffDate") Date cutoffDate,
+                                                 @Param("lastAppointmentId") Long lastAppointmentId,
+                                                 @Param("limit") Integer limit);
 }

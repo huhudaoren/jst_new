@@ -154,4 +154,17 @@
           and main_status in ('booked', 'partial_writeoff', 'fully_writeoff')
           and del_flag = '0'
     </select>
+
+    <select id="selectExpiredBookedAppointmentIds" resultType="long">
+        select appointment_id
+        from jst_appointment_record
+        where main_status = 'booked'
+          and appointment_date <![CDATA[ < ]]> #{cutoffDate}
+          and del_flag = '0'
+        <if test="lastAppointmentId != null">
+          and appointment_id <![CDATA[ > ]]> #{lastAppointmentId}
+        </if>
+        order by appointment_id asc
+        limit #{limit}
+    </select>
 </mapper>

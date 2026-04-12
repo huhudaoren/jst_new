@@ -7,6 +7,7 @@ import com.ruoyi.jst.event.dto.WxContestQueryDTO;
 import com.ruoyi.jst.event.vo.CategoryStatVO;
 import com.ruoyi.jst.event.vo.ContestDetailVO;
 import com.ruoyi.jst.event.vo.ContestListVO;
+import com.ruoyi.jst.event.vo.ContestRecommendVO;
 import com.ruoyi.jst.event.vo.WxContestCardVO;
 import com.ruoyi.jst.event.vo.WxContestDetailVO;
 
@@ -34,6 +35,8 @@ public interface ContestService {
 
     void offlineContest(Long contestId);
 
+    void deleteContest(Long contestId);
+
     List<ContestListVO> selectAdminList(ContestQueryReqDTO query);
 
     ContestDetailVO getAdminDetail(Long contestId);
@@ -43,6 +46,8 @@ public interface ContestService {
     WxContestDetailVO getWxDetail(Long contestId);
 
     List<WxContestCardVO> selectHotList(Integer limit);
+
+    ContestRecommendVO getWxRecommend(Long contestId);
 
     List<CategoryStatVO> selectCategoryStats();
 }

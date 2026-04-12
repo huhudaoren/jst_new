@@ -7,6 +7,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.jst.common.audit.OperateLog;
 import com.ruoyi.jst.common.context.JstLoginContext;
+import com.ruoyi.jst.common.event.EnrollAuditEvent;
 import com.ruoyi.jst.common.exception.BizErrorCode;
 import com.ruoyi.jst.common.id.SnowflakeIdWorker;
 import com.ruoyi.jst.common.lock.JstLockTemplate;
@@ -33,8 +34,11 @@ import com.ruoyi.jst.event.vo.EnrollDetailVO;
 import com.ruoyi.jst.event.vo.EnrollListVO;
 import com.ruoyi.jst.event.vo.EnrollSubmitResVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -66,6 +70,7 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
     @Autowired private JstEnrollFormTemplateMapper jstEnrollFormTemplateMapper;
     @Autowired private JstLockTemplate jstLockTemplate;
     @Autowired private SnowflakeIdWorker snowflakeIdWorker;
+    @Autowired private ApplicationEventPublisher eventPublisher;
 
     /**
      * 保存报名草稿。
@@ -280,8 +285,80 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
                 throw new ServiceException("报名审核失败，状态已变更，请刷新后重试",
                         BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
             }
+            if (target == EnrollAuditStatus.APPROVED || target == EnrollAuditStatus.REJECTED) {
+                JstContest contest = requireContest(record.getContestId());
+                Map<String, Object> extraData = new LinkedHashMap<>();
+                extraData.put("contestName", contest.getContestName());
+                extraData.put("rejectReason", req.getAuditRemark());
+                String bizType = target == EnrollAuditStatus.APPROVED ? "enroll_approved" : "enroll_rejected";
+                publishAfterCommit(new EnrollAuditEvent(this, record.getUserId(), enrollId, bizType, extraData));
+            }
             return null;
         });
+    }
+
+    /**
+     * 批量审核报名记录。
+     *
+     * @param enrollIds   报名ID集合
+     * @param auditStatus 目标审核状态
+     * @param remark      审核备注
+     * @return 成功处理条数
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @OperateLog(module = "赛事", action = "ENROLL_BATCH_AUDIT", target = "#{enrollIds}")
+    public int batchAudit(List<Long> enrollIds, String auditStatus, String remark) {
+        // TX: 批量审核整批成功或整批失败
+        if (enrollIds == null || enrollIds.isEmpty()) {
+            throw new ServiceException("报名ID列表不能为空", BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+        }
+        if (StringUtils.isBlank(auditStatus)) {
+            throw new ServiceException("审核结果不能为空", BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+        }
+        String normalizedRemark = StringUtils.trim(remark);
+        if (StringUtils.isBlank(normalizedRemark)) {
+            normalizedRemark = null;
+        }
+        if ("rejected".equals(auditStatus) && normalizedRemark == null) {
+            throw new ServiceException("驳回时必须填写审核备注", BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+        }
+
+        Set<Long> uniqueIds = new LinkedHashSet<>();
+        for (Long enrollId : enrollIds) {
+            if (enrollId != null) {
+                uniqueIds.add(enrollId);
+            }
+        }
+        if (uniqueIds.isEmpty()) {
+            throw new ServiceException("报名ID列表不能为空", BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+        }
+
+        int count = 0;
+        EnrollAuditReqDTO req = new EnrollAuditReqDTO();
+        req.setResult(auditStatus);
+        req.setAuditRemark(normalizedRemark);
+        for (Long enrollId : uniqueIds) {
+            audit(enrollId, req);
+            count++;
+        }
+        return count;
+    }
+
+    private void publishAfterCommit(Object event) {
+        if (event == null) {
+            return;
+        }
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    eventPublisher.publishEvent(event);
+                }
+            });
+            return;
+        }
+        eventPublisher.publishEvent(event);
     }
 
     private JstEnrollRecord buildNewRecord(Long contestId, Long participantId, Long userId) {

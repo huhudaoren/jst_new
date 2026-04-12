@@ -219,6 +219,28 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     /**
+     * 查询赛事方可用模板列表（公共模板 + 当前赛事方模板）。
+     *
+     * @param query     查询条件
+     * @param partnerId 当前赛事方ID
+     * @return 列表结果
+     */
+    @Override
+    public List<FormTemplateListVO> selectPartnerAvailableList(FormTemplateQueryReqDTO query, Long partnerId) {
+        if (query == null) {
+            query = new FormTemplateQueryReqDTO();
+        }
+        Long currentPartnerId = partnerId != null ? partnerId : JstLoginContext.currentPartnerId();
+        if (currentPartnerId == null) {
+            throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
+                    BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+        }
+        query.setOwnerType(null);
+        query.setOwnerId(null);
+        return formTemplateMapperExt.selectPartnerAvailableList(currentPartnerId, query);
+    }
+
+    /**
      * 查询后台模板详情。
      *
      * @param templateId 模板ID

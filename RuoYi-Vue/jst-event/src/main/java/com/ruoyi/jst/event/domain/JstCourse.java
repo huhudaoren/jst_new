@@ -43,6 +43,34 @@ public class JstCourse extends BaseEntity
     @Excel(name = "积分价格")
     private Long pointsPrice;
 
+    /** 课时数 */
+    @Excel(name = "课时数")
+    private Integer lessonCount;
+
+    /** 学习人数 */
+    @Excel(name = "学习人数")
+    private Integer learnerCount;
+
+    /** 总时长如12小时30分 */
+    @Excel(name = "总时长如12小时30分")
+    private String totalDuration;
+
+    /** 课程目录JSON */
+    @Excel(name = "课程目录JSON")
+    private String chaptersJson;
+
+    /** 讲师姓名 */
+    @Excel(name = "讲师姓名")
+    private String teacherName;
+
+    /** 讲师头像 */
+    @Excel(name = "讲师头像")
+    private String teacherAvatar;
+
+    /** 讲师简介 */
+    @Excel(name = "讲师简介")
+    private String teacherDesc;
+
     /** 创建者类型：platform/channel */
     @Excel(name = "创建者类型：platform/channel")
     private String creatorType;
@@ -140,6 +168,76 @@ public class JstCourse extends BaseEntity
         return pointsPrice;
     }
 
+    public void setLessonCount(Integer lessonCount)
+    {
+        this.lessonCount = lessonCount;
+    }
+
+    public Integer getLessonCount()
+    {
+        return lessonCount;
+    }
+
+    public void setLearnerCount(Integer learnerCount)
+    {
+        this.learnerCount = learnerCount;
+    }
+
+    public Integer getLearnerCount()
+    {
+        return learnerCount;
+    }
+
+    public void setTotalDuration(String totalDuration)
+    {
+        this.totalDuration = totalDuration;
+    }
+
+    public String getTotalDuration()
+    {
+        return totalDuration;
+    }
+
+    public void setChaptersJson(String chaptersJson)
+    {
+        this.chaptersJson = chaptersJson;
+    }
+
+    public String getChaptersJson()
+    {
+        return chaptersJson;
+    }
+
+    public void setTeacherName(String teacherName)
+    {
+        this.teacherName = teacherName;
+    }
+
+    public String getTeacherName()
+    {
+        return teacherName;
+    }
+
+    public void setTeacherAvatar(String teacherAvatar)
+    {
+        this.teacherAvatar = teacherAvatar;
+    }
+
+    public String getTeacherAvatar()
+    {
+        return teacherAvatar;
+    }
+
+    public void setTeacherDesc(String teacherDesc)
+    {
+        this.teacherDesc = teacherDesc;
+    }
+
+    public String getTeacherDesc()
+    {
+        return teacherDesc;
+    }
+
     public void setCreatorType(String creatorType) 
     {
         this.creatorType = creatorType;
@@ -220,6 +318,13 @@ public class JstCourse extends BaseEntity
             .append("description", getDescription())
             .append("price", getPrice())
             .append("pointsPrice", getPointsPrice())
+            .append("lessonCount", getLessonCount())
+            .append("learnerCount", getLearnerCount())
+            .append("totalDuration", getTotalDuration())
+            .append("chaptersJson", getChaptersJson())
+            .append("teacherName", getTeacherName())
+            .append("teacherAvatar", getTeacherAvatar())
+            .append("teacherDesc", getTeacherDesc())
             .append("creatorType", getCreatorType())
             .append("creatorId", getCreatorId())
             .append("maicSourceId", getMaicSourceId())

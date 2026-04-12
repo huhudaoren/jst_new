@@ -7,6 +7,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.jst.event.dto.WxContestQueryDTO;
 import com.ruoyi.jst.event.service.ContestService;
 import com.ruoyi.jst.event.vo.CategoryStatVO;
+import com.ruoyi.jst.event.vo.ContestRecommendVO;
 import com.ruoyi.jst.event.vo.WxContestCardVO;
 import com.ruoyi.jst.event.vo.WxContestDetailVO;
 import jakarta.validation.Valid;
@@ -70,6 +71,18 @@ public class WxContestController extends BaseController {
     public AjaxResult hot(@RequestParam(value = "limit", defaultValue = "6") Integer limit) {
         List<WxContestCardVO> list = contestService.selectHotList(limit);
         return AjaxResult.success(list);
+    }
+
+    /**
+     * 赛事详情推荐内容。
+     *
+     * @param contestId 赛事ID
+     * @return 推荐结果
+     */
+    @GetMapping("/{contestId}/recommend")
+    public AjaxResult recommend(@PathVariable("contestId") Long contestId) {
+        ContestRecommendVO vo = contestService.getWxRecommend(contestId);
+        return AjaxResult.success(vo);
     }
 
     /**

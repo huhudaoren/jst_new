@@ -3197,3 +3197,286 @@ client.test("FIX5-7 public cert verify should succeed", function() {
   client.assert(response.body.data === null || typeof response.body.data === "object");
 });
 %}
+
+### =====================================================================
+### MSG-TRIGGER. 消息触发器联动
+### Preconditions:
+###   1. ruoyi-admin 在 8080 启动
+###   2. 99-test-fixtures.sql 已导入
+### =====================================================================
+
+### MSG-1-0. login student 1001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("msg_user_token", response.body.data.token);
+client.test("MSG-1-0 login should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MSG-1-1. create order for enroll 8908
+POST {{baseUrl}}/jst/wx/order/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{msg_user_token}}
+
+{
+  "enrollId": 8908,
+  "pointsToUse": 0,
+  "payMethod": "wechat"
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("msg_order_id", response.body.data.orderId);
+}
+client.test("MSG-1-1 create order should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MSG-1-2. mock pay success
+POST {{baseUrl}}/jst/wx/pay/mock-success?orderId={{msg_order_id}}
+Authorization: Bearer {{msg_user_token}}
+
+> {%
+client.test("MSG-1-2 mock pay should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MSG-1-3. verify message contains order_paid
+GET {{baseUrl}}/jst/wx/message/my?pageNum=1&pageSize=20
+Authorization: Bearer {{msg_user_token}}
+
+> {%
+client.test("MSG-1-3 should contain order_paid", function() {
+  client.assert(response.body.code === 200);
+  var list = response.body.data || [];
+  client.assert(Array.isArray(list));
+  var found = list.some(function(item) { return item && item.bizType === "order_paid"; });
+  client.assert(found);
+});
+%}
+
+### MSG-2-0. submit channel auth apply
+POST {{baseUrl}}/jst/wx/channel/auth/apply
+Content-Type: {{contentType}}
+Authorization: Bearer {{msg_user_token}}
+
+{
+  "channelType": "teacher",
+  "applyName": "MSG触发测试教师认证",
+  "materialsJson": "{\"teacher_cert_url\":\"https://fixture.example.com/cert/msg-trigger.jpg\"}"
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("msg_apply_id", response.body.data.applyId);
+}
+client.test("MSG-2-0 apply should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MSG-2-1. login admin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+> {%
+client.global.set("msg_admin_token", response.body.token);
+client.test("MSG-2-1 admin login should succeed", function() {
+  client.assert(!!response.body.token);
+});
+%}
+
+### MSG-2-2. approve channel apply
+POST {{baseUrl}}/jst/organizer/channel/apply/{{msg_apply_id}}/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{msg_admin_token}}
+
+{
+  "auditRemark": "资料审核通过",
+  "tags": "msg-trigger"
+}
+
+> {%
+client.test("MSG-2-2 approve should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MSG-2-3. verify message contains auth_approved
+GET {{baseUrl}}/jst/wx/message/my?pageNum=1&pageSize=20
+Authorization: Bearer {{msg_user_token}}
+
+> {%
+client.test("MSG-2-3 should contain auth_approved", function() {
+  client.assert(response.body.code === 200);
+  var list = response.body.data || [];
+  client.assert(Array.isArray(list));
+  var found = list.some(function(item) { return item && item.bizType === "auth_approved"; });
+  client.assert(found);
+});
+%}
+
+### MSG-3-1. mark all messages read
+POST {{baseUrl}}/jst/wx/message/read-all
+Authorization: Bearer {{msg_user_token}}
+
+> {%
+client.test("MSG-3-1 read all should succeed", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### MSG-3-2. verify all readStatus=1
+GET {{baseUrl}}/jst/wx/message/my?pageNum=1&pageSize=20
+Authorization: Bearer {{msg_user_token}}
+
+> {%
+client.test("MSG-3-2 all messages should be read", function() {
+  client.assert(response.body.code === 200);
+  var list = response.body.data || [];
+  client.assert(Array.isArray(list));
+  var allRead = list.every(function(item) { return item && (item.readStatus === 1 || item.readFlag === 1); });
+  client.assert(allRead);
+});
+%}
+
+### =====================================================================
+### FEAT-INDEX-ENRICH-BE 首页聚合接口
+### Preconditions:
+###   1. ruoyi-admin 在 8080 启动
+###   2. 99-test-fixtures.sql 已导入
+### =====================================================================
+
+### HOME-1 推荐赛事
+GET {{baseUrl}}/jst/wx/home/recommend-contests
+
+> {%
+client.test("HOME-1 recommend contests should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+  client.assert(response.body.data.length <= 8);
+});
+%}
+
+### HOME-2 推荐课程
+GET {{baseUrl}}/jst/wx/home/recommend-courses
+
+> {%
+client.test("HOME-2 recommend courses should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+  client.assert(response.body.data.length <= 6);
+});
+%}
+
+### HOME-3 热门标签
+GET {{baseUrl}}/jst/wx/home/hot-tags
+
+> {%
+client.test("HOME-3 hot tags should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+  client.assert(response.body.data.length <= 12);
+});
+%}
+
+### HOME-4 专题活动
+GET {{baseUrl}}/jst/wx/home/topics
+
+> {%
+client.test("HOME-4 topics should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+  client.assert(response.body.data.length <= 3);
+});
+%}
+
+### =====================================================================
+### FEAT-CONTEST-DETAIL-BE 赛事详情推荐接口
+### Preconditions:
+###   1. ruoyi-admin 在 8080 启动
+###   2. 已执行 99-migration-contest-detail-fields.sql
+### =====================================================================
+
+### CONTEST-DETAIL-BE-1 推荐内容（happy path）
+GET {{baseUrl}}/jst/wx/contest/8809/recommend
+
+> {%
+client.test("CONTEST-DETAIL-BE-1 recommend should succeed", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data);
+  client.assert(Array.isArray(response.body.data.relatedContests));
+  client.assert(Array.isArray(response.body.data.relatedCourses));
+  client.assert(response.body.data.relatedContests.length <= 6);
+  client.assert(response.body.data.relatedCourses.length <= 4);
+});
+%}
+
+### CONTEST-DETAIL-BE-2 赛事未上架（non-happy path）
+GET {{baseUrl}}/jst/wx/contest/8808/recommend
+
+> {%
+client.test("CONTEST-DETAIL-BE-2 not online should fail", function() {
+  client.assert(response.body.code === 20003);
+});
+%}
+
+### =====================================================================
+### FEAT-FILTER-BE 多级筛选接口
+### =====================================================================
+
+### FILTER-1 赛事分类字典
+GET {{baseUrl}}/jst/wx/dict/contest-categories
+
+> {%
+client.test("FILTER-1 contest categories should succeed", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### FILTER-2 课程分类字典
+GET {{baseUrl}}/jst/wx/dict/course-categories
+
+> {%
+client.test("FILTER-2 course categories should succeed", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### FILTER-3 赛事列表多条件筛选
+GET {{baseUrl}}/jst/wx/contest/list?pageNum=1&pageSize=10&category=art&sortBy=hot&eventType=online&tag=%E8%89%BA%E6%9C%AF
+
+> {%
+client.test("FILTER-3 contest list with filters should succeed", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.rows));
+});
+%}
+
+### FILTER-4 课程列表分类+排序筛选
+GET {{baseUrl}}/jst/wx/course/list?pageNum=1&pageSize=10&category=ai_maic&sortBy=hot
+
+> {%
+client.test("FILTER-4 course list with filters should succeed", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.rows));
+});
+%}

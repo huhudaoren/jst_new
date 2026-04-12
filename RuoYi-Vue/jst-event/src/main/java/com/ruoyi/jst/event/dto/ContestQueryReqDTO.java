@@ -1,5 +1,7 @@
 package com.ruoyi.jst.event.dto;
 
+import com.ruoyi.common.core.domain.BaseEntity;
+
 import java.util.Date;
 
 /**
@@ -8,7 +10,7 @@ import java.util.Date;
  * @author jst
  * @since 1.0.0
  */
-public class ContestQueryReqDTO {
+public class ContestQueryReqDTO extends BaseEntity {
 
     private String contestName;
 

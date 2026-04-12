@@ -25,6 +25,16 @@ public interface FormTemplateMapperExt {
     List<FormTemplateListVO> selectFormTemplateList(@Param("query") FormTemplateQueryReqDTO query);
 
     /**
+     * 查询赛事方可用模板（公共模板 + 当前赛事方模板）。
+     *
+     * @param partnerId 当前赛事方ID
+     * @param query     查询条件
+     * @return 模板列表
+     */
+    List<FormTemplateListVO> selectPartnerAvailableList(@Param("partnerId") Long partnerId,
+                                                        @Param("query") FormTemplateQueryReqDTO query);
+
+    /**
      * 保存编辑后的模板内容，并做版本自增与乐观锁控制。
      *
      * @param template             模板实体

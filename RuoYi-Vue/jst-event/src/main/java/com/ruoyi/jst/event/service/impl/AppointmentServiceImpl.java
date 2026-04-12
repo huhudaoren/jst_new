@@ -164,6 +164,30 @@ public class AppointmentServiceImpl implements AppointmentService {
         return detail;
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean expireBySystem(Long appointmentId) {
+        EventAppointmentRecord record = appointmentRecordMapperExt.selectById(appointmentId);
+        if (record == null || !"0".equals(defaultDelFlag(record.getDelFlag()))) {
+            return false;
+        }
+        AppointmentStatus current = AppointmentStatus.fromDb(record.getMainStatus());
+        if (current != AppointmentStatus.BOOKED) {
+            return false;
+        }
+        // SM-11: booked -> expired
+        current.assertCanTransitTo(AppointmentStatus.EXPIRED);
+        Date now = DateUtils.getNowDate();
+        String operator = "system";
+        int updated = appointmentRecordMapperExt.updateMainStatus(appointmentId, AppointmentStatus.BOOKED.dbValue(),
+                AppointmentStatus.EXPIRED.dbValue(), operator, now);
+        if (updated == 0) {
+            return false;
+        }
+        writeoffItemMapperExt.expireUnusedByAppointmentId(appointmentId, operator, now);
+        return true;
+    }
+
     private AppointmentApplyResVO doApply(Long userId, JstContest contest, ParticipantSnapshot participant,
                                           AppointmentApplyDTO req, List<WriteoffConfigItem> configItems,
                                           String operator) {

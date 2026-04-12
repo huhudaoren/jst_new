@@ -58,4 +58,13 @@ public interface IJstRebateLedgerService
      * @return 结果
      */
     public int deleteJstRebateLedgerByLedgerId(Long ledgerId);
+
+    /**
+     * 系统任务自动计提：pending_accrual -> withdrawable。
+     *
+     * @param ledgerId 台账ID
+     * @param remark   计提备注
+     * @return true=成功计提；false=状态已变化或条件不满足
+     */
+    public boolean settlePendingAccrual(Long ledgerId, String remark);
 }

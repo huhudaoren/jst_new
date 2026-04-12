@@ -92,72 +92,48 @@ export const constantRoutes = [
   }
 ]
 
-export const partnerHomeRoute = {
-  path: '/partner',
-  component: Layout,
-  meta: { roles: ['jst_partner'] },
-  children: [
-    {
-      path: 'home',
-      component: () => import('@/views/partner/home'),
-      name: 'PartnerHome',
-      meta: { title: '工作台', icon: 'dashboard', affix: true }
-    },
-    {
-      path: 'contest-list',
-      component: () => import('@/views/partner/contest-list'),
-      name: 'PartnerContestList',
-      meta: { title: '赛事管理', icon: 'flag' }
-    },
-    {
-      path: 'contest-edit',
-      component: () => import('@/views/partner/contest-edit'),
-      name: 'PartnerContestCreate',
-      hidden: true,
-      meta: { title: '新建赛事', activeMenu: '/partner/contest-list' }
-    },
-    {
-      path: 'contest-edit/:contestId(\\d+)',
-      component: () => import('@/views/partner/contest-edit'),
-      name: 'PartnerContestEdit',
-      hidden: true,
-      meta: { title: '编辑赛事', activeMenu: '/partner/contest-list' }
-    },
-    {
-      path: 'enroll-manage',
-      component: () => import('@/views/partner/enroll-manage'),
-      name: 'PartnerEnrollManage',
-      meta: { title: '报名审核', icon: 'form' }
-    },
-    {
-      path: 'score-manage',
-      component: () => import('@/views/partner/score-manage'),
-      name: 'PartnerScoreManage',
-      meta: { title: '成绩管理', icon: 'edit' }
-    },
-    {
-      path: 'cert-manage',
-      component: () => import('@/views/partner/cert-manage'),
-      name: 'PartnerCertManage',
-      meta: { title: '证书管理', icon: 'education' }
-    },
-    {
-      path: 'writeoff',
-      component: () => import('@/views/partner/writeoff'),
-      name: 'PartnerWriteoff',
-      meta: { title: '现场核销', icon: 'form' }
-    },
-    {
-      path: 'settlement',
-      component: () => import('@/views/partner/settlement'),
-      name: 'PartnerSettlement',
-      meta: { title: '结算中心', icon: 'money' }
-    }
-  ]
-}
-
-// Dynamic routes
+// Dynamic routes (hidden sub-pages not in backend menu tree)
 export const dynamicRoutes = [
+  {
+    path: '/partner',
+    component: Layout,
+    hidden: true,
+    permissions: ['jst:partner:contest:list'],
+    children: [
+      {
+        path: 'contest-edit',
+        component: () => import('@/views/partner/contest-edit'),
+        name: 'PartnerContestCreate',
+        meta: { title: '新建赛事', activeMenu: '/partner/contest-list' }
+      },
+      {
+        path: 'contest-edit/:contestId(\\d+)',
+        component: () => import('@/views/partner/contest-edit'),
+        name: 'PartnerContestEdit',
+        meta: { title: '编辑赛事', activeMenu: '/partner/contest-list' }
+      }
+    ]
+  },
+  {
+    path: '/jst',
+    component: Layout,
+    hidden: true,
+    permissions: ['jst:event:course:list'],
+    children: [
+      {
+        path: 'course-edit',
+        component: () => import('@/views/jst/course/edit'),
+        name: 'JstCourseCreate',
+        meta: { title: '新增课程', activeMenu: '/jst/course' }
+      },
+      {
+        path: 'course-edit/:courseId(\\d+)',
+        component: () => import('@/views/jst/course/edit'),
+        name: 'JstCourseEdit',
+        meta: { title: '编辑课程', activeMenu: '/jst/course' }
+      }
+    ]
+  },
   {
     path: '/system/user-auth',
     component: Layout,

@@ -60,6 +60,15 @@ public interface FormTemplateService {
     List<FormTemplateListVO> selectList(FormTemplateQueryReqDTO query);
 
     /**
+     * 查询赛事方可用模板列表（公共模板 + 当前赛事方模板）。
+     *
+     * @param query     查询条件
+     * @param partnerId 当前赛事方ID
+     * @return 列表结果
+     */
+    List<FormTemplateListVO> selectPartnerAvailableList(FormTemplateQueryReqDTO query, Long partnerId);
+
+    /**
      * 查询后台模板详情。
      *
      * @param templateId 模板ID

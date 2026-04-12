@@ -55,7 +55,7 @@
     <div class="toolbar-row">
       <div class="toolbar-hint">
         <el-alert
-          title="当前页面桥接 F7 /jst/event/contest 接口；partner 前缀路由和部分字段缺口已写入反馈文档。"
+          title="当前页面已切换至 /jst/partner/contest 接口；如字段缺口仍存在，请以任务卡反馈文档为准。"
           type="info"
           :closable="false"
           show-icon

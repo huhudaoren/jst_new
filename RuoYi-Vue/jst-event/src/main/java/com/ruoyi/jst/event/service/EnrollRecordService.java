@@ -82,4 +82,14 @@ public interface EnrollRecordService {
      * @param req      审核请求
      */
     void audit(Long enrollId, EnrollAuditReqDTO req);
+
+    /**
+     * 批量审核报名记录。
+     *
+     * @param enrollIds   报名ID集合
+     * @param auditStatus 目标审核状态
+     * @param remark      审核备注
+     * @return 成功处理数量
+     */
+    int batchAudit(List<Long> enrollIds, String auditStatus, String remark);
 }

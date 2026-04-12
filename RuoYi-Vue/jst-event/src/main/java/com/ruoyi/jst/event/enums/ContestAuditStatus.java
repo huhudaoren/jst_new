@@ -32,7 +32,7 @@ public enum ContestAuditStatus {
         ALLOWED.put(DRAFT, EnumSet.of(PENDING));
         ALLOWED.put(PENDING, EnumSet.of(APPROVED, REJECTED));
         ALLOWED.put(APPROVED, EnumSet.of(ONLINE));
-        ALLOWED.put(REJECTED, Collections.emptySet());
+        ALLOWED.put(REJECTED, EnumSet.of(PENDING));
         ALLOWED.put(ONLINE, EnumSet.of(OFFLINE));
         ALLOWED.put(OFFLINE, Collections.emptySet());
     }

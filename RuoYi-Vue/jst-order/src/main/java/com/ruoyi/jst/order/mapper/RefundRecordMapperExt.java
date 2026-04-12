@@ -19,6 +19,10 @@ public interface RefundRecordMapperExt {
 
     int countBlockingByOrderId(@Param("orderId") Long orderId);
 
+    List<Long> selectTimeoutPendingRefundIds(@Param("deadlineTime") Date deadlineTime,
+                                             @Param("lastRefundId") Long lastRefundId,
+                                             @Param("limit") Integer limit);
+
     int updateStatusByExpected(@Param("refundId") Long refundId,
                                @Param("expectedStatus") String expectedStatus,
                                @Param("targetStatus") String targetStatus,

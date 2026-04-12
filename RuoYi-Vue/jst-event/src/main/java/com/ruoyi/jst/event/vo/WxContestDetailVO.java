@@ -31,6 +31,10 @@ public class WxContestDetailVO {
     private Integer appointmentCapacity;
     private String writeoffConfig;
     private Integer allowRepeatAppointment;
+    private String scheduleJson;
+    private String awardsJson;
+    private String faqJson;
+    private String recommendTags;
     private String certRuleJson;
     private String scoreRuleJson;
     private Long aftersaleDays;
@@ -193,6 +197,38 @@ public class WxContestDetailVO {
 
     public void setAllowRepeatAppointment(Integer allowRepeatAppointment) {
         this.allowRepeatAppointment = allowRepeatAppointment;
+    }
+
+    public String getScheduleJson() {
+        return scheduleJson;
+    }
+
+    public void setScheduleJson(String scheduleJson) {
+        this.scheduleJson = scheduleJson;
+    }
+
+    public String getAwardsJson() {
+        return awardsJson;
+    }
+
+    public void setAwardsJson(String awardsJson) {
+        this.awardsJson = awardsJson;
+    }
+
+    public String getFaqJson() {
+        return faqJson;
+    }
+
+    public void setFaqJson(String faqJson) {
+        this.faqJson = faqJson;
+    }
+
+    public String getRecommendTags() {
+        return recommendTags;
+    }
+
+    public void setRecommendTags(String recommendTags) {
+        this.recommendTags = recommendTags;
     }
 
     public String getCertRuleJson() {

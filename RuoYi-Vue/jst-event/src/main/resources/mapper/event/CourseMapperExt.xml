@@ -12,6 +12,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="description" column="description"/>
         <result property="price" column="price"/>
         <result property="pointsPrice" column="points_price"/>
+        <result property="lessonCount" column="lesson_count"/>
+        <result property="learnerCount" column="learner_count"/>
+        <result property="totalDuration" column="total_duration"/>
+        <result property="chaptersJson" column="chapters_json"/>
+        <result property="teacherName" column="teacher_name"/>
+        <result property="teacherAvatar" column="teacher_avatar"/>
+        <result property="teacherDesc" column="teacher_desc"/>
         <result property="creatorType" column="creator_type"/>
         <result property="creatorId" column="creator_id"/>
         <result property="maicSourceId" column="maic_source_id"/>
@@ -33,6 +40,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="coverImage" column="cover_image"/>
         <result property="price" column="price"/>
         <result property="pointsPrice" column="points_price"/>
+        <result property="lessonCount" column="lesson_count"/>
+        <result property="learnerCount" column="learner_count"/>
         <result property="creatorType" column="creator_type"/>
         <result property="creatorId" column="creator_id"/>
         <result property="auditStatus" column="audit_status"/>
@@ -49,6 +58,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="description" column="description"/>
         <result property="price" column="price"/>
         <result property="pointsPrice" column="points_price"/>
+        <result property="lessonCount" column="lesson_count"/>
+        <result property="learnerCount" column="learner_count"/>
+        <result property="totalDuration" column="total_duration"/>
+        <result property="chaptersJson" column="chapters_json"/>
+        <result property="teacherName" column="teacher_name"/>
+        <result property="teacherAvatar" column="teacher_avatar"/>
+        <result property="teacherDesc" column="teacher_desc"/>
         <result property="creatorType" column="creator_type"/>
         <result property="creatorId" column="creator_id"/>
         <result property="maicSourceId" column="maic_source_id"/>
@@ -68,6 +84,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="description" column="description"/>
         <result property="price" column="price"/>
         <result property="pointsPrice" column="points_price"/>
+        <result property="lessonCount" column="lesson_count"/>
+        <result property="learnerCount" column="learner_count"/>
+        <result property="totalDuration" column="total_duration"/>
+        <result property="chaptersJson" column="chapters_json"/>
+        <result property="teacherName" column="teacher_name"/>
+        <result property="teacherAvatar" column="teacher_avatar"/>
+        <result property="teacherDesc" column="teacher_desc"/>
     </resultMap>
 
     <resultMap id="WxCourseDetailVoMap" type="com.ruoyi.jst.event.vo.WxCourseDetailVO">
@@ -93,6 +116,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <sql id="CourseColumns">
         course_id, course_name, course_type, cover_image, description, price, points_price,
+        lesson_count, learner_count, total_duration, chapters_json, teacher_name, teacher_avatar, teacher_desc,
         creator_type, creator_id, maic_source_id, audit_status, status, visible_scope,
         create_by, create_time, update_by, update_time, remark, del_flag
     </sql>
@@ -101,10 +125,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             useGeneratedKeys="true" keyProperty="courseId">
         INSERT INTO jst_course (
             course_name, course_type, cover_image, description, price, points_price,
+            lesson_count, learner_count, total_duration, chapters_json, teacher_name, teacher_avatar, teacher_desc,
             creator_type, creator_id, maic_source_id, audit_status, status, visible_scope,
             create_by, create_time, update_by, update_time, remark, del_flag
         ) VALUES (
             #{courseName}, #{courseType}, #{coverImage}, #{description}, #{price}, #{pointsPrice,jdbcType=BIGINT},
+            #{lessonCount,jdbcType=INTEGER}, #{learnerCount,jdbcType=INTEGER}, #{totalDuration,jdbcType=VARCHAR},
+            #{chaptersJson,jdbcType=LONGVARCHAR}, #{teacherName,jdbcType=VARCHAR}, #{teacherAvatar,jdbcType=VARCHAR},
+            #{teacherDesc,jdbcType=VARCHAR},
             #{creatorType}, #{creatorId,jdbcType=BIGINT}, #{maicSourceId,jdbcType=VARCHAR}, #{auditStatus}, #{status},
             #{visibleScope,jdbcType=VARCHAR}, #{createBy}, #{createTime}, #{updateBy}, #{updateTime},
             #{remark,jdbcType=VARCHAR}, #{delFlag}
@@ -126,6 +154,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             description = #{description},
             price = #{price},
             points_price = #{pointsPrice,jdbcType=BIGINT},
+            lesson_count = #{lessonCount,jdbcType=INTEGER},
+            learner_count = #{learnerCount,jdbcType=INTEGER},
+            total_duration = #{totalDuration,jdbcType=VARCHAR},
+            chapters_json = #{chaptersJson,jdbcType=LONGVARCHAR},
+            teacher_name = #{teacherName,jdbcType=VARCHAR},
+            teacher_avatar = #{teacherAvatar,jdbcType=VARCHAR},
+            teacher_desc = #{teacherDesc,jdbcType=VARCHAR},
             creator_type = #{creatorType},
             creator_id = #{creatorId,jdbcType=BIGINT},
             maic_source_id = #{maicSourceId,jdbcType=VARCHAR},
@@ -160,7 +195,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectAdminList"
             parameterType="com.ruoyi.jst.event.dto.CourseQueryReqDTO"
             resultMap="CourseListVoMap">
-        SELECT course_id, course_name, course_type, cover_image, price, points_price,
+        SELECT course_id, course_name, course_type, cover_image, price, points_price, lesson_count, learner_count,
                creator_type, creator_id, audit_status, status, create_time, update_time
         FROM jst_course
         <where>
@@ -183,6 +218,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectAdminDetail" resultMap="CourseDetailVoMap">
         SELECT course_id, course_name, course_type, cover_image, description, price, points_price,
+               lesson_count, learner_count, total_duration, chapters_json, teacher_name, teacher_avatar, teacher_desc,
                creator_type, creator_id, maic_source_id, audit_status, status, visible_scope,
                remark, create_time, update_time
         FROM jst_course
@@ -208,12 +244,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="courseType != null and courseType != ''">
                 AND course_type = #{courseType}
             </if>
+            <if test="category != null and category != ''">
+                AND (
+                    course_type = #{category}
+                    OR course_name LIKE CONCAT('%', #{category}, '%')
+                    OR description LIKE CONCAT('%', #{category}, '%')
+                    OR remark LIKE CONCAT('%', #{category}, '%')
+                )
+            </if>
         </where>
-        ORDER BY update_time DESC, course_id DESC
+        <choose>
+            <when test="sortBy == 'hot'">
+                ORDER BY IFNULL(learner_count, 0) DESC, update_time DESC, course_id DESC
+            </when>
+            <when test="sortBy == 'newest'">
+                ORDER BY create_time DESC, course_id DESC
+            </when>
+            <otherwise>
+                ORDER BY update_time DESC, course_id DESC
+            </otherwise>
+        </choose>
     </select>
 
     <select id="selectWxDetail" resultMap="WxCourseDetailVoMap">
-        SELECT course_id, course_name, course_type, cover_image, description, price, points_price
+        SELECT course_id, course_name, course_type, cover_image, description, price, points_price,
+               lesson_count, learner_count, total_duration, chapters_json, teacher_name, teacher_avatar, teacher_desc
         FROM jst_course
         WHERE course_id = #{courseId}
           AND del_flag = '0'

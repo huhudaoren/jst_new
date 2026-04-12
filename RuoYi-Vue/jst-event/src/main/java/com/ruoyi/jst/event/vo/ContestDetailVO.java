@@ -31,11 +31,17 @@ public class ContestDetailVO {
     private Integer appointmentCapacity;
     private String writeoffConfig;
     private Integer allowRepeatAppointment;
+    private Integer allowAppointmentRefund;
     private String certRuleJson;
     private String scoreRuleJson;
+    private String scheduleJson;
+    private String awardsJson;
+    private String faqJson;
+    private String recommendTags;
     private Long formTemplateId;
     private Long aftersaleDays;
     private String auditStatus;
+    private String auditRemark;
     private String status;
     private Long createdUserId;
 
@@ -199,6 +205,14 @@ public class ContestDetailVO {
         this.allowRepeatAppointment = allowRepeatAppointment;
     }
 
+    public Integer getAllowAppointmentRefund() {
+        return allowAppointmentRefund;
+    }
+
+    public void setAllowAppointmentRefund(Integer allowAppointmentRefund) {
+        this.allowAppointmentRefund = allowAppointmentRefund;
+    }
+
     public String getCertRuleJson() {
         return certRuleJson;
     }
@@ -213,6 +227,38 @@ public class ContestDetailVO {
 
     public void setScoreRuleJson(String scoreRuleJson) {
         this.scoreRuleJson = scoreRuleJson;
+    }
+
+    public String getScheduleJson() {
+        return scheduleJson;
+    }
+
+    public void setScheduleJson(String scheduleJson) {
+        this.scheduleJson = scheduleJson;
+    }
+
+    public String getAwardsJson() {
+        return awardsJson;
+    }
+
+    public void setAwardsJson(String awardsJson) {
+        this.awardsJson = awardsJson;
+    }
+
+    public String getFaqJson() {
+        return faqJson;
+    }
+
+    public void setFaqJson(String faqJson) {
+        this.faqJson = faqJson;
+    }
+
+    public String getRecommendTags() {
+        return recommendTags;
+    }
+
+    public void setRecommendTags(String recommendTags) {
+        this.recommendTags = recommendTags;
     }
 
     public Long getFormTemplateId() {
@@ -237,6 +283,14 @@ public class ContestDetailVO {
 
     public void setAuditStatus(String auditStatus) {
         this.auditStatus = auditStatus;
+    }
+
+    public String getAuditRemark() {
+        return auditRemark;
+    }
+
+    public void setAuditRemark(String auditRemark) {
+        this.auditRemark = auditRemark;
     }
 
     public String getStatus() {

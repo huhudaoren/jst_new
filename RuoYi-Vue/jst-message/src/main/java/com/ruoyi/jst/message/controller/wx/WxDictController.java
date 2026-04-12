@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +29,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/jst/wx/dict")
 public class WxDictController extends BaseController {
+
+    private static final String CONTEST_CATEGORY_DICT_TYPE = "jst_contest_category";
+    private static final String COURSE_CATEGORY_DICT_TYPE = "jst_course_category";
 
     @Autowired
     private NoticeService noticeService;
@@ -49,5 +54,47 @@ public class WxDictController extends BaseController {
             String dictType) {
         List<Map<String, Object>> list = noticeService.selectDictOptions(dictType);
         return AjaxResult.success(list);
+    }
+
+    /**
+     * 查询赛事分类字典。
+     *
+     * @return 字典项列表（label/value）
+     * @关联表 sys_dict_data
+     * @关联状态机 无
+     * @关联权限 @Anonymous
+     */
+    @Anonymous
+    @GetMapping("/contest-categories")
+    public AjaxResult contestCategories() {
+        return AjaxResult.success(onlyLabelValue(noticeService.selectDictOptions(CONTEST_CATEGORY_DICT_TYPE)));
+    }
+
+    /**
+     * 查询课程分类字典。
+     *
+     * @return 字典项列表（label/value）
+     * @关联表 sys_dict_data
+     * @关联状态机 无
+     * @关联权限 @Anonymous
+     */
+    @Anonymous
+    @GetMapping("/course-categories")
+    public AjaxResult courseCategories() {
+        return AjaxResult.success(onlyLabelValue(noticeService.selectDictOptions(COURSE_CATEGORY_DICT_TYPE)));
+    }
+
+    private List<Map<String, Object>> onlyLabelValue(List<Map<String, Object>> source) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        if (source == null || source.isEmpty()) {
+            return result;
+        }
+        for (Map<String, Object> item : source) {
+            Map<String, Object> simple = new LinkedHashMap<>();
+            simple.put("label", item.get("label"));
+            simple.put("value", item.get("value"));
+            result.add(simple);
+        }
+        return result;
     }
 }

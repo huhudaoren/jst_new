@@ -17,6 +17,7 @@ import com.ruoyi.jst.organizer.dto.ChannelAuthResubmitReqDTO;
 import com.ruoyi.jst.organizer.dto.RejectReqDTO;
 import com.ruoyi.jst.organizer.enums.ChannelAuthStatus;
 import com.ruoyi.jst.common.event.ChannelAuthApprovedEvent;
+import com.ruoyi.jst.common.event.ChannelAuthRejectedEvent;
 import com.ruoyi.jst.organizer.mapper.ChannelAuthApplyMapperExt;
 import com.ruoyi.jst.organizer.mapper.SysUserExtMapper;
 import com.ruoyi.jst.organizer.service.ChannelAuthApplyService;
@@ -37,7 +38,9 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 渠道认证申请领域服务实现
@@ -250,15 +253,14 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
             final Long eventUserId = apply.getUserId();
             final Long eventChannelId = channel.getChannelId();
             final String eventChannelType = apply.getChannelType();
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    eventPublisher.publishEvent(
-                            new ChannelAuthApprovedEvent(this, eventUserId, eventChannelId, eventChannelType));
-                    log.info("[ChannelAuthApply] ChannelAuthApprovedEvent published userId={} channelId={}",
-                            eventUserId, eventChannelId);
-                }
-            });
+            Map<String, Object> extraData = new LinkedHashMap<>();
+            extraData.put("channelId", eventChannelId);
+            extraData.put("channelType", eventChannelType);
+            extraData.put("auditRemark", req.getAuditRemark());
+            publishAfterCommit(new ChannelAuthApprovedEvent(this, eventUserId, eventChannelId, applyId,
+                    eventChannelType, extraData));
+            log.info("[ChannelAuthApply] ChannelAuthApprovedEvent published userId={} channelId={}",
+                    eventUserId, eventChannelId);
 
             ChannelAuthApproveResVO vo = new ChannelAuthApproveResVO();
             vo.setChannelId(channel.getChannelId());
@@ -305,6 +307,12 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
             int newRejectCount = currentRejectCount + 1;
             int lockedFlag = newRejectCount >= MAX_REJECT_COUNT ? 1 : 0;
             channelAuthApplyMapperExt.updateRejectCount(applyId, newRejectCount, lockedFlag);
+            Map<String, Object> extraData = new LinkedHashMap<>();
+            extraData.put("rejectReason", req.getAuditRemark());
+            extraData.put("rejectCount", newRejectCount);
+            extraData.put("lockedForManual", lockedFlag);
+            publishAfterCommit(new ChannelAuthRejectedEvent(this, apply.getUserId(), applyId,
+                    "auth_rejected", extraData));
 
             log.info("[ChannelAuthApply] 审核驳回 applyId={} userId={} rejectCount={}/{} locked={} remark={}",
                     applyId, apply.getUserId(), newRejectCount, MAX_REJECT_COUNT, lockedFlag, req.getAuditRemark());
@@ -507,6 +515,22 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
             log.info("[ChannelAuthApply] 用户撤回申请 applyId={} userId={}", applyId, userId);
             return null;
         });
+    }
+
+    private void publishAfterCommit(Object event) {
+        if (event == null) {
+            return;
+        }
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    eventPublisher.publishEvent(event);
+                }
+            });
+            return;
+        }
+        eventPublisher.publishEvent(event);
     }
 
     private String lockKey(Long applyId) {

@@ -65,6 +65,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           and del_flag = '0'
     </select>
 
+    <select id="selectTimeoutPendingRefundIds" resultType="long">
+        select refund_id
+        from jst_refund_record
+        where status = 'pending'
+          and create_time <![CDATA[ < ]]> #{deadlineTime}
+          and del_flag = '0'
+        <if test="lastRefundId != null">
+          and refund_id <![CDATA[ > ]]> #{lastRefundId}
+        </if>
+        order by refund_id asc
+        limit #{limit}
+    </select>
+
     <update id="updateStatusByExpected">
         update jst_refund_record
         set status = #{targetStatus},

@@ -19,6 +19,8 @@ public class CourseListVO {
     private String coverImage;
     private BigDecimal price;
     private Long pointsPrice;
+    private Integer lessonCount;
+    private Integer learnerCount;
     private String creatorType;
     private Long creatorId;
     private String auditStatus;
@@ -76,6 +78,22 @@ public class CourseListVO {
 
     public void setPointsPrice(Long pointsPrice) {
         this.pointsPrice = pointsPrice;
+    }
+
+    public Integer getLessonCount() {
+        return lessonCount;
+    }
+
+    public void setLessonCount(Integer lessonCount) {
+        this.lessonCount = lessonCount;
+    }
+
+    public Integer getLearnerCount() {
+        return learnerCount;
+    }
+
+    public void setLearnerCount(Integer learnerCount) {
+        this.learnerCount = learnerCount;
     }
 
     public String getCreatorType() {

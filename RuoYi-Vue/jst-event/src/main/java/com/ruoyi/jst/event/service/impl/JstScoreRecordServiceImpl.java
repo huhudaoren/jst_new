@@ -1,9 +1,16 @@
 package com.ruoyi.jst.event.service.impl;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.jst.common.event.ScorePublishedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import com.ruoyi.jst.event.mapper.JstScoreRecordMapper;
 import com.ruoyi.jst.event.domain.JstScoreRecord;
 import com.ruoyi.jst.event.service.IJstScoreRecordService;
@@ -19,6 +26,8 @@ public class JstScoreRecordServiceImpl implements IJstScoreRecordService
 {
     @Autowired
     private JstScoreRecordMapper jstScoreRecordMapper;
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     /**
      * 查询成绩记录
@@ -66,8 +75,16 @@ public class JstScoreRecordServiceImpl implements IJstScoreRecordService
     @Override
     public int updateJstScoreRecord(JstScoreRecord jstScoreRecord)
     {
+        JstScoreRecord before = null;
+        if (jstScoreRecord != null && jstScoreRecord.getScoreId() != null) {
+            before = jstScoreRecordMapper.selectJstScoreRecordByScoreId(jstScoreRecord.getScoreId());
+        }
         jstScoreRecord.setUpdateTime(DateUtils.getNowDate());
-        return jstScoreRecordMapper.updateJstScoreRecord(jstScoreRecord);
+        int updated = jstScoreRecordMapper.updateJstScoreRecord(jstScoreRecord);
+        if (updated > 0 && shouldPublishScoreEvent(before, jstScoreRecord)) {
+            publishAfterCommit(buildScorePublishedEvent(before, jstScoreRecord));
+        }
+        return updated;
     }
 
     /**
@@ -92,5 +109,48 @@ public class JstScoreRecordServiceImpl implements IJstScoreRecordService
     public int deleteJstScoreRecordByScoreId(Long scoreId)
     {
         return jstScoreRecordMapper.deleteJstScoreRecordByScoreId(scoreId);
+    }
+
+    private boolean shouldPublishScoreEvent(JstScoreRecord before, JstScoreRecord request) {
+        if (before == null || request == null || request.getScoreId() == null) {
+            return false;
+        }
+        if (!Objects.equals("published", request.getPublishStatus())) {
+            return false;
+        }
+        return !Objects.equals("published", before.getPublishStatus());
+    }
+
+    private ScorePublishedEvent buildScorePublishedEvent(JstScoreRecord before, JstScoreRecord request) {
+        Long userId = request.getUserId() == null ? before.getUserId() : request.getUserId();
+        Long scoreId = request.getScoreId() == null ? before.getScoreId() : request.getScoreId();
+        Map<String, Object> extraData = new LinkedHashMap<>();
+        if (request.getScoreValue() != null) {
+            extraData.put("scoreValue", request.getScoreValue());
+        } else if (before.getScoreValue() != null) {
+            extraData.put("scoreValue", before.getScoreValue());
+        }
+        if (request.getAwardLevel() != null) {
+            extraData.put("awardLevel", request.getAwardLevel());
+        } else if (before.getAwardLevel() != null) {
+            extraData.put("awardLevel", before.getAwardLevel());
+        }
+        return new ScorePublishedEvent(this, userId, scoreId, "score_published", extraData);
+    }
+
+    private void publishAfterCommit(Object event) {
+        if (event == null) {
+            return;
+        }
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    eventPublisher.publishEvent(event);
+                }
+            });
+            return;
+        }
+        eventPublisher.publishEvent(event);
     }
 }

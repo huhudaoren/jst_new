@@ -23,4 +23,12 @@ public interface AppointmentService {
     List<AppointmentListVO> selectMyList(Long userId);
 
     AppointmentDetailVO getMyDetail(Long userId, Long appointmentId);
+
+    /**
+     * 系统任务自动过期预约。
+     *
+     * @param appointmentId 预约ID
+     * @return true=成功过期；false=状态已变化
+     */
+    boolean expireBySystem(Long appointmentId);
 }

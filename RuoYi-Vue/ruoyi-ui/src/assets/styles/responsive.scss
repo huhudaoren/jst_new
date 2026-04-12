@@ -1,0 +1,50 @@
+// 响应式全局基础样式
+// 断点变量
+$breakpoint-mobile: 768px;
+$breakpoint-tablet: 1024px;
+
+@media (max-width: $breakpoint-mobile) {
+  // 容器内边距缩小
+  .app-container {
+    padding: 12px !important;
+  }
+
+  // 表格横向滚动
+  .el-table {
+    overflow-x: auto;
+  }
+
+  // 搜索表单垂直堆叠
+  .el-form--inline .el-form-item {
+    display: block;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  // 弹窗近全屏
+  .el-dialog {
+    width: 95% !important;
+    margin-top: 5vh !important;
+  }
+
+  // 抽屉全屏
+  .el-drawer {
+    width: 100% !important;
+  }
+
+  // 分页组件紧凑
+  .pagination-container {
+    padding: 16px 0 !important;
+
+    .el-pagination {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+  // 操作栏按钮自适应
+  .mb8 .el-col {
+    margin-bottom: 8px;
+  }
+}

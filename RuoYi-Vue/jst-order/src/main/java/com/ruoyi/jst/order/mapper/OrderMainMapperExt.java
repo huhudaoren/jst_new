@@ -34,6 +34,10 @@ public interface OrderMainMapperExt {
                                @Param("updateBy") String updateBy,
                                @Param("updateTime") Date updateTime);
 
+    List<Long> selectTimeoutPendingPayOrderIds(@Param("deadlineTime") Date deadlineTime,
+                                               @Param("lastOrderId") Long lastOrderId,
+                                               @Param("limit") Integer limit);
+
     List<OrderListVO> selectWxList(OrderQueryReqDTO query);
 
     List<OrderListVO> selectAdminList(OrderQueryReqDTO query);

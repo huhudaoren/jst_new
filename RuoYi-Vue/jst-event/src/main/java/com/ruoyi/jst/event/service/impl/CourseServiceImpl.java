@@ -323,6 +323,13 @@ public class CourseServiceImpl implements CourseService {
         course.setDescription(req.getDescription());
         course.setPrice(req.getPrice());
         course.setPointsPrice(req.getPointsPrice());
+        course.setLessonCount(req.getLessonCount());
+        course.setLearnerCount(req.getLearnerCount());
+        course.setTotalDuration(req.getTotalDuration());
+        course.setChaptersJson(req.getChaptersJson());
+        course.setTeacherName(req.getTeacherName());
+        course.setTeacherAvatar(req.getTeacherAvatar());
+        course.setTeacherDesc(req.getTeacherDesc());
         course.setCreatorType(req.getCreatorType());
         course.setCreatorId(req.getCreatorId());
         course.setMaicSourceId(req.getMaicSourceId());

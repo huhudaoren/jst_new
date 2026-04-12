@@ -15,6 +15,12 @@ public class WxCourseQueryDTO {
     @Pattern(regexp = "normal|ai_maic", message = "课程类型非法")
     private String courseType;
 
+    @Pattern(regexp = "[a-z0-9_]*", message = "category 格式非法")
+    private String category;
+
+    @Pattern(regexp = "(default|newest|hot)?", message = "sortBy 仅支持 default/newest/hot")
+    private String sortBy;
+
     @Min(value = 1, message = "pageNum 不能小于1")
     private Integer pageNum;
 
@@ -28,6 +34,22 @@ public class WxCourseQueryDTO {
 
     public void setCourseType(String courseType) {
         this.courseType = courseType;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getSortBy() {
+        return sortBy;
+    }
+
+    public void setSortBy(String sortBy) {
+        this.sortBy = sortBy;
     }
 
     public Integer getPageNum() {

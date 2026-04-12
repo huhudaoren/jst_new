@@ -157,6 +157,9 @@
             <if test="query != null and query.guardianMobile != null and query.guardianMobile != ''">
                 and p.guardian_mobile like concat('%', #{query.guardianMobile}, '%')
             </if>
+            <if test="query != null and query.params != null and query.params.dataScope != null and query.params.dataScope != ''">
+                ${query.params.dataScope}
+            </if>
         </where>
         order by er.update_time desc, er.enroll_id desc
     </select>

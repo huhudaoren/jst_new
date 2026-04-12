@@ -19,4 +19,7 @@ public interface ChannelLookupMapper {
             "WHERE user_id = #{userId} AND del_flag = '0' " +
             "ORDER BY channel_id ASC LIMIT 1")
     Map<String, Object> selectCurrentByUserId(@Param("userId") Long userId);
+
+    @Select("SELECT user_id FROM jst_channel WHERE channel_id = #{channelId} AND del_flag = '0' LIMIT 1")
+    Long selectUserIdByChannelId(@Param("channelId") Long channelId);
 }

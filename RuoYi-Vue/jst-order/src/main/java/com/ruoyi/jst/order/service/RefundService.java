@@ -83,6 +83,15 @@ public interface RefundService {
     void reject(Long refundId, RefundAuditDTO req);
 
     /**
+     * 系统任务关闭超时未审核退款申请。
+     *
+     * @param refundId 退款单ID
+     * @param remark   关闭备注
+     * @return true=成功关闭；false=退款单状态已变化
+     */
+    boolean closeTimeoutPending(Long refundId, String remark);
+
+    /**
      * 执行退款资金回退。
      *
      * @param refundId 退款单ID

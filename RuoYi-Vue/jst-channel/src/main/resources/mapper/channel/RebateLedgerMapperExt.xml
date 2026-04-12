@@ -29,6 +29,48 @@
         <result property="delFlag" column="del_flag"/>
     </resultMap>
 
+    <select id="selectByLedgerId" resultMap="LedgerResult">
+        select *
+        from jst_rebate_ledger
+        where ledger_id = #{ledgerId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectAutoSettleLedgerIds" resultType="long">
+        select l.ledger_id
+        from jst_rebate_ledger l
+        inner join jst_order_main o on o.order_id = l.order_id and o.del_flag = '0'
+        where l.status = 'pending_accrual'
+          and l.direction = 'positive'
+          and o.order_status = 'completed'
+          and o.aftersale_deadline is not null
+          and o.aftersale_deadline <![CDATA[ < ]]> #{deadlineTime}
+          and l.del_flag = '0'
+        <if test="lastLedgerId != null">
+          and l.ledger_id <![CDATA[ > ]]> #{lastLedgerId}
+        </if>
+        order by l.ledger_id asc
+        limit #{limit}
+    </select>
+
+    <update id="settleToWithdrawable">
+        update jst_rebate_ledger l
+        inner join jst_order_main o on o.order_id = l.order_id and o.del_flag = '0'
+        set l.status = #{targetStatus},
+            l.accrual_time = #{accrualTime},
+            l.update_by = #{updateBy},
+            l.update_time = #{updateTime},
+            l.remark = #{remark}
+        where l.ledger_id = #{ledgerId}
+          and l.status = #{expectedStatus}
+          and l.direction = 'positive'
+          and o.order_status = 'completed'
+          and o.aftersale_deadline is not null
+          and o.aftersale_deadline <![CDATA[ < ]]> #{deadlineTime}
+          and l.del_flag = '0'
+    </update>
+
     <select id="selectSummaryByChannelId" resultType="map">
         select coalesce(sum(case
                                 when status = 'withdrawable' and direction = 'positive' then rebate_amount

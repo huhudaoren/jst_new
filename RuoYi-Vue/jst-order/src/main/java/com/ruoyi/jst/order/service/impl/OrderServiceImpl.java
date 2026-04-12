@@ -5,6 +5,7 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.jst.common.audit.OperateLog;
+import com.ruoyi.jst.common.event.OrderPaidEvent;
 import com.ruoyi.jst.common.exception.BizErrorCode;
 import com.ruoyi.jst.common.id.SnowflakeIdWorker;
 import com.ruoyi.jst.common.lock.JstLockTemplate;
@@ -38,11 +39,15 @@ import com.ruoyi.jst.order.vo.OrderListVO;
 import com.ruoyi.jst.order.vo.WechatPrepayVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.LinkedHashMap;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +80,7 @@ public class OrderServiceImpl implements OrderService {
     @Autowired private WxPayService wxPayService;
     @Autowired private JstLockTemplate jstLockTemplate;
     @Autowired private SnowflakeIdWorker snowflakeIdWorker;
+    @Autowired private ApplicationEventPublisher eventPublisher;
 
     @Value("${jst.biz.points-cash-rate:100}")
     private Integer pointsCashRate;
@@ -152,6 +158,31 @@ public class OrderServiceImpl implements OrderService {
             OrderStatus current = OrderStatus.fromDb(order.getOrderStatus());
             current.assertCanTransitTo(OrderStatus.CANCELLED); // SM-1
             doCancel(order, current, operator, now);
+        });
+    }
+
+    /**
+     * 系统任务触发超时取消（pending_pay -> cancelled）。
+     *
+     * @param orderId 订单ID
+     * @param reason  取消原因
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void cancelTimeoutOrder(Long orderId, String reason) {
+        Date now = DateUtils.getNowDate();
+        String operator = "system";
+        // LOCK: lock:order:cancel:{orderId}
+        jstLockTemplate.execute("lock:order:cancel:" + orderId, 3, 5, () -> {
+            JstOrderMain order = requireOrder(orderId);
+            OrderStatus current = OrderStatus.fromDb(order.getOrderStatus());
+            if (current != OrderStatus.PENDING_PAY) {
+                return null;
+            }
+            // SM-1: pending_pay -> cancelled
+            current.assertCanTransitTo(OrderStatus.CANCELLED);
+            doCancel(order, current, operator, now);
+            return null;
         });
     }
 
@@ -339,6 +370,7 @@ public class OrderServiceImpl implements OrderService {
             }
             insertPaymentRecord(order, finalTransactionId, now, operator);
             finalizeBenefits(order, now);
+            publishAfterCommit(buildOrderPaidEvent(order));
             return null;
         });
     }
@@ -685,6 +717,29 @@ public class OrderServiceImpl implements OrderService {
 
     private Date dateValue(Object value) {
         return value instanceof Date ? (Date) value : null;
+    }
+
+    private OrderPaidEvent buildOrderPaidEvent(JstOrderMain order) {
+        LinkedHashMap<String, Object> extraData = new LinkedHashMap<>();
+        extraData.put("orderNo", order.getOrderNo());
+        extraData.put("payAmount", safeAmount(order.getNetPayAmount()));
+        return new OrderPaidEvent(this, order.getUserId(), order.getOrderId(), "order_paid", extraData);
+    }
+
+    private void publishAfterCommit(Object event) {
+        if (event == null) {
+            return;
+        }
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    eventPublisher.publishEvent(event);
+                }
+            });
+            return;
+        }
+        eventPublisher.publishEvent(event);
     }
 
     private static class PointsSnapshot {

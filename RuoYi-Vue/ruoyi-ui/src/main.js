@@ -35,6 +35,9 @@ import ImagePreview from "@/components/ImagePreview"
 import DictTag from '@/components/DictTag'
 // 字典数据组件
 import DictData from '@/components/DictData'
+// 业务公共组件
+import JstStatusBadge from '@/components/JstStatusBadge'
+import JstEmptyState from '@/components/JstEmptyState'
 
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts
@@ -55,6 +58,8 @@ Vue.component('Editor', Editor)
 Vue.component('FileUpload', FileUpload)
 Vue.component('ImageUpload', ImageUpload)
 Vue.component('ImagePreview', ImagePreview)
+Vue.component('JstStatusBadge', JstStatusBadge)
+Vue.component('JstEmptyState', JstEmptyState)
 
 Vue.use(directive)
 Vue.use(plugins)

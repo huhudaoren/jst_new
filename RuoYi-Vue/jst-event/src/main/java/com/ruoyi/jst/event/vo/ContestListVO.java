@@ -19,10 +19,15 @@ public class ContestListVO {
     private BigDecimal price;
     private Date enrollStartTime;
     private Date enrollEndTime;
+    private Date eventStartTime;
+    private Date eventEndTime;
+    private Long enrollCount;
     private String auditStatus;
+    private String auditRemark;
     private String status;
     private Long partnerId;
     private String partnerName;
+    private String recommendTags;
 
     public Long getContestId() {
         return contestId;
@@ -88,12 +93,44 @@ public class ContestListVO {
         this.enrollEndTime = enrollEndTime;
     }
 
+    public Date getEventStartTime() {
+        return eventStartTime;
+    }
+
+    public void setEventStartTime(Date eventStartTime) {
+        this.eventStartTime = eventStartTime;
+    }
+
+    public Date getEventEndTime() {
+        return eventEndTime;
+    }
+
+    public void setEventEndTime(Date eventEndTime) {
+        this.eventEndTime = eventEndTime;
+    }
+
+    public Long getEnrollCount() {
+        return enrollCount;
+    }
+
+    public void setEnrollCount(Long enrollCount) {
+        this.enrollCount = enrollCount;
+    }
+
     public String getAuditStatus() {
         return auditStatus;
     }
 
     public void setAuditStatus(String auditStatus) {
         this.auditStatus = auditStatus;
+    }
+
+    public String getAuditRemark() {
+        return auditRemark;
+    }
+
+    public void setAuditRemark(String auditRemark) {
+        this.auditRemark = auditRemark;
     }
 
     public String getStatus() {
@@ -118,5 +155,13 @@ public class ContestListVO {
 
     public void setPartnerName(String partnerName) {
         this.partnerName = partnerName;
+    }
+
+    public String getRecommendTags() {
+        return recommendTags;
+    }
+
+    public void setRecommendTags(String recommendTags) {
+        this.recommendTags = recommendTags;
     }
 }

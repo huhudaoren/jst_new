@@ -22,6 +22,8 @@ import com.ruoyi.jst.event.service.ContestService;
 import com.ruoyi.jst.event.vo.CategoryStatVO;
 import com.ruoyi.jst.event.vo.ContestDetailVO;
 import com.ruoyi.jst.event.vo.ContestListVO;
+import com.ruoyi.jst.event.vo.ContestRecommendCourseVO;
+import com.ruoyi.jst.event.vo.ContestRecommendVO;
 import com.ruoyi.jst.event.vo.WxContestCardVO;
 import com.ruoyi.jst.event.vo.WxContestDetailVO;
 import org.slf4j.Logger;
@@ -31,8 +33,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 赛事领域服务实现。
@@ -94,8 +100,13 @@ public class ContestServiceImpl implements ContestService {
         contest.setAppointmentCapacity(req.getAppointmentCapacity());
         contest.setWriteoffConfig(req.getWriteoffConfig());
         contest.setAllowRepeatAppointment(req.getAllowRepeatAppointment());
+        contest.setAllowAppointmentRefund(req.getAllowAppointmentRefund());
         contest.setCertRuleJson(req.getCertRuleJson());
         contest.setScoreRuleJson(req.getScoreRuleJson());
+        contest.setScheduleJson(req.getScheduleJson());
+        contest.setAwardsJson(req.getAwardsJson());
+        contest.setFaqJson(req.getFaqJson());
+        contest.setRecommendTags(req.getRecommendTags());
         contest.setFormTemplateId(req.getFormTemplateId());
         contest.setAftersaleDays(req.getAftersaleDays());
         contest.setAuditStatus(ContestAuditStatus.DRAFT.dbValue()); // SM-5a
@@ -157,8 +168,13 @@ public class ContestServiceImpl implements ContestService {
         update.setAppointmentCapacity(req.getAppointmentCapacity());
         update.setWriteoffConfig(req.getWriteoffConfig());
         update.setAllowRepeatAppointment(req.getAllowRepeatAppointment());
+        update.setAllowAppointmentRefund(req.getAllowAppointmentRefund());
         update.setCertRuleJson(req.getCertRuleJson());
         update.setScoreRuleJson(req.getScoreRuleJson());
+        update.setScheduleJson(req.getScheduleJson());
+        update.setAwardsJson(req.getAwardsJson());
+        update.setFaqJson(req.getFaqJson());
+        update.setRecommendTags(req.getRecommendTags());
         update.setFormTemplateId(req.getFormTemplateId());
         update.setAftersaleDays(req.getAftersaleDays());
         update.setUpdateBy(currentOperatorName());
@@ -368,6 +384,39 @@ public class ContestServiceImpl implements ContestService {
     }
 
     /**
+     * 删除赛事草稿。
+     *
+     * @param contestId 赛事ID
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @OperateLog(module = "赛事", action = "CONTEST_DELETE", target = "#{contestId}")
+    public void deleteContest(Long contestId) {
+        // TX: 删除草稿需在一个事务内完成归属与状态校验
+        // LOCK: lock:contest:audit:{contestId}
+        jstLockTemplate.execute("lock:contest:audit:" + contestId, 3, 5, () -> {
+            JstContest contest = getRequiredContest(contestId);
+            assertContestOwnership(contest);
+            ContestAuditStatus currentAudit = ContestAuditStatus.fromDb(contest.getAuditStatus());
+            if (currentAudit != ContestAuditStatus.DRAFT) {
+                throw new ServiceException("仅草稿状态允许删除",
+                        BizErrorCode.JST_EVENT_CONTEST_ILLEGAL_TRANSIT.code());
+            }
+            int updated = contestMapperExt.logicalDeleteByExpectedAudit(
+                    contestId,
+                    currentAudit.dbValue(),
+                    currentOperatorName(),
+                    DateUtils.getNowDate()
+            );
+            if (updated == 0) {
+                throw new ServiceException("删除失败：赛事状态已变更，请刷新后重试",
+                        BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
+            }
+            return null;
+        });
+    }
+
+    /**
      * 查询后台赛事列表。
      *
      * @param query 查询条件
@@ -441,6 +490,40 @@ public class ContestServiceImpl implements ContestService {
     }
 
     /**
+     * 查询赛事详情页推荐内容。
+     *
+     * @param contestId 赛事ID
+     * @return 推荐内容
+     */
+    @Override
+    public ContestRecommendVO getWxRecommend(Long contestId) {
+        JstContest contest = getRequiredContest(contestId);
+        if (!ContestAuditStatus.ONLINE.dbValue().equals(contest.getAuditStatus())) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_CONTEST_NOT_ONLINE.message(),
+                    BizErrorCode.JST_EVENT_CONTEST_NOT_ONLINE.code());
+        }
+
+        ContestRecommendVO result = new ContestRecommendVO();
+        List<ContestListVO> relatedContests = contestMapperExt.selectRelatedContests(
+                contestId,
+                contest.getCategory(),
+                6
+        );
+        result.setRelatedContests(relatedContests == null ? Collections.emptyList() : relatedContests);
+
+        List<String> tags = splitRecommendTags(contest.getRecommendTags());
+        List<ContestRecommendCourseVO> relatedCourses = Collections.emptyList();
+        if (!tags.isEmpty()) {
+            relatedCourses = contestMapperExt.selectRelatedCoursesByTags(tags, 4);
+        }
+        if (relatedCourses == null || relatedCourses.isEmpty()) {
+            relatedCourses = contestMapperExt.selectHotCourses(4);
+        }
+        result.setRelatedCourses(relatedCourses == null ? Collections.emptyList() : relatedCourses);
+        return result;
+    }
+
+    /**
      * 查询赛事分类统计。
      *
      * @return 分类统计
@@ -480,6 +563,9 @@ public class ContestServiceImpl implements ContestService {
         }
         if (req.getAllowRepeatAppointment() == null) {
             req.setAllowRepeatAppointment(0);
+        }
+        if (req.getAllowAppointmentRefund() == null) {
+            req.setAllowAppointmentRefund(0);
         }
     }
 
@@ -523,6 +609,25 @@ public class ContestServiceImpl implements ContestService {
                 && contest.getEnrollEndTime() != null
                 && !now.before(contest.getEnrollStartTime())
                 && !now.after(contest.getEnrollEndTime());
+    }
+
+    private List<String> splitRecommendTags(String recommendTags) {
+        if (StringUtils.isBlank(recommendTags)) {
+            return Collections.emptyList();
+        }
+        String normalized = recommendTags.replace('，', ',');
+        String[] segments = normalized.split(",");
+        Set<String> uniqueTags = new LinkedHashSet<>();
+        for (String segment : segments) {
+            String tag = segment == null ? null : segment.trim();
+            if (StringUtils.isNotBlank(tag)) {
+                uniqueTags.add(tag);
+            }
+        }
+        if (uniqueTags.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return new ArrayList<>(uniqueTags);
     }
 
     private String currentOperatorName() {

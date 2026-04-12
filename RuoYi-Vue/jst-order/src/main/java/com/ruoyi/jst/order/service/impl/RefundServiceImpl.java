@@ -5,6 +5,7 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.jst.common.context.JstLoginContext;
+import com.ruoyi.jst.common.event.RefundSuccessEvent;
 import com.ruoyi.jst.common.exception.BizErrorCode;
 import com.ruoyi.jst.common.id.SnowflakeIdWorker;
 import com.ruoyi.jst.common.lock.JstLockTemplate;
@@ -35,14 +36,18 @@ import com.ruoyi.jst.order.service.RefundService;
 import com.ruoyi.jst.order.vo.RefundDetailVO;
 import com.ruoyi.jst.order.vo.RefundListVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -68,6 +73,7 @@ public class RefundServiceImpl implements RefundService {
     @Autowired private WxPayService wxPayService;
     @Autowired private JstLockTemplate jstLockTemplate;
     @Autowired private SnowflakeIdWorker snowflakeIdWorker;
+    @Autowired private ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -195,6 +201,31 @@ public class RefundServiceImpl implements RefundService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public boolean closeTimeoutPending(Long refundId, String remark) {
+        return jstLockTemplate.execute("lock:refund:approve:" + refundId, 3, 5, () -> {
+            Date now = DateUtils.getNowDate();
+            String operator = "system";
+            JstRefundRecord refund = requireRefund(refundId);
+            JstOrderMain order = requireOrder(refund.getOrderId());
+            RefundStatus current = RefundStatus.fromDb(refund.getStatus());
+            if (current != RefundStatus.PENDING) {
+                return false;
+            }
+            // SM-2: pending -> closed
+            current.assertCanTransitTo(RefundStatus.CLOSED);
+            int updated = refundRecordMapperExt.updateStatusByExpected(refundId, RefundStatus.PENDING.dbValue(),
+                    RefundStatus.CLOSED.dbValue(), remark, null, null, null,
+                    null, null, operator, now);
+            if (updated == 0) {
+                return false;
+            }
+            restoreOrderStatus(refund, order, operator, now);
+            return true;
+        });
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void execute(Long refundId) {
         jstLockTemplate.execute("lock:refund:execute:" + refundId, 5, 30, () -> {
             Date now = DateUtils.getNowDate();
@@ -230,6 +261,7 @@ public class RefundServiceImpl implements RefundService {
                     operatorId, now, operator, now) == 0) {
                 throwDataTampered();
             }
+            publishAfterCommit(buildRefundSuccessEvent(refund, order, actualCash));
         });
     }
 
@@ -624,6 +656,29 @@ public class RefundServiceImpl implements RefundService {
 
     private Date dateValue(Object value) {
         return value instanceof Date ? (Date) value : null;
+    }
+
+    private RefundSuccessEvent buildRefundSuccessEvent(JstRefundRecord refund, JstOrderMain order, BigDecimal actualCash) {
+        LinkedHashMap<String, Object> extraData = new LinkedHashMap<>();
+        extraData.put("refundNo", refund.getRefundNo());
+        extraData.put("refundAmount", safeAmount(actualCash));
+        return new RefundSuccessEvent(this, order.getUserId(), refund.getRefundId(), "refund_success", extraData);
+    }
+
+    private void publishAfterCommit(Object event) {
+        if (event == null) {
+            return;
+        }
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    eventPublisher.publishEvent(event);
+                }
+            });
+            return;
+        }
+        eventPublisher.publishEvent(event);
     }
 
     private static class PointsSnapshot {

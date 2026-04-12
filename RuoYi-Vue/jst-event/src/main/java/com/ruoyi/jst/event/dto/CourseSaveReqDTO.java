@@ -44,6 +44,26 @@ public class CourseSaveReqDTO {
     @Min(value = 0, message = "积分价格不能小于0")
     private Long pointsPrice;
 
+    @Min(value = 0, message = "课时数不能小于0")
+    private Integer lessonCount;
+
+    @Min(value = 0, message = "学习人数不能小于0")
+    private Integer learnerCount;
+
+    @Size(max = 50, message = "总时长长度不能超过50个字符")
+    private String totalDuration;
+
+    private String chaptersJson;
+
+    @Size(max = 100, message = "讲师姓名长度不能超过100个字符")
+    private String teacherName;
+
+    @Size(max = 255, message = "讲师头像长度不能超过255个字符")
+    private String teacherAvatar;
+
+    @Size(max = 500, message = "讲师简介长度不能超过500个字符")
+    private String teacherDesc;
+
     @NotBlank(message = "创建者类型不能为空")
     @Pattern(regexp = "platform|channel", message = "创建者类型非法")
     private String creatorType;
@@ -113,6 +133,62 @@ public class CourseSaveReqDTO {
 
     public void setPointsPrice(Long pointsPrice) {
         this.pointsPrice = pointsPrice;
+    }
+
+    public Integer getLessonCount() {
+        return lessonCount;
+    }
+
+    public void setLessonCount(Integer lessonCount) {
+        this.lessonCount = lessonCount;
+    }
+
+    public Integer getLearnerCount() {
+        return learnerCount;
+    }
+
+    public void setLearnerCount(Integer learnerCount) {
+        this.learnerCount = learnerCount;
+    }
+
+    public String getTotalDuration() {
+        return totalDuration;
+    }
+
+    public void setTotalDuration(String totalDuration) {
+        this.totalDuration = totalDuration;
+    }
+
+    public String getChaptersJson() {
+        return chaptersJson;
+    }
+
+    public void setChaptersJson(String chaptersJson) {
+        this.chaptersJson = chaptersJson;
+    }
+
+    public String getTeacherName() {
+        return teacherName;
+    }
+
+    public void setTeacherName(String teacherName) {
+        this.teacherName = teacherName;
+    }
+
+    public String getTeacherAvatar() {
+        return teacherAvatar;
+    }
+
+    public void setTeacherAvatar(String teacherAvatar) {
+        this.teacherAvatar = teacherAvatar;
+    }
+
+    public String getTeacherDesc() {
+        return teacherDesc;
+    }
+
+    public void setTeacherDesc(String teacherDesc) {
+        this.teacherDesc = teacherDesc;
     }
 
     public String getCreatorType() {

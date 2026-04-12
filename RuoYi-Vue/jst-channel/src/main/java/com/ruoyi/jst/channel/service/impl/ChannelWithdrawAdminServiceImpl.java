@@ -13,6 +13,7 @@ import com.ruoyi.jst.channel.enums.RebateSettlementStatus;
 import com.ruoyi.jst.channel.mapper.JstRebateSettlementMapper;
 import com.ruoyi.jst.channel.mapper.RebateLedgerMapperExt;
 import com.ruoyi.jst.channel.mapper.RebateSettlementMapperExt;
+import com.ruoyi.jst.channel.mapper.lookup.ChannelLookupMapper;
 import com.ruoyi.jst.channel.mapper.lookup.PaymentPayRecordLookupMapper;
 import com.ruoyi.jst.channel.payout.PayoutService;
 import com.ruoyi.jst.channel.service.ChannelWithdrawAdminService;
@@ -20,13 +21,17 @@ import com.ruoyi.jst.channel.vo.RebateLedgerListVO;
 import com.ruoyi.jst.channel.vo.WithdrawAdminDetailVO;
 import com.ruoyi.jst.channel.vo.WithdrawAdminListVO;
 import com.ruoyi.jst.channel.vo.WithdrawDetailVO;
+import com.ruoyi.jst.common.event.WithdrawPaidEvent;
 import com.ruoyi.jst.common.exception.BizErrorCode;
 import com.ruoyi.jst.common.id.SnowflakeIdWorker;
 import com.ruoyi.jst.common.lock.JstLockTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -59,6 +64,9 @@ public class ChannelWithdrawAdminServiceImpl implements ChannelWithdrawAdminServ
     private PaymentPayRecordLookupMapper paymentPayRecordLookupMapper;
 
     @Autowired
+    private ChannelLookupMapper channelLookupMapper;
+
+    @Autowired
     private List<PayoutService> payoutServices;
 
     @Autowired
@@ -66,6 +74,9 @@ public class ChannelWithdrawAdminServiceImpl implements ChannelWithdrawAdminServ
 
     @Autowired
     private SnowflakeIdWorker snowflakeIdWorker;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Value("${jst.payout.enabled:mock}")
     private String payoutMode;
@@ -192,6 +203,7 @@ public class ChannelWithdrawAdminServiceImpl implements ChannelWithdrawAdminServ
             if (updated <= 0) {
                 throwDataTampered();
             }
+            publishAfterCommit(buildWithdrawPaidEvent(settlement, actualPayAmount));
             return null;
         });
     }
@@ -350,6 +362,37 @@ public class ChannelWithdrawAdminServiceImpl implements ChannelWithdrawAdminServ
 
     private String defaultDelFlag(String delFlag) {
         return StringUtils.isBlank(delFlag) ? "0" : delFlag;
+    }
+
+    private WithdrawPaidEvent buildWithdrawPaidEvent(JstRebateSettlement settlement, BigDecimal actualPayAmount) {
+        if (settlement == null || settlement.getSettlementId() == null || settlement.getChannelId() == null) {
+            return null;
+        }
+        Long userId = channelLookupMapper.selectUserIdByChannelId(settlement.getChannelId());
+        if (userId == null) {
+            return null;
+        }
+        Map<String, Object> extraData = new LinkedHashMap<>();
+        extraData.put("applyAmount", safeAmount(settlement.getApplyAmount()));
+        extraData.put("actualPayAmount", safeAmount(actualPayAmount));
+        extraData.put("channelId", settlement.getChannelId());
+        return new WithdrawPaidEvent(this, userId, settlement.getSettlementId(), "withdraw_paid", extraData);
+    }
+
+    private void publishAfterCommit(Object event) {
+        if (event == null) {
+            return;
+        }
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    eventPublisher.publishEvent(event);
+                }
+            });
+            return;
+        }
+        eventPublisher.publishEvent(event);
     }
 
     private static class NegativeOffsetDecision {
