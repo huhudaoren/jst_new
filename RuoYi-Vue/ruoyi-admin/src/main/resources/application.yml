@@ -188,6 +188,20 @@ jst:
     api-v3-key: ${JST_WXPAY_APIV3:}
     private-key-path: ${JST_WXPAY_PRIVKEY:}
     notify-url: ${JST_WXPAY_NOTIFY:https://api.jst.example.com/jst/pay/notify/wechat}
+    refund-notify-url: ${JST_WXPAY_REFUND_NOTIFY:https://api.jst.example.com/jst/pay/refund-notify/wechat}
+
+  # 短信服务(阿里云/腾讯云, enabled=false 时不发送, 仅记录日志)
+  sms:
+    enabled: ${JST_SMS_ENABLED:false}
+    provider: ${JST_SMS_PROVIDER:aliyun}
+    access-key-id: ${JST_SMS_AK:}
+    access-key-secret: ${JST_SMS_SK:}
+    sign-name: ${JST_SMS_SIGN:竞赛通}
+    region: ${JST_SMS_REGION:cn-hangzhou}
+
+  # 微信订阅消息推送(需在微信后台申请模板ID)
+  wxmsg:
+    enabled: ${JST_WXMSG_ENABLED:false}
 
   # 核销二维码 payload 配置
   qrcode:
