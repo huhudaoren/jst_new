@@ -33,36 +33,34 @@
 9. `D:/coding/jst_v1/jst-uniapp/pages/login/login.vue` ← 页面样板
 
 **任务相关读**：
-10. ⭐ **任务卡指定的 PNG 高保真截图**: `D:/coding/jst_v1/小程序原型图/{xxx}.png` ← **首要视觉参考**
+10. ⭐ **任务卡指定的 PNG 高保真截图**: `D:/coding/jst_v1/小程序原型图/{xxx}.png` ← **首要视觉与布局参考**
     - 91 张 PNG 与 HTML 一一对应,文件名相同 (如 contest-list.html ↔ contest-list.png)
-    - PNG 是真实视觉源,包含**精确**颜色 / 字号 / 间距 / 阴影 / 圆角 / icon 形态
-    - 你必须用 Read 工具读 PNG (Claude 支持图片输入) 看实际效果
-    - **不要只看 HTML** - HTML 浏览器渲染可能与 PNG 设计稿有偏差
+    - 你必须用 Read 工具读 PNG 看整体排版、卡片层级和元素分布关系。
+    - **警告：绝对禁止从图片中目测具体像素值（如色号、圆角、边距）**，多模态视觉存在幻觉，具体数值请查阅规范文档。
 11. `D:/coding/jst_v1/小程序原型图/{xxx}.html` ← DOM 结构 + class 命名 + 文案参考
-    - 用 HTML 拿到结构骨架 + class 命名规约
-    - 精确视觉以 PNG 为准
+    - 用 HTML 拿到结构骨架 + class 命名规约。
 12. `小程序原型图/AGENT_GUIDE.md` ← 设计规范文档
-13. `小程序原型图/design-system.css` ← 公共 CSS token (颜色/字号/间距 全在这)
+13. `小程序原型图/design-system.css` ← 公共 CSS token (所有合法的颜色/字号/间距都在这)
 
 ### 视觉对齐工作流 (强制 5 步)
-1. **先 Read PNG** 看整体视觉效果 (颜色/布局/卡片样式)
-2. **再 Read HTML** 看具体 dom 结构和 class 命名
-3. **把 design-system.css 的 token 转换**为 SCSS 变量到 styles/variables.scss
-4. **在 .vue template 复刻 dom 结构,用 SCSS 变量复刻样式**
-5. **像素级对齐 PNG** (px → rpx ×2, 375 设计稿基准)
+1. **看 PNG 理解布局结构**：利用视觉判断卡片层级、元素是左右排布还是上下排布、是否需要 Flex 布局。**禁止试图从图片中目测具体像素值！**
+2. **看 HTML 拿精确结构**：提取 DOM 骨架和 class 命名。
+3. **查 Design System 拿精确数值**：所有的颜色、字号、边距、圆角，**必须**查阅 `design-system.css` 或 `AGENT_GUIDE.md` 中的设计规范，将语义映射到对应的 CSS Token。
+4. **Uniapp 标签转换**：将 HTML 的 `div/span/img` 精确转换为 Uniapp 的 `view/text/image`，**禁止在 template 中残留 web 标签**。
+5. **应用全局 SCSS**：直接 import 并使用 `styles/variables.scss` 中已有的预设变量。**禁止自行发明颜色值或边距值，禁止修改 variables.scss 文件本身。**
 
 ### Step 2：自我检查清单
 
 读完文档后，**用文字回答以下问题**给主 Agent 看（在你的报告开头）：
 
-1. 任务对应的原型 PNG 和 HTML 是哪两个文件？(必须列两个文件名,证明你看了 PNG)
+1. 任务对应的原型 PNG 和 HTML 是哪两个文件？(必须列两个文件名)
 2. 任务调用哪些接口？（列 URL + Method + 文档章节号）
 3. 任务涉及哪些已有的 store / api 模块？
 4. 任务新建哪些页面 / 组件？（精确路径）
 5. 数据流：从哪里取数据 → 在哪里展示 → 用户操作如何回传？
 6. 双视角问题：本页面是否区分学生/老师视角？
 7. 你打算复用哪个样板代码？
-8. ⭐ PNG 中的主色 / 卡片圆角 / 关键间距 数值是什么? (证明你真的看了 PNG)
+8. ⭐ **观察 PNG 和 HTML 后，本页面使用的核心元素（如主按钮、卡片背景、大标题）应该对应 `design-system.css` 中的哪几个 CSS 变量（Token）？请列出对应关系。(证明你理解了设计规范)**
 
 如果其中任何一项你答不上来 → **停止编码**，返回主 Agent 要求补充任务卡。
 
@@ -90,6 +88,12 @@
 - ❌ 在主包堆所有页面（违反微信小程序 2MB 主包限制）
 - ❌ 在 pages.json 之外定义路由
 - ❌ 自己起非 jst- 前缀的公共组件名
+- ❌ **修改 `styles/variables.scss` 全局样式表**（你只能读取和引用）
+
+### 布局与组件规约
+- **强制使用 Flexbox 布局**：除了极其特殊的重叠效果（如绝对定位的角标），所有页面的基础排版必须使用 `display: flex` 处理对齐和分布。
+- **Web 标签转换**：原型的 `div` 必须改写为 `view`，文本必须包裹在 `text` 中，图片必须用 `image` 标签并根据原型处理 `mode`（如 `aspectFill`）。
+- **安全区处理**：底部有固定按钮的页面，必须处理 `padding-bottom: env(safe-area-inset-bottom);`。
 
 ### API 调用规约
 - 必须用 `import request from '@/api/request'` 的封装
@@ -115,7 +119,7 @@
 ### 样式规约
 - 优先复用 `小程序原型图/design-system.css` 的 CSS 变量和组件类
 - 单位用 rpx (微信小程序响应式单位)，不用 px
-- 颜色不许写死，必须用 design-system 的 color token
+- 颜色和边距**不许写死**，必须用 design-system 的 token 变量（如 `$color-primary`, `$spacing-m`）
 - **禁止**引入 ElementUI / Vant / 任何 PC 端 UI 库
 - **允许**用 uni-ui (Uniapp 官方组件库)
 
@@ -127,7 +131,7 @@
 - 路由路径全小写: `/pages-sub/my/binding`
 
 ### 注释规约
-- 每个 .vue 文件顶部 `<!-- 中文注释: 页面说明 + 对应原型 + 对应接口 -->`
+- 每个 .vue 文件顶部 ``
 - 复杂 method 加 `// 中文注释`
 - 计算属性、watcher 必须有注释解释为什么
 
@@ -159,7 +163,7 @@
 # 任务报告 - P{X} {feature 名称}
 
 ## A. 任务前自检（Step 2 答题）
-1. 对应原型: 小程序原型图/binding.html
+1. 对应原型: 小程序原型图/binding.html / binding.png
 2. 调用接口:
    - GET /jst/wx/user/binding (27 文档 §3.1)
    - POST /jst/wx/user/binding/switch (27 文档 §3.1)
@@ -172,6 +176,7 @@
    - 点切换 → api.switchChannel → 刷新列表
 6. 双视角: 否 (本页面所有用户都可见)
 7. 复用样板: pages/login/login.vue 的 method 写法
+8. 核心 Token: 主按钮使用 `$color-primary`, 卡片背景 `$bg-color-card`, 边距 `$spacing-m`
 
 ## B. 交付物清单
 新增文件:
@@ -190,7 +195,8 @@
 6. ✓ 接口 401 → 自动跳登录页
 
 ## D. 视觉对比
-- ✅ 与 binding.html 原型一致 (主色 #FF6B35, 卡片圆角, 字体大小)
+- ✅ 与 binding.html 结构一致，已将 div 转换为 view
+- ✅ 样式已全部替换为 design-system 的 SCSS 变量
 - ⚠️ 偏差: 原型有「老师头像」字段, 接口未返回, 已用默认头像兜底
 
 ## E. 遗留 TODO
@@ -207,55 +213,5 @@
 - [x] 没有引入新依赖
 - [x] 没有改 RuoYi-Vue
 - [x] 没有改架构文档
-- [x] 单位全部 rpx
-- [x] 颜色用 design-system token
-```
-
----
-
-## 你被拒收时怎么办
-
-主 Agent 审查后可能给你返工意见。常见返工原因：
-
-1. **页面内 mock 数据** → 删掉，改从接口取
-2. **直接 uni.request** → 改用 api/request.js
-3. **硬编码 URL** → 改用 api/{module}.js 的 export 函数
-4. **没用 useUserStore** → token/userInfo 必须走 store
-5. **没和原型对齐** → 看原型 HTML 重做 layout
-6. **没处理 401/网络异常** → request.js 已经处理，你别绕过
-7. **引入了 ElementUI** → 删除，改 uni-ui 或自写
-
-按返工意见**精确修改**，不要扩展范围。
-
----
-
-## 紧急情况
-
-- 任务卡有歧义 → **停止**，写问题清单交给主 Agent
-- 接口未实现 → **停止**，告诉主 Agent 让 Backend Agent 先做
-- 27 文档与 26 文档冲突 → 以 27 为准（API 契约更具体）
-- 原型 HTML 与 27 文档冲突 → 以 27 为准（PRD = SSOT）
-
-宁可慢，不要错。前端写错的代码用户能直接看到，比后端 bug 更尴尬。
-
----
-
-## 工具能力清单
-
-你需要能：
-- ✅ 读 `D:/coding/jst_v1/` 下任意文件
-- ✅ 写 `D:/coding/jst_v1/jst-uniapp/` 下文件
-- ❌ 不能写 `RuoYi-Vue/` 或 `架构设计/` 下文件
-- ✅ 跑 `npm install` 在 jst-uniapp 目录
-- ❌ 不能跑 mvn / 不能改后端
-- ✅ 在 HBuilderX 内置浏览器或 Chrome 验证页面
-- ❌ 不能跑微信小程序真机调试（除非用户配了 AppID + 开发者工具）
-
----
-
-## 备选：你没有 Uniapp 开发环境怎么办
-
-如果你只是个 LLM 没本地 HBuilderX：
-- 你写的 .vue 文件用户会拷贝到 HBuilderX
-- 验证步骤改为：`描述每个交互的预期结果` 而非真跑
-- 报告中明确标注「未本地验证，待用户运行」
+- [x] DOM 标签已转为 view/text/image
+- [x] 样式全部应用 variables.scss 变量，未硬编码像素值

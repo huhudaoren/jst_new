@@ -1,0 +1,93 @@
+﻿{
+    "started":  true,
+    "pid":  43412,
+    "records":  [
+                    {
+                        "Step":  "startup",
+                        "HttpStatus":  200,
+                        "Code":  null,
+                        "Msg":  "started",
+                        "Extra":  ""
+                    },
+                    {
+                        "Step":  "login-1001",
+                        "HttpStatus":  200,
+                        "Code":  200,
+                        "Msg":  "操作成功",
+                        "Extra":  ""
+                    },
+                    {
+                        "Step":  "create-order-8901",
+                        "HttpStatus":  200,
+                        "Code":  200,
+                        "Msg":  "操作成功",
+                        "Extra":  "orderId=94433"
+                    },
+                    {
+                        "Step":  "mock-pay",
+                        "HttpStatus":  200,
+                        "Code":  200,
+                        "Msg":  "æä½æå",
+                        "Extra":  "orderId=94433"
+                    },
+                    {
+                        "Step":  "message-my-1001",
+                        "HttpStatus":  200,
+                        "Code":  200,
+                        "Msg":  "æä½æå",
+                        "Extra":  ""
+                    },
+                    {
+                        "Step":  "login-1002",
+                        "HttpStatus":  200,
+                        "Code":  200,
+                        "Msg":  "操作成功",
+                        "Extra":  ""
+                    },
+                    {
+                        "Step":  "apply-1002",
+                        "HttpStatus":  200,
+                        "Code":  60011,
+                        "Msg":  "æ¸ éè®¤è¯ç³è¯·éå¤æäº¤",
+                        "Extra":  "applyId="
+                    },
+                    {
+                        "Step":  "admin-login",
+                        "HttpStatus":  200,
+                        "Code":  200,
+                        "Msg":  "操作成功",
+                        "Extra":  ""
+                    },
+                    {
+                        "Step":  "approve-apply",
+                        "HttpStatus":  0,
+                        "Code":  null,
+                        "Msg":  "skip-missing-apply-or-admin-token",
+                        "Extra":  "applyId="
+                    },
+                    {
+                        "Step":  "message-my-1002",
+                        "HttpStatus":  200,
+                        "Code":  200,
+                        "Msg":  "æä½æå",
+                        "Extra":  ""
+                    },
+                    {
+                        "Step":  "read-all-1002",
+                        "HttpStatus":  200,
+                        "Code":  200,
+                        "Msg":  "æä½æå",
+                        "Extra":  ""
+                    },
+                    {
+                        "Step":  "message-my-1002-after-read",
+                        "HttpStatus":  200,
+                        "Code":  200,
+                        "Msg":  "æä½æå",
+                        "Extra":  ""
+                    }
+                ],
+    "warnLines":  "00:34:05.813 [http-nio-8080-exec-3] WARN  c.r.j.m.s.MessagePublisher - [send,60] - [MessagePublisher] skip send because jst_message table/columns missing",
+    "logPath":  "D:\\coding\\jst_v1\\subagent\\tasks\\任务报告\\msg-trigger-smoke2.log",
+    "errPath":  "D:\\coding\\jst_v1\\subagent\\tasks\\任务报告\\msg-trigger-smoke2.err.log"
+}

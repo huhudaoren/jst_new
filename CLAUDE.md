@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次会话时间：2026-04-09 21:30 UTC（阶段 C 全部收尾，批 4 合并，核心闭环 100% 可上线）
+> 会话恢复文件。上次更新：2026-04-10（阶段 E 全部完成 + FIX-1~5 已修复，阶段 F 四任务并行执行中）
 
 ---
 
@@ -92,31 +92,22 @@ D:\coding\jst_v1\
 ├── subagent\                     # ⭐ 子 Agent 协作体系
 │   ├── BACKEND_AGENT_PROMPT.md   # 后端 Agent 系统提示
 │   ├── MINIPROGRAM_AGENT_PROMPT.md  # 前端 Agent 系统提示（含 PNG 对齐要求）
-│   ├── UI_POLISH_AGENT_PROMPT.md    # UI 视觉优化 Agent（直连用户对话模式）
+│   ├── UI_POLISH_AGENT_PROMPT.md    # UI 视觉优化 Agent（直连用户对话模式，已升级为 UI Refresh）
+│   ├── UI_REFRESH_AGENT_PROMPT.md   # ⭐ UI Refresh Agent（uView 2.0 + Design Token 体系化刷新）
 │   ├── TEST_AGENT_PROMPT.md         # ⭐ 测试审计 Agent（Layer1 静态 + Layer2 运行态 + Layer3 前端访问）
+│   ├── WEB_ADMIN_AGENT_PROMPT.md    # ⭐ Web Admin Agent（Vue 2 + Element UI ruoyi-ui）
 │   ├── TASK_CARD_TEMPLATE.md
 │   ├── WORKFLOW.md
 │   ├── ui-feedback\              # UI Agent 字段缺口反馈文档
-│   └── tasks\                    # 任务卡 + 任务报告
-│       ├── F4-学生渠道绑定.md
-│       ├── F5-赛事方入驻审核.md
-│       ├── F6-渠道认证申请.md
-│       ├── F7-赛事CRUD与查询.md
-│       ├── F8-动态表单模板.md
-│       ├── F9-报名记录与表单快照.md
-│       ├── F-NOTICE-公告与首页接口.md
-│       ├── F-COURSE-课程基础接口.md
-│       ├── P1-登录与个人中心.md
-│       ├── P2-首页与公告tab.md
-│       ├── P3-赛事tab与详情.md
-│       ├── P4-课程tab与详情.md
-│       ├── P5-公开页面集.md
-│       ├── P6-学生闭环页面集.md
-│       ├── C2-订单混合支付.md
-│       ├── C4-退款全流程.md
-│       ├── DEBT-1-代码债清理.md
-│       ├── P-POLISH-视觉对齐备忘.md
-│       ├── README-依赖图.md
+│   └── tasks\                    # 任务卡 + 任务报告（B~F 阶段全量）
+│       ├── (B 阶段) F4~F9, F-NOTICE, F-COURSE
+│       ├── (B 前端) P1~P6
+│       ├── (C 阶段) C2, C4, DEBT-1
+│       ├── (D 阶段) D2-*, POLISH-*
+│       ├── (E 阶段) E0-1, E1-CH-1~7, E2-PA-1~9
+│       ├── (修复) FIX-1~5, TEST-ROUND1
+│       ├── (F 阶段) MSG-TRIGGER, PARTNER-WRAPPER, QUARTZ-TASKS, ADMIN-SCAFFOLD, TEST-ROUND2
+│       ├── (UI 刷新) UI-INFRA, UI-REFRESH-1~4
 │       └── 任务报告\              # 子 Agent 完成报告
 ├── test\
 │   ├── wx-tests.http             # ⭐ 小程序端接口测试（用这个）
@@ -175,8 +166,17 @@ D:\coding\jst_v1\
 | **E2-PA-7/8** | 赛事结算 + 现场核销 | ✅ 完成 |
 | **菜单 SQL** | 99-migration-partner-menus.sql（9700-9799 段） | ✅ 完成 |
 | **入口修复** | my 老师→申请渠道方 + home 批量报名/团队预约跳转 | ✅ 完成 |
-| **测试审计** | Test Agent Layer 1/2/3 | 🏃 执行中 |
-| **E-4-WEB Web 后台** | 65 菜单 PC + 手机响应式（承担 H5 审核端职能） | ⏸️ 等原型出齐后启动（Vue 2） |
+| **测试审计（第一轮）** | Test Agent Layer 1/2/3 | ✅ 完成（admin 81% / wx 95%） |
+| **FIX-1~5** | 权限/fixture/接口补齐/断链修复/前端页面补全 | ✅ 完成 |
+| **阶段 F — 后端 4 卡已完成** | | |
+| F-MSG-TRIGGER | Spring Event 消息触发（7 类事件 + 7 监听器） | ✅ 完成 |
+| F-PARTNER-WRAPPER | 赛事方接口包装层（3 Controller + PW-1~7 全绿） | ✅ 完成 |
+| F-QUARTZ-TASKS | 4 个定时任务（订单超时/退款关闭/返点计提/预约过期） | ✅ 完成 |
+| F-ADMIN-SCAFFOLD | ruoyi-ui 脚手架（后端菜单驱动/responsive/公共组件） | ✅ 完成 |
+| **TEST-ROUND2** | 第二轮全量测试 | ⏳ 待派发（SQL 已执行+后端已重启） |
+| **UI-INFRA** | uView 2.0 + Design Token + 组件升级 | ⏳ 待派发 |
+| **UI-REFRESH-1** | 核心 5 页刷新（首页/赛事/我的/公告/课程） | ⏳ 等 UI-INFRA |
+| **E-4-WEB Web 后台** | 65 菜单 PC + 手机响应式（承担 H5 审核端职能） | ⏸️ 等测试收尾后启动 |
 
 ---
 
@@ -224,39 +224,36 @@ D:\coding\jst_v1\
 
 ## 六、已知问题与待办
 
-> 最后更新：2026-04-10 阶段 E 第三波派发
+> 最后更新：2026-04-10 阶段 F 并行派发
 
-### 阶段 E 进度总览（当前）
+### 阶段 E 总结（✅ 已收尾）
 
-**已完成**：
-- E-0 后端接口预备（11 端点 + DDL + 角色） ✅
-- E2-PA-9 PartnerScope 切面 ✅
-- E1-CH-1 渠道认证前端 3 页 ✅
-- E1-CH-5 返点+提现结算合并 ✅
-- E2-PA-1 赛事方入驻申请 3 公开页 ✅
-- E2-PA-2 赛事方工作台首页 ✅
-- E2-PA-4 报名审核 ✅
+阶段 E 全部 17 张任务卡 + 菜单 SQL + 入口修复已完成。第一轮测试审计发现 10 个失败点，FIX-1~5 已全部修复。
 
-**第三波 ✅**：E1-CH-2/3/4/6 + E2-PA-3 全部完成
-**第四波 ✅**：E1-CH-7 + E2-PA-5/6/7/8 全部完成
-**菜单 SQL ✅**：`99-migration-partner-menus.sql` 赛事方 8 菜单 + 22 按钮权限注册
-**入口修复 ✅**：my/index "老师→申请渠道方" + home 批量报名/团队预约跳转修复
+### 阶段 F 当前进度
 
-**🧪 测试审计（进行中）**：
-- Test Agent 已派发（Layer 1 静态 + Layer 2 运行态 + Layer 3 前端访问）
-- 静态扫描已知：12 处 toast 占位 / 5 处 API 后端 404 / 2 处 URL 路径不一致
-- 等报告回来再出精确修复卡（FIX-LINK-FE + FIX-LINK-BE，任务卡已预写待确认）
+**🏃 执行中（4 任务并行 + 1 UI Agent）**：
 
-**待补充**：
-- 赛事方后端 `/jst/partner/*` Controller 部分接口桥接到 F7/F9 现有路由（PA-3/PA-4 前端已做兜底）
-- 后端字段缺口文档（PA-2 dashboard 3 接口、PA-4 partner enroll 路由、CH-4 订单详情费用明细）→ `subagent/ui-feedback/` 目录
+| 任务 | Agent | 说明 |
+|---|---|---|
+| MSG-TRIGGER | Backend Agent 1 | Spring Event 消息触发（6 监听器 + jst-message 事件驱动） |
+| PARTNER-WRAPPER | Backend Agent 2 | 赛事方接口包装层（/jst/partner/* + PartnerDataScope 数据隔离） |
+| QUARTZ-TASKS | Backend Agent 3 | 4 个定时任务（订单超时取消/退款关闭/返点计提/预约过期） |
+| ADMIN-SCAFFOLD | Web Admin Agent | ruoyi-ui 脚手架（后端菜单驱动/responsive.scss/公共组件） |
+| POLISH-FULL | UI Polish Agent | 视觉对齐（用户直接监督，不走任务卡） |
 
-### 待做但暂缓
+**⏳ 等待派发**：
+- **TEST-ROUND2**：等 MSG-TRIGGER + PARTNER-WRAPPER 完成 → 重启后端 → 派发第二轮全量测试
+
+### F 阶段完成后的下一步
+
+1. **TEST-ROUND2 收尾** → 确认健康度基线 ≥95%
+2. **E-4-WEB Web 后台开始** → 65 菜单 Vue 2 + 响应式（已有 WEB_ADMIN_AGENT_PROMPT.md）
+3. **剩余 F-2 批次**（按优先级排列）：
 
 | 项 | 状态 | 说明 |
 |---|---|---|
-| **E-4-WEB Web 后台** | ⏸️ 等原型 | 65 菜单 Vue 2 + 响应式（承担 H5 审核端职能） |
-| **POLISH-FULL** | 🟡 UI Agent 并行 | 91 页原型对齐，Design Token 基线已落 |
+| **E-4-WEB Web 后台** | ⏸️ 等 F 收尾 | 65 菜单 Vue 2 + 响应式（承担 H5 审核端职能） |
 | **F-AI-MAIC** | ⏸️ 缺外部文档 | OpenMAIC API 文档 + 测试账号待确认 |
 | **F-ANALYSIS** | ⏸️ F-2 批次 | 经营分析 2 页 |
 | **F-CONTRACT-INVOICE** | ⏸️ F-2 批次 | 合同开票 |
@@ -266,12 +263,8 @@ D:\coding\jst_v1\
 
 | 项 | 状态 |
 |---|---|
-| `98-migration DDL` 测试库未执行 | 需手动跑 |
-| `lock:channel:unbind` 登记到 15-Redis-Key | 待补 |
-| `auto-claim` 查用户手机号逻辑 | E0-1 遗留 #5 |
 | `owner_type` 数据清洗 | DEBT-3 遗留脚本，需停服窗口 |
 | OSS 上传组件集成（小程序端认证表单用文本框占位） | 待真实 OSS 配置后接入 |
-| Spring Boot 4.0+ `spring-boot-starter-aspectj` | 已适配 |
 
 ### CCB 决策索引
 - **`架构设计/34-功能闭环决策记录.md`**：Q-01~Q-14 全量决策（解绑倒计时/驳回上限/预约退款配置/账号模型等）
@@ -302,6 +295,7 @@ D:\coding\jst_v1\
 | 97-migration-baseline-roles.sql | 基线角色补齐（student/partner/channel/platform_op） |
 | 98-migration-phase-e-prep.sql | E 阶段 DDL（reject_count/allow_appointment_refund/新角色） |
 | 99-migration-partner-menus.sql | ⭐ 赛事方菜单树（9700-9799 段，8 菜单 + 22 按钮） |
+| 99-migration-quartz-jobs.sql | ⭐ 定时任务注册（QUARTZ-TASKS 产出） |
 | 99-test-fixtures.sql | 测试数据 |
 
 ---
@@ -321,7 +315,7 @@ D:\coding\jst_v1\
 请开始 Step 1 阅读文档,然后 Step 2 自检答题,最后实现并交付报告。
 ```
 
-### 前端 Agent
+### 前端 Agent（小程序）
 ```
 你是竞赛通项目的 MiniProgram Agent。请按以下两份文档的要求开始工作:
 
@@ -335,15 +329,47 @@ D:\coding\jst_v1\
 请开始 Step 1 阅读文档,然后 Step 2 自检答题,最后实现并交付报告。
 ```
 
+### Web Admin Agent（管理端前端）
+```
+你是竞赛通项目的 Web Admin Agent。请按以下两份文档工作：
+
+【文档 1: SYSTEM PROMPT】
+（粘贴 D:\coding\jst_v1\subagent\WEB_ADMIN_AGENT_PROMPT.md 全部内容）
+
+【文档 2: 任务卡】
+（粘贴对应任务卡内容）
+
+⭐ 先读已有 views/partner/ 下的页面了解项目风格。
+⭐ 先出 Diff Plan，等我 confirm 再动手。
+⭐ 必须响应式适配手机浏览器。
+⭐ npm run build:prod 必须通过。
+```
+
+### UI Refresh Agent（小程序视觉刷新）
+```
+你是竞赛通项目的 UI Refresh Agent。请按以下两份文档工作：
+
+【文档 1: SYSTEM PROMPT】
+（粘贴 D:\coding\jst_v1\subagent\UI_REFRESH_AGENT_PROMPT.md 全部内容）
+
+【文档 2: 任务卡】
+（粘贴对应任务卡内容）
+
+⭐ 原型是下限不是上限，你的目标是做得比原型更好。
+⭐ 必须用 uView 组件 + Design Token，禁止手写硬编码 CSS。
+⭐ 先出 Diff Plan，等我 confirm 再动手。
+⭐ script 块的业务逻辑一行不动。
+```
+
 ---
 
 ## 九、恢复会话后第一步
 
 1. 读取此 CLAUDE.md
 2. `git log --oneline -20` 查看最近代码变更
-3. 查看 `subagent/tasks/任务报告/C4-退款全流程-回答.md` 做 review
-4. 跑测试验证 C2 全绿
-5. 继续出 C5/C6/C7/C8 任务卡
+3. 检查 §六 当前进度，确认哪些任务还在执行中
+4. 查看 `subagent/tasks/任务报告/` 是否有新报告需要 review
+5. 根据当前阶段继续推进（F 阶段 → TEST-ROUND2 → E-4-WEB）
 
 ## 十、PRD 版本规则
 

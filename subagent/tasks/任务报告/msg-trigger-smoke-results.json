@@ -1,0 +1,66 @@
+﻿{
+    "started":  true,
+    "processId":  45692,
+    "results":  [
+                    {
+                        "Step":  "startup",
+                        "StatusCode":  200,
+                        "Content":  "started"
+                    },
+                    {
+                        "Step":  "MSG-1-0 login",
+                        "StatusCode":  200,
+                        "Content":  "{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"isNewUser\":false,\"roles\":[\"jst_student\"],\"token\":\"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ3eF8xMDAxIiwibG9naW5fdXNlcl9rZXkiOiJlYzU2MTUxOS1hNjM4LTQwNzUtYWJmZi04MGQ0ZDlmNWFhMmMifQ.iqdE32wo2r7dqfGWbEhfvsosn4awheg8tLipnB3dOCajbGTLWGQQa2BoU1EO4nVDsgdBU0AZ4FQFZiHlm_QF4w\",\"userInfo\":{\"avatar\":null,\"mobileMasked\":\"138****0001\",\"nickname\":\"测试_张妈妈\",\"phoneBound\":true,\"userId\":1001,\"userType\":\"parent\"}}}"
+                    },
+                    {
+                        "Step":  "MSG-1-1 create-order",
+                        "StatusCode":  200,
+                        "Content":  "{\"msg\":\"å½åæ¥åå·²å­å¨ææè®¢å\",\"code\":30006}"
+                    },
+                    {
+                        "Step":  "MSG-1-2 mock-pay",
+                        "StatusCode":  0,
+                        "Content":  "skip: no orderId"
+                    },
+                    {
+                        "Step":  "MSG-1-3 message-my",
+                        "StatusCode":  200,
+                        "Content":  "{\"msg\":\"æä½æå\",\"code\":200,\"data\":[]}"
+                    },
+                    {
+                        "Step":  "MSG-2-0 apply",
+                        "StatusCode":  200,
+                        "Content":  "{\"msg\":\"æ¸ éè®¤è¯ç³è¯·éå¤æäº¤\",\"code\":60011}"
+                    },
+                    {
+                        "Step":  "MSG-2-1 admin-login",
+                        "StatusCode":  200,
+                        "Content":  "{\"msg\":\"操作成功\",\"code\":200,\"token\":\"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImxvZ2luX3VzZXJfa2V5IjoiM2Q4NzY3N2ItYzk4Yi00NWY1LWJkNDUtZWM3MGU4MjFjNjE4In0.zTwGoar4PnjV1LRmjzJyMBaP4_W9m_o29FmffEE0Tf4e5P0Jd3TzrLhSmt1zGjyhDhQX-87AVFpRs-R0Emr8Ig\"}"
+                    },
+                    {
+                        "Step":  "MSG-2-2 approve",
+                        "StatusCode":  0,
+                        "Content":  "skip: missing applyId or adminToken"
+                    },
+                    {
+                        "Step":  "MSG-2-3 message-my",
+                        "StatusCode":  200,
+                        "Content":  "{\"msg\":\"æä½æå\",\"code\":200,\"data\":[]}"
+                    },
+                    {
+                        "Step":  "MSG-3-1 read-all",
+                        "StatusCode":  200,
+                        "Content":  "{\"msg\":\"æä½æå\",\"code\":200}"
+                    },
+                    {
+                        "Step":  "MSG-3-2 message-my",
+                        "StatusCode":  200,
+                        "Content":  "{\"msg\":\"æä½æå\",\"code\":200,\"data\":[]}"
+                    }
+                ],
+    "warnLines":  {
+
+                  },
+    "logPath":  "D:\\coding\\jst_v1\\subagent\\tasks\\任务报告\\msg-trigger-smoke.log",
+    "errPath":  "D:\\coding\\jst_v1\\subagent\\tasks\\任务报告\\msg-trigger-smoke.err.log"
+}
