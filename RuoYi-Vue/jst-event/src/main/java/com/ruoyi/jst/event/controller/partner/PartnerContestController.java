@@ -1,7 +1,9 @@
 package com.ruoyi.jst.event.controller.partner;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.jst.common.annotation.PartnerDataScope;
 import com.ruoyi.jst.common.controller.BasePartnerController;
 import com.ruoyi.jst.event.dto.ContestQueryReqDTO;
@@ -85,6 +87,7 @@ public class PartnerContestController extends BasePartnerController {
      * @关联状态机 SM-5
      * @关联权限 hasRole('jst_partner')
      */
+    @Log(title = "赛事方新增赛事", businessType = BusinessType.INSERT)
     @PreAuthorize("@ss.hasRole('jst_partner')")
     @PostMapping
     public AjaxResult create(@Valid @RequestBody ContestSaveReqDTO req) {
@@ -103,6 +106,7 @@ public class PartnerContestController extends BasePartnerController {
      * @关联状态机 SM-5
      * @关联权限 hasRole('jst_partner')
      */
+    @Log(title = "赛事方编辑赛事", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasRole('jst_partner')")
     @PutMapping("/{contestId}")
     public AjaxResult update(@PathVariable("contestId") Long contestId,
@@ -122,6 +126,7 @@ public class PartnerContestController extends BasePartnerController {
      * @关联状态机 SM-5
      * @关联权限 hasRole('jst_partner')
      */
+    @Log(title = "赛事方提交审核", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasRole('jst_partner')")
     @PutMapping("/{contestId}/submit")
     public AjaxResult submit(@PathVariable("contestId") Long contestId) {
@@ -138,6 +143,7 @@ public class PartnerContestController extends BasePartnerController {
      * @关联状态机 SM-5
      * @关联权限 hasRole('jst_partner')
      */
+    @Log(title = "赛事方下线赛事", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasRole('jst_partner')")
     @PutMapping("/{contestId}/offline")
     public AjaxResult offline(@PathVariable("contestId") Long contestId) {
@@ -154,6 +160,7 @@ public class PartnerContestController extends BasePartnerController {
      * @关联状态机 SM-5
      * @关联权限 hasRole('jst_partner')
      */
+    @Log(title = "赛事方删除赛事", businessType = BusinessType.DELETE)
     @PreAuthorize("@ss.hasRole('jst_partner')")
     @DeleteMapping("/{contestId}")
     public AjaxResult delete(@PathVariable("contestId") Long contestId) {

@@ -1,0 +1,60 @@
+# ============================================================
+# 竞赛通 - 测试环境配置 (test)
+# 敏感值支持环境变量注入，也提供合理默认值
+# ============================================================
+
+# --- 数据源（测试服务器）---
+spring.datasource:
+  druid:
+    master:
+      url: ${DB_URL:jdbc:mysql://localhost:3306/jst_test?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8}
+      username: ${DB_USER:jst_test}
+      password: ${DB_PASS:}
+
+# --- Redis ---
+spring.data.redis:
+  host: ${REDIS_HOST:localhost}
+  port: ${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD:}
+
+# --- 连接池（测试环境适度放大）---
+spring.datasource.druid:
+  initialSize: 5
+  minIdle: 10
+  maxActive: 30
+
+# --- Druid 监控（测试开启但限 IP）---
+spring.datasource.druid.stat-view-servlet:
+  enabled: true
+  login-username: ${DRUID_USER:admin}
+  login-password: ${DRUID_PASS:StrongPass123!}
+  allow: 127.0.0.1,10.0.0.0/8
+
+# --- Swagger（测试开启）---
+springdoc:
+  swagger-ui:
+    enabled: true
+
+# --- 日志（INFO）---
+logging:
+  level:
+    com.ruoyi: info
+    com.ruoyi.jst: info
+
+# --- Token ---
+token:
+  secret: ${TOKEN_SECRET:test-secret-key-change-in-prod-12345678}
+
+# --- jst 业务 ---
+jst:
+  security:
+    aes-key: ${JST_AES_KEY:bE8Ru+Z5tKOwHQG5c+gogb4tC3C/QbehGpKL1dot1TQ=}
+  cors:
+    allowed-origins: ${JST_CORS_ORIGINS:http://localhost:80,http://localhost:1024}
+  wxauth:
+    mock: ${JST_WXAUTH_MOCK:true}
+
+# --- 代码生成器（测试开启）---
+ruoyi:
+  generator:
+    enabled: true

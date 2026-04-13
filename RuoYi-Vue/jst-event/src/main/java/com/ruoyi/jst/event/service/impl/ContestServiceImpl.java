@@ -7,6 +7,7 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.jst.common.audit.OperateLog;
 import com.ruoyi.jst.common.context.JstLoginContext;
 import com.ruoyi.jst.common.exception.BizErrorCode;
+import com.ruoyi.jst.common.cache.JstCacheService;
 import com.ruoyi.jst.common.lock.JstLockTemplate;
 import com.ruoyi.jst.event.domain.JstContest;
 import com.ruoyi.jst.event.domain.JstEnrollFormTemplate;
@@ -60,6 +61,9 @@ public class ContestServiceImpl implements ContestService {
 
     @Autowired
     private JstEnrollFormTemplateMapper enrollFormTemplateMapper;
+
+    @Autowired
+    private JstCacheService jstCacheService;
 
     @Autowired
     private JstLockTemplate jstLockTemplate;
@@ -121,6 +125,7 @@ public class ContestServiceImpl implements ContestService {
             throw new ServiceException("创建赛事失败", BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
         }
         log.info("[ContestAdd] 新建赛事成功 contestId={} partnerId={}", contest.getContestId(), partnerId);
+        evictContestCache();
         return contest.getContestId();
     }
 
@@ -185,6 +190,7 @@ public class ContestServiceImpl implements ContestService {
             throw new ServiceException("编辑失败：赛事状态已变更，请刷新后重试",
                     BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
         }
+        evictContestCache();
     }
 
     /**
@@ -220,6 +226,7 @@ public class ContestServiceImpl implements ContestService {
             }
             return null;
         });
+        evictContestCache();
     }
 
     /**
@@ -254,6 +261,7 @@ public class ContestServiceImpl implements ContestService {
             }
             return null;
         });
+        evictContestCache();
     }
 
     /**
@@ -291,6 +299,7 @@ public class ContestServiceImpl implements ContestService {
             }
             return null;
         });
+        evictContestCache();
     }
 
     /**
@@ -348,6 +357,7 @@ public class ContestServiceImpl implements ContestService {
             }
             return null;
         });
+        evictContestCache();
     }
 
     /**
@@ -381,6 +391,7 @@ public class ContestServiceImpl implements ContestService {
             }
             return null;
         });
+        evictContestCache();
     }
 
     /**
@@ -414,6 +425,7 @@ public class ContestServiceImpl implements ContestService {
             }
             return null;
         });
+        evictContestCache();
     }
 
     /**
@@ -446,39 +458,51 @@ public class ContestServiceImpl implements ContestService {
     }
 
     /**
-     * 查询小程序在线赛事列表。
+     * 查询小程序在线赛事列表（缓存 5 分钟）。
+     * <p>
+     * 仅对无关键词搜索的分类浏览走缓存，关键词/标签/组别搜索直接查库。
      *
      * @param query 查询条件
      * @return 列表
      */
     @Override
     public List<WxContestCardVO> selectWxList(WxContestQueryDTO query) {
-        return contestMapperExt.selectWxList(query);
+        // 关键词/标签/组别搜索不走缓存（高基数低命中率）
+        if (StringUtils.isNotBlank(query.getKeyword()) || StringUtils.isNotBlank(query.getTag())
+                || StringUtils.isNotBlank(query.getGroupLevel())) {
+            return contestMapperExt.selectWxList(query);
+        }
+        int pn = query.getPageNum() != null ? query.getPageNum() : 1;
+        String key = "cache:contest:list:" + safeKeyPart(query.getCategory()) + ":" + pn;
+        return jstCacheService.getOrLoadPage(key, 300, () -> contestMapperExt.selectWxList(query));
     }
 
     /**
-     * 查询小程序在线赛事详情。
+     * 查询小程序在线赛事详情（缓存 10 分钟）。
      *
      * @param contestId 赛事ID
      * @return 详情
      */
     @Override
     public WxContestDetailVO getWxDetail(Long contestId) {
-        JstContest contest = getRequiredContest(contestId);
-        if (!ContestAuditStatus.ONLINE.dbValue().equals(contest.getAuditStatus())) {
-            throw new ServiceException(BizErrorCode.JST_EVENT_CONTEST_NOT_ONLINE.message(),
-                    BizErrorCode.JST_EVENT_CONTEST_NOT_ONLINE.code());
-        }
-        WxContestDetailVO vo = contestMapperExt.selectWxDetail(contestId);
-        if (vo == null) {
-            throw new ServiceException(BizErrorCode.JST_EVENT_CONTEST_NOT_ONLINE.message(),
-                    BizErrorCode.JST_EVENT_CONTEST_NOT_ONLINE.code());
-        }
-        return vo;
+        String key = "cache:contest:detail:" + contestId;
+        return jstCacheService.getOrLoad(key, 600, () -> {
+            JstContest contest = getRequiredContest(contestId);
+            if (!ContestAuditStatus.ONLINE.dbValue().equals(contest.getAuditStatus())) {
+                throw new ServiceException(BizErrorCode.JST_EVENT_CONTEST_NOT_ONLINE.message(),
+                        BizErrorCode.JST_EVENT_CONTEST_NOT_ONLINE.code());
+            }
+            WxContestDetailVO vo = contestMapperExt.selectWxDetail(contestId);
+            if (vo == null) {
+                throw new ServiceException(BizErrorCode.JST_EVENT_CONTEST_NOT_ONLINE.message(),
+                        BizErrorCode.JST_EVENT_CONTEST_NOT_ONLINE.code());
+            }
+            return vo;
+        });
     }
 
     /**
-     * 查询热门赛事。
+     * 查询热门赛事（缓存 5 分钟）。
      *
      * @param limit 限制数量
      * @return 热门赛事列表
@@ -486,7 +510,8 @@ public class ContestServiceImpl implements ContestService {
     @Override
     public List<WxContestCardVO> selectHotList(Integer limit) {
         int safeLimit = limit == null || limit <= 0 ? 6 : Math.min(limit, 20);
-        return contestMapperExt.selectHotList(safeLimit);
+        String key = "cache:contest:hot:" + safeLimit;
+        return jstCacheService.getOrLoad(key, 300, () -> contestMapperExt.selectHotList(safeLimit));
     }
 
     /**
@@ -524,13 +549,14 @@ public class ContestServiceImpl implements ContestService {
     }
 
     /**
-     * 查询赛事分类统计。
+     * 查询赛事分类统计（缓存 60 分钟）。
      *
      * @return 分类统计
      */
     @Override
     public List<CategoryStatVO> selectCategoryStats() {
-        return contestMapperExt.selectCategoryStats();
+        return jstCacheService.getOrLoad("cache:contest:categories", 3600,
+                () -> contestMapperExt.selectCategoryStats());
     }
 
     private JstContest getRequiredContest(Long contestId) {
@@ -637,5 +663,17 @@ public class ContestServiceImpl implements ContestService {
 
     private String safeRemark(AuditReqDTO req) {
         return req == null ? null : req.getAuditRemark();
+    }
+
+    /**
+     * 赛事写操作后清除缓存（列表 + 详情 + 首页推荐）。
+     */
+    private void evictContestCache() {
+        jstCacheService.evictByPrefix("cache:contest:");
+        jstCacheService.evictByPrefix("cache:home:");
+    }
+
+    private String safeKeyPart(String value) {
+        return StringUtils.isBlank(value) ? "_all" : value;
     }
 }

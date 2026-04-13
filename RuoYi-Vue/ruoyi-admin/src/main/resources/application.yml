@@ -32,10 +32,10 @@ server:
       # Tomcat启动初始化的线程数，默认值10
       min-spare: 100
 
-# 日志配置
+# 日志配置（各环境 yml 覆盖）
 logging:
   level:
-    com.ruoyi: debug
+    com.ruoyi: info
     org.springframework: warn
 
 # 用户配置
@@ -53,7 +53,11 @@ spring:
     # 国际化资源文件路径
     basename: i18n/messages
   profiles:
-    active: druid
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+    group:
+      dev: druid
+      test: druid
+      prod: druid
   # 文件上传
   servlet:
     multipart:
@@ -70,16 +74,10 @@ spring:
       # 热部署开关
       enabled: false
   data:
-    # redis 配置
+    # redis 配置（host/port/password 由各环境 yml 覆盖）
     redis:
-      # 地址
-      host: localhost
-      # 端口，默认为6379
-      port: 6379
       # 数据库索引
       database: 0
-      # 密码
-      password:
       # 连接超时时间
       timeout: 10s
       lettuce:
@@ -93,12 +91,10 @@ spring:
           # #连接池最大阻塞等待时间（使用负值表示没有限制）
           max-wait: -1ms
 
-# token配置
+# token配置（secret 由各环境 yml 覆盖）
 token:
   # 令牌自定义标识
   header: Authorization
-  # 令牌密钥
-  secret: abcdefghijklmnopqrstuvwxyz
   # 令牌有效期（默认30分钟）
   expireTime: 30
 
@@ -118,12 +114,12 @@ pagehelper:
   supportMethodsArguments: true
   params: count=countSql
 
-# Springdoc配置
+# Springdoc配置（swagger-ui.enabled 由各环境 yml 覆盖，默认关闭）
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
-    enabled: true
+    enabled: false
     path: /swagger-ui.html
     tags-sorter: alpha
   group-configs:
@@ -154,12 +150,14 @@ xss:
 # 敏感字段(AK/SK/AES key)必须通过环境变量注入,禁止入仓
 # ============================================================
 jst:
-  # 安全：AES-256 字段加密密钥(32 字节 base64),由运维通过环境变量注入
+  # 安全：AES-256 字段加密密钥(32 字节 base64),由各环境 yml 覆盖
   # 生成命令:openssl rand -base64 32
   # 详见 架构设计/16-安全与敏感字段.md AES Key 运维生成步骤
   security:
-#    aes-key: ${JST_AES_KEY:}
-    aes-key: "bE8Ru+Z5tKOwHQG5c+gogb4tC3C/QbehGpKL1dot1TQ="
+    aes-key: ${JST_AES_KEY:please-set-in-env}
+  # CORS 白名单（各环境 yml 覆盖）
+  cors:
+    allowed-origins: ${JST_CORS_ORIGINS:http://localhost:80,http://localhost:1024}
   # 阿里云 OSS:文件上传(图片/凭证/合同附件等)
   oss:
     endpoint: ${JST_OSS_ENDPOINT:oss-cn-hangzhou.aliyuncs.com}

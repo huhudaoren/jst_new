@@ -1,7 +1,9 @@
 package com.ruoyi.jst.event.controller.partner;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.jst.common.annotation.PartnerDataScope;
 import com.ruoyi.jst.common.controller.BasePartnerController;
 import com.ruoyi.jst.event.dto.ScoreCorrectionApplyReqDTO;
@@ -49,6 +51,7 @@ public class PartnerScoreController extends BasePartnerController {
      * @param file      Excel 文件
      * @return 导入结果
      */
+    @Log(title = "赛事方导入成绩", businessType = BusinessType.IMPORT)
     @PreAuthorize("@ss.hasPermi('jst:event:score_record:add')")
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public AjaxResult importScores(@RequestParam("contestId") Long contestId,
@@ -90,6 +93,7 @@ public class PartnerScoreController extends BasePartnerController {
      * @param req 保存请求
      * @return 成绩ID
      */
+    @Log(title = "赛事方编辑成绩", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:event:score_record:edit')")
     @PutMapping("/{id}")
     public AjaxResult save(@PathVariable("id") Long id, @Valid @RequestBody ScoreSaveReqDTO req) {
@@ -103,6 +107,7 @@ public class PartnerScoreController extends BasePartnerController {
      * @param req 提审请求
      * @return 操作结果
      */
+    @Log(title = "赛事方提交成绩审核", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:event:score_record:edit')")
     @PutMapping("/submit-review")
     public AjaxResult submitReview(@Valid @RequestBody ScoreSubmitReviewReqDTO req) {
@@ -130,6 +135,7 @@ public class PartnerScoreController extends BasePartnerController {
      * @param req 更正申请
      * @return 操作结果
      */
+    @Log(title = "赛事方成绩更正申请", businessType = BusinessType.INSERT)
     @PreAuthorize("@ss.hasPermi('jst:event:score_record:edit')")
     @PostMapping("/correction/apply")
     public AjaxResult applyCorrection(@Valid @RequestBody ScoreCorrectionApplyReqDTO req) {

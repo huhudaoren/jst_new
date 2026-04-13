@@ -1,7 +1,9 @@
 package com.ruoyi.jst.event.controller.partner;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.jst.common.annotation.PartnerDataScope;
 import com.ruoyi.jst.common.controller.BasePartnerController;
 import com.ruoyi.jst.event.dto.CertBatchGrantReqDTO;
@@ -45,6 +47,7 @@ public class PartnerCertController extends BasePartnerController {
      * @param req 模板请求
      * @return 模板ID
      */
+    @Log(title = "赛事方登记证书模板", businessType = BusinessType.INSERT)
     @PreAuthorize("@ss.hasPermi('jst:event:cert_template:add')")
     @PostMapping(value = "/template", consumes = MediaType.APPLICATION_JSON_VALUE)
     public AjaxResult saveTemplate(@Valid @RequestBody CertTemplateReqDTO req) {
@@ -61,6 +64,7 @@ public class PartnerCertController extends BasePartnerController {
      * @param file         模板底图文件
      * @return 模板ID
      */
+    @Log(title = "赛事方上传证书模板", businessType = BusinessType.INSERT)
     @PreAuthorize("@ss.hasPermi('jst:event:cert_template:add')")
     @PostMapping(value = "/template", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public AjaxResult uploadTemplate(@RequestParam("templateName") String templateName,
@@ -106,6 +110,7 @@ public class PartnerCertController extends BasePartnerController {
      * @param req 生成请求
      * @return 生成结果
      */
+    @Log(title = "赛事方批量颁发证书", businessType = BusinessType.INSERT)
     @PreAuthorize("@ss.hasPermi('jst:event:cert_record:add')")
     @PostMapping("/batch-grant")
     public AjaxResult batchGrant(@Valid @RequestBody CertBatchGrantReqDTO req) {
@@ -118,6 +123,7 @@ public class PartnerCertController extends BasePartnerController {
      * @param req 提审请求
      * @return 操作结果
      */
+    @Log(title = "赛事方提交证书审核", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:event:cert_record:edit')")
     @PostMapping("/submit-review")
     public AjaxResult submitReview(@Valid @RequestBody CertSubmitReviewReqDTO req) {

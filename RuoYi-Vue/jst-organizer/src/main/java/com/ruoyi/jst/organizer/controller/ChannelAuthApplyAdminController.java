@@ -1,8 +1,10 @@
 package com.ruoyi.jst.organizer.controller;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.jst.organizer.dto.ApproveChannelReqDTO;
 import com.ruoyi.jst.organizer.dto.ChannelAuthApplyQueryDTO;
 import com.ruoyi.jst.organizer.dto.RejectReqDTO;
@@ -70,6 +72,7 @@ public class ChannelAuthApplyAdminController extends BaseController {
      * @param req     审核入参
      * @return 渠道ID
      */
+    @Log(title = "渠道认证审核通过", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:organizer:channelApply:approve')")
     @PostMapping("/{applyId}/approve")
     public AjaxResult approve(@PathVariable Long applyId, @Valid @RequestBody ApproveChannelReqDTO req) {
@@ -83,6 +86,7 @@ public class ChannelAuthApplyAdminController extends BaseController {
      * @param req     驳回入参
      * @return 处理结果
      */
+    @Log(title = "渠道认证审核驳回", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:organizer:channelApply:reject')")
     @PostMapping("/{applyId}/reject")
     public AjaxResult reject(@PathVariable Long applyId, @Valid @RequestBody RejectReqDTO req) {
@@ -96,6 +100,7 @@ public class ChannelAuthApplyAdminController extends BaseController {
      * @param applyId 申请ID
      * @return 处理结果
      */
+    @Log(title = "渠道认证暂停", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:organizer:channelApply:suspend')")
     @PostMapping("/{applyId}/suspend")
     public AjaxResult suspend(@PathVariable Long applyId) {

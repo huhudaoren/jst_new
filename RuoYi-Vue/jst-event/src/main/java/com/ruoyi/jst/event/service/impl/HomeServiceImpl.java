@@ -1,6 +1,7 @@
 package com.ruoyi.jst.event.service.impl;
 
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.jst.common.cache.JstCacheService;
 import com.ruoyi.jst.event.mapper.HomeMapperExt;
 import com.ruoyi.jst.event.service.HomeService;
 import com.ruoyi.jst.event.vo.ContestListVO;
@@ -42,8 +43,11 @@ public class HomeServiceImpl implements HomeService {
     @Autowired
     private HomeMapperExt homeMapperExt;
 
+    @Autowired
+    private JstCacheService jstCacheService;
+
     /**
-     * 查询首页推荐赛事。
+     * 查询首页推荐赛事（缓存 3 分钟）。
      *
      * @return 推荐赛事列表
      * @关联表 jst_contest / jst_enroll_record
@@ -51,11 +55,12 @@ public class HomeServiceImpl implements HomeService {
      */
     @Override
     public List<ContestListVO> selectRecommendContests() {
-        return homeMapperExt.selectRecommendContests(DEFAULT_RECOMMEND_CONTEST_LIMIT);
+        return jstCacheService.getOrLoad("cache:home:recommend-contests", 180,
+                () -> homeMapperExt.selectRecommendContests(DEFAULT_RECOMMEND_CONTEST_LIMIT));
     }
 
     /**
-     * 查询首页推荐课程。
+     * 查询首页推荐课程（缓存 3 分钟）。
      *
      * @return 推荐课程列表
      * @关联表 jst_course
@@ -63,11 +68,12 @@ public class HomeServiceImpl implements HomeService {
      */
     @Override
     public List<CourseListVO> selectRecommendCourses() {
-        return homeMapperExt.selectRecommendCourses(DEFAULT_RECOMMEND_COURSE_LIMIT);
+        return jstCacheService.getOrLoad("cache:home:recommend-courses", 180,
+                () -> homeMapperExt.selectRecommendCourses(DEFAULT_RECOMMEND_COURSE_LIMIT));
     }
 
     /**
-     * 查询首页热门标签。
+     * 查询首页热门标签（缓存 3 分钟）。
      *
      * @return 热门标签列表
      * @关联表 jst_contest
@@ -75,6 +81,10 @@ public class HomeServiceImpl implements HomeService {
      */
     @Override
     public List<HomeHotTagVO> selectHotTags() {
+        return jstCacheService.getOrLoad("cache:home:hot-tags", 180, this::loadHotTags);
+    }
+
+    private List<HomeHotTagVO> loadHotTags() {
         List<HomeTagSourceVO> sources = homeMapperExt.selectHotTagSources(HOT_TAG_SOURCE_LIMIT);
         if (sources == null || sources.isEmpty()) {
             return Collections.emptyList();
@@ -125,7 +135,7 @@ public class HomeServiceImpl implements HomeService {
     }
 
     /**
-     * 查询首页专题活动。
+     * 查询首页专题活动（缓存 3 分钟）。
      *
      * @return 专题活动列表
      * @关联表 jst_notice
@@ -133,6 +143,10 @@ public class HomeServiceImpl implements HomeService {
      */
     @Override
     public List<HomeTopicVO> selectTopics() {
+        return jstCacheService.getOrLoad("cache:home:topics", 180, this::loadTopics);
+    }
+
+    private List<HomeTopicVO> loadTopics() {
         List<HomeTopicVO> topics = homeMapperExt.selectTopics(DEFAULT_TOPIC_LIMIT);
         if (topics == null || topics.isEmpty()) {
             return Collections.emptyList();

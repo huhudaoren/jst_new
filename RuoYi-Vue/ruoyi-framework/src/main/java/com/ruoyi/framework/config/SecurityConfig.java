@@ -1,6 +1,7 @@
 package com.ruoyi.framework.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -58,6 +59,10 @@ public class SecurityConfig
     @Autowired
     private PermitAllUrlProperties permitAllUrl;
 
+    /** 代码生成器开关（prod.yml 设为 false 禁用） */
+    @Value("${ruoyi.generator.enabled:true}")
+    private boolean generatorEnabled;
+
 	/**
 	 * 身份验证实现
 	 */
@@ -99,6 +104,11 @@ public class SecurityConfig
             // 注解标记允许匿名访问的url
             .authorizeHttpRequests((requests) -> {
                 permitAllUrl.getUrls().forEach(url -> requests.requestMatchers(url).permitAll());
+                // 代码生成器：由 ruoyi.generator.enabled 控制，prod 下禁用
+                if (!generatorEnabled)
+                {
+                    requests.requestMatchers("/tool/gen/**").denyAll();
+                }
                 // 对于登录login 注册register 验证码captchaImage 允许匿名访问
                 requests.requestMatchers("/login", "/register", "/captchaImage").permitAll()
                     // 静态资源，可匿名访问

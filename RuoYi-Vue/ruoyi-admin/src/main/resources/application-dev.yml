@@ -1,0 +1,53 @@
+# ============================================================
+# 竞赛通 - 开发环境配置 (dev)
+# 本地开发用，允许弱密钥和明文凭证
+# ============================================================
+
+# --- 数据源（本地/测试服务器）---
+spring.datasource:
+  druid:
+    master:
+      url: jdbc:mysql://59.110.53.165:3306/jst_new?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+      username: jst_new
+      password: J8zZpAa4zG8y6a7e
+
+# --- Redis（本地）---
+spring.data.redis:
+  host: localhost
+  port: 6379
+  password:
+
+# --- Druid 监控（开发开启）---
+spring.datasource.druid.stat-view-servlet:
+  enabled: true
+  login-username: admin
+  login-password: admin123
+
+# --- Swagger（开发开启）---
+springdoc:
+  swagger-ui:
+    enabled: true
+
+# --- 日志（DEBUG）---
+logging:
+  level:
+    com.ruoyi: debug
+    com.ruoyi.jst: debug
+
+# --- Token（开发用弱密钥，仅本地，不影响安全）---
+token:
+  secret: dev-only-secret-key-do-not-use-in-prod-12345678
+
+# --- jst 业务（开发用明文密钥）---
+jst:
+  security:
+    aes-key: "bE8Ru+Z5tKOwHQG5c+gogb4tC3C/QbehGpKL1dot1TQ="
+  cors:
+    allowed-origins: "http://localhost:80,http://localhost:1024,http://localhost:8080,http://localhost:3000"
+  wxauth:
+    mock: true
+
+# --- 代码生成器（开发开启）---
+ruoyi:
+  generator:
+    enabled: true

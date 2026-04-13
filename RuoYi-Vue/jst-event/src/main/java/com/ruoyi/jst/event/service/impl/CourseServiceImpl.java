@@ -5,6 +5,7 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.jst.common.audit.OperateLog;
+import com.ruoyi.jst.common.cache.JstCacheService;
 import com.ruoyi.jst.common.exception.BizErrorCode;
 import com.ruoyi.jst.event.domain.JstCourse;
 import com.ruoyi.jst.event.dto.CourseQueryReqDTO;
@@ -47,6 +48,9 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private CourseMapperExt courseMapperExt;
 
+    @Autowired
+    private JstCacheService jstCacheService;
+
     /**
      * 新增课程。
      *
@@ -78,6 +82,7 @@ public class CourseServiceImpl implements CourseService {
             throw new ServiceException("新增课程失败", BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
         }
         log.info("[CourseAdd] 新增课程成功 courseId={} courseName={}", course.getCourseId(), course.getCourseName());
+        evictCourseCache();
         return course.getCourseId();
     }
 
@@ -113,6 +118,7 @@ public class CourseServiceImpl implements CourseService {
             throw new ServiceException("编辑课程失败，课程可能已删除", BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
         }
         log.info("[CourseEdit] 编辑课程成功 courseId={}", existing.getCourseId());
+        evictCourseCache();
     }
 
     /**
@@ -133,6 +139,7 @@ public class CourseServiceImpl implements CourseService {
         CourseAuditStatus.fromDb(course.getAuditStatus()).assertCanTransitTo(CourseAuditStatus.PENDING);
         updateAuditStatus(courseId, course.getAuditStatus(), CourseAuditStatus.PENDING.dbValue(), "课程提审失败，状态已变化");
         log.info("[CourseSubmit] 课程提审成功 courseId={}", courseId);
+        evictCourseCache();
     }
 
     /**
@@ -153,6 +160,7 @@ public class CourseServiceImpl implements CourseService {
         CourseAuditStatus.fromDb(course.getAuditStatus()).assertCanTransitTo(CourseAuditStatus.APPROVED);
         updateAuditStatus(courseId, course.getAuditStatus(), CourseAuditStatus.APPROVED.dbValue(), "课程审核通过失败，状态已变化");
         log.info("[CourseApprove] 课程审核通过 courseId={}", courseId);
+        evictCourseCache();
     }
 
     /**
@@ -173,6 +181,7 @@ public class CourseServiceImpl implements CourseService {
         CourseAuditStatus.fromDb(course.getAuditStatus()).assertCanTransitTo(CourseAuditStatus.REJECTED);
         updateAuditStatus(courseId, course.getAuditStatus(), CourseAuditStatus.REJECTED.dbValue(), "课程审核驳回失败，状态已变化");
         log.info("[CourseReject] 课程审核驳回 courseId={}", courseId);
+        evictCourseCache();
     }
 
     /**
@@ -202,6 +211,7 @@ public class CourseServiceImpl implements CourseService {
             throw new ServiceException("课程上架失败，状态已变化", BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
         }
         log.info("[CourseOn] 课程上架成功 courseId={}", courseId);
+        evictCourseCache();
     }
 
     /**
@@ -228,6 +238,7 @@ public class CourseServiceImpl implements CourseService {
             throw new ServiceException("课程下架失败，状态已变化", BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
         }
         log.info("[CourseOff] 课程下架成功 courseId={}", courseId);
+        evictCourseCache();
     }
 
     /**
@@ -262,7 +273,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     /**
-     * 小程序端公开课程列表。
+     * 小程序端公开课程列表（缓存 5 分钟）。
      *
      * @param query 查询条件
      * @return 课程卡片列表
@@ -271,11 +282,13 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public List<WxCourseCardVO> selectWxList(WxCourseQueryDTO query) {
-        return courseMapperExt.selectWxList(query);
+        int pn = query.getPageNum() != null ? query.getPageNum() : 1;
+        String key = "cache:course:list:" + safeKeyPart(query.getCourseType()) + ":" + pn;
+        return jstCacheService.getOrLoadPage(key, 300, () -> courseMapperExt.selectWxList(query));
     }
 
     /**
-     * 小程序端公开课程详情。
+     * 小程序端公开课程详情（缓存 10 分钟）。
      *
      * @param courseId 课程ID
      * @return 课程详情
@@ -284,18 +297,21 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public WxCourseDetailVO getWxDetail(Long courseId) {
-        JstCourse course = requireCourse(courseId);
-        if (!Objects.equals(CourseAuditStatus.APPROVED.dbValue(), course.getAuditStatus())
-                || !Objects.equals(COURSE_STATUS_ON, course.getStatus())) {
-            throw new ServiceException(BizErrorCode.JST_EVENT_COURSE_NOT_ON.message(),
-                    BizErrorCode.JST_EVENT_COURSE_NOT_ON.code());
-        }
-        WxCourseDetailVO detail = courseMapperExt.selectWxDetail(courseId);
-        if (detail == null) {
-            throw new ServiceException(BizErrorCode.JST_EVENT_COURSE_NOT_FOUND.message(),
-                    BizErrorCode.JST_EVENT_COURSE_NOT_FOUND.code());
-        }
-        return detail;
+        String key = "cache:course:detail:" + courseId;
+        return jstCacheService.getOrLoad(key, 600, () -> {
+            JstCourse course = requireCourse(courseId);
+            if (!Objects.equals(CourseAuditStatus.APPROVED.dbValue(), course.getAuditStatus())
+                    || !Objects.equals(COURSE_STATUS_ON, course.getStatus())) {
+                throw new ServiceException(BizErrorCode.JST_EVENT_COURSE_NOT_ON.message(),
+                        BizErrorCode.JST_EVENT_COURSE_NOT_ON.code());
+            }
+            WxCourseDetailVO detail = courseMapperExt.selectWxDetail(courseId);
+            if (detail == null) {
+                throw new ServiceException(BizErrorCode.JST_EVENT_COURSE_NOT_FOUND.message(),
+                        BizErrorCode.JST_EVENT_COURSE_NOT_FOUND.code());
+            }
+            return detail;
+        });
     }
 
     /**
@@ -357,5 +373,17 @@ public class CourseServiceImpl implements CourseService {
     private String currentOperatorName() {
         String username = SecurityUtils.getUsername();
         return StringUtils.isBlank(username) ? "system" : username;
+    }
+
+    /**
+     * 课程写操作后清除缓存（列表 + 详情 + 首页推荐课程）。
+     */
+    private void evictCourseCache() {
+        jstCacheService.evictByPrefix("cache:course:");
+        jstCacheService.evictByPrefix("cache:home:");
+    }
+
+    private String safeKeyPart(String value) {
+        return StringUtils.isBlank(value) ? "_all" : value;
     }
 }

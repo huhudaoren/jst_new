@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.quartz.domain.SysJob;
@@ -15,6 +16,36 @@ import com.ruoyi.quartz.domain.SysJob;
  */
 public class JobInvokeUtil
 {
+    /** 定时任务允许调用的包名白名单 */
+    private static final Set<String> ALLOWED_PACKAGES = Set.of(
+        "com.ruoyi.jst",
+        "com.ruoyi.quartz.task"
+    );
+
+    /**
+     * 校验 Bean 是否在允许调用的白名单内
+     *
+     * @param beanName Bean 名称或全限定类名
+     * @return true 允许 false 拒绝
+     */
+    private static boolean isAllowedBean(String beanName)
+    {
+        // Spring Bean 短名（非全限定类名）默认允许，由 Spring 容器管理
+        if (!isValidClassName(beanName))
+        {
+            return true;
+        }
+        // 全限定类名需要在白名单包内
+        for (String pkg : ALLOWED_PACKAGES)
+        {
+            if (beanName.startsWith(pkg))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * 执行方法
      *
@@ -26,6 +57,12 @@ public class JobInvokeUtil
         String beanName = getBeanName(invokeTarget);
         String methodName = getMethodName(invokeTarget);
         List<Object[]> methodParams = getMethodParams(invokeTarget);
+
+        // 白名单校验：防止定时任务调用任意 Bean
+        if (!isAllowedBean(beanName))
+        {
+            throw new SecurityException("定时任务不允许调用此 Bean: " + beanName);
+        }
 
         if (!isValidClassName(beanName))
         {

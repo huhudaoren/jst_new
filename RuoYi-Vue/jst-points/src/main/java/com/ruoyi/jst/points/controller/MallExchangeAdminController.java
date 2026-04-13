@@ -1,8 +1,10 @@
 package com.ruoyi.jst.points.controller;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.jst.points.dto.ExchangeQueryReqDTO;
 import com.ruoyi.jst.points.dto.ExchangeShipDTO;
 import com.ruoyi.jst.points.service.MallExchangeService;
@@ -41,6 +43,7 @@ public class MallExchangeAdminController extends BaseController {
         return AjaxResult.success(mallExchangeService.getAdminDetail(exchangeId));
     }
 
+    @Log(title = "商城兑换发货", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:points:mall:exchange:ship')")
     @PostMapping("/{exchangeId}/ship")
     public AjaxResult ship(@PathVariable("exchangeId") Long exchangeId, @Valid @RequestBody ExchangeShipDTO req) {
@@ -48,6 +51,7 @@ public class MallExchangeAdminController extends BaseController {
         return AjaxResult.success();
     }
 
+    @Log(title = "商城兑换完成", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:points:mall:exchange:ship')")
     @PostMapping("/{exchangeId}/complete")
     public AjaxResult complete(@PathVariable("exchangeId") Long exchangeId) {

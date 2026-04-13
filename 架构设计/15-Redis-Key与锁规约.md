@@ -39,10 +39,39 @@ jst:{domain}:{purpose}:{key1}[:{key2}]
 | `jst:cert:verify:{verifyCode}` | 1d | String/JSON | 公开证书验证缓存 | CertVerifyController |
 | `jst:msg:template:{tplCode}` | 1h | String | 消息模板缓存 | MessageTemplateService |
 
+### 2.2 热点数据缓存 Key 清单（cache: 前缀，由 JstCacheService 统一管理）
+
+> PERF-CACHE 任务新增。这些 key 由 `jst-common` 的 `JstCacheService` 统一读写，
+> 含空值防穿透（NULL 标记 60s）+ TTL 抖动防雪崩（±20%）。
+
+| Key 模板 | 基础 TTL | 用途 | 写入位置 | 失效时机 |
+|---|---|---|---|---|
+| `cache:contest:list:{category}:{pageNum}` | 5min | 赛事列表分页缓存 | ContestServiceImpl.selectWxList | 赛事增删改/上下线 |
+| `cache:contest:detail:{contestId}` | 10min | 赛事详情缓存 | ContestServiceImpl.getWxDetail | 赛事编辑/上下线 |
+| `cache:contest:hot:{limit}` | 5min | 热门赛事列表 | ContestServiceImpl.selectHotList | 赛事上下线 |
+| `cache:contest:categories` | 60min | 赛事分类统计 | ContestServiceImpl.selectCategoryStats | 赛事增删改 |
+| `cache:course:list:{courseType}:{pageNum}` | 5min | 课程列表分页缓存 | CourseServiceImpl.selectWxList | 课程增删改/上下架 |
+| `cache:course:detail:{courseId}` | 10min | 课程详情缓存 | CourseServiceImpl.getWxDetail | 课程编辑/上下架 |
+| `cache:home:recommend-contests` | 3min | 首页推荐赛事 | HomeServiceImpl.selectRecommendContests | 赛事/公告变更 |
+| `cache:home:recommend-courses` | 3min | 首页推荐课程 | HomeServiceImpl.selectRecommendCourses | 课程/赛事变更 |
+| `cache:home:hot-tags` | 3min | 首页热门标签 | HomeServiceImpl.selectHotTags | 赛事变更 |
+| `cache:home:topics` | 3min | 首页专题活动 | HomeServiceImpl.selectTopics | 公告变更 |
+| `cache:home:banners` | 3min | 首页 Banner | NoticeServiceImpl.selectBannerList | 公告发布/下线 |
+| `cache:notice:list:{category}:{pageNum}` | 5min | 公告列表分页缓存 | NoticeServiceImpl.selectWxNoticeList | 公告增删改/发布/下线 |
+| `cache:dict:{dictType}` | 30min | 业务字典缓存 | NoticeServiceImpl.selectDictOptions | TTL 自然过期 |
+
+**缓存失效策略**：
+- 写操作后由各 Service 的 `evictXxxCache()` 按前缀批量清除
+- `evictByPrefix("cache:contest:")` → 清除赛事列表+详情+热门+分类
+- `evictByPrefix("cache:course:")` → 清除课程列表+详情
+- `evictByPrefix("cache:notice:")` → 清除公告列表
+- `evictByPrefix("cache:home:")` → 清除首页所有聚合数据
+- 前缀级 KEYS 扫描可控（cache: 命名空间 key 数量有限），非全量 `KEYS *`
+
 ### 缓存失效统一约定
 - 写入数据时 **必须** 主动 `del` 对应 key（而不是等 TTL 自然过期）
 - 多 key 联动失效（如更新等级配置 → del `jst:level:config:all`）封装到 Service 层
-- **禁止使用 keys * 类操作**
+- **禁止使用 keys * 类操作**（`cache:` 前缀的定向 KEYS 扫描属于可控例外）
 
 ---
 

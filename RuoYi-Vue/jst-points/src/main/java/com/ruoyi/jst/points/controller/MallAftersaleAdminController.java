@@ -1,8 +1,10 @@
 package com.ruoyi.jst.points.controller;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.jst.points.dto.AftersaleAuditDTO;
 import com.ruoyi.jst.points.dto.AftersaleQueryReqDTO;
 import com.ruoyi.jst.points.service.MallAftersaleService;
@@ -41,6 +43,7 @@ public class MallAftersaleAdminController extends BaseController {
         return AjaxResult.success(mallAftersaleService.getAdminDetail(refundId));
     }
 
+    @Log(title = "商城售后审核通过", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:points:mall:aftersale:audit')")
     @PostMapping("/{refundId}/approve")
     public AjaxResult approve(@PathVariable("refundId") Long refundId, @Valid @RequestBody AftersaleAuditDTO req) {
@@ -48,6 +51,7 @@ public class MallAftersaleAdminController extends BaseController {
         return AjaxResult.success();
     }
 
+    @Log(title = "商城售后审核驳回", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:points:mall:aftersale:audit')")
     @PostMapping("/{refundId}/reject")
     public AjaxResult reject(@PathVariable("refundId") Long refundId, @Valid @RequestBody AftersaleAuditDTO req) {

@@ -1,8 +1,10 @@
 package com.ruoyi.jst.order.controller;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.jst.common.scope.PartnerScope;
 import com.ruoyi.jst.order.dto.RefundAuditDTO;
 import com.ruoyi.jst.order.dto.RefundQueryReqDTO;
@@ -51,6 +53,7 @@ public class RefundAdminController extends BaseController {
      * @param req      审核备注
      * @return 操作结果
      */
+    @Log(title = "退款审核通过", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasRole('jst_partner') or @ss.hasPermi('jst:order:refund:approve')")
     @PostMapping("/jst/order/refund/{refundId}/approve")
     public AjaxResult approve(@PathVariable("refundId") Long refundId, @Valid @RequestBody RefundAuditDTO req) {
@@ -65,6 +68,7 @@ public class RefundAdminController extends BaseController {
      * @param req      审核备注
      * @return 操作结果
      */
+    @Log(title = "退款审核驳回", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasRole('jst_partner') or @ss.hasPermi('jst:order:refund:approve')")
     @PostMapping("/jst/order/refund/{refundId}/reject")
     public AjaxResult reject(@PathVariable("refundId") Long refundId, @Valid @RequestBody RefundAuditDTO req) {
@@ -78,6 +82,7 @@ public class RefundAdminController extends BaseController {
      * @param refundId 退款单ID
      * @return 操作结果
      */
+    @Log(title = "退款执行", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:order:refund:execute')")
     @PostMapping("/jst/order/refund/{refundId}/execute")
     public AjaxResult execute(@PathVariable("refundId") Long refundId) {
@@ -92,6 +97,7 @@ public class RefundAdminController extends BaseController {
      * @param req     特批备注
      * @return refundId / refundNo
      */
+    @Log(title = "平台特批退款", businessType = BusinessType.INSERT)
     @PreAuthorize("@ss.hasPermi('jst:order:refund:special')")
     @PostMapping("/jst/admin/order/{orderId}/special-refund")
     public AjaxResult specialRefund(@PathVariable("orderId") Long orderId, @Valid @RequestBody RefundAuditDTO req) {

@@ -1,7 +1,9 @@
 package com.ruoyi.jst.event.controller.partner;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.jst.common.annotation.PartnerDataScope;
 import com.ruoyi.jst.common.controller.BasePartnerController;
 import com.ruoyi.jst.event.dto.EnrollAuditReqDTO;
@@ -85,6 +87,7 @@ public class PartnerEnrollController extends BasePartnerController {
      * @关联状态机 SM-6
      * @关联权限 hasRole('jst_partner')
      */
+    @Log(title = "赛事方报名审核", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasRole('jst_partner')")
     @PutMapping("/{enrollId}/audit")
     public AjaxResult audit(@PathVariable("enrollId") Long enrollId,
@@ -102,6 +105,7 @@ public class PartnerEnrollController extends BasePartnerController {
      * @关联状态机 SM-6
      * @关联权限 hasRole('jst_partner')
      */
+    @Log(title = "赛事方批量审核报名", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasRole('jst_partner')")
     @PutMapping("/batch-audit")
     public AjaxResult batchAudit(@Valid @RequestBody EnrollBatchAuditReqDTO req) {

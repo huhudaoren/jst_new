@@ -1,8 +1,10 @@
 package com.ruoyi.jst.organizer.controller;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.jst.organizer.dto.ApproveReqDTO;
 import com.ruoyi.jst.organizer.dto.PartnerApplyQueryDTO;
 import com.ruoyi.jst.organizer.dto.RejectReqDTO;
@@ -72,6 +74,7 @@ public class PartnerApplyAdminController extends BaseController {
      * @param req     请求体
      * @return 创建结果
      */
+    @Log(title = "赛事方入驻审核通��", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:organizer:partnerApply:approve')")
     @PostMapping("/{applyId}/approve")
     public AjaxResult approve(@PathVariable("applyId") Long applyId, @Valid @RequestBody ApproveReqDTO req) {
@@ -86,6 +89,7 @@ public class PartnerApplyAdminController extends BaseController {
      * @param req     请求体
      * @return 处理结果
      */
+    @Log(title = "赛事方入驻审核驳回", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:organizer:partnerApply:reject')")
     @PostMapping("/{applyId}/reject")
     public AjaxResult reject(@PathVariable("applyId") Long applyId, @Valid @RequestBody RejectReqDTO req) {
@@ -100,6 +104,7 @@ public class PartnerApplyAdminController extends BaseController {
      * @param req     请求体
      * @return 处理结果
      */
+    @Log(title = "赛事方入驻要求补充材料", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:organizer:partnerApply:supplement')")
     @PostMapping("/{applyId}/supplement")
     public AjaxResult supplement(@PathVariable("applyId") Long applyId, @Valid @RequestBody SupplementReqDTO req) {

@@ -8,6 +8,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.html.EscapeUtil;
 import com.ruoyi.jst.common.audit.OperateLog;
+import com.ruoyi.jst.common.cache.JstCacheService;
 import com.ruoyi.jst.common.exception.BizErrorCode;
 import com.ruoyi.jst.message.domain.JstNotice;
 import com.ruoyi.jst.message.dto.NoticeQueryReqDTO;
@@ -31,7 +32,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 公告与首页展示领域服务实现。
@@ -67,6 +67,9 @@ public class NoticeServiceImpl implements NoticeService {
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired
+    private JstCacheService jstCacheService;
+
     /**
      * 管理后台新增公告。
      *
@@ -94,6 +97,7 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setUpdateTime(DateUtils.getNowDate());
         notice.setDelFlag("0");
         jstNoticeMapper.insertJstNotice(notice);
+        evictNoticeCache();
         return notice.getNoticeId();
     }
 
@@ -131,6 +135,7 @@ public class NoticeServiceImpl implements NoticeService {
             throw new ServiceException("公告编辑失败，当前状态不可编辑或已变更",
                     BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
         }
+        evictNoticeCache();
     }
 
     /**
@@ -161,6 +166,7 @@ public class NoticeServiceImpl implements NoticeService {
             throw new ServiceException("公告发布失败，状态已变更",
                     BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
         }
+        evictNoticeCache();
     }
 
     /**
@@ -191,6 +197,7 @@ public class NoticeServiceImpl implements NoticeService {
             throw new ServiceException("公告下线失败，状态已变更",
                     BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
         }
+        evictNoticeCache();
     }
 
     /**
@@ -208,7 +215,7 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     /**
-     * 小程序端分页查询公告列表。
+     * 小程序端分页查询公告列表（缓存 5 分钟）。
      *
      * @param query 查询条件
      * @return 公告卡片列表
@@ -218,7 +225,14 @@ public class NoticeServiceImpl implements NoticeService {
      */
     @Override
     public List<WxNoticeCardVO> selectWxNoticeList(WxNoticeQueryDTO query) {
-        List<JstNotice> notices = noticeMapperExt.selectPublishedNoticeList(query == null ? null : query.getCategory());
+        String category = query == null ? null : query.getCategory();
+        int pn = (query != null && query.getPageNum() != null) ? query.getPageNum() : 1;
+        String key = "cache:notice:list:" + safeKeyPart(category) + ":" + pn;
+        return jstCacheService.getOrLoad(key, 300, () -> loadWxNoticeList(category));
+    }
+
+    private List<WxNoticeCardVO> loadWxNoticeList(String category) {
+        List<JstNotice> notices = noticeMapperExt.selectPublishedNoticeList(category);
         List<WxNoticeCardVO> result = new ArrayList<>(notices.size());
         for (JstNotice notice : notices) {
             WxNoticeCardVO vo = new WxNoticeCardVO();
@@ -262,7 +276,7 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     /**
-     * 查询首页 banner。
+     * 查询首页 banner（缓存 3 分钟）。
      *
      * @return banner 列表
      * @关联表 jst_notice
@@ -271,6 +285,10 @@ public class NoticeServiceImpl implements NoticeService {
      */
     @Override
     public List<BannerVO> selectBannerList() {
+        return jstCacheService.getOrLoad("cache:home:banners", 180, this::loadBannerList);
+    }
+
+    private List<BannerVO> loadBannerList() {
         List<JstNotice> notices = noticeMapperExt.selectTopBannerNotices(BANNER_LIMIT);
         List<BannerVO> result = new ArrayList<>(notices.size());
         for (JstNotice notice : notices) {
@@ -286,7 +304,7 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     /**
-     * 查询业务字典下拉选项并缓存。
+     * 查询业务字典下拉选项并缓存（缓存 30 分钟，含 TTL 抖动防雪崩）。
      *
      * @param dictType 字典类型
      * @return 字典项列表
@@ -295,17 +313,15 @@ public class NoticeServiceImpl implements NoticeService {
      * @关联权限 @Anonymous
      */
     @Override
-    @SuppressWarnings("unchecked")
     public List<Map<String, Object>> selectDictOptions(String dictType) {
         if (!isAllowedDictType(dictType)) {
             return Collections.emptyList();
         }
-        String cacheKey = "jst:dict:" + dictType;
-        List<Map<String, Object>> cached = redisCache.getCacheObject(cacheKey);
-        if (cached != null) {
-            return cached;
-        }
+        String cacheKey = "cache:dict:" + dictType;
+        return jstCacheService.getOrLoad(cacheKey, 1800, () -> loadDictOptions(dictType));
+    }
 
+    private List<Map<String, Object>> loadDictOptions(String dictType) {
         List<SysDictData> rows = dictLookupMapper.selectEnabledByType(dictType);
         List<Map<String, Object>> result = new ArrayList<>(rows.size());
         for (SysDictData row : rows) {
@@ -315,7 +331,6 @@ public class NoticeServiceImpl implements NoticeService {
             item.put("cssClass", row.getCssClass());
             result.add(item);
         }
-        redisCache.setCacheObject(cacheKey, result, DICT_CACHE_TTL_HOURS, TimeUnit.HOURS);
         return result;
     }
 
@@ -364,5 +379,17 @@ public class NoticeServiceImpl implements NoticeService {
     private String currentOperatorName() {
         String username = SecurityUtils.getUsername();
         return StringUtils.isEmpty(username) ? "system" : username;
+    }
+
+    /**
+     * 公告写操作后清除缓存（公告列表 + 首页 banner/专题）。
+     */
+    private void evictNoticeCache() {
+        jstCacheService.evictByPrefix("cache:notice:");
+        jstCacheService.evictByPrefix("cache:home:");
+    }
+
+    private String safeKeyPart(String value) {
+        return StringUtils.isEmpty(value) ? "_all" : value;
     }
 }

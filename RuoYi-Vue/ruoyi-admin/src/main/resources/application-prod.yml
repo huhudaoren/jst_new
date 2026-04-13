@@ -1,0 +1,74 @@
+# ============================================================
+# 竞赛通 - 生产环境配置 (prod)
+# 所有敏感值必须通过环境变量注入，无默认值（不配置则启动失败）
+# ============================================================
+
+# --- 数据源（全部环境变量，无默认值，强制配置）---
+spring.datasource:
+  druid:
+    master:
+      url: ${DB_URL}
+      username: ${DB_USER}
+      password: ${DB_PASS}
+
+# --- Redis（强制密码）---
+spring.data.redis:
+  host: ${REDIS_HOST}
+  port: ${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD}
+
+# --- 连接池（生产环境高并发配置）---
+spring.datasource.druid:
+  initialSize: 10
+  minIdle: 10
+  maxActive: 50
+  maxWait: 30000
+
+# --- Druid 监控（生产禁用）---
+spring.datasource.druid.stat-view-servlet:
+  enabled: false
+
+# --- Swagger（生产禁用）---
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+# --- 日志（生产 WARN + 业务 INFO）---
+logging:
+  level:
+    com.ruoyi: warn
+    com.ruoyi.jst: info
+
+# --- Token（强制环境变量，无默认值）---
+token:
+  secret: ${TOKEN_SECRET}
+
+# --- jst 业务（全部强制环境变量）---
+jst:
+  security:
+    aes-key: ${JST_AES_KEY}
+  cors:
+    allowed-origins: ${JST_CORS_ORIGINS:https://admin.jingsaitong.com,https://jingsaitong.com}
+  wxauth:
+    mock: false
+    appid: ${JST_WX_APPID}
+    secret: ${JST_WX_SECRET}
+  wxpay:
+    enabled: true
+    mch-id: ${JST_WXPAY_MCHID}
+    app-id: ${JST_WXPAY_APPID}
+    api-v3-key: ${JST_WXPAY_APIV3}
+    private-key-path: ${JST_WXPAY_PRIVKEY}
+  sms:
+    enabled: true
+    access-key-id: ${JST_SMS_AK}
+    access-key-secret: ${JST_SMS_SK}
+  wxmsg:
+    enabled: true
+
+# --- 代码生成器（生产禁用）---
+ruoyi:
+  generator:
+    enabled: false
