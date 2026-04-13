@@ -8,7 +8,13 @@
       </app-link>
     </template>
 
-    <el-submenu v-else ref="subMenu" :index="resolvePath(item.path)" popper-append-to-body>
+    <el-submenu
+      v-else
+      ref="subMenu"
+      :index="resolvePath(item.path)"
+      :popper-class="submenuPopperClass(item)"
+      popper-append-to-body
+    >
       <template slot="title">
         <item v-if="item.meta" :icon="item.meta && item.meta.icon" :title="item.meta.title" />
       </template>
@@ -55,6 +61,34 @@ export default {
     return {}
   },
   methods: {
+    submenuPopperClass(routeItem) {
+      const navType = this.$store.state.settings.navType
+      if (!(navType === 2 || navType === 3)) {
+        return ''
+      }
+      const classes = ['top-nav-popper']
+      const visibleChildCount = this.getVisibleChildCount(routeItem)
+      if (this.isJstManagementMenu(routeItem) || visibleChildCount >= 12) {
+        classes.push('top-nav-popper--long')
+      }
+      if (visibleChildCount >= 24) {
+        classes.push('top-nav-popper--xlong')
+      }
+      return classes.join(' ')
+    },
+    isJstManagementMenu(routeItem) {
+      if (!routeItem) {
+        return false
+      }
+      const title = routeItem.meta && routeItem.meta.title
+      return routeItem.path === '/jst' || routeItem.path.indexOf('/jst/') === 0 || title === '竞赛通管理'
+    },
+    getVisibleChildCount(routeItem) {
+      if (!routeItem || !Array.isArray(routeItem.children)) {
+        return 0
+      }
+      return routeItem.children.filter(child => child && child.hidden !== true).length
+    },
     hasOneShowingChild(children = [], parent) {
       if (!children) {
         children = []

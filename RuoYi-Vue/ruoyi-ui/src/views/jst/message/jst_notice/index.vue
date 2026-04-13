@@ -13,7 +13,7 @@ export default {
   name: 'JstNoticeDeprecated',
   methods: {
     goNewPage() {
-      this.$router.push('/jst/notice/index')
+      this.$router.push('/jst/notice')
     }
   }
 }

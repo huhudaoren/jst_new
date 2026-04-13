@@ -44,7 +44,7 @@
       </div>
       <el-row :gutter="16">
         <el-col v-for="item in todoItems" :key="item.key" :xs="12" :sm="8" :md="4">
-          <button class="todo-entry" type="button" @click="goTo(item.path)">
+          <button class="todo-entry" :class="{ 'is-disabled': !item.enabled }" type="button" @click="handleEntryClick(item)">
             <div class="todo-entry__icon" :class="item.theme">
               <i :class="item.icon" />
             </div>
@@ -68,7 +68,7 @@
       </div>
       <el-row :gutter="16">
         <el-col v-for="item in quickActions" :key="item.key" :xs="12" :sm="12" :md="8">
-          <button class="todo-entry quick-entry" type="button" @click="goTo(item.path)">
+          <button class="todo-entry quick-entry" :class="{ 'is-disabled': !item.enabled }" type="button" @click="handleEntryClick(item)">
             <div class="todo-entry__icon" :class="item.theme">
               <i :class="item.icon" />
             </div>
@@ -126,6 +126,7 @@
 
 <script>
 import { getOverview, getTodo, getTopContests, getTopChannels } from '@/api/admin/dashboard'
+import { collectAvailablePaths, resolveFirstAvailablePath } from '@/utils/route-access'
 
 export default {
   name: 'AdminDashboard',
@@ -150,6 +151,106 @@ export default {
         pendingPartnerApply: 0,
         pendingChannelAuth: 0
       },
+      todoItemConfigs: [
+        {
+          key: 'contest',
+          title: '待审核赛事',
+          countKey: 'pendingContestAudit',
+          icon: 'el-icon-s-flag',
+          theme: 'theme-blue',
+          candidates: ['/jst/contest']
+        },
+        {
+          key: 'enroll',
+          title: '待审核报名',
+          countKey: 'pendingEnrollAudit',
+          icon: 'el-icon-edit-outline',
+          theme: 'theme-green',
+          candidates: ['/jst/enroll']
+        },
+        {
+          key: 'refund',
+          title: '待处理退款',
+          countKey: 'pendingRefund',
+          icon: 'el-icon-coin',
+          theme: 'theme-orange',
+          candidates: ['/jst/order/admin-refund']
+        },
+        {
+          key: 'withdraw',
+          title: '待审核提现',
+          countKey: 'pendingWithdraw',
+          icon: 'el-icon-wallet',
+          theme: 'theme-purple',
+          candidates: ['/jst/channel/admin-withdraw']
+        },
+        {
+          key: 'partner',
+          title: '待审入驻申请',
+          countKey: 'pendingPartnerApply',
+          icon: 'el-icon-office-building',
+          theme: 'theme-blue',
+          candidates: ['/jst/partner-apply']
+        },
+        {
+          key: 'channel',
+          title: '待审渠道认证',
+          countKey: 'pendingChannelAuth',
+          icon: 'el-icon-postcard',
+          theme: 'theme-green',
+          candidates: ['/jst/channel-auth']
+        }
+      ],
+      quickActionConfigs: [
+        {
+          key: 'createContest',
+          title: '创建赛事',
+          desc: '按 6 个模块快速发起新赛事',
+          icon: 'el-icon-plus',
+          theme: 'theme-blue',
+          candidates: ['/jst/contest-edit']
+        },
+        {
+          key: 'auditEnroll',
+          title: '审核报名',
+          desc: '处理通过、驳回与补充材料',
+          icon: 'el-icon-edit-outline',
+          theme: 'theme-green',
+          candidates: ['/jst/enroll']
+        },
+        {
+          key: 'dealRefund',
+          title: '处理退款',
+          desc: '优先审核待处理退款申请',
+          icon: 'el-icon-money',
+          theme: 'theme-orange',
+          candidates: ['/jst/order/admin-refund']
+        },
+        {
+          key: 'auditWithdraw',
+          title: '审核提现',
+          desc: '审核后执行渠道打款流程',
+          icon: 'el-icon-wallet',
+          theme: 'theme-purple',
+          candidates: ['/jst/channel/admin-withdraw']
+        },
+        {
+          key: 'publishNotice',
+          title: '发布公告',
+          desc: '统一发布平台与赛事公告',
+          icon: 'el-icon-bell',
+          theme: 'theme-blue',
+          candidates: ['/jst/notice']
+        },
+        {
+          key: 'viewChannel',
+          title: '查看渠道',
+          desc: '查看渠道状态和关键数据',
+          icon: 'el-icon-user-solid',
+          theme: 'theme-green',
+          candidates: ['/jst/channel']
+        }
+      ],
       contestRank: [],
       channelRank: []
     }
@@ -167,25 +268,32 @@ export default {
       const t = this.todo
       return t.pendingContestAudit + t.pendingEnrollAudit + t.pendingRefund + t.pendingWithdraw + t.pendingPartnerApply + t.pendingChannelAuth
     },
+    availablePathSet() {
+      const routeSet = collectAvailablePaths(this.$store.getters.permission_routes || [])
+      const sidebarSet = collectAvailablePaths(this.$store.getters.sidebarRouters || [])
+      sidebarSet.forEach(path => routeSet.add(path))
+      return routeSet
+    },
     todoItems() {
-      return [
-        { key: 'contest', title: '待审核赛事', count: this.todo.pendingContestAudit, icon: 'el-icon-s-flag', theme: 'theme-blue', path: '/jst/contest' },
-        { key: 'enroll', title: '待审核报名', count: this.todo.pendingEnrollAudit, icon: 'el-icon-edit-outline', theme: 'theme-green', path: '/jst/enroll' },
-        { key: 'refund', title: '待处理退款', count: this.todo.pendingRefund, icon: 'el-icon-coin', theme: 'theme-orange', path: '/jst/order/admin-refund' },
-        { key: 'withdraw', title: '待审核提现', count: this.todo.pendingWithdraw, icon: 'el-icon-wallet', theme: 'theme-purple', path: '/jst/channel/admin-withdraw' },
-        { key: 'partner', title: '待审入驻申请', count: this.todo.pendingPartnerApply, icon: 'el-icon-office-building', theme: 'theme-blue', path: '/jst/partner-apply' },
-        { key: 'channel', title: '待审渠道认证', count: this.todo.pendingChannelAuth, icon: 'el-icon-postcard', theme: 'theme-green', path: '/jst/channel-auth' }
-      ]
+      return this.todoItemConfigs.map(item => {
+        const targetPath = resolveFirstAvailablePath(item.candidates, this.availablePathSet)
+        return {
+          ...item,
+          count: this.todo[item.countKey] || 0,
+          targetPath,
+          enabled: Boolean(targetPath)
+        }
+      })
     },
     quickActions() {
-      return [
-        { key: 'createContest', title: '创建赛事', desc: '按 6 个模块快速发起新赛事', icon: 'el-icon-plus', theme: 'theme-blue', path: '/partner/contest-edit' },
-        { key: 'auditEnroll', title: '审核报名', desc: '处理通过、驳回与补充材料', icon: 'el-icon-edit-outline', theme: 'theme-green', path: '/jst/enroll' },
-        { key: 'dealRefund', title: '处理退款', desc: '优先审核待处理退款申请', icon: 'el-icon-money', theme: 'theme-orange', path: '/jst/order/admin-refund' },
-        { key: 'auditWithdraw', title: '审核提现', desc: '审核后执行渠道打款流程', icon: 'el-icon-wallet', theme: 'theme-purple', path: '/jst/channel/admin-withdraw' },
-        { key: 'publishNotice', title: '发布公告', desc: '统一发布平台与赛事公告', icon: 'el-icon-bell', theme: 'theme-blue', path: '/jst/notice' },
-        { key: 'viewChannel', title: '查看渠道', desc: '查看渠道状态和关键数据', icon: 'el-icon-user-solid', theme: 'theme-green', path: '/jst/channel' }
-      ]
+      return this.quickActionConfigs.map(item => {
+        const targetPath = resolveFirstAvailablePath(item.candidates, this.availablePathSet)
+        return {
+          ...item,
+          targetPath,
+          enabled: Boolean(targetPath)
+        }
+      })
     },
     contestMaxEnroll() {
       if (!this.contestRank.length) return 1
@@ -248,8 +356,22 @@ export default {
       if (!max) return '0%'
       return Math.round((Number(value || 0) / max) * 100) + '%'
     },
-    goTo(path) {
-      this.$router.push({ path })
+    notifyNoAccess() {
+      const text = '当前账号未配置该菜单或无权限'
+      if (this.$modal && this.$modal.msgWarning) {
+        this.$modal.msgWarning(text)
+        return
+      }
+      if (this.$message && this.$message.warning) {
+        this.$message.warning(text)
+      }
+    },
+    handleEntryClick(entry) {
+      if (!entry || !entry.enabled || !entry.targetPath) {
+        this.notifyNoAccess()
+        return
+      }
+      this.$router.push({ path: entry.targetPath })
     }
   }
 }
@@ -411,6 +533,32 @@ export default {
   border-color: #86abdc;
   box-shadow: 0 10px 20px rgba(31, 91, 168, 0.1);
   transform: translateY(-2px);
+}
+
+.todo-entry.is-disabled {
+  border-color: #e5eaf2;
+  background: #f7f9fc;
+  cursor: not-allowed;
+}
+
+.todo-entry.is-disabled:hover {
+  border-color: #e5eaf2;
+  box-shadow: none;
+  transform: none;
+}
+
+.todo-entry.is-disabled .todo-entry__title,
+.todo-entry.is-disabled .quick-entry__desc,
+.todo-entry.is-disabled .todo-entry__unit {
+  color: #a0acbd;
+}
+
+.todo-entry.is-disabled .todo-entry__number {
+  color: #97a6bc;
+}
+
+.todo-entry.is-disabled .todo-entry__arrow {
+  color: #d1d8e4;
 }
 
 .todo-entry__icon {

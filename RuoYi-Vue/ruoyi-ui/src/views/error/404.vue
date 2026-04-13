@@ -9,17 +9,18 @@
       </div>
       <div class="bullshit">
         <div class="bullshit__oops">
-          404错误!
+          404
         </div>
         <div class="bullshit__headline">
           {{ message }}
         </div>
         <div class="bullshit__info">
-          对不起，您正在寻找的页面不存在。尝试检查URL的错误，然后按浏览器上的刷新按钮或尝试在我们的应用程序中找到其他内容。
+          页面不存在或您没有访问权限。请检查菜单权限后重试，或返回首页继续操作。
         </div>
-        <router-link to="/" class="bullshit__return-home">
-          返回首页
-        </router-link>
+        <div class="bullshit__actions">
+          <el-button type="primary" size="small" @click="$router.push('/')">返回首页</el-button>
+          <el-button size="small" @click="goBack">返回上一页</el-button>
+        </div>
       </div>
     </div>
   </div>
@@ -31,7 +32,12 @@ export default {
   name: 'Page404',
   computed: {
     message() {
-      return '找不到网页！'
+      return '页面不存在或无权限访问'
+    }
+  },
+  methods: {
+    goBack() {
+      this.$router.go(-1)
     }
   }
 }
@@ -218,6 +224,15 @@ export default {
       animation-delay: 0.3s;
       animation-fill-mode: forwards;
     }
+    &__actions {
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      animation-name: slideUp;
+      animation-duration: 0.5s;
+      animation-delay: 0.3s;
+      animation-fill-mode: forwards;
+    }
     @keyframes slideUp {
       0% {
         transform: translateY(60px);
@@ -227,6 +242,30 @@ export default {
         transform: translateY(0);
         opacity: 1;
       }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .wscn-http404-container {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    padding: 20px 12px;
+  }
+  .wscn-http404 {
+    width: 100%;
+    padding: 0;
+    .pic-404 {
+      float: none;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    .bullshit {
+      float: none;
+      width: 100%;
+      padding: 0;
     }
   }
 }

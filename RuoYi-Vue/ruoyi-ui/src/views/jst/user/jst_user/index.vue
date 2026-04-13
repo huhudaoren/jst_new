@@ -2,12 +2,16 @@
   <div class="app-container">
     <el-alert
       title="此页面已废弃"
-      description="用户管理功能请使用「用户管理 > 用户账户」页面（user/index.vue），本页面为代码生成器产物，将在后续版本移除。"
       type="warning"
       :closable="false"
       show-icon
       style="margin-bottom: 16px"
-    />
+    >
+      <template slot="default">
+        用户管理请使用精品页「/jst/user」，本页面为代码生成器产物，将在后续版本移除。
+        <el-button type="text" @click="$router.push('/jst/user')">前往新页面</el-button>
+      </template>
+    </el-alert>
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="微信小程序 openid" prop="openid">
         <el-input

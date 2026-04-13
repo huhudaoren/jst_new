@@ -27,10 +27,17 @@ const getDefaultHomePath = () => {
   return isPartnerUser() ? '/partner/home' : '/'
 }
 
+const APP_TITLE = '竞赛通'
+
+const setPageTitle = (to) => {
+  const pageTitle = to && to.meta && to.meta.title ? String(to.meta.title) : ''
+  document.title = pageTitle ? `${pageTitle} - ${APP_TITLE}` : APP_TITLE
+}
+
 router.beforeEach((to, from, next) => {
   NProgress.start()
+  setPageTitle(to)
   if (getToken()) {
-    to.meta.title && store.dispatch('settings/setTitle', to.meta.title)
     const isLock = store.getters.isLock
     if (to.path === '/login') {
       next({ path: getDefaultHomePath() })

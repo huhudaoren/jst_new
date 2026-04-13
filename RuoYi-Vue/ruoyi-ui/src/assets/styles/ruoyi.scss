@@ -144,6 +144,101 @@
   min-width: 120px !important;
 }
 
+/* top navigation popup overflow protection */
+.el-menu--popup.top-nav-popper,
+.el-menu--popup.jst-management-popper {
+  max-height: 72vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-width: 220px !important;
+  max-width: calc(100vw - 16px);
+  padding: 6px 0;
+}
+
+.el-menu--popup.top-nav-popper .el-menu-item,
+.el-menu--popup.top-nav-popper .el-submenu__title,
+.el-menu--popup.jst-management-popper .el-menu-item,
+.el-menu--popup.jst-management-popper .el-submenu__title {
+  height: 42px;
+  line-height: 42px;
+  padding: 0 16px !important;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 769px) {
+  .el-menu--popup.top-nav-popper--long,
+  .el-menu--popup.jst-management-popper {
+    width: 420px;
+    column-count: 2;
+    column-gap: 0;
+    column-fill: auto;
+  }
+
+  .el-menu--popup.top-nav-popper--xlong {
+    width: 520px;
+  }
+
+  .el-menu--popup.top-nav-popper--long .el-menu-item,
+  .el-menu--popup.top-nav-popper--long .el-submenu__title,
+  .el-menu--popup.jst-management-popper .el-menu-item,
+  .el-menu--popup.jst-management-popper .el-submenu__title {
+    break-inside: avoid;
+    min-width: 0 !important;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .el-menu--popup.top-nav-popper,
+  .el-menu--popup.jst-management-popper {
+    width: min(92vw, 340px);
+    min-width: 0 !important;
+    column-count: 1;
+    max-height: 68vh !important;
+  }
+
+  .el-menu--popup.top-nav-popper .el-menu-item,
+  .el-menu--popup.top-nav-popper .el-submenu__title,
+  .el-menu--popup.jst-management-popper .el-menu-item,
+  .el-menu--popup.jst-management-popper .el-submenu__title {
+    height: 44px;
+    line-height: 44px;
+  }
+}
+
+.el-menu--popup.top-nav-popper::-webkit-scrollbar,
+.el-menu--popup.jst-management-popper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.el-menu--popup.top-nav-popper::-webkit-scrollbar-thumb,
+.el-menu--popup.jst-management-popper::-webkit-scrollbar-thumb {
+  background: #c1c7d0;
+  border-radius: 8px;
+}
+
+.el-menu--popup.top-nav-popper::-webkit-scrollbar-track,
+.el-menu--popup.jst-management-popper::-webkit-scrollbar-track {
+  background: #f4f6f8;
+}
+
+/* fallback: any horizontal dropdown opened below the top menu is clipped+scrollable */
+.el-menu--popup[x-placement^="bottom"] {
+  max-height: 72vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .el-menu--popup[x-placement^="bottom"] {
+    max-height: 68vh;
+    max-width: calc(100vw - 12px);
+  }
+}
+
 @media (max-width: 768px) {
   .pagination-container .el-pagination > .el-pagination__jump {
     display: none !important;

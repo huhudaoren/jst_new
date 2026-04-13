@@ -1,6 +1,18 @@
 <template>
-  <!-- DEPRECATED: 请使用 jst/contest/index.vue -->
+  <!-- DEPRECATED: 请使用 jst/enroll/index.vue -->
   <div class="app-container">
+    <el-alert
+      title="此页面已废弃"
+      type="warning"
+      :closable="false"
+      show-icon
+      style="margin-bottom: 16px"
+    >
+      <template slot="default">
+        请使用精品页继续处理报名审核。
+        <el-button type="text" @click="$router.push('/jst/enroll')">前往新页面</el-button>
+      </template>
+    </el-alert>
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="报名编号" prop="enrollNo">
         <el-input
