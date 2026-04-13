@@ -7,7 +7,18 @@
         <h2>运营数据总览</h2>
         <p class="hero-desc">聚合平台核心指标与待办事项，快速掌握运营全局。</p>
       </div>
-      <el-button type="primary" plain icon="el-icon-refresh" @click="initPage">刷新数据</el-button>
+      <div class="hero-actions">
+        <el-popover placement="bottom-end" width="320" trigger="click">
+          <div class="help-popover__content">
+            <p>看板数据分为今日、月度与累计三层，适合先看趋势再下钻页面处理。</p>
+            <p>待处理事项展示当前最紧急任务，点击任意卡片可直接进入对应管理页。</p>
+            <p>快速操作区提供新手高频入口，先完成审核与退款，再处理内容发布。</p>
+            <p>排行榜用于定位热点赛事和高贡献渠道，便于优先安排运营动作。</p>
+          </div>
+          <el-button slot="reference" circle icon="el-icon-question" class="hero-help-btn" />
+        </el-popover>
+        <el-button type="primary" plain icon="el-icon-refresh" @click="initPage">刷新数据</el-button>
+      </div>
     </div>
 
     <!-- KPI 卡片 -->
@@ -43,6 +54,27 @@
                 <span class="todo-entry__number" v-loading="todoLoading">{{ item.count }}</span>
                 <span class="todo-entry__unit">条待处理</span>
               </div>
+            </div>
+            <i class="el-icon-arrow-right todo-entry__arrow" />
+          </button>
+        </el-col>
+      </el-row>
+    </el-card>
+
+    <el-card shadow="never" class="section-card">
+      <div slot="header" class="section-header">
+        <span>快速操作</span>
+        <span class="section-header__hint">面向新手的高频入口，点击即可处理</span>
+      </div>
+      <el-row :gutter="16">
+        <el-col v-for="item in quickActions" :key="item.key" :xs="12" :sm="12" :md="8">
+          <button class="todo-entry quick-entry" type="button" @click="goTo(item.path)">
+            <div class="todo-entry__icon" :class="item.theme">
+              <i :class="item.icon" />
+            </div>
+            <div class="todo-entry__body">
+              <div class="todo-entry__title">{{ item.title }}</div>
+              <div class="quick-entry__desc">{{ item.desc }}</div>
             </div>
             <i class="el-icon-arrow-right todo-entry__arrow" />
           </button>
@@ -143,6 +175,16 @@ export default {
         { key: 'withdraw', title: '待审核提现', count: this.todo.pendingWithdraw, icon: 'el-icon-wallet', theme: 'theme-purple', path: '/jst/channel/admin-withdraw' },
         { key: 'partner', title: '待审入驻申请', count: this.todo.pendingPartnerApply, icon: 'el-icon-office-building', theme: 'theme-blue', path: '/jst/partner-apply' },
         { key: 'channel', title: '待审渠道认证', count: this.todo.pendingChannelAuth, icon: 'el-icon-postcard', theme: 'theme-green', path: '/jst/channel-auth' }
+      ]
+    },
+    quickActions() {
+      return [
+        { key: 'createContest', title: '创建赛事', desc: '按 6 个模块快速发起新赛事', icon: 'el-icon-plus', theme: 'theme-blue', path: '/partner/contest-edit' },
+        { key: 'auditEnroll', title: '审核报名', desc: '处理通过、驳回与补充材料', icon: 'el-icon-edit-outline', theme: 'theme-green', path: '/jst/enroll' },
+        { key: 'dealRefund', title: '处理退款', desc: '优先审核待处理退款申请', icon: 'el-icon-money', theme: 'theme-orange', path: '/jst/order/admin-refund' },
+        { key: 'auditWithdraw', title: '审核提现', desc: '审核后执行渠道打款流程', icon: 'el-icon-wallet', theme: 'theme-purple', path: '/jst/channel/admin-withdraw' },
+        { key: 'publishNotice', title: '发布公告', desc: '统一发布平台与赛事公告', icon: 'el-icon-bell', theme: 'theme-blue', path: '/jst/notice' },
+        { key: 'viewChannel', title: '查看渠道', desc: '查看渠道状态和关键数据', icon: 'el-icon-user-solid', theme: 'theme-green', path: '/jst/channel' }
       ]
     },
     contestMaxEnroll() {
@@ -252,6 +294,28 @@ export default {
   font-size: 14px;
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.86);
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.hero-help-btn {
+  border: none;
+  color: #1f5ba8;
+}
+
+.help-popover__content p {
+  margin: 0 0 8px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.help-popover__content p:last-child {
+  margin-bottom: 0;
 }
 
 .section-row {
@@ -397,6 +461,16 @@ export default {
   flex-shrink: 0;
 }
 
+.quick-entry {
+  min-height: 96px;
+}
+
+.quick-entry__desc {
+  font-size: 12px;
+  color: #7d8da0;
+  line-height: 1.5;
+}
+
 /* 排行榜 */
 .rank-list {
   display: flex;
@@ -476,6 +550,11 @@ export default {
     flex-direction: column;
     padding: 20px;
     border-radius: 18px;
+  }
+
+  .hero-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .hero-banner h2 {

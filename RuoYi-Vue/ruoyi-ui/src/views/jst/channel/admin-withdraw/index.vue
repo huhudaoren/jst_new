@@ -6,7 +6,18 @@
         <h2>渠道提现管理</h2>
         <p class="hero-desc">审核渠道方提现申请，驳回不合规请求，执行打款操作。</p>
       </div>
-      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+      <div class="hero-actions">
+        <el-popover placement="bottom-end" width="320" trigger="click">
+          <div class="help-popover__content">
+            <p>提现处理流程：待审核→审核通过→执行打款，打款后状态会更新为已打款。</p>
+            <p>驳回时请填写具体原因，便于渠道方后续修正材料再次申请。</p>
+            <p>打款前先核对银行信息和金额，确认无误后再执行。</p>
+            <p>建议按申请时间顺序处理，优先避免历史申请堆积。</p>
+          </div>
+          <el-button slot="reference" circle icon="el-icon-question" class="hero-help-btn" />
+        </el-popover>
+        <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+      </div>
     </div>
 
     <el-form
@@ -333,6 +344,28 @@ export default {
   color: #6f7b8f;
 }
 
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.hero-help-btn {
+  border: 1px solid #dbe4f2;
+  color: #2f6fec;
+}
+
+.help-popover__content p {
+  margin: 0 0 8px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.help-popover__content p:last-child {
+  margin-bottom: 0;
+}
+
 .query-panel {
   padding: 16px 16px 0;
   margin-bottom: 16px;
@@ -416,10 +449,22 @@ export default {
     padding: 18px;
   }
 
-  .page-hero .el-button {
+  .hero-actions {
     width: 100%;
-    min-height: 44px;
     margin-top: 16px;
+    justify-content: flex-start;
+  }
+
+  .hero-actions .hero-help-btn {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    min-height: 44px;
+  }
+
+  .hero-actions .el-button:not(.hero-help-btn) {
+    flex: 1;
+    min-height: 44px;
   }
 
   .page-hero h2 {

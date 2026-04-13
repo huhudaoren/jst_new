@@ -6,7 +6,18 @@
         <h2>订单管理</h2>
         <p class="hero-desc">支持按订单号、状态筛选，查看订单详情，并可发起特批退款。</p>
       </div>
-      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+      <div class="hero-actions">
+        <el-popover placement="bottom-end" width="320" trigger="click">
+          <div class="help-popover__content">
+            <p>订单状态表示支付进度，退款状态表示售后进度，建议组合查看避免误判。</p>
+            <p>处理异常订单时先点详情，核对订单项、支付记录和退款记录。</p>
+            <p>“特批退款”会直接发起全额退款，仅用于特殊场景，需填写清晰原因。</p>
+            <p>可先筛选退款状态为“无退款”且订单已支付，再批量处理。</p>
+          </div>
+          <el-button slot="reference" circle icon="el-icon-question" class="hero-help-btn" />
+        </el-popover>
+        <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+      </div>
     </div>
 
     <el-form
@@ -421,6 +432,28 @@ export default {
   color: #6f7b8f;
 }
 
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.hero-help-btn {
+  border: 1px solid #dbe4f2;
+  color: #2f6fec;
+}
+
+.help-popover__content p {
+  margin: 0 0 8px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.help-popover__content p:last-child {
+  margin-bottom: 0;
+}
+
 .query-panel {
   padding: 16px 16px 0;
   margin-bottom: 16px;
@@ -514,10 +547,22 @@ export default {
     padding: 18px;
   }
 
-  .page-hero .el-button {
+  .hero-actions {
     width: 100%;
-    min-height: 44px;
     margin-top: 16px;
+    justify-content: flex-start;
+  }
+
+  .hero-actions .hero-help-btn {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    min-height: 44px;
+  }
+
+  .hero-actions .el-button:not(.hero-help-btn) {
+    flex: 1;
+    min-height: 44px;
   }
 
   .page-hero h2 {

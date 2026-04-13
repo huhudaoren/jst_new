@@ -6,7 +6,18 @@
         <h2>赛事管理</h2>
         <p class="hero-desc">统一处理赛事审核、上下线、详情查看与核心内容编辑。</p>
       </div>
-      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+      <div class="hero-actions">
+        <el-popover placement="bottom-end" width="320" trigger="click">
+          <div class="help-popover__content">
+            <p>标准流程：草稿填写完成后提审，平台审核通过后再执行上线。</p>
+            <p>待审核状态可做通过或驳回，驳回时建议填写可执行的修改建议。</p>
+            <p>上线后可继续维护详情内容，若活动变更可先下线再调整。</p>
+            <p>建议每天先筛选“待审核”和“待上线”，优先处理关键赛事。</p>
+          </div>
+          <el-button slot="reference" circle icon="el-icon-question" class="hero-help-btn" />
+        </el-popover>
+        <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+      </div>
     </div>
 
     <el-form
@@ -433,6 +444,28 @@ export default {
   color: #6f7b8f;
 }
 
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.hero-help-btn {
+  border: 1px solid #dbe4f2;
+  color: #2f6fec;
+}
+
+.help-popover__content p {
+  margin: 0 0 8px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.help-popover__content p:last-child {
+  margin-bottom: 0;
+}
+
 .query-panel {
   padding: 16px 16px 0;
   margin-bottom: 16px;
@@ -498,10 +531,22 @@ export default {
     padding: 18px;
   }
 
-  .page-hero .el-button {
+  .hero-actions {
     width: 100%;
-    min-height: 44px;
     margin-top: 16px;
+    justify-content: flex-start;
+  }
+
+  .hero-actions .hero-help-btn {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    min-height: 44px;
+  }
+
+  .hero-actions .el-button:not(.hero-help-btn) {
+    flex: 1;
+    min-height: 44px;
   }
 
   .page-hero h2 {

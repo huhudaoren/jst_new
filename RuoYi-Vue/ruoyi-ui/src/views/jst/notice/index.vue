@@ -1,6 +1,25 @@
 <template>
-  <div class="app-container">
-    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="68px">
+  <div class="app-container jst-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">Notice Center</p>
+        <h2>公告管理</h2>
+        <p class="hero-desc">统一维护公告分类、发布状态与置顶信息，编辑区改为抽屉。</p>
+      </div>
+      <div class="hero-actions">
+        <el-popover placement="bottom" width="280" trigger="hover">
+          <div class="help-lines">
+            <p>1. 草稿可编辑后发布。</p>
+            <p>2. 已发布公告可一键下线。</p>
+            <p>3. 专题活动公告需上传封面图。</p>
+          </div>
+          <el-button slot="reference" icon="el-icon-question" plain>使用说明</el-button>
+        </el-popover>
+        <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+      </div>
+    </div>
+
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="68px" class="query-panel">
       <el-form-item label="标题" prop="title">
         <el-input v-model="queryParams.title" placeholder="请输入标题" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
@@ -15,19 +34,18 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh-left" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
+    <el-row :gutter="10" class="mb8 toolbar-row">
       <el-col :span="1.5">
         <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAdd" v-hasPermi="['jst:message:notice:add']">新增</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <!-- 手机卡片 -->
     <div v-if="isMobile" v-loading="loading">
       <div v-if="list.length" class="mobile-card-list">
         <div v-for="row in list" :key="row.noticeId" class="mobile-card">
@@ -37,7 +55,7 @@
           </div>
           <div class="mobile-card__meta">
             <span>{{ categoryLabel(row.category) }}</span>
-            <span v-if="row.topFlag === 1" style="color:#E6A23C">置顶</span>
+            <span v-if="row.topFlag === 1" class="top-text">置顶</span>
             <span>{{ parseTime(row.publishTime || row.createTime) }}</span>
           </div>
           <div class="mobile-card__actions">
@@ -50,7 +68,6 @@
       <el-empty v-else description="暂无公告" />
     </div>
 
-    <!-- 桌面表格 -->
     <el-table v-else v-loading="loading" :data="list">
       <el-table-column label="ID" prop="noticeId" width="70" />
       <el-table-column label="标题" prop="title" min-width="200" show-overflow-tooltip />
@@ -85,36 +102,43 @@
 
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
 
-    <!-- 编辑弹窗 -->
-    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" :width="isMobile ? '100%' : '760px'" :fullscreen="isMobile" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="标题" prop="title">
-          <el-input v-model="form.title" placeholder="请输入公告标题" />
-        </el-form-item>
-        <el-form-item label="分类" prop="category">
-          <el-select v-model="form.category" placeholder="请选择分类" @change="onCategoryChange">
-            <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="封面图" :prop="form.category === 'topic' ? 'coverImage' : ''">
-          <image-upload v-model="form.coverImage" :limit="1" />
-          <div v-if="form.category === 'topic'" class="el-form-item__tip" style="color:#E6A23C;font-size:12px">专题活动封面图必填，将在小程序首页展示</div>
-        </el-form-item>
-        <el-form-item label="置顶">
-          <el-switch v-model="form.topFlag" :active-value="1" :inactive-value="0" />
-        </el-form-item>
-        <el-form-item v-if="form.category === 'topic'" label="跳转链接">
-          <el-input v-model="form.remark" placeholder="请输入跳转链接 URL" />
-        </el-form-item>
-        <el-form-item label="内容" prop="content">
-          <editor v-model="form.content" :min-height="260" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">确 定</el-button>
+    <el-drawer
+      :title="dialogTitle"
+      :visible.sync="dialogVisible"
+      :size="isMobile ? '100%' : '55%'"
+      append-to-body
+      :with-header="true"
+    >
+      <div class="drawer-body">
+        <el-form ref="form" :model="form" :rules="rules" :label-width="isMobile ? '90px' : '96px'">
+          <el-form-item label="标题" prop="title">
+            <el-input v-model="form.title" placeholder="请输入公告标题" />
+          </el-form-item>
+          <el-form-item label="分类" prop="category">
+            <el-select v-model="form.category" placeholder="请选择分类" class="full-width" @change="onCategoryChange">
+              <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="封面图" :prop="form.category === 'topic' ? 'coverImage' : ''">
+            <image-upload v-model="form.coverImage" :limit="1" />
+            <div v-if="form.category === 'topic'" class="field-tip">专题活动封面图必填，将在小程序首页展示。</div>
+          </el-form-item>
+          <el-form-item label="置顶">
+            <el-switch v-model="form.topFlag" :active-value="1" :inactive-value="0" />
+          </el-form-item>
+          <el-form-item v-if="form.category === 'topic'" label="跳转链接">
+            <el-input v-model="form.remark" placeholder="请输入跳转链接 URL" />
+          </el-form-item>
+          <el-form-item label="内容" prop="content">
+            <editor v-model="form.content" :min-height="280" />
+          </el-form-item>
+        </el-form>
       </div>
-    </el-dialog>
+      <div class="drawer-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">确认</el-button>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
@@ -248,10 +272,199 @@ export default {
 </script>
 
 <style scoped>
-.mobile-card-list { padding: 0 4px; }
-.mobile-card { background: #fff; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-.mobile-card__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.mobile-card__title { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; }
-.mobile-card__meta { font-size: 12px; color: #909399; display: flex; gap: 12px; margin-bottom: 8px; }
-.mobile-card__actions { display: flex; gap: 6px; }
+.jst-page {
+  background: #f6f8fb;
+  min-height: calc(100vh - 84px);
+}
+
+.page-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 24px;
+  margin-bottom: 16px;
+  color: #fff;
+  border-radius: 12px;
+  background: linear-gradient(130deg, #0f766e 0%, #2563eb 58%, #1e293b 100%);
+}
+
+.hero-eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .82;
+}
+
+.page-hero h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.hero-desc {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.help-lines p {
+  margin: 0 0 6px;
+  line-height: 1.6;
+}
+
+.help-lines p:last-child {
+  margin-bottom: 0;
+}
+
+.query-panel {
+  padding: 16px 16px 0;
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 10px;
+}
+
+.toolbar-row {
+  margin-bottom: 12px;
+}
+
+.mobile-card-list {
+  padding: 0 4px;
+}
+
+.mobile-card {
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.mobile-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.mobile-card__title {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70%;
+}
+
+.mobile-card__meta {
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.top-text {
+  color: #e6a23c;
+  font-weight: 600;
+}
+
+.mobile-card__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.drawer-body {
+  padding: 8px 20px 90px;
+}
+
+.drawer-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 20px;
+  border-top: 1px solid #e5eaf2;
+  background: #fff;
+}
+
+.field-tip {
+  color: #e6a23c;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .jst-page {
+    padding: 12px;
+  }
+
+  .page-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 18px;
+  }
+
+  .page-hero h2 {
+    font-size: 20px;
+  }
+
+  .hero-actions {
+    width: 100%;
+  }
+
+  .hero-actions .el-button {
+    flex: 1;
+    min-height: 44px;
+  }
+
+  .query-panel {
+    padding-bottom: 10px;
+  }
+
+  .query-panel ::v-deep .el-form-item {
+    display: block;
+    margin-right: 0;
+  }
+
+  .query-panel ::v-deep .el-form-item__content,
+  .query-panel ::v-deep .el-input,
+  .query-panel ::v-deep .el-select,
+  .query-panel ::v-deep .el-date-editor {
+    width: 100%;
+  }
+
+  .query-panel .el-button,
+  .mobile-card__actions .el-button {
+    min-height: 44px;
+  }
+
+  .drawer-body {
+    padding: 8px 14px 96px;
+  }
+
+  .drawer-footer {
+    padding: 10px 14px;
+  }
+
+  .drawer-footer .el-button {
+    min-height: 44px;
+  }
+}
 </style>

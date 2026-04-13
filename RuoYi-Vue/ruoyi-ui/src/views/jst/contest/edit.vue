@@ -291,34 +291,89 @@
                   <el-input-number v-model="form.formTemplateId" :min="0" controls-position="right" class="full-width" />
                 </el-form-item>
               </el-col>
-              <el-col :xs="24" :md="16">
-                <el-form-item label="核销配置JSON">
-                  <el-input
-                    v-model="form.writeoffConfig"
-                    type="textarea"
-                    :rows="4"
-                    placeholder='如：{"writeoffMode":"qr"}'
-                  />
+              <el-col :xs="24" :md="12">
+                <el-form-item label="成绩发布模式">
+                  <el-select v-model="scoreRuleForm.publishMode" class="full-width" placeholder="请选择发布模式">
+                    <el-option label="手动发布" value="manual" />
+                    <el-option label="自动发布" value="auto" />
+                  </el-select>
+                  <div class="editor-inline-title">成绩项</div>
+                  <div class="tag-box score-tag-box">
+                    <el-tag
+                      v-for="(item, index) in scoreRuleForm.scoreItems"
+                      :key="item + '_' + index"
+                      closable
+                      class="tag-item"
+                      @close="removeScoreItem(index)"
+                    >
+                      {{ item }}
+                    </el-tag>
+                    <el-input
+                      v-if="scoreItemInputVisible"
+                      ref="scoreItemInputRef"
+                      v-model="scoreItemInputValue"
+                      class="tag-input"
+                      size="small"
+                      @keyup.enter.native="confirmScoreItem"
+                      @blur="confirmScoreItem"
+                    />
+                    <el-button v-else class="tag-button" size="small" @click="showScoreItemInput">+ 添加成绩项</el-button>
+                  </div>
+                  <div class="editor-help">例如：总分、技巧、表现力。会自动转成可提交 JSON。</div>
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :md="12">
-                <el-form-item label="证书规则JSON">
-                  <el-input
-                    v-model="form.certRuleJson"
-                    type="textarea"
-                    :rows="4"
-                    placeholder='如：{"template":"default"}'
-                  />
+                <el-form-item label="证书颁发模式">
+                  <el-select v-model="certRuleForm.issueMode" class="full-width" placeholder="请选择颁发模式">
+                    <el-option label="手动颁发" value="manual" />
+                    <el-option label="自动颁发" value="auto" />
+                  </el-select>
+                  <div class="editor-inline-title">证书模板</div>
+                  <el-select
+                    v-model="certRuleForm.templateIds"
+                    class="full-width"
+                    multiple
+                    collapse-tags
+                    filterable
+                    clearable
+                    placeholder="请选择证书模板（可多选）"
+                  >
+                    <el-option
+                      v-for="item in certTemplateOptions"
+                      :key="item.templateId"
+                      :label="formatCertTemplateLabel(item)"
+                      :value="item.templateId"
+                    />
+                  </el-select>
+                  <div class="editor-help">可先保存后再补模板，系统会保持已选配置。</div>
                 </el-form-item>
               </el-col>
-              <el-col :xs="24" :md="12">
-                <el-form-item label="成绩规则JSON">
-                  <el-input
-                    v-model="form.scoreRuleJson"
-                    type="textarea"
-                    :rows="4"
-                    placeholder='如：{"publishMode":"manual"}'
-                  />
+              <el-col :xs="24" :md="24">
+                <el-form-item label="核销配置">
+                  <el-row :gutter="16">
+                    <el-col :xs="24" :md="12">
+                      <div class="editor-inline-title">核销方式</div>
+                      <el-select
+                        v-model="writeoffForm.writeoffMode"
+                        class="full-width"
+                        :disabled="form.supportAppointment !== 1"
+                        placeholder="请选择核销方式"
+                      >
+                        <el-option label="二维码" value="qr" />
+                        <el-option label="手动输入" value="manual" />
+                      </el-select>
+                    </el-col>
+                    <el-col :xs="24" :md="12">
+                      <div class="editor-inline-title">需要签到</div>
+                      <el-switch
+                        v-model="writeoffForm.needSignIn"
+                        :disabled="form.supportAppointment !== 1"
+                        active-text="是"
+                        inactive-text="否"
+                      />
+                    </el-col>
+                  </el-row>
+                  <div class="editor-help">关闭线下预约时该配置不会生效，开启后自动写回提交字段。</div>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -336,6 +391,7 @@
 
 <script>
 import { getAdminContest, updateAdminContest } from '@/api/jst/event/admin-contest'
+import { listJst_cert_template } from '@/api/jst/event/jst_cert_template'
 
 function createDefaultForm() {
   return {
@@ -369,6 +425,27 @@ function createDefaultForm() {
   }
 }
 
+function createDefaultScoreRule() {
+  return {
+    publishMode: 'manual',
+    scoreItems: []
+  }
+}
+
+function createDefaultCertRule() {
+  return {
+    issueMode: 'manual',
+    templateIds: []
+  }
+}
+
+function createDefaultWriteoffConfig() {
+  return {
+    writeoffMode: 'qr',
+    needSignIn: true
+  }
+}
+
 export default {
   name: 'JstContestEditDialog',
   props: {
@@ -391,8 +468,14 @@ export default {
       awardRows: [],
       faqRows: [],
       tags: [],
+      certTemplateOptions: [],
+      scoreRuleForm: createDefaultScoreRule(),
+      certRuleForm: createDefaultCertRule(),
+      writeoffForm: createDefaultWriteoffConfig(),
       tagInputVisible: false,
       tagInputValue: '',
+      scoreItemInputVisible: false,
+      scoreItemInputValue: '',
       rules: {
         contestName: [{ required: true, message: '请输入赛事名称', trigger: 'blur' }],
         category: [{ required: true, message: '请输入赛事分类', trigger: 'blur' }],
@@ -424,11 +507,34 @@ export default {
       return this.contestId ? '编辑赛事' : '新建赛事'
     }
   },
+  watch: {
+    scoreRuleForm: {
+      handler() {
+        this.syncScoreRuleJson()
+      },
+      deep: true
+    },
+    certRuleForm: {
+      handler() {
+        this.syncCertRuleJson()
+      },
+      deep: true
+    },
+    writeoffForm: {
+      handler() {
+        this.syncWriteoffConfig()
+      },
+      deep: true
+    }
+  },
   methods: {
     handleOpen() {
       this.activeTab = 'basic'
       this.tagInputVisible = false
       this.tagInputValue = ''
+      this.scoreItemInputVisible = false
+      this.scoreItemInputValue = ''
+      this.loadCertTemplates()
       if (this.contestId) {
         this.loadDetail()
       } else {
@@ -441,6 +547,10 @@ export default {
       this.awardRows = []
       this.faqRows = []
       this.tags = []
+      this.scoreRuleForm = createDefaultScoreRule()
+      this.certRuleForm = createDefaultCertRule()
+      this.writeoffForm = createDefaultWriteoffConfig()
+      this.syncAllJsonFields()
     },
     async loadDetail() {
       if (!this.contestId) return
@@ -465,11 +575,103 @@ export default {
         this.awardRows = this.normalizeAwards(data.awardsJson)
         this.faqRows = this.normalizeFaq(data.faqJson)
         this.tags = this.normalizeTags(data.recommendTags)
+        this.hydrateRuleFormsFromJson()
       } catch (e) {
         this.resetData()
       } finally {
         this.loading = false
       }
+    },
+    loadCertTemplates() {
+      listJst_cert_template({ pageNum: 1, pageSize: 200 }).then(res => {
+        this.certTemplateOptions = Array.isArray(res.rows) ? res.rows : []
+      }).catch(() => {
+        this.certTemplateOptions = []
+      })
+    },
+    hydrateRuleFormsFromJson() {
+      this.scoreRuleForm = this.normalizeScoreRule(this.parseJsonObject(this.form.scoreRuleJson))
+      this.certRuleForm = this.normalizeCertRule(this.parseJsonObject(this.form.certRuleJson))
+      this.writeoffForm = this.normalizeWriteoffConfig(this.parseJsonObject(this.form.writeoffConfig))
+      this.scoreItemInputVisible = false
+      this.scoreItemInputValue = ''
+      this.syncAllJsonFields()
+    },
+    parseJsonObject(value) {
+      if (!value) return {}
+      if (typeof value === 'object' && !Array.isArray(value)) return value
+      try {
+        const parsed = JSON.parse(value)
+        return parsed && typeof parsed === 'object' ? parsed : {}
+      } catch (e) {
+        return {}
+      }
+    },
+    normalizeStringArray(value) {
+      const list = Array.isArray(value) ? value : []
+      const result = []
+      list.forEach(item => {
+        const text = String(item || '').trim()
+        if (text && !result.includes(text)) {
+          result.push(text)
+        }
+      })
+      return result
+    },
+    normalizeNumberArray(value) {
+      const list = Array.isArray(value) ? value : []
+      const result = []
+      list.forEach(item => {
+        const num = Number(item)
+        if (Number.isFinite(num) && !result.includes(num)) {
+          result.push(num)
+        }
+      })
+      return result
+    },
+    normalizeScoreRule(raw) {
+      return {
+        publishMode: raw.publishMode === 'auto' ? 'auto' : 'manual',
+        scoreItems: this.normalizeStringArray(raw.scoreItems)
+      }
+    },
+    normalizeCertRule(raw) {
+      return {
+        issueMode: raw.issueMode === 'auto' ? 'auto' : 'manual',
+        templateIds: this.normalizeNumberArray(raw.templateIds || raw.templates)
+      }
+    },
+    normalizeWriteoffConfig(raw) {
+      return {
+        writeoffMode: raw.writeoffMode === 'manual' ? 'manual' : 'qr',
+        needSignIn: raw.needSignIn !== false
+      }
+    },
+    syncAllJsonFields() {
+      this.syncScoreRuleJson()
+      this.syncCertRuleJson()
+      this.syncWriteoffConfig()
+    },
+    syncScoreRuleJson() {
+      const payload = {
+        publishMode: this.scoreRuleForm.publishMode === 'auto' ? 'auto' : 'manual',
+        scoreItems: this.normalizeStringArray(this.scoreRuleForm.scoreItems)
+      }
+      this.form.scoreRuleJson = JSON.stringify(payload)
+    },
+    syncCertRuleJson() {
+      const payload = {
+        issueMode: this.certRuleForm.issueMode === 'auto' ? 'auto' : 'manual',
+        templateIds: this.normalizeNumberArray(this.certRuleForm.templateIds)
+      }
+      this.form.certRuleJson = JSON.stringify(payload)
+    },
+    syncWriteoffConfig() {
+      const payload = {
+        writeoffMode: this.writeoffForm.writeoffMode === 'manual' ? 'manual' : 'qr',
+        needSignIn: this.writeoffForm.needSignIn !== false
+      }
+      this.form.writeoffConfig = JSON.stringify(payload)
     },
     parseJsonRows(value) {
       if (!value) return []
@@ -553,6 +755,30 @@ export default {
     removeTag(index) {
       this.tags.splice(index, 1)
     },
+    showScoreItemInput() {
+      this.scoreItemInputVisible = true
+      this.$nextTick(() => {
+        if (this.$refs.scoreItemInputRef && this.$refs.scoreItemInputRef.focus) {
+          this.$refs.scoreItemInputRef.focus()
+        }
+      })
+    },
+    confirmScoreItem() {
+      const value = String(this.scoreItemInputValue || '').trim()
+      if (value && !this.scoreRuleForm.scoreItems.includes(value)) {
+        this.scoreRuleForm.scoreItems.push(value)
+      }
+      this.scoreItemInputValue = ''
+      this.scoreItemInputVisible = false
+    },
+    removeScoreItem(index) {
+      this.scoreRuleForm.scoreItems.splice(index, 1)
+    },
+    formatCertTemplateLabel(item) {
+      const name = item.templateName || item.name || `模板 ${item.templateId}`
+      const status = item.auditStatus === 'approved' ? '已审' : '待审'
+      return `${name}（${status}）`
+    },
     toSwitch(value) {
       return value === 1 || value === true || value === '1' ? 1 : 0
     },
@@ -599,6 +825,7 @@ export default {
       return true
     },
     buildPayload() {
+      this.syncAllJsonFields()
       const scheduleRows = this.serializeScheduleRows()
       const awardRows = this.serializeAwardRows()
       const faqRows = this.serializeFaqRows()
@@ -690,6 +917,23 @@ export default {
   margin-top: 8px;
   color: #738094;
   font-size: 12px;
+}
+
+.score-tag-box {
+  margin-top: 8px;
+}
+
+.editor-inline-title {
+  margin: 10px 0 6px;
+  color: #475569;
+  font-size: 12px;
+}
+
+.editor-help {
+  margin-top: 6px;
+  color: #738094;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 @media (max-width: 768px) {

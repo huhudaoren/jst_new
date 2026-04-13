@@ -6,7 +6,18 @@
         <h2>退款管理</h2>
         <p class="hero-desc">审核退款申请、驳回不合理请求、执行已审核的退款操作。</p>
       </div>
-      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+      <div class="hero-actions">
+        <el-popover placement="bottom-end" width="320" trigger="click">
+          <div class="help-popover__content">
+            <p>退款流程分三步：待审核→已审核→执行退款，执行后不可撤销。</p>
+            <p>驳回时请写明原因，便于渠道或用户理解并补充材料。</p>
+            <p>执行前建议再次核对退款金额与订单状态，避免重复退款。</p>
+            <p>可先处理“待审核”单，再集中执行“已审核”单，提高效率。</p>
+          </div>
+          <el-button slot="reference" circle icon="el-icon-question" class="hero-help-btn" />
+        </el-popover>
+        <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+      </div>
     </div>
 
     <el-form
@@ -303,6 +314,28 @@ export default {
   color: #6f7b8f;
 }
 
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.hero-help-btn {
+  border: 1px solid #dbe4f2;
+  color: #2f6fec;
+}
+
+.help-popover__content p {
+  margin: 0 0 8px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.help-popover__content p:last-child {
+  margin-bottom: 0;
+}
+
 .query-panel {
   padding: 16px 16px 0;
   margin-bottom: 16px;
@@ -381,10 +414,22 @@ export default {
     padding: 18px;
   }
 
-  .page-hero .el-button {
+  .hero-actions {
     width: 100%;
-    min-height: 44px;
     margin-top: 16px;
+    justify-content: flex-start;
+  }
+
+  .hero-actions .hero-help-btn {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    min-height: 44px;
+  }
+
+  .hero-actions .el-button:not(.hero-help-btn) {
+    flex: 1;
+    min-height: 44px;
   }
 
   .page-hero h2 {

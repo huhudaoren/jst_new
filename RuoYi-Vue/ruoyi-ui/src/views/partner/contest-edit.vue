@@ -205,29 +205,68 @@
             <el-row :gutter="24">
               <el-col :xs="24" :md="12">
                 <el-form-item label="成绩规则" prop="scoreRuleJson">
-                  <el-input
-                    v-model="form.scoreRuleJson"
-                    type="textarea"
-                    :rows="10"
-                    placeholder='请输入 JSON，如 {"publishMode":"manual","scoreItems":["总分"]}'
-                  />
-                  <el-button type="text" icon="el-icon-magic-stick" @click="formatJsonField('scoreRuleJson')">格式化 JSON</el-button>
+                  <el-select v-model="scoreRuleForm.publishMode" class="full-width" placeholder="请选择发布模式">
+                    <el-option label="手动发布" value="manual" />
+                    <el-option label="自动发布" value="auto" />
+                  </el-select>
+                  <div class="score-items-editor">
+                    <span class="editor-label">成绩项</span>
+                    <div class="tag-editor">
+                      <el-tag
+                        v-for="(item, index) in scoreRuleForm.scoreItems"
+                        :key="item + '_' + index"
+                        closable
+                        class="tag-item"
+                        @close="removeScoreItem(index)"
+                      >
+                        {{ item }}
+                      </el-tag>
+                      <el-input
+                        v-if="scoreItemInputVisible"
+                        ref="scoreItemInput"
+                        v-model="scoreItemInputValue"
+                        class="tag-input"
+                        size="small"
+                        @keyup.enter.native="confirmScoreItem"
+                        @blur="confirmScoreItem"
+                      />
+                      <el-button v-else size="small" class="tag-add-btn" icon="el-icon-plus" @click="showScoreItemInput">添加成绩项</el-button>
+                    </div>
+                  </div>
+                  <div class="field-help">常用项：总分、技巧、表现力。新增后会自动转为可提交 JSON。</div>
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :md="12">
                 <el-form-item label="证书规则" prop="certRuleJson">
-                  <el-input
-                    v-model="form.certRuleJson"
-                    type="textarea"
-                    :rows="10"
-                    placeholder='请输入 JSON，如 {"issueMode":"manual","templates":[]}'
-                  />
-                  <el-button type="text" icon="el-icon-magic-stick" @click="formatJsonField('certRuleJson')">格式化 JSON</el-button>
+                  <el-select v-model="certRuleForm.issueMode" class="full-width" placeholder="请选择颁发模式">
+                    <el-option label="手动颁发" value="manual" />
+                    <el-option label="自动颁发" value="auto" />
+                  </el-select>
+                  <div class="score-items-editor">
+                    <span class="editor-label">证书模板</span>
+                    <el-select
+                      v-model="certRuleForm.templateIds"
+                      class="full-width"
+                      multiple
+                      collapse-tags
+                      filterable
+                      clearable
+                      placeholder="请选择证书模板（可多选）"
+                    >
+                      <el-option
+                        v-for="item in certTemplateOptions"
+                        :key="item.templateId"
+                        :label="formatCertTemplateLabel(item)"
+                        :value="item.templateId"
+                      />
+                    </el-select>
+                  </div>
+                  <div class="field-help">未选择模板时可先保存草稿，后续在证书管理里补充完善。</div>
                 </el-form-item>
               </el-col>
               <el-col :span="24">
                 <el-alert
-                  title="当前 F7 保存接口只提供 scoreRuleJson / certRuleJson 字符串字段，证书模板选择、奖项结构与成绩发布时间需要后端补充结构化协议。"
+                  title="页面使用表单化编辑，系统会自动写回 scoreRuleJson / certRuleJson 字符串字段，保存协议不变。"
                   type="info"
                   show-icon
                   :closable="false"
@@ -273,16 +312,30 @@
               </el-col>
               <el-col :span="24">
                 <el-form-item label="核销配置" prop="writeoffConfig">
-                  <el-input
-                    v-model="form.writeoffConfig"
-                    type="textarea"
-                    :rows="8"
-                    placeholder='请输入 JSON，如 {"writeoffMode":"qr","needSignIn":true}'
-                    :disabled="form.supportAppointment !== 1"
-                  />
-                  <el-button type="text" icon="el-icon-magic-stick" :disabled="form.supportAppointment !== 1" @click="formatJsonField('writeoffConfig')">
-                    格式化 JSON
-                  </el-button>
+                  <el-row :gutter="16">
+                    <el-col :xs="24" :md="12">
+                      <div class="editor-label">核销方式</div>
+                      <el-select
+                        v-model="writeoffForm.writeoffMode"
+                        class="full-width"
+                        placeholder="请选择核销方式"
+                        :disabled="form.supportAppointment !== 1"
+                      >
+                        <el-option label="二维码" value="qr" />
+                        <el-option label="手动输入" value="manual" />
+                      </el-select>
+                    </el-col>
+                    <el-col :xs="24" :md="12">
+                      <div class="editor-label">需要签到</div>
+                      <el-switch
+                        v-model="writeoffForm.needSignIn"
+                        :disabled="form.supportAppointment !== 1"
+                        active-text="是"
+                        inactive-text="否"
+                      />
+                    </el-col>
+                  </el-row>
+                  <div class="field-help">预约关闭时核销配置将不生效，开启后会自动带入并提交。</div>
                 </el-form-item>
               </el-col>
               <el-col :span="24">
@@ -334,6 +387,28 @@ import {
   submitPartnerContest,
   updatePartnerContest
 } from '@/api/partner/contest'
+import { listCertTemplates } from '@/api/partner/cert'
+
+function createDefaultScoreRule() {
+  return {
+    publishMode: 'manual',
+    scoreItems: []
+  }
+}
+
+function createDefaultCertRule() {
+  return {
+    issueMode: 'manual',
+    templateIds: []
+  }
+}
+
+function createDefaultWriteoffConfig() {
+  return {
+    writeoffMode: 'qr',
+    needSignIn: true
+  }
+}
 
 const DEFAULT_FORM = {
   contestId: null,
@@ -370,6 +445,12 @@ export default {
       submitLoading: false,
       form: { ...DEFAULT_FORM },
       formTemplateOptions: [],
+      certTemplateOptions: [],
+      scoreRuleForm: createDefaultScoreRule(),
+      certRuleForm: createDefaultCertRule(),
+      writeoffForm: createDefaultWriteoffConfig(),
+      scoreItemInputVisible: false,
+      scoreItemInputValue: '',
       categoryOptions: ['艺术', '音乐', '舞蹈', '美术', '朗诵戏剧', '文化', '科技', '体育'],
       rules: {
         contestName: [{ required: true, message: '请输入赛事名称', trigger: 'blur' }],
@@ -395,8 +476,30 @@ export default {
       return this.$route.params.contestId || this.$route.query.contestId
     }
   },
+  watch: {
+    scoreRuleForm: {
+      handler() {
+        this.syncScoreRuleJson()
+      },
+      deep: true
+    },
+    certRuleForm: {
+      handler() {
+        this.syncCertRuleJson()
+      },
+      deep: true
+    },
+    writeoffForm: {
+      handler() {
+        this.syncWriteoffConfig()
+      },
+      deep: true
+    }
+  },
   created() {
     this.loadFormTemplates()
+    this.loadCertTemplates()
+    this.hydrateRuleFormsFromJson()
     if (this.routeContestId) {
       this.loadDetail(this.routeContestId)
     }
@@ -419,6 +522,7 @@ export default {
           aftersaleDays: Number(data.aftersaleDays || 0),
           price: Number(data.price || 0)
         }
+        this.hydrateRuleFormsFromJson()
       }).finally(() => {
         this.detailLoading = false
       })
@@ -429,6 +533,116 @@ export default {
       }).catch(() => {
         this.formTemplateOptions = []
       })
+    },
+    loadCertTemplates() {
+      listCertTemplates().then(response => {
+        this.certTemplateOptions = Array.isArray(response.data) ? response.data : []
+      }).catch(() => {
+        this.certTemplateOptions = []
+      })
+    },
+    hydrateRuleFormsFromJson() {
+      this.scoreRuleForm = this.normalizeScoreRule(this.parseJsonObject(this.form.scoreRuleJson))
+      this.certRuleForm = this.normalizeCertRule(this.parseJsonObject(this.form.certRuleJson))
+      this.writeoffForm = this.normalizeWriteoffConfig(this.parseJsonObject(this.form.writeoffConfig))
+      this.scoreItemInputVisible = false
+      this.scoreItemInputValue = ''
+      this.syncAllJsonFields()
+    },
+    parseJsonObject(value) {
+      if (!value) return {}
+      if (typeof value === 'object' && !Array.isArray(value)) return value
+      try {
+        const parsed = JSON.parse(value)
+        return parsed && typeof parsed === 'object' ? parsed : {}
+      } catch (e) {
+        return {}
+      }
+    },
+    normalizeStringArray(value) {
+      const list = Array.isArray(value) ? value : []
+      const result = []
+      list.forEach(item => {
+        const text = String(item || '').trim()
+        if (text && !result.includes(text)) {
+          result.push(text)
+        }
+      })
+      return result
+    },
+    normalizeNumberArray(value) {
+      const list = Array.isArray(value) ? value : []
+      const result = []
+      list.forEach(item => {
+        const num = Number(item)
+        if (Number.isFinite(num) && !result.includes(num)) {
+          result.push(num)
+        }
+      })
+      return result
+    },
+    normalizeScoreRule(raw) {
+      return {
+        publishMode: raw.publishMode === 'auto' ? 'auto' : 'manual',
+        scoreItems: this.normalizeStringArray(raw.scoreItems)
+      }
+    },
+    normalizeCertRule(raw) {
+      return {
+        issueMode: raw.issueMode === 'auto' ? 'auto' : 'manual',
+        templateIds: this.normalizeNumberArray(raw.templateIds || raw.templates)
+      }
+    },
+    normalizeWriteoffConfig(raw) {
+      return {
+        writeoffMode: raw.writeoffMode === 'manual' ? 'manual' : 'qr',
+        needSignIn: raw.needSignIn !== false
+      }
+    },
+    syncAllJsonFields() {
+      this.syncScoreRuleJson()
+      this.syncCertRuleJson()
+      this.syncWriteoffConfig()
+    },
+    syncScoreRuleJson() {
+      const payload = {
+        publishMode: this.scoreRuleForm.publishMode === 'auto' ? 'auto' : 'manual',
+        scoreItems: this.normalizeStringArray(this.scoreRuleForm.scoreItems)
+      }
+      this.form.scoreRuleJson = JSON.stringify(payload)
+    },
+    syncCertRuleJson() {
+      const payload = {
+        issueMode: this.certRuleForm.issueMode === 'auto' ? 'auto' : 'manual',
+        templateIds: this.normalizeNumberArray(this.certRuleForm.templateIds)
+      }
+      this.form.certRuleJson = JSON.stringify(payload)
+    },
+    syncWriteoffConfig() {
+      const payload = {
+        writeoffMode: this.writeoffForm.writeoffMode === 'manual' ? 'manual' : 'qr',
+        needSignIn: this.writeoffForm.needSignIn !== false
+      }
+      this.form.writeoffConfig = JSON.stringify(payload)
+    },
+    showScoreItemInput() {
+      this.scoreItemInputVisible = true
+      this.$nextTick(() => {
+        if (this.$refs.scoreItemInput && this.$refs.scoreItemInput.focus) {
+          this.$refs.scoreItemInput.focus()
+        }
+      })
+    },
+    confirmScoreItem() {
+      const text = String(this.scoreItemInputValue || '').trim()
+      if (text && !this.scoreRuleForm.scoreItems.includes(text)) {
+        this.scoreRuleForm.scoreItems.push(text)
+      }
+      this.scoreItemInputValue = ''
+      this.scoreItemInputVisible = false
+    },
+    removeScoreItem(index) {
+      this.scoreRuleForm.scoreItems.splice(index, 1)
     },
     saveDraft() {
       this.validateForm().then(() => {
@@ -486,6 +700,7 @@ export default {
       })
     },
     validateJsonFields() {
+      this.syncAllJsonFields()
       const fields = [
         { key: 'scoreRuleJson', label: '成绩规则' },
         { key: 'certRuleJson', label: '证书规则' },
@@ -509,19 +724,8 @@ export default {
         return false
       }
     },
-    formatJsonField(field) {
-      const value = this.form[field]
-      if (!value) {
-        this.form[field] = '{}'
-        return
-      }
-      try {
-        this.form[field] = JSON.stringify(JSON.parse(value), null, 2)
-      } catch (e) {
-        this.$modal.msgError('当前内容不是合法 JSON，暂不能格式化')
-      }
-    },
     buildPayload() {
+      this.syncAllJsonFields()
       return {
         contestId: this.form.contestId,
         contestName: this.form.contestName,
@@ -538,7 +742,7 @@ export default {
         supportPointsDeduct: this.toSwitch(this.form.supportPointsDeduct),
         supportAppointment: this.toSwitch(this.form.supportAppointment),
         appointmentCapacity: this.form.supportAppointment === 1 ? this.form.appointmentCapacity : 0,
-        writeoffConfig: this.form.supportAppointment === 1 ? this.form.writeoffConfig : '',
+        writeoffConfig: this.form.writeoffConfig,
         allowRepeatAppointment: this.form.supportAppointment === 1 ? this.toSwitch(this.form.allowRepeatAppointment) : 0,
         allowAppointmentRefund: this.toSwitch(this.form.allowAppointmentRefund),
         certRuleJson: this.form.certRuleJson,
@@ -554,6 +758,11 @@ export default {
       const name = item.templateName || item.name || `模板 ${item.templateId}`
       const version = item.templateVersion || item.version
       return version ? `${name}（${version}）` : name
+    },
+    formatCertTemplateLabel(item) {
+      const name = item.templateName || item.name || `模板 ${item.templateId}`
+      const status = item.auditStatus === 'approved' ? '已审' : '待审'
+      return `${name}（${status}）`
     },
     goBack() {
       this.$router.push('/partner/contest-list')
@@ -650,6 +859,39 @@ export default {
   color: #8c98a8;
   font-size: 12px;
   line-height: 1.6;
+}
+
+.score-items-editor {
+  margin-top: 12px;
+}
+
+.editor-label {
+  margin-bottom: 8px;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.tag-editor {
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  background: #fafcff;
+}
+
+.tag-item {
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.tag-input {
+  width: 140px;
+  vertical-align: top;
+}
+
+.tag-add-btn {
+  margin-bottom: 8px;
 }
 
 .inline-alert {
