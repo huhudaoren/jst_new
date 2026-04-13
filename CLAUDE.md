@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次更新：2026-04-12（阶段 F 全部完成 + FEAT 9 卡 + UI-REFRESH 4 批 + WEB-ADMIN 4 卡，进入 P1/P2 扩展阶段）
+> 会话恢复文件。上次更新：2026-04-13（全量完成 + 安全审计 + 性能优化进行中）
 
 ---
 
@@ -189,7 +189,32 @@ D:\coding\jst_v1\
 | **WEB-ADMIN-3** | 公告/课程/表单模板/优惠券/权益/商城管理 | ✅ 完成 |
 | **WEB-ADMIN-4** | 渠道认证/渠道/绑定/预约/数据看板 + 菜单 SQL | ✅ 完成 |
 | **断链修复** | 19 处断链全部修复（toast占位/API 404/路径不一致） | ✅ 完成 |
-| **E-4-WEB 扩展** | 65 菜单全覆盖（当前 28 页，还需扩展） | ⏳ P1 待规划 |
+| **E-4-WEB 扩展** | | |
+| WEB-ADMIN-5~8 | 40 页代码生成页精品化增强 + 2 页 partner 补齐 + 9 页 deprecated | ✅ 完成 |
+| **P2 — 合同发票+运营聚合** | | |
+| F-CONTRACT-INVOICE-BE | wx 合同/发票 Controller 5 端点（13/13 测试全绿） | ✅ 完成 |
+| F-CONTRACT-INVOICE-FE | 小程序 4 新页面 + API + my/index 入口恢复 | ✅ 完成 |
+| F-ANALYSIS-BE | Admin 聚合 Controller 5 端点 + 前端 dashboard 适配 | ✅ 完成 |
+| **UX 友好化** | | |
+| WEB-ADMIN-UX | Dashboard 快捷操作 + 菜单隐藏 SQL + 6 页帮助 + JSON 可视化 | ✅ 完成 |
+| WEB-ADMIN-POLISH | course/edit 5-Tab + 9 页列表 Hero/drawer/响应式 | ✅ 完成 |
+| **品牌与路由修复** | | |
+| 品牌替换 | 若依→竞赛通（登录页改版 + 前后端文案 + 页面标题） | ✅ 完成 |
+| WEB-ADMIN-FIX | 菜单注册 SQL 55 条(9800段) + 路由 404 修复 + 404 页优化 | ✅ 完成 |
+| 导航优化 | 菜单分组（6 组）+ 防溢出 + 去重 + 不可达禁用 | ✅ 完成 |
+| **ID→名称** | | |
+| ID2NAME-BE | 16 Mapper XML LEFT JOIN + 15 Domain 追加名称属性 | ✅ 完成 |
+| ID2NAME-FE | 17 页 ID→名称+跳转 + 4 页 autoOpen | ✅ 完成 |
+| **质量修复** | | |
+| QUALITY-FIX-ADMIN | 开发残留清理 + 11 页 catch toast + 权限补齐 + formatMoney 统一 | ✅ 完成 |
+| QUALITY-FIX-MP | Mock 隐藏 + 技术文案清理 + catch toast + 硬编码色修复 | ✅ 完成 |
+| 编码修复 | 7 文件 BOM 清除 + 1 文件 GBK 乱码 + 13 文件 Unicode 转义 + Agent 编码规范 | ✅ 完成 |
+| **操作文档** | 小程序手册(612行) + 管理端手册(907行) | ✅ 完成 |
+| **安全与性能（执行中）** | | |
+| SECURITY-FIX | 多环境 yml 拆分(dev/test/prod) + 5 项🔴安全修复 | 🏃 执行中 |
+| PERF-INDEX | 数据库索引补齐 + 连接池优化 | 🏃 执行中 |
+| PERF-CACHE | 热点数据缓存层（8 查询 + 穿透/雪崩防护） | 🏃 执行中 |
+| DATA-MIGRATION | 旧数据迁移方案与脚本 | ⏸️ 搁置至 5 月中旬 |
 
 ---
 
@@ -237,7 +262,7 @@ D:\coding\jst_v1\
 
 ## 六、已知问题与待办
 
-> 最后更新：2026-04-12 全量完成，进入扩展阶段
+> 最后更新：2026-04-13 安全审计 + 性能优化进行中
 
 ### 已完成总览
 
@@ -247,30 +272,73 @@ D:\coding\jst_v1\
 | F 后端 | MSG-TRIGGER / PARTNER-WRAPPER / QUARTZ-TASKS / ADMIN-SCAFFOLD | 全部 ✅ |
 | FEAT | 9 卡（赛事详情/课程详情/首页丰富/筛选/报名修复） | 全部 ✅ |
 | UI-REFRESH | 4 批 74 页全量刷新（uView 2.0 + Design Token，全局零硬编码） | 全部 ✅ |
-| WEB-ADMIN | 4 卡 28 页管理端（用户/赛事/订单/渠道/公告/课程/商城） | 全部 ✅ |
-| 修复 | FIX-1~5 + FIX-COMPILE + 19 处断链 | 全部 ✅ |
+| WEB-ADMIN 1~8 | 28 手工页 + 40 增强页 + 2 partner 补齐 + 9 deprecated | 全部 ✅ |
+| P2 功能 | 合同发票(BE+FE) + 运营聚合看板 | 全部 ✅ |
+| UX 友好化 | Dashboard 快捷操作 + 课程 5-Tab + 10 页精品化 + JSON 可视化 | 全部 ✅ |
+| 品牌与路由 | 若依→竞赛通 + 菜单注册 55 条 + 路由 404 修复 + 导航分组 | 全部 ✅ |
+| ID→名称 | 16 Mapper JOIN + 17 页前端名称展示+跳转 | 全部 ✅ |
+| 质量修复 | 双端质量审计 61 项修复 + 编码修复(BOM/GBK/Unicode) | 全部 ✅ |
+| 文档 | 小程序手册(612 行) + 管理端手册(907 行) + 操作文档 | 全部 ✅ |
+| 修复 | FIX-1~5 + FIX-COMPILE + 断链 + 权限 + 样式 | 全部 ✅ |
 | 测试 | TEST-ROUND1 (81%/95%) → TEST-ROUND2 (93%/98%) | 全部 ✅ |
 
-### 当前待办（按优先级）
+### 生产安全审计结果（2026-04-13）
+
+| 维度 | 🔴 | 🟡 | 🟢 |
+|---|---|---|---|
+| 安全与配置 | 5 | 5 | 3 |
+| 权限与越权 | 0 | 0 | 10 |
+| 性能与数据库 | 0 | 3 | 6 |
+| 并发与稳定性 | 0 | 1 | 7 |
+| 日志与可观测性 | 0 | 4 | 4 |
+
+亮点：权限体系 9.5/10、并发控制 9/10、幂等设计完整。
+
+### 当前执行中
+
+| 任务 | Agent | 说明 |
+|---|---|---|
+| SECURITY-FIX | Backend 1 | 多环境 yml(dev/test/prod) + CORS 白名单 + 密钥外置 + Swagger/Druid 条件化 |
+| PERF-INDEX | Backend 2 | 组合索引补齐 + 连接池优化 + EXPLAIN 验证 |
+| PERF-CACHE | Backend 3 | JstCacheService + 8 热点缓存 + 穿透/雪崩防护 |
+
+### 当前待办
 
 | 优先级 | 项 | 状态 | 说明 |
 |---|---|---|---|
-| **P1** | **E-4-WEB 扩展** | ⏳ 待规划 | 当前 28 页，目标 65 菜单全覆盖 |
-| **P2** | **F-ANALYSIS** | ⏸️ | 经营分析 2 页（渠道+平台） |
-| **P2** | **F-CONTRACT-INVOICE** | ⏸️ | 合同开票功能 |
-| **P2** | **F-AI-MAIC** | ⏸️ 缺外部文档 | OpenMAIC API 文档 + 测试账号待确认 |
-| **P3** | **F-RISK** | ⏸️ | 风控完整化 |
-| **P3** | **TEST-ROUND3** | ⏳ 等 P1/P2 完成 | FEAT + WEB-ADMIN 全量回归 |
+| **P0** | SECURITY-FIX | 🏃 执行中 | 5 个🔴审计问题修复 |
+| **P1** | PERF-INDEX / PERF-CACHE | 🏃 执行中 | 索引 + 缓存层 |
+| **P2** | DATA-MIGRATION | ⏸️ 5 月中旬 | 旧数据迁移（等旧库信息） |
+| **P2** | TEST-ROUND3 | ⏳ 等安全+性能完成 | 全量回归测试 |
+| **P3** | F-RISK | ⏸️ | 风控规则引擎（CRUD 已有，缺评估逻辑） |
+| **远期** | F-AI-MAIC | ⏸️ | 缺 OpenMAIC 外部文档 |
 
 ### 技术债
 
 | 项 | 状态 |
 |---|---|
 | `owner_type` 数据清洗 | DEBT-3 遗留脚本，需停服窗口 |
-| OSS 上传组件集成（小程序端认证表单用文本框占位） | 待真实 OSS 配置后接入 |
+| OSS 上传组件集成 | 待真实 OSS 配置后接入 |
+| select * 替换（15 处） | 性能审计建议，非阻塞 |
+| @Log 补齐（11 处 Controller） | 安全审计建议，SECURITY-FIX 卡中 |
+
+### 生产部署就绪清单
+
+| 项 | 状态 | 说明 |
+|---|---|---|
+| 多环境配置 | 🏃 | SECURITY-FIX 执行中 |
+| 数据库索引 | 🏃 | PERF-INDEX 执行中 |
+| 缓存层 | 🏃 | PERF-CACHE 执行中 |
+| 微信支付 | ⏳ | 需商户账号 + SDK 接入 |
+| 微信登录 | ⏳ | 需 appid/secret |
+| 短信服务 | ⏳ | 需阿里云 SMS 配置 |
+| OSS 文件上传 | ⏳ | 需阿里云 OSS 配置 |
+| 旧数据迁移 | ⏸️ 5 月中旬 | 脚本框架已就绪 |
+| 域名 + SSL | ⏳ | 需运维配置 |
+| 双机部署 + Nginx | ⏳ | 需运维配置 |
 
 ### CCB 决策索引
-- **`架构设计/34-功能闭环决策记录.md`**：Q-01~Q-14 全量决策（解绑倒计时/驳回上限/预约退款配置/账号模型等）
+- **`架构设计/34-功能闭环决策记录.md`**：Q-01~Q-14 全量决策
 - **`架构设计/35-PartnerScope切面使用说明.md`**：赛事方数据隔离接入指南
 
 ---
@@ -374,9 +442,9 @@ D:\coding\jst_v1\
 
 1. 读取此 CLAUDE.md
 2. `git log --oneline -20` 查看最近代码变更
-3. 检查 §六 当前待办，确认优先级
+3. 检查 §六 当前执行中任务 + 待办
 4. 查看 `subagent/tasks/任务报告/` 是否有新报告需要 review
-5. 当前阶段：P1 E-4-WEB 扩展 → P2 F-ANALYSIS/CONTRACT → TEST-ROUND3
+5. 当前阶段：SECURITY-FIX + PERF 完成 → TEST-ROUND3 → 生产部署准备
 
 ## 十、PRD 版本规则
 
