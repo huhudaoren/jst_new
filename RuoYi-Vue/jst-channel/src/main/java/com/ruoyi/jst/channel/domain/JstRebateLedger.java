@@ -86,6 +86,12 @@ public class JstRebateLedger extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 渠道名称（JOIN查出，非持久化） */
+    private String channelName;
+
+    /** 订单编号（JOIN查出，非持久化） */
+    private String orderNo;
+
     public void setLedgerId(Long ledgerId) 
     {
         this.ledgerId = ledgerId;
@@ -254,6 +260,26 @@ public class JstRebateLedger extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setChannelName(String channelName)
+    {
+        this.channelName = channelName;
+    }
+
+    public String getChannelName()
+    {
+        return channelName;
+    }
+
+    public void setOrderNo(String orderNo)
+    {
+        this.orderNo = orderNo;
+    }
+
+    public String getOrderNo()
+    {
+        return orderNo;
     }
 
     @Override

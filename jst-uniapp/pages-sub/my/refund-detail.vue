@@ -112,7 +112,7 @@
     <jst-empty
       v-else-if="!pageLoading"
       icon="💳"
-      text="退款详情暂未返回。"
+      text="暂无退款详情"
     />
 
     <view v-if="detail.status === 'pending'" class="refund-detail-page__bottom">

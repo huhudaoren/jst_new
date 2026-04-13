@@ -18,7 +18,7 @@
           <el-descriptions-item label="账号状态">
             <JstStatusBadge :status="String(user.status)" :status-map="accountStatusMap" />
           </el-descriptions-item>
-          <el-descriptions-item label="渠道绑定ID">{{ user.boundChannelId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="渠道绑定">{{ boundChannelDisplay(user) }}</el-descriptions-item>
           <el-descriptions-item label="监护人">{{ user.guardianName || '--' }}</el-descriptions-item>
           <el-descriptions-item label="监护人手机号">{{ user.guardianMobile || '--' }}</el-descriptions-item>
           <el-descriptions-item label="注册时间">{{ parseTime(user.registerTime || user.createTime) || '--' }}</el-descriptions-item>
@@ -41,7 +41,7 @@
             </template>
           </el-table-column>
           <el-table-column label="认领用户" min-width="100">
-            <template slot-scope="scope">{{ scope.row.claimedUserId || scope.row.userId || '--' }}</template>
+            <template slot-scope="scope">{{ participantClaimDisplay(scope.row) }}</template>
           </el-table-column>
           <el-table-column label="认领时间" min-width="160">
             <template slot-scope="scope">{{ parseTime(scope.row.claimedTime || scope.row.claimTime) || '--' }}</template>
@@ -52,10 +52,9 @@
         <div class="section-title">绑定关系</div>
         <el-table v-if="bindings.length" :data="bindings" size="small" max-height="220">
           <el-table-column label="绑定ID" prop="bindingId" width="96" />
-          <el-table-column label="渠道名称" prop="channelName" min-width="140" show-overflow-tooltip>
-            <template slot-scope="scope">{{ scope.row.channelName || '--' }}</template>
+          <el-table-column label="渠道" min-width="160" show-overflow-tooltip>
+            <template slot-scope="scope">{{ bindingChannelDisplay(scope.row) }}</template>
           </el-table-column>
-          <el-table-column label="渠道ID" prop="channelId" width="96" />
           <el-table-column label="渠道类型" prop="channelType" min-width="100">
             <template slot-scope="scope">{{ scope.row.channelType || '--' }}</template>
           </el-table-column>
@@ -253,6 +252,18 @@ export default {
     formatPoints(value) {
       const n = Number(value || 0)
       return n >= 0 ? '+' + n : String(n)
+    },
+    participantClaimDisplay(row) {
+      if (!row) return '--'
+      return row.claimUserName || row.claimedUserName || row.userName || row.claimedUserId || row.userId || '--'
+    },
+    bindingChannelDisplay(row) {
+      if (!row) return '--'
+      return row.channelName || row.boundChannelName || row.channelId || '--'
+    },
+    boundChannelDisplay(row) {
+      if (!row) return '--'
+      return row.boundChannelName || row.channelName || row.boundChannelId || '--'
     }
   }
 }

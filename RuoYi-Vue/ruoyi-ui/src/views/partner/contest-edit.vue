@@ -15,14 +15,6 @@
       </div>
     </div>
 
-    <el-alert
-      title="当前页面已切换至 /jst/partner/contest 包装路由；若仍有字段缺口，请按 ui-feedback 文档跟进。"
-      type="info"
-      show-icon
-      :closable="false"
-      class="page-alert"
-    />
-
     <el-form
       ref="contestForm"
       v-loading="detailLoading"
@@ -361,7 +353,7 @@
               任务卡要求覆盖团队预约配置入口；当前 F7 赛事保存 DTO 与详情 VO 未提供团队报名/团队预约的最小人数、最大人数、队伍成员字段、联系人字段与批量预约规则。
             </div>
             <el-alert
-              title="本页保留配置入口并将字段清单写入 ui-feedback，待后端补齐字段后可在此标签内无破坏扩展。"
+              title="本页保留配置入口并将字段清单写入 ，待后端补齐字段后可在此标签内无破坏扩展。"
               type="info"
               show-icon
               :closable="false"
@@ -817,10 +809,6 @@ export default {
   gap: 10px;
   flex-wrap: wrap;
   justify-content: flex-end;
-}
-
-.page-alert {
-  margin-bottom: 16px;
 }
 
 .contest-form {

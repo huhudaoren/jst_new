@@ -62,6 +62,15 @@ public class JstUserCoupon extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 用户昵称（JOIN查出，非持久化） */
+    private String userName;
+
+    /** 优惠券模板名称（JOIN查出，非持久化） */
+    private String couponTemplateName;
+
+    /** 订单编号（JOIN查出，非持久化） */
+    private String orderNo;
+
     public void setUserCouponId(Long userCouponId) 
     {
         this.userCouponId = userCouponId;
@@ -170,6 +179,36 @@ public class JstUserCoupon extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setUserName(String userName)
+    {
+        this.userName = userName;
+    }
+
+    public String getUserName()
+    {
+        return userName;
+    }
+
+    public void setCouponTemplateName(String couponTemplateName)
+    {
+        this.couponTemplateName = couponTemplateName;
+    }
+
+    public String getCouponTemplateName()
+    {
+        return couponTemplateName;
+    }
+
+    public void setOrderNo(String orderNo)
+    {
+        this.orderNo = orderNo;
+    }
+
+    public String getOrderNo()
+    {
+        return orderNo;
     }
 
     @Override

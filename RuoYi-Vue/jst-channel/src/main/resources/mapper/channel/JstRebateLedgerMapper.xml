@@ -27,36 +27,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="channelName"    column="channel_name_"    />
+        <result property="orderNo"    column="order_no_"    />
     </resultMap>
 
     <sql id="selectJstRebateLedgerVo">
-        select ledger_id, order_id, item_id, channel_id, contest_id, rule_id, list_amount, net_pay_amount, service_fee, rebate_base, rebate_amount, direction, status, accrual_time, event_end_time, settlement_id, create_by, create_time, update_by, update_time, remark, del_flag from jst_rebate_ledger
+        select t.*,
+               c.channel_name as channel_name_,
+               o.order_no as order_no_
+        from jst_rebate_ledger t
+        left join jst_channel c on t.channel_id = c.channel_id and c.del_flag = '0'
+        left join jst_order_main o on t.order_id = o.order_id and o.del_flag = '0'
     </sql>
 
     <select id="selectJstRebateLedgerList" parameterType="JstRebateLedger" resultMap="JstRebateLedgerResult">
         <include refid="selectJstRebateLedgerVo"/>
-        <where>  
-            <if test="orderId != null "> and order_id = #{orderId}</if>
-            <if test="itemId != null "> and item_id = #{itemId}</if>
-            <if test="channelId != null "> and channel_id = #{channelId}</if>
-            <if test="contestId != null "> and contest_id = #{contestId}</if>
-            <if test="ruleId != null "> and rule_id = #{ruleId}</if>
-            <if test="listAmount != null "> and list_amount = #{listAmount}</if>
-            <if test="netPayAmount != null "> and net_pay_amount = #{netPayAmount}</if>
-            <if test="serviceFee != null "> and service_fee = #{serviceFee}</if>
-            <if test="rebateBase != null "> and rebate_base = #{rebateBase}</if>
-            <if test="rebateAmount != null "> and rebate_amount = #{rebateAmount}</if>
-            <if test="direction != null  and direction != ''"> and direction = #{direction}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="accrualTime != null "> and accrual_time = #{accrualTime}</if>
-            <if test="eventEndTime != null "> and event_end_time = #{eventEndTime}</if>
-            <if test="settlementId != null "> and settlement_id = #{settlementId}</if>
+        <where>
+            <if test="orderId != null "> and t.order_id = #{orderId}</if>
+            <if test="itemId != null "> and t.item_id = #{itemId}</if>
+            <if test="channelId != null "> and t.channel_id = #{channelId}</if>
+            <if test="contestId != null "> and t.contest_id = #{contestId}</if>
+            <if test="ruleId != null "> and t.rule_id = #{ruleId}</if>
+            <if test="listAmount != null "> and t.list_amount = #{listAmount}</if>
+            <if test="netPayAmount != null "> and t.net_pay_amount = #{netPayAmount}</if>
+            <if test="serviceFee != null "> and t.service_fee = #{serviceFee}</if>
+            <if test="rebateBase != null "> and t.rebate_base = #{rebateBase}</if>
+            <if test="rebateAmount != null "> and t.rebate_amount = #{rebateAmount}</if>
+            <if test="direction != null  and direction != ''"> and t.direction = #{direction}</if>
+            <if test="status != null  and status != ''"> and t.status = #{status}</if>
+            <if test="accrualTime != null "> and t.accrual_time = #{accrualTime}</if>
+            <if test="eventEndTime != null "> and t.event_end_time = #{eventEndTime}</if>
+            <if test="settlementId != null "> and t.settlement_id = #{settlementId}</if>
         </where>
     </select>
     
     <select id="selectJstRebateLedgerByLedgerId" parameterType="Long" resultMap="JstRebateLedgerResult">
         <include refid="selectJstRebateLedgerVo"/>
-        where ledger_id = #{ledgerId}
+        where t.ledger_id = #{ledgerId}
     </select>
 
     <insert id="insertJstRebateLedger" parameterType="JstRebateLedger" useGeneratedKeys="true" keyProperty="ledgerId">

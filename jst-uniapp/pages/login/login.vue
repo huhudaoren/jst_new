@@ -17,16 +17,15 @@
       <text class="login-page__badge-text">学生 / 家长端登录</text>
     </view>
 
-    <view class="login-page__tip">
-      <text class="login-page__tip-title">开发联调入口</text>
-      <text class="login-page__tip-text">使用真实后端接口登录，成功后进入“我的”页完成资料与档案闭环。</text>
+    <view v-if=”isDev” class=”login-page__tip”>
+      <text class=”login-page__tip-title”>开发联调入口</text>
+      <text class=”login-page__tip-text”>使用真实后端接口登录，成功后进入”我的”页完成资料与档案闭环。</text>
     </view>
 
-    <view class="login-page__card">
-      <text class="login-page__card-title">欢迎登录</text>
-      <text class="login-page__card-desc">Mock 按钮用于联调测试账号；微信登录按钮保留生产占位。</text>
+    <view class=”login-page__card”>
+      <text class=”login-page__card-title”>欢迎登录</text>
 
-      <u-button class="login-page__button login-page__button--primary" :loading="submitting" @click="handleMockLogin">
+      <u-button v-if=”isDev” class=”login-page__button login-page__button--primary” :loading=”submitting” @click=”handleMockLogin”>
         Mock 登录（测试账号）
       </u-button>
 
@@ -52,6 +51,11 @@ export default {
     return {
       submitting: false,
       message: ''
+    }
+  },
+  computed: {
+    isDev() {
+      return process.env.NODE_ENV === 'development'
     }
   },
   onShow() {
@@ -89,7 +93,7 @@ export default {
         const res = await userStore.login('MOCK_1003')
         await this.finishLogin(res)
       } catch (error) {
-        this.message = '登录失败，请检查后端或测试数据'
+        this.message = '登录失败，请稍后重试'
       } finally {
         this.submitting = false
       }

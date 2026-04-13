@@ -241,7 +241,7 @@ export default {
     },
 
     viewDetail(item) {
-      uni.showToast({ title: '详情页待后续实现', icon: 'none' })
+      uni.showToast({ title: '暂不支持查看详情', icon: 'none' })
     },
 
     goBack() { uni.navigateBack() }

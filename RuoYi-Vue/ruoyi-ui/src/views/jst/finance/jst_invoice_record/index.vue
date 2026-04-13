@@ -94,7 +94,7 @@
           <el-descriptions-item label="开票时间">{{ parseTime(detail.issueTime) || '--' }}</el-descriptions-item>
           <el-descriptions-item label="备注">{{ detail.remark || '--' }}</el-descriptions-item>
           <el-descriptions-item v-if="detail.fileUrl" label="发票文件" :span="2">
-            <a :href="detail.fileUrl" target="_blank" style="color:#2f6fec">查看发票文件</a>
+            <a :href="detail.fileUrl" target="_blank" class="text-brand">查看发票文件</a>
           </el-descriptions-item>
         </el-descriptions>
       </div>
@@ -104,6 +104,7 @@
 
 <script>
 import { listJst_invoice_record, getJst_invoice_record } from '@/api/jst/finance/jst_invoice_record'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 const STATUS_META = {
   pending_apply: { label: '待申请', type: 'info' },
@@ -155,12 +156,15 @@ export default {
       try {
         const res = await getJst_invoice_record(row.invoiceId)
         this.detail = res.data
-      } catch (_) { this.detail = row }
+      } catch (e) {
+        this.$modal.msgError('加载详情失败')
+        this.detail = row
+      }
     },
     statusLabel(s) { return (STATUS_META[s] && STATUS_META[s].label) || s || '--' },
     statusType(s) { return (STATUS_META[s] && STATUS_META[s].type) || 'info' },
     targetTypeLabel(t) { return { channel: '渠道方', partner: '赛事方' }[t] || t || '--' },
-    formatMoney(v) { return '\u00a5' + Number(v || 0).toFixed(2) }
+    formatMoney(v) { return formatMoneyUtil(v) }
   }
 }
 </script>

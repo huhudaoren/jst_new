@@ -30,10 +30,22 @@
             <el-tag size="mini" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </div>
           <div class="mobile-card__meta">
-            <span>用户：{{ row.userId || '--' }}</span>
-            <span>模板：{{ row.couponTemplateId || '--' }}</span>
+            <span>
+              用户：
+              <el-link v-if="row.userId && row.userName" type="primary" :underline="false" @click="goUser(row)">
+                {{ row.userName }}
+              </el-link>
+              <span v-else>{{ row.userName || row.userId || '--' }}</span>
+            </span>
+            <span>模板：{{ row.couponTemplateName || row.couponTemplateId || '--' }}</span>
             <span>有效期至：{{ parseTime(row.validEnd, '{y}-{m}-{d}') || '--' }}</span>
-            <span>订单：{{ row.orderId || '--' }}</span>
+            <span>
+              订单：
+              <el-link v-if="row.orderId && row.orderNo" type="primary" :underline="false" @click="openOrder(row.orderId)">
+                {{ row.orderNo }}
+              </el-link>
+              <span v-else>{{ row.orderNo || row.orderId || '--' }}</span>
+            </span>
           </div>
           <div class="mobile-card__actions">
             <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
@@ -46,8 +58,17 @@
 
     <el-table v-else v-loading="loading" :data="list">
       <el-table-column label="用户券ID" prop="userCouponId" width="100" />
-      <el-table-column label="用户ID" prop="userId" min-width="100" />
-      <el-table-column label="模板ID" prop="couponTemplateId" min-width="100" />
+      <el-table-column label="用户" min-width="120" show-overflow-tooltip>
+        <template slot-scope="{ row }">
+          <el-link v-if="row.userId && row.userName" type="primary" :underline="false" @click="goUser(row)">
+            {{ row.userName }}
+          </el-link>
+          <span v-else>{{ row.userName || row.userId || '--' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="模板" min-width="140" show-overflow-tooltip>
+        <template slot-scope="{ row }">{{ row.couponTemplateName || row.couponTemplateId || '--' }}</template>
+      </el-table-column>
       <el-table-column label="发券来源" prop="issueSource" min-width="100" />
       <el-table-column label="状态" width="100">
         <template slot-scope="{ row }">
@@ -60,10 +81,12 @@
       <el-table-column label="失效时间" min-width="160">
         <template slot-scope="{ row }">{{ parseTime(row.validEnd) || '--' }}</template>
       </el-table-column>
-      <el-table-column label="使用订单ID" min-width="110">
+      <el-table-column label="使用订单号" min-width="130" show-overflow-tooltip>
         <template slot-scope="{ row }">
-          <el-button v-if="row.orderId" type="text" size="mini" @click="openOrder(row.orderId)">{{ row.orderId }}</el-button>
-          <span v-else>--</span>
+          <el-link v-if="row.orderId && row.orderNo" type="primary" :underline="false" @click="openOrder(row.orderId)">
+            {{ row.orderNo }}
+          </el-link>
+          <span v-else>{{ row.orderNo || row.orderId || '--' }}</span>
         </template>
       </el-table-column>
       <el-table-column label="使用时间" min-width="160">
@@ -82,8 +105,13 @@
       <div class="detail-body">
         <el-descriptions :column="1" border size="small">
           <el-descriptions-item label="用户券ID">{{ detailData.userCouponId || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="用户ID">{{ detailData.userId || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="模板ID">{{ detailData.couponTemplateId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="用户">
+            <el-link v-if="detailData.userId && detailData.userName" type="primary" :underline="false" @click="goUser(detailData)">
+              {{ detailData.userName }}
+            </el-link>
+            <span v-else>{{ detailData.userName || detailData.userId || '--' }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="模板">{{ detailData.couponTemplateName || detailData.couponTemplateId || '--' }}</el-descriptions-item>
           <el-descriptions-item label="批次号">{{ detailData.issueBatchNo || '--' }}</el-descriptions-item>
           <el-descriptions-item label="发券来源">{{ detailData.issueSource || '--' }}</el-descriptions-item>
           <el-descriptions-item label="状态">
@@ -91,7 +119,12 @@
           </el-descriptions-item>
           <el-descriptions-item label="生效时间">{{ parseTime(detailData.validStart) || '--' }}</el-descriptions-item>
           <el-descriptions-item label="失效时间">{{ parseTime(detailData.validEnd) || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="使用订单">{{ detailData.orderId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="使用订单">
+            <el-link v-if="detailData.orderId && detailData.orderNo" type="primary" :underline="false" @click="openOrder(detailData.orderId)">
+              {{ detailData.orderNo }}
+            </el-link>
+            <span v-else>{{ detailData.orderNo || detailData.orderId || '--' }}</span>
+          </el-descriptions-item>
           <el-descriptions-item label="使用时间">{{ parseTime(detailData.useTime) || '--' }}</el-descriptions-item>
           <el-descriptions-item label="备注">{{ detailData.remark || '--' }}</el-descriptions-item>
         </el-descriptions>
@@ -171,13 +204,19 @@ export default {
         this.detailVisible = true
       })
     },
+    goUser(row) {
+      const userId = row && row.userId
+      if (!userId) return
+      this.$router.push({
+        path: '/jst/user',
+        query: { userId: String(userId), autoOpen: '1' }
+      }).catch(() => {})
+    },
     openOrder(orderId) {
       this.$router.push({
-        path: '/jst/order/main',
-        query: { orderId: orderId }
-      }).catch(() => {
-        this.$modal.msgWarning('订单页面暂未配置路由')
-      })
+        path: '/jst/order/admin-order',
+        query: { orderId: String(orderId), autoOpen: '1' }
+      }).catch(() => {})
     }
   }
 }

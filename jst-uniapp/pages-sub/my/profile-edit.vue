@@ -209,7 +209,7 @@ export default {
       this.form.birthday = event.detail.value
     },
     handleAvatarTap() {
-      uni.showToast({ title: '头像上传能力暂未接入', icon: 'none' })
+      uni.showToast({ title: '头像上传即将开放', icon: 'none' })
     },
     handleGuardianMobileFocus() {
       if (this.form.guardianMobile.indexOf('*') !== -1) {

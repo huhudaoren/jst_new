@@ -86,7 +86,13 @@
             </div>
             <JstStatusBadge :status="String(row.auditStatus || '')" :status-map="auditStatusMap" />
           </div>
-          <div class="mobile-info-row">所属：{{ ownerTypeLabel(row.ownerType) }} / {{ row.ownerId || '--' }}</div>
+          <div class="mobile-info-row">
+            所属：{{ ownerTypeLabel(row.ownerType) }} /
+            <el-link v-if="canGoContest(row)" type="primary" :underline="false" @click="goContest(row)">
+              {{ ownerDisplayName(row) }}
+            </el-link>
+            <span v-else>{{ ownerDisplayName(row) }}</span>
+          </div>
           <div class="mobile-info-row">生效时间：{{ parseTime(row.effectiveTime) || '--' }}</div>
           <div class="mobile-info-row">
             启停状态：
@@ -114,7 +120,14 @@
       <el-table-column label="所属类型" min-width="110">
         <template slot-scope="scope">{{ ownerTypeLabel(scope.row.ownerType) }}</template>
       </el-table-column>
-      <el-table-column label="所属方ID" prop="ownerId" min-width="110" />
+      <el-table-column label="所属赛事" min-width="140" show-overflow-tooltip>
+        <template slot-scope="scope">
+          <el-link v-if="canGoContest(scope.row)" type="primary" :underline="false" @click="goContest(scope.row)">
+            {{ ownerDisplayName(scope.row) }}
+          </el-link>
+          <span v-else>{{ ownerDisplayName(scope.row) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="审核状态" min-width="110">
         <template slot-scope="scope">
           <JstStatusBadge :status="String(scope.row.auditStatus || '')" :status-map="auditStatusMap" />
@@ -159,7 +172,12 @@
           <el-descriptions-item label="模板名称">{{ detailData.templateName || '--' }}</el-descriptions-item>
           <el-descriptions-item label="版本号">{{ detailData.templateVersion || '--' }}</el-descriptions-item>
           <el-descriptions-item label="所属类型">{{ ownerTypeLabel(detailData.ownerType) }}</el-descriptions-item>
-          <el-descriptions-item label="所属方ID">{{ detailData.ownerId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="所属赛事">
+            <el-link v-if="canGoContest(detailData)" type="primary" :underline="false" @click="goContest(detailData)">
+              {{ ownerDisplayName(detailData) }}
+            </el-link>
+            <span v-else>{{ ownerDisplayName(detailData) }}</span>
+          </el-descriptions-item>
           <el-descriptions-item label="审核状态">
             <JstStatusBadge :status="String(detailData.auditStatus || '')" :status-map="auditStatusMap" />
           </el-descriptions-item>
@@ -460,6 +478,22 @@ export default {
     ownerTypeLabel(value) {
       const found = this.ownerTypeOptions.find(item => item.value === value)
       return found ? found.label : (value || '--')
+    },
+    ownerDisplayName(row) {
+      if (!row) return '--'
+      return row.ownerName || row.contestName || row.ownerId || '--'
+    },
+    canGoContest(row) {
+      if (!row || !row.ownerId) return false
+      return Boolean(row.ownerName || row.contestName)
+    },
+    goContest(row) {
+      const contestId = row && row.ownerId
+      if (!contestId) return
+      this.$router.push({
+        path: '/jst/contest',
+        query: { contestId: String(contestId), autoOpen: '1' }
+      }).catch(() => {})
     },
     formatJson(value) {
       if (!value) return '--'

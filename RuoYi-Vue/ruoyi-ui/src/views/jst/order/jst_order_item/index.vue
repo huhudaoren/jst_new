@@ -150,6 +150,7 @@
 
 <script>
 import { listJst_order_item, getJst_order_item } from '@/api/jst/order/jst_order_item'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 const SKU_TYPE_MAP = {
   enroll: '报名',
@@ -260,8 +261,7 @@ export default {
       return SKU_TYPE_MAP[value] || value || '--'
     },
     formatMoney(value) {
-      const n = Number(value || 0)
-      return '\u00A5' + (n / 100).toFixed(2)
+      return formatMoneyUtil(value, true)
     }
   }
 }

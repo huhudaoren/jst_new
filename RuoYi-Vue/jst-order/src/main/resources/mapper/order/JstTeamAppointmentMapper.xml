@@ -24,33 +24,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="contestName"    column="contest_name_"    />
     </resultMap>
 
     <sql id="selectJstTeamAppointmentVo">
-        select team_appointment_id, team_no, contest_id, channel_id, team_name, appointment_date, session_code, total_persons, member_persons, extra_persons, extra_list_json, writeoff_persons, status, create_by, create_time, update_by, update_time, remark, del_flag from jst_team_appointment
+        select t.*,
+               ct.contest_name as contest_name_
+        from jst_team_appointment t
+        left join jst_contest ct on t.contest_id = ct.contest_id and ct.del_flag = '0'
     </sql>
 
     <select id="selectJstTeamAppointmentList" parameterType="JstTeamAppointment" resultMap="JstTeamAppointmentResult">
         <include refid="selectJstTeamAppointmentVo"/>
-        <where>  
-            <if test="teamNo != null  and teamNo != ''"> and team_no = #{teamNo}</if>
-            <if test="contestId != null "> and contest_id = #{contestId}</if>
-            <if test="channelId != null "> and channel_id = #{channelId}</if>
-            <if test="teamName != null  and teamName != ''"> and team_name like concat('%', #{teamName}, '%')</if>
-            <if test="appointmentDate != null "> and appointment_date = #{appointmentDate}</if>
-            <if test="sessionCode != null  and sessionCode != ''"> and session_code = #{sessionCode}</if>
-            <if test="totalPersons != null "> and total_persons = #{totalPersons}</if>
-            <if test="memberPersons != null "> and member_persons = #{memberPersons}</if>
-            <if test="extraPersons != null "> and extra_persons = #{extraPersons}</if>
-            <if test="extraListJson != null  and extraListJson != ''"> and extra_list_json = #{extraListJson}</if>
-            <if test="writeoffPersons != null "> and writeoff_persons = #{writeoffPersons}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
+        <where>
+            <if test="teamNo != null  and teamNo != ''"> and t.team_no = #{teamNo}</if>
+            <if test="contestId != null "> and t.contest_id = #{contestId}</if>
+            <if test="channelId != null "> and t.channel_id = #{channelId}</if>
+            <if test="teamName != null  and teamName != ''"> and t.team_name like concat('%', #{teamName}, '%')</if>
+            <if test="appointmentDate != null "> and t.appointment_date = #{appointmentDate}</if>
+            <if test="sessionCode != null  and sessionCode != ''"> and t.session_code = #{sessionCode}</if>
+            <if test="totalPersons != null "> and t.total_persons = #{totalPersons}</if>
+            <if test="memberPersons != null "> and t.member_persons = #{memberPersons}</if>
+            <if test="extraPersons != null "> and t.extra_persons = #{extraPersons}</if>
+            <if test="extraListJson != null  and extraListJson != ''"> and t.extra_list_json = #{extraListJson}</if>
+            <if test="writeoffPersons != null "> and t.writeoff_persons = #{writeoffPersons}</if>
+            <if test="status != null  and status != ''"> and t.status = #{status}</if>
         </where>
     </select>
     
     <select id="selectJstTeamAppointmentByTeamAppointmentId" parameterType="Long" resultMap="JstTeamAppointmentResult">
         <include refid="selectJstTeamAppointmentVo"/>
-        where team_appointment_id = #{teamAppointmentId}
+        where t.team_appointment_id = #{teamAppointmentId}
     </select>
 
     <insert id="insertJstTeamAppointment" parameterType="JstTeamAppointment" useGeneratedKeys="true" keyProperty="teamAppointmentId">

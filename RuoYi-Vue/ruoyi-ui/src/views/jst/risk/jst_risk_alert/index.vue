@@ -163,7 +163,10 @@ export default {
       try {
         const res = await getJst_risk_alert(row.alertId)
         this.detail = res.data
-      } catch (_) { this.detail = row }
+      } catch (e) {
+        this.$modal.msgError('加载详情失败')
+        this.detail = row
+      }
     },
     levelLabel(l) { return { low: '低风险', mid: '中风险', high: '高风险' }[l] || l || '--' },
     levelType(l) { return { low: 'info', mid: 'warning', high: 'danger' }[l] || 'info' },

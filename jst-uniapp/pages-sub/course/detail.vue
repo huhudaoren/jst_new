@@ -243,6 +243,7 @@ export default {
         this.parseChapters(this.detail.chaptersJson)
         this.loadError = false
       } catch (error) {
+        uni.showToast({ title: '加载失败，请重试', icon: 'none' })
         this.loadError = true
       } finally {
         this.pageLoading = false

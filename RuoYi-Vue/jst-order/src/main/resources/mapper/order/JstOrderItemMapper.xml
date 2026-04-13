@@ -25,34 +25,38 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="orderNo"    column="order_no_"    />
     </resultMap>
 
     <sql id="selectJstOrderItemVo">
-        select item_id, order_id, sku_type, ref_id, item_name, quantity, list_amount, coupon_share, points_share, net_pay_share, service_fee_share, rebate_share, refund_amount, refund_points, create_by, create_time, update_by, update_time, remark, del_flag from jst_order_item
+        select t.*,
+               o.order_no as order_no_
+        from jst_order_item t
+        left join jst_order_main o on t.order_id = o.order_id and o.del_flag = '0'
     </sql>
 
     <select id="selectJstOrderItemList" parameterType="JstOrderItem" resultMap="JstOrderItemResult">
         <include refid="selectJstOrderItemVo"/>
-        <where>  
-            <if test="orderId != null "> and order_id = #{orderId}</if>
-            <if test="skuType != null  and skuType != ''"> and sku_type = #{skuType}</if>
-            <if test="refId != null "> and ref_id = #{refId}</if>
-            <if test="itemName != null  and itemName != ''"> and item_name like concat('%', #{itemName}, '%')</if>
-            <if test="quantity != null "> and quantity = #{quantity}</if>
-            <if test="listAmount != null "> and list_amount = #{listAmount}</if>
-            <if test="couponShare != null "> and coupon_share = #{couponShare}</if>
-            <if test="pointsShare != null "> and points_share = #{pointsShare}</if>
-            <if test="netPayShare != null "> and net_pay_share = #{netPayShare}</if>
-            <if test="serviceFeeShare != null "> and service_fee_share = #{serviceFeeShare}</if>
-            <if test="rebateShare != null "> and rebate_share = #{rebateShare}</if>
-            <if test="refundAmount != null "> and refund_amount = #{refundAmount}</if>
-            <if test="refundPoints != null "> and refund_points = #{refundPoints}</if>
+        <where>
+            <if test="orderId != null "> and t.order_id = #{orderId}</if>
+            <if test="skuType != null  and skuType != ''"> and t.sku_type = #{skuType}</if>
+            <if test="refId != null "> and t.ref_id = #{refId}</if>
+            <if test="itemName != null  and itemName != ''"> and t.item_name like concat('%', #{itemName}, '%')</if>
+            <if test="quantity != null "> and t.quantity = #{quantity}</if>
+            <if test="listAmount != null "> and t.list_amount = #{listAmount}</if>
+            <if test="couponShare != null "> and t.coupon_share = #{couponShare}</if>
+            <if test="pointsShare != null "> and t.points_share = #{pointsShare}</if>
+            <if test="netPayShare != null "> and t.net_pay_share = #{netPayShare}</if>
+            <if test="serviceFeeShare != null "> and t.service_fee_share = #{serviceFeeShare}</if>
+            <if test="rebateShare != null "> and t.rebate_share = #{rebateShare}</if>
+            <if test="refundAmount != null "> and t.refund_amount = #{refundAmount}</if>
+            <if test="refundPoints != null "> and t.refund_points = #{refundPoints}</if>
         </where>
     </select>
     
     <select id="selectJstOrderItemByItemId" parameterType="Long" resultMap="JstOrderItemResult">
         <include refid="selectJstOrderItemVo"/>
-        where item_id = #{itemId}
+        where t.item_id = #{itemId}
     </select>
 
     <insert id="insertJstOrderItem" parameterType="JstOrderItem" useGeneratedKeys="true" keyProperty="itemId">

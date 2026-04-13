@@ -127,24 +127,24 @@
         <el-row :gutter="12">
           <el-col :xs="24" :sm="12">
             <el-form-item label="积分价格" prop="pointsPrice">
-              <el-input-number v-model="form.pointsPrice" :min="0" controls-position="right" style="width:100%" />
+              <el-input-number v-model="form.pointsPrice" :min="0" controls-position="right" class="full-width" />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
             <el-form-item label="现金补差" prop="cashPrice">
-              <el-input-number v-model="form.cashPrice" :min="0" :precision="2" controls-position="right" style="width:100%" />
+              <el-input-number v-model="form.cashPrice" :min="0" :precision="2" controls-position="right" class="full-width" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="12">
           <el-col :xs="24" :sm="12">
             <el-form-item label="库存" prop="stock">
-              <el-input-number v-model="form.stock" :min="0" controls-position="right" style="width:100%" />
+              <el-input-number v-model="form.stock" :min="0" controls-position="right" class="full-width" />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
             <el-form-item label="预警阈值" prop="stockWarning">
-              <el-input-number v-model="form.stockWarning" :min="0" controls-position="right" style="width:100%" />
+              <el-input-number v-model="form.stockWarning" :min="0" controls-position="right" class="full-width" />
             </el-form-item>
           </el-col>
         </el-row>

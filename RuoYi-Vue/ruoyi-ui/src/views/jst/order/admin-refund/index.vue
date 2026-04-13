@@ -135,6 +135,7 @@
 
 <script>
 import { listRefunds, approveRefund, rejectRefund, executeRefund } from '@/api/jst/order/refund-admin'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 const STATUS_META = {
   pending: { label: '待审核', type: 'warning' },
@@ -270,8 +271,7 @@ export default {
       return (STATUS_META[status] && STATUS_META[status].type) || 'info'
     },
     formatMoney(value) {
-      const n = Number(value || 0)
-      return '\u00a5' + n.toFixed(2)
+      return formatMoneyUtil(value)
     }
   }
 }

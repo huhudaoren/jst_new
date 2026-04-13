@@ -82,6 +82,7 @@ export default {
         const list = await getAddressList({ silent: true })
         this.addresses = Array.isArray(list) ? list : []
       } catch (error) {
+        uni.showToast({ title: '加载失败，请重试', icon: 'none' })
         this.addresses = []
       } finally {
         this.pageLoading = false

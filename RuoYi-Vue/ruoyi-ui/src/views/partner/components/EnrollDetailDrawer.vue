@@ -83,7 +83,7 @@
                 </div>
               </div>
             </div>
-            <div v-else class="empty-block">暂无作品材料，或当前接口尚未返回标准化附件字段。</div>
+            <div v-else class="empty-block">暂无附件</div>
           </div>
 
           <div class="section-card">
@@ -126,7 +126,7 @@
             type="danger"
             :disabled="!canAudit"
             :loading="submitting"
-            v-hasPermi="['jst:event:enrollRecord:audit']"
+            v-hasRole="['jst_partner']"
             @click="handleAudit('rejected')"
           >
             驳回
@@ -135,7 +135,7 @@
             type="primary"
             :disabled="!canAudit"
             :loading="submitting"
-            v-hasPermi="['jst:event:enrollRecord:audit']"
+            v-hasRole="['jst_partner']"
             @click="handleAudit('approved')"
           >
             通过

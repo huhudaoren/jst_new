@@ -52,7 +52,7 @@
             <span>{{ parseTime(row.createTime) }}</span>
           </div>
           <div class="mobile-card__actions">
-            <el-button type="text" size="mini" @click="handleDetail(row)">查看</el-button>
+            <el-button type="text" size="mini" @click="handleDetail(row)" v-hasPermi="['jst:points:mall:exchange:list']">查看</el-button>
             <el-button v-if="row.status === 'pending_ship'" type="text" size="mini" @click="handleShip(row)" v-hasPermi="['jst:points:mall:exchange:ship']">发货</el-button>
             <el-button v-if="row.status === 'shipped'" type="text" size="mini" @click="handleComplete(row)" v-hasPermi="['jst:points:mall:exchange:ship']">确认完成</el-button>
           </div>
@@ -82,7 +82,7 @@
       </el-table-column>
       <el-table-column label="操作" fixed="right" width="200">
         <template slot-scope="{ row }">
-          <el-button type="text" size="mini" @click="handleDetail(row)">查看</el-button>
+          <el-button type="text" size="mini" @click="handleDetail(row)" v-hasPermi="['jst:points:mall:exchange:list']">查看</el-button>
           <el-button v-if="row.status === 'pending_ship'" type="text" size="mini" @click="handleShip(row)" v-hasPermi="['jst:points:mall:exchange:ship']">发货</el-button>
           <el-button v-if="row.status === 'shipped'" type="text" size="mini" @click="handleComplete(row)" v-hasPermi="['jst:points:mall:exchange:ship']">确认完成</el-button>
         </template>

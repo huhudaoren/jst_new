@@ -110,7 +110,7 @@
     <jst-empty
       v-else-if="!pageLoading"
       icon="📭"
-      text="赛事详情暂未返回，待后端 F7 联调完成后自动展示。"
+      text="暂无赛事详情"
     />
   </view>
 </template>
@@ -188,6 +188,7 @@ export default {
         const response = await getContestDetail(this.contestId, { silent: true })
         this.detail = normalizeContestCard(response || {})
       } catch (error) {
+        uni.showToast({ title: '加载失败，请重试', icon: 'none' })
         this.detail = null
       } finally {
         this.pageLoading = false
@@ -216,11 +217,6 @@ export default {
 
       uni.navigateTo({
         url: `/pages-sub/contest/enroll?contestId=${this.contestId}`
-      })
-      return
-      uni.showToast({
-        title: 'F9 完成后开放',
-        icon: 'none'
       })
     }
   }

@@ -37,7 +37,13 @@
             </el-tag>
           </div>
           <div class="mobile-card__meta">
-            <span>用户：{{ row.ownerId || '--' }}</span>
+            <span>
+              用户：
+              <el-link v-if="row.ownerId && row.ownerName" type="primary" :underline="false" @click="goUser(row)">
+                {{ row.ownerName }}
+              </el-link>
+              <span v-else>{{ row.ownerName || row.ownerId || '--' }}</span>
+            </span>
             <span>{{ changeTypeLabel(row.changeType) }}</span>
             <span :class="Number(row.pointsChange) >= 0 ? 'points-positive' : 'points-negative'">
               {{ Number(row.pointsChange) >= 0 ? '+' : '' }}{{ row.pointsChange || 0 }}
@@ -55,7 +61,14 @@
 
     <el-table v-else v-loading="loading" :data="list">
       <el-table-column label="流水ID" prop="ledgerId" width="90" />
-      <el-table-column label="持有者ID" prop="ownerId" min-width="110" />
+      <el-table-column label="持有者" min-width="130" show-overflow-tooltip>
+        <template slot-scope="{ row }">
+          <el-link v-if="row.ownerId && row.ownerName" type="primary" :underline="false" @click="goUser(row)">
+            {{ row.ownerName }}
+          </el-link>
+          <span v-else>{{ row.ownerName || row.ownerId || '--' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="变更类型" min-width="110">
         <template slot-scope="{ row }">{{ changeTypeLabel(row.changeType) }}</template>
       </el-table-column>
@@ -90,7 +103,18 @@
         <el-descriptions :column="1" border size="small">
           <el-descriptions-item label="流水ID">{{ detailData.ledgerId }}</el-descriptions-item>
           <el-descriptions-item label="账户ID">{{ detailData.accountId || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="持有者">{{ detailData.ownerType || '--' }} / {{ detailData.ownerId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="持有者">
+            {{ detailData.ownerType || '--' }} /
+            <el-link
+              v-if="detailData.ownerId && detailData.ownerName"
+              type="primary"
+              :underline="false"
+              @click="goUser(detailData)"
+            >
+              {{ detailData.ownerName }}
+            </el-link>
+            <span v-else>{{ detailData.ownerName || detailData.ownerId || '--' }}</span>
+          </el-descriptions-item>
           <el-descriptions-item label="变更类型">{{ changeTypeLabel(detailData.changeType) }}</el-descriptions-item>
           <el-descriptions-item label="业务来源">{{ sourceTypeLabel(detailData.sourceType) }}</el-descriptions-item>
           <el-descriptions-item label="来源单据ID">{{ detailData.sourceRefId || '--' }}</el-descriptions-item>
@@ -208,6 +232,14 @@ export default {
         this.detailData = res.data || res || row
         this.detailVisible = true
       })
+    },
+    goUser(row) {
+      const userId = row && row.ownerId
+      if (!userId) return
+      this.$router.push({
+        path: '/jst/user',
+        query: { userId: String(userId), autoOpen: '1' }
+      }).catch(() => {})
     },
     handleBusinessJump(row) {
       if (!row.sourceRefId) {

@@ -29,38 +29,42 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="userName"    column="user_name_"    />
     </resultMap>
 
     <sql id="selectJstChannelVo">
-        select channel_id, user_id, channel_type, channel_name, contact_mobile, id_card_no, business_license_no, cert_materials_json, auth_status, auth_time, auth_remark, current_level_id, status, risk_flag, tags, bank_account_name, bank_account_no, bank_name, create_by, create_time, update_by, update_time, remark, del_flag from jst_channel
+        select t.*,
+               u.nick_name as user_name_
+        from jst_channel t
+        left join sys_user u on t.user_id = u.user_id and u.del_flag = '0'
     </sql>
 
     <select id="selectJstChannelList" parameterType="JstChannel" resultMap="JstChannelResult">
         <include refid="selectJstChannelVo"/>
-        <where>  
-            <if test="userId != null "> and user_id = #{userId}</if>
-            <if test="channelType != null  and channelType != ''"> and channel_type = #{channelType}</if>
-            <if test="channelName != null  and channelName != ''"> and channel_name like concat('%', #{channelName}, '%')</if>
-            <if test="contactMobile != null  and contactMobile != ''"> and contact_mobile = #{contactMobile}</if>
-            <if test="idCardNo != null  and idCardNo != ''"> and id_card_no = #{idCardNo}</if>
-            <if test="businessLicenseNo != null  and businessLicenseNo != ''"> and business_license_no = #{businessLicenseNo}</if>
-            <if test="certMaterialsJson != null  and certMaterialsJson != ''"> and cert_materials_json = #{certMaterialsJson}</if>
-            <if test="authStatus != null  and authStatus != ''"> and auth_status = #{authStatus}</if>
-            <if test="authTime != null "> and auth_time = #{authTime}</if>
-            <if test="authRemark != null  and authRemark != ''"> and auth_remark = #{authRemark}</if>
-            <if test="currentLevelId != null "> and current_level_id = #{currentLevelId}</if>
-            <if test="status != null "> and status = #{status}</if>
-            <if test="riskFlag != null "> and risk_flag = #{riskFlag}</if>
-            <if test="tags != null  and tags != ''"> and tags = #{tags}</if>
-            <if test="bankAccountName != null  and bankAccountName != ''"> and bank_account_name like concat('%', #{bankAccountName}, '%')</if>
-            <if test="bankAccountNo != null  and bankAccountNo != ''"> and bank_account_no = #{bankAccountNo}</if>
-            <if test="bankName != null  and bankName != ''"> and bank_name like concat('%', #{bankName}, '%')</if>
+        <where>
+            <if test="userId != null "> and t.user_id = #{userId}</if>
+            <if test="channelType != null  and channelType != ''"> and t.channel_type = #{channelType}</if>
+            <if test="channelName != null  and channelName != ''"> and t.channel_name like concat('%', #{channelName}, '%')</if>
+            <if test="contactMobile != null  and contactMobile != ''"> and t.contact_mobile = #{contactMobile}</if>
+            <if test="idCardNo != null  and idCardNo != ''"> and t.id_card_no = #{idCardNo}</if>
+            <if test="businessLicenseNo != null  and businessLicenseNo != ''"> and t.business_license_no = #{businessLicenseNo}</if>
+            <if test="certMaterialsJson != null  and certMaterialsJson != ''"> and t.cert_materials_json = #{certMaterialsJson}</if>
+            <if test="authStatus != null  and authStatus != ''"> and t.auth_status = #{authStatus}</if>
+            <if test="authTime != null "> and t.auth_time = #{authTime}</if>
+            <if test="authRemark != null  and authRemark != ''"> and t.auth_remark = #{authRemark}</if>
+            <if test="currentLevelId != null "> and t.current_level_id = #{currentLevelId}</if>
+            <if test="status != null "> and t.status = #{status}</if>
+            <if test="riskFlag != null "> and t.risk_flag = #{riskFlag}</if>
+            <if test="tags != null  and tags != ''"> and t.tags = #{tags}</if>
+            <if test="bankAccountName != null  and bankAccountName != ''"> and t.bank_account_name like concat('%', #{bankAccountName}, '%')</if>
+            <if test="bankAccountNo != null  and bankAccountNo != ''"> and t.bank_account_no = #{bankAccountNo}</if>
+            <if test="bankName != null  and bankName != ''"> and t.bank_name like concat('%', #{bankName}, '%')</if>
         </where>
     </select>
     
     <select id="selectJstChannelByChannelId" parameterType="Long" resultMap="JstChannelResult">
         <include refid="selectJstChannelVo"/>
-        where channel_id = #{channelId}
+        where t.channel_id = #{channelId}
     </select>
 
     <insert id="insertJstChannel" parameterType="JstChannel" useGeneratedKeys="true" keyProperty="channelId">

@@ -78,6 +78,9 @@ public class JstRebateSettlement extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 渠道名称（JOIN查出，非持久化） */
+    private String channelName;
+
     public void setSettlementId(Long settlementId) 
     {
         this.settlementId = settlementId;
@@ -226,6 +229,16 @@ public class JstRebateSettlement extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setChannelName(String channelName)
+    {
+        this.channelName = channelName;
+    }
+
+    public String getChannelName()
+    {
+        return channelName;
     }
 
     @Override

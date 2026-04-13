@@ -19,28 +19,35 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="studentName"    column="student_name_"    />
+        <result property="channelName"    column="channel_name_"    />
     </resultMap>
 
     <sql id="selectJstStudentChannelBindingVo">
-        select binding_id, user_id, channel_id, bind_time, unbind_time, status, unbind_reason, operator_id, create_by, create_time, update_by, update_time, remark, del_flag from jst_student_channel_binding
+        select t.*,
+               u.nick_name as student_name_,
+               ch.channel_name as channel_name_
+        from jst_student_channel_binding t
+        left join sys_user u on t.user_id = u.user_id and u.del_flag = '0'
+        left join jst_channel ch on t.channel_id = ch.channel_id and ch.del_flag = '0'
     </sql>
 
     <select id="selectJstStudentChannelBindingList" parameterType="JstStudentChannelBinding" resultMap="JstStudentChannelBindingResult">
         <include refid="selectJstStudentChannelBindingVo"/>
-        <where>  
-            <if test="userId != null "> and user_id = #{userId}</if>
-            <if test="channelId != null "> and channel_id = #{channelId}</if>
-            <if test="bindTime != null "> and bind_time = #{bindTime}</if>
-            <if test="unbindTime != null "> and unbind_time = #{unbindTime}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="unbindReason != null  and unbindReason != ''"> and unbind_reason = #{unbindReason}</if>
-            <if test="operatorId != null "> and operator_id = #{operatorId}</if>
+        <where>
+            <if test="userId != null "> and t.user_id = #{userId}</if>
+            <if test="channelId != null "> and t.channel_id = #{channelId}</if>
+            <if test="bindTime != null "> and t.bind_time = #{bindTime}</if>
+            <if test="unbindTime != null "> and t.unbind_time = #{unbindTime}</if>
+            <if test="status != null  and status != ''"> and t.status = #{status}</if>
+            <if test="unbindReason != null  and unbindReason != ''"> and t.unbind_reason = #{unbindReason}</if>
+            <if test="operatorId != null "> and t.operator_id = #{operatorId}</if>
         </where>
     </select>
     
     <select id="selectJstStudentChannelBindingByBindingId" parameterType="Long" resultMap="JstStudentChannelBindingResult">
         <include refid="selectJstStudentChannelBindingVo"/>
-        where binding_id = #{bindingId}
+        where t.binding_id = #{bindingId}
     </select>
 
     <insert id="insertJstStudentChannelBinding" parameterType="JstStudentChannelBinding" useGeneratedKeys="true" keyProperty="bindingId">

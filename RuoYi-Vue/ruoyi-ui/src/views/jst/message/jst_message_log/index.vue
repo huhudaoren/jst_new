@@ -18,7 +18,7 @@
         <el-input v-model="queryParams.targetUserId" placeholder="请输入用户ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="发送时间" prop="sendTime">
-        <el-date-picker v-model="queryParams.sendTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="精确时间" clearable style="width:190px" />
+        <el-date-picker v-model="queryParams.sendTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="精确时间" clearable class="date-picker-width" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>

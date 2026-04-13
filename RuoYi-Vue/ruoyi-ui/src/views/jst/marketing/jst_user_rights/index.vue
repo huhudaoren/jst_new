@@ -30,7 +30,13 @@
             <el-tag size="mini" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </div>
           <div class="mobile-card__meta">
-            <span>用户：{{ row.ownerId || '--' }}</span>
+            <span>
+              用户：
+              <el-link v-if="row.ownerId && hasOwnerName(row)" type="primary" :underline="false" @click="goUser(row)">
+                {{ ownerDisplayName(row) }}
+              </el-link>
+              <span v-else>{{ ownerDisplayName(row) }}</span>
+            </span>
             <span>模板：{{ row.rightsTemplateId || '--' }}</span>
             <span>剩余：{{ row.remainQuota || 0 }}</span>
             <span>有效至：{{ parseTime(row.validEnd, '{y}-{m}-{d}') || '--' }}</span>
@@ -47,7 +53,18 @@
       <el-table-column label="用户权益ID" prop="userRightsId" width="110" />
       <el-table-column label="权益模板ID" prop="rightsTemplateId" min-width="110" />
       <el-table-column label="持有者" min-width="130">
-        <template slot-scope="{ row }">{{ row.ownerType || '--' }} / {{ row.ownerId || '--' }}</template>
+        <template slot-scope="{ row }">
+          {{ row.ownerType || '--' }} /
+          <el-link
+            v-if="row.ownerId && hasOwnerName(row)"
+            type="primary"
+            :underline="false"
+            @click="goUser(row)"
+          >
+            {{ ownerDisplayName(row) }}
+          </el-link>
+          <span v-else>{{ ownerDisplayName(row) }}</span>
+        </template>
       </el-table-column>
       <el-table-column label="来源" min-width="110">
         <template slot-scope="{ row }">{{ row.sourceType || '--' }}</template>
@@ -78,7 +95,18 @@
         <el-descriptions :column="1" border size="small">
           <el-descriptions-item label="权益ID">{{ detailData.userRightsId || '--' }}</el-descriptions-item>
           <el-descriptions-item label="模板ID">{{ detailData.rightsTemplateId || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="持有者">{{ detailData.ownerType || '--' }} / {{ detailData.ownerId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="持有者">
+            {{ detailData.ownerType || '--' }} /
+            <el-link
+              v-if="detailData.ownerId && hasOwnerName(detailData)"
+              type="primary"
+              :underline="false"
+              @click="goUser(detailData)"
+            >
+              {{ ownerDisplayName(detailData) }}
+            </el-link>
+            <span v-else>{{ ownerDisplayName(detailData) }}</span>
+          </el-descriptions-item>
           <el-descriptions-item label="来源">{{ detailData.sourceType || '--' }} / {{ detailData.sourceRefId || '--' }}</el-descriptions-item>
           <el-descriptions-item label="剩余额度">{{ detailData.remainQuota || 0 }}</el-descriptions-item>
           <el-descriptions-item label="状态">
@@ -163,6 +191,14 @@ export default {
     statusLabel(status) {
       return (STATUS_META[status] || {}).label || status || '--'
     },
+    ownerDisplayName(row) {
+      if (!row) return '--'
+      return row.userName || row.ownerName || row.ownerNickname || row.ownerId || '--'
+    },
+    hasOwnerName(row) {
+      if (!row) return false
+      return Boolean(row.userName || row.ownerName || row.ownerNickname)
+    },
     getList() {
       this.loading = true
       listJst_user_rights(this.queryParams).then(res => {
@@ -186,6 +222,14 @@ export default {
         this.detailVisible = true
         this.getWriteoffList(row.userRightsId)
       })
+    },
+    goUser(row) {
+      const userId = row && row.ownerId
+      if (!userId) return
+      this.$router.push({
+        path: '/jst/user',
+        query: { userId: String(userId), autoOpen: '1' }
+      }).catch(() => {})
     },
     getWriteoffList(userRightsId) {
       this.writeoffLoading = true

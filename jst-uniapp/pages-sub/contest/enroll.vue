@@ -22,7 +22,7 @@
           <text v-if="contestInfo.statusText" class="enroll-page__summary-status">{{ contestInfo.statusText }}</text>
         </view>
 
-        <text class="enroll-page__summary-name">{{ contestInfo.contestName || '赛事待联调' }}</text>
+        <text class="enroll-page__summary-name">{{ contestInfo.contestName || '暂无赛事信息' }}</text>
         <view class="enroll-page__summary-meta">
           <text class="enroll-page__summary-meta-item">报名时间：{{ contestInfo.enrollPeriod || '--' }}</text>
           <text class="enroll-page__summary-meta-item">比赛时间：{{ contestInfo.eventPeriod || '--' }}</text>
@@ -83,7 +83,7 @@
         <jst-empty
           v-else
           icon="📝"
-          text="报名模板暂未返回，待 F8/F9 接口联调完成后自动展示。"
+          text="暂无报名表单"
         />
       </view>
     </view>
@@ -221,6 +221,7 @@ export default {
         const detail = await getContestDetail(this.contestId, { silent: true })
         this.contestInfo = this.normalizeContestInfo(detail || {})
       } catch (error) {
+        uni.showToast({ title: '加载失败，请重试', icon: 'none' })
         this.contestInfo = this.normalizeContestInfo({})
       }
     },
@@ -238,6 +239,7 @@ export default {
           schemaJson: data && data.schemaJson ? data.schemaJson : { fields: [] }
         }
       } catch (error) {
+        uni.showToast({ title: '加载失败，请重试', icon: 'none' })
         this.templateInfo = {
           templateId: '',
           templateVersion: '',
@@ -251,6 +253,7 @@ export default {
         const list = await myParticipants()
         this.participants = Array.isArray(list) ? list : []
       } catch (error) {
+        uni.showToast({ title: '加载失败，请重试', icon: 'none' })
         this.participants = []
       }
     },

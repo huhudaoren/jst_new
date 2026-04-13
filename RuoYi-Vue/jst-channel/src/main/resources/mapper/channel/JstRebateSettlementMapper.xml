@@ -25,34 +25,38 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="channelName"    column="channel_name_"    />
     </resultMap>
 
     <sql id="selectJstRebateSettlementVo">
-        select settlement_id, settlement_no, channel_id, apply_amount, negative_offset_amount, actual_pay_amount, invoice_status, invoice_id, bank_account_snapshot, status, audit_remark, pay_voucher_url, apply_time, pay_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_rebate_settlement
+        select t.*,
+               ch.channel_name as channel_name_
+        from jst_rebate_settlement t
+        left join jst_channel ch on t.channel_id = ch.channel_id and ch.del_flag = '0'
     </sql>
 
     <select id="selectJstRebateSettlementList" parameterType="JstRebateSettlement" resultMap="JstRebateSettlementResult">
         <include refid="selectJstRebateSettlementVo"/>
-        <where>  
-            <if test="settlementNo != null  and settlementNo != ''"> and settlement_no = #{settlementNo}</if>
-            <if test="channelId != null "> and channel_id = #{channelId}</if>
-            <if test="applyAmount != null "> and apply_amount = #{applyAmount}</if>
-            <if test="negativeOffsetAmount != null "> and negative_offset_amount = #{negativeOffsetAmount}</if>
-            <if test="actualPayAmount != null "> and actual_pay_amount = #{actualPayAmount}</if>
-            <if test="invoiceStatus != null  and invoiceStatus != ''"> and invoice_status = #{invoiceStatus}</if>
-            <if test="invoiceId != null "> and invoice_id = #{invoiceId}</if>
-            <if test="bankAccountSnapshot != null  and bankAccountSnapshot != ''"> and bank_account_snapshot = #{bankAccountSnapshot}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="auditRemark != null  and auditRemark != ''"> and audit_remark = #{auditRemark}</if>
-            <if test="payVoucherUrl != null  and payVoucherUrl != ''"> and pay_voucher_url = #{payVoucherUrl}</if>
-            <if test="applyTime != null "> and apply_time = #{applyTime}</if>
-            <if test="payTime != null "> and pay_time = #{payTime}</if>
+        <where>
+            <if test="settlementNo != null  and settlementNo != ''"> and t.settlement_no = #{settlementNo}</if>
+            <if test="channelId != null "> and t.channel_id = #{channelId}</if>
+            <if test="applyAmount != null "> and t.apply_amount = #{applyAmount}</if>
+            <if test="negativeOffsetAmount != null "> and t.negative_offset_amount = #{negativeOffsetAmount}</if>
+            <if test="actualPayAmount != null "> and t.actual_pay_amount = #{actualPayAmount}</if>
+            <if test="invoiceStatus != null  and invoiceStatus != ''"> and t.invoice_status = #{invoiceStatus}</if>
+            <if test="invoiceId != null "> and t.invoice_id = #{invoiceId}</if>
+            <if test="bankAccountSnapshot != null  and bankAccountSnapshot != ''"> and t.bank_account_snapshot = #{bankAccountSnapshot}</if>
+            <if test="status != null  and status != ''"> and t.status = #{status}</if>
+            <if test="auditRemark != null  and auditRemark != ''"> and t.audit_remark = #{auditRemark}</if>
+            <if test="payVoucherUrl != null  and payVoucherUrl != ''"> and t.pay_voucher_url = #{payVoucherUrl}</if>
+            <if test="applyTime != null "> and t.apply_time = #{applyTime}</if>
+            <if test="payTime != null "> and t.pay_time = #{payTime}</if>
         </where>
     </select>
     
     <select id="selectJstRebateSettlementBySettlementId" parameterType="Long" resultMap="JstRebateSettlementResult">
         <include refid="selectJstRebateSettlementVo"/>
-        where settlement_id = #{settlementId}
+        where t.settlement_id = #{settlementId}
     </select>
 
     <insert id="insertJstRebateSettlement" parameterType="JstRebateSettlement" useGeneratedKeys="true" keyProperty="settlementId">

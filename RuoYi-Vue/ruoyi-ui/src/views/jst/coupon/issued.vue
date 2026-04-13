@@ -138,7 +138,11 @@ export default {
       listUserCoupon(this.queryParams).then(res => {
         this.list = res.rows || []
         this.total = res.total || 0
-      }).finally(() => { this.loading = false })
+      }).catch(() => {
+        this.$modal.msgError('加载列表失败')
+      }).finally(() => {
+        this.loading = false
+      })
     },
     handleQuery() { this.queryParams.pageNum = 1; this.getList() },
     resetQuery() { this.$refs.queryForm && this.$refs.queryForm.resetFields(); this.handleQuery() },

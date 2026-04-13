@@ -121,7 +121,7 @@
           </el-col>
           <el-col :xs="24" :sm="12">
             <el-form-item label="奖励数值" prop="rewardValue">
-              <el-input-number v-model="form.rewardValue" :precision="4" :min="0" :max="999999" controls-position="right" style="width:100%" />
+              <el-input-number v-model="form.rewardValue" :precision="4" :min="0" :max="999999" controls-position="right" class="full-width" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -135,12 +135,12 @@
         <el-row :gutter="12">
           <el-col :xs="24" :sm="12">
             <el-form-item label="生效时间">
-              <el-date-picker v-model="form.effectiveTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="可选" style="width:100%" />
+              <el-date-picker v-model="form.effectiveTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="可选" class="full-width" />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
             <el-form-item label="失效时间">
-              <el-date-picker v-model="form.expireTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="可选" style="width:100%" />
+              <el-date-picker v-model="form.expireTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="可选" class="full-width" />
             </el-form-item>
           </el-col>
         </el-row>

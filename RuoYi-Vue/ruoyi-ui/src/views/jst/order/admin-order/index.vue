@@ -76,7 +76,7 @@
           </div>
           <div class="mobile-info-row">{{ parseTime(row.createTime) || '--' }}</div>
           <div class="mobile-actions">
-            <el-button type="text" @click="openDetail(row)">查看详情</el-button>
+            <el-button type="text" @click="openDetail(row)" v-hasPermi="['jst:order:query']">查看详情</el-button>
             <el-button
               v-if="canSpecialRefund(row)"
               type="text"
@@ -122,7 +122,7 @@
       </el-table-column>
       <el-table-column label="操作" width="180" fixed="right">
         <template slot-scope="scope">
-          <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
+          <el-button type="text" @click="openDetail(scope.row)" v-hasPermi="['jst:order:query']">详情</el-button>
           <el-button
             v-if="canSpecialRefund(scope.row)"
             type="text"
@@ -234,6 +234,7 @@
 <script>
 import { listOrderMains, getOrderDetail } from '@/api/jst/order/order-admin'
 import { specialRefund } from '@/api/jst/order/refund-admin'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 const ORDER_STATUS = {
   pending_pay: { label: '待支付', type: 'warning' },
@@ -388,8 +389,7 @@ export default {
       return (REFUND_STATUS[status] && REFUND_STATUS[status].type) || 'info'
     },
     formatMoney(value) {
-      const n = Number(value || 0)
-      return '\u00A5' + (n / 100).toFixed(2)
+      return formatMoneyUtil(value, true)
     }
   }
 }

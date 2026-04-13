@@ -100,7 +100,7 @@
           <el-descriptions-item label="签署日期">{{ parseTime(detail.signTime, '{y}-{m}-{d}') || '--' }}</el-descriptions-item>
           <el-descriptions-item label="备注" :span="2">{{ detail.remark || '--' }}</el-descriptions-item>
           <el-descriptions-item v-if="detail.fileUrl" label="合同文件" :span="2">
-            <a :href="detail.fileUrl" target="_blank" style="color:#2f6fec">查看合同文件</a>
+            <a :href="detail.fileUrl" target="_blank" class="text-brand">查看合同文件</a>
           </el-descriptions-item>
         </el-descriptions>
       </div>
@@ -160,7 +160,10 @@ export default {
       try {
         const res = await getJst_contract_record(row.contractId)
         this.detail = res.data
-      } catch (_) { this.detail = row }
+      } catch (e) {
+        this.$modal.msgError('加载详情失败')
+        this.detail = row
+      }
     },
     statusLabel(s) { return (STATUS_META[s] && STATUS_META[s].label) || s || '--' },
     statusType(s) { return (STATUS_META[s] && STATUS_META[s].type) || 'info' },

@@ -38,7 +38,11 @@
           <div class="mobile-card-top">
             <div>
               <div class="mobile-title">规则 #{{ row.ruleId }}</div>
-              <div class="mobile-sub">赛事 #{{ row.contestId || '--' }}{{ row.channelId ? ' / 渠道 #' + row.channelId : '' }}</div>
+              <div class="mobile-sub">
+                <el-link v-if="row.contestName && row.contestId" type="primary" :underline="false" @click="goContest(row)">{{ row.contestName }}</el-link>
+                <span v-else>{{ row.contestName || row.contestId || '--' }}</span>
+                <span> / 渠道 {{ row.channelName || row.channelId || '默认' }}</span>
+              </div>
             </div>
             <el-switch v-model="row.status" :active-value="1" :inactive-value="0" @change="handleStatusChange(row)" v-hasPermi="['jst:channel:rebate_rule:edit']" />
           </div>
@@ -59,9 +63,16 @@
     <!-- PC 端表格 -->
     <el-table v-else v-loading="loading" :data="list">
       <el-table-column label="规则ID" prop="ruleId" width="80" />
-      <el-table-column label="赛事ID" prop="contestId" width="90" />
-      <el-table-column label="渠道ID" prop="channelId" width="90">
-        <template slot-scope="scope">{{ scope.row.channelId || '默认' }}</template>
+      <el-table-column label="赛事" min-width="160" show-overflow-tooltip>
+        <template slot-scope="scope">
+          <el-link v-if="scope.row.contestName && scope.row.contestId" type="primary" :underline="false" @click="goContest(scope.row)">
+            {{ scope.row.contestName }}
+          </el-link>
+          <span v-else>{{ scope.row.contestName || scope.row.contestId || '--' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="渠道" min-width="140" show-overflow-tooltip>
+        <template slot-scope="scope">{{ scope.row.channelName || scope.row.channelId || '默认' }}</template>
       </el-table-column>
       <el-table-column label="返点模式" min-width="100">
         <template slot-scope="scope">
@@ -141,6 +152,7 @@
 
 <script>
 import { listJst_rebate_rule, getJst_rebate_rule, addJst_rebate_rule, updateJst_rebate_rule, delJst_rebate_rule } from '@/api/jst/channel/jst_rebate_rule'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 export default {
   name: 'RebateRuleManage',
@@ -235,7 +247,15 @@ export default {
         this.$modal.msgSuccess('删除成功')
       }).catch(() => {})
     },
-    formatMoney(v) { return '\u00a5' + Number(v || 0).toFixed(2) },
+    formatMoney(v) { return formatMoneyUtil(v) },
+    goContest(row) {
+      const contestId = row && row.contestId
+      if (!contestId) return
+      this.$router.push({
+        path: '/jst/contest',
+        query: { contestId: String(contestId), autoOpen: '1' }
+      }).catch(() => {})
+    },
     serviceFeeLabel(mode) {
       return { fixed: '固定', rate: '按比例', none: '无' }[mode] || mode || '--'
     }

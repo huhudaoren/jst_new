@@ -102,13 +102,13 @@
     <el-dialog title="添加名单" :visible.sync="dialogVisible" :width="isMobile ? '95%' : '560px'" append-to-body>
       <el-form ref="addForm" :model="form" :rules="rules" label-width="90px">
         <el-form-item label="名单类型" prop="listType">
-          <el-select v-model="form.listType" style="width:100%">
+          <el-select v-model="form.listType" class="full-width">
             <el-option label="黑名单" value="black" />
             <el-option label="白名单" value="white" />
           </el-select>
         </el-form-item>
         <el-form-item label="目标类型" prop="targetType">
-          <el-select v-model="form.targetType" style="width:100%">
+          <el-select v-model="form.targetType" class="full-width">
             <el-option label="用户" value="user" />
             <el-option label="设备" value="device" />
             <el-option label="手机" value="mobile" />
@@ -123,7 +123,7 @@
           <el-input v-model="form.reason" type="textarea" :rows="2" placeholder="请输入原因" />
         </el-form-item>
         <el-form-item label="过期时间">
-          <el-date-picker v-model="form.expireTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="留空为永久" style="width:100%" />
+          <el-date-picker v-model="form.expireTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="留空为永久" class="full-width" />
         </el-form-item>
       </el-form>
       <div slot="footer">

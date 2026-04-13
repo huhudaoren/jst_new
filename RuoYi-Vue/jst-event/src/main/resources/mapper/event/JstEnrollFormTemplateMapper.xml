@@ -20,29 +20,33 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="ownerName"    column="owner_name_"    />
     </resultMap>
 
     <sql id="selectJstEnrollFormTemplateVo">
-        select template_id, template_name, template_version, owner_type, owner_id, schema_json, audit_status, status, effective_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_enroll_form_template
+        select t.*,
+               ct.contest_name as owner_name_
+        from jst_enroll_form_template t
+        left join jst_contest ct on t.owner_id = ct.contest_id and ct.del_flag = '0'
     </sql>
 
     <select id="selectJstEnrollFormTemplateList" parameterType="JstEnrollFormTemplate" resultMap="JstEnrollFormTemplateResult">
         <include refid="selectJstEnrollFormTemplateVo"/>
-        <where>  
-            <if test="templateName != null  and templateName != ''"> and template_name like concat('%', #{templateName}, '%')</if>
-            <if test="templateVersion != null "> and template_version = #{templateVersion}</if>
-            <if test="ownerType != null  and ownerType != ''"> and owner_type = #{ownerType}</if>
-            <if test="ownerId != null "> and owner_id = #{ownerId}</if>
-            <if test="schemaJson != null  and schemaJson != ''"> and schema_json = #{schemaJson}</if>
-            <if test="auditStatus != null  and auditStatus != ''"> and audit_status = #{auditStatus}</if>
-            <if test="status != null "> and status = #{status}</if>
-            <if test="effectiveTime != null "> and effective_time = #{effectiveTime}</if>
+        <where>
+            <if test="templateName != null  and templateName != ''"> and t.template_name like concat('%', #{templateName}, '%')</if>
+            <if test="templateVersion != null "> and t.template_version = #{templateVersion}</if>
+            <if test="ownerType != null  and ownerType != ''"> and t.owner_type = #{ownerType}</if>
+            <if test="ownerId != null "> and t.owner_id = #{ownerId}</if>
+            <if test="schemaJson != null  and schemaJson != ''"> and t.schema_json = #{schemaJson}</if>
+            <if test="auditStatus != null  and auditStatus != ''"> and t.audit_status = #{auditStatus}</if>
+            <if test="status != null "> and t.status = #{status}</if>
+            <if test="effectiveTime != null "> and t.effective_time = #{effectiveTime}</if>
         </where>
     </select>
     
     <select id="selectJstEnrollFormTemplateByTemplateId" parameterType="Long" resultMap="JstEnrollFormTemplateResult">
         <include refid="selectJstEnrollFormTemplateVo"/>
-        where template_id = #{templateId}
+        where t.template_id = #{templateId}
     </select>
 
     <insert id="insertJstEnrollFormTemplate" parameterType="JstEnrollFormTemplate" useGeneratedKeys="true" keyProperty="templateId">

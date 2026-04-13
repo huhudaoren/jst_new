@@ -105,6 +105,7 @@
 
 <script>
 import { listJst_payment_pay_record, getJst_payment_pay_record } from '@/api/jst/finance/jst_payment_pay_record'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 export default {
   name: 'PaymentPayRecordManage',
@@ -146,11 +147,14 @@ export default {
       try {
         const res = await getJst_payment_pay_record(row.payRecordId)
         this.detail = res.data
-      } catch (_) { this.detail = row }
+      } catch (e) {
+        this.$modal.msgError('加载详情失败')
+        this.detail = row
+      }
     },
     bizTypeLabel(t) { return { rebate_withdraw: '渠道提现', event_settlement: '赛事结算' }[t] || t || '--' },
     targetTypeLabel(t) { return { channel: '渠道方', partner: '赛事方' }[t] || t || '--' },
-    formatMoney(v) { return '\u00a5' + Number(v || 0).toFixed(2) }
+    formatMoney(v) { return formatMoneyUtil(v) }
   }
 }
 </script>

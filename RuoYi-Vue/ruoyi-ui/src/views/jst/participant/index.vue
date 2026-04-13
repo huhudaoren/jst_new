@@ -46,7 +46,13 @@
           </div>
           <div class="mobile-info-row">年龄：{{ row.age || '--' }}</div>
           <div class="mobile-info-row">学校：{{ row.school || '--' }}</div>
-          <div class="mobile-info-row">认领用户：{{ getClaimUser(row) }}</div>
+          <div class="mobile-info-row">
+            认领用户：
+            <el-link v-if="canGoClaimUser(row)" type="primary" :underline="false" @click="goClaimUser(row)">
+              {{ getClaimUser(row) }}
+            </el-link>
+            <span v-else>{{ getClaimUser(row) }}</span>
+          </div>
           <div class="mobile-info-row">渠道：{{ getChannelName(row) }}</div>
           <div class="mobile-actions">
             <el-button type="text" @click="openDetail(row)">详情</el-button>
@@ -86,7 +92,12 @@
         </template>
       </el-table-column>
       <el-table-column label="认领用户" min-width="110">
-        <template slot-scope="scope">{{ getClaimUser(scope.row) }}</template>
+        <template slot-scope="scope">
+          <el-link v-if="canGoClaimUser(scope.row)" type="primary" :underline="false" @click="goClaimUser(scope.row)">
+            {{ getClaimUser(scope.row) }}
+          </el-link>
+          <span v-else>{{ getClaimUser(scope.row) }}</span>
+        </template>
       </el-table-column>
       <el-table-column label="渠道" min-width="130">
         <template slot-scope="scope">{{ getChannelName(scope.row) }}</template>
@@ -169,14 +180,26 @@
             <el-descriptions-item label="认领状态">
               <JstStatusBadge :status="String(detailData.claimStatus || '')" :status-map="claimStatusMap" />
             </el-descriptions-item>
-            <el-descriptions-item label="认领用户">{{ detailData.claimedUserId || '--' }}</el-descriptions-item>
+            <el-descriptions-item label="认领用户">
+              <el-link v-if="canGoClaimUser(detailData)" type="primary" :underline="false" @click="goClaimUser(detailData)">
+                {{ getClaimUser(detailData) }}
+              </el-link>
+              <span v-else>{{ getClaimUser(detailData) }}</span>
+            </el-descriptions-item>
             <el-descriptions-item label="认领时间">{{ parseTime(detailData.claimedTime) || '--' }}</el-descriptions-item>
           </el-descriptions>
 
           <div class="section-title">认领映射记录</div>
           <el-table v-if="detailMaps.length" :data="detailMaps" size="small" max-height="260">
             <el-table-column label="映射ID" prop="mapId" width="90" />
-            <el-table-column label="用户ID" prop="userId" width="100" />
+            <el-table-column label="认领用户" width="140" show-overflow-tooltip>
+              <template slot-scope="scope">
+                <el-link v-if="canGoClaimUser(scope.row)" type="primary" :underline="false" @click="goClaimUser(scope.row)">
+                  {{ getClaimUser(scope.row) }}
+                </el-link>
+                <span v-else>{{ getClaimUser(scope.row) }}</span>
+              </template>
+            </el-table-column>
             <el-table-column label="认领方式" prop="claimMethod" min-width="120" />
             <el-table-column label="状态" min-width="100">
               <template slot-scope="scope">
@@ -308,9 +331,30 @@ export default {
     canRevoke(row) {
       return ['auto_claimed', 'manual_claimed'].includes(row.claimStatus)
     },
+    getClaimUserName(row) {
+      if (!row) return ''
+      return row.claimUserName || row.claimedUserName || row.userName || ''
+    },
+    getClaimUserId(row) {
+      if (!row) return null
+      const map = row.participantId ? (this.participantMapById[row.participantId] || {}) : {}
+      return row.claimedUserId || row.userId || map.userId || null
+    },
     getClaimUser(row) {
-      const map = this.participantMapById[row.participantId] || {}
-      return row.claimedUserId || row.userId || map.userId || '--'
+      const name = this.getClaimUserName(row)
+      const userId = this.getClaimUserId(row)
+      return name || userId || '--'
+    },
+    canGoClaimUser(row) {
+      return Boolean(this.getClaimUserId(row) && this.getClaimUserName(row))
+    },
+    goClaimUser(row) {
+      const userId = this.getClaimUserId(row)
+      if (!userId) return
+      this.$router.push({
+        path: '/jst/user',
+        query: { userId: String(userId), autoOpen: '1' }
+      }).catch(() => {})
     },
     getChannelName(row) {
       if (row.channelName) return row.channelName

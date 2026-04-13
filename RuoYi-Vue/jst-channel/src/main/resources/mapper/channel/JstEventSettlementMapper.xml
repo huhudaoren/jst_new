@@ -29,38 +29,45 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="partnerName"    column="partner_name_"    />
+        <result property="contestName"    column="contest_name_"    />
     </resultMap>
 
     <sql id="selectJstEventSettlementVo">
-        select event_settlement_id, settlement_no, partner_id, contest_id, total_list_amount, total_coupon_amount, total_points_amount, platform_bear_amount, total_net_pay, total_refund, total_rebate, total_service_fee, contract_deduction, final_amount, status, audit_remark, pay_voucher_url, pay_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_event_settlement
+        select t.*,
+               ep.partner_name as partner_name_,
+               ct.contest_name as contest_name_
+        from jst_event_settlement t
+        left join jst_event_partner ep on t.partner_id = ep.partner_id and ep.del_flag = '0'
+        left join jst_contest ct on t.contest_id = ct.contest_id and ct.del_flag = '0'
     </sql>
 
     <select id="selectJstEventSettlementList" parameterType="JstEventSettlement" resultMap="JstEventSettlementResult">
         <include refid="selectJstEventSettlementVo"/>
-        <where>  
-            <if test="settlementNo != null  and settlementNo != ''"> and settlement_no = #{settlementNo}</if>
-            <if test="partnerId != null "> and partner_id = #{partnerId}</if>
-            <if test="contestId != null "> and contest_id = #{contestId}</if>
-            <if test="totalListAmount != null "> and total_list_amount = #{totalListAmount}</if>
-            <if test="totalCouponAmount != null "> and total_coupon_amount = #{totalCouponAmount}</if>
-            <if test="totalPointsAmount != null "> and total_points_amount = #{totalPointsAmount}</if>
-            <if test="platformBearAmount != null "> and platform_bear_amount = #{platformBearAmount}</if>
-            <if test="totalNetPay != null "> and total_net_pay = #{totalNetPay}</if>
-            <if test="totalRefund != null "> and total_refund = #{totalRefund}</if>
-            <if test="totalRebate != null "> and total_rebate = #{totalRebate}</if>
-            <if test="totalServiceFee != null "> and total_service_fee = #{totalServiceFee}</if>
-            <if test="contractDeduction != null "> and contract_deduction = #{contractDeduction}</if>
-            <if test="finalAmount != null "> and final_amount = #{finalAmount}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="auditRemark != null  and auditRemark != ''"> and audit_remark = #{auditRemark}</if>
-            <if test="payVoucherUrl != null  and payVoucherUrl != ''"> and pay_voucher_url = #{payVoucherUrl}</if>
-            <if test="payTime != null "> and pay_time = #{payTime}</if>
+        <where>
+            <if test="settlementNo != null  and settlementNo != ''"> and t.settlement_no = #{settlementNo}</if>
+            <if test="partnerId != null "> and t.partner_id = #{partnerId}</if>
+            <if test="contestId != null "> and t.contest_id = #{contestId}</if>
+            <if test="totalListAmount != null "> and t.total_list_amount = #{totalListAmount}</if>
+            <if test="totalCouponAmount != null "> and t.total_coupon_amount = #{totalCouponAmount}</if>
+            <if test="totalPointsAmount != null "> and t.total_points_amount = #{totalPointsAmount}</if>
+            <if test="platformBearAmount != null "> and t.platform_bear_amount = #{platformBearAmount}</if>
+            <if test="totalNetPay != null "> and t.total_net_pay = #{totalNetPay}</if>
+            <if test="totalRefund != null "> and t.total_refund = #{totalRefund}</if>
+            <if test="totalRebate != null "> and t.total_rebate = #{totalRebate}</if>
+            <if test="totalServiceFee != null "> and t.total_service_fee = #{totalServiceFee}</if>
+            <if test="contractDeduction != null "> and t.contract_deduction = #{contractDeduction}</if>
+            <if test="finalAmount != null "> and t.final_amount = #{finalAmount}</if>
+            <if test="status != null  and status != ''"> and t.status = #{status}</if>
+            <if test="auditRemark != null  and auditRemark != ''"> and t.audit_remark = #{auditRemark}</if>
+            <if test="payVoucherUrl != null  and payVoucherUrl != ''"> and t.pay_voucher_url = #{payVoucherUrl}</if>
+            <if test="payTime != null "> and t.pay_time = #{payTime}</if>
         </where>
     </select>
     
     <select id="selectJstEventSettlementByEventSettlementId" parameterType="Long" resultMap="JstEventSettlementResult">
         <include refid="selectJstEventSettlementVo"/>
-        where event_settlement_id = #{eventSettlementId}
+        where t.event_settlement_id = #{eventSettlementId}
     </select>
 
     <insert id="insertJstEventSettlement" parameterType="JstEventSettlement" useGeneratedKeys="true" keyProperty="eventSettlementId">

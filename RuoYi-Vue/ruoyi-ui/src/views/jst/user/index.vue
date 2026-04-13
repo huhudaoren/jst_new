@@ -143,6 +143,7 @@ export default {
       registerRange: [],
       detailVisible: false,
       currentUserId: null,
+      lastAutoOpenKey: '',
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -175,6 +176,14 @@ export default {
   created() {
     this.getList()
   },
+  watch: {
+    '$route.query': {
+      handler() {
+        this.tryAutoOpenFromRoute()
+      },
+      deep: true
+    }
+  },
   methods: {
     async getList() {
       this.loading = true
@@ -189,6 +198,7 @@ export default {
         this.total = Number(res.total || 0)
       } finally {
         this.loading = false
+        this.tryAutoOpenFromRoute()
       }
     },
     handleQuery() {
@@ -204,6 +214,17 @@ export default {
     openDetail(row) {
       this.currentUserId = row.userId
       this.detailVisible = true
+    },
+    tryAutoOpenFromRoute() {
+      const query = this.$route.query || {}
+      if (query.autoOpen !== '1' || !query.userId) return
+      const key = `user-${query.userId}-${query.autoOpen}`
+      if (this.lastAutoOpenKey === key) return
+      const target = this.userList.find(item => String(item.userId) === String(query.userId))
+      const userId = Number(query.userId)
+      if (!target && !userId) return
+      this.lastAutoOpenKey = key
+      this.openDetail(target || { userId })
     },
     toggleUserStatus(row) {
       const nextStatus = Number(row.status) === 1 ? 0 : 1

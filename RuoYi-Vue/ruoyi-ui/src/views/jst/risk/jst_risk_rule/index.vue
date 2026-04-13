@@ -103,12 +103,12 @@
           <el-input v-model="form.ruleName" placeholder="请输入规则名" />
         </el-form-item>
         <el-form-item label="规则类型" prop="ruleType">
-          <el-select v-model="form.ruleType" placeholder="请选择" style="width:100%">
+          <el-select v-model="form.ruleType" placeholder="请选择" class="full-width">
             <el-option v-for="t in ruleTypes" :key="t.value" :label="t.label" :value="t.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="维度" prop="dimension">
-          <el-select v-model="form.dimension" placeholder="请选择" style="width:100%">
+          <el-select v-model="form.dimension" placeholder="请选择" class="full-width">
             <el-option label="用户" value="user" />
             <el-option label="设备" value="device" />
             <el-option label="手机" value="mobile" />
@@ -116,7 +116,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="触发动作" prop="action">
-          <el-select v-model="form.action" placeholder="请选择" style="width:100%">
+          <el-select v-model="form.action" placeholder="请选择" class="full-width">
             <el-option label="告警" value="warn" />
             <el-option label="拦截" value="intercept" />
             <el-option label="人工审核" value="manual" />

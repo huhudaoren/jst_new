@@ -39,7 +39,13 @@
             <el-tag size="small" :type="authStatusType(row.authStatus)">{{ authStatusLabel(row.authStatus) }}</el-tag>
           </div>
           <div class="mobile-info-row">
-            <span>用户 #{{ row.userId }}</span>
+            <span>
+              用户：
+              <el-link v-if="row.userId && row.userName" type="primary" :underline="false" @click="goUser(row)">
+                {{ row.userName }}
+              </el-link>
+              <span v-else>{{ row.userName || row.userId || '--' }}</span>
+            </span>
             <el-tag v-if="row.riskFlag === 1" size="mini" type="danger">风险</el-tag>
           </div>
           <div class="mobile-actions">
@@ -53,7 +59,14 @@
     <!-- PC 端表格 -->
     <el-table v-else v-loading="loading" :data="list">
       <el-table-column label="ID" prop="channelId" width="70" />
-      <el-table-column label="用户ID" prop="userId" width="80" />
+      <el-table-column label="用户" min-width="120" show-overflow-tooltip>
+        <template slot-scope="scope">
+          <el-link v-if="scope.row.userId && scope.row.userName" type="primary" :underline="false" @click="goUser(scope.row)">
+            {{ scope.row.userName }}
+          </el-link>
+          <span v-else>{{ scope.row.userName || scope.row.userId || '--' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="渠道类型" min-width="90">
         <template slot-scope="scope">
           <el-tag size="small" type="info">{{ channelTypeLabel(scope.row.channelType) }}</el-tag>
@@ -89,7 +102,12 @@
       <div v-if="detail" class="drawer-body">
         <el-descriptions :column="isMobile ? 1 : 2" border>
           <el-descriptions-item label="渠道ID">{{ detail.channelId }}</el-descriptions-item>
-          <el-descriptions-item label="用户ID">{{ detail.userId }}</el-descriptions-item>
+          <el-descriptions-item label="用户">
+            <el-link v-if="detail.userId && detail.userName" type="primary" :underline="false" @click="goUser(detail)">
+              {{ detail.userName }}
+            </el-link>
+            <span v-else>{{ detail.userName || detail.userId || '--' }}</span>
+          </el-descriptions-item>
           <el-descriptions-item label="渠道类型"><el-tag size="small" type="info">{{ channelTypeLabel(detail.channelType) }}</el-tag></el-descriptions-item>
           <el-descriptions-item label="渠道名">{{ detail.channelName }}</el-descriptions-item>
           <el-descriptions-item label="联系手机">{{ detail.contactMobile || '--' }}</el-descriptions-item>
@@ -177,7 +195,18 @@ export default {
       try {
         const res = await getJst_channel(row.channelId)
         this.detail = res.data
-      } catch (_) { this.detail = row }
+      } catch (e) {
+        this.$modal.msgError('加载详情失败')
+        this.detail = row
+      }
+    },
+    goUser(row) {
+      const userId = row && row.userId
+      if (!userId) return
+      this.$router.push({
+        path: '/jst/user',
+        query: { userId: String(userId), autoOpen: '1' }
+      }).catch(() => {})
     },
     authStatusLabel(s) { return (AUTH_STATUS_META[s] && AUTH_STATUS_META[s].label) || s || '--' },
     authStatusType(s) { return (AUTH_STATUS_META[s] && AUTH_STATUS_META[s].type) || 'info' },

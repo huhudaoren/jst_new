@@ -26,35 +26,42 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="userName"    column="user_name_"    />
+        <result property="goodsName"    column="goods_name_"    />
     </resultMap>
 
     <sql id="selectJstMallExchangeOrderVo">
-        select exchange_id, exchange_no, user_id, goods_id, quantity, points_used, cash_amount, order_id, address_snapshot_json, status, logistics_company, logistics_no, ship_time, complete_time, aftersale_status, create_by, create_time, update_by, update_time, remark, del_flag from jst_mall_exchange_order
+        select t.*,
+               u.nick_name as user_name_,
+               g.goods_name as goods_name_
+        from jst_mall_exchange_order t
+        left join sys_user u on t.user_id = u.user_id and u.del_flag = '0'
+        left join jst_mall_goods g on t.goods_id = g.goods_id and g.del_flag = '0'
     </sql>
 
     <select id="selectJstMallExchangeOrderList" parameterType="JstMallExchangeOrder" resultMap="JstMallExchangeOrderResult">
         <include refid="selectJstMallExchangeOrderVo"/>
-        <where>  
-            <if test="exchangeNo != null  and exchangeNo != ''"> and exchange_no = #{exchangeNo}</if>
-            <if test="userId != null "> and user_id = #{userId}</if>
-            <if test="goodsId != null "> and goods_id = #{goodsId}</if>
-            <if test="quantity != null "> and quantity = #{quantity}</if>
-            <if test="pointsUsed != null "> and points_used = #{pointsUsed}</if>
-            <if test="cashAmount != null "> and cash_amount = #{cashAmount}</if>
-            <if test="orderId != null "> and order_id = #{orderId}</if>
-            <if test="addressSnapshotJson != null  and addressSnapshotJson != ''"> and address_snapshot_json = #{addressSnapshotJson}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="logisticsCompany != null  and logisticsCompany != ''"> and logistics_company = #{logisticsCompany}</if>
-            <if test="logisticsNo != null  and logisticsNo != ''"> and logistics_no = #{logisticsNo}</if>
-            <if test="shipTime != null "> and ship_time = #{shipTime}</if>
-            <if test="completeTime != null "> and complete_time = #{completeTime}</if>
-            <if test="aftersaleStatus != null  and aftersaleStatus != ''"> and aftersale_status = #{aftersaleStatus}</if>
+        <where>
+            <if test="exchangeNo != null  and exchangeNo != ''"> and t.exchange_no = #{exchangeNo}</if>
+            <if test="userId != null "> and t.user_id = #{userId}</if>
+            <if test="goodsId != null "> and t.goods_id = #{goodsId}</if>
+            <if test="quantity != null "> and t.quantity = #{quantity}</if>
+            <if test="pointsUsed != null "> and t.points_used = #{pointsUsed}</if>
+            <if test="cashAmount != null "> and t.cash_amount = #{cashAmount}</if>
+            <if test="orderId != null "> and t.order_id = #{orderId}</if>
+            <if test="addressSnapshotJson != null  and addressSnapshotJson != ''"> and t.address_snapshot_json = #{addressSnapshotJson}</if>
+            <if test="status != null  and status != ''"> and t.status = #{status}</if>
+            <if test="logisticsCompany != null  and logisticsCompany != ''"> and t.logistics_company = #{logisticsCompany}</if>
+            <if test="logisticsNo != null  and logisticsNo != ''"> and t.logistics_no = #{logisticsNo}</if>
+            <if test="shipTime != null "> and t.ship_time = #{shipTime}</if>
+            <if test="completeTime != null "> and t.complete_time = #{completeTime}</if>
+            <if test="aftersaleStatus != null  and aftersaleStatus != ''"> and t.aftersale_status = #{aftersaleStatus}</if>
         </where>
     </select>
     
     <select id="selectJstMallExchangeOrderByExchangeId" parameterType="Long" resultMap="JstMallExchangeOrderResult">
         <include refid="selectJstMallExchangeOrderVo"/>
-        where exchange_id = #{exchangeId}
+        where t.exchange_id = #{exchangeId}
     </select>
 
     <insert id="insertJstMallExchangeOrder" parameterType="JstMallExchangeOrder" useGeneratedKeys="true" keyProperty="exchangeId">

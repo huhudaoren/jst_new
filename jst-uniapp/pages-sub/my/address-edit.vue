@@ -182,6 +182,8 @@ export default {
         this.form.postalCode = detail.postalCode || ''
         this.form.isDefault = detail.isDefault === 1 ? 1 : 0
         this.setRegionByValue(detail.province, detail.city, detail.district)
+      } catch (error) {
+        uni.showToast({ title: '加载失败，请重试', icon: 'none' })
       } finally {
         this.pageLoading = false
       }

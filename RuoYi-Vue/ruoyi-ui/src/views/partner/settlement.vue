@@ -228,6 +228,7 @@ import {
   getPartnerSettlement,
   listPartnerSettlements
 } from '@/api/partner/settlement'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 export default {
   name: 'PartnerSettlement',

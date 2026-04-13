@@ -11,7 +11,7 @@
 
     <el-alert
       v-if="hasLoadError"
-      title="首页接口尚未在后端落地，当前以空态渲染页面并保留接线。字段需求已同步到 ui-feedback 文档。"
+      title="?"
       type="warning"
       :closable="false"
       show-icon

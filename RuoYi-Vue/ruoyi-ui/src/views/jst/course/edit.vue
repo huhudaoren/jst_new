@@ -235,7 +235,10 @@ export default {
         }
         try {
           this.chapters = typeof d.chaptersJson === 'string' ? JSON.parse(d.chaptersJson) : (d.chaptersJson || [])
-        } catch (e) { this.chapters = [] }
+        } catch (e) {
+          this.$modal.msgError('章节数据解析失败')
+          this.chapters = []
+        }
       })
     },
     addChapter() { this.chapters.push({ name: '', lessons: [] }) },

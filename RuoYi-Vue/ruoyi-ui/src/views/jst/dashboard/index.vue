@@ -127,6 +127,7 @@
 <script>
 import { getOverview, getTodo, getTopContests, getTopChannels } from '@/api/admin/dashboard'
 import { collectAvailablePaths, resolveFirstAvailablePath } from '@/utils/route-access'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 export default {
   name: 'AdminDashboard',
@@ -349,8 +350,7 @@ export default {
       this.rankLoading = false
     },
     formatMoney(val) {
-      if (!val && val !== 0) return '0.00'
-      return Number(val).toFixed(2)
+      return formatMoneyUtil(val).replace('\u00A5', '')
     },
     barWidth(value, max) {
       if (!max) return '0%'

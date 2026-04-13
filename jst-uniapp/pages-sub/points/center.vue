@@ -133,7 +133,7 @@ export default {
 
 .pc-level { padding: $jst-space-md $jst-space-lg; border-radius: $jst-radius-lg; background: $jst-amber-light; margin-top: $jst-space-md; transition: transform $jst-duration-fast $jst-easing; }
 .pc-level:active { transform: scale(0.98); }
-.pc-level--active { background: linear-gradient(135deg, #7B1FA2, $jst-amber); color: $jst-text-inverse; }
+.pc-level--active { background: linear-gradient(135deg, $jst-purple, $jst-amber); color: $jst-text-inverse; }
 .pc-level--locked { opacity: 0.55; }
 .pc-level__head { display: flex; align-items: center; justify-content: space-between; }
 .pc-level__name { font-size: $jst-font-base; font-weight: $jst-weight-semibold; }

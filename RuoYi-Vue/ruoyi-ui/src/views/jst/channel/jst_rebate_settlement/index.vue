@@ -34,7 +34,7 @@
           <div class="mobile-card-top">
             <div>
               <div class="mobile-title">{{ row.settlementNo || '--' }}</div>
-              <div class="mobile-sub">渠道 #{{ row.channelId || '--' }}</div>
+              <div class="mobile-sub">渠道 {{ row.channelName || row.channelId || '--' }}</div>
             </div>
             <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </div>
@@ -55,7 +55,9 @@
     <el-table v-else v-loading="loading" :data="list" show-summary :summary-method="getSummary">
       <el-table-column label="ID" prop="settlementId" width="70" />
       <el-table-column label="结算单号" prop="settlementNo" min-width="160" show-overflow-tooltip />
-      <el-table-column label="渠道ID" prop="channelId" width="90" />
+      <el-table-column label="渠道" min-width="140" show-overflow-tooltip>
+        <template slot-scope="scope">{{ scope.row.channelName || scope.row.channelId || '--' }}</template>
+      </el-table-column>
       <el-table-column label="申请金额" prop="applyAmount" min-width="120" align="right">
         <template slot-scope="scope">{{ formatMoney(scope.row.applyAmount) }}</template>
       </el-table-column>
@@ -88,7 +90,7 @@
         <el-descriptions :column="isMobile ? 1 : 2" border>
           <el-descriptions-item label="结算ID">{{ detail.settlementId }}</el-descriptions-item>
           <el-descriptions-item label="结算单号">{{ detail.settlementNo }}</el-descriptions-item>
-          <el-descriptions-item label="渠道ID">{{ detail.channelId }}</el-descriptions-item>
+          <el-descriptions-item label="渠道">{{ detail.channelName || detail.channelId || '--' }}</el-descriptions-item>
           <el-descriptions-item label="状态"><el-tag size="small" :type="statusType(detail.status)">{{ statusLabel(detail.status) }}</el-tag></el-descriptions-item>
           <el-descriptions-item label="申请金额">{{ formatMoney(detail.applyAmount) }}</el-descriptions-item>
           <el-descriptions-item label="负向抵扣"><span class="amount-negative">{{ formatMoney(detail.negativeOffsetAmount) }}</span></el-descriptions-item>
@@ -109,6 +111,7 @@
 
 <script>
 import { listJst_rebate_settlement, getJst_rebate_settlement } from '@/api/jst/channel/jst_rebate_settlement'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 const STATUS_META = {
   pending: { label: '待审核', type: 'info' },
@@ -159,7 +162,10 @@ export default {
       try {
         const res = await getJst_rebate_settlement(row.settlementId)
         this.detail = res.data
-      } catch (_) { this.detail = row }
+      } catch (e) {
+        this.$modal.msgError('加载详情失败')
+        this.detail = row
+      }
     },
     getSummary({ columns, data }) {
       const sums = []
@@ -175,7 +181,7 @@ export default {
     statusLabel(status) { return (STATUS_META[status] && STATUS_META[status].label) || status || '--' },
     statusType(status) { return (STATUS_META[status] && STATUS_META[status].type) || 'info' },
     invoiceStatusLabel(s) { return { none: '无', pending: '待开', issued: '已开', voided: '已作废' }[s] || s || '--' },
-    formatMoney(v) { return '\u00a5' + Number(v || 0).toFixed(2) }
+    formatMoney(v) { return formatMoneyUtil(v) }
   }
 }
 </script>

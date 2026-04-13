@@ -106,7 +106,14 @@
           <el-tag size="small" :type="writeoffMeta(scope.row).type">{{ writeoffMeta(scope.row).label }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="关联订单ID" prop="orderId" min-width="120" />
+      <el-table-column label="关联订单号" min-width="150" show-overflow-tooltip>
+        <template slot-scope="scope">
+          <el-link v-if="scope.row.orderNo && scope.row.orderId" type="primary" :underline="false" @click="goOrder(scope.row)">
+            {{ scope.row.orderNo }}
+          </el-link>
+          <span v-else>{{ scope.row.orderNo || scope.row.orderId || '--' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="120" fixed="right">
         <template slot-scope="scope">
           <el-button type="text" @click="openDetail(scope.row)">详情</el-button>
@@ -133,7 +140,10 @@
           <el-descriptions-item label="预约日期">{{ detail.appointmentDate || '--' }}</el-descriptions-item>
           <el-descriptions-item label="场次/时段">{{ detail.sessionCode || '--' }}</el-descriptions-item>
           <el-descriptions-item label="关联团队ID">{{ detail.teamAppointmentId || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="关联订单ID">{{ detail.orderId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="关联订单号">
+            <el-link v-if="detail.orderNo && detail.orderId" type="primary" :underline="false" @click="goOrder(detail)">{{ detail.orderNo }}</el-link>
+            <span v-else>{{ detail.orderNo || detail.orderId || '--' }}</span>
+          </el-descriptions-item>
           <el-descriptions-item label="渠道ID">{{ detail.channelId || '--' }}</el-descriptions-item>
           <el-descriptions-item label="预约状态">
             <el-tag size="small" :type="statusType(detail.mainStatus)">{{ statusLabel(detail.mainStatus) }}</el-tag>
@@ -311,6 +321,14 @@ export default {
       const id = Number(appointmentId)
       if (!id) return
       this.openDetail({ appointmentId: id })
+    },
+    goOrder(row) {
+      const orderId = row && row.orderId
+      if (!orderId) return
+      this.$router.push({
+        path: '/jst/order/admin-order',
+        query: { orderId: String(orderId), autoOpen: '1' }
+      }).catch(() => {})
     },
     contestText(row) {
       return row.contestName || row.contestTitle || (row.contestId ? '赛事 #' + row.contestId : '--')

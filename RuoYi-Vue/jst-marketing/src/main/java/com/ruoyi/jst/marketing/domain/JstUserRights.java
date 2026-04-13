@@ -62,6 +62,9 @@ public class JstUserRights extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 用户昵称（JOIN查出，非持久化） */
+    private String userName;
+
     public void setUserRightsId(Long userRightsId) 
     {
         this.userRightsId = userRightsId;
@@ -170,6 +173,16 @@ public class JstUserRights extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setUserName(String userName)
+    {
+        this.userName = userName;
+    }
+
+    public String getUserName()
+    {
+        return userName;
     }
 
     @Override

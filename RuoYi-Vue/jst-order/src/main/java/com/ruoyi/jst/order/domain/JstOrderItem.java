@@ -74,6 +74,9 @@ public class JstOrderItem extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 订单编号（JOIN查出，非持久化） */
+    private String orderNo;
+
     public void setItemId(Long itemId) 
     {
         this.itemId = itemId;
@@ -222,6 +225,16 @@ public class JstOrderItem extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setOrderNo(String orderNo)
+    {
+        this.orderNo = orderNo;
+    }
+
+    public String getOrderNo()
+    {
+        return orderNo;
     }
 
     @Override

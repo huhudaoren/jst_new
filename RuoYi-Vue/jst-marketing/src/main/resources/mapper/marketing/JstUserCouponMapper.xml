@@ -21,30 +21,40 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="userName"    column="user_name_"    />
+        <result property="couponTemplateName"    column="coupon_name_"    />
+        <result property="orderNo"    column="order_no_"    />
     </resultMap>
 
     <sql id="selectJstUserCouponVo">
-        select user_coupon_id, coupon_template_id, user_id, issue_batch_no, issue_source, status, valid_start, valid_end, order_id, use_time, create_by, create_time, update_by, update_time, remark, del_flag from jst_user_coupon
+        select t.*,
+               u.nick_name as user_name_,
+               ct.coupon_name as coupon_name_,
+               o.order_no as order_no_
+        from jst_user_coupon t
+        left join sys_user u on t.user_id = u.user_id and u.del_flag = '0'
+        left join jst_coupon_template ct on t.coupon_template_id = ct.coupon_template_id and ct.del_flag = '0'
+        left join jst_order_main o on t.order_id = o.order_id and o.del_flag = '0'
     </sql>
 
     <select id="selectJstUserCouponList" parameterType="JstUserCoupon" resultMap="JstUserCouponResult">
         <include refid="selectJstUserCouponVo"/>
-        <where>  
-            <if test="couponTemplateId != null "> and coupon_template_id = #{couponTemplateId}</if>
-            <if test="userId != null "> and user_id = #{userId}</if>
-            <if test="issueBatchNo != null  and issueBatchNo != ''"> and issue_batch_no = #{issueBatchNo}</if>
-            <if test="issueSource != null  and issueSource != ''"> and issue_source = #{issueSource}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="validStart != null "> and valid_start = #{validStart}</if>
-            <if test="validEnd != null "> and valid_end = #{validEnd}</if>
-            <if test="orderId != null "> and order_id = #{orderId}</if>
-            <if test="useTime != null "> and use_time = #{useTime}</if>
+        <where>
+            <if test="couponTemplateId != null "> and t.coupon_template_id = #{couponTemplateId}</if>
+            <if test="userId != null "> and t.user_id = #{userId}</if>
+            <if test="issueBatchNo != null  and issueBatchNo != ''"> and t.issue_batch_no = #{issueBatchNo}</if>
+            <if test="issueSource != null  and issueSource != ''"> and t.issue_source = #{issueSource}</if>
+            <if test="status != null  and status != ''"> and t.status = #{status}</if>
+            <if test="validStart != null "> and t.valid_start = #{validStart}</if>
+            <if test="validEnd != null "> and t.valid_end = #{validEnd}</if>
+            <if test="orderId != null "> and t.order_id = #{orderId}</if>
+            <if test="useTime != null "> and t.use_time = #{useTime}</if>
         </where>
     </select>
     
     <select id="selectJstUserCouponByUserCouponId" parameterType="Long" resultMap="JstUserCouponResult">
         <include refid="selectJstUserCouponVo"/>
-        where user_coupon_id = #{userCouponId}
+        where t.user_coupon_id = #{userCouponId}
     </select>
 
     <insert id="insertJstUserCoupon" parameterType="JstUserCoupon" useGeneratedKeys="true" keyProperty="userCouponId">

@@ -82,6 +82,12 @@ public class JstMallExchangeOrder extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 用户昵称（JOIN查出，非持久化） */
+    private String userName;
+
+    /** 商品名称（JOIN查出，非持久化） */
+    private String goodsName;
+
     public void setExchangeId(Long exchangeId) 
     {
         this.exchangeId = exchangeId;
@@ -240,6 +246,26 @@ public class JstMallExchangeOrder extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setUserName(String userName)
+    {
+        this.userName = userName;
+    }
+
+    public String getUserName()
+    {
+        return userName;
+    }
+
+    public void setGoodsName(String goodsName)
+    {
+        this.goodsName = goodsName;
+    }
+
+    public String getGoodsName()
+    {
+        return goodsName;
     }
 
     @Override

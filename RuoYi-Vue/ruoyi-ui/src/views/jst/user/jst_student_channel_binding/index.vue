@@ -33,7 +33,19 @@
         <div v-for="row in list" :key="row.bindingId" class="mobile-card">
           <div class="mobile-card-top">
             <div>
-              <div class="mobile-title">学生 #{{ row.userId }} - 渠道 #{{ row.channelId }}</div>
+              <div class="mobile-title">
+                学生：
+                <el-link v-if="row.userId && row.studentName" type="primary" :underline="false" @click="goUser(row)">
+                  {{ row.studentName }}
+                </el-link>
+                <span v-else>{{ row.studentName || row.userId || '--' }}</span>
+                -
+                渠道：
+                <el-link v-if="row.channelId && row.channelName" type="primary" :underline="false" @click="goChannel(row)">
+                  {{ row.channelName }}
+                </el-link>
+                <span v-else>{{ row.channelName || row.channelId || '--' }}</span>
+              </div>
               <div class="mobile-sub">绑定：{{ parseTime(row.bindTime, '{y}-{m}-{d}') || '--' }}</div>
             </div>
             <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
@@ -48,8 +60,22 @@
     <!-- PC 端表格 -->
     <el-table v-else v-loading="loading" :data="list">
       <el-table-column label="ID" prop="bindingId" width="70" />
-      <el-table-column label="学生ID" prop="userId" width="90" />
-      <el-table-column label="渠道ID" prop="channelId" width="90" />
+      <el-table-column label="学生" min-width="130" show-overflow-tooltip>
+        <template slot-scope="scope">
+          <el-link v-if="scope.row.userId && scope.row.studentName" type="primary" :underline="false" @click="goUser(scope.row)">
+            {{ scope.row.studentName }}
+          </el-link>
+          <span v-else>{{ scope.row.studentName || scope.row.userId || '--' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="渠道" min-width="130" show-overflow-tooltip>
+        <template slot-scope="scope">
+          <el-link v-if="scope.row.channelId && scope.row.channelName" type="primary" :underline="false" @click="goChannel(scope.row)">
+            {{ scope.row.channelName }}
+          </el-link>
+          <span v-else>{{ scope.row.channelName || scope.row.channelId || '--' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="绑定时间" min-width="160">
         <template slot-scope="scope">{{ parseTime(scope.row.bindTime) || '--' }}</template>
       </el-table-column>
@@ -113,6 +139,22 @@ export default {
     resetQuery() {
       this.queryParams = { pageNum: 1, pageSize: 10, userId: undefined, channelId: undefined, status: undefined }
       this.getList()
+    },
+    goUser(row) {
+      const userId = row && row.userId
+      if (!userId) return
+      this.$router.push({
+        path: '/jst/user',
+        query: { userId: String(userId), autoOpen: '1' }
+      }).catch(() => {})
+    },
+    goChannel(row) {
+      const channelId = row && row.channelId
+      if (!channelId) return
+      this.$router.push({
+        path: '/jst/channel',
+        query: { channelId: String(channelId), autoOpen: '1' }
+      }).catch(() => {})
     },
     statusLabel(s) { return (STATUS_META[s] && STATUS_META[s].label) || s || '--' },
     statusType(s) { return (STATUS_META[s] && STATUS_META[s].type) || 'info' }

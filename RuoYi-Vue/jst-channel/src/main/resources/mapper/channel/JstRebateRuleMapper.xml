@@ -21,30 +21,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="contestName"    column="contest_name_"    />
+        <result property="channelName"    column="channel_name_"    />
     </resultMap>
 
     <sql id="selectJstRebateRuleVo">
-        select rule_id, contest_id, channel_id, rebate_mode, rebate_value, service_fee_mode, service_fee_value, effective_time, expire_time, status, create_by, create_time, update_by, update_time, remark, del_flag from jst_rebate_rule
+        select t.*,
+               ct.contest_name as contest_name_,
+               ch.channel_name as channel_name_
+        from jst_rebate_rule t
+        left join jst_contest ct on t.contest_id = ct.contest_id and ct.del_flag = '0'
+        left join jst_channel ch on t.channel_id = ch.channel_id and ch.del_flag = '0'
     </sql>
 
     <select id="selectJstRebateRuleList" parameterType="JstRebateRule" resultMap="JstRebateRuleResult">
         <include refid="selectJstRebateRuleVo"/>
-        <where>  
-            <if test="contestId != null "> and contest_id = #{contestId}</if>
-            <if test="channelId != null "> and channel_id = #{channelId}</if>
-            <if test="rebateMode != null  and rebateMode != ''"> and rebate_mode = #{rebateMode}</if>
-            <if test="rebateValue != null "> and rebate_value = #{rebateValue}</if>
-            <if test="serviceFeeMode != null  and serviceFeeMode != ''"> and service_fee_mode = #{serviceFeeMode}</if>
-            <if test="serviceFeeValue != null "> and service_fee_value = #{serviceFeeValue}</if>
-            <if test="effectiveTime != null "> and effective_time = #{effectiveTime}</if>
-            <if test="expireTime != null "> and expire_time = #{expireTime}</if>
-            <if test="status != null "> and status = #{status}</if>
+        <where>
+            <if test="contestId != null "> and t.contest_id = #{contestId}</if>
+            <if test="channelId != null "> and t.channel_id = #{channelId}</if>
+            <if test="rebateMode != null  and rebateMode != ''"> and t.rebate_mode = #{rebateMode}</if>
+            <if test="rebateValue != null "> and t.rebate_value = #{rebateValue}</if>
+            <if test="serviceFeeMode != null  and serviceFeeMode != ''"> and t.service_fee_mode = #{serviceFeeMode}</if>
+            <if test="serviceFeeValue != null "> and t.service_fee_value = #{serviceFeeValue}</if>
+            <if test="effectiveTime != null "> and t.effective_time = #{effectiveTime}</if>
+            <if test="expireTime != null "> and t.expire_time = #{expireTime}</if>
+            <if test="status != null "> and t.status = #{status}</if>
         </where>
     </select>
     
     <select id="selectJstRebateRuleByRuleId" parameterType="Long" resultMap="JstRebateRuleResult">
         <include refid="selectJstRebateRuleVo"/>
-        where rule_id = #{ruleId}
+        where t.rule_id = #{ruleId}
     </select>
 
     <insert id="insertJstRebateRule" parameterType="JstRebateRule" useGeneratedKeys="true" keyProperty="ruleId">

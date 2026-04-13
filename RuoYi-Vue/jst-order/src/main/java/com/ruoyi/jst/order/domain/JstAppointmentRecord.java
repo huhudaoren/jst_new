@@ -72,6 +72,15 @@ public class JstAppointmentRecord extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 订单编号（JOIN查出，非持久化） */
+    private String orderNo;
+
+    /** 用户昵称（JOIN查出，非持久化） */
+    private String userName;
+
+    /** 赛事名称（JOIN查出，非持久化） */
+    private String contestName;
+
     public void setAppointmentId(Long appointmentId) 
     {
         this.appointmentId = appointmentId;
@@ -210,6 +219,36 @@ public class JstAppointmentRecord extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setOrderNo(String orderNo)
+    {
+        this.orderNo = orderNo;
+    }
+
+    public String getOrderNo()
+    {
+        return orderNo;
+    }
+
+    public void setUserName(String userName)
+    {
+        this.userName = userName;
+    }
+
+    public String getUserName()
+    {
+        return userName;
+    }
+
+    public void setContestName(String contestName)
+    {
+        this.contestName = contestName;
+    }
+
+    public String getContestName()
+    {
+        return contestName;
     }
 
     @Override

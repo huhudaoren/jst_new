@@ -82,7 +82,7 @@
           size="mini"
           icon="el-icon-check"
           :disabled="!ids.length"
-          v-hasPermi="['jst:event:enrollRecord:audit']"
+          v-hasRole="['jst_partner']"
           @click="openBatchDialog('approved')"
         >
           批量通过
@@ -93,7 +93,7 @@
           size="mini"
           icon="el-icon-close"
           :disabled="!ids.length"
-          v-hasPermi="['jst:event:enrollRecord:audit']"
+          v-hasRole="['jst_partner']"
           @click="openBatchDialog('rejected')"
         >
           批量驳回
@@ -128,6 +128,7 @@
                 v-if="canAudit(row)"
                 type="text"
                 size="mini"
+                v-hasRole="['jst_partner']"
                 @click="openDetail(row)"
               >
                 审核
@@ -182,7 +183,7 @@
             v-if="canAudit(scope.row)"
             type="text"
             size="mini"
-            v-hasPermi="['jst:event:enrollRecord:audit']"
+            v-hasRole="['jst_partner']"
             @click="openDetail(scope.row)"
           >
             审核

@@ -93,6 +93,12 @@ public class JstEventSettlement extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 赛事方名称（JOIN查出，非持久化） */
+    private String partnerName;
+
+    /** 赛事名称（JOIN查出，非持久化） */
+    private String contestName;
+
     public void setEventSettlementId(Long eventSettlementId) 
     {
         this.eventSettlementId = eventSettlementId;
@@ -281,6 +287,26 @@ public class JstEventSettlement extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setPartnerName(String partnerName)
+    {
+        this.partnerName = partnerName;
+    }
+
+    public String getPartnerName()
+    {
+        return partnerName;
+    }
+
+    public void setContestName(String contestName)
+    {
+        this.contestName = contestName;
+    }
+
+    public String getContestName()
+    {
+        return contestName;
     }
 
     @Override

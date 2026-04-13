@@ -26,12 +26,23 @@
       <div v-if="list.length" class="mobile-card-list">
         <div v-for="row in list" :key="row.exchangeId" class="mobile-card">
           <div class="mobile-card__head">
-            <span class="mobile-card__title">{{ row.goodsName || '--' }}</span>
+            <span class="mobile-card__title">
+              <el-link v-if="row.goodsId && row.goodsName" type="primary" :underline="false" @click="goMallGoods(row)">
+                {{ row.goodsName }}
+              </el-link>
+              <span v-else>{{ row.goodsName || row.goodsId || '--' }}</span>
+            </span>
             <el-tag size="mini" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </div>
           <div class="mobile-card__meta">
             <span>{{ row.exchangeNo }}</span>
-            <span>用户：{{ row.userId || '--' }}</span>
+            <span>
+              用户：
+              <el-link v-if="row.userId && row.userName" type="primary" :underline="false" @click="goUser(row)">
+                {{ row.userName }}
+              </el-link>
+              <span v-else>{{ row.userName || row.userId || '--' }}</span>
+            </span>
             <span>{{ row.pointsUsed || 0 }} 积分</span>
             <span class="amount-cell">¥ {{ formatAmount(row.cashAmount) }}</span>
           </div>
@@ -48,8 +59,22 @@
     <el-table v-else v-loading="loading" :data="list">
       <el-table-column label="订单ID" prop="exchangeId" width="90" />
       <el-table-column label="订单号" prop="exchangeNo" min-width="150" show-overflow-tooltip />
-      <el-table-column label="用户ID" prop="userId" min-width="100" />
-      <el-table-column label="商品ID" prop="goodsId" min-width="90" />
+      <el-table-column label="用户" min-width="120" show-overflow-tooltip>
+        <template slot-scope="{ row }">
+          <el-link v-if="row.userId && row.userName" type="primary" :underline="false" @click="goUser(row)">
+            {{ row.userName }}
+          </el-link>
+          <span v-else>{{ row.userName || row.userId || '--' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="商品" min-width="150" show-overflow-tooltip>
+        <template slot-scope="{ row }">
+          <el-link v-if="row.goodsId && row.goodsName" type="primary" :underline="false" @click="goMallGoods(row)">
+            {{ row.goodsName }}
+          </el-link>
+          <span v-else>{{ row.goodsName || row.goodsId || '--' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="数量" prop="quantity" min-width="70" align="right" />
       <el-table-column label="积分消耗" prop="pointsUsed" min-width="100" align="right" />
       <el-table-column label="现金补差" min-width="100" align="right">
@@ -98,8 +123,23 @@
       <div class="detail-body">
         <el-descriptions :column="1" border size="small">
           <el-descriptions-item label="订单号">{{ detailData.exchangeNo || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="用户ID">{{ detailData.userId || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="商品ID">{{ detailData.goodsId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="用户">
+            <el-link v-if="detailData.userId && detailData.userName" type="primary" :underline="false" @click="goUser(detailData)">
+              {{ detailData.userName }}
+            </el-link>
+            <span v-else>{{ detailData.userName || detailData.userId || '--' }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="商品">
+            <el-link
+              v-if="detailData.goodsId && detailData.goodsName"
+              type="primary"
+              :underline="false"
+              @click="goMallGoods(detailData)"
+            >
+              {{ detailData.goodsName }}
+            </el-link>
+            <span v-else>{{ detailData.goodsName || detailData.goodsId || '--' }}</span>
+          </el-descriptions-item>
           <el-descriptions-item label="数量">{{ detailData.quantity || 0 }}</el-descriptions-item>
           <el-descriptions-item label="积分消耗">{{ detailData.pointsUsed || 0 }}</el-descriptions-item>
           <el-descriptions-item label="现金补差">¥ {{ formatAmount(detailData.cashAmount) }}</el-descriptions-item>
@@ -242,6 +282,22 @@ export default {
       }).then(() => {
         this.$modal.msgSuccess('操作成功')
         this.getList()
+      }).catch(() => {})
+    },
+    goUser(row) {
+      const userId = row && row.userId
+      if (!userId) return
+      this.$router.push({
+        path: '/jst/user',
+        query: { userId: String(userId), autoOpen: '1' }
+      }).catch(() => {})
+    },
+    goMallGoods(row) {
+      const goodsId = row && row.goodsId
+      if (!goodsId) return
+      this.$router.push({
+        path: '/jst/mall',
+        query: { goodsId: String(goodsId), autoOpen: '1' }
       }).catch(() => {})
     }
   }

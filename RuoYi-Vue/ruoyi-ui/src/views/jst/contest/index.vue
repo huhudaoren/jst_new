@@ -224,6 +224,7 @@ import {
 } from '@/api/jst/event/admin-contest'
 import ContestDetail from './detail.vue'
 import ContestEdit from './edit.vue'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 export default {
   name: 'JstAdminContestIndex',
@@ -240,6 +241,7 @@ export default {
       detailVisible: false,
       editVisible: false,
       currentContestId: null,
+      lastAutoOpenKey: '',
       auditVisible: false,
       queryParams: {
         pageNum: 1,
@@ -312,6 +314,14 @@ export default {
   created() {
     this.getList()
   },
+  watch: {
+    '$route.query': {
+      handler() {
+        this.tryAutoOpenFromRoute()
+      },
+      deep: true
+    }
+  },
   methods: {
     async getList() {
       this.loading = true
@@ -321,6 +331,7 @@ export default {
         this.total = Number(res.total || 0)
       } finally {
         this.loading = false
+        this.tryAutoOpenFromRoute()
       }
     },
     handleQuery() {
@@ -335,6 +346,17 @@ export default {
     openDetail(row) {
       this.currentContestId = row.contestId
       this.detailVisible = true
+    },
+    tryAutoOpenFromRoute() {
+      const query = this.$route.query || {}
+      if (query.autoOpen !== '1' || !query.contestId) return
+      const key = `contest-${query.contestId}-${query.autoOpen}`
+      if (this.lastAutoOpenKey === key) return
+      const target = this.contestList.find(item => String(item.contestId) === String(query.contestId))
+      const contestId = Number(query.contestId)
+      if (!target && !contestId) return
+      this.lastAutoOpenKey = key
+      this.openDetail(target || { contestId })
     },
     openEdit(row) {
       this.currentContestId = row.contestId
@@ -400,8 +422,7 @@ export default {
       return row.auditStatus === 'online'
     },
     formatMoney(value) {
-      const n = Number(value || 0)
-      return n.toFixed(2)
+      return formatMoneyUtil(value).replace('\u00A5', '')
     }
   }
 }

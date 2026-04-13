@@ -53,6 +53,12 @@ public class JstStudentChannelBinding extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 学生昵称（JOIN查出，非持久化） */
+    private String studentName;
+
+    /** 渠道名称（JOIN查出，非持久化） */
+    private String channelName;
+
     public void setBindingId(Long bindingId) 
     {
         this.bindingId = bindingId;
@@ -141,6 +147,26 @@ public class JstStudentChannelBinding extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setStudentName(String studentName)
+    {
+        this.studentName = studentName;
+    }
+
+    public String getStudentName()
+    {
+        return studentName;
+    }
+
+    public void setChannelName(String channelName)
+    {
+        this.channelName = channelName;
+    }
+
+    public String getChannelName()
+    {
+        return channelName;
     }
 
     @Override

@@ -57,6 +57,9 @@ public class JstPointsLedger extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 持有者名称（JOIN查出，非持久化） */
+    private String ownerName;
+
     public void setLedgerId(Long ledgerId) 
     {
         this.ledgerId = ledgerId;
@@ -165,6 +168,16 @@ public class JstPointsLedger extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setOwnerName(String ownerName)
+    {
+        this.ownerName = ownerName;
+    }
+
+    public String getOwnerName()
+    {
+        return ownerName;
     }
 
     @Override

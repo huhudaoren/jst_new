@@ -13,7 +13,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="核销时间" prop="writeoffTime">
-        <el-date-picker v-model="queryParams.writeoffTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="精确时间" clearable style="width:190px" />
+        <el-date-picker v-model="queryParams.writeoffTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="精确时间" clearable class="date-picker-width" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>

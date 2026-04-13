@@ -77,7 +77,7 @@
     <jst-empty
       v-else-if="!pageLoading"
       icon="📝"
-      text="报名详情暂未返回。"
+      text="暂无报名详情"
     />
 
     <!-- POLISH-BATCH2 B: 优惠券选择 (仅已通过待支付时可见) -->

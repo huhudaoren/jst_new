@@ -175,7 +175,10 @@ export default {
       try {
         const res = await getJst_audit_log(row.auditId)
         this.detail = res.data
-      } catch (_) { this.detail = row }
+      } catch (e) {
+        this.$modal.msgError('加载详情失败')
+        this.detail = row
+      }
     },
     operatorTypeLabel(t) { return { admin: '管理员', partner: '赛事方', channel: '渠道方', system: '系统' }[t] || t || '--' },
     actionLabel(a) { const found = ACTION_OPTIONS.find(o => o.value === a); return found ? found.label : a || '--' },

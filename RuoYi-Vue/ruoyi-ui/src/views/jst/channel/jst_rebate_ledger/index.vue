@@ -39,8 +39,14 @@
         <div v-for="row in list" :key="row.ledgerId" class="mobile-card">
           <div class="mobile-card-top">
             <div>
-              <div class="mobile-title">渠道 #{{ row.channelId || '--' }}</div>
-              <div class="mobile-sub">订单 #{{ row.orderId || '--' }}</div>
+              <div class="mobile-title">
+                <el-link v-if="row.channelName && row.channelId" type="primary" :underline="false" @click="goChannel(row)">{{ row.channelName }}</el-link>
+                <span v-else>{{ row.channelName || row.channelId || '--' }}</span>
+              </div>
+              <div class="mobile-sub">
+                <el-link v-if="row.orderNo && row.orderId" type="primary" :underline="false" @click="goOrder(row)">{{ row.orderNo }}</el-link>
+                <span v-else>{{ row.orderNo || row.orderId || '--' }}</span>
+              </div>
             </div>
             <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </div>
@@ -60,8 +66,22 @@
     <!-- PC 端表格 -->
     <el-table v-else v-loading="loading" :data="list">
       <el-table-column label="台账ID" prop="ledgerId" width="80" />
-      <el-table-column label="渠道ID" prop="channelId" width="90" />
-      <el-table-column label="订单ID" prop="orderId" width="90" />
+      <el-table-column label="渠道" min-width="140" show-overflow-tooltip>
+        <template slot-scope="scope">
+          <el-link v-if="scope.row.channelName && scope.row.channelId" type="primary" :underline="false" @click="goChannel(scope.row)">
+            {{ scope.row.channelName }}
+          </el-link>
+          <span v-else>{{ scope.row.channelName || scope.row.channelId || '--' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="订单号" min-width="140" show-overflow-tooltip>
+        <template slot-scope="scope">
+          <el-link v-if="scope.row.orderNo && scope.row.orderId" type="primary" :underline="false" @click="goOrder(scope.row)">
+            {{ scope.row.orderNo }}
+          </el-link>
+          <span v-else>{{ scope.row.orderNo || scope.row.orderId || '--' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="方向" width="90">
         <template slot-scope="scope">
           <el-tag size="small" :type="scope.row.direction === 'positive' ? 'success' : 'danger'">{{ scope.row.direction === 'positive' ? '收入' : '扣减' }}</el-tag>
@@ -100,8 +120,14 @@
       <div v-if="detail" class="drawer-body">
         <el-descriptions :column="isMobile ? 1 : 2" border>
           <el-descriptions-item label="台账ID">{{ detail.ledgerId }}</el-descriptions-item>
-          <el-descriptions-item label="渠道ID">{{ detail.channelId }}</el-descriptions-item>
-          <el-descriptions-item label="订单ID">{{ detail.orderId }}</el-descriptions-item>
+          <el-descriptions-item label="渠道">
+            <el-link v-if="detail.channelName && detail.channelId" type="primary" :underline="false" @click="goChannel(detail)">{{ detail.channelName }}</el-link>
+            <span v-else>{{ detail.channelName || detail.channelId || '--' }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="订单号">
+            <el-link v-if="detail.orderNo && detail.orderId" type="primary" :underline="false" @click="goOrder(detail)">{{ detail.orderNo }}</el-link>
+            <span v-else>{{ detail.orderNo || detail.orderId || '--' }}</span>
+          </el-descriptions-item>
           <el-descriptions-item label="赛事ID">{{ detail.contestId }}</el-descriptions-item>
           <el-descriptions-item label="规则ID">{{ detail.ruleId }}</el-descriptions-item>
           <el-descriptions-item label="方向">
@@ -127,6 +153,7 @@
 
 <script>
 import { listJst_rebate_ledger, getJst_rebate_ledger } from '@/api/jst/channel/jst_rebate_ledger'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 const STATUS_META = {
   pending_accrual: { label: '待计提', type: 'info' },
@@ -178,11 +205,30 @@ export default {
       try {
         const res = await getJst_rebate_ledger(row.ledgerId)
         this.detail = res.data
-      } catch (_) { this.detail = row }
+      } catch (e) {
+        this.$modal.msgError('加载详情失败')
+        this.detail = row
+      }
+    },
+    goChannel(row) {
+      const channelId = row && row.channelId
+      if (!channelId) return
+      this.$router.push({
+        path: '/jst/channel',
+        query: { channelId: String(channelId), autoOpen: '1' }
+      }).catch(() => {})
+    },
+    goOrder(row) {
+      const orderId = row && row.orderId
+      if (!orderId) return
+      this.$router.push({
+        path: '/jst/order/admin-order',
+        query: { orderId: String(orderId), autoOpen: '1' }
+      }).catch(() => {})
     },
     statusLabel(status) { return (STATUS_META[status] && STATUS_META[status].label) || status || '--' },
     statusType(status) { return (STATUS_META[status] && STATUS_META[status].type) || 'info' },
-    formatMoney(v) { return '\u00a5' + Number(v || 0).toFixed(2) }
+    formatMoney(v) { return formatMoneyUtil(v) }
   }
 }
 </script>

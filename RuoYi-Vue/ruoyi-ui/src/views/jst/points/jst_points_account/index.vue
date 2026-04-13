@@ -29,10 +29,14 @@
             <el-tag size="mini" :type="ownerTypeTagType(row.ownerType)">{{ ownerTypeLabel(row.ownerType) }}</el-tag>
           </div>
           <div class="mobile-card__meta">
-            <span>持有者ID：{{ row.ownerId }}</span>
+            <span>
+              持有者：
+              <el-link v-if="row.ownerName && row.ownerId" type="primary" :underline="false" @click="goUser(row)">{{ row.ownerName }}</el-link>
+              <span v-else>{{ row.ownerName || row.ownerId || '--' }}</span>
+            </span>
             <span class="points-positive">可用 {{ row.availablePoints || 0 }}</span>
             <span class="points-negative">冻结 {{ row.frozenPoints || 0 }}</span>
-            <span>等级ID：{{ row.currentLevelId || '--' }}</span>
+            <span>等级：{{ row.levelName || row.currentLevelId || '--' }}</span>
           </div>
           <div class="mobile-card__actions">
             <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
@@ -49,7 +53,14 @@
           <el-tag size="small" :type="ownerTypeTagType(row.ownerType)">{{ ownerTypeLabel(row.ownerType) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="持有者ID" prop="ownerId" min-width="120" />
+      <el-table-column label="持有者" min-width="150" show-overflow-tooltip>
+        <template slot-scope="{ row }">
+          <el-link v-if="row.ownerName && row.ownerId" type="primary" :underline="false" @click="goUser(row)">
+            {{ row.ownerName }}
+          </el-link>
+          <span v-else>{{ row.ownerName || row.ownerId || '--' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="可用积分" min-width="100" align="right">
         <template slot-scope="{ row }">
           <span class="points-positive">{{ row.availablePoints || 0 }}</span>
@@ -63,7 +74,9 @@
       <el-table-column label="累计获取" prop="totalEarn" min-width="100" align="right" />
       <el-table-column label="累计消耗" prop="totalSpend" min-width="100" align="right" />
       <el-table-column label="成长值" prop="growthValue" min-width="100" align="right" />
-      <el-table-column label="当前等级ID" prop="currentLevelId" min-width="100" />
+      <el-table-column label="当前等级" min-width="120" show-overflow-tooltip>
+        <template slot-scope="{ row }">{{ row.levelName || row.currentLevelId || '--' }}</template>
+      </el-table-column>
       <el-table-column label="更新时间" min-width="160">
         <template slot-scope="{ row }">{{ parseTime(row.updateTime) }}</template>
       </el-table-column>
@@ -79,13 +92,17 @@
     <el-drawer :title="'积分账户详情 #' + (detailData.accountId || '')" :visible.sync="detailVisible" :size="isMobile ? '100%' : '520px'" append-to-body>
       <div class="detail-body">
         <el-descriptions :column="1" border size="small">
-          <el-descriptions-item label="持有者">{{ ownerTypeLabel(detailData.ownerType) }} / {{ detailData.ownerId }}</el-descriptions-item>
+          <el-descriptions-item label="持有者">
+            {{ ownerTypeLabel(detailData.ownerType) }} /
+            <el-link v-if="detailData.ownerName && detailData.ownerId" type="primary" :underline="false" @click="goUser(detailData)">{{ detailData.ownerName }}</el-link>
+            <span v-else>{{ detailData.ownerName || detailData.ownerId || '--' }}</span>
+          </el-descriptions-item>
           <el-descriptions-item label="可用积分"><span class="points-positive">{{ detailData.availablePoints || 0 }}</span></el-descriptions-item>
           <el-descriptions-item label="冻结积分"><span class="points-negative">{{ detailData.frozenPoints || 0 }}</span></el-descriptions-item>
           <el-descriptions-item label="累计获取">{{ detailData.totalEarn || 0 }}</el-descriptions-item>
           <el-descriptions-item label="累计消耗">{{ detailData.totalSpend || 0 }}</el-descriptions-item>
           <el-descriptions-item label="成长值">{{ detailData.growthValue || 0 }}</el-descriptions-item>
-          <el-descriptions-item label="当前等级ID">{{ detailData.currentLevelId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="当前等级">{{ detailData.levelName || detailData.currentLevelId || '--' }}</el-descriptions-item>
         </el-descriptions>
 
         <div class="drawer-block-title">最近流水</div>
@@ -206,6 +223,14 @@ export default {
       }).finally(() => {
         this.ledgerLoading = false
       })
+    },
+    goUser(row) {
+      const userId = row && (row.ownerId || row.userId)
+      if (!userId) return
+      this.$router.push({
+        path: '/jst/user',
+        query: { userId: String(userId), autoOpen: '1' }
+      }).catch(() => {})
     }
   }
 }

@@ -167,7 +167,10 @@ export default {
       try {
         const res = await getJst_channel_auth_apply(row.applyId)
         this.detail = res.data
-      } catch (_) { this.detail = row }
+      } catch (e) {
+        this.$modal.msgError('加载详情失败')
+        this.detail = row
+      }
     },
     statusLabel(s) { return (STATUS_META[s] && STATUS_META[s].label) || s || '--' },
     statusType(s) { return (STATUS_META[s] && STATUS_META[s].type) || 'info' },

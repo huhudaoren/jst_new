@@ -64,8 +64,8 @@
           </div>
           <div class="mobile-card__actions">
             <el-button type="text" size="mini" @click="handleEdit(row)" v-hasPermi="['jst:points:mall_goods:edit']">编辑</el-button>
-            <el-button v-if="row.status !== 'on'" type="text" size="mini" @click="handleToggle(row, 'on')">上架</el-button>
-            <el-button v-if="row.status === 'on'" type="text" size="mini" @click="handleToggle(row, 'off')">下架</el-button>
+            <el-button v-if="row.status !== 'on'" type="text" size="mini" @click="handleToggle(row, 'on')" v-hasPermi="['jst:points:mall_goods:edit']">上架</el-button>
+            <el-button v-if="row.status === 'on'" type="text" size="mini" @click="handleToggle(row, 'off')" v-hasPermi="['jst:points:mall_goods:edit']">下架</el-button>
           </div>
         </div>
       </div>
@@ -96,8 +96,8 @@
       <el-table-column label="操作" fixed="right" width="180">
         <template slot-scope="{ row }">
           <el-button type="text" size="mini" @click="handleEdit(row)" v-hasPermi="['jst:points:mall_goods:edit']">编辑</el-button>
-          <el-button v-if="row.status !== 'on'" type="text" size="mini" @click="handleToggle(row, 'on')">上架</el-button>
-          <el-button v-if="row.status === 'on'" type="text" size="mini" @click="handleToggle(row, 'off')">下架</el-button>
+          <el-button v-if="row.status !== 'on'" type="text" size="mini" @click="handleToggle(row, 'on')" v-hasPermi="['jst:points:mall_goods:edit']">上架</el-button>
+          <el-button v-if="row.status === 'on'" type="text" size="mini" @click="handleToggle(row, 'off')" v-hasPermi="['jst:points:mall_goods:edit']">下架</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -191,6 +191,7 @@ export default {
       queryParams: { pageNum: 1, pageSize: 10, goodsName: null, goodsType: null, status: null },
       dialogVisible: false,
       dialogTitle: '',
+      lastAutoOpenKey: '',
       form: {},
       formRules: {
         goodsName: [{ required: true, message: '商品名称不能为空', trigger: 'blur' }],
@@ -204,6 +205,14 @@ export default {
     isMobile() { return this.$store.state.app.device === 'mobile' }
   },
   created() { this.getList() },
+  watch: {
+    '$route.query': {
+      handler() {
+        this.tryAutoOpenFromRoute()
+      },
+      deep: true
+    }
+  },
   methods: {
     statusType(s) { return s === 'on' ? 'success' : s === 'off' ? 'info' : 'warning' },
     statusLabel(s) { return s === 'on' ? '上架' : s === 'off' ? '下架' : '草稿' },
@@ -217,7 +226,10 @@ export default {
       listMallGoods(this.queryParams).then(res => {
         this.list = res.rows || []
         this.total = res.total || 0
-      }).finally(() => { this.loading = false })
+      }).finally(() => {
+        this.loading = false
+        this.tryAutoOpenFromRoute()
+      })
     },
     handleQuery() { this.queryParams.pageNum = 1; this.getList() },
     resetQuery() { this.$refs.queryForm && this.$refs.queryForm.resetFields(); this.handleQuery() },
@@ -236,6 +248,17 @@ export default {
         this.dialogTitle = '编辑商品'
         this.dialogVisible = true
       })
+    },
+    tryAutoOpenFromRoute() {
+      const query = this.$route.query || {}
+      if (query.autoOpen !== '1' || !query.goodsId) return
+      const key = `mall-${query.goodsId}-${query.autoOpen}`
+      if (this.lastAutoOpenKey === key) return
+      const target = this.list.find(item => String(item.goodsId) === String(query.goodsId))
+      const goodsId = Number(query.goodsId)
+      if (!target && !goodsId) return
+      this.lastAutoOpenKey = key
+      this.handleEdit(target || { goodsId })
     },
     handleSubmit() {
       this.$refs.form.validate(valid => {

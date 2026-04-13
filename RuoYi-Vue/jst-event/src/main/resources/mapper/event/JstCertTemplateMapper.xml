@@ -19,28 +19,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="ownerName"    column="owner_name_"    />
     </resultMap>
 
     <sql id="selectJstCertTemplateVo">
-        select template_id, template_name, owner_type, owner_id, bg_image, layout_json, audit_status, status, create_by, create_time, update_by, update_time, remark, del_flag from jst_cert_template
+        select t.*,
+               ct.contest_name as owner_name_
+        from jst_cert_template t
+        left join jst_contest ct on t.owner_id = ct.contest_id and ct.del_flag = '0'
     </sql>
 
     <select id="selectJstCertTemplateList" parameterType="JstCertTemplate" resultMap="JstCertTemplateResult">
         <include refid="selectJstCertTemplateVo"/>
-        <where>  
-            <if test="templateName != null  and templateName != ''"> and template_name like concat('%', #{templateName}, '%')</if>
-            <if test="ownerType != null  and ownerType != ''"> and owner_type = #{ownerType}</if>
-            <if test="ownerId != null "> and owner_id = #{ownerId}</if>
-            <if test="bgImage != null  and bgImage != ''"> and bg_image = #{bgImage}</if>
-            <if test="layoutJson != null  and layoutJson != ''"> and layout_json = #{layoutJson}</if>
-            <if test="auditStatus != null  and auditStatus != ''"> and audit_status = #{auditStatus}</if>
-            <if test="status != null "> and status = #{status}</if>
+        <where>
+            <if test="templateName != null  and templateName != ''"> and t.template_name like concat('%', #{templateName}, '%')</if>
+            <if test="ownerType != null  and ownerType != ''"> and t.owner_type = #{ownerType}</if>
+            <if test="ownerId != null "> and t.owner_id = #{ownerId}</if>
+            <if test="bgImage != null  and bgImage != ''"> and t.bg_image = #{bgImage}</if>
+            <if test="layoutJson != null  and layoutJson != ''"> and t.layout_json = #{layoutJson}</if>
+            <if test="auditStatus != null  and auditStatus != ''"> and t.audit_status = #{auditStatus}</if>
+            <if test="status != null "> and t.status = #{status}</if>
         </where>
     </select>
     
     <select id="selectJstCertTemplateByTemplateId" parameterType="Long" resultMap="JstCertTemplateResult">
         <include refid="selectJstCertTemplateVo"/>
-        where template_id = #{templateId}
+        where t.template_id = #{templateId}
     </select>
 
     <insert id="insertJstCertTemplate" parameterType="JstCertTemplate" useGeneratedKeys="true" keyProperty="templateId">

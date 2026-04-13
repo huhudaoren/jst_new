@@ -99,6 +99,7 @@
 
 <script>
 import { listChannel, getChannel, updateChannel } from '@/api/admin/channel'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 export default {
   name: 'ChannelList',
@@ -116,7 +117,8 @@ export default {
         status: undefined
       },
       detailOpen: false,
-      detailData: null
+      detailData: null,
+      lastAutoOpenKey: ''
     }
   },
   computed: {
@@ -127,13 +129,24 @@ export default {
   created() {
     this.getList()
   },
+  watch: {
+    '$route.query': {
+      handler() {
+        this.tryAutoOpenFromRoute()
+      },
+      deep: true
+    }
+  },
   methods: {
     getList() {
       this.loading = true
       listChannel(this.queryParams).then(res => {
         this.list = res.rows || []
         this.total = res.total || 0
-      }).finally(() => { this.loading = false })
+      }).finally(() => {
+        this.loading = false
+        this.tryAutoOpenFromRoute()
+      })
     },
     handleQuery() {
       this.queryParams.pageNum = 1
@@ -145,7 +158,7 @@ export default {
     },
     formatMoney(val) {
       if (!val && val !== 0) return '-'
-      return Number(val).toFixed(2)
+      return formatMoneyUtil(val).replace('\u00A5', '')
     },
     riskTagType(flag) {
       const map = { 0: 'success', 1: 'danger', 2: 'warning' }
@@ -161,6 +174,17 @@ export default {
       getChannel(row.channelId).then(res => {
         this.detailData = res.data || row
       }).catch(() => {})
+    },
+    tryAutoOpenFromRoute() {
+      const query = this.$route.query || {}
+      if (query.autoOpen !== '1' || !query.channelId) return
+      const key = `channel-${query.channelId}-${query.autoOpen}`
+      if (this.lastAutoOpenKey === key) return
+      const target = this.list.find(item => String(item.channelId) === String(query.channelId))
+      const channelId = Number(query.channelId)
+      if (!target && !channelId) return
+      this.lastAutoOpenKey = key
+      this.handleDetail(target || { channelId })
     },
     handleToggle(row, newStatus) {
       const action = newStatus === '1' ? '停用' : '启用'

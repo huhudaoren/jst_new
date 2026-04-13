@@ -57,6 +57,12 @@ public class JstPointsAccount extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 持有者名称（JOIN查出，非持久化） */
+    private String ownerName;
+
+    /** 等级名称（JOIN查出，非持久化） */
+    private String levelName;
+
     public void setAccountId(Long accountId) 
     {
         this.accountId = accountId;
@@ -165,6 +171,26 @@ public class JstPointsAccount extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setOwnerName(String ownerName)
+    {
+        this.ownerName = ownerName;
+    }
+
+    public String getOwnerName()
+    {
+        return ownerName;
+    }
+
+    public void setLevelName(String levelName)
+    {
+        this.levelName = levelName;
+    }
+
+    public String getLevelName()
+    {
+        return levelName;
     }
 
     @Override

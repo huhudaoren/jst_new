@@ -62,6 +62,12 @@ public class JstRebateRule extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 赛事名称（JOIN查出，非持久化） */
+    private String contestName;
+
+    /** 渠道名称（JOIN查出，非持久化） */
+    private String channelName;
+
     public void setRuleId(Long ruleId) 
     {
         this.ruleId = ruleId;
@@ -170,6 +176,26 @@ public class JstRebateRule extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setContestName(String contestName)
+    {
+        this.contestName = contestName;
+    }
+
+    public String getContestName()
+    {
+        return contestName;
+    }
+
+    public void setChannelName(String channelName)
+    {
+        this.channelName = channelName;
+    }
+
+    public String getChannelName()
+    {
+        return channelName;
     }
 
     @Override

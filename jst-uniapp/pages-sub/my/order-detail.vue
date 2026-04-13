@@ -103,7 +103,7 @@
     <jst-empty
       v-else-if="!pageLoading"
       icon="🧾"
-      text="订单详情暂未返回。"
+      text="暂无订单详情"
     />
 
     <view v-if="showActions" class="order-detail-page__bottom">

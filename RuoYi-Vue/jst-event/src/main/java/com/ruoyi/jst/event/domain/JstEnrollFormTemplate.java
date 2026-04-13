@@ -56,6 +56,9 @@ public class JstEnrollFormTemplate extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 所属赛事名称（JOIN查出，非持久化） */
+    private String ownerName;
+
     public void setTemplateId(Long templateId) 
     {
         this.templateId = templateId;
@@ -154,6 +157,16 @@ public class JstEnrollFormTemplate extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setOwnerName(String ownerName)
+    {
+        this.ownerName = ownerName;
+    }
+
+    public String getOwnerName()
+    {
+        return ownerName;
     }
 
     @Override

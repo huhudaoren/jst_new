@@ -34,7 +34,12 @@
           <div class="mobile-card-top">
             <div>
               <div class="mobile-title">{{ row.settlementNo || '--' }}</div>
-              <div class="mobile-sub">赛事方 #{{ row.partnerId || '--' }} / 赛事 #{{ row.contestId || '--' }}</div>
+              <div class="mobile-sub">
+                <span>赛事方 {{ row.partnerName || row.partnerId || '--' }}</span>
+                <span> / 赛事 </span>
+                <el-link v-if="row.contestName && row.contestId" type="primary" :underline="false" @click="goContest(row)">{{ row.contestName }}</el-link>
+                <span v-else>{{ row.contestName || row.contestId || '--' }}</span>
+              </div>
             </div>
             <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </div>
@@ -54,8 +59,17 @@
     <el-table v-else v-loading="loading" :data="list">
       <el-table-column label="ID" prop="eventSettlementId" width="70" />
       <el-table-column label="结算单号" prop="settlementNo" min-width="160" show-overflow-tooltip />
-      <el-table-column label="赛事方" prop="partnerId" width="90" />
-      <el-table-column label="赛事" prop="contestId" width="80" />
+      <el-table-column label="赛事方" min-width="140" show-overflow-tooltip>
+        <template slot-scope="scope">{{ scope.row.partnerName || scope.row.partnerId || '--' }}</template>
+      </el-table-column>
+      <el-table-column label="赛事" min-width="160" show-overflow-tooltip>
+        <template slot-scope="scope">
+          <el-link v-if="scope.row.contestName && scope.row.contestId" type="primary" :underline="false" @click="goContest(scope.row)">
+            {{ scope.row.contestName }}
+          </el-link>
+          <span v-else>{{ scope.row.contestName || scope.row.contestId || '--' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="结算金额" min-width="130" align="right">
         <template slot-scope="scope"><strong class="amount-brand">{{ formatMoney(scope.row.finalAmount) }}</strong></template>
       </el-table-column>
@@ -88,8 +102,11 @@
         <el-descriptions :column="isMobile ? 1 : 2" border>
           <el-descriptions-item label="结算ID">{{ detail.eventSettlementId }}</el-descriptions-item>
           <el-descriptions-item label="结算单号">{{ detail.settlementNo }}</el-descriptions-item>
-          <el-descriptions-item label="赛事方ID">{{ detail.partnerId }}</el-descriptions-item>
-          <el-descriptions-item label="赛事ID">{{ detail.contestId }}</el-descriptions-item>
+          <el-descriptions-item label="赛事方">{{ detail.partnerName || detail.partnerId || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="赛事">
+            <el-link v-if="detail.contestName && detail.contestId" type="primary" :underline="false" @click="goContest(detail)">{{ detail.contestName }}</el-link>
+            <span v-else>{{ detail.contestName || detail.contestId || '--' }}</span>
+          </el-descriptions-item>
           <el-descriptions-item label="状态"><el-tag size="small" :type="statusType(detail.status)">{{ statusLabel(detail.status) }}</el-tag></el-descriptions-item>
           <el-descriptions-item label="总挂牌金额">{{ formatMoney(detail.totalListAmount) }}</el-descriptions-item>
           <el-descriptions-item label="优惠券抵扣">{{ formatMoney(detail.totalCouponAmount) }}</el-descriptions-item>
@@ -114,6 +131,7 @@
 
 <script>
 import { listJst_event_settlement, getJst_event_settlement } from '@/api/jst/channel/jst_event_settlement'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 const STATUS_META = {
   pending_confirm: { label: '待确认', type: 'info' },
@@ -164,11 +182,22 @@ export default {
       try {
         const res = await getJst_event_settlement(row.eventSettlementId)
         this.detail = res.data
-      } catch (_) { this.detail = row }
+      } catch (e) {
+        this.$modal.msgError('加载详情失败')
+        this.detail = row
+      }
+    },
+    goContest(row) {
+      const contestId = row && row.contestId
+      if (!contestId) return
+      this.$router.push({
+        path: '/jst/contest',
+        query: { contestId: String(contestId), autoOpen: '1' }
+      }).catch(() => {})
     },
     statusLabel(status) { return (STATUS_META[status] && STATUS_META[status].label) || status || '--' },
     statusType(status) { return (STATUS_META[status] && STATUS_META[status].type) || 'info' },
-    formatMoney(v) { return '\u00a5' + Number(v || 0).toFixed(2) }
+    formatMoney(v) { return formatMoneyUtil(v) }
   }
 }
 </script>

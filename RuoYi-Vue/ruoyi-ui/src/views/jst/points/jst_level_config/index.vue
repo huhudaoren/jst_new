@@ -91,12 +91,12 @@
         <el-row :gutter="12">
           <el-col :xs="24" :sm="12">
             <el-form-item label="等级序号" prop="levelNo">
-              <el-input-number v-model="form.levelNo" :min="1" :max="9999" controls-position="right" style="width:100%" />
+              <el-input-number v-model="form.levelNo" :min="1" :max="9999" controls-position="right" class="full-width" />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
             <el-form-item label="成长阈值" prop="growthThreshold">
-              <el-input-number v-model="form.growthThreshold" :min="0" :max="99999999" controls-position="right" style="width:100%" />
+              <el-input-number v-model="form.growthThreshold" :min="0" :max="99999999" controls-position="right" class="full-width" />
             </el-form-item>
           </el-col>
         </el-row>

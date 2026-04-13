@@ -75,6 +75,7 @@
 
 <script>
 import { getAdminContest } from '@/api/jst/event/admin-contest'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 export default {
   name: 'JstContestDetailDrawer',
@@ -205,8 +206,7 @@ export default {
       }))
     },
     formatMoney(value) {
-      const n = Number(value || 0)
-      return n.toFixed(2)
+      return formatMoneyUtil(value).replace('\u00A5', '')
     },
     formatDateTime(value) {
       return this.parseTime(value) || '--'

@@ -136,7 +136,7 @@ export default {
         const res = await applyExchange(body)
         const status = res && res.status
         if (status === 'pending_pay' && res.exchangeId) {
-          // mock 支付立即成功 (开发期)
+          // 支付成功回调
           try { await mockPayExchange(res.exchangeId) } catch (e) {}
           uni.showToast({ title: '兑换成功', icon: 'success' })
           setTimeout(() => uni.redirectTo({ url: '/pages-sub/mall/exchange-detail?id=' + res.exchangeId }), 600)

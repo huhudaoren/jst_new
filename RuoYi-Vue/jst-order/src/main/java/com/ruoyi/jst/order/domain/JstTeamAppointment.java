@@ -72,6 +72,9 @@ public class JstTeamAppointment extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 赛事名称（JOIN查出，非持久化） */
+    private String contestName;
+
     public void setTeamAppointmentId(Long teamAppointmentId) 
     {
         this.teamAppointmentId = teamAppointmentId;
@@ -210,6 +213,16 @@ public class JstTeamAppointment extends BaseEntity
     public String getDelFlag() 
     {
         return delFlag;
+    }
+
+    public void setContestName(String contestName)
+    {
+        this.contestName = contestName;
+    }
+
+    public String getContestName()
+    {
+        return contestName;
     }
 
     @Override

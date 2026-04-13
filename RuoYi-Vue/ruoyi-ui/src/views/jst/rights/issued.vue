@@ -51,7 +51,7 @@
             <span>有效至：{{ parseTime(row.validEnd, '{y}-{m}-{d}') || '--' }}</span>
           </div>
           <div class="mobile-card__actions">
-            <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
+            <el-button type="text" size="mini" @click="handleDetail(row)" v-hasPermi="['jst:marketing:user_rights:list']">详情</el-button>
           </div>
         </div>
       </div>
@@ -75,7 +75,7 @@
       </el-table-column>
       <el-table-column label="操作" width="90" fixed="right">
         <template slot-scope="{ row }">
-          <el-button type="text" size="mini" @click="handleDetail(row)">详情</el-button>
+          <el-button type="text" size="mini" @click="handleDetail(row)" v-hasPermi="['jst:marketing:user_rights:list']">详情</el-button>
         </template>
       </el-table-column>
     </el-table>

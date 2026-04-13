@@ -156,6 +156,7 @@
 
 <script>
 import { listJst_payment_record, getJst_payment_record } from '@/api/jst/order/jst_payment_record'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 const PAY_METHOD_MAP = {
   wechat: '微信支付',
@@ -309,8 +310,7 @@ export default {
       return VOUCHER_AUDIT_MAP[value] || value || '--'
     },
     formatMoney(value) {
-      const n = Number(value || 0)
-      return '\u00A5' + (n / 100).toFixed(2)
+      return formatMoneyUtil(value, true)
     }
   }
 }
