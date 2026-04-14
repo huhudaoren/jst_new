@@ -136,18 +136,56 @@
             :disabled="!canAudit"
             :loading="submitting"
             v-hasRole="['jst_partner']"
-            @click="handleAudit('approved')"
+            @click="handleApprove"
           >
             通过
           </el-button>
         </div>
       </div>
+    <el-dialog
+      title="审核通过 — 成绩打分"
+      :visible.sync="scoreDialogVisible"
+      width="560px"
+      append-to-body
+      :close-on-click-modal="false"
+    >
+      <div v-if="scoreItems.length" class="score-panel">
+        <div class="score-hint">请为本条报名的各成绩项打分，确认后将同步提交审核通过。</div>
+        <el-table :data="scoreItems" border size="small" class="score-table">
+          <el-table-column label="项目名称" prop="itemName" min-width="140" />
+          <el-table-column label="满分" prop="maxScore" width="80" align="center" />
+          <el-table-column label="权重" prop="weight" width="80" align="center" />
+          <el-table-column label="打分" width="140" align="center">
+            <template slot-scope="{ row }">
+              <el-input-number
+                v-model="row.score"
+                :min="0"
+                :max="row.maxScore || 999"
+                :precision="1"
+                :step="1"
+                size="small"
+                controls-position="right"
+                class="score-input"
+              />
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="score-summary">
+          <span>加权总分：</span>
+          <span class="score-total">{{ weightedTotal }}</span>
+        </div>
+      </div>
+      <div slot="footer">
+        <el-button @click="scoreDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitting" @click="submitApproveWithScores">确认通过</el-button>
+      </div>
+    </el-dialog>
     </div>
   </el-drawer>
 </template>
 
 <script>
-import { auditPartnerEnroll, getPartnerEnrollDetail } from '@/api/partner/enroll'
+import { auditPartnerEnroll, getPartnerEnrollDetail, listScoreItems } from '@/api/partner/enroll'
 import { parseTime } from '@/utils/ruoyi'
 
 const STATUS_META = {
@@ -187,7 +225,9 @@ export default {
       detail: {},
       auditForm: {
         auditRemark: ''
-      }
+      },
+      scoreDialogVisible: false,
+      scoreItems: []
     }
   },
   computed: {
@@ -259,6 +299,18 @@ export default {
     },
     auditRecords() {
       return this.buildAuditRecords()
+    },
+    weightedTotal() {
+      if (!this.scoreItems.length) return '--'
+      let total = 0
+      let weightSum = 0
+      this.scoreItems.forEach(item => {
+        const w = Number(item.weight) || 1
+        const s = Number(item.score) || 0
+        total += s * w
+        weightSum += w
+      })
+      return weightSum > 0 ? total.toFixed(1) : '--'
     }
   },
   watch: {
@@ -305,6 +357,46 @@ export default {
     },
     closeDrawer() {
       this.localVisible = false
+    },
+    handleApprove() {
+      if (!this.enrollId || this.submitting) return
+      const contestId = this.detail.contestId
+      if (!contestId) {
+        this.handleAudit('approved')
+        return
+      }
+      listScoreItems(contestId).then(response => {
+        const items = Array.isArray(response.data) ? response.data : (Array.isArray(response.rows) ? response.rows : [])
+        if (items.length > 0) {
+          this.scoreItems = items.map(item => ({ ...item, score: null }))
+          this.scoreDialogVisible = true
+        } else {
+          this.handleAudit('approved')
+        }
+      }).catch(() => {
+        this.handleAudit('approved')
+      })
+    },
+    submitApproveWithScores() {
+      const hasEmpty = this.scoreItems.some(item => item.score === null || item.score === undefined)
+      if (hasEmpty) {
+        this.$modal.msgWarning('请为所有成绩项打分')
+        return
+      }
+      const remark = (this.auditForm.auditRemark || '').trim()
+      this.submitting = true
+      auditPartnerEnroll(this.enrollId, {
+        result: 'approved',
+        auditRemark: remark,
+        scores: this.scoreItems.map(item => ({ itemId: item.itemId || item.id, score: item.score }))
+      }).then(() => {
+        this.$modal.msgSuccess('审核通过并打分成功')
+        this.scoreDialogVisible = false
+        this.$emit('audited')
+        this.loadDetail()
+      }).finally(() => {
+        this.submitting = false
+      })
     },
     handleAudit(result) {
       const remark = (this.auditForm.auditRemark || '').trim()
@@ -740,5 +832,42 @@ export default {
     width: 100%;
     margin-left: 0;
   }
+}
+
+.score-panel {
+  padding: 0 4px;
+}
+
+.score-hint {
+  margin-bottom: 14px;
+  color: #606266;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.score-table {
+  width: 100%;
+}
+
+.score-input {
+  width: 110px;
+}
+
+.score-summary {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #f0f9eb;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #303133;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-total {
+  font-size: 22px;
+  font-weight: 700;
+  color: #67c23a;
 }
 </style>

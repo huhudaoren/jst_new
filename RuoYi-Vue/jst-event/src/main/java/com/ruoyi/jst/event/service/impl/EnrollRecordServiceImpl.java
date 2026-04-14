@@ -13,22 +13,30 @@ import com.ruoyi.jst.common.id.SnowflakeIdWorker;
 import com.ruoyi.jst.common.lock.JstLockTemplate;
 import com.ruoyi.jst.common.security.SecurityCheck;
 import com.ruoyi.jst.common.util.MaskUtil;
+import com.ruoyi.jst.common.service.BizNoGenerateService;
+import com.ruoyi.jst.event.domain.JstCertRecord;
 import com.ruoyi.jst.event.domain.JstContest;
 import com.ruoyi.jst.event.domain.JstEnrollFormTemplate;
 import com.ruoyi.jst.event.domain.JstEnrollRecord;
+import com.ruoyi.jst.event.domain.JstScoreItem;
+import com.ruoyi.jst.event.domain.JstScoreRecord;
 import com.ruoyi.jst.event.dto.EnrollAuditReqDTO;
 import com.ruoyi.jst.event.dto.EnrollDraftDTO;
 import com.ruoyi.jst.event.dto.EnrollQueryReqDTO;
 import com.ruoyi.jst.event.dto.EnrollSubmitDTO;
 import com.ruoyi.jst.event.dto.EnrollSupplementDTO;
+import com.ruoyi.jst.event.dto.ScoreItemReqDTO;
 import com.ruoyi.jst.event.enums.ContestAuditStatus;
 import com.ruoyi.jst.event.enums.ContestBizStatus;
 import com.ruoyi.jst.event.enums.EnrollAuditStatus;
 import com.ruoyi.jst.event.enums.EnrollMaterialStatus;
 import com.ruoyi.jst.event.mapper.EnrollRecordMapperExt;
+import com.ruoyi.jst.event.mapper.JstCertRecordMapper;
 import com.ruoyi.jst.event.mapper.JstContestMapper;
 import com.ruoyi.jst.event.mapper.JstEnrollFormTemplateMapper;
 import com.ruoyi.jst.event.mapper.JstEnrollRecordMapper;
+import com.ruoyi.jst.event.mapper.JstScoreItemMapper;
+import com.ruoyi.jst.event.mapper.JstScoreRecordMapper;
 import com.ruoyi.jst.event.service.EnrollRecordService;
 import com.ruoyi.jst.event.vo.EnrollDetailVO;
 import com.ruoyi.jst.event.vo.EnrollListVO;
@@ -41,10 +49,13 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -71,6 +82,10 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
     @Autowired private JstLockTemplate jstLockTemplate;
     @Autowired private SnowflakeIdWorker snowflakeIdWorker;
     @Autowired private ApplicationEventPublisher eventPublisher;
+    @Autowired private JstScoreItemMapper jstScoreItemMapper;
+    @Autowired private JstScoreRecordMapper jstScoreRecordMapper;
+    @Autowired private JstCertRecordMapper jstCertRecordMapper;
+    @Autowired private BizNoGenerateService bizNoGenerateService;
 
     /**
      * 保存报名草稿。
@@ -262,15 +277,18 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
     }
 
     /**
-     * 审核报名记录。
+     * 审核报名记录。审核通过时可选传入各成绩项打分，自动写入成绩记录并生成证书编号。
+     *
      * @param enrollId 报名 ID
-     * @param req 审核请求
+     * @param req 审核请求（含可选 scores）
+     * @关联表 jst_enroll_record, jst_score_record, jst_score_item, jst_cert_record
+     * @关联状态机 SM-6
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @OperateLog(module = "赛事", action = "ENROLL_AUDIT", target = "#{enrollId}")
     public void audit(Long enrollId, EnrollAuditReqDTO req) {
-        // TX: 报名审核
+        // TX: 报名审核 + 打分 + 证书编号生成
         // LOCK: lock:enroll:audit:{enrollId}
         jstLockTemplate.execute("lock:enroll:audit:" + enrollId, 3, 5, () -> {
             JstEnrollRecord record = requireEnroll(enrollId);
@@ -284,6 +302,10 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
             if (updated == 0) {
                 throw new ServiceException("报名审核失败，状态已变更，请刷新后重试",
                         BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
+            }
+            // 审核通过 + 有打分 → 写入成绩 + 生成证书编号
+            if (target == EnrollAuditStatus.APPROVED && req.getScores() != null && !req.getScores().isEmpty()) {
+                handleScoreAndCert(record, req.getScores());
             }
             if (target == EnrollAuditStatus.APPROVED || target == EnrollAuditStatus.REJECTED) {
                 JstContest contest = requireContest(record.getContestId());
@@ -303,12 +325,13 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
      * @param enrollIds   报名ID集合
      * @param auditStatus 目标审核状态
      * @param remark      审核备注
+     * @param scores      各成绩项统一打分（批量通过时可选）
      * @return 成功处理条数
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @OperateLog(module = "赛事", action = "ENROLL_BATCH_AUDIT", target = "#{enrollIds}")
-    public int batchAudit(List<Long> enrollIds, String auditStatus, String remark) {
+    public int batchAudit(List<Long> enrollIds, String auditStatus, String remark, List<ScoreItemReqDTO> scores) {
         // TX: 批量审核整批成功或整批失败
         if (enrollIds == null || enrollIds.isEmpty()) {
             throw new ServiceException("报名ID列表不能为空", BizErrorCode.JST_COMMON_PARAM_INVALID.code());
@@ -338,11 +361,96 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
         EnrollAuditReqDTO req = new EnrollAuditReqDTO();
         req.setResult(auditStatus);
         req.setAuditRemark(normalizedRemark);
+        req.setScores(scores);
         for (Long enrollId : uniqueIds) {
             audit(enrollId, req);
             count++;
         }
         return count;
+    }
+
+    /**
+     * 审核通过时处理打分和证书编号生成。
+     * <p>
+     * 1. 校验每个 score item 属于该赛事且分数不超过满分
+     * 2. 计算加权总分写入 jst_score_record
+     * 3. 调用 BizNoGenerateService 生成证书编号写入 jst_cert_record
+     *
+     * @param record 报名记录
+     * @param scores 各成绩项打分
+     * @关联表 jst_score_item, jst_score_record, jst_cert_record
+     */
+    private void handleScoreAndCert(JstEnrollRecord record, List<ScoreItemReqDTO> scores) {
+        Long contestId = record.getContestId();
+        Long enrollId = record.getEnrollId();
+        String operator = currentOperatorName();
+        Date now = DateUtils.getNowDate();
+
+        // 1. 加载赛事的成绩项定义
+        List<JstScoreItem> items = jstScoreItemMapper.selectByContestId(contestId);
+        Map<Long, JstScoreItem> itemMap = new HashMap<>();
+        for (JstScoreItem item : items) {
+            itemMap.put(item.getItemId(), item);
+        }
+
+        // 2. 校验并计算加权总分
+        BigDecimal weightedTotal = BigDecimal.ZERO;
+        List<Map<String, Object>> scoreDetails = new ArrayList<>();
+        for (ScoreItemReqDTO s : scores) {
+            JstScoreItem item = itemMap.get(s.getItemId());
+            if (item == null) {
+                throw new ServiceException("成绩项不存在: itemId=" + s.getItemId(),
+                        BizErrorCode.JST_EVENT_SCORE_NOT_FOUND.code());
+            }
+            if (item.getMaxScore() != null && s.getScore().compareTo(item.getMaxScore()) > 0) {
+                throw new ServiceException("成绩项 [" + item.getItemName() + "] 打分超过满分 " + item.getMaxScore(),
+                        BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+            }
+            BigDecimal weight = item.getWeight() != null ? item.getWeight() : BigDecimal.ONE;
+            weightedTotal = weightedTotal.add(s.getScore().multiply(weight));
+            Map<String, Object> detail = new LinkedHashMap<>();
+            detail.put("itemId", s.getItemId());
+            detail.put("itemName", item.getItemName());
+            detail.put("score", s.getScore());
+            detail.put("maxScore", item.getMaxScore());
+            detail.put("weight", weight);
+            scoreDetails.add(detail);
+        }
+        weightedTotal = weightedTotal.setScale(2, RoundingMode.HALF_UP);
+
+        // 3. 写入成绩记录
+        JstScoreRecord scoreRecord = new JstScoreRecord();
+        scoreRecord.setContestId(contestId);
+        scoreRecord.setEnrollId(enrollId);
+        scoreRecord.setUserId(record.getUserId());
+        scoreRecord.setParticipantId(record.getParticipantId());
+        scoreRecord.setScoreValue(weightedTotal);
+        scoreRecord.setAuditStatus("approved");
+        scoreRecord.setPublishStatus("unpublished");
+        scoreRecord.setRemark(JSON.toJSONString(scoreDetails));
+        scoreRecord.setCreateBy(operator);
+        scoreRecord.setCreateTime(now);
+        scoreRecord.setUpdateBy(operator);
+        scoreRecord.setUpdateTime(now);
+        scoreRecord.setDelFlag("0");
+        jstScoreRecordMapper.insertJstScoreRecord(scoreRecord);
+
+        // 4. 生成证书编号并写入证书记录
+        String certNo = bizNoGenerateService.nextNo("cert_no");
+        JstCertRecord certRecord = new JstCertRecord();
+        certRecord.setCertNo(certNo);
+        certRecord.setContestId(contestId);
+        certRecord.setScoreId(scoreRecord.getScoreId());
+        certRecord.setEnrollId(enrollId);
+        certRecord.setUserId(record.getUserId());
+        certRecord.setParticipantId(record.getParticipantId());
+        certRecord.setIssueStatus("pending");
+        certRecord.setCreateBy(operator);
+        certRecord.setCreateTime(now);
+        certRecord.setUpdateBy(operator);
+        certRecord.setUpdateTime(now);
+        certRecord.setDelFlag("0");
+        jstCertRecordMapper.insertJstCertRecord(certRecord);
     }
 
     private void publishAfterCommit(Object event) {

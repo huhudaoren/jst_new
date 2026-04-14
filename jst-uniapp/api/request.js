@@ -10,7 +10,12 @@
 
 // 开发时改成你电脑 IP (如果用真机/模拟器调试)
 // 微信开发者工具 → 详情 → 本地设置 → 勾选「不校验合法域名...」
+// #ifdef H5
+export const BASE_URL = ''  // H5 同域部署，Nginx 反向代理
+// #endif
+// #ifndef H5
 export const BASE_URL = 'http://127.0.0.1:8080'
+// #endif
 
 const TOKEN_KEY = 'jst-token'
 

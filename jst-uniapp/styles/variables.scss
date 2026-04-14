@@ -108,4 +108,14 @@ $jst-chip-refunded-fg:  #3A3A3A; $jst-chip-refunded-bg:  #D6D6D6;
   --jst-space-lg: 32rpx;
   --jst-space-xl: 40rpx;
   --jst-space-xxl: 48rpx;
+
+  // REFACTOR-10: 视觉重塑追加
+  --jst-bg-subtle: #F8F9FC;
+  --jst-card-glow: 0 2rpx 16rpx rgba(43, 108, 255, 0.04), 0 0 1rpx rgba(0, 0, 0, 0.04);
+  --jst-glass-bg: rgba(255, 255, 255, 0.72);
+  --jst-shadow-ring: 0 0 0 1rpx rgba(0, 0, 0, 0.03);
+  --jst-shadow-ambient: 0 4rpx 12rpx rgba(0, 0, 0, 0.03);
+  --jst-shadow-lift: 0 8rpx 24rpx rgba(43, 108, 255, 0.06);
+  --jst-radius-card: 20rpx;
+  --jst-radius-button: 24rpx;
 }

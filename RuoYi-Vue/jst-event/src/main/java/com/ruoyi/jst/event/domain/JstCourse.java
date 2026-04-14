@@ -56,6 +56,7 @@ public class JstCourse extends BaseEntity
     private String totalDuration;
 
     /** 课程目录JSON */
+    @Deprecated
     @Excel(name = "课程目录JSON")
     private String chaptersJson;
 

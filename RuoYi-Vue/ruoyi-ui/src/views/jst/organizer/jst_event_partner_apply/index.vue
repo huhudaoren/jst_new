@@ -154,7 +154,11 @@
       <el-table-column label="结算信息JSON" align="center" prop="settlementInfoJson" />
       <el-table-column label="发票信息JSON" align="center" prop="invoiceInfoJson" />
       <el-table-column label="合同附件JSON" align="center" prop="contractFilesJson" />
-      <el-table-column label="状态：draft/pending/approved/rejected/supplement" align="center" prop="applyStatus" />
+      <el-table-column label="状态" align="center" prop="applyStatus">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.jst_audit_status" :value="scope.row.applyStatus" />
+        </template>
+      </el-table-column>
       <el-table-column label="补充材料说明" align="center" prop="supplementRemark" />
       <el-table-column label="审核意见" align="center" prop="auditRemark" />
       <el-table-column label="审核员ID" align="center" prop="auditUserId" />
@@ -291,6 +295,7 @@ import { listJst_event_partner_apply, getJst_event_partner_apply, delJst_event_p
 
 export default {
   name: "Jst_event_partner_apply",
+  dicts: ['jst_audit_status'],
   data() {
     return {
       // 遮罩层

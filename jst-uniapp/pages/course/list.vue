@@ -292,7 +292,7 @@ export default {
 .course-list-page {
   min-height: 100vh;
   padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
-  background: $jst-bg-page;
+  background: $jst-bg-subtle;
 }
 
 // 骨架屏
@@ -318,7 +318,7 @@ export default {
 
 .course-list-page__hero {
   padding: 88rpx $jst-space-xl 60rpx;
-  background: linear-gradient(150deg, $jst-brand-dark 0%, $jst-brand 60%, lighten($jst-brand, 12%) 100%);
+  background: $jst-hero-gradient;
   border-bottom-left-radius: $jst-radius-xl;
   border-bottom-right-radius: $jst-radius-xl;
   position: relative;

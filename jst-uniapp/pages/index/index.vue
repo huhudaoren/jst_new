@@ -654,13 +654,13 @@ export default {
 
 .home-page {
   min-height: 100vh;
-  background: $jst-bg-page;
+  background: $jst-bg-subtle;
 }
 
 // 骨架屏
 .home-page__skeleton-hero {
   height: 320rpx;
-  background: linear-gradient(150deg, $jst-purple-dark 0%, $jst-purple 55%, $jst-brand 100%);
+  background: $jst-hero-gradient;
   border-bottom-left-radius: $jst-radius-xl;
   border-bottom-right-radius: $jst-radius-xl;
 }
@@ -687,7 +687,7 @@ export default {
   position: relative;
   overflow: hidden;
   padding: $jst-space-lg $jst-space-xl 160rpx;
-  background: linear-gradient(150deg, $jst-purple-dark 0%, $jst-purple 55%, $jst-brand 100%);
+  background: $jst-hero-gradient;
   border-bottom-left-radius: $jst-radius-xl;
   border-bottom-right-radius: $jst-radius-xl;
 }
@@ -703,7 +703,8 @@ export default {
   right: -120rpx;
   width: 420rpx;
   height: 420rpx;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  filter: blur(30px);
 }
 
 .home-page__hero-bg--bottom {
@@ -711,7 +712,8 @@ export default {
   bottom: -160rpx;
   width: 360rpx;
   height: 360rpx;
-  background: rgba(255, 107, 53, 0.18);
+  background: rgba(43, 108, 255, 0.12);
+  filter: blur(40px);
 }
 
 .home-page__hero-main {
@@ -778,9 +780,11 @@ export default {
   margin-top: $jst-space-lg;
   padding: 0 $jst-space-lg;
   height: 84rpx;
-  border-radius: $jst-radius-xl;
-  background: rgba(255, 255, 255, 0.18);
-  border: 2rpx solid rgba(255, 255, 255, 0.24);
+  border-radius: $jst-radius-round;
+  background: $jst-glass-bg;
+  backdrop-filter: blur($jst-glass-blur);
+  -webkit-backdrop-filter: blur($jst-glass-blur);
+  border: 1rpx solid $jst-glass-border;
   transition: transform $jst-duration-fast $jst-easing;
 }
 .home-page__search:active { transform: scale(0.99); }
@@ -792,7 +796,7 @@ export default {
 .home-page__search-text {
   margin-left: $jst-space-md;
   font-size: $jst-font-sm;
-  color: rgba(255, 255, 255, 0.78);
+  color: $jst-text-secondary;
 }
 
 .home-page__body {
@@ -809,9 +813,12 @@ export default {
   align-items: center;
   margin-top: $jst-space-lg;
   padding: $jst-space-lg;
-  border-radius: $jst-radius-lg;
-  background: $jst-bg-card;
-  box-shadow: $jst-shadow-sm;
+  border-radius: $jst-radius-card;
+  background: $jst-glass-bg;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1rpx solid $jst-glass-border;
+  box-shadow: $jst-card-glow;
 }
 
 .home-page__notice-strip-icon {
@@ -881,9 +888,9 @@ export default {
   flex-wrap: wrap;
   margin-top: $jst-space-lg;
   padding: $jst-space-sm $jst-space-xs;
-  border-radius: $jst-radius-lg;
+  border-radius: $jst-radius-card;
   background: $jst-bg-card;
-  box-shadow: $jst-shadow-sm;
+  box-shadow: $jst-shadow-ring, $jst-shadow-ambient;
 }
 
 .home-page__entry-item {
@@ -902,8 +909,10 @@ export default {
   justify-content: center;
   width: 72rpx;
   height: 72rpx;
-  border-radius: $jst-radius-lg;
+  border-radius: $jst-radius-card;
   font-size: $jst-font-lg;
+  box-shadow: $jst-card-glow;
+  transition: transform $jst-duration-fast $jst-easing, box-shadow $jst-duration-fast $jst-easing;
 }
 
 .home-page__entry-icon--brand {
@@ -1077,9 +1086,9 @@ export default {
 // 竖排赛事列表
 .home-page__contest-list {
   padding: $jst-space-xs;
-  border-radius: $jst-radius-lg;
+  border-radius: $jst-radius-card;
   background: $jst-bg-card;
-  box-shadow: $jst-shadow-sm;
+  box-shadow: $jst-shadow-ring, $jst-shadow-ambient;
 }
 .home-page__contest-list > * {
   padding: $jst-space-xs;
@@ -1089,9 +1098,9 @@ export default {
 .home-page__platform-intro {
   margin-top: $jst-space-xl;
   padding: $jst-space-xl;
-  border-radius: $jst-radius-lg;
+  border-radius: $jst-radius-card;
   background: $jst-bg-card;
-  box-shadow: $jst-shadow-sm;
+  box-shadow: $jst-shadow-ring, $jst-shadow-ambient;
 }
 .home-page__platform-intro-title {
   display: block;

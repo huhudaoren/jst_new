@@ -1,5 +1,6 @@
 package com.ruoyi.jst.event.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -25,6 +26,10 @@ public class EnrollBatchAuditReqDTO {
     @Size(max = 255, message = "auditRemark 长度不能超过 255")
     private String auditRemark;
 
+    /** 各成绩项统一打分（批量通过时可选） */
+    @Valid
+    private List<ScoreItemReqDTO> scores;
+
     public List<Long> getEnrollIds() {
         return enrollIds;
     }
@@ -47,5 +52,13 @@ public class EnrollBatchAuditReqDTO {
 
     public void setAuditRemark(String auditRemark) {
         this.auditRemark = auditRemark;
+    }
+
+    public List<ScoreItemReqDTO> getScores() {
+        return scores;
+    }
+
+    public void setScores(List<ScoreItemReqDTO> scores) {
+        this.scores = scores;
     }
 }

@@ -5,6 +5,7 @@ import com.ruoyi.jst.event.dto.EnrollDraftDTO;
 import com.ruoyi.jst.event.dto.EnrollQueryReqDTO;
 import com.ruoyi.jst.event.dto.EnrollSubmitDTO;
 import com.ruoyi.jst.event.dto.EnrollSupplementDTO;
+import com.ruoyi.jst.event.dto.ScoreItemReqDTO;
 import com.ruoyi.jst.event.vo.EnrollDetailVO;
 import com.ruoyi.jst.event.vo.EnrollListVO;
 import com.ruoyi.jst.event.vo.EnrollSubmitResVO;
@@ -89,7 +90,8 @@ public interface EnrollRecordService {
      * @param enrollIds   报名ID集合
      * @param auditStatus 目标审核状态
      * @param remark      审核备注
+     * @param scores      各成绩项打分（批量通过时统一分数，可选）
      * @return 成功处理数量
      */
-    int batchAudit(List<Long> enrollIds, String auditStatus, String remark);
+    int batchAudit(List<Long> enrollIds, String auditStatus, String remark, List<ScoreItemReqDTO> scores);
 }

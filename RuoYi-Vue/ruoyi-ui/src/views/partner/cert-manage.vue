@@ -7,7 +7,7 @@
         <div class="page-desc">维护证书模板，基于已发布成绩生成证书草稿并提交平台审核。</div>
       </div>
       <div class="banner-actions">
-        <el-button icon="el-icon-picture-outline" @click="templateDialogOpen = true">新增模板</el-button>
+        <el-button icon="el-icon-picture-outline" @click="openDesigner(null)">新增模板</el-button>
         <el-button type="primary" icon="el-icon-medal" :disabled="!canBatchGrant" @click="batchGrant">批量生成证书</el-button>
       </div>
     </div>
@@ -54,7 +54,7 @@
           <el-tag size="small" :type="statusType(scope.row.displayStatus)">{{ statusLabel(scope.row.displayStatus) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" fixed="right" width="180">
+      <el-table-column label="操作" fixed="right" width="220">
         <template slot-scope="scope">
           <el-button v-if="scope.row.displayStatus === 'draft'" type="text" size="mini" @click="submitRows([scope.row])">提审</el-button>
           <el-button type="text" size="mini" @click="openPreview(scope.row)">预览</el-button>
@@ -64,23 +64,58 @@
 
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
 
-    <el-dialog title="新增证书模板" :visible.sync="templateDialogOpen" width="560px" append-to-body>
-      <el-form ref="templateForm" :model="templateForm" :rules="templateRules" label-width="96px">
-        <el-form-item label="模板名称" prop="templateName"><el-input v-model="templateForm.templateName" maxlength="64" /></el-form-item>
-        <el-form-item label="底图地址" prop="bgImage"><el-input v-model="templateForm.bgImage" placeholder="可填 OSS key，也可上传图片" /></el-form-item>
-        <el-form-item label="上传底图">
-          <el-upload action="" :auto-upload="false" :limit="1" :on-change="onTemplateFileChange" :on-remove="onTemplateFileRemove" accept=".jpg,.jpeg,.png,.gif,.webp">
-            <el-button icon="el-icon-upload">选择图片</el-button>
-          </el-upload>
-        </el-form-item>
-        <el-form-item label="布局JSON"><el-input v-model="templateForm.layoutJson" type="textarea" :rows="4" /></el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="templateDialogOpen = false">取消</el-button>
-        <el-button type="primary" @click="saveTemplate">保存并提审</el-button>
+    <!-- 模板列表管理区域 -->
+    <el-card shadow="never" class="template-card">
+      <div slot="header" class="template-header">
+        <span class="section-title">证书模板库</span>
+        <el-button type="primary" plain size="small" icon="el-icon-plus" @click="openDesigner(null)">新增模板</el-button>
       </div>
-    </el-dialog>
+      <el-table v-loading="templateLoading" :data="templates" size="small">
+        <el-table-column label="模板名称" prop="templateName" min-width="180" show-overflow-tooltip />
+        <el-table-column label="审核状态" min-width="100">
+          <template slot-scope="scope">
+            <el-tag size="mini" :type="scope.row.auditStatus === 'approved' ? 'success' : 'warning'">
+              {{ scope.row.auditStatus === 'approved' ? '已审核' : '待审核' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="160">
+          <template slot-scope="scope">
+            <el-button type="text" size="mini" icon="el-icon-edit" @click="openDesigner(scope.row)">编辑设计</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
 
+    <!-- 设计器 Drawer -->
+    <el-drawer
+      :title="designerTitle"
+      :visible.sync="designerVisible"
+      size="95%"
+      direction="rtl"
+      append-to-body
+      :before-close="onDesignerClose"
+      class="designer-drawer"
+    >
+      <div class="designer-drawer-body">
+        <el-form v-if="!editingTemplateId" ref="tplNameForm" :model="newTemplateForm" :rules="tplNameRules" :inline="true" size="small" class="tpl-name-bar">
+          <el-form-item label="模板名称" prop="templateName">
+            <el-input v-model="newTemplateForm.templateName" maxlength="64" placeholder="请输入模板名称" style="width: 260px" />
+          </el-form-item>
+        </el-form>
+        <CertDesigner
+          v-if="designerVisible"
+          ref="certDesigner"
+          :layout-json="designerLayoutJson"
+          :bg-image="designerBgImage"
+          :owner-type="designerOwnerType"
+          :title="designerTitle"
+          @save="onDesignerSave"
+        />
+      </div>
+    </el-drawer>
+
+    <!-- 证书预览 -->
     <el-dialog title="证书预览" :visible.sync="previewDialogOpen" width="760px" append-to-body>
       <div class="preview-box">
         <img v-if="previewImage" :src="previewImage" alt="证书预览" />
@@ -93,13 +128,15 @@
 import { listPartnerContests } from '@/api/partner/contest'
 import {
   batchGrantCerts,
+  getCertTemplate,
   listCertTemplates,
   listPartnerCerts,
   previewCert,
   saveCertTemplate,
   submitCertReview,
-  uploadCertTemplate
+  updateCertTemplate
 } from '@/api/partner/cert'
+import CertDesigner from './components/CertDesigner/index.vue'
 
 const STATUS_META = {
   draft: { label: '草稿', type: 'info' },
@@ -110,9 +147,11 @@ const STATUS_META = {
 
 export default {
   name: 'PartnerCertManage',
+  components: { CertDesigner },
   data() {
     return {
       loading: false,
+      templateLoading: false,
       showSearch: true,
       total: 0,
       contests: [],
@@ -120,10 +159,8 @@ export default {
       certList: [],
       selectedRows: [],
       selectedTemplateId: null,
-      templateDialogOpen: false,
       previewDialogOpen: false,
       previewImage: null,
-      templateFile: null,
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -131,13 +168,16 @@ export default {
         participantName: null,
         displayStatus: null
       },
-      templateForm: {
-        templateName: null,
-        bgImage: null,
-        layoutJson: '{}'
-      },
       statusOptions: Object.keys(STATUS_META).map(key => ({ value: key, label: STATUS_META[key].label })),
-      templateRules: {
+      // Designer state
+      designerVisible: false,
+      designerTitle: '新增证书模板',
+      designerLayoutJson: null,
+      designerBgImage: '',
+      designerOwnerType: 'contest',
+      editingTemplateId: null,
+      newTemplateForm: { templateName: '' },
+      tplNameRules: {
         templateName: [{ required: true, message: '模板名称不能为空', trigger: 'blur' }]
       }
     }
@@ -159,8 +199,11 @@ export default {
       })
     },
     loadTemplates() {
+      this.templateLoading = true
       listCertTemplates().then(response => {
         this.templates = Array.isArray(response.data) ? response.data : []
+      }).finally(() => {
+        this.templateLoading = false
       })
     },
     getList() {
@@ -180,33 +223,6 @@ export default {
       this.resetForm('queryForm')
       this.queryParams.pageNum = 1
       this.getList()
-    },
-    onTemplateFileChange(file) {
-      this.templateFile = file.raw
-    },
-    onTemplateFileRemove() {
-      this.templateFile = null
-    },
-    saveTemplate() {
-      this.$refs.templateForm.validate(valid => {
-        if (!valid) return
-        const promise = this.templateFile ? this.uploadTemplate() : saveCertTemplate(this.templateForm)
-        promise.then(() => {
-          this.$modal.msgSuccess('模板已保存，等待平台审核')
-          this.templateDialogOpen = false
-          this.templateFile = null
-          this.templateForm = { templateName: null, bgImage: null, layoutJson: '{}' }
-          this.loadTemplates()
-        })
-      })
-    },
-    uploadTemplate() {
-      const formData = new FormData()
-      formData.append('templateName', this.templateForm.templateName)
-      if (this.templateForm.bgImage) formData.append('bgImage', this.templateForm.bgImage)
-      if (this.templateForm.layoutJson) formData.append('layoutJson', this.templateForm.layoutJson)
-      formData.append('file', this.templateFile)
-      return uploadCertTemplate(formData)
     },
     batchGrant() {
       batchGrantCerts({
@@ -243,6 +259,67 @@ export default {
     },
     statusType(status) {
       return STATUS_META[status] ? STATUS_META[status].type : 'info'
+    },
+
+    // ==================== Designer ====================
+    openDesigner(template) {
+      if (template && template.templateId) {
+        this.editingTemplateId = template.templateId
+        this.designerTitle = '编辑模板 - ' + (template.templateName || '')
+        getCertTemplate(template.templateId).then(response => {
+          const data = response.data || template
+          this.designerLayoutJson = data.layoutJson || null
+          this.designerBgImage = data.bgImage || data.backgroundImage || ''
+          this.designerVisible = true
+        }).catch(() => {
+          this.designerLayoutJson = template.layoutJson || null
+          this.designerBgImage = template.bgImage || template.backgroundImage || ''
+          this.designerVisible = true
+        })
+      } else {
+        this.editingTemplateId = null
+        this.designerTitle = '新增证书模板'
+        this.designerLayoutJson = null
+        this.designerBgImage = ''
+        this.newTemplateForm = { templateName: '' }
+        this.designerVisible = true
+      }
+    },
+    onDesignerSave({ layoutJson, thumbnail }) {
+      if (this.editingTemplateId) {
+        updateCertTemplate(this.editingTemplateId, {
+          layoutJson,
+          thumbnail
+        }).then(() => {
+          this.$modal.msgSuccess('模板已保存')
+          this.designerVisible = false
+          this.loadTemplates()
+        }).catch(() => {
+          this.$modal.msgError('保存失败，请重试')
+        })
+      } else {
+        if (this.$refs.tplNameForm) {
+          this.$refs.tplNameForm.validate(valid => {
+            if (!valid) return
+            saveCertTemplate({
+              templateName: this.newTemplateForm.templateName,
+              layoutJson,
+              thumbnail
+            }).then(() => {
+              this.$modal.msgSuccess('模板已创建')
+              this.designerVisible = false
+              this.loadTemplates()
+            }).catch(() => {
+              this.$modal.msgError('创建失败，请重试')
+            })
+          })
+        }
+      }
+    },
+    onDesignerClose(done) {
+      this.$confirm('关闭将丢失未保存的设计，确认关闭？', '提示', {
+        type: 'warning'
+      }).then(() => done()).catch(() => {})
     }
   }
 }
@@ -284,6 +361,29 @@ export default {
 .toolbar-row {
   margin: 12px 0;
 }
+.template-card {
+  margin-top: 20px;
+}
+.template-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+}
+.designer-drawer-body {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  padding: 0 12px 12px;
+}
+.tpl-name-bar {
+  padding: 8px 0;
+  flex-shrink: 0;
+}
 .preview-box {
   display: flex;
   justify-content: center;
@@ -304,5 +404,13 @@ export default {
     align-items: stretch;
     flex-direction: column;
   }
+}
+</style>
+
+<style>
+/* Unscoped: drawer body padding override */
+.designer-drawer .el-drawer__body {
+  padding: 0;
+  overflow: hidden;
 }
 </style>

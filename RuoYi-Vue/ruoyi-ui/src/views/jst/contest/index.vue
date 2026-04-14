@@ -63,7 +63,7 @@
             </div>
             <JstStatusBadge :status="String(row.auditStatus || '')" :status-map="auditStatusMap" />
           </div>
-          <div class="mobile-info-row">分类：{{ row.category || '--' }}</div>
+          <div class="mobile-info-row">分类：<dict-tag :options="dict.type.jst_contest_category" :value="row.category" /></div>
           <div class="mobile-info-row">赛事方：{{ row.partnerName || '--' }}</div>
           <div class="mobile-info-row">价格：¥{{ formatMoney(row.price) }}</div>
           <div class="mobile-info-row">报名数：{{ row.enrollCount || 0 }}</div>
@@ -117,7 +117,11 @@
     <el-table v-else v-loading="loading" :data="contestList">
       <el-table-column label="赛事ID" prop="contestId" min-width="92" />
       <el-table-column label="赛事名称" prop="contestName" min-width="220" show-overflow-tooltip />
-      <el-table-column label="分类" prop="category" min-width="120" />
+      <el-table-column label="分类" prop="category" min-width="120">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.jst_contest_category" :value="scope.row.category" />
+        </template>
+      </el-table-column>
       <el-table-column label="赛事方" prop="partnerName" min-width="140" show-overflow-tooltip />
       <el-table-column label="价格" min-width="90" align="right">
         <template slot-scope="scope">¥{{ formatMoney(scope.row.price) }}</template>
@@ -228,6 +232,7 @@ import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 export default {
   name: 'JstAdminContestIndex',
+  dicts: ['jst_contest_category'],
   components: {
     ContestDetail,
     ContestEdit

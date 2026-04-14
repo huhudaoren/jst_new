@@ -1,0 +1,11 @@
+const path = require('path')
+
+module.exports = {
+  parser: require('postcss-comment'),
+  plugins: [
+    require('autoprefixer')({
+      overrideBrowserslist: ['Android >= 4.4', 'ios >= 9']
+    }),
+    require('@dcloudio/vue-cli-plugin-uni/packages/postcss')
+  ]
+}

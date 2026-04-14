@@ -7,12 +7,22 @@
 import request from '@/api/request'
 
 /**
- * 申请预约
- * @param {Object} body { contestId, sessionCode, appointmentDate:'yyyy-MM-dd', participantId?, couponId?, pointsToUse? }
+ * 申请预约（基于时间段 slotId）
+ * @param {Object} body { contestId, slotId, participantId?, couponId?, pointsToUse? }
  * @returns { appointmentId, appointmentNo, orderId?, orderNo?, orderStatus?, appointmentStatus, qrCodes:string[] }
  */
 export function applyAppointment(body) {
   return request({ url: '/jst/wx/appointment/apply', method: 'POST', data: body })
+}
+
+/**
+ * 获取赛事预约时间段列表（从赛事详情 appointmentSlotList 获取）
+ * 兜底方法：如果赛事详情不包含 slot，走独立接口
+ * @param {Number|String} contestId
+ * @returns List<AppointmentSlot> { slotId, slotDate, startTime, endTime, venue, capacity, bookedCount, status }
+ */
+export function getAppointmentSlots(contestId) {
+  return request({ url: `/jst/wx/appointment/contest/${contestId}/slots`, method: 'GET' })
 }
 
 /** 取消预约（学生自己的单） */

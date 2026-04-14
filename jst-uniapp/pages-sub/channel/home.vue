@@ -323,10 +323,10 @@ export default {
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
 
-.ch-home { min-height: 100vh; padding-bottom: calc(#{$jst-space-xxl} + env(safe-area-inset-bottom)); background: $jst-bg-page; }
+.ch-home { min-height: 100vh; padding-bottom: calc(#{$jst-space-xxl} + env(safe-area-inset-bottom)); background: $jst-bg-subtle; }
 
 /* Hero */
-.ch-hero { background: linear-gradient(150deg, $jst-brand-dark 0%, $jst-brand 45%, lighten($jst-brand, 8%) 100%); padding: 88rpx $jst-space-xl $jst-space-xxl; position: relative; overflow: hidden; border-bottom-left-radius: $jst-radius-xl; border-bottom-right-radius: $jst-radius-xl; }
+.ch-hero { background: $jst-hero-gradient; padding: 88rpx $jst-space-xl $jst-space-xxl; position: relative; overflow: hidden; border-bottom-left-radius: $jst-radius-xl; border-bottom-right-radius: $jst-radius-xl; }
 .ch-hero::before { content: ''; position: absolute; top: -60rpx; right: -40rpx; width: 280rpx; height: 280rpx; border-radius: 50%; background: rgba($jst-text-inverse, 0.06); }
 .ch-hero__nav { display: flex; align-items: center; margin-bottom: $jst-space-xl; position: relative; z-index: 1; }
 .ch-hero__back { width: 72rpx; height: 72rpx; border-radius: $jst-radius-sm; background: rgba($jst-text-inverse, 0.15); display: flex; align-items: center; justify-content: center; font-size: $jst-font-xl; color: $jst-text-inverse; margin-right: $jst-space-lg; transition: transform $jst-duration-fast $jst-easing; &:active { transform: scale(0.98); } }

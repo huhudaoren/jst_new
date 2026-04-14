@@ -168,7 +168,11 @@
       <el-table-column label="报名字段全量快照JSON：动态字段值+附件URL" align="center" prop="formSnapshotJson" />
       <el-table-column label="关联订单ID" align="center" prop="orderId" />
       <el-table-column label="资料状态：draft/submitted/supplement" align="center" prop="materialStatus" />
-      <el-table-column label="审核状态：pending/approved/rejected/supplement" align="center" prop="auditStatus" />
+      <el-table-column label="审核状态" align="center" prop="auditStatus">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.jst_enroll_audit_status" :value="scope.row.auditStatus" />
+        </template>
+      </el-table-column>
       <el-table-column label="审核备注" align="center" prop="auditRemark" />
       <el-table-column label="提交时间" align="center" prop="submitTime" width="180">
         <template slot-scope="scope">
@@ -293,6 +297,7 @@ import { listJst_enroll_record, getJst_enroll_record, delJst_enroll_record, addJ
 
 export default {
   name: "Jst_enroll_record",
+  dicts: ['jst_enroll_audit_status'],
   data() {
     return {
       // 遮罩层

@@ -56,5 +56,26 @@
         },
         "usingComponents" : true
     },
+    "h5" : {
+        "title" : "竞赛通",
+        "router" : {
+            "mode" : "history",
+            "base" : "/"
+        },
+        "devServer" : {
+            "port" : 8081,
+            "proxy" : {
+                "/jst" : {
+                    "target" : "http://127.0.0.1:8080",
+                    "changeOrigin" : true
+                }
+            }
+        },
+        "optimization" : {
+            "treeShaking" : {
+                "enable" : true
+            }
+        }
+    },
     "vueVersion" : "2"
 }

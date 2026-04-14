@@ -1,7 +1,14 @@
 package com.ruoyi.jst.event.vo;
 
+import com.ruoyi.jst.event.domain.JstAppointmentSlot;
+import com.ruoyi.jst.event.domain.JstContestAward;
+import com.ruoyi.jst.event.domain.JstContestFaq;
+import com.ruoyi.jst.event.domain.JstContestSchedule;
+import com.ruoyi.jst.event.domain.JstScoreItem;
+
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 小程序赛事详情 VO。
@@ -14,6 +21,7 @@ public class WxContestDetailVO {
     private Long contestId;
     private String contestName;
     private String coverImage;
+    private String bannerImage;
     private String category;
     private String groupLevels;
     private String description;
@@ -28,16 +36,40 @@ public class WxContestDetailVO {
     private Integer supportChannelEnroll;
     private Integer supportPointsDeduct;
     private Integer supportAppointment;
+    private Integer totalQuota;
+    private Integer perUserLimit;
     private Integer appointmentCapacity;
+    private String writeoffMode;
     private String writeoffConfig;
+    private Integer needSignIn;
+    private Integer teamMinSize;
+    private Integer teamMaxSize;
+    private String teamLeaderFields;
+    private String teamMemberFields;
     private Integer allowRepeatAppointment;
+    @Deprecated
     private String scheduleJson;
+    @Deprecated
     private String awardsJson;
+    @Deprecated
     private String faqJson;
     private String recommendTags;
     private String certRuleJson;
+    private String certIssueMode;
+    private Date scorePublishTime;
+    private String scorePublishMode;
+    @Deprecated
     private String scoreRuleJson;
     private Long aftersaleDays;
+    private Date aftersaleDeadline;
+    private String organizer;
+    private String coOrganizer;
+    private String eventAddress;
+    private List<JstContestSchedule> scheduleList;
+    private List<JstContestAward> awardList;
+    private List<JstContestFaq> faqList;
+    private List<JstScoreItem> scoreItemList;
+    private List<JstAppointmentSlot> appointmentSlotList;
 
     public Long getContestId() {
         return contestId;
@@ -61,6 +93,14 @@ public class WxContestDetailVO {
 
     public void setCoverImage(String coverImage) {
         this.coverImage = coverImage;
+    }
+
+    public String getBannerImage() {
+        return bannerImage;
+    }
+
+    public void setBannerImage(String bannerImage) {
+        this.bannerImage = bannerImage;
     }
 
     public String getCategory() {
@@ -175,6 +215,22 @@ public class WxContestDetailVO {
         this.supportAppointment = supportAppointment;
     }
 
+    public Integer getTotalQuota() {
+        return totalQuota;
+    }
+
+    public void setTotalQuota(Integer totalQuota) {
+        this.totalQuota = totalQuota;
+    }
+
+    public Integer getPerUserLimit() {
+        return perUserLimit;
+    }
+
+    public void setPerUserLimit(Integer perUserLimit) {
+        this.perUserLimit = perUserLimit;
+    }
+
     public Integer getAppointmentCapacity() {
         return appointmentCapacity;
     }
@@ -183,12 +239,60 @@ public class WxContestDetailVO {
         this.appointmentCapacity = appointmentCapacity;
     }
 
+    public String getWriteoffMode() {
+        return writeoffMode;
+    }
+
+    public void setWriteoffMode(String writeoffMode) {
+        this.writeoffMode = writeoffMode;
+    }
+
     public String getWriteoffConfig() {
         return writeoffConfig;
     }
 
     public void setWriteoffConfig(String writeoffConfig) {
         this.writeoffConfig = writeoffConfig;
+    }
+
+    public Integer getNeedSignIn() {
+        return needSignIn;
+    }
+
+    public void setNeedSignIn(Integer needSignIn) {
+        this.needSignIn = needSignIn;
+    }
+
+    public Integer getTeamMinSize() {
+        return teamMinSize;
+    }
+
+    public void setTeamMinSize(Integer teamMinSize) {
+        this.teamMinSize = teamMinSize;
+    }
+
+    public Integer getTeamMaxSize() {
+        return teamMaxSize;
+    }
+
+    public void setTeamMaxSize(Integer teamMaxSize) {
+        this.teamMaxSize = teamMaxSize;
+    }
+
+    public String getTeamLeaderFields() {
+        return teamLeaderFields;
+    }
+
+    public void setTeamLeaderFields(String teamLeaderFields) {
+        this.teamLeaderFields = teamLeaderFields;
+    }
+
+    public String getTeamMemberFields() {
+        return teamMemberFields;
+    }
+
+    public void setTeamMemberFields(String teamMemberFields) {
+        this.teamMemberFields = teamMemberFields;
     }
 
     public Integer getAllowRepeatAppointment() {
@@ -239,6 +343,30 @@ public class WxContestDetailVO {
         this.certRuleJson = certRuleJson;
     }
 
+    public String getCertIssueMode() {
+        return certIssueMode;
+    }
+
+    public void setCertIssueMode(String certIssueMode) {
+        this.certIssueMode = certIssueMode;
+    }
+
+    public Date getScorePublishTime() {
+        return scorePublishTime;
+    }
+
+    public void setScorePublishTime(Date scorePublishTime) {
+        this.scorePublishTime = scorePublishTime;
+    }
+
+    public String getScorePublishMode() {
+        return scorePublishMode;
+    }
+
+    public void setScorePublishMode(String scorePublishMode) {
+        this.scorePublishMode = scorePublishMode;
+    }
+
     public String getScoreRuleJson() {
         return scoreRuleJson;
     }
@@ -253,5 +381,77 @@ public class WxContestDetailVO {
 
     public void setAftersaleDays(Long aftersaleDays) {
         this.aftersaleDays = aftersaleDays;
+    }
+
+    public Date getAftersaleDeadline() {
+        return aftersaleDeadline;
+    }
+
+    public void setAftersaleDeadline(Date aftersaleDeadline) {
+        this.aftersaleDeadline = aftersaleDeadline;
+    }
+
+    public String getOrganizer() {
+        return organizer;
+    }
+
+    public void setOrganizer(String organizer) {
+        this.organizer = organizer;
+    }
+
+    public String getCoOrganizer() {
+        return coOrganizer;
+    }
+
+    public void setCoOrganizer(String coOrganizer) {
+        this.coOrganizer = coOrganizer;
+    }
+
+    public String getEventAddress() {
+        return eventAddress;
+    }
+
+    public void setEventAddress(String eventAddress) {
+        this.eventAddress = eventAddress;
+    }
+
+    public List<JstContestSchedule> getScheduleList() {
+        return scheduleList;
+    }
+
+    public void setScheduleList(List<JstContestSchedule> scheduleList) {
+        this.scheduleList = scheduleList;
+    }
+
+    public List<JstContestAward> getAwardList() {
+        return awardList;
+    }
+
+    public void setAwardList(List<JstContestAward> awardList) {
+        this.awardList = awardList;
+    }
+
+    public List<JstContestFaq> getFaqList() {
+        return faqList;
+    }
+
+    public void setFaqList(List<JstContestFaq> faqList) {
+        this.faqList = faqList;
+    }
+
+    public List<JstScoreItem> getScoreItemList() {
+        return scoreItemList;
+    }
+
+    public void setScoreItemList(List<JstScoreItem> scoreItemList) {
+        this.scoreItemList = scoreItemList;
+    }
+
+    public List<JstAppointmentSlot> getAppointmentSlotList() {
+        return appointmentSlotList;
+    }
+
+    public void setAppointmentSlotList(List<JstAppointmentSlot> appointmentSlotList) {
+        this.appointmentSlotList = appointmentSlotList;
     }
 }

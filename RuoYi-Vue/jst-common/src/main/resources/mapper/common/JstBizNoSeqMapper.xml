@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.common.mapper.JstBizNoSeqMapper">
+
+    <resultMap id="JstBizNoSeqMap" type="com.ruoyi.jst.common.domain.JstBizNoSeq">
+        <result column="rule_code" property="ruleCode"/>
+        <result column="date_key" property="dateKey"/>
+        <result column="current_seq" property="currentSeq"/>
+    </resultMap>
+
+    <select id="selectByRuleCodeAndDateKey" resultMap="JstBizNoSeqMap">
+        SELECT rule_code, date_key, current_seq
+        FROM jst_biz_no_seq
+        WHERE rule_code = #{ruleCode}
+          AND date_key = #{dateKey}
+        LIMIT 1
+    </select>
+
+    <insert id="upsertCurrentSeq">
+        INSERT INTO jst_biz_no_seq (rule_code, date_key, current_seq)
+        VALUES (#{ruleCode}, #{dateKey}, #{currentSeq})
+        ON DUPLICATE KEY UPDATE
+            current_seq = IF(current_seq &lt; VALUES(current_seq), VALUES(current_seq), current_seq)
+    </insert>
+</mapper>

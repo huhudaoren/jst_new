@@ -1,8 +1,11 @@
 package com.ruoyi.jst.event.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
+import java.util.List;
 
 /**
  * 报名记录审核请求 DTO。
@@ -19,6 +22,10 @@ public class EnrollAuditReqDTO {
     @Size(max = 255, message = "auditRemark 长度不能超过 255")
     private String auditRemark;
 
+    /** 各成绩项打分（仅审核通过时可选传入） */
+    @Valid
+    private List<ScoreItemReqDTO> scores;
+
     public String getResult() {
         return result;
     }
@@ -33,5 +40,13 @@ public class EnrollAuditReqDTO {
 
     public void setAuditRemark(String auditRemark) {
         this.auditRemark = auditRemark;
+    }
+
+    public List<ScoreItemReqDTO> getScores() {
+        return scores;
+    }
+
+    public void setScores(List<ScoreItemReqDTO> scores) {
+        this.scores = scores;
     }
 }

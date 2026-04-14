@@ -53,6 +53,7 @@ public class CourseSaveReqDTO {
     @Size(max = 50, message = "总时长长度不能超过50个字符")
     private String totalDuration;
 
+    @Deprecated
     private String chaptersJson;
 
     @Size(max = 100, message = "讲师姓名长度不能超过100个字符")

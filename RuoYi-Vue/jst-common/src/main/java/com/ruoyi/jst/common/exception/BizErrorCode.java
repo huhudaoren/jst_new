@@ -43,6 +43,8 @@ public enum BizErrorCode {
     JST_EVENT_CERT_NOT_FOUND(20061, "证书记录不存在"),
     JST_EVENT_CERT_ILLEGAL_TRANSIT(20062, "证书状态非法流转"),
     JST_EVENT_CERT_BATCH_EMPTY(20063, "没有可生成证书的已发布成绩"),
+    JST_EVENT_REVIEWER_NOT_FOUND(20070, "评审老师不存在"),
+    JST_EVENT_REVIEWER_DUPLICATE(20071, "评审老师重复配置"),
 
     // ========== jst-order (3xxxx) ==========
     JST_ORDER_NOT_FOUND(30001, "订单不存在"),
@@ -150,6 +152,10 @@ public enum BizErrorCode {
     JST_PARTICIPANT_AUTO_CLAIM_CONFLICT(10043, "临时档案自动认领存在多个候选，需人工处理"),
 
     // ========== common ==========
+    JST_COMMON_BIZ_NO_RULE_NOT_FOUND(99910, "编号规则不存在"),
+    JST_COMMON_BIZ_NO_RULE_DISABLED(99911, "编号规则未启用"),
+    JST_COMMON_BIZ_NO_RULE_CODE_DUPLICATE(99912, "编号规则编码重复"),
+    JST_COMMON_BIZ_NO_GENERATE_FAILED(99913, "编号生成失败"),
     JST_COMMON_LOCK_TIMEOUT(99900, "操作过于频繁，请稍后再试"),
     JST_COMMON_PARAM_INVALID(99901, "参数校验失败"),
     JST_COMMON_AUTH_DENIED(99902, "无权访问该资源"),

@@ -53,14 +53,6 @@
     </el-form>
 
     <div class="toolbar-row">
-      <div class="toolbar-hint">
-        <el-alert
-          title="当前页面已切换至 /jst/partner/contest 接口；如字段缺口仍存在，请以任务卡反馈文档为准。"
-          type="info"
-          :closable="false"
-          show-icon
-        />
-      </div>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
     </div>
 
@@ -75,12 +67,13 @@
             <el-tag size="small" :type="auditStatusType(row.auditStatus)">{{ auditStatusLabel(row.auditStatus) }}</el-tag>
           </div>
           <div class="contest-meta">
-            <span>{{ row.category || '--' }}</span>
+            <span><dict-tag :options="dict.type.jst_contest_category" :value="row.category" /></span>
             <span>报名：{{ formatDate(row.enrollStartTime) }}</span>
             <span>报名数：{{ row.enrollCount || '--' }}</span>
           </div>
           <div class="contest-actions">
             <el-button type="text" size="mini" @click="handleEdit(row)">编辑</el-button>
+            <el-button type="text" size="mini" @click="handleCopy(row)">复制</el-button>
             <el-button v-if="canSubmit(row)" type="text" size="mini" @click="handleSubmit(row)">提交审核</el-button>
             <el-button v-if="canOffline(row)" type="text" size="mini" @click="handleOffline(row)">下线</el-button>
             <el-button type="text" size="mini" @click="handleViewEnroll(row)">查看报名</el-button>
@@ -94,7 +87,11 @@
     <el-table v-else v-loading="loading" :data="contestList">
       <el-table-column label="赛事编号" prop="contestId" min-width="110" />
       <el-table-column label="赛事名称" prop="contestName" min-width="220" show-overflow-tooltip />
-      <el-table-column label="类别" prop="category" min-width="120" />
+      <el-table-column label="类别" prop="category" min-width="120">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.jst_contest_category" :value="scope.row.category" />
+        </template>
+      </el-table-column>
       <el-table-column label="开始时间" min-width="160">
         <template slot-scope="scope">
           <span>{{ formatDate(scope.row.eventStartTime || scope.row.enrollStartTime) }}</span>
@@ -110,9 +107,10 @@
           <span>{{ scope.row.enrollCount || '--' }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" fixed="right" width="320">
+      <el-table-column label="操作" fixed="right" width="360">
         <template slot-scope="scope">
           <el-button type="text" size="mini" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button type="text" size="mini" @click="handleCopy(scope.row)">复制</el-button>
           <el-button v-if="canSubmit(scope.row)" type="text" size="mini" @click="handleSubmit(scope.row)">提交审核</el-button>
           <el-button v-if="canOffline(scope.row)" type="text" size="mini" @click="handleOffline(scope.row)">下线</el-button>
           <el-button type="text" size="mini" @click="handleViewEnroll(scope.row)">查看报名</el-button>
@@ -132,7 +130,7 @@
 </template>
 
 <script>
-import { listPartnerContests, offlinePartnerContest, submitPartnerContest } from '@/api/partner/contest'
+import { listPartnerContests, offlinePartnerContest, submitPartnerContest, copyPartnerContest } from '@/api/partner/contest'
 import { parseTime } from '@/utils/ruoyi'
 
 const AUDIT_STATUS_META = {
@@ -146,6 +144,7 @@ const AUDIT_STATUS_META = {
 
 export default {
   name: 'PartnerContestList',
+  dicts: ['jst_contest_category'],
   data() {
     return {
       loading: false,
@@ -230,6 +229,19 @@ export default {
       }).then(() => {
         this.$modal.msgSuccess('下线成功')
         this.getList()
+      }).catch(() => {})
+    },
+    handleCopy(row) {
+      this.$modal.confirm(`确认复制赛事「${row.contestName || row.contestId}」吗？`).then(() => {
+        return copyPartnerContest(row.contestId)
+      }).then(response => {
+        const newId = (response.data && response.data.contestId) || response.contestId
+        this.$modal.msgSuccess('已复制，请修改后保存')
+        if (newId) {
+          this.$router.push({ path: `/partner/contest-edit/${newId}` })
+        } else {
+          this.getList()
+        }
       }).catch(() => {})
     },
     handleDelete() {

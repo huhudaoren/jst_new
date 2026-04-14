@@ -2143,3 +2143,351 @@ client.test("FA-BE-7 invalid days should fail", function() {
   client.assert(response.status !== 200 || response.body.code !== 200);
 });
 %}
+
+### =====================================================================
+### REFACTOR-1. 数据库去 JSON 化（赛事保存级联 + 详情子表 + 赛事复制）
+### =====================================================================
+
+### REFACTOR-1-0. partner A 登录
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_a",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("refactor_partner_token", response.body.token);
+client.test("REFACTOR-1 login success", function() {
+  client.assert(response.body.code === 200);
+});
+%}
+
+### REFACTOR-1-1. 创建带结构化子表的赛事
+POST {{baseUrl}}/jst/partner/contest
+Content-Type: {{contentType}}
+Authorization: Bearer {{refactor_partner_token}}
+
+{
+  "contestName": "REFACTOR1 结构化赛事",
+  "category": "art",
+  "groupLevels": "小学组,初中组",
+  "coverImage": "https://fixture.example.com/refactor/contest-cover.jpg",
+  "bannerImage": "https://fixture.example.com/refactor/contest-banner.jpg",
+  "description": "REFACTOR1 save with child tables",
+  "enrollStartTime": "2026-04-01 09:00:00",
+  "enrollEndTime": "2026-05-01 18:00:00",
+  "eventStartTime": "2026-05-10 09:00:00",
+  "eventEndTime": "2026-05-20 18:00:00",
+  "price": 99.00,
+  "supportChannelEnroll": 1,
+  "supportPointsDeduct": 1,
+  "supportAppointment": 1,
+  "totalQuota": 200,
+  "perUserLimit": 2,
+  "writeoffMode": "qr",
+  "needSignIn": 1,
+  "teamMinSize": 2,
+  "teamMaxSize": 4,
+  "teamLeaderFields": "name,mobile",
+  "teamMemberFields": "name",
+  "appointmentCapacity": 100,
+  "allowRepeatAppointment": 0,
+  "allowAppointmentRefund": 1,
+  "certRuleJson": "{}",
+  "scoreRuleJson": "{\"legacy\":true}",
+  "scorePublishMode": "manual",
+  "certIssueMode": "manual",
+  "organizer": "主办方A",
+  "coOrganizer": "协办方B",
+  "eventAddress": "上海市浦东新区XX路88号",
+  "aftersaleDays": 7,
+  "scheduleList": [
+    {
+      "stageName": "海选",
+      "startTime": "2026-05-10 09:00:00",
+      "endTime": "2026-05-10 12:00:00",
+      "venue": "A馆",
+      "description": "第一阶段",
+      "sortOrder": 1
+    },
+    {
+      "stageName": "决赛",
+      "startTime": "2026-05-20 14:00:00",
+      "endTime": "2026-05-20 18:00:00",
+      "venue": "B馆",
+      "description": "最终阶段",
+      "sortOrder": 2
+    }
+  ],
+  "awardList": [
+    {"awardName": "一等奖", "awardLevel": "first", "description": "冠军", "quota": 1, "sortOrder": 1},
+    {"awardName": "二等奖", "awardLevel": "second", "description": "亚军", "quota": 2, "sortOrder": 2}
+  ],
+  "faqList": [
+    {"question": "如何报名?", "answer": "在线提交资料", "sortOrder": 1},
+    {"question": "是否可退?", "answer": "售后期内可申请", "sortOrder": 2}
+  ],
+  "scoreItemList": [
+    {"itemName": "技巧", "maxScore": 50.00, "weight": 0.50, "sortOrder": 1},
+    {"itemName": "表现力", "maxScore": 50.00, "weight": 0.50, "sortOrder": 2}
+  ],
+  "appointmentSlotList": [
+    {"slotDate": "2026-05-11", "startTime": "09:00:00", "endTime": "10:00:00", "venue": "A馆", "capacity": 30},
+    {"slotDate": "2026-05-11", "startTime": "10:00:00", "endTime": "11:00:00", "venue": "A馆", "capacity": 30}
+  ]
+}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("refactor_contest_id", response.body.data.contestId);
+}
+client.test("REFACTOR-1 create contest success", function() {
+  client.assert(response.body.code === 200);
+  client.assert(client.global.get("refactor_contest_id"));
+});
+%}
+
+### REFACTOR-1-2. 详情返回结构化子表列表
+GET {{baseUrl}}/jst/partner/contest/{{refactor_contest_id}}
+Authorization: Bearer {{refactor_partner_token}}
+
+> {%
+client.test("REFACTOR-1 detail includes child lists", function() {
+  client.assert(response.body.code === 200);
+  client.assert(Array.isArray(response.body.data.scheduleList));
+  client.assert(Array.isArray(response.body.data.awardList));
+  client.assert(Array.isArray(response.body.data.faqList));
+  client.assert(Array.isArray(response.body.data.scoreItemList));
+  client.assert(Array.isArray(response.body.data.appointmentSlotList));
+  client.assert(response.body.data.scheduleList.length >= 2);
+  client.assert(response.body.data.scheduleList[0].sortOrder <= response.body.data.scheduleList[1].sortOrder);
+});
+%}
+
+### REFACTOR-1-3. 复制赛事
+POST {{baseUrl}}/jst/partner/contest/copy/{{refactor_contest_id}}
+Authorization: Bearer {{refactor_partner_token}}
+
+> {%
+if (response.body.code === 200 && response.body.data) {
+  client.global.set("refactor_copy_contest_id", response.body.data.contestId);
+}
+client.test("REFACTOR-1 copy contest success", function() {
+  client.assert(response.body.code === 200);
+  client.assert(client.global.get("refactor_copy_contest_id"));
+});
+%}
+
+### REFACTOR-1-4. 副本详情包含复制的子表
+GET {{baseUrl}}/jst/partner/contest/{{refactor_copy_contest_id}}
+Authorization: Bearer {{refactor_partner_token}}
+
+> {%
+client.test("REFACTOR-1 copied contest includes child data", function() {
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.contestName.indexOf("(副本)") >= 0);
+  client.assert(Array.isArray(response.body.data.scheduleList));
+  client.assert(Array.isArray(response.body.data.awardList));
+  client.assert(Array.isArray(response.body.data.faqList));
+  client.assert(Array.isArray(response.body.data.scoreItemList));
+  client.assert(response.body.data.scheduleList.length >= 2);
+});
+%}
+
+### REFACTOR-1-5A. 越权复制前，partner B 登录
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_b",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("refactor_partner_b_token", response.body.token);
+%}
+
+### REFACTOR-1-5B. 越权复制（partner B 复制 partner A 赛事）应失败
+POST {{baseUrl}}/jst/partner/contest/copy/{{refactor_contest_id}}
+Authorization: Bearer {{refactor_partner_b_token}}
+
+> {%
+client.test("REFACTOR-1 cross partner copy should fail", function() {
+  client.assert(response.status === 403 || response.body.code !== 200);
+});
+%}
+
+### =====================================================================
+### REFACTOR-6-BIZ-NO 统一编号规则引擎 (jst-common / JstBizNoRuleController)
+### 前置: 已执行 架构设计/ddl/99-migration-biz-no-rule.sql
+### =====================================================================
+
+### R6-BIZNO-1. 查询编号规则列表
+GET {{baseUrl}}/jst/admin/biz-no-rule/list?pageNum=1&pageSize=20
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("R6-BIZNO-1 list success", function() {
+  client.assert(response.status === 200);
+  client.assert(Array.isArray(response.body.rows));
+  var certRow = null;
+  for (var i = 0; i < response.body.rows.length; i++) {
+    if (response.body.rows[i].ruleCode === "cert_no") {
+      certRow = response.body.rows[i];
+      break;
+    }
+  }
+  client.assert(certRow !== null, "预置规则 cert_no 应存在");
+  client.global.set("r6_biz_no_rule_id", certRow.ruleId);
+});
+%}
+
+### R6-BIZNO-2. 查询规则详情
+GET {{baseUrl}}/jst/admin/biz-no-rule/{{r6_biz_no_rule_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+client.test("R6-BIZNO-2 detail success", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  client.assert(response.body.data.ruleCode === "cert_no");
+});
+%}
+
+### R6-BIZNO-3. 新增重复 ruleCode 应失败
+POST {{baseUrl}}/jst/admin/biz-no-rule
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_token}}
+
+{
+  "ruleCode": "cert_no",
+  "ruleName": "证书编号重复校验",
+  "prefix": "JST-CERT-",
+  "dateFormat": "yyyyMMdd",
+  "seqLength": 4,
+  "seqStart": 1,
+  "description": "重复编码测试",
+  "status": 1
+}
+
+> {%
+client.test("R6-BIZNO-3 duplicate code should fail", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### =====================================================================
+### REFACTOR-4. 报名审核 + 评审系统
+### 前置: fixture 98001~98003 score_item, 98101~98102 reviewer, 8901 pending enroll
+### =====================================================================
+
+### R4-0. partner A login
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "partner_f7_a",
+  "password": "admin123",
+  "code": "1",
+  "uuid": ""
+}
+
+> {%
+client.global.set("r4_token", response.body.token);
+%}
+
+### R4-1. GET reviewer list for contest 8201
+GET {{baseUrl}}/jst/partner/contest/8201/reviewers
+Authorization: Bearer {{r4_token}}
+
+> {%
+client.test("R4-1 reviewer list success", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+});
+%}
+
+### R4-2. POST save reviewers for contest 8201
+POST {{baseUrl}}/jst/partner/contest/8201/reviewers
+Content-Type: {{contentType}}
+Authorization: Bearer {{r4_token}}
+
+{
+  "reviewers": [
+    {"userId": 9101, "reviewerName": "测试_主评A", "role": "chief_reviewer"},
+    {"userId": 9102, "reviewerName": "测试_副评B", "role": "reviewer"}
+  ]
+}
+
+> {%
+client.test("R4-2 save reviewers success", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+});
+%}
+
+### R4-3. Audit enroll 8901 approved with scores
+PUT {{baseUrl}}/jst/partner/enroll/8901/audit
+Content-Type: {{contentType}}
+Authorization: Bearer {{r4_token}}
+
+{
+  "result": "approved",
+  "auditRemark": "通过，成绩优秀",
+  "scores": [
+    {"itemId": 98001, "score": 88.50},
+    {"itemId": 98002, "score": 92.00},
+    {"itemId": 98003, "score": 85.00}
+  ]
+}
+
+> {%
+client.test("R4-3 audit with scores success", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+});
+%}
+
+### R4-4. Audit with score exceeding max (should fail)
+PUT {{baseUrl}}/jst/partner/enroll/8903/audit
+Content-Type: {{contentType}}
+Authorization: Bearer {{r4_token}}
+
+{
+  "result": "approved",
+  "auditRemark": "超分测试",
+  "scores": [
+    {"itemId": 98001, "score": 150.00}
+  ]
+}
+
+> {%
+client.test("R4-4 score exceeds max should fail", function() {
+  client.assert(response.body.code !== 200);
+});
+%}
+
+### R4-5. Audit with invalid score item (should fail)
+PUT {{baseUrl}}/jst/partner/enroll/8903/audit
+Content-Type: {{contentType}}
+Authorization: Bearer {{r4_token}}
+
+{
+  "result": "approved",
+  "auditRemark": "无效项测试",
+  "scores": [
+    {"itemId": 999999, "score": 80.00}
+  ]
+}
+
+> {%
+client.test("R4-5 invalid score item should fail", function() {
+  client.assert(response.body.code !== 200);
+});
+%}

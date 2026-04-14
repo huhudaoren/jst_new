@@ -107,3 +107,82 @@
   90% { opacity: 1; }
   100% { transform: translateY(460rpx); opacity: 0; }
 }
+
+// ═══════════════════════════════════════════
+// REFACTOR-10 追加 — 视觉重塑动画
+// ═══════════════════════════════════════════
+
+// ── 柔和上浮淡入（比 slide-up 更轻柔，位移更小） ──
+.jst-anim-fade-up {
+  animation: jstFadeUp 0.4s ease-out both;
+}
+
+@keyframes jstFadeUp {
+  from { opacity: 0; transform: translateY(24rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// ── 毛玻璃入场（模糊→清晰 + 淡入） ──
+.jst-anim-blur-in {
+  animation: jstBlurIn 0.5s ease-out both;
+}
+
+@keyframes jstBlurIn {
+  from { opacity: 0; filter: blur(8px); transform: scale(0.98); }
+  to { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+// ── 数字弹出（放大→回弹） ──
+.jst-anim-number-pop {
+  animation: jstNumberPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes jstNumberPop {
+  0% { opacity: 0; transform: scale(0.5); }
+  70% { transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+// ── 微光脉冲（卡片边缘微光闪烁，用于骨架屏/加载态） ──
+.jst-anim-glow-pulse {
+  animation: jstGlowPulse 2s ease-in-out infinite;
+}
+
+@keyframes jstGlowPulse {
+  0%, 100% { box-shadow: 0 2rpx 16rpx rgba(43, 108, 255, 0.04); }
+  50% { box-shadow: 0 4rpx 24rpx rgba(43, 108, 255, 0.1); }
+}
+
+// ── Logo 弹入（登录页专用） ──
+.jst-anim-logo-pop {
+  animation: jstLogoPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes jstLogoPop {
+  0% { opacity: 0; transform: scale(0.6) translateY(20rpx); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+// ── 从下方滑入（延迟版，配合 Logo 使用） ──
+.jst-anim-rise-delayed {
+  animation: jstFadeUp 0.45s ease-out 0.25s both;
+}
+
+// ── 卡片悬浮微抬（hover/交互态） ──
+.jst-anim-lift {
+  transition: transform $jst-duration-fast $jst-easing, box-shadow $jst-duration-fast $jst-easing;
+  &:active {
+    transform: translateY(-4rpx);
+    box-shadow: 0 8rpx 24rpx rgba(43, 108, 255, 0.08);
+  }
+}
+
+// ── 粘性导航入场 ──
+.jst-anim-sticky-enter {
+  animation: jstStickyEnter 0.3s ease-out both;
+}
+
+@keyframes jstStickyEnter {
+  from { opacity: 0; transform: translateY(-20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}

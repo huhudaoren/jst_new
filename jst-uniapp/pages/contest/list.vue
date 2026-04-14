@@ -284,7 +284,7 @@ export default {
 .contest-list-page {
   min-height: 100vh;
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
-  background: $jst-bg-page;
+  background: $jst-bg-subtle;
 }
 
 // 骨架屏
@@ -308,8 +308,10 @@ export default {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: $jst-bg-card;
-  box-shadow: $jst-shadow-sm;
+  background: $jst-glass-bg;
+  backdrop-filter: blur($jst-glass-blur);
+  -webkit-backdrop-filter: blur($jst-glass-blur);
+  box-shadow: $jst-shadow-ambient;
 }
 
 /* 搜索栏 */
@@ -379,19 +381,12 @@ export default {
 }
 
 .contest-list-page__cat-tab--active {
-  color: $jst-brand;
+  color: $jst-text-inverse;
   font-weight: $jst-weight-bold;
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 28rpx;
-    right: 28rpx;
-    height: 4rpx;
-    background: $jst-brand;
-    border-radius: 2rpx;
-  }
+  background: $jst-brand;
+  border-radius: $jst-radius-round;
+  margin: $jst-space-sm 0;
+  padding: $jst-space-sm 28rpx;
 }
 
 /* 结果栏 */

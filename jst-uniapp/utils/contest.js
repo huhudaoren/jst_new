@@ -55,7 +55,13 @@ export function normalizeContestCard(contest = {}) {
     scheduleJson: contest.scheduleJson || '',
     awardsJson: contest.awardsJson || '',
     faqJson: contest.faqJson || '',
-    recommendTags: contest.recommendTags || ''
+    recommendTags: contest.recommendTags || '',
+    teamMinSize: contest.teamMinSize || 0,
+    teamMaxSize: contest.teamMaxSize || 0,
+    teamLeaderFields: contest.teamLeaderFields || '',
+    teamMemberFields: contest.teamMemberFields || '',
+    allowRepeatAppointment: contest.allowRepeatAppointment,
+    appointmentSlotList: Array.isArray(contest.appointmentSlotList) ? contest.appointmentSlotList : []
   }
 }
 

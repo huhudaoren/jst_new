@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.JstContestAwardMapper">
+
+    <resultMap id="JstContestAwardResult" type="com.ruoyi.jst.event.domain.JstContestAward">
+        <id property="awardId" column="award_id"/>
+        <result property="contestId" column="contest_id"/>
+        <result property="awardName" column="award_name"/>
+        <result property="awardLevel" column="award_level"/>
+        <result property="description" column="description"/>
+        <result property="quota" column="quota"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        award_id, contest_id, award_name, award_level, description, quota, sort_order,
+        create_by, create_time, update_by, update_time, del_flag
+    </sql>
+
+    <select id="selectByAwardId" resultMap="JstContestAwardResult">
+        select <include refid="BaseColumns"/>
+        from jst_contest_award
+        where award_id = #{awardId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectByContestId" resultMap="JstContestAwardResult">
+        select <include refid="BaseColumns"/>
+        from jst_contest_award
+        where contest_id = #{contestId}
+          and del_flag = '0'
+        order by sort_order asc, award_id asc
+    </select>
+
+    <insert id="insertJstContestAward" parameterType="com.ruoyi.jst.event.domain.JstContestAward"
+            useGeneratedKeys="true" keyProperty="entity.awardId">
+        insert into jst_contest_award (
+            contest_id, award_name, award_level, description, quota, sort_order,
+            create_by, create_time, update_by, update_time, del_flag
+        ) values (
+            #{entity.contestId}, #{entity.awardName}, #{entity.awardLevel}, #{entity.description},
+            #{entity.quota}, #{entity.sortOrder},
+            #{entity.createBy}, #{entity.createTime}, #{entity.updateBy}, #{entity.updateTime}, #{entity.delFlag}
+        )
+    </insert>
+
+    <insert id="batchInsert">
+        insert into jst_contest_award (
+            contest_id, award_name, award_level, description, quota, sort_order,
+            create_by, create_time, update_by, update_time, del_flag
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.contestId}, #{item.awardName}, #{item.awardLevel}, #{item.description},
+                #{item.quota}, #{item.sortOrder},
+                #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.delFlag}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateJstContestAward" parameterType="com.ruoyi.jst.event.domain.JstContestAward">
+        update jst_contest_award
+        set award_name = #{entity.awardName},
+            award_level = #{entity.awardLevel},
+            description = #{entity.description},
+            quota = #{entity.quota},
+            sort_order = #{entity.sortOrder},
+            update_by = #{entity.updateBy},
+            update_time = #{entity.updateTime}
+        where award_id = #{entity.awardId}
+          and del_flag = '0'
+    </update>
+
+    <delete id="deleteByAwardId">
+        delete from jst_contest_award where award_id = #{awardId}
+    </delete>
+
+    <delete id="deleteByContestId">
+        delete from jst_contest_award where contest_id = #{contestId}
+    </delete>
+
+</mapper>

@@ -337,7 +337,7 @@ export default {
 
 .cd-page {
   min-height: 100vh;
-  background: $jst-bg-page;
+  background: $jst-bg-subtle;
   padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
 }
 

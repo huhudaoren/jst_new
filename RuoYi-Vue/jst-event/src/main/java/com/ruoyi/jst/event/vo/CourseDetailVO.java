@@ -23,6 +23,7 @@ public class CourseDetailVO {
     private Integer lessonCount;
     private Integer learnerCount;
     private String totalDuration;
+    @Deprecated
     private String chaptersJson;
     private String teacherName;
     private String teacherAvatar;

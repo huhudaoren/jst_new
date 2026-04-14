@@ -108,8 +108,8 @@ export default {
 
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
-.pc-page { min-height: 100vh; padding-bottom: $jst-space-xxl; background: $jst-bg-page; }
-.pc-hero { padding: 96rpx $jst-space-xl 64rpx; background: linear-gradient(150deg, $jst-purple-dark 0%, $jst-purple 55%, $jst-amber 130%); color: $jst-text-inverse; border-bottom-left-radius: 40rpx; border-bottom-right-radius: 40rpx; text-align: center; }
+.pc-page { min-height: 100vh; padding-bottom: $jst-space-xxl; background: $jst-bg-subtle; }
+.pc-hero { padding: 96rpx $jst-space-xl 64rpx; background: $jst-hero-gradient-dark; color: $jst-text-inverse; border-bottom-left-radius: 40rpx; border-bottom-right-radius: 40rpx; text-align: center; }
 .pc-hero__badge { display: inline-block; padding: $jst-space-sm $jst-space-xl; border-radius: $jst-radius-round; background: rgba(245,166,35,0.28); border: 2rpx solid rgba(245,166,35,0.6); color: $jst-gold; font-size: $jst-font-base; font-weight: $jst-weight-semibold; }
 .pc-hero__name { display: block; margin-top: $jst-space-md; font-size: $jst-font-xl; font-weight: $jst-weight-semibold; }
 .pc-hero__bar { margin: $jst-space-lg auto 0; width: 520rpx; height: $jst-space-md; border-radius: $jst-radius-sm; background: rgba(255,255,255,0.22); overflow: hidden; }

@@ -56,3 +56,16 @@ export function getMyEnrolls(params = {}, options = {}) {
     ...options
   })
 }
+
+/**
+ * 团队报名提交
+ * @param {Object} data { contestId, leaderInfo:{}, members:[{name,phone,idCard,...}] }
+ */
+export function submitTeamEnroll(data, options = {}) {
+  return request({
+    url: '/jst/wx/enroll/team/submit',
+    method: 'POST',
+    data,
+    ...options
+  })
+}

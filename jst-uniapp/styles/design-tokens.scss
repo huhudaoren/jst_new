@@ -86,3 +86,31 @@ $jst-duration-fast: 150ms;
 $jst-duration-normal: 300ms;
 $jst-duration-slow: 500ms;
 $jst-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+// ═══════════════════════════════════════════
+// REFACTOR-10 追加 — 视觉重塑升级 Token
+// ═══════════════════════════════════════════
+
+// ── 高级灰色系 ──
+$jst-bg-subtle: #F8F9FC;                     // 冷灰页面底色（替代 $jst-bg-page 用于重塑页面）
+$jst-card-glow: 0 2rpx 16rpx rgba(43, 108, 255, 0.04), 0 0 1rpx rgba(0, 0, 0, 0.04);  // 微光阴影
+$jst-glass-bg: rgba(255, 255, 255, 0.72);    // 毛玻璃背景
+$jst-glass-blur: 20px;                       // 毛玻璃模糊度
+$jst-glass-border: rgba(255, 255, 255, 0.2); // 毛玻璃边框色
+
+// ── 层次阴影三件套 ──
+$jst-shadow-ring: 0 0 0 1rpx rgba(0, 0, 0, 0.03);       // 结构边界
+$jst-shadow-ambient: 0 4rpx 12rpx rgba(0, 0, 0, 0.03);   // 环境光
+$jst-shadow-lift: 0 8rpx 24rpx rgba(43, 108, 255, 0.06);  // 品牌色调主投影
+
+// ── 圆角升级 ──
+$jst-radius-card: 20rpx;                     // 卡片圆角（更圆润）
+$jst-radius-button: 24rpx;                   // 按钮圆角
+
+// ── 过渡 Token ──
+$jst-transition-enter: 0.35s ease-out;
+$jst-transition-page: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+// ── Hero 渐变 ──
+$jst-hero-gradient: linear-gradient(165deg, #1A3A6E 0%, #2B6CFF 100%);   // 冷蓝 Hero
+$jst-hero-gradient-dark: linear-gradient(165deg, #0F2244 0%, #1A4FCC 100%); // 深色 Hero

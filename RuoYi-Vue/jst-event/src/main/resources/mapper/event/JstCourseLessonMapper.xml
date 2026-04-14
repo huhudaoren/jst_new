@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.JstCourseLessonMapper">
+
+    <resultMap id="JstCourseLessonResult" type="com.ruoyi.jst.event.domain.JstCourseLesson">
+        <id property="lessonId" column="lesson_id"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="lessonName" column="lesson_name"/>
+        <result property="duration" column="duration"/>
+        <result property="isFree" column="is_free"/>
+        <result property="videoUrl" column="video_url"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        lesson_id, chapter_id, lesson_name, duration, is_free, video_url, sort_order,
+        create_by, create_time, update_by, update_time, del_flag
+    </sql>
+
+    <select id="selectByLessonId" resultMap="JstCourseLessonResult">
+        select <include refid="BaseColumns"/>
+        from jst_course_lesson
+        where lesson_id = #{lessonId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectByChapterId" resultMap="JstCourseLessonResult">
+        select <include refid="BaseColumns"/>
+        from jst_course_lesson
+        where chapter_id = #{chapterId}
+          and del_flag = '0'
+        order by sort_order asc, lesson_id asc
+    </select>
+
+    <insert id="insertJstCourseLesson" parameterType="com.ruoyi.jst.event.domain.JstCourseLesson"
+            useGeneratedKeys="true" keyProperty="entity.lessonId">
+        insert into jst_course_lesson (
+            chapter_id, lesson_name, duration, is_free, video_url, sort_order,
+            create_by, create_time, update_by, update_time, del_flag
+        ) values (
+            #{entity.chapterId}, #{entity.lessonName}, #{entity.duration}, #{entity.isFree},
+            #{entity.videoUrl}, #{entity.sortOrder},
+            #{entity.createBy}, #{entity.createTime}, #{entity.updateBy}, #{entity.updateTime}, #{entity.delFlag}
+        )
+    </insert>
+
+    <insert id="batchInsert">
+        insert into jst_course_lesson (
+            chapter_id, lesson_name, duration, is_free, video_url, sort_order,
+            create_by, create_time, update_by, update_time, del_flag
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.chapterId}, #{item.lessonName}, #{item.duration}, #{item.isFree},
+                #{item.videoUrl}, #{item.sortOrder},
+                #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.delFlag}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateJstCourseLesson" parameterType="com.ruoyi.jst.event.domain.JstCourseLesson">
+        update jst_course_lesson
+        set lesson_name = #{entity.lessonName},
+            duration = #{entity.duration},
+            is_free = #{entity.isFree},
+            video_url = #{entity.videoUrl},
+            sort_order = #{entity.sortOrder},
+            update_by = #{entity.updateBy},
+            update_time = #{entity.updateTime}
+        where lesson_id = #{entity.lessonId}
+          and del_flag = '0'
+    </update>
+
+    <delete id="deleteByLessonId">
+        delete from jst_course_lesson where lesson_id = #{lessonId}
+    </delete>
+
+    <delete id="deleteByChapterId">
+        delete from jst_course_lesson where chapter_id = #{chapterId}
+    </delete>
+
+    <delete id="deleteByCourseId">
+        delete l
+        from jst_course_lesson l
+        inner join jst_course_chapter c on c.chapter_id = l.chapter_id
+        where c.course_id = #{courseId}
+    </delete>
+
+</mapper>

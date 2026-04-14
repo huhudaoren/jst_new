@@ -54,3 +54,18 @@ export function previewCert(certId) {
     method: 'get'
   })
 }
+
+export function getCertTemplate(templateId) {
+  return request({
+    url: `/jst/partner/cert/template/${templateId}`,
+    method: 'get'
+  })
+}
+
+export function updateCertTemplate(templateId, data) {
+  return request({
+    url: `/jst/partner/cert/template/${templateId}`,
+    method: 'put',
+    data
+  })
+}

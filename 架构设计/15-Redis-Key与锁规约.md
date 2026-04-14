@@ -38,6 +38,7 @@ jst:{domain}:{purpose}:{key1}[:{key2}]
 | `jst:level:config:all` | 1h | String/JSON | 等级配置全表缓存 | LevelConfigService |
 | `jst:cert:verify:{verifyCode}` | 1d | String/JSON | 公开证书验证缓存 | CertVerifyController |
 | `jst:msg:template:{tplCode}` | 1h | String | 消息模板缓存 | MessageTemplateService |
+| `jst:biz_no:{ruleCode}:{dateKey}` | 48h | String(Long) | 统一编号日序列计数器（Redis INCR） | BizNoGenerateService.nextNo |
 
 ### 2.2 热点数据缓存 Key 清单（cache: 前缀，由 JstCacheService 统一管理）
 

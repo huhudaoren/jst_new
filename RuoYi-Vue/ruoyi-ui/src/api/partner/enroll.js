@@ -30,3 +30,10 @@ export function batchAuditEnrolls(data) {
     data
   })
 }
+
+export function listScoreItems(contestId) {
+  return request({
+    url: `/jst/partner/contest/${contestId}/score-items`,
+    method: 'get'
+  })
+}

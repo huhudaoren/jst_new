@@ -210,10 +210,22 @@ D:\coding\jst_v1\
 | QUALITY-FIX-MP | Mock 隐藏 + 技术文案清理 + catch toast + 硬编码色修复 | ✅ 完成 |
 | 编码修复 | 7 文件 BOM 清除 + 1 文件 GBK 乱码 + 13 文件 Unicode 转义 + Agent 编码规范 | ✅ 完成 |
 | **操作文档** | 小程序手册(612行) + 管理端手册(907行) | ✅ 完成 |
-| **安全与性能（执行中）** | | |
-| SECURITY-FIX | 多环境 yml 拆分(dev/test/prod) + 5 项🔴安全修复 | 🏃 执行中 |
-| PERF-INDEX | 数据库索引补齐 + 连接池优化 | 🏃 执行中 |
-| PERF-CACHE | 热点数据缓存层（8 查询 + 穿透/雪崩防护） | 🏃 执行中 |
+| **安全与性能** | | |
+| SECURITY-FIX | 多环境 yml 拆分(dev/test/prod) + 5 项🔴安全修复 + 31 @Log 补齐 | ✅ 完成 |
+| PERF-INDEX | 7 组合索引 + 连接池优化 + EXPLAIN 验证 | ✅ 完成 |
+| PERF-CACHE | JstCacheService + 13 热点缓存 + 穿透/雪崩防护 | ✅ 完成 |
+| **傻瓜化深度重构（11 卡）** | | |
+| REFACTOR-1-DDL | 7 张子表 + jst_contest 16 新字段 + 级联保存 + 赛事复制 | ✅ 完成 |
+| REFACTOR-2-DICT | 7 字典类型 30 条数据 + 若依 dict-tag 全局翻译 10 页 | ✅ 完成 |
+| REFACTOR-3-CONTEST | 赛事编辑傻瓜化重构（8 Tab + 复制 + 预览 + JSON 清零） | ✅ 完成 |
+| REFACTOR-4-ENROLL | 评审老师 + 审核打分一体化 + 卡片滑动审核 + 键盘快捷键 | ✅ 完成 |
+| REFACTOR-5-CERT | Fabric.js 证书拖拽设计器（三栏 + 13 变量 + 撤销/重做） | ✅ 完成 |
+| REFACTOR-6-BIZNO | 统一编号规则引擎（Redis INCR + 3 预置规则） | ✅ 完成 |
+| REFACTOR-7-MENU | 菜单清理（重命名 + 隐藏 5 重复 + 合并渠道 + 根级 4→2） | ✅ 完成 |
+| REFACTOR-8-MP-FORM | 动态表单渲染引擎（11 字段类型 + 实时校验 + 文件上传） | ✅ 完成 |
+| REFACTOR-9-MP-BOOKING | 预约时间段选择 + 团队报名 3 步向导 + 7 项防呆 | ✅ 完成 |
+| REFACTOR-10-MP-VISUAL | C 端视觉重塑 15 页 + 8 组件 + 15 Token + 8 动画 | ✅ 完成 |
+| REFACTOR-11-MP-CERT | 成绩雷达图 + 证书海报 Canvas + 一键保存相册 + 3 入口 | ✅ 完成 |
 | DATA-MIGRATION | 旧数据迁移方案与脚本 | ⏸️ 搁置至 5 月中旬 |
 
 ---
@@ -262,7 +274,7 @@ D:\coding\jst_v1\
 
 ## 六、已知问题与待办
 
-> 最后更新：2026-04-13 安全审计 + 性能优化进行中
+> 最后更新：2026-04-14 傻瓜化重构 11 卡全部完成
 
 ### 已完成总览
 
@@ -281,35 +293,50 @@ D:\coding\jst_v1\
 | 文档 | 小程序手册(612 行) + 管理端手册(907 行) + 操作文档 | 全部 ✅ |
 | 修复 | FIX-1~5 + FIX-COMPILE + 断链 + 权限 + 样式 | 全部 ✅ |
 | 测试 | TEST-ROUND1 (81%/95%) → TEST-ROUND2 (93%/98%) | 全部 ✅ |
+| 安全+性能 | SECURITY-FIX(11项) + PERF-INDEX(7索引) + PERF-CACHE(13缓存) | 全部 ✅ |
+| **傻瓜化重构** | **11 卡：DDL去JSON + 字典翻译 + 赛事编辑 + 审核评审 + 证书设计器 + 编号引擎 + 菜单清理 + 动态表单 + 预约团队 + 视觉重塑 + 成绩证书** | **全部 ✅** |
 
-### 生产安全审计结果（2026-04-13）
+### 傻瓜化重构成果汇总（2026-04-14）
 
-| 维度 | 🔴 | 🟡 | 🟢 |
+| 维度 | 数量 |
+|---|---|
+| 新建数据库表 | 10 张（7 子表 + reviewer + 2 编号表） |
+| jst_contest 新增字段 | 16 个（banner/名额/团队/核销/主办方等） |
+| 字典补齐 | 7 类型 30 条（若依 dict-tag 全局翻译） |
+| 赛事编辑重构 | 8 Tab 全量傻瓜化（JSON→表格、Drawer 快建、批量生成） |
+| 证书设计器 | Fabric.js 三栏拖拽（13 变量 + 撤销/重做 + 渠道复用） |
+| 审核系统 | 打分一体化 + 卡片滑动审核 + 评审老师分配 + 键盘快捷键 |
+| 编号引擎 | Redis INCR 并发安全 + 3 预置规则（cert/auth/enroll） |
+| 菜单精简 | 根级 4→2 + 隐藏 5 重复 + 合并渠道 |
+| 动态表单引擎 | 11 字段类型 + 实时校验 + 文件上传（图片/视频/PDF） |
+| 预约改造 | 日期 Tab + 容量三态 + 批量生成 + 7 项防呆 |
+| 团队报名 | 3 步向导 + 人数校验 + 微信分享邀请 |
+| C 端视觉重塑 | 15 页极简高级灰 + 8 组件 + 15 Token + 8 动画 |
+| 成绩证书 | 雷达图 + Canvas 海报 + 一键保存相册 + 验证公开页 |
+
+### 重构遗留 TODO（后端接口补齐）
+
+| 优先级 | 项 | 来源卡 | 说明 |
 |---|---|---|---|
-| 安全与配置 | 5 | 5 | 3 |
-| 权限与越权 | 0 | 0 | 10 |
-| 性能与数据库 | 0 | 3 | 6 |
-| 并发与稳定性 | 0 | 1 | 7 |
-| 日志与可观测性 | 0 | 4 | 4 |
+| **P0** | 后端 VO 补充字段 | 卡 11 | scorePublished/hasCert/totalScore/certImageUrl 需在 wx 详情接口返回 |
+| **P0** | 团队报名后端接口 | 卡 9 | `POST /jst/wx/enroll/team/submit`（前端已就绪） |
+| **P1** | 证书生成引擎 | 卡 5 | `POST /jst/partner/cert/generate`（读取 layout_json → 渲染 PDF/PNG） |
+| **P1** | 预约时间段接口 | 卡 9 | `GET /jst/wx/appointment/contest/{id}/slots`（前端有兜底方案） |
+| **P1** | 小程序码生成 | 卡 11 | 海报中小程序码需后端 wxacode 接口 |
+| **P1** | 表单模板 partner 端点 | 卡 3 | 当前复用 admin API，partner 角色需补独立 create 端点 |
+| **P1** | 真机兼容性验证 | 卡 10 | backdrop-filter/视差/sticky 在 iOS/Android 微信实测 |
+| **P2** | 评审老师自动过滤 | 卡 4 | 评审老师登录后只看负责赛事的报名（REFACTOR-4b） |
+| **P2** | 微信邀请自动加入 | 卡 9 | 当前仅传 contestId，被邀请者需手动进入 |
+| **P3** | 旧组件清理 | 卡 8 | jst-form-render 组件仍保留（其他页面可能引用） |
+| **P3** | 证书对齐辅助线 | 卡 5 | Fabric.js guideline 插件 |
+| **P3** | OSS 真实上传 | 卡 5 | 底图/印章目前 dataURL，待 OSS 配置后接入 |
 
-亮点：权限体系 9.5/10、并发控制 9/10、幂等设计完整。
-
-### 当前执行中
-
-| 任务 | Agent | 说明 |
-|---|---|---|
-| SECURITY-FIX | Backend 1 | 多环境 yml(dev/test/prod) + CORS 白名单 + 密钥外置 + Swagger/Druid 条件化 |
-| PERF-INDEX | Backend 2 | 组合索引补齐 + 连接池优化 + EXPLAIN 验证 |
-| PERF-CACHE | Backend 3 | JstCacheService + 8 热点缓存 + 穿透/雪崩防护 |
-
-### 当前待办
+### 其他待办
 
 | 优先级 | 项 | 状态 | 说明 |
 |---|---|---|---|
-| **P0** | SECURITY-FIX | 🏃 执行中 | 5 个🔴审计问题修复 |
-| **P1** | PERF-INDEX / PERF-CACHE | 🏃 执行中 | 索引 + 缓存层 |
 | **P2** | DATA-MIGRATION | ⏸️ 5 月中旬 | 旧数据迁移（等旧库信息） |
-| **P2** | TEST-ROUND3 | ⏳ 等安全+性能完成 | 全量回归测试 |
+| **P2** | TEST-ROUND3 | ⏳ | 全量回归测试（等遗留 TODO 补齐后） |
 | **P3** | F-RISK | ⏸️ | 风控规则引擎（CRUD 已有，缺评估逻辑） |
 | **远期** | F-AI-MAIC | ⏸️ | 缺 OpenMAIC 外部文档 |
 
@@ -320,22 +347,21 @@ D:\coding\jst_v1\
 | `owner_type` 数据清洗 | DEBT-3 遗留脚本，需停服窗口 |
 | OSS 上传组件集成 | 待真实 OSS 配置后接入 |
 | select * 替换（15 处） | 性能审计建议，非阻塞 |
-| @Log 补齐（11 处 Controller） | 安全审计建议，SECURITY-FIX 卡中 |
 
 ### 生产部署就绪清单
 
 | 项 | 状态 | 说明 |
 |---|---|---|
-| 多环境配置 | 🏃 | SECURITY-FIX 执行中 |
-| 数据库索引 | 🏃 | PERF-INDEX 执行中 |
-| 缓存层 | 🏃 | PERF-CACHE 执行中 |
+| 多环境配置 | ✅ | dev/test/prod 三环境 yml |
+| 数据库索引 | ✅ | 7 组合索引 + 连接池优化 |
+| 缓存层 | ✅ | 13 热点缓存 + 穿透/雪崩防护 |
+| 测试服务器 | ✅ | 39.107.69.244（jstadmin.esget.cn + jstapp.esget.cn） |
 | 微信支付 | ⏳ | 需商户账号 + SDK 接入 |
 | 微信登录 | ⏳ | 需 appid/secret |
 | 短信服务 | ⏳ | 需阿里云 SMS 配置 |
 | OSS 文件上传 | ⏳ | 需阿里云 OSS 配置 |
 | 旧数据迁移 | ⏸️ 5 月中旬 | 脚本框架已就绪 |
-| 域名 + SSL | ⏳ | 需运维配置 |
-| 双机部署 + Nginx | ⏳ | 需运维配置 |
+| 域名 + SSL | ⏳ | 需运维配置（已有 HTTP 域名） |
 
 ### CCB 决策索引
 - **`架构设计/34-功能闭环决策记录.md`**：Q-01~Q-14 全量决策
@@ -371,6 +397,11 @@ D:\coding\jst_v1\
 | 99-migration-contest-detail-fields.sql | jst_contest 追加 schedule_json/awards_json/faq_json/recommend_tags |
 | 99-migration-course-detail-fields.sql | jst_course 追加 chapters_json/teacher 等字段 |
 | 99-migration-admin-menus.sql | ⭐ Web 管理端菜单注册（9900-9999 段） |
+| 99-migration-refactor-dejson.sql | ⭐ 傻瓜化：7 子表 + jst_contest 16 新字段 |
+| 99-migration-refactor-dict.sql | ⭐ 傻瓜化：7 字典类型 30 条数据 |
+| 99-migration-refactor-menus.sql | ⭐ 傻瓜化：菜单重命名+隐藏+合并 |
+| 99-migration-biz-no-rule.sql | ⭐ 傻瓜化：编号规则表+序列表+3预置规则 |
+| 99-migration-contest-reviewer.sql | ⭐ 傻瓜化：评审老师表 |
 | 99-test-fixtures.sql | 测试数据 |
 
 ---

@@ -56,7 +56,9 @@
             <template slot-scope="scope">{{ bindingChannelDisplay(scope.row) }}</template>
           </el-table-column>
           <el-table-column label="渠道类型" prop="channelType" min-width="100">
-            <template slot-scope="scope">{{ scope.row.channelType || '--' }}</template>
+            <template slot-scope="scope">
+              <dict-tag :options="dict.type.jst_channel_type" :value="scope.row.channelType" />
+            </template>
           </el-table-column>
           <el-table-column label="状态" min-width="110">
             <template slot-scope="scope">
@@ -81,7 +83,9 @@
             </template>
           </el-table-column>
           <el-table-column label="来源" prop="sourceType" min-width="120">
-            <template slot-scope="scope">{{ scope.row.sourceType || '--' }}</template>
+            <template slot-scope="scope">
+              <dict-tag :options="dict.type.jst_source_type" :value="scope.row.sourceType" />
+            </template>
           </el-table-column>
           <el-table-column label="变更积分" min-width="110" align="right">
             <template slot-scope="scope">
@@ -115,6 +119,7 @@ import { getAdminParticipant, listAdminParticipants } from '@/api/jst/user/admin
 
 export default {
   name: 'JstAdminUserDetail',
+  dicts: ['jst_channel_type', 'jst_source_type'],
   props: {
     visible: {
       type: Boolean,

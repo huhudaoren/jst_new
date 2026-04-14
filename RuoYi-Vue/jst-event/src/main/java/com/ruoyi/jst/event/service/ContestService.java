@@ -37,6 +37,8 @@ public interface ContestService {
 
     void deleteContest(Long contestId);
 
+    Long copyContest(Long contestId);
+
     List<ContestListVO> selectAdminList(ContestQueryReqDTO query);
 
     ContestDetailVO getAdminDetail(Long contestId);

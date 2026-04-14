@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.JstContestScheduleMapper">
+
+    <resultMap id="JstContestScheduleResult" type="com.ruoyi.jst.event.domain.JstContestSchedule">
+        <id property="scheduleId" column="schedule_id"/>
+        <result property="contestId" column="contest_id"/>
+        <result property="stageName" column="stage_name"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="venue" column="venue"/>
+        <result property="description" column="description"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        schedule_id, contest_id, stage_name, start_time, end_time, venue, description,
+        sort_order, create_by, create_time, update_by, update_time, del_flag
+    </sql>
+
+    <select id="selectByScheduleId" resultMap="JstContestScheduleResult">
+        select <include refid="BaseColumns"/>
+        from jst_contest_schedule
+        where schedule_id = #{scheduleId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectByContestId" resultMap="JstContestScheduleResult">
+        select <include refid="BaseColumns"/>
+        from jst_contest_schedule
+        where contest_id = #{contestId}
+          and del_flag = '0'
+        order by sort_order asc, schedule_id asc
+    </select>
+
+    <insert id="insertJstContestSchedule" parameterType="com.ruoyi.jst.event.domain.JstContestSchedule"
+            useGeneratedKeys="true" keyProperty="entity.scheduleId">
+        insert into jst_contest_schedule (
+            contest_id, stage_name, start_time, end_time, venue, description, sort_order,
+            create_by, create_time, update_by, update_time, del_flag
+        ) values (
+            #{entity.contestId}, #{entity.stageName}, #{entity.startTime}, #{entity.endTime},
+            #{entity.venue}, #{entity.description}, #{entity.sortOrder},
+            #{entity.createBy}, #{entity.createTime}, #{entity.updateBy}, #{entity.updateTime}, #{entity.delFlag}
+        )
+    </insert>
+
+    <insert id="batchInsert">
+        insert into jst_contest_schedule (
+            contest_id, stage_name, start_time, end_time, venue, description, sort_order,
+            create_by, create_time, update_by, update_time, del_flag
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.contestId}, #{item.stageName}, #{item.startTime}, #{item.endTime},
+                #{item.venue}, #{item.description}, #{item.sortOrder},
+                #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.delFlag}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateJstContestSchedule" parameterType="com.ruoyi.jst.event.domain.JstContestSchedule">
+        update jst_contest_schedule
+        set stage_name = #{entity.stageName},
+            start_time = #{entity.startTime},
+            end_time = #{entity.endTime},
+            venue = #{entity.venue},
+            description = #{entity.description},
+            sort_order = #{entity.sortOrder},
+            update_by = #{entity.updateBy},
+            update_time = #{entity.updateTime}
+        where schedule_id = #{entity.scheduleId}
+          and del_flag = '0'
+    </update>
+
+    <delete id="deleteByScheduleId">
+        delete from jst_contest_schedule where schedule_id = #{scheduleId}
+    </delete>
+
+    <delete id="deleteByContestId">
+        delete from jst_contest_schedule where contest_id = #{contestId}
+    </delete>
+
+</mapper>

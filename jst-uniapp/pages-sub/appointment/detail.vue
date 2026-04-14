@@ -131,7 +131,7 @@ export default {
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
 
-.ad-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
+.ad-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: $jst-bg-subtle; }
 .ad-header { padding: 72rpx 32rpx 48rpx; background: linear-gradient(135deg, $jst-brand, $jst-brand-light); color: $jst-text-inverse; }
 .ad-header__title { display: block; font-size: 36rpx; font-weight: 600; }
 

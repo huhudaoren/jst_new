@@ -1,7 +1,9 @@
 package com.ruoyi.jst.finance.controller.partner;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.jst.common.annotation.PartnerDataScope;
 import com.ruoyi.jst.common.controller.BasePartnerController;
 import com.ruoyi.jst.finance.dto.PartnerSettlementQueryReqDTO;
@@ -56,6 +58,7 @@ public class PartnerSettlementController extends BasePartnerController {
     /**
      * 赛事方确认结算单。
      */
+    @Log(title = "赛事方确认结算", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:channel:event_settlement:edit')")
     @PostMapping("/{id}/confirm")
     public AjaxResult confirm(@PathVariable("id") Long id) {
@@ -65,6 +68,7 @@ public class PartnerSettlementController extends BasePartnerController {
     /**
      * 赛事方提交结算争议。
      */
+    @Log(title = "赛事方结算争议", businessType = BusinessType.UPDATE)
     @PreAuthorize("@ss.hasPermi('jst:channel:event_settlement:edit')")
     @PostMapping("/{id}/dispute")
     public AjaxResult dispute(@PathVariable("id") Long id, @Valid @RequestBody SettlementDisputeReqDTO req) {

@@ -8,9 +8,12 @@ import com.ruoyi.jst.common.annotation.PartnerDataScope;
 import com.ruoyi.jst.common.controller.BasePartnerController;
 import com.ruoyi.jst.event.dto.ContestQueryReqDTO;
 import com.ruoyi.jst.event.dto.ContestSaveReqDTO;
+import com.ruoyi.jst.event.dto.ReviewerSaveReqDTO;
+import com.ruoyi.jst.event.service.ContestReviewerService;
 import com.ruoyi.jst.event.service.ContestService;
 import com.ruoyi.jst.event.vo.ContestDetailVO;
 import com.ruoyi.jst.event.vo.ContestListVO;
+import com.ruoyi.jst.event.vo.ReviewerVO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,6 +46,9 @@ public class PartnerContestController extends BasePartnerController {
 
     @Autowired
     private ContestService contestService;
+
+    @Autowired
+    private ContestReviewerService contestReviewerService;
 
     /**
      * 查询赛事方赛事列表。
@@ -165,6 +171,58 @@ public class PartnerContestController extends BasePartnerController {
     @DeleteMapping("/{contestId}")
     public AjaxResult delete(@PathVariable("contestId") Long contestId) {
         contestService.deleteContest(contestId);
+        return AjaxResult.success();
+    }
+
+    /**
+     * 赛事方复制赛事。
+     *
+     * @param contestId 原赛事ID
+     * @return 新赛事ID
+     * @关联表 jst_contest, jst_contest_schedule, jst_contest_award, jst_contest_faq, jst_score_item
+     * @关联状态机 SM-5
+     * @关联权限 hasRole('jst_partner')
+     */
+    @Log(title = "赛事方复制赛事", businessType = BusinessType.INSERT)
+    @PreAuthorize("@ss.hasRole('jst_partner')")
+    @PostMapping("/copy/{contestId}")
+    public AjaxResult copy(@PathVariable("contestId") Long contestId) {
+        Long newContestId = contestService.copyContest(contestId);
+        return AjaxResult.success(Collections.singletonMap("contestId", newContestId));
+    }
+
+    // ========== 评审老师管理 ==========
+
+    /**
+     * 获取赛事评审老师列表。
+     *
+     * @param contestId 赛事ID
+     * @return 评审老师列表
+     * @关联表 jst_contest_reviewer
+     * @关联权限 hasRole('jst_partner')
+     */
+    @PreAuthorize("@ss.hasRole('jst_partner')")
+    @GetMapping("/{contestId}/reviewers")
+    public AjaxResult listReviewers(@PathVariable("contestId") Long contestId) {
+        List<ReviewerVO> list = contestReviewerService.listByContestId(contestId);
+        return AjaxResult.success(list);
+    }
+
+    /**
+     * 配置赛事评审老师（全量替换）。
+     *
+     * @param contestId 赛事ID
+     * @param req       评审老师配置请求
+     * @return 操作结果
+     * @关联表 jst_contest_reviewer
+     * @关联权限 hasRole('jst_partner')
+     */
+    @Log(title = "赛事方配置评审老师", businessType = BusinessType.UPDATE)
+    @PreAuthorize("@ss.hasRole('jst_partner')")
+    @PostMapping("/{contestId}/reviewers")
+    public AjaxResult saveReviewers(@PathVariable("contestId") Long contestId,
+                                    @Valid @RequestBody ReviewerSaveReqDTO req) {
+        contestReviewerService.saveReviewers(contestId, req);
         return AjaxResult.success();
     }
 }

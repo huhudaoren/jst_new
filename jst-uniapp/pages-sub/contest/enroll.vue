@@ -62,7 +62,7 @@
 
       <view class="enroll-page__card enroll-page__card--tip">
         <text class="enroll-page__tip-title">填写提醒</text>
-        <text class="enroll-page__tip-text">带 * 为必填项。图片/文件类字段本期先使用 mock URL 占位，不接真实上传。</text>
+        <text class="enroll-page__tip-text">带 * 为必填项，请认真填写并上传所需材料。</text>
       </view>
 
       <view class="enroll-page__card">
@@ -71,11 +71,12 @@
           <text v-if="templateInfo.templateVersion" class="enroll-page__card-subtitle">模板 V{{ templateInfo.templateVersion }}</text>
         </view>
 
-        <jst-form-render
+        <jst-dynamic-form
           v-if="schemaReady"
-          ref="formRenderer"
+          ref="dynamicForm"
           :schema="templateInfo.schemaJson"
           :value="formState"
+          :show-validation="showValidation"
           @input="handleFormInput"
           @validate="handleValidate"
         />
@@ -118,7 +119,7 @@ import {
 } from '@/api/enroll'
 import { myParticipants } from '@/api/participant'
 import JstEmpty from '@/components/jst-empty/jst-empty.vue'
-import JstFormRender from '@/components/jst-form-render/jst-form-render.vue'
+import JstDynamicForm from '@/components/jst-dynamic-form/jst-dynamic-form.vue'
 import JstLoading from '@/components/jst-loading/jst-loading.vue'
 
 const DRAFT_STORAGE_KEY = 'jst-enroll-draft'
@@ -126,7 +127,7 @@ const DRAFT_STORAGE_KEY = 'jst-enroll-draft'
 export default {
   components: {
     JstEmpty,
-    JstFormRender,
+    JstDynamicForm,
     JstLoading
   },
   data() {
@@ -153,7 +154,8 @@ export default {
       participants: [],
       selectedParticipantId: '',
       formState: {},
-      validationErrors: [],
+      formValid: false,
+      showValidation: false,
       cachedAttachments: []
     }
   },
@@ -301,8 +303,8 @@ export default {
       this.formState = Object.assign({}, this.formState, { [key]: value })
     },
 
-    handleValidate(errors) {
-      this.validationErrors = Array.isArray(errors) ? errors : []
+    handleValidate(isValid) {
+      this.formValid = isValid
     },
 
     selectParticipant(item) {
@@ -354,7 +356,8 @@ export default {
         return
       }
 
-      const errors = this.$refs.formRenderer ? this.$refs.formRenderer.validateForm() : []
+      this.showValidation = true
+      const errors = this.$refs.dynamicForm ? this.$refs.dynamicForm.validateForm() : []
       if (errors.length) {
         uni.showToast({
           title: errors[0].message,
@@ -535,7 +538,7 @@ export default {
 .enroll-page {
   min-height: 100vh;
   padding-bottom: calc(164rpx + env(safe-area-inset-bottom));
-  background: $jst-bg-page;
+  background: $jst-bg-subtle;
 }
 
 .jst-page-skeleton {
@@ -574,7 +577,7 @@ export default {
 
 .enroll-page__hero {
   padding: 28rpx 24rpx 180rpx;
-  background: linear-gradient(180deg, $jst-brand-dark 0%, $jst-brand 100%);
+  background: $jst-hero-gradient;
 }
 
 .enroll-page__hero-title {
@@ -600,11 +603,11 @@ export default {
 }
 
 .enroll-page__card {
-  margin-bottom: 20rpx;
-  padding: 28rpx 24rpx;
-  border-radius: 32rpx;
+  margin-bottom: $jst-space-lg;
+  padding: $jst-space-xl $jst-space-lg;
+  border-radius: $jst-radius-card;
   background: $jst-bg-card;
-  box-shadow: $jst-shadow-md;
+  box-shadow: $jst-shadow-ring, $jst-shadow-ambient;
 }
 
 .enroll-page__card--summary {
@@ -759,11 +762,15 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 30;
   display: flex;
-  gap: 18rpx;
-  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
-  background: rgba($jst-bg-card, 0.98);
-  box-shadow: $jst-shadow-md;
+  gap: $jst-space-md;
+  padding: $jst-space-lg $jst-page-padding calc(#{$jst-space-lg} + env(safe-area-inset-bottom));
+  background: $jst-glass-bg;
+  backdrop-filter: blur($jst-glass-blur);
+  -webkit-backdrop-filter: blur($jst-glass-blur);
+  border-top: 1rpx solid $jst-glass-border;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.04);
 }
 
 .enroll-page__bottom-btn {

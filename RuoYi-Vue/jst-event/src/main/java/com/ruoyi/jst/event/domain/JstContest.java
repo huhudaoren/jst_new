@@ -45,6 +45,10 @@ public class JstContest extends BaseEntity
     @Excel(name = "封面图URL")
     private String coverImage;
 
+    /** Banner大图URL */
+    @Excel(name = "Banner大图URL")
+    private String bannerImage;
+
     /** 赛事介绍HTML/富文本 */
     @Excel(name = "赛事介绍HTML/富文本")
     private String description;
@@ -85,13 +89,45 @@ public class JstContest extends BaseEntity
     @Excel(name = "是否支持线下预约：0否 1是")
     private Integer supportAppointment;
 
+    /** 总报名名额(0=不限) */
+    @Excel(name = "总报名名额", readConverterExp = "0=不限")
+    private Integer totalQuota;
+
+    /** 单人限购数 */
+    @Excel(name = "单人限购数")
+    private Integer perUserLimit;
+
     /** 预约容量 */
     @Excel(name = "预约容量")
     private Integer appointmentCapacity = 0;
 
+    /** 核销模式：qr/manual */
+    @Excel(name = "核销模式：qr/manual")
+    private String writeoffMode;
+
     /** 核销子项配置JSON */
     @Excel(name = "核销子项配置JSON")
     private String writeoffConfig;
+
+    /** 是否需要签到：0否 1是 */
+    @Excel(name = "是否需要签到：0否 1是")
+    private Integer needSignIn;
+
+    /** 团队最小人数 */
+    @Excel(name = "团队最小人数")
+    private Integer teamMinSize;
+
+    /** 团队最大人数 */
+    @Excel(name = "团队最大人数")
+    private Integer teamMaxSize;
+
+    /** 队长需填字段 */
+    @Excel(name = "队长需填字段")
+    private String teamLeaderFields;
+
+    /** 队员需填字段 */
+    @Excel(name = "队员需填字段")
+    private String teamMemberFields;
 
     /** 是否允许重复预约：0否 1是 */
     @Excel(name = "是否允许重复预约：0否 1是")
@@ -105,19 +141,53 @@ public class JstContest extends BaseEntity
     @Excel(name = "证书发放规则JSON")
     private String certRuleJson;
 
+    /** 证书颁发模式：manual/auto */
+    @Excel(name = "证书颁发模式：manual/auto")
+    private String certIssueMode;
+
+    /** 成绩发布时间(auto模式用) */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "成绩发布时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date scorePublishTime;
+
+    /** 成绩发布模式：manual/auto */
+    @Excel(name = "成绩发布模式：manual/auto")
+    private String scorePublishMode;
+
     /** 成绩规则JSON */
+    @Deprecated
     @Excel(name = "成绩规则JSON")
     private String scoreRuleJson;
 
+    /** 售后截止时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "售后截止时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date aftersaleDeadline;
+
+    /** 主办方 */
+    @Excel(name = "主办方")
+    private String organizer;
+
+    /** 协办方 */
+    @Excel(name = "协办方")
+    private String coOrganizer;
+
+    /** 比赛地址 */
+    @Excel(name = "比赛地址")
+    private String eventAddress;
+
     /** 赛程JSON */
+    @Deprecated
     @Excel(name = "赛程JSON")
     private String scheduleJson;
 
     /** 奖项JSON */
+    @Deprecated
     @Excel(name = "奖项JSON")
     private String awardsJson;
 
     /** 常见问题JSON */
+    @Deprecated
     @Excel(name = "常见问题JSON")
     private String faqJson;
 
@@ -218,6 +288,14 @@ public class JstContest extends BaseEntity
         return coverImage;
     }
 
+    public String getBannerImage() {
+        return bannerImage;
+    }
+
+    public void setBannerImage(String bannerImage) {
+        this.bannerImage = bannerImage;
+    }
+
     public void setDescription(String description) 
     {
         this.description = description;
@@ -308,6 +386,22 @@ public class JstContest extends BaseEntity
         return supportAppointment;
     }
 
+    public Integer getTotalQuota() {
+        return totalQuota;
+    }
+
+    public void setTotalQuota(Integer totalQuota) {
+        this.totalQuota = totalQuota;
+    }
+
+    public Integer getPerUserLimit() {
+        return perUserLimit;
+    }
+
+    public void setPerUserLimit(Integer perUserLimit) {
+        this.perUserLimit = perUserLimit;
+    }
+
     public void setAppointmentCapacity(Integer appointmentCapacity)
     {
         this.appointmentCapacity = appointmentCapacity;
@@ -318,6 +412,14 @@ public class JstContest extends BaseEntity
         return appointmentCapacity;
     }
 
+    public String getWriteoffMode() {
+        return writeoffMode;
+    }
+
+    public void setWriteoffMode(String writeoffMode) {
+        this.writeoffMode = writeoffMode;
+    }
+
     public void setWriteoffConfig(String writeoffConfig)
     {
         this.writeoffConfig = writeoffConfig;
@@ -326,6 +428,46 @@ public class JstContest extends BaseEntity
     public String getWriteoffConfig()
     {
         return writeoffConfig;
+    }
+
+    public Integer getNeedSignIn() {
+        return needSignIn;
+    }
+
+    public void setNeedSignIn(Integer needSignIn) {
+        this.needSignIn = needSignIn;
+    }
+
+    public Integer getTeamMinSize() {
+        return teamMinSize;
+    }
+
+    public void setTeamMinSize(Integer teamMinSize) {
+        this.teamMinSize = teamMinSize;
+    }
+
+    public Integer getTeamMaxSize() {
+        return teamMaxSize;
+    }
+
+    public void setTeamMaxSize(Integer teamMaxSize) {
+        this.teamMaxSize = teamMaxSize;
+    }
+
+    public String getTeamLeaderFields() {
+        return teamLeaderFields;
+    }
+
+    public void setTeamLeaderFields(String teamLeaderFields) {
+        this.teamLeaderFields = teamLeaderFields;
+    }
+
+    public String getTeamMemberFields() {
+        return teamMemberFields;
+    }
+
+    public void setTeamMemberFields(String teamMemberFields) {
+        this.teamMemberFields = teamMemberFields;
     }
 
     public void setAllowRepeatAppointment(Integer allowRepeatAppointment)
@@ -356,6 +498,30 @@ public class JstContest extends BaseEntity
         return certRuleJson;
     }
 
+    public String getCertIssueMode() {
+        return certIssueMode;
+    }
+
+    public void setCertIssueMode(String certIssueMode) {
+        this.certIssueMode = certIssueMode;
+    }
+
+    public Date getScorePublishTime() {
+        return scorePublishTime;
+    }
+
+    public void setScorePublishTime(Date scorePublishTime) {
+        this.scorePublishTime = scorePublishTime;
+    }
+
+    public String getScorePublishMode() {
+        return scorePublishMode;
+    }
+
+    public void setScorePublishMode(String scorePublishMode) {
+        this.scorePublishMode = scorePublishMode;
+    }
+
     public void setScoreRuleJson(String scoreRuleJson) 
     {
         this.scoreRuleJson = scoreRuleJson;
@@ -364,6 +530,38 @@ public class JstContest extends BaseEntity
     public String getScoreRuleJson() 
     {
         return scoreRuleJson;
+    }
+
+    public Date getAftersaleDeadline() {
+        return aftersaleDeadline;
+    }
+
+    public void setAftersaleDeadline(Date aftersaleDeadline) {
+        this.aftersaleDeadline = aftersaleDeadline;
+    }
+
+    public String getOrganizer() {
+        return organizer;
+    }
+
+    public void setOrganizer(String organizer) {
+        this.organizer = organizer;
+    }
+
+    public String getCoOrganizer() {
+        return coOrganizer;
+    }
+
+    public void setCoOrganizer(String coOrganizer) {
+        this.coOrganizer = coOrganizer;
+    }
+
+    public String getEventAddress() {
+        return eventAddress;
+    }
+
+    public void setEventAddress(String eventAddress) {
+        this.eventAddress = eventAddress;
     }
 
     public void setScheduleJson(String scheduleJson)
@@ -476,6 +674,7 @@ public class JstContest extends BaseEntity
             .append("category", getCategory())
             .append("groupLevels", getGroupLevels())
             .append("coverImage", getCoverImage())
+            .append("bannerImage", getBannerImage())
             .append("description", getDescription())
             .append("enrollStartTime", getEnrollStartTime())
             .append("enrollEndTime", getEnrollEndTime())
@@ -485,12 +684,27 @@ public class JstContest extends BaseEntity
             .append("supportChannelEnroll", getSupportChannelEnroll())
             .append("supportPointsDeduct", getSupportPointsDeduct())
             .append("supportAppointment", getSupportAppointment())
+            .append("totalQuota", getTotalQuota())
+            .append("perUserLimit", getPerUserLimit())
             .append("appointmentCapacity", getAppointmentCapacity())
+            .append("writeoffMode", getWriteoffMode())
             .append("writeoffConfig", getWriteoffConfig())
+            .append("needSignIn", getNeedSignIn())
+            .append("teamMinSize", getTeamMinSize())
+            .append("teamMaxSize", getTeamMaxSize())
+            .append("teamLeaderFields", getTeamLeaderFields())
+            .append("teamMemberFields", getTeamMemberFields())
             .append("allowRepeatAppointment", getAllowRepeatAppointment())
             .append("allowAppointmentRefund", getAllowAppointmentRefund())
             .append("certRuleJson", getCertRuleJson())
+            .append("certIssueMode", getCertIssueMode())
+            .append("scorePublishTime", getScorePublishTime())
+            .append("scorePublishMode", getScorePublishMode())
             .append("scoreRuleJson", getScoreRuleJson())
+            .append("aftersaleDeadline", getAftersaleDeadline())
+            .append("organizer", getOrganizer())
+            .append("coOrganizer", getCoOrganizer())
+            .append("eventAddress", getEventAddress())
             .append("scheduleJson", getScheduleJson())
             .append("awardsJson", getAwardsJson())
             .append("faqJson", getFaqJson())

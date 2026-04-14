@@ -447,7 +447,7 @@ export default {
 .order-detail-page {
   min-height: 100vh;
   padding-bottom: calc(132rpx + env(safe-area-inset-bottom));
-  background: $jst-bg-page;
+  background: $jst-bg-subtle;
 }
 
 .jst-page-skeleton {
@@ -485,14 +485,14 @@ export default {
 .order-detail-page__hero,
 .order-detail-page__card {
   margin: $jst-space-lg $jst-page-padding 0;
-  padding: 28rpx $jst-page-padding;
-  border-radius: $jst-radius-lg;
+  padding: $jst-space-xl $jst-page-padding;
+  border-radius: $jst-radius-card;
   background: $jst-bg-card;
-  box-shadow: $jst-shadow-md;
+  box-shadow: $jst-shadow-ring, $jst-shadow-ambient;
 }
 
 .order-detail-page__hero {
-  background: linear-gradient(135deg, $jst-brand-dark 0%, $jst-brand 100%);
+  background: $jst-hero-gradient;
 }
 
 .order-detail-page__hero-title {

@@ -91,6 +91,17 @@ public class GlobalExceptionHandler
     }
 
     /**
+     * 数据库操作异常（防止 SQL 错误信息泄露给前端）
+     */
+    @ExceptionHandler(java.sql.SQLException.class)
+    public AjaxResult handleSqlException(java.sql.SQLException e, HttpServletRequest request)
+    {
+        String requestURI = request.getRequestURI();
+        log.error("请求地址'{}',数据库操作异常.", requestURI, e);
+        return AjaxResult.error("数据处理异常，请稍后重试");
+    }
+
+    /**
      * 拦截未知的运行时异常
      */
     @ExceptionHandler(RuntimeException.class)
@@ -98,7 +109,7 @@ public class GlobalExceptionHandler
     {
         String requestURI = request.getRequestURI();
         log.error("请求地址'{}',发生未知异常.", requestURI, e);
-        return AjaxResult.error(e.getMessage());
+        return AjaxResult.error("系统内部错误，请稍后重试");
     }
 
     /**
@@ -109,7 +120,7 @@ public class GlobalExceptionHandler
     {
         String requestURI = request.getRequestURI();
         log.error("请求地址'{}',发生系统异常.", requestURI, e);
-        return AjaxResult.error(e.getMessage());
+        return AjaxResult.error("系统内部错误，请稍后重试");
     }
 
     /**

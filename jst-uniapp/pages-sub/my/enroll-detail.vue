@@ -55,10 +55,10 @@
 
       <view class="enroll-detail-page__card">
         <text class="enroll-detail-page__card-title">表单回显</text>
-        <jst-form-render
+        <jst-dynamic-form
           :schema="displaySchema"
           :value="resolvedFormValue"
-          readonly
+          :readonly="true"
         />
       </view>
 
@@ -70,6 +70,19 @@
           class="enroll-detail-page__attachment"
         >
           <text class="enroll-detail-page__attachment-text">{{ item }}</text>
+        </view>
+      </view>
+
+      <!-- 成绩与证书入口 -->
+      <view v-if="detail.scorePublished" class="enroll-detail-page__card">
+        <text class="enroll-detail-page__card-title">成绩与证书</text>
+        <view class="enroll-detail-page__info-row" @tap="goScoreDetail">
+          <text class="enroll-detail-page__info-key">查看成绩</text>
+          <text class="enroll-detail-page__info-value">{{ detail.totalScore != null ? (detail.totalScore + ' 分') : '查看 ›' }}</text>
+        </view>
+        <view v-if="detail.hasCert" class="enroll-detail-page__info-row" @tap="goCertDetail">
+          <text class="enroll-detail-page__info-key">查看证书</text>
+          <text class="enroll-detail-page__info-value">{{ detail.awardLevel || '' }} ›</text>
         </view>
       </view>
     </template>
@@ -103,14 +116,14 @@
 import { createOrder } from '@/api/order'
 import { getEnrollDetail, getEnrollTemplate } from '@/api/enroll'
 import JstEmpty from '@/components/jst-empty/jst-empty.vue'
-import JstFormRender from '@/components/jst-form-render/jst-form-render.vue'
+import JstDynamicForm from '@/components/jst-dynamic-form/jst-dynamic-form.vue'
 import JstLoading from '@/components/jst-loading/jst-loading.vue'
 import JstStatusBadge from '@/components/jst-status-badge/jst-status-badge.vue'
 
 export default {
   components: {
     JstEmpty,
-    JstFormRender,
+    JstDynamicForm,
     JstLoading,
     JstStatusBadge
   },
@@ -300,6 +313,22 @@ export default {
         })
       } catch (error) {
         uni.hideLoading()
+      }
+    },
+
+    // 跳转成绩详情
+    goScoreDetail() {
+      var id = this.detail.scoreId || this.detail.enrollId
+      if (id) {
+        uni.navigateTo({ url: '/pages-sub/my/score-detail?id=' + id })
+      }
+    },
+    // 跳转证书详情
+    goCertDetail() {
+      if (this.detail.certId) {
+        uni.navigateTo({ url: '/pages-sub/my/cert-detail?id=' + this.detail.certId })
+      } else {
+        uni.navigateTo({ url: '/pages-sub/my/cert' })
       }
     },
 

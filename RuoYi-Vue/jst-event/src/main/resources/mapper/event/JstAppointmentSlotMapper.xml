@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.JstAppointmentSlotMapper">
+
+    <resultMap id="JstAppointmentSlotResult" type="com.ruoyi.jst.event.domain.JstAppointmentSlot">
+        <id property="slotId" column="slot_id"/>
+        <result property="contestId" column="contest_id"/>
+        <result property="slotDate" column="slot_date"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="venue" column="venue"/>
+        <result property="capacity" column="capacity"/>
+        <result property="bookedCount" column="booked_count"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        slot_id, contest_id, slot_date, start_time, end_time, venue, capacity, booked_count, status,
+        create_by, create_time, update_by, update_time, del_flag
+    </sql>
+
+    <select id="selectBySlotId" resultMap="JstAppointmentSlotResult">
+        select <include refid="BaseColumns"/>
+        from jst_appointment_slot
+        where slot_id = #{slotId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectByContestId" resultMap="JstAppointmentSlotResult">
+        select <include refid="BaseColumns"/>
+        from jst_appointment_slot
+        where contest_id = #{contestId}
+          and del_flag = '0'
+        order by slot_date asc, start_time asc, slot_id asc
+    </select>
+
+    <insert id="insertJstAppointmentSlot" parameterType="com.ruoyi.jst.event.domain.JstAppointmentSlot"
+            useGeneratedKeys="true" keyProperty="entity.slotId">
+        insert into jst_appointment_slot (
+            contest_id, slot_date, start_time, end_time, venue, capacity, booked_count, status,
+            create_by, create_time, update_by, update_time, del_flag
+        ) values (
+            #{entity.contestId}, #{entity.slotDate}, #{entity.startTime}, #{entity.endTime},
+            #{entity.venue}, #{entity.capacity}, #{entity.bookedCount}, #{entity.status},
+            #{entity.createBy}, #{entity.createTime}, #{entity.updateBy}, #{entity.updateTime}, #{entity.delFlag}
+        )
+    </insert>
+
+    <insert id="batchInsert">
+        insert into jst_appointment_slot (
+            contest_id, slot_date, start_time, end_time, venue, capacity, booked_count, status,
+            create_by, create_time, update_by, update_time, del_flag
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.contestId}, #{item.slotDate}, #{item.startTime}, #{item.endTime},
+                #{item.venue}, #{item.capacity}, #{item.bookedCount}, #{item.status},
+                #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.delFlag}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateJstAppointmentSlot" parameterType="com.ruoyi.jst.event.domain.JstAppointmentSlot">
+        update jst_appointment_slot
+        set slot_date = #{entity.slotDate},
+            start_time = #{entity.startTime},
+            end_time = #{entity.endTime},
+            venue = #{entity.venue},
+            capacity = #{entity.capacity},
+            booked_count = #{entity.bookedCount},
+            status = #{entity.status},
+            update_by = #{entity.updateBy},
+            update_time = #{entity.updateTime}
+        where slot_id = #{entity.slotId}
+          and del_flag = '0'
+    </update>
+
+    <delete id="deleteBySlotId">
+        delete from jst_appointment_slot where slot_id = #{slotId}
+    </delete>
+
+    <delete id="deleteByContestId">
+        delete from jst_appointment_slot where contest_id = #{contestId}
+    </delete>
+
+</mapper>

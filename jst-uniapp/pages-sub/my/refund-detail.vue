@@ -308,7 +308,7 @@ export default {
 .refund-detail-page {
   min-height: 100vh;
   padding-bottom: calc(132rpx + env(safe-area-inset-bottom));
-  background: $jst-bg-page;
+  background: $jst-bg-subtle;
 }
 
 .jst-page-skeleton {
@@ -345,15 +345,15 @@ export default {
 
 .refund-detail-page__hero,
 .refund-detail-page__card {
-  margin: 20rpx 24rpx 0;
-  padding: 28rpx 24rpx;
-  border-radius: 28rpx;
+  margin: $jst-space-lg $jst-page-padding 0;
+  padding: $jst-space-xl $jst-page-padding;
+  border-radius: $jst-radius-card;
   background: $jst-bg-card;
-  box-shadow: $jst-shadow-md;
+  box-shadow: $jst-shadow-ring, $jst-shadow-ambient;
 }
 
 .refund-detail-page__hero {
-  background: linear-gradient(135deg, $jst-brand-dark 0%, $jst-brand 100%);
+  background: linear-gradient(135deg, #B84A00 0%, $jst-warning 100%);
 }
 
 .refund-detail-page__hero-title {

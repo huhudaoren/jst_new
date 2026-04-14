@@ -163,12 +163,17 @@ export default {
       return '🏅'
     },
     openDetail(item) {
-      if (item.scoreId) {
-        // 若后端有详情接口, 跳详情页; 暂未实现详情页, 先不跳
+      var id = item.scoreId || item.enrollId
+      if (id) {
+        uni.navigateTo({ url: '/pages-sub/my/score-detail?id=' + id })
       }
     },
     viewCert(item) {
-      uni.navigateTo({ url: '/pages-sub/my/cert' })
+      if (item.certId) {
+        uni.navigateTo({ url: '/pages-sub/my/cert-detail?id=' + item.certId })
+      } else {
+        uni.navigateTo({ url: '/pages-sub/my/cert' })
+      }
     },
     // 公开查询跳到独立页面
     doPublicQuery() {
@@ -196,7 +201,7 @@ export default {
 .score-page {
   min-height: 100vh;
   padding-bottom: 60rpx;
-  background: $jst-bg-page;
+  background: $jst-bg-subtle;
 }
 
 .jst-page-skeleton {
@@ -235,8 +240,8 @@ export default {
   position: relative;
   margin: $jst-space-lg $jst-page-padding 0;
   padding: $jst-space-xl;
-  border-radius: $jst-radius-lg;
-  background: linear-gradient(135deg, $jst-brand 0%, $jst-brand-dark 100%);
+  border-radius: $jst-radius-card;
+  background: $jst-hero-gradient;
   overflow: hidden;
 }
 

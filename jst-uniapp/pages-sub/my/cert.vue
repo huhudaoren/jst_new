@@ -129,10 +129,14 @@ export default {
       return '🏅'
     },
     viewCert(item) {
-      uni.showToast({ title: '证书查看功能完善中', icon: 'none' })
+      if (item.certId) {
+        uni.navigateTo({ url: '/pages-sub/my/cert-detail?id=' + item.certId })
+      }
     },
     downloadCert(item) {
-      uni.showToast({ title: '证书下载功能完善中', icon: 'none' })
+      if (item.certId) {
+        uni.navigateTo({ url: '/pages-sub/my/cert-detail?id=' + item.certId })
+      }
     },
     verifyCert(item) {
       if (item.certNo) {
@@ -161,7 +165,7 @@ export default {
 .cert-page {
   min-height: 100vh;
   padding-bottom: 60rpx;
-  background: $jst-bg-page;
+  background: $jst-bg-subtle;
 }
 
 .jst-page-skeleton {

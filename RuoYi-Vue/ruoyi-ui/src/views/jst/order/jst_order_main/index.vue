@@ -261,8 +261,16 @@
           <span>{{ parseTime(scope.row.payTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="订单状态：created/pending_pay/paid/reviewing/in_service/aftersale/completed/cancelled/closed" align="center" prop="orderStatus" />
-      <el-table-column label="退款状态：none/partial/full" align="center" prop="refundStatus" />
+      <el-table-column label="订单状态" align="center" prop="orderStatus">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.jst_order_status" :value="scope.row.orderStatus" />
+        </template>
+      </el-table-column>
+      <el-table-column label="退款状态" align="center" prop="refundStatus">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.jst_refund_status" :value="scope.row.refundStatus" />
+        </template>
+      </el-table-column>
       <el-table-column label="售后截止时间 = max(赛事结束,成绩发布) + N天" align="center" prop="aftersaleDeadline" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.aftersaleDeadline, '{y}-{m}-{d}') }}</span>
@@ -443,6 +451,7 @@ import { listJst_order_main, getJst_order_main, delJst_order_main, addJst_order_
 
 export default {
   name: "Jst_order_main",
+  dicts: ['jst_order_status', 'jst_refund_status'],
   data() {
     return {
       // 遮罩层

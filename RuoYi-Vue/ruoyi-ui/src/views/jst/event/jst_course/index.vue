@@ -130,7 +130,11 @@
       <el-table-column label="创建者类型：platform/channel" align="center" prop="creatorType" />
       <el-table-column label="创建者ID" align="center" prop="creatorId" />
       <el-table-column label="OpenMAIC 第三方课件ID" align="center" prop="maicSourceId" />
-      <el-table-column label="审核状态：draft/pending/approved/rejected" align="center" prop="auditStatus" />
+      <el-table-column label="审核状态" align="center" prop="auditStatus">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.jst_audit_status" :value="scope.row.auditStatus" />
+        </template>
+      </el-table-column>
       <el-table-column label="上下架：on/off" align="center" prop="status" />
       <el-table-column label="可见范围" align="center" prop="visibleScope" />
       <el-table-column label="备注" align="center" prop="remark" />
@@ -231,6 +235,7 @@ import { listJst_course, getJst_course, delJst_course, addJst_course, updateJst_
 
 export default {
   name: "Jst_course",
+  dicts: ['jst_audit_status'],
   data() {
     return {
       // 遮罩层

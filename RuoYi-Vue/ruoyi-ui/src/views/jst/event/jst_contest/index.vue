@@ -190,9 +190,17 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="赛事ID" align="center" prop="contestId" />
       <el-table-column label="赛事名称" align="center" prop="contestName" />
-      <el-table-column label="赛事来源：platform平台自营/partner赛事方" align="center" prop="sourceType" />
+      <el-table-column label="赛事来源" align="center" prop="sourceType">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.jst_source_type" :value="scope.row.sourceType" />
+        </template>
+      </el-table-column>
       <el-table-column label="所属赛事方ID，FK→jst_event_partner" align="center" prop="partnerId" />
-      <el-table-column label="分类：艺术/音乐/舞蹈/美术/朗诵戏剧/文化/科技/体育" align="center" prop="category" />
+      <el-table-column label="分类" align="center" prop="category">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.jst_contest_category" :value="scope.row.category" />
+        </template>
+      </el-table-column>
       <el-table-column label="参赛组别多选" align="center" prop="groupLevels" />
       <el-table-column label="封面图URL" align="center" prop="coverImage" width="100">
         <template slot-scope="scope">
@@ -228,7 +236,11 @@
       <el-table-column label="成绩规则JSON" align="center" prop="scoreRuleJson" />
       <el-table-column label="默认报名表单模板ID，FK→jst_enroll_form_template" align="center" prop="formTemplateId" />
       <el-table-column label="售后宽限天数" align="center" prop="aftersaleDays" />
-      <el-table-column label="审核状态：draft/pending/approved/rejected/online/offline" align="center" prop="auditStatus" />
+      <el-table-column label="审核状态" align="center" prop="auditStatus">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.jst_audit_status" :value="scope.row.auditStatus" />
+        </template>
+      </el-table-column>
       <el-table-column label="业务状态：not_started/enrolling/closed/scoring/published/ended" align="center" prop="status" />
       <el-table-column label="创建人用户ID" align="center" prop="createdUserId" />
       <el-table-column label="备注" align="center" prop="remark" />
@@ -394,6 +406,7 @@ import { listJst_contest, getJst_contest, delJst_contest, addJst_contest, update
 
 export default {
   name: "Jst_contest",
+  dicts: ['jst_source_type', 'jst_contest_category', 'jst_audit_status'],
   data() {
     return {
       // 遮罩层

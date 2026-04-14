@@ -1930,3 +1930,29 @@ SET schedule_json = '[{"stageName":"初赛","startTime":"2026-05-01","endTime":"
     update_by = 'fixture',
     update_time = NOW()
 WHERE contest_id IN (8201, 8202);
+
+-- =====================================================================
+-- REFACTOR-4 报名审核+评审系统 fixtures
+-- 涉及表: jst_score_item / jst_contest_reviewer / jst_biz_no_rule
+-- =====================================================================
+
+DELETE FROM jst_contest_reviewer WHERE create_by = 'fixture';
+DELETE FROM jst_score_item WHERE create_by = 'fixture' AND contest_id = 8201;
+
+-- 成绩项定义（赛事 8201 三个评分维度）
+INSERT INTO jst_score_item (item_id, contest_id, item_name, max_score, weight, sort_order, create_by, create_time, del_flag)
+VALUES
+(98001, 8201, '技巧', 100.00, 0.40, 1, 'fixture', NOW(), '0'),
+(98002, 8201, '表现力', 100.00, 0.35, 2, 'fixture', NOW(), '0'),
+(98003, 8201, '创意', 100.00, 0.25, 3, 'fixture', NOW(), '0');
+
+-- 评审老师（赛事 8201，关联 partner 用户 9101）
+INSERT INTO jst_contest_reviewer (id, contest_id, user_id, reviewer_name, role, status, create_by, create_time)
+VALUES
+(98101, 8201, 9101, '测试_主评老师A', 'chief_reviewer', 1, 'fixture', NOW()),
+(98102, 8201, 9102, '测试_副评老师B', 'reviewer', 1, 'fixture', NOW());
+
+-- 确保 cert_no 规则存在（幂等）
+INSERT INTO jst_biz_no_rule (rule_code, rule_name, prefix, date_format, seq_length, seq_start, description, status, create_by, create_time, update_by, update_time)
+SELECT 'cert_no', '证书编号', 'JST-CERT-', 'yyyyMMdd', 4, 1, '证书唯一编号', 1, 'fixture', NOW(), 'fixture', NOW()
+WHERE NOT EXISTS (SELECT 1 FROM jst_biz_no_rule WHERE rule_code = 'cert_no');

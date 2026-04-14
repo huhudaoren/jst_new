@@ -1,44 +1,50 @@
 <template>
   <view class="login-page">
-    <u-skeleton v-if="submitting" :loading="true" :rows="6" title :avatar="false" class="jst-page-skeleton" />
+    <!-- 背景光球 -->
     <view class="login-page__orb login-page__orb--top"></view>
     <view class="login-page__orb login-page__orb--bottom"></view>
+    <view class="login-page__orb login-page__orb--center"></view>
 
-    <view class="login-page__back" @tap="handleBack">←</view>
+    <view class="login-page__back" @tap="handleBack">
+      <text class="login-page__back-arrow">&#8592;</text>
+    </view>
 
-    <view class="login-page__logo-box">
-      <view class="login-page__logo">🏆</view>
+    <!-- Logo 区 -->
+    <view class="login-page__logo-box jst-anim-logo-pop">
+      <view class="login-page__logo">&#127942;</view>
       <text class="login-page__title">竞赛通</text>
       <text class="login-page__subtitle">一站式竞赛服务平台</text>
     </view>
 
-    <view class="login-page__badge">
+    <view class="login-page__badge jst-anim-rise-delayed">
       <text class="login-page__badge-dot"></text>
       <text class="login-page__badge-text">学生 / 家长端登录</text>
     </view>
 
-    <view v-if=”isDev” class=”login-page__tip”>
-      <text class=”login-page__tip-title”>开发联调入口</text>
-      <text class=”login-page__tip-text”>使用真实后端接口登录，成功后进入”我的”页完成资料与档案闭环。</text>
+    <!-- 开发提示(降权为小字) -->
+    <view v-if="isDev" class="login-page__dev-hint jst-anim-rise-delayed">
+      <text class="login-page__dev-hint-text">DEV: 使用后端接口登录，成功后进入个人中心</text>
     </view>
 
-    <view class=”login-page__card”>
-      <text class=”login-page__card-title”>欢迎登录</text>
+    <!-- 毛玻璃登录卡 -->
+    <view class="login-page__card jst-anim-rise-delayed">
+      <text class="login-page__card-title">欢迎登录</text>
+      <text class="login-page__card-desc">微信一键登录，开启竞赛之旅</text>
 
-      <u-button v-if=”isDev” class=”login-page__button login-page__button--primary” :loading=”submitting” @click=”handleMockLogin”>
-        Mock 登录（测试账号）
+      <u-button class="login-page__button login-page__button--wx" @click="handleWxLogin">
+        <text class="login-page__button-icon">&#128172;</text>
+        微信一键登录
       </u-button>
 
-      <u-button class="login-page__button login-page__button--secondary" @click="handleWxLogin">
-        微信登录（待生产开通）
+      <u-button v-if="isDev" class="login-page__button login-page__button--dev" :loading="submitting" @click="handleMockLogin">
+        Mock 登录（测试账号）
       </u-button>
 
       <text v-if="message" class="login-page__message">{{ message }}</text>
     </view>
 
-    <view class="login-page__footer">
+    <view class="login-page__footer jst-anim-rise-delayed">
       <text class="login-page__footer-line">登录即表示同意《用户服务协议》与《隐私保护政策》</text>
-      <text class="login-page__footer-line">微信一键登录，开启竞赛之旅</text>
     </view>
   </view>
 </template>
@@ -123,39 +129,48 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .login-page {
   position: relative;
   min-height: 100vh;
   padding: 88rpx 40rpx 56rpx;
   overflow: hidden;
-  background: var(--jst-color-card-bg);
+  background: $jst-hero-gradient;
 }
 
 .login-page__orb {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.9;
   pointer-events: none;
 }
 
-.jst-page-skeleton {
-  margin-bottom: 24rpx;
-}
-
 .login-page__orb--top {
-  top: -120rpx;
-  right: -120rpx;
-  width: 360rpx;
-  height: 360rpx;
-  background: var(--jst-color-brand-orb);
+  top: -160rpx;
+  right: -100rpx;
+  width: 420rpx;
+  height: 420rpx;
+  background: rgba(255, 255, 255, 0.06);
+  filter: blur(40px);
 }
 
 .login-page__orb--bottom {
   left: -120rpx;
-  bottom: -120rpx;
-  width: 320rpx;
-  height: 320rpx;
-  background: var(--jst-color-primary-orb);
+  bottom: -100rpx;
+  width: 360rpx;
+  height: 360rpx;
+  background: rgba(43, 108, 255, 0.2);
+  filter: blur(50px);
+}
+
+.login-page__orb--center {
+  top: 30%;
+  left: 50%;
+  margin-left: -100rpx;
+  width: 200rpx;
+  height: 200rpx;
+  background: rgba(255, 255, 255, 0.04);
+  filter: blur(30px);
 }
 
 .login-page__back {
@@ -164,157 +179,163 @@ export default {
   justify-content: center;
   width: 64rpx;
   height: 64rpx;
-  border-radius: var(--jst-radius-sm);
-  background: var(--jst-color-page-bg);
-  color: var(--jst-color-text-secondary);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.login-page__back-arrow {
   font-size: 32rpx;
+  color: $jst-text-inverse;
 }
 
 .login-page__logo-box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 72rpx;
+  margin-top: 80rpx;
 }
 
 .login-page__logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 136rpx;
-  height: 136rpx;
-  border-radius: 32rpx;
-  background: linear-gradient(135deg, var(--jst-color-brand) 0%, var(--jst-color-brand-light) 100%);
-  box-shadow: var(--jst-shadow-strong);
-  font-size: 64rpx;
+  width: 144rpx;
+  height: 144rpx;
+  border-radius: 36rpx;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  font-size: 72rpx;
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
 }
 
 .login-page__title {
-  margin-top: 28rpx;
-  font-size: 52rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
-  line-height: 1.2;
+  margin-top: $jst-space-xl;
+  font-size: 56rpx;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-inverse;
+  letter-spacing: 4rpx;
 }
 
 .login-page__subtitle {
-  margin-top: 12rpx;
-  font-size: 26rpx;
-  color: var(--jst-color-text-tertiary);
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-sm;
+  color: rgba(255, 255, 255, 0.65);
 }
 
 .login-page__badge {
   display: flex;
   align-items: center;
-  align-self: center;
   width: fit-content;
-  margin: 48rpx auto 0;
-  padding: 12rpx 20rpx;
-  border: 2rpx solid var(--jst-color-success-border);
-  border-radius: var(--jst-radius-full);
-  background: var(--jst-color-success-soft);
+  margin: $jst-space-xxl auto 0;
+  padding: $jst-space-sm $jst-space-lg;
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  border-radius: $jst-radius-round;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .login-page__badge-dot {
   width: 12rpx;
   height: 12rpx;
   border-radius: 50%;
-  background: var(--jst-color-success);
+  background: $jst-success;
 }
 
 .login-page__badge-text {
-  margin-left: 12rpx;
-  font-size: 22rpx;
-  font-weight: 600;
-  color: var(--jst-color-success);
+  margin-left: $jst-space-sm;
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-medium;
+  color: rgba(255, 255, 255, 0.85);
 }
 
-.login-page__tip {
-  margin-top: 24rpx;
-  padding: 20rpx 24rpx;
-  border-radius: var(--jst-radius-md);
-  background: var(--jst-color-primary-soft);
+.login-page__dev-hint {
+  margin-top: $jst-space-lg;
+  text-align: center;
 }
 
-.login-page__tip-title {
-  display: block;
-  font-size: 24rpx;
-  font-weight: 700;
-  color: var(--jst-color-primary);
-}
-
-.login-page__tip-text {
-  display: block;
-  margin-top: 10rpx;
-  font-size: 22rpx;
-  line-height: 1.7;
-  color: var(--jst-color-text-secondary);
+.login-page__dev-hint-text {
+  font-size: $jst-font-xs;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .login-page__card {
-  margin-top: 28rpx;
-  padding: 32rpx 28rpx;
-  border-radius: var(--jst-radius-lg);
-  background: var(--jst-color-card-bg);
-  box-shadow: var(--jst-shadow-card);
+  margin-top: $jst-space-xl;
+  padding: $jst-space-xl;
+  border-radius: $jst-radius-card;
+  background: $jst-glass-bg;
+  backdrop-filter: blur($jst-glass-blur);
+  -webkit-backdrop-filter: blur($jst-glass-blur);
+  border: 1rpx solid $jst-glass-border;
+  box-shadow: $jst-shadow-float;
 }
 
 .login-page__card-title {
   display: block;
-  font-size: 36rpx;
-  font-weight: 700;
-  color: var(--jst-color-text);
+  font-size: $jst-font-xl;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
 }
 
 .login-page__card-desc {
   display: block;
-  margin-top: 12rpx;
-  font-size: 24rpx;
-  line-height: 1.7;
-  color: var(--jst-color-text-secondary);
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
 }
 
 .login-page__button {
-  margin-top: 24rpx;
-  height: 88rpx;
-  border-radius: var(--jst-radius-md);
-  font-size: 28rpx;
-  font-weight: 700;
+  margin-top: $jst-space-lg;
+  height: 96rpx;
+  border-radius: $jst-radius-button;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-bold;
 }
 
-.login-page__button--primary {
-  background: linear-gradient(135deg, var(--jst-color-primary) 0%, var(--jst-color-primary-light) 100%);
-  color: var(--jst-color-card-bg);
+.login-page__button--wx {
+  background: #07C160;
+  color: $jst-text-inverse;
 }
 
-.login-page__button--secondary {
-  border: 2rpx solid var(--jst-color-border);
-  background: var(--jst-color-card-bg);
-  color: var(--jst-color-text-secondary);
+.login-page__button-icon {
+  margin-right: $jst-space-sm;
+  font-size: $jst-font-lg;
+}
+
+.login-page__button--dev {
+  background: $jst-bg-grey;
+  color: $jst-text-secondary;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-regular;
+  height: 80rpx;
 }
 
 ::v-deep .login-page__button.u-button {
-  min-height: 88rpx;
-  border: 0;
+  min-height: 80rpx;
+  border: none;
 }
 
 .login-page__message {
   display: block;
-  margin-top: 16rpx;
+  margin-top: $jst-space-md;
   text-align: center;
-  font-size: 22rpx;
-  color: var(--jst-color-text-tertiary);
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
 }
 
 .login-page__footer {
-  margin-top: 28rpx;
+  margin-top: $jst-space-xl;
+  text-align: center;
 }
 
 .login-page__footer-line {
   display: block;
-  text-align: center;
-  font-size: 22rpx;
+  font-size: $jst-font-xs;
   line-height: 1.8;
-  color: var(--jst-color-text-tertiary);
+  color: rgba(255, 255, 255, 0.4);
 }
 </style>

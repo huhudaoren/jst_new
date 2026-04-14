@@ -109,7 +109,7 @@ public class PartnerEnrollController extends BasePartnerController {
     @PreAuthorize("@ss.hasRole('jst_partner')")
     @PutMapping("/batch-audit")
     public AjaxResult batchAudit(@Valid @RequestBody EnrollBatchAuditReqDTO req) {
-        int successCount = enrollRecordService.batchAudit(req.getEnrollIds(), req.getResult(), req.getAuditRemark());
+        int successCount = enrollRecordService.batchAudit(req.getEnrollIds(), req.getResult(), req.getAuditRemark(), req.getScores());
         return AjaxResult.success(Collections.singletonMap("successCount", successCount));
     }
 }

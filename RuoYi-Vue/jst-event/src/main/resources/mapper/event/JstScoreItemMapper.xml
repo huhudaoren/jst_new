@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.event.mapper.JstScoreItemMapper">
+
+    <resultMap id="JstScoreItemResult" type="com.ruoyi.jst.event.domain.JstScoreItem">
+        <id property="itemId" column="item_id"/>
+        <result property="contestId" column="contest_id"/>
+        <result property="itemName" column="item_name"/>
+        <result property="maxScore" column="max_score"/>
+        <result property="weight" column="weight"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        item_id, contest_id, item_name, max_score, weight, sort_order,
+        create_by, create_time, update_by, update_time, del_flag
+    </sql>
+
+    <select id="selectByItemId" resultMap="JstScoreItemResult">
+        select <include refid="BaseColumns"/>
+        from jst_score_item
+        where item_id = #{itemId}
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectByContestId" resultMap="JstScoreItemResult">
+        select <include refid="BaseColumns"/>
+        from jst_score_item
+        where contest_id = #{contestId}
+          and del_flag = '0'
+        order by sort_order asc, item_id asc
+    </select>
+
+    <insert id="insertJstScoreItem" parameterType="com.ruoyi.jst.event.domain.JstScoreItem"
+            useGeneratedKeys="true" keyProperty="entity.itemId">
+        insert into jst_score_item (
+            contest_id, item_name, max_score, weight, sort_order,
+            create_by, create_time, update_by, update_time, del_flag
+        ) values (
+            #{entity.contestId}, #{entity.itemName}, #{entity.maxScore}, #{entity.weight}, #{entity.sortOrder},
+            #{entity.createBy}, #{entity.createTime}, #{entity.updateBy}, #{entity.updateTime}, #{entity.delFlag}
+        )
+    </insert>
+
+    <insert id="batchInsert">
+        insert into jst_score_item (
+            contest_id, item_name, max_score, weight, sort_order,
+            create_by, create_time, update_by, update_time, del_flag
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.contestId}, #{item.itemName}, #{item.maxScore}, #{item.weight}, #{item.sortOrder},
+                #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.delFlag}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateJstScoreItem" parameterType="com.ruoyi.jst.event.domain.JstScoreItem">
+        update jst_score_item
+        set item_name = #{entity.itemName},
+            max_score = #{entity.maxScore},
+            weight = #{entity.weight},
+            sort_order = #{entity.sortOrder},
+            update_by = #{entity.updateBy},
+            update_time = #{entity.updateTime}
+        where item_id = #{entity.itemId}
+          and del_flag = '0'
+    </update>
+
+    <delete id="deleteByItemId">
+        delete from jst_score_item where item_id = #{itemId}
+    </delete>
+
+    <delete id="deleteByContestId">
+        delete from jst_score_item where contest_id = #{contestId}
+    </delete>
+
+</mapper>

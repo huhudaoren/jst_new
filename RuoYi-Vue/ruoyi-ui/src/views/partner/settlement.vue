@@ -163,7 +163,11 @@
             <el-table-column label="服务费" min-width="100" align="right">
               <template slot-scope="scope">{{ formatMoney(scope.row.serviceFee) }}</template>
             </el-table-column>
-            <el-table-column label="退款" prop="refundStatus" min-width="90" />
+            <el-table-column label="退款" prop="refundStatus" min-width="90">
+              <template slot-scope="scope">
+                <dict-tag :options="dict.type.jst_refund_status" :value="scope.row.refundStatus" />
+              </template>
+            </el-table-column>
             <el-table-column label="支付时间" min-width="150">
               <template slot-scope="scope">{{ parseTime(scope.row.payTime) || '--' }}</template>
             </el-table-column>
@@ -232,6 +236,7 @@ import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 export default {
   name: 'PartnerSettlement',
+  dicts: ['jst_refund_status'],
   data() {
     return {
       loading: false,

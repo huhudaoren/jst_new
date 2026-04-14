@@ -155,6 +155,20 @@
           }
         },
         {
+          "path": "score-detail",
+          "style": {
+            "navigationBarTitleText": "成绩详情",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "cert-detail",
+          "style": {
+            "navigationBarTitleText": "证书详情",
+            "navigationStyle": "custom"
+          }
+        },
+        {
           "path": "message",
           "style": {
             "navigationBarTitleText": "我的消息",
@@ -191,6 +205,13 @@
           "path": "detail",
           "style": {
             "navigationBarTitleText": "\u8d5b\u4e8b\u8be6\u60c5",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "team-enroll",
+          "style": {
+            "navigationBarTitleText": "团队报名",
             "navigationStyle": "custom"
           }
         }
