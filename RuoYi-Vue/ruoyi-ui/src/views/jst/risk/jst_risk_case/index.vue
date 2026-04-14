@@ -4,7 +4,7 @@
       <div>
         <p class="hero-eyebrow">风控中心</p>
         <h2>风控案例</h2>
-        <p class="hero-desc">查看风控工单，按案例号、状态、处理人筛选，查看处理时间线。</p>
+        <p class="hero-desc">跟踪风控处置案例</p>
       </div>
       <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
     </div>
@@ -15,7 +15,7 @@
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>
-          <el-option v-for="s in statusOptions" :key="s.value" :label="s.label" :value="s.value" />
+          <el-option v-for="item in dict.type.jst_risk_case_status" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item label="处理人ID" prop="assigneeId">
@@ -36,7 +36,7 @@
               <div class="mobile-title">{{ row.caseNo || '--' }}</div>
               <div class="mobile-sub">告警 #{{ row.alertId || '--' }} / 处理人 #{{ row.assigneeId || '--' }}</div>
             </div>
-            <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+            <dict-tag :options="dict.type.jst_risk_case_status" :value="row.status" />
           </div>
           <div v-if="row.conclusion" class="mobile-info-row">{{ row.conclusion }}</div>
           <div class="mobile-info-row">{{ parseTime(row.createTime) || '--' }}</div>
@@ -56,7 +56,7 @@
       <el-table-column label="处理人" prop="assigneeId" width="90" />
       <el-table-column label="状态" min-width="100">
         <template slot-scope="scope">
-          <el-tag size="small" :type="statusType(scope.row.status)">{{ statusLabel(scope.row.status) }}</el-tag>
+          <dict-tag :options="dict.type.jst_risk_case_status" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="结论" prop="conclusion" min-width="200" show-overflow-tooltip />
@@ -81,7 +81,7 @@
           <el-descriptions-item label="案例号">{{ detail.caseNo }}</el-descriptions-item>
           <el-descriptions-item label="告警ID">{{ detail.alertId }}</el-descriptions-item>
           <el-descriptions-item label="处理人ID">{{ detail.assigneeId || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="状态"><el-tag size="small" :type="statusType(detail.status)">{{ statusLabel(detail.status) }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="状态"><dict-tag :options="dict.type.jst_risk_case_status" :value="detail.status" /></el-descriptions-item>
           <el-descriptions-item label="审核人ID">{{ detail.reviewerId || '--' }}</el-descriptions-item>
           <el-descriptions-item label="结论" :span="2">{{ detail.conclusion || '--' }}</el-descriptions-item>
           <el-descriptions-item label="创建时间">{{ parseTime(detail.createTime) || '--' }}</el-descriptions-item>
@@ -104,16 +104,9 @@
 <script>
 import { listJst_risk_case, getJst_risk_case } from '@/api/jst/risk/jst_risk_case'
 
-const STATUS_META = {
-  open: { label: '待处理', type: 'danger' },
-  assigned: { label: '已分配', type: 'warning' },
-  processing: { label: '处理中', type: 'warning' },
-  reviewing: { label: '审核中', type: '' },
-  closed: { label: '已关闭', type: 'success' }
-}
-
 export default {
   name: 'RiskCaseManage',
+  dicts: ['jst_risk_case_status'],
   data() {
     return {
       loading: false,
@@ -121,7 +114,6 @@ export default {
       list: [],
       total: 0,
       queryParams: { pageNum: 1, pageSize: 10, caseNo: undefined, status: undefined, assigneeId: undefined },
-      statusOptions: Object.entries(STATUS_META).map(([value, { label }]) => ({ value, label })),
       detailVisible: false,
       detail: null
     }
@@ -176,8 +168,11 @@ export default {
         this.detail = row
       }
     },
-    statusLabel(s) { return (STATUS_META[s] && STATUS_META[s].label) || s || '--' },
-    statusType(s) { return (STATUS_META[s] && STATUS_META[s].type) || 'info' }
+    getDictLabel(dictData, value) {
+      if (!dictData || !Array.isArray(dictData)) return value || '--'
+      const item = dictData.find(d => d.value === value)
+      return item ? item.label : value || '--'
+    }
   }
 }
 </script>

@@ -4,7 +4,7 @@
       <div>
         <p class="hero-eyebrow">风控中心</p>
         <h2>风控告警</h2>
-        <p class="hero-desc">查看风控规则触发的告警记录，按级别、规则、时间筛选，查看命中详情。</p>
+        <p class="hero-desc">查看风控预警记录</p>
       </div>
       <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
     </div>
@@ -12,9 +12,7 @@
     <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
       <el-form-item label="告警级别" prop="riskLevel">
         <el-select v-model="queryParams.riskLevel" placeholder="全部" clearable>
-          <el-option label="低" value="low" />
-          <el-option label="中" value="mid" />
-          <el-option label="高" value="high" />
+          <el-option v-for="item in dict.type.jst_risk_level" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item label="规则ID" prop="riskRuleId">
@@ -40,7 +38,7 @@
               <div class="mobile-title">告警 #{{ row.alertId }}</div>
               <div class="mobile-sub">规则 #{{ row.riskRuleId || '--' }} / {{ row.targetType }} #{{ row.targetId }}</div>
             </div>
-            <el-tag size="small" :type="levelType(row.riskLevel)" :class="levelClass(row.riskLevel)">{{ levelLabel(row.riskLevel) }}</el-tag>
+            <dict-tag :options="dict.type.jst_risk_level" :value="row.riskLevel" />
           </div>
           <div class="mobile-info-row">
             <el-tag size="mini" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
@@ -60,7 +58,7 @@
       <el-table-column label="规则ID" prop="riskRuleId" width="80" />
       <el-table-column label="告警级别" min-width="100">
         <template slot-scope="scope">
-          <el-tag size="small" :type="levelType(scope.row.riskLevel)" :class="levelClass(scope.row.riskLevel)">{{ levelLabel(scope.row.riskLevel) }}</el-tag>
+          <dict-tag :options="dict.type.jst_risk_level" :value="scope.row.riskLevel" />
         </template>
       </el-table-column>
       <el-table-column label="目标类型" prop="targetType" min-width="90" />
@@ -92,7 +90,7 @@
           <el-descriptions-item label="告警ID">{{ detail.alertId }}</el-descriptions-item>
           <el-descriptions-item label="规则ID">{{ detail.riskRuleId }}</el-descriptions-item>
           <el-descriptions-item label="告警级别">
-            <el-tag size="small" :type="levelType(detail.riskLevel)" :class="levelClass(detail.riskLevel)">{{ levelLabel(detail.riskLevel) }}</el-tag>
+            <dict-tag :options="dict.type.jst_risk_level" :value="detail.riskLevel" />
           </el-descriptions-item>
           <el-descriptions-item label="处理状态">
             <el-tag size="small" :type="statusType(detail.status)">{{ statusLabel(detail.status) }}</el-tag>
@@ -124,6 +122,7 @@ const STATUS_META = {
 
 export default {
   name: 'RiskAlertManage',
+  dicts: ['jst_risk_level'],
   data() {
     return {
       loading: false,
@@ -168,9 +167,6 @@ export default {
         this.detail = row
       }
     },
-    levelLabel(l) { return { low: '低风险', mid: '中风险', high: '高风险' }[l] || l || '--' },
-    levelType(l) { return { low: 'info', mid: 'warning', high: 'danger' }[l] || 'info' },
-    levelClass(l) { return l === 'low' ? 'level-low' : l === 'mid' ? 'level-mid' : l === 'high' ? 'level-high' : '' },
     statusLabel(s) { return (STATUS_META[s] && STATUS_META[s].label) || s || '--' },
     statusType(s) { return (STATUS_META[s] && STATUS_META[s].type) || 'info' },
     formatJson(str) {
@@ -189,10 +185,6 @@ export default {
 .query-panel { padding: 16px 16px 0; margin-bottom: 16px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
 .drawer-body { padding: 20px; }
 .json-block { background: #f6f8fb; border: 1px solid #e5eaf2; border-radius: 6px; padding: 12px; font-size: 13px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
-/* 告警级别颜色 */
-.level-low ::v-deep .el-tag { background: #ecf5ff; color: #409eff; border-color: #b3d8ff; }
-.level-mid ::v-deep .el-tag { background: #fdf6ec; color: #e6a23c; border-color: #f5dab1; }
-.level-high ::v-deep .el-tag { background: #fef0f0; color: #f56c6c; border-color: #fbc4c4; }
 .mobile-list { min-height: 180px; }
 .mobile-card { padding: 16px; margin-bottom: 12px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
 .mobile-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }

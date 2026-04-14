@@ -3,8 +3,8 @@
     <div class="page-hero">
       <div>
         <p class="hero-eyebrow">财务中心</p>
-        <h2>合同记录</h2>
-        <p class="hero-desc">管理平台合同，按合同号、对象类型、状态筛选，查看有效期和签署信息。</p>
+        <h2>合同管理</h2>
+        <p class="hero-desc">管理赛事方与渠道合同</p>
       </div>
       <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
     </div>
@@ -21,7 +21,7 @@
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>
-          <el-option v-for="s in statusOptions" :key="s.value" :label="s.label" :value="s.value" />
+          <el-option v-for="item in dict.type.jst_contract_status" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -39,7 +39,7 @@
               <div class="mobile-title">{{ row.contractNo || '--' }}</div>
               <div class="mobile-sub">{{ contractTypeLabel(row.contractType) }} / {{ targetTypeLabel(row.targetType) }} #{{ row.targetId }}</div>
             </div>
-            <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+            <dict-tag :options="dict.type.jst_contract_status" :value="row.status" />
           </div>
           <div class="mobile-info-row">有效期：{{ parseTime(row.effectiveTime, '{y}-{m}-{d}') || '--' }} 起</div>
           <div class="mobile-info-row">签署：{{ parseTime(row.signTime, '{y}-{m}-{d}') || '未签署' }}</div>
@@ -57,7 +57,7 @@
       <el-table-column label="合同号" prop="contractNo" min-width="160" show-overflow-tooltip />
       <el-table-column label="合同类型" min-width="110">
         <template slot-scope="scope">
-          <el-tag size="small" type="info">{{ contractTypeLabel(scope.row.contractType) }}</el-tag>
+          <dict-tag :options="dict.type.jst_contract_type" :value="scope.row.contractType" />
         </template>
       </el-table-column>
       <el-table-column label="对象类型" min-width="90">
@@ -66,7 +66,7 @@
       <el-table-column label="对象ID" prop="targetId" width="80" />
       <el-table-column label="状态" min-width="100">
         <template slot-scope="scope">
-          <el-tag size="small" :type="statusType(scope.row.status)">{{ statusLabel(scope.row.status) }}</el-tag>
+          <dict-tag :options="dict.type.jst_contract_status" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="生效日期" min-width="120">
@@ -90,11 +90,11 @@
         <el-descriptions :column="isMobile ? 1 : 2" border>
           <el-descriptions-item label="合同ID">{{ detail.contractId }}</el-descriptions-item>
           <el-descriptions-item label="合同号">{{ detail.contractNo }}</el-descriptions-item>
-          <el-descriptions-item label="合同类型"><el-tag size="small" type="info">{{ contractTypeLabel(detail.contractType) }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="合同类型"><dict-tag :options="dict.type.jst_contract_type" :value="detail.contractType" /></el-descriptions-item>
           <el-descriptions-item label="对象类型">{{ targetTypeLabel(detail.targetType) }}</el-descriptions-item>
           <el-descriptions-item label="对象ID">{{ detail.targetId }}</el-descriptions-item>
           <el-descriptions-item label="模板ID">{{ detail.templateId || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="状态"><el-tag size="small" :type="statusType(detail.status)">{{ statusLabel(detail.status) }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="状态"><dict-tag :options="dict.type.jst_contract_status" :value="detail.status" /></el-descriptions-item>
           <el-descriptions-item label="关联结算ID">{{ detail.refSettlementId || '--' }}</el-descriptions-item>
           <el-descriptions-item label="生效日期">{{ parseTime(detail.effectiveTime, '{y}-{m}-{d}') || '--' }}</el-descriptions-item>
           <el-descriptions-item label="签署日期">{{ parseTime(detail.signTime, '{y}-{m}-{d}') || '--' }}</el-descriptions-item>
@@ -111,16 +111,9 @@
 <script>
 import { listJst_contract_record, getJst_contract_record } from '@/api/jst/finance/jst_contract_record'
 
-const STATUS_META = {
-  draft: { label: '草稿', type: 'info' },
-  pending_sign: { label: '待签署', type: 'warning' },
-  signed: { label: '已签署', type: 'success' },
-  expired: { label: '已过期', type: 'danger' },
-  archived: { label: '已归档', type: 'info' }
-}
-
 export default {
   name: 'ContractRecordManage',
+  dicts: ['jst_contract_type', 'jst_contract_status'],
   data() {
     return {
       loading: false,
@@ -128,7 +121,6 @@ export default {
       list: [],
       total: 0,
       queryParams: { pageNum: 1, pageSize: 10, contractNo: undefined, targetType: undefined, status: undefined },
-      statusOptions: Object.entries(STATUS_META).map(([value, { label }]) => ({ value, label })),
       detailVisible: false,
       detail: null
     }
@@ -165,9 +157,6 @@ export default {
         this.detail = row
       }
     },
-    statusLabel(s) { return (STATUS_META[s] && STATUS_META[s].label) || s || '--' },
-    statusType(s) { return (STATUS_META[s] && STATUS_META[s].type) || 'info' },
-    contractTypeLabel(t) { return { partner_coop: '赛事合作', channel_settle: '渠道结算', supplement: '补充协议' }[t] || t || '--' },
     targetTypeLabel(t) { return { partner: '赛事方', channel: '渠道方' }[t] || t || '--' }
   }
 }

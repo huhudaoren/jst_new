@@ -26,13 +26,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
         <result property="orderNo"    column="order_no_"    />
+        <result property="contestName"    column="contest_name_"    />
+        <result property="participantName"    column="participant_name_"    />
     </resultMap>
 
     <sql id="selectJstOrderItemVo">
         select t.*,
-               o.order_no as order_no_
+               o.order_no as order_no_,
+               ct.contest_name as contest_name_,
+               p.name as participant_name_
         from jst_order_item t
         left join jst_order_main o on t.order_id = o.order_id and o.del_flag = '0'
+        left join jst_contest ct on o.contest_id = ct.contest_id and ct.del_flag = '0'
+        left join jst_participant p on o.participant_id = p.participant_id and p.del_flag = '0'
     </sql>
 
     <select id="selectJstOrderItemList" parameterType="JstOrderItem" resultMap="JstOrderItemResult">

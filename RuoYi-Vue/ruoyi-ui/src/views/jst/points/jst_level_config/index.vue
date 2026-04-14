@@ -1,6 +1,15 @@
 <template>
-  <div class="app-container">
-    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
+  <div class="app-container level-config-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">积分管理</p>
+        <h2>等级配置</h2>
+        <p class="hero-desc">配置用户等级体系，设置成长值门槛与权益。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
       <el-form-item label="等级名称" prop="levelName">
         <el-input v-model="queryParams.levelName" placeholder="请输入等级名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
@@ -48,7 +57,9 @@
 
     <el-table v-else v-loading="loading" :data="sortedList">
       <el-table-column label="等级ID" prop="levelId" width="90" />
-      <el-table-column label="等级序号" prop="levelNo" width="90" />
+      <el-table-column label="等级" width="70" align="center">
+        <template slot-scope="{ row }"><span class="level-badge">{{ row.levelNo }}</span></template>
+      </el-table-column>
       <el-table-column label="等级编码" prop="levelCode" min-width="120" />
       <el-table-column label="等级名称" prop="levelName" min-width="120" />
       <el-table-column label="成长值门槛" prop="growthThreshold" min-width="110" align="right" />
@@ -245,6 +256,64 @@ export default {
 </script>
 
 <style scoped>
+.level-config-page {
+  background: #f6f8fb;
+  min-height: calc(100vh - 84px);
+}
+
+.page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  margin-bottom: 18px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.hero-eyebrow {
+  margin: 0 0 8px;
+  color: #2f6fec;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.page-hero h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.hero-desc {
+  margin: 8px 0 0;
+  color: #6f7b8f;
+}
+
+.query-panel {
+  padding: 16px 16px 0;
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #2f6fec;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  margin-right: 6px;
+}
+
 .mobile-card-list {
   padding: 0 4px;
 }
@@ -285,5 +354,45 @@ export default {
 .mobile-card__actions {
   display: flex;
   gap: 6px;
+}
+
+@media (max-width: 768px) {
+  .level-config-page {
+    padding: 12px;
+  }
+
+  .page-hero {
+    display: block;
+    padding: 18px;
+  }
+
+  .page-hero .el-button {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 16px;
+  }
+
+  .page-hero h2 {
+    font-size: 20px;
+  }
+
+  .query-panel {
+    padding-bottom: 8px;
+  }
+
+  .query-panel >>> .el-form-item {
+    display: block;
+    margin-right: 0;
+  }
+
+  .query-panel >>> .el-form-item__content,
+  .query-panel >>> .el-select,
+  .query-panel >>> .el-input {
+    width: 100%;
+  }
+
+  .mobile-card__actions .el-button {
+    min-height: 44px;
+  }
 }
 </style>

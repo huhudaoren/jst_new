@@ -1,6 +1,15 @@
 <template>
-  <div class="app-container">
-    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
+  <div class="app-container mall-goods-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">积分商城</p>
+        <h2>商城商品</h2>
+        <p class="hero-desc">管理积分商城商品，支持上下架和库存预警。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
       <el-form-item label="商品名称" prop="goodsName">
         <el-input v-model="queryParams.goodsName" placeholder="请输入商品名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
@@ -37,6 +46,9 @@
             <span class="mobile-card__title">{{ row.goodsName }}</span>
             <el-tag size="mini" :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </div>
+          <div v-if="row.coverImage" class="mobile-card__thumb">
+            <el-image :src="row.coverImage" style="width: 80px; height: 80px; border-radius: 6px;" fit="cover" lazy />
+          </div>
           <div class="mobile-card__meta">
             <span>{{ row.goodsType === 'virtual' ? '虚拟' : '实物' }}</span>
             <span>{{ row.pointsPrice || 0 }} 积分</span>
@@ -59,6 +71,12 @@
 
     <el-table v-else v-loading="loading" :data="list">
       <el-table-column label="商品ID" prop="goodsId" width="90" />
+      <el-table-column label="封面" width="72" align="center">
+        <template slot-scope="{ row }">
+          <el-image v-if="row.coverImage" :src="row.coverImage" class="goods-thumb" fit="cover" lazy />
+          <span v-else class="goods-thumb-placeholder"><i class="el-icon-picture-outline" /></span>
+        </template>
+      </el-table-column>
       <el-table-column label="商品名称" prop="goodsName" min-width="160" show-overflow-tooltip />
       <el-table-column label="类型" width="90">
         <template slot-scope="{ row }">{{ row.goodsType === 'virtual' ? '虚拟' : '实物' }}</template>
@@ -326,6 +344,70 @@ export default {
 </script>
 
 <style scoped>
+.mall-goods-page {
+  background: #f6f8fb;
+  min-height: calc(100vh - 84px);
+}
+
+.page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  margin-bottom: 18px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.hero-eyebrow {
+  margin: 0 0 8px;
+  color: #2f6fec;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.page-hero h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.hero-desc {
+  margin: 8px 0 0;
+  color: #6f7b8f;
+}
+
+.query-panel {
+  padding: 16px 16px 0;
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.goods-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  vertical-align: middle;
+}
+
+.goods-thumb-placeholder {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  background: #f0f2f5;
+  line-height: 48px;
+  text-align: center;
+  color: #c0c4cc;
+  font-size: 20px;
+}
+
 .amount-cell {
   text-align: right;
   display: inline-block;
@@ -360,6 +442,10 @@ export default {
   max-width: 65%;
 }
 
+.mobile-card__thumb {
+  margin: 8px 0;
+}
+
 .mobile-card__meta {
   font-size: 12px;
   color: #909399;
@@ -372,5 +458,45 @@ export default {
 .mobile-card__actions {
   display: flex;
   gap: 6px;
+}
+
+@media (max-width: 768px) {
+  .mall-goods-page {
+    padding: 12px;
+  }
+
+  .page-hero {
+    display: block;
+    padding: 18px;
+  }
+
+  .page-hero .el-button {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 16px;
+  }
+
+  .page-hero h2 {
+    font-size: 20px;
+  }
+
+  .query-panel {
+    padding-bottom: 8px;
+  }
+
+  .query-panel >>> .el-form-item {
+    display: block;
+    margin-right: 0;
+  }
+
+  .query-panel >>> .el-form-item__content,
+  .query-panel >>> .el-select,
+  .query-panel >>> .el-input {
+    width: 100%;
+  }
+
+  .mobile-card__actions .el-button {
+    min-height: 44px;
+  }
 }
 </style>

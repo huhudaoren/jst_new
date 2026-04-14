@@ -26,9 +26,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <sql id="selectJstPointsLedgerVo">
         select t.*,
-               u.nick_name as owner_name_
+               COALESCE(u.nick_name, ch.channel_name) as owner_name_
         from jst_points_ledger t
-        left join sys_user u on t.owner_id = u.user_id and u.del_flag = '0'
+        left join sys_user u on t.owner_type = 'student' and t.owner_id = u.user_id and u.del_flag = '0'
+        left join jst_channel ch on t.owner_type = 'channel' and t.owner_id = ch.channel_id and ch.del_flag = '0'
     </sql>
 
     <select id="selectJstPointsLedgerList" parameterType="JstPointsLedger" resultMap="JstPointsLedgerResult">

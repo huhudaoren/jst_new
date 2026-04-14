@@ -25,13 +25,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
         <result property="contestName"    column="contest_name_"    />
+        <result property="channelName"    column="channel_name_"    />
     </resultMap>
 
     <sql id="selectJstTeamAppointmentVo">
         select t.*,
-               ct.contest_name as contest_name_
+               ct.contest_name as contest_name_,
+               ch.channel_name as channel_name_
         from jst_team_appointment t
         left join jst_contest ct on t.contest_id = ct.contest_id and ct.del_flag = '0'
+        left join jst_channel ch on t.channel_id = ch.channel_id and ch.del_flag = '0'
     </sql>
 
     <select id="selectJstTeamAppointmentList" parameterType="JstTeamAppointment" resultMap="JstTeamAppointmentResult">

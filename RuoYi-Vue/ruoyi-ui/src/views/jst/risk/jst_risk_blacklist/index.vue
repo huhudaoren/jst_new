@@ -3,8 +3,8 @@
     <div class="page-hero">
       <div>
         <p class="hero-eyebrow">风控中心</p>
-        <h2>黑名单管理</h2>
-        <p class="hero-desc">管理黑白名单，按类型和目标灵活添加与移除，移除操作需二次确认。</p>
+        <h2>黑白名单</h2>
+        <p class="hero-desc">管理风控黑白名单</p>
       </div>
       <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
     </div>
@@ -12,8 +12,7 @@
     <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
       <el-form-item label="名单类型" prop="listType">
         <el-select v-model="queryParams.listType" placeholder="全部" clearable>
-          <el-option label="黑名单" value="black" />
-          <el-option label="白名单" value="white" />
+          <el-option v-for="item in dict.type.jst_list_type" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item label="目标类型" prop="targetType">
@@ -49,7 +48,7 @@
               <div class="mobile-title">{{ row.targetValue || '--' }}</div>
               <div class="mobile-sub">{{ targetTypeLabel(row.targetType) }}</div>
             </div>
-            <el-tag size="small" :type="row.listType === 'black' ? 'danger' : 'success'">{{ row.listType === 'black' ? '黑名单' : '白名单' }}</el-tag>
+            <dict-tag :options="dict.type.jst_list_type" :value="row.listType" />
           </div>
           <div class="mobile-info-row">{{ row.reason || '--' }}</div>
           <div class="mobile-info-row">有效期：{{ parseTime(row.effectiveTime, '{y}-{m}-{d}') || '--' }} ~ {{ parseTime(row.expireTime, '{y}-{m}-{d}') || '永久' }}</div>
@@ -68,7 +67,7 @@
       <el-table-column label="ID" prop="listId" width="70" />
       <el-table-column label="名单类型" min-width="90">
         <template slot-scope="scope">
-          <el-tag size="small" :type="scope.row.listType === 'black' ? 'danger' : 'success'">{{ scope.row.listType === 'black' ? '黑名单' : '白名单' }}</el-tag>
+          <dict-tag :options="dict.type.jst_list_type" :value="scope.row.listType" />
         </template>
       </el-table-column>
       <el-table-column label="目标类型" min-width="90">
@@ -103,8 +102,7 @@
       <el-form ref="addForm" :model="form" :rules="rules" label-width="90px">
         <el-form-item label="名单类型" prop="listType">
           <el-select v-model="form.listType" class="full-width">
-            <el-option label="黑名单" value="black" />
-            <el-option label="白名单" value="white" />
+            <el-option v-for="item in dict.type.jst_list_type" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="目标类型" prop="targetType">
@@ -139,6 +137,7 @@ import { listJst_risk_blacklist, addJst_risk_blacklist, delJst_risk_blacklist } 
 
 export default {
   name: 'RiskBlacklistManage',
+  dicts: ['jst_list_type'],
   data() {
     return {
       loading: false,

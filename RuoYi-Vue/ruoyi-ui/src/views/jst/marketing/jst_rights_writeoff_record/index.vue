@@ -1,6 +1,15 @@
 <template>
-  <div class="app-container">
-    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
+  <div class="app-container writeoff-record-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">营销管理</p>
+        <h2>权益核销记录</h2>
+        <p class="hero-desc">查看权益核销明细，包含核销单号、使用额度、审核状态。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
       <el-form-item label="核销单号" prop="writeoffNo">
         <el-input v-model="queryParams.writeoffNo" placeholder="请输入核销单号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
@@ -34,7 +43,7 @@
           </div>
           <div class="mobile-card__meta">
             <span>权益ID：{{ row.userRightsId }}</span>
-            <span class="amount-cell">使用：¥ {{ formatAmount(row.useAmount) }}</span>
+            <span class="amount-cell">使用：{{ formatMoney(row.useAmount) }}</span>
             <span>核销时间：{{ parseTime(row.writeoffTime) || '--' }}</span>
           </div>
           <div class="mobile-card__actions">
@@ -51,7 +60,7 @@
       <el-table-column label="权益ID" prop="userRightsId" min-width="100" />
       <el-table-column label="使用额度" min-width="100" align="right">
         <template slot-scope="{ row }">
-          <span class="amount-cell">¥ {{ formatAmount(row.useAmount) }}</span>
+          <span class="amount-cell">{{ formatMoney(row.useAmount) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" width="100">
@@ -77,7 +86,7 @@
         <el-descriptions :column="1" border size="small">
           <el-descriptions-item label="核销单号">{{ detailData.writeoffNo || '--' }}</el-descriptions-item>
           <el-descriptions-item label="权益ID">{{ detailData.userRightsId || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="使用额度">¥ {{ formatAmount(detailData.useAmount) }}</el-descriptions-item>
+          <el-descriptions-item label="使用额度">{{ formatMoney(detailData.useAmount) }}</el-descriptions-item>
           <el-descriptions-item label="状态">
             <el-tag size="small" :type="statusType(detailData.status)">{{ statusLabel(detailData.status) }}</el-tag>
           </el-descriptions-item>
@@ -94,6 +103,7 @@
 
 <script>
 import { parseTime } from '@/utils/ruoyi'
+import { formatMoney as formatMoneyUtil } from '@/utils/format'
 import { listJst_rights_writeoff_record, getJst_rights_writeoff_record } from '@/api/jst/marketing/jst_rights_writeoff_record'
 
 const STATUS_META = {
@@ -141,16 +151,8 @@ export default {
     statusLabel(status) {
       return (STATUS_META[status] || {}).label || status || '--'
     },
-    formatAmount(value) {
-      if (value === null || value === undefined || value === '') {
-        return '0.00'
-      }
-      const num = Number(value)
-      if (Number.isNaN(num)) {
-        return value
-      }
-      const displayNum = Number.isInteger(num) ? num / 100 : num
-      return displayNum.toFixed(2)
+    formatMoney(value) {
+      return formatMoneyUtil(value, true)
     },
     getList() {
       this.loading = true
@@ -180,6 +182,50 @@ export default {
 </script>
 
 <style scoped>
+.writeoff-record-page {
+  background: #f6f8fb;
+  min-height: calc(100vh - 84px);
+}
+
+.page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  margin-bottom: 18px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.hero-eyebrow {
+  margin: 0 0 8px;
+  color: #2f6fec;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.page-hero h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.hero-desc {
+  margin: 8px 0 0;
+  color: #6f7b8f;
+}
+
+.query-panel {
+  padding: 16px 16px 0;
+  margin-bottom: 16px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
 .amount-cell {
   text-align: right;
   display: inline-block;
@@ -230,5 +276,41 @@ export default {
 .mobile-card__actions {
   display: flex;
   gap: 6px;
+}
+
+@media (max-width: 768px) {
+  .writeoff-record-page {
+    padding: 12px;
+  }
+
+  .page-hero {
+    display: block;
+    padding: 18px;
+  }
+
+  .page-hero .el-button {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 16px;
+  }
+
+  .page-hero h2 {
+    font-size: 20px;
+  }
+
+  .query-panel {
+    padding-bottom: 8px;
+  }
+
+  .query-panel ::v-deep .el-form-item {
+    display: block;
+    margin-right: 0;
+  }
+
+  .query-panel ::v-deep .el-form-item__content,
+  .query-panel ::v-deep .el-select,
+  .query-panel ::v-deep .el-input {
+    width: 100%;
+  }
 }
 </style>

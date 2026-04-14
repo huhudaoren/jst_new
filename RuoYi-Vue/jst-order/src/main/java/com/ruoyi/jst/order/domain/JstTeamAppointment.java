@@ -75,6 +75,9 @@ public class JstTeamAppointment extends BaseEntity
     /** 赛事名称（JOIN查出，非持久化） */
     private String contestName;
 
+    /** 渠道名称（JOIN查出，非持久化） */
+    private String channelName;
+
     public void setTeamAppointmentId(Long teamAppointmentId) 
     {
         this.teamAppointmentId = teamAppointmentId;
@@ -223,6 +226,16 @@ public class JstTeamAppointment extends BaseEntity
     public String getContestName()
     {
         return contestName;
+    }
+
+    public void setChannelName(String channelName)
+    {
+        this.channelName = channelName;
+    }
+
+    public String getChannelName()
+    {
+        return channelName;
     }
 
     @Override

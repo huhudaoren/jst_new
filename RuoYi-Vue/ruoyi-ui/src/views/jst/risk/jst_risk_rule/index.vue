@@ -4,7 +4,7 @@
       <div>
         <p class="hero-eyebrow">风控中心</p>
         <h2>风控规则</h2>
-        <p class="hero-desc">管理平台风控规则，配置阈值与触发动作，按维度和类型灵活启停。</p>
+        <p class="hero-desc">配置风控检测规则</p>
       </div>
       <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
     </div>
@@ -51,7 +51,8 @@
             <el-switch v-model="row.status" :active-value="1" :inactive-value="0" @change="handleStatusChange(row)" v-hasPermi="['jst:risk:rule:edit']" />
           </div>
           <div class="mobile-info-row">
-            <el-tag size="mini" :type="actionType(row.action)">{{ actionLabel(row.action) }}</el-tag>
+            <dict-tag :options="dict.type.jst_risk_action" :value="row.action" />
+            <span v-if="row.thresholdJson" class="threshold-preview">{{ thresholdSummary(row.thresholdJson) }}</span>
           </div>
           <div class="mobile-actions">
             <el-button type="text" @click="handleEdit(row)" v-hasPermi="['jst:risk:rule:edit']">编辑</el-button>
@@ -78,7 +79,16 @@
       </el-table-column>
       <el-table-column label="触发动作" min-width="100">
         <template slot-scope="scope">
-          <el-tag size="small" :type="actionType(scope.row.action)">{{ actionLabel(scope.row.action) }}</el-tag>
+          <dict-tag :options="dict.type.jst_risk_action" :value="scope.row.action" />
+        </template>
+      </el-table-column>
+      <el-table-column label="阈值配置" min-width="180">
+        <template slot-scope="scope">
+          <el-popover v-if="scope.row.thresholdJson" trigger="hover" placement="top" width="320">
+            <pre class="json-block">{{ formatJson(scope.row.thresholdJson) }}</pre>
+            <span slot="reference" class="threshold-preview">{{ thresholdSummary(scope.row.thresholdJson) }}</span>
+          </el-popover>
+          <span v-else>--</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" width="90" align="center">
@@ -151,6 +161,7 @@ const RULE_TYPES = [
 
 export default {
   name: 'RiskRuleManage',
+  dicts: ['jst_risk_action'],
   data() {
     return {
       loading: false,
@@ -233,8 +244,15 @@ export default {
     },
     ruleTypeLabel(t) { const found = RULE_TYPES.find(r => r.value === t); return found ? found.label : t || '--' },
     dimensionLabel(d) { return { user: '用户', device: '设备', mobile: '手机', channel: '渠道' }[d] || d || '--' },
-    actionLabel(a) { return { warn: '告警', intercept: '拦截', manual: '人工审核' }[a] || a || '--' },
-    actionType(a) { return { warn: 'warning', intercept: 'danger', manual: 'info' }[a] || 'info' }
+    formatJson(str) {
+      try { return JSON.stringify(JSON.parse(str), null, 2) } catch (_) { return str }
+    },
+    thresholdSummary(str) {
+      try {
+        const obj = JSON.parse(str)
+        return Object.entries(obj).map(([k, v]) => `${k}=${v}`).join(', ')
+      } catch (_) { return str }
+    }
   }
 }
 </script>
@@ -248,6 +266,8 @@ export default {
 .query-panel { padding: 16px 16px 0; margin-bottom: 16px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
 .action-bar { padding: 0 4px; margin-bottom: 12px; }
 .danger-text { color: #f56c6c; }
+.json-block { background: #f6f8fb; border: 1px solid #e5eaf2; border-radius: 6px; padding: 12px; font-size: 13px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; margin: 0; }
+.threshold-preview { font-size: 12px; color: #606266; cursor: pointer; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; border-bottom: 1px dashed #c0c4cc; }
 .mobile-list { min-height: 180px; }
 .mobile-card { padding: 16px; margin-bottom: 12px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
 .mobile-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }

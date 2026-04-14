@@ -4,7 +4,7 @@
       <div>
         <p class="hero-eyebrow">风控中心</p>
         <h2>审计日志</h2>
-        <p class="hero-desc">查看平台操作审计日志，按操作人、类型、模块筛选。只读，不可编辑或删除。</p>
+        <p class="hero-desc">查看系统操作审计记录</p>
       </div>
       <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
     </div>

@@ -77,6 +77,12 @@ public class JstOrderItem extends BaseEntity
     /** 订单编号（JOIN查出，非持久化） */
     private String orderNo;
 
+    /** 赛事名称（JOIN查出，非持久化） */
+    private String contestName;
+
+    /** 参赛人姓名（JOIN查出，非持久化） */
+    private String participantName;
+
     public void setItemId(Long itemId) 
     {
         this.itemId = itemId;
@@ -235,6 +241,26 @@ public class JstOrderItem extends BaseEntity
     public String getOrderNo()
     {
         return orderNo;
+    }
+
+    public void setContestName(String contestName)
+    {
+        this.contestName = contestName;
+    }
+
+    public String getContestName()
+    {
+        return contestName;
+    }
+
+    public void setParticipantName(String participantName)
+    {
+        this.participantName = participantName;
+    }
+
+    public String getParticipantName()
+    {
+        return participantName;
     }
 
     @Override

@@ -24,33 +24,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="orderNo"    column="order_no_"    />
     </resultMap>
 
     <sql id="selectJstPaymentRecordVo">
-        select payment_id, payment_no, order_id, pay_method, cash_amount, points_amount, points_used, third_party_no, voucher_url, voucher_audit_status, pay_status, pay_time, operator_id, create_by, create_time, update_by, update_time, remark, del_flag from jst_payment_record
+        select t.*,
+               o.order_no as order_no_
+        from jst_payment_record t
+        left join jst_order_main o on t.order_id = o.order_id and o.del_flag = '0'
     </sql>
 
     <select id="selectJstPaymentRecordList" parameterType="JstPaymentRecord" resultMap="JstPaymentRecordResult">
         <include refid="selectJstPaymentRecordVo"/>
-        <where>  
-            <if test="paymentNo != null  and paymentNo != ''"> and payment_no = #{paymentNo}</if>
-            <if test="orderId != null "> and order_id = #{orderId}</if>
-            <if test="payMethod != null  and payMethod != ''"> and pay_method = #{payMethod}</if>
-            <if test="cashAmount != null "> and cash_amount = #{cashAmount}</if>
-            <if test="pointsAmount != null "> and points_amount = #{pointsAmount}</if>
-            <if test="pointsUsed != null "> and points_used = #{pointsUsed}</if>
-            <if test="thirdPartyNo != null  and thirdPartyNo != ''"> and third_party_no = #{thirdPartyNo}</if>
-            <if test="voucherUrl != null  and voucherUrl != ''"> and voucher_url = #{voucherUrl}</if>
-            <if test="voucherAuditStatus != null  and voucherAuditStatus != ''"> and voucher_audit_status = #{voucherAuditStatus}</if>
-            <if test="payStatus != null  and payStatus != ''"> and pay_status = #{payStatus}</if>
-            <if test="payTime != null "> and pay_time = #{payTime}</if>
-            <if test="operatorId != null "> and operator_id = #{operatorId}</if>
+        <where>
+            <if test="paymentNo != null  and paymentNo != ''"> and t.payment_no = #{paymentNo}</if>
+            <if test="orderId != null "> and t.order_id = #{orderId}</if>
+            <if test="payMethod != null  and payMethod != ''"> and t.pay_method = #{payMethod}</if>
+            <if test="cashAmount != null "> and t.cash_amount = #{cashAmount}</if>
+            <if test="pointsAmount != null "> and t.points_amount = #{pointsAmount}</if>
+            <if test="pointsUsed != null "> and t.points_used = #{pointsUsed}</if>
+            <if test="thirdPartyNo != null  and thirdPartyNo != ''"> and t.third_party_no = #{thirdPartyNo}</if>
+            <if test="voucherUrl != null  and voucherUrl != ''"> and t.voucher_url = #{voucherUrl}</if>
+            <if test="voucherAuditStatus != null  and voucherAuditStatus != ''"> and t.voucher_audit_status = #{voucherAuditStatus}</if>
+            <if test="payStatus != null  and payStatus != ''"> and t.pay_status = #{payStatus}</if>
+            <if test="payTime != null "> and t.pay_time = #{payTime}</if>
+            <if test="operatorId != null "> and t.operator_id = #{operatorId}</if>
         </where>
     </select>
-    
+
     <select id="selectJstPaymentRecordByPaymentId" parameterType="Long" resultMap="JstPaymentRecordResult">
         <include refid="selectJstPaymentRecordVo"/>
-        where payment_id = #{paymentId}
+        where t.payment_id = #{paymentId}
     </select>
 
     <insert id="insertJstPaymentRecord" parameterType="JstPaymentRecord" useGeneratedKeys="true" keyProperty="paymentId">

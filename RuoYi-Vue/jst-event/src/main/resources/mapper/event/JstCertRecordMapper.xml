@@ -24,33 +24,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="contestName"    column="contest_name_"    />
+        <result property="participantName"    column="participant_name_"    />
+        <result property="templateName"    column="template_name_"    />
     </resultMap>
 
     <sql id="selectJstCertRecordVo">
-        select cert_id, cert_no, contest_id, score_id, enroll_id, user_id, participant_id, template_id, cert_file_url, issue_status, issue_time, void_reason, verify_code, create_by, create_time, update_by, update_time, remark, del_flag from jst_cert_record
+        select t.*,
+               ct.contest_name as contest_name_,
+               p.name as participant_name_,
+               tpl.template_name as template_name_
+        from jst_cert_record t
+        left join jst_contest ct on t.contest_id = ct.contest_id and ct.del_flag = '0'
+        left join jst_participant p on t.participant_id = p.participant_id and p.del_flag = '0'
+        left join jst_cert_template tpl on t.template_id = tpl.template_id and tpl.del_flag = '0'
     </sql>
 
     <select id="selectJstCertRecordList" parameterType="JstCertRecord" resultMap="JstCertRecordResult">
         <include refid="selectJstCertRecordVo"/>
-        <where>  
-            <if test="certNo != null  and certNo != ''"> and cert_no = #{certNo}</if>
-            <if test="contestId != null "> and contest_id = #{contestId}</if>
-            <if test="scoreId != null "> and score_id = #{scoreId}</if>
-            <if test="enrollId != null "> and enroll_id = #{enrollId}</if>
-            <if test="userId != null "> and user_id = #{userId}</if>
-            <if test="participantId != null "> and participant_id = #{participantId}</if>
-            <if test="templateId != null "> and template_id = #{templateId}</if>
-            <if test="certFileUrl != null  and certFileUrl != ''"> and cert_file_url = #{certFileUrl}</if>
-            <if test="issueStatus != null  and issueStatus != ''"> and issue_status = #{issueStatus}</if>
-            <if test="issueTime != null "> and issue_time = #{issueTime}</if>
-            <if test="voidReason != null  and voidReason != ''"> and void_reason = #{voidReason}</if>
-            <if test="verifyCode != null  and verifyCode != ''"> and verify_code = #{verifyCode}</if>
+        <where>
+            <if test="certNo != null  and certNo != ''"> and t.cert_no = #{certNo}</if>
+            <if test="contestId != null "> and t.contest_id = #{contestId}</if>
+            <if test="scoreId != null "> and t.score_id = #{scoreId}</if>
+            <if test="enrollId != null "> and t.enroll_id = #{enrollId}</if>
+            <if test="userId != null "> and t.user_id = #{userId}</if>
+            <if test="participantId != null "> and t.participant_id = #{participantId}</if>
+            <if test="templateId != null "> and t.template_id = #{templateId}</if>
+            <if test="certFileUrl != null  and certFileUrl != ''"> and t.cert_file_url = #{certFileUrl}</if>
+            <if test="issueStatus != null  and issueStatus != ''"> and t.issue_status = #{issueStatus}</if>
+            <if test="issueTime != null "> and t.issue_time = #{issueTime}</if>
+            <if test="voidReason != null  and voidReason != ''"> and t.void_reason = #{voidReason}</if>
+            <if test="verifyCode != null  and verifyCode != ''"> and t.verify_code = #{verifyCode}</if>
         </where>
     </select>
-    
+
     <select id="selectJstCertRecordByCertId" parameterType="Long" resultMap="JstCertRecordResult">
         <include refid="selectJstCertRecordVo"/>
-        where cert_id = #{certId}
+        where t.cert_id = #{certId}
     </select>
 
     <insert id="insertJstCertRecord" parameterType="JstCertRecord" useGeneratedKeys="true" keyProperty="certId">

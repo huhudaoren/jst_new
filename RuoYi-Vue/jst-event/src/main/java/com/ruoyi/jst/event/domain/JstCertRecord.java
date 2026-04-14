@@ -72,6 +72,15 @@ public class JstCertRecord extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 赛事名称（JOIN查出，非持久化） */
+    private String contestName;
+
+    /** 参赛人姓名（JOIN查出，非持久化） */
+    private String participantName;
+
+    /** 模板名称（JOIN查出，非持久化） */
+    private String templateName;
+
     public void setCertId(Long certId) 
     {
         this.certId = certId;
@@ -207,9 +216,39 @@ public class JstCertRecord extends BaseEntity
         this.delFlag = delFlag;
     }
 
-    public String getDelFlag() 
+    public String getDelFlag()
     {
         return delFlag;
+    }
+
+    public void setContestName(String contestName)
+    {
+        this.contestName = contestName;
+    }
+
+    public String getContestName()
+    {
+        return contestName;
+    }
+
+    public void setParticipantName(String participantName)
+    {
+        this.participantName = participantName;
+    }
+
+    public String getParticipantName()
+    {
+        return participantName;
+    }
+
+    public void setTemplateName(String templateName)
+    {
+        this.templateName = templateName;
+    }
+
+    public String getTemplateName()
+    {
+        return templateName;
     }
 
     @Override

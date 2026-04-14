@@ -20,29 +20,35 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="ownerName"    column="owner_name_"    />
     </resultMap>
 
     <sql id="selectJstGrowthLedgerVo">
-        select ledger_id, account_id, change_type, source_type, source_ref_id, growth_change, balance_after, level_before, level_after, create_by, create_time, update_by, update_time, remark, del_flag from jst_growth_ledger
+        select t.*,
+               COALESCE(u.nick_name, ch.channel_name) as owner_name_
+        from jst_growth_ledger t
+        left join jst_points_account pa on t.account_id = pa.account_id and pa.del_flag = '0'
+        left join sys_user u on pa.owner_type = 'student' and pa.owner_id = u.user_id and u.del_flag = '0'
+        left join jst_channel ch on pa.owner_type = 'channel' and pa.owner_id = ch.channel_id and ch.del_flag = '0'
     </sql>
 
     <select id="selectJstGrowthLedgerList" parameterType="JstGrowthLedger" resultMap="JstGrowthLedgerResult">
         <include refid="selectJstGrowthLedgerVo"/>
-        <where>  
-            <if test="accountId != null "> and account_id = #{accountId}</if>
-            <if test="changeType != null  and changeType != ''"> and change_type = #{changeType}</if>
-            <if test="sourceType != null  and sourceType != ''"> and source_type = #{sourceType}</if>
-            <if test="sourceRefId != null "> and source_ref_id = #{sourceRefId}</if>
-            <if test="growthChange != null "> and growth_change = #{growthChange}</if>
-            <if test="balanceAfter != null "> and balance_after = #{balanceAfter}</if>
-            <if test="levelBefore != null "> and level_before = #{levelBefore}</if>
-            <if test="levelAfter != null "> and level_after = #{levelAfter}</if>
+        <where>
+            <if test="accountId != null "> and t.account_id = #{accountId}</if>
+            <if test="changeType != null  and changeType != ''"> and t.change_type = #{changeType}</if>
+            <if test="sourceType != null  and sourceType != ''"> and t.source_type = #{sourceType}</if>
+            <if test="sourceRefId != null "> and t.source_ref_id = #{sourceRefId}</if>
+            <if test="growthChange != null "> and t.growth_change = #{growthChange}</if>
+            <if test="balanceAfter != null "> and t.balance_after = #{balanceAfter}</if>
+            <if test="levelBefore != null "> and t.level_before = #{levelBefore}</if>
+            <if test="levelAfter != null "> and t.level_after = #{levelAfter}</if>
         </where>
     </select>
-    
+
     <select id="selectJstGrowthLedgerByLedgerId" parameterType="Long" resultMap="JstGrowthLedgerResult">
         <include refid="selectJstGrowthLedgerVo"/>
-        where ledger_id = #{ledgerId}
+        where t.ledger_id = #{ledgerId}
     </select>
 
     <insert id="insertJstGrowthLedger" parameterType="JstGrowthLedger" useGeneratedKeys="true" keyProperty="ledgerId">

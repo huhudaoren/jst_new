@@ -3,8 +3,8 @@
     <div class="page-hero">
       <div>
         <p class="hero-eyebrow">财务中心</p>
-        <h2>发票记录</h2>
-        <p class="hero-desc">管理平台发票，按发票号、开票抬头、状态筛选，查看开票与物流信息。</p>
+        <h2>发票管理</h2>
+        <p class="hero-desc">管理发票申请与开具</p>
       </div>
       <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
     </div>
@@ -18,7 +18,7 @@
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>
-          <el-option v-for="s in statusOptions" :key="s.value" :label="s.label" :value="s.value" />
+          <el-option v-for="item in dict.type.jst_invoice_status" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -36,7 +36,7 @@
               <div class="mobile-title">{{ row.invoiceNo || '--' }}</div>
               <div class="mobile-sub">{{ row.invoiceTitle || '--' }}</div>
             </div>
-            <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+            <dict-tag :options="dict.type.jst_invoice_status" :value="row.status" />
           </div>
           <div style="margin-top:12px;font-size:20px;font-weight:700;color:#172033">{{ formatMoney(row.amount) }}</div>
           <div class="mobile-info-row">开票：{{ parseTime(row.issueTime, '{y}-{m}-{d}') || '--' }}</div>
@@ -55,11 +55,11 @@
       <el-table-column label="开票抬头" prop="invoiceTitle" min-width="180" show-overflow-tooltip />
       <el-table-column label="税号" prop="taxNo" min-width="160" show-overflow-tooltip />
       <el-table-column label="金额" min-width="120" align="right">
-        <template slot-scope="scope"><strong>{{ formatMoney(scope.row.amount) }}</strong></template>
+        <template slot-scope="scope"><strong class="amount-brand">{{ formatMoney(scope.row.amount) }}</strong></template>
       </el-table-column>
       <el-table-column label="状态" min-width="100">
         <template slot-scope="scope">
-          <el-tag size="small" :type="statusType(scope.row.status)">{{ statusLabel(scope.row.status) }}</el-tag>
+          <dict-tag :options="dict.type.jst_invoice_status" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="物流状态" min-width="100">
@@ -88,8 +88,8 @@
           <el-descriptions-item label="关联结算号">{{ detail.refSettlementNo || '--' }}</el-descriptions-item>
           <el-descriptions-item label="开票抬头">{{ detail.invoiceTitle }}</el-descriptions-item>
           <el-descriptions-item label="税号">{{ detail.taxNo || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="金额"><strong style="font-size:18px">{{ formatMoney(detail.amount) }}</strong></el-descriptions-item>
-          <el-descriptions-item label="状态"><el-tag size="small" :type="statusType(detail.status)">{{ statusLabel(detail.status) }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="金额"><strong class="amount-brand" style="font-size:18px">{{ formatMoney(detail.amount) }}</strong></el-descriptions-item>
+          <el-descriptions-item label="状态"><dict-tag :options="dict.type.jst_invoice_status" :value="detail.status" /></el-descriptions-item>
           <el-descriptions-item label="物流状态">{{ detail.expressStatus || '--' }}</el-descriptions-item>
           <el-descriptions-item label="开票时间">{{ parseTime(detail.issueTime) || '--' }}</el-descriptions-item>
           <el-descriptions-item label="备注">{{ detail.remark || '--' }}</el-descriptions-item>
@@ -106,17 +106,9 @@
 import { listJst_invoice_record, getJst_invoice_record } from '@/api/jst/finance/jst_invoice_record'
 import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
-const STATUS_META = {
-  pending_apply: { label: '待申请', type: 'info' },
-  reviewing: { label: '审核中', type: 'warning' },
-  issuing: { label: '开票中', type: 'warning' },
-  issued: { label: '已开票', type: 'success' },
-  voided: { label: '已作废', type: 'danger' },
-  red_offset: { label: '红冲', type: 'danger' }
-}
-
 export default {
   name: 'InvoiceRecordManage',
+  dicts: ['jst_invoice_status'],
   data() {
     return {
       loading: false,
@@ -124,7 +116,6 @@ export default {
       list: [],
       total: 0,
       queryParams: { pageNum: 1, pageSize: 10, invoiceNo: undefined, invoiceTitle: undefined, status: undefined },
-      statusOptions: Object.entries(STATUS_META).map(([value, { label }]) => ({ value, label })),
       detailVisible: false,
       detail: null
     }
@@ -161,8 +152,6 @@ export default {
         this.detail = row
       }
     },
-    statusLabel(s) { return (STATUS_META[s] && STATUS_META[s].label) || s || '--' },
-    statusType(s) { return (STATUS_META[s] && STATUS_META[s].type) || 'info' },
     targetTypeLabel(t) { return { channel: '渠道方', partner: '赛事方' }[t] || t || '--' },
     formatMoney(v) { return formatMoneyUtil(v) }
   }
@@ -176,6 +165,7 @@ export default {
 .page-hero h2 { margin: 0; font-size: 24px; font-weight: 700; color: #172033; }
 .hero-desc { margin: 8px 0 0; color: #6f7b8f; }
 .query-panel { padding: 16px 16px 0; margin-bottom: 16px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
+.amount-brand { color: #2f6fec; }
 .drawer-body { padding: 20px; }
 .mobile-list { min-height: 180px; }
 .mobile-card { padding: 16px; margin-bottom: 12px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }

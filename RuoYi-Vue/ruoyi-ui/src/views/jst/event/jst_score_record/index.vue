@@ -87,7 +87,7 @@
             <JstStatusBadge :status="String(row.auditStatus || '')" :status-map="auditStatusMap" />
           </div>
           <div class="mobile-info-row">参赛人：{{ row.participantName || row.participantId || '--' }}</div>
-          <div class="mobile-info-row">分数：{{ formatScore(row.scoreValue) }}</div>
+          <div class="mobile-info-row">分数：<span class="score-highlight">{{ formatScore(row.scoreValue) }}</span></div>
           <div class="mobile-info-row">奖项：{{ row.awardLevel || '--' }}</div>
           <div class="mobile-info-row">
             发布状态：
@@ -120,7 +120,7 @@
         </template>
       </el-table-column>
       <el-table-column label="分数" prop="scoreValue" min-width="90" align="right">
-        <template slot-scope="scope">{{ formatScore(scope.row.scoreValue) }}</template>
+        <template slot-scope="scope"><span class="score-highlight">{{ formatScore(scope.row.scoreValue) }}</span></template>
       </el-table-column>
       <el-table-column label="奖项" prop="awardLevel" min-width="130" show-overflow-tooltip />
       <el-table-column label="审核状态" min-width="110">
@@ -549,6 +549,12 @@ export default {
   display: flex;
   gap: 16px;
   margin-top: 12px;
+}
+
+.score-highlight {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2f6fec;
 }
 
 .danger-text {

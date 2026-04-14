@@ -69,6 +69,15 @@ public class JstScoreRecord extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 赛事名称（JOIN查出，非持久化） */
+    private String contestName;
+
+    /** 参赛人姓名（JOIN查出，非持久化） */
+    private String participantName;
+
+    /** 报名编号（JOIN查出，非持久化） */
+    private String enrollNo;
+
     public void setScoreId(Long scoreId) 
     {
         this.scoreId = scoreId;
@@ -194,9 +203,39 @@ public class JstScoreRecord extends BaseEntity
         this.delFlag = delFlag;
     }
 
-    public String getDelFlag() 
+    public String getDelFlag()
     {
         return delFlag;
+    }
+
+    public void setContestName(String contestName)
+    {
+        this.contestName = contestName;
+    }
+
+    public String getContestName()
+    {
+        return contestName;
+    }
+
+    public void setParticipantName(String participantName)
+    {
+        this.participantName = participantName;
+    }
+
+    public String getParticipantName()
+    {
+        return participantName;
+    }
+
+    public void setEnrollNo(String enrollNo)
+    {
+        this.enrollNo = enrollNo;
+    }
+
+    public String getEnrollNo()
+    {
+        return enrollNo;
     }
 
     @Override

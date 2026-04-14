@@ -73,6 +73,9 @@ public class JstPaymentRecord extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 订单编号（JOIN查出，非持久化） */
+    private String orderNo;
+
     public void setPaymentId(Long paymentId) 
     {
         this.paymentId = paymentId;
@@ -208,9 +211,19 @@ public class JstPaymentRecord extends BaseEntity
         this.delFlag = delFlag;
     }
 
-    public String getDelFlag() 
+    public String getDelFlag()
     {
         return delFlag;
+    }
+
+    public void setOrderNo(String orderNo)
+    {
+        this.orderNo = orderNo;
+    }
+
+    public String getOrderNo()
+    {
+        return orderNo;
     }
 
     @Override

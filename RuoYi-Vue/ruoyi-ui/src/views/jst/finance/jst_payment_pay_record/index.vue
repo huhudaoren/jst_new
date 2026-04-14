@@ -4,7 +4,7 @@
       <div>
         <p class="hero-eyebrow">财务中心</p>
         <h2>打款记录</h2>
-        <p class="hero-desc">查看平台对渠道方和赛事方的打款记录，支持按单号、类型、时间筛选。</p>
+        <p class="hero-desc">查看所有对外打款记录</p>
       </div>
       <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
     </div>
@@ -63,12 +63,17 @@
         </template>
       </el-table-column>
       <el-table-column label="目标ID" prop="targetId" width="80" />
+      <el-table-column label="审核状态" min-width="100">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.jst_audit_status" :value="scope.row.status" />
+        </template>
+      </el-table-column>
       <el-table-column label="打款金额" min-width="130" align="right">
         <template slot-scope="scope"><strong class="amount-brand">{{ formatMoney(scope.row.amount) }}</strong></template>
       </el-table-column>
       <el-table-column label="打款账户" prop="payAccount" min-width="160" show-overflow-tooltip />
-      <el-table-column label="打款时间" min-width="160">
-        <template slot-scope="scope">{{ parseTime(scope.row.payTime) || '--' }}</template>
+      <el-table-column label="打款时间" min-width="150">
+        <template slot-scope="scope">{{ parseTime(scope.row.payTime, '{y}-{m}-{d} {h}:{i}') || '--' }}</template>
       </el-table-column>
       <el-table-column label="操作" width="80" fixed="right">
         <template slot-scope="scope">
@@ -109,6 +114,7 @@ import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 export default {
   name: 'PaymentPayRecordManage',
+  dicts: ['jst_audit_status'],
   data() {
     return {
       loading: false,

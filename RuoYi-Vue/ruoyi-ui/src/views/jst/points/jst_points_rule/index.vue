@@ -1,6 +1,15 @@
 <template>
-  <div class="app-container">
-    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px">
+  <div class="app-container points-rule-page">
+    <div class="page-hero">
+      <div>
+        <p class="hero-eyebrow">积分管理</p>
+        <h2>积分规则</h2>
+        <p class="hero-desc">配置积分获取与消耗规则，支持按行为和角色定义奖励。</p>
+      </div>
+      <el-button type="primary" icon="el-icon-refresh" :loading="loading" @click="getList">刷新</el-button>
+    </div>
+
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
       <el-form-item label="规则类型" prop="ruleType">
         <el-select v-model="queryParams.ruleType" placeholder="全部" clearable>
           <el-option label="积分规则" value="points" />
@@ -40,7 +49,7 @@
           </div>
           <div class="mobile-card__meta">
             <span>行为：{{ sourceTypeLabel(row.sourceType) }}</span>
-            <span>模式：{{ row.rewardMode }}</span>
+            <span>模式：{{ rewardModeLabel(row.rewardMode) }}</span>
             <span>数值：{{ row.rewardValue }}</span>
           </div>
           <div class="mobile-card__actions">
@@ -62,7 +71,9 @@
       <el-table-column label="来源行为" min-width="120">
         <template slot-scope="{ row }">{{ sourceTypeLabel(row.sourceType) }}</template>
       </el-table-column>
-      <el-table-column label="模式" prop="rewardMode" width="90" />
+      <el-table-column label="奖励模式" width="100">
+        <template slot-scope="{ row }">{{ rewardModeLabel(row.rewardMode) }}</template>
+      </el-table-column>
       <el-table-column label="数值" prop="rewardValue" min-width="100" align="right" />
       <el-table-column label="适用角色" prop="applicableRole" min-width="110" />
       <el-table-column label="生效时间" min-width="150">
@@ -218,6 +229,10 @@ export default {
       const match = SOURCE_TYPE_OPTIONS.find(item => item.value === sourceType)
       return match ? match.label : sourceType || '--'
     },
+    rewardModeLabel(mode) {
+      const map = { fixed: '固定值', rate: '比例' }
+      return map[mode] || mode || '--'
+    },
     getList() {
       this.loading = true
       listJst_points_rule(this.queryParams).then(res => {
@@ -301,6 +316,50 @@ export default {
 </script>
 
 <style scoped>
+.points-rule-page {
+  background: #f6f8fb;
+  min-height: calc(100vh - 84px);
+}
+
+.page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  margin-bottom: 18px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.hero-eyebrow {
+  margin: 0 0 8px;
+  color: #2f6fec;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.page-hero h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.hero-desc {
+  margin: 8px 0 0;
+  color: #6f7b8f;
+}
+
+.query-panel {
+  padding: 16px 16px 0;
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
 .mobile-card-list {
   padding: 0 4px;
 }
@@ -341,5 +400,45 @@ export default {
 .mobile-card__actions {
   display: flex;
   gap: 6px;
+}
+
+@media (max-width: 768px) {
+  .points-rule-page {
+    padding: 12px;
+  }
+
+  .page-hero {
+    display: block;
+    padding: 18px;
+  }
+
+  .page-hero .el-button {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 16px;
+  }
+
+  .page-hero h2 {
+    font-size: 20px;
+  }
+
+  .query-panel {
+    padding-bottom: 8px;
+  }
+
+  .query-panel >>> .el-form-item {
+    display: block;
+    margin-right: 0;
+  }
+
+  .query-panel >>> .el-form-item__content,
+  .query-panel >>> .el-select,
+  .query-panel >>> .el-input {
+    width: 100%;
+  }
+
+  .mobile-card__actions .el-button {
+    min-height: 44px;
+  }
 }
 </style>
