@@ -123,7 +123,7 @@ const permission = {
         getRouters().then(res => {
           const sdata = JSON.parse(JSON.stringify(res.data))
           const rdata = JSON.parse(JSON.stringify(res.data))
-          const sidebarRoutes = groupJstRootChildren(dedupeJstRootRoutes(filterAsyncRouter(sdata)))
+          const sidebarRoutes = dedupeJstRootRoutes(filterAsyncRouter(sdata))
           const rewriteRoutes = dedupeJstRootRoutes(filterAsyncRouter(rdata, false, true))
           const asyncRoutes = filterDynamicRoutes(dynamicRoutes)
           rewriteRoutes.push({ path: '*', redirect: '/404', hidden: true })
