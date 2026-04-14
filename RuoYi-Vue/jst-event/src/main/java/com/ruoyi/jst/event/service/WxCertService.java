@@ -2,6 +2,7 @@ package com.ruoyi.jst.event.service;
 
 import com.ruoyi.jst.event.dto.PublicCertVerifyQueryDTO;
 import com.ruoyi.jst.event.vo.PublicCertVerifyVO;
+import com.ruoyi.jst.event.vo.WxCertDetailVO;
 import com.ruoyi.jst.event.vo.WxCertVO;
 
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.List;
 public interface WxCertService {
 
     List<WxCertVO> selectMyCerts(Long userId);
+
+    WxCertDetailVO selectCertDetail(Long userId, Long certId);
 
     PublicCertVerifyVO verifyPublicCert(PublicCertVerifyQueryDTO query);
 }

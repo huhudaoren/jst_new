@@ -34,10 +34,40 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="bannerImage"    column="banner_image"    />
+        <result property="totalQuota"    column="total_quota"    />
+        <result property="perUserLimit"    column="per_user_limit"    />
+        <result property="scorePublishMode"    column="score_publish_mode"    />
+        <result property="certIssueMode"    column="cert_issue_mode"    />
+        <result property="writeoffMode"    column="writeoff_mode"    />
+        <result property="needSignIn"    column="need_sign_in"    />
+        <result property="teamMinSize"    column="team_min_size"    />
+        <result property="teamMaxSize"    column="team_max_size"    />
+        <result property="teamLeaderFields"    column="team_leader_fields"    />
+        <result property="teamMemberFields"    column="team_member_fields"    />
+        <result property="scorePublishTime"    column="score_publish_time"    />
+        <result property="aftersaleDeadline"    column="aftersale_deadline"    />
+        <result property="organizer"    column="organizer"    />
+        <result property="coOrganizer"    column="co_organizer"    />
+        <result property="eventAddress"    column="event_address"    />
+        <result property="appointmentCapacity"    column="appointment_capacity"    />
+        <result property="writeoffConfig"    column="writeoff_config"    />
+        <result property="allowRepeatAppointment"    column="allow_repeat_appointment"    />
+        <result property="allowAppointmentRefund"    column="allow_appointment_refund"    />
     </resultMap>
 
     <sql id="selectJstContestVo">
-        select contest_id, contest_name, source_type, partner_id, category, group_levels, cover_image, description, enroll_start_time, enroll_end_time, event_start_time, event_end_time, price, support_channel_enroll, support_points_deduct, support_appointment, cert_rule_json, score_rule_json, form_template_id, aftersale_days, audit_status, status, created_user_id, create_by, create_time, update_by, update_time, remark, del_flag from jst_contest
+        select contest_id, contest_name, source_type, partner_id, category, group_levels, cover_image, description,
+        enroll_start_time, enroll_end_time, event_start_time, event_end_time, price,
+        support_channel_enroll, support_points_deduct, support_appointment,
+        appointment_capacity, writeoff_config, allow_repeat_appointment, allow_appointment_refund,
+        cert_rule_json, score_rule_json, form_template_id, aftersale_days,
+        banner_image, total_quota, per_user_limit, score_publish_mode, cert_issue_mode,
+        writeoff_mode, need_sign_in, team_min_size, team_max_size,
+        team_leader_fields, team_member_fields, score_publish_time, aftersale_deadline,
+        organizer, co_organizer, event_address,
+        audit_status, status, created_user_id, create_by, create_time, update_by, update_time, remark, del_flag
+        from jst_contest
     </sql>
 
     <select id="selectJstContestList" parameterType="JstContest" resultMap="JstContestResult">

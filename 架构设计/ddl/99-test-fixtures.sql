@@ -555,6 +555,42 @@ INSERT INTO jst_contest (
  '2026-06-01 09:00:00', '2026-06-20 18:00:00', '2026-06-25 09:00:00', '2026-06-26 18:00:00', 0.00,
  0, 0, 0, '{}', '{}', NULL, 7, 'draft', 'not_started', 9102, 'fixture', NOW(), '0');
 
+-- REFACTOR: 给 8201 赛事追加团队报名配置 + 预约时间段
+UPDATE jst_contest SET
+  team_min_size = 2, team_max_size = 5,
+  team_leader_fields = 'name,phone,school', team_member_fields = 'name,phone',
+  support_appointment = 1, appointment_capacity = 100,
+  banner_image = 'https://fixture.example.com/f7-banner.jpg',
+  organizer = '测试主办方', co_organizer = '测试协办方', event_address = '北京市朝阳区测试路1号'
+WHERE contest_id = 8201;
+
+-- REFACTOR: 新增团队赛事 fixture（8206，专门用于团队报名测试）
+INSERT INTO jst_contest (
+    contest_id, contest_name, source_type, partner_id, category, group_levels, cover_image,
+    banner_image, description, enroll_start_time, enroll_end_time, event_start_time, event_end_time,
+    price, support_channel_enroll, support_points_deduct, support_appointment,
+    team_min_size, team_max_size, team_leader_fields, team_member_fields,
+    cert_rule_json, score_rule_json, form_template_id, aftersale_days,
+    audit_status, status, created_user_id, create_by, create_time, del_flag
+) SELECT 8206, '测试_团队报名赛事', 'partner', 8101, 'sport', '小学组,初中组',
+  'https://fixture.example.com/team-contest.jpg', 'https://fixture.example.com/team-banner.jpg',
+  '团队报名测试赛事，支持2-5人团队',
+  '2026-04-01 09:00:00', '2026-06-01 18:00:00', '2026-06-10 09:00:00', '2026-06-12 18:00:00',
+  50.00, 1, 0, 1, 2, 5, 'name,phone,idCard,school', 'name,phone',
+  '{}', '{}', NULL, 7, 'online', 'enrolling', 9101, 'fixture', NOW(), '0'
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM jst_contest WHERE contest_id = 8206);
+
+-- REFACTOR: 为 8206 赛事新增预约时间段
+INSERT INTO jst_appointment_slot (contest_id, slot_date, start_time, end_time, venue, capacity, booked_count, status, create_by, create_time, del_flag)
+SELECT 8206, '2026-06-10', '09:00:00', '10:00:00', 'A厅', 20, 0, 1, 'fixture', NOW(), '0' FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM jst_appointment_slot WHERE contest_id = 8206 AND start_time = '09:00:00' AND slot_date = '2026-06-10');
+INSERT INTO jst_appointment_slot (contest_id, slot_date, start_time, end_time, venue, capacity, booked_count, status, create_by, create_time, del_flag)
+SELECT 8206, '2026-06-10', '10:00:00', '11:00:00', 'A厅', 20, 18, 1, 'fixture', NOW(), '0' FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM jst_appointment_slot WHERE contest_id = 8206 AND start_time = '10:00:00' AND slot_date = '2026-06-10');
+INSERT INTO jst_appointment_slot (contest_id, slot_date, start_time, end_time, venue, capacity, booked_count, status, create_by, create_time, del_flag)
+SELECT 8206, '2026-06-10', '14:00:00', '15:00:00', 'B厅', 15, 15, 1, 'fixture', NOW(), '0' FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM jst_appointment_slot WHERE contest_id = 8206 AND start_time = '14:00:00' AND slot_date = '2026-06-10');
+
 -- =====================================================================
 -- F8 jst-event 动态表单模板测试数据-- 涉及表：jst_enroll_form_template / jst_contest
 -- =====================================================================

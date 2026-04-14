@@ -349,11 +349,12 @@ export default {
       uni.removeStorageSync('te_picked_participant')
     }
   },
-  // 微信分享
+  // 微信分享（带赛事名称+邀请标识，被邀请者打开后进入赛事详情页方便组队）
   onShareAppMessage() {
     return {
-      title: '邀请你加入团队报名：' + (this.contestName || '赛事'),
-      path: '/pages-sub/contest/team-enroll?contestId=' + this.contestId + '&inviteFrom=share'
+      title: '邀请你一起参加：' + (this.contestName || '赛事团队报名'),
+      path: '/pages-sub/contest/detail?contestId=' + this.contestId + '&inviteTeam=1',
+      imageUrl: this.contestCover || ''
     }
   },
   methods: {

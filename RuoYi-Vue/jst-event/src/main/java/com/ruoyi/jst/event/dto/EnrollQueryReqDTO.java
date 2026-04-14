@@ -4,6 +4,8 @@ import com.ruoyi.common.core.domain.BaseEntity;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.util.List;
+
 /**
  * 报名记录列表查询请求 DTO。
  *
@@ -30,6 +32,11 @@ public class EnrollQueryReqDTO extends BaseEntity {
     private String guardianMobile;
 
     private Long partnerId;
+
+    /**
+     * 评审老师可见赛事ID列表（内部注入，不由前端传入）。
+     */
+    private List<Long> contestIds;
 
     public Long getContestId() {
         return contestId;
@@ -85,5 +92,13 @@ public class EnrollQueryReqDTO extends BaseEntity {
 
     public void setPartnerId(Long partnerId) {
         this.partnerId = partnerId;
+    }
+
+    public List<Long> getContestIds() {
+        return contestIds;
+    }
+
+    public void setContestIds(List<Long> contestIds) {
+        this.contestIds = contestIds;
     }
 }

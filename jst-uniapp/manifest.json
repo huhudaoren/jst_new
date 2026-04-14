@@ -52,9 +52,11 @@
         /* 小程序特有相关 */
         "appid" : "wx8392685820e9e0f3",
         "setting" : {
-            "urlCheck" : false
+            "urlCheck" : false,
+            "miniprogramNpmDistDir" : ""
         },
-        "usingComponents" : true
+        "usingComponents" : true,
+        "libVersion" : "2.9.0"
     },
     "h5" : {
         "title" : "竞赛通",

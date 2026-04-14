@@ -20,7 +20,20 @@
           mode="widthFix"
           @tap="previewImage"
         />
-        <!-- 无真实图片时显示模拟证书 -->
+        <!-- Canvas 渲染证书（layoutJson 可用时） -->
+        <view v-else-if="hasLayout" class="cert-detail-page__preview-canvas">
+          <canvas
+            type="2d"
+            id="certCanvas"
+            class="cert-detail-page__cert-canvas"
+            :style="{ width: certCanvasW + 'px', height: certCanvasH + 'px' }"
+            @tap="previewCertCanvas"
+          />
+          <view v-if="rendering" class="cert-detail-page__rendering">
+            <text class="cert-detail-page__rendering-text">证书生成中...</text>
+          </view>
+        </view>
+        <!-- 无真实图片和 layoutJson 时显示模拟证书 -->
         <view v-else class="cert-detail-page__preview-mock" :class="'cert-detail-page__preview-mock--' + awardTheme">
           <view class="cert-detail-page__preview-border"></view>
           <view class="cert-detail-page__preview-inner">
@@ -100,6 +113,7 @@
 
 <script>
 import { getCertDetail } from '@/api/cert'
+import { renderCert, CERT_WIDTH, CERT_HEIGHT } from '@/utils/cert-renderer'
 import JstEmpty from '@/components/jst-empty/jst-empty.vue'
 import JstLoading from '@/components/jst-loading/jst-loading.vue'
 
@@ -110,7 +124,12 @@ export default {
       loading: false,
       certId: '',
       detail: null,
-      posterGenerating: false
+      posterGenerating: false,
+      hasLayout: false,
+      rendering: false,
+      certCanvasW: 0,
+      certCanvasH: 0,
+      canvasNode: null
     }
   },
   computed: {
@@ -149,11 +168,74 @@ export default {
       try {
         var res = await getCertDetail(this.certId)
         this.detail = res || null
+
+        // 检测 layoutJson 是否可用，触发 Canvas 渲染
+        if (this.detail && this.detail.layoutJson && !this.detail.certImageUrl) {
+          this.hasLayout = true
+          this.initCanvasSize()
+          var that = this
+          this.$nextTick(function() {
+            that.renderCertCanvas()
+          })
+        }
       } catch (e) {
         this.detail = null
       } finally {
         this.loading = false
       }
+    },
+    // 计算画布显示尺寸（保持 A4 比例）
+    initCanvasSize() {
+      var sysInfo = uni.getSystemInfoSync()
+      // 减去两侧页面边距 (24rpx * 2 = 48rpx ≈ screenWidth * 48/750)
+      var displayW = sysInfo.windowWidth - Math.round(sysInfo.windowWidth * 48 / 750)
+      var displayH = Math.round(displayW * (CERT_HEIGHT / CERT_WIDTH))
+      this.certCanvasW = displayW
+      this.certCanvasH = displayH
+    },
+    // 用 cert-renderer 将 layoutJson 渲染到 Canvas 2D
+    renderCertCanvas() {
+      var that = this
+      that.rendering = true
+      var query = uni.createSelectorQuery().in(that)
+      query.select('#certCanvas').fields({ node: true, size: true }).exec(function(res) {
+        if (!res || !res[0] || !res[0].node) {
+          console.warn('[cert-detail] Canvas 节点获取失败')
+          that.rendering = false
+          return
+        }
+        var canvas = res[0].node
+        that.canvasNode = canvas
+        var ctx = canvas.getContext('2d')
+        var dpr = uni.getSystemInfoSync().pixelRatio
+
+        // 设置画布内部分辨率（Fabric.js 原始尺寸 * DPR）
+        canvas.width = CERT_WIDTH * dpr
+        canvas.height = CERT_HEIGHT * dpr
+        ctx.scale(dpr, dpr)
+
+        var layoutData = {}
+        try {
+          layoutData = JSON.parse(that.detail.layoutJson)
+        } catch (e) {
+          console.warn('[cert-detail] layoutJson 解析失败:', e)
+          that.rendering = false
+          return
+        }
+
+        var variables = that.detail.variables || {}
+
+        renderCert(ctx, layoutData, variables, {
+          width: CERT_WIDTH,
+          height: CERT_HEIGHT,
+          canvas: canvas
+        }).then(function() {
+          that.rendering = false
+        }).catch(function(e) {
+          console.warn('[cert-detail] 证书渲染失败:', e)
+          that.rendering = false
+        })
+      })
     },
     formatDate(val) {
       if (!val) return '--'
@@ -167,6 +249,24 @@ export default {
         uni.previewImage({ urls: [this.detail.certImageUrl] })
       }
     },
+    // 预览 Canvas 渲染的证书大图
+    previewCertCanvas() {
+      var that = this
+      if (!that.canvasNode) return
+      uni.canvasToTempFilePath({
+        canvas: that.canvasNode,
+        width: that.canvasNode.width,
+        height: that.canvasNode.height,
+        destWidth: that.canvasNode.width,
+        destHeight: that.canvasNode.height,
+        success: function(res) {
+          uni.previewImage({ urls: [res.tempFilePath] })
+        },
+        fail: function() {
+          uni.showToast({ title: '预览失败', icon: 'none' })
+        }
+      })
+    },
     // 保存证书图片到相册
     saveCertToAlbum() {
       var that = this
@@ -175,10 +275,53 @@ export default {
       var imageUrl = this.detail.certImageUrl
       if (imageUrl) {
         that.downloadAndSave(imageUrl)
+      } else if (that.canvasNode && that.hasLayout) {
+        // Canvas 渲染的证书 → 导出并保存
+        that.saveCertCanvasToAlbum()
       } else {
         // 无真实图片时生成海报再保存
         that.generateAndSavePoster()
       }
+    },
+    // 将 Canvas 2D 渲染的证书导出并保存到相册
+    saveCertCanvasToAlbum() {
+      var that = this
+      uni.showLoading({ title: '保存中...' })
+      uni.canvasToTempFilePath({
+        canvas: that.canvasNode,
+        width: that.canvasNode.width,
+        height: that.canvasNode.height,
+        destWidth: that.canvasNode.width,
+        destHeight: that.canvasNode.height,
+        success: function(res) {
+          uni.saveImageToPhotosAlbum({
+            filePath: res.tempFilePath,
+            success: function() {
+              uni.hideLoading()
+              uni.showToast({ title: '已保存到相册', icon: 'success' })
+            },
+            fail: function(err) {
+              uni.hideLoading()
+              if (err.errMsg && err.errMsg.indexOf('auth deny') !== -1) {
+                uni.showModal({
+                  title: '需要相册权限',
+                  content: '请在设置中允许访问相册',
+                  confirmText: '去设置',
+                  success: function(modalRes) {
+                    if (modalRes.confirm) uni.openSetting()
+                  }
+                })
+              } else {
+                uni.showToast({ title: '保存失败', icon: 'none' })
+              }
+            }
+          })
+        },
+        fail: function() {
+          uni.hideLoading()
+          uni.showToast({ title: '导出失败', icon: 'none' })
+        }
+      })
     },
     // 下载网络图片并保存到相册
     downloadAndSave(url) {
@@ -462,6 +605,36 @@ export default {
   border-radius: $jst-radius-card;
   overflow: hidden;
   box-shadow: $jst-shadow-ring, $jst-shadow-ambient, $jst-shadow-lift;
+}
+
+// Canvas 渲染区
+.cert-detail-page__preview-canvas {
+  position: relative;
+  border-radius: $jst-radius-card;
+  overflow: hidden;
+  background: $jst-bg-card;
+}
+
+.cert-detail-page__cert-canvas {
+  display: block;
+  width: 100%;
+}
+
+.cert-detail-page__rendering {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.cert-detail-page__rendering-text {
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
 }
 
 .cert-detail-page__preview-img {

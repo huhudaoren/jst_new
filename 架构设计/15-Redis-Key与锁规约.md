@@ -105,6 +105,7 @@ jst:{domain}:{purpose}:{key1}[:{key2}]
 | `lock:org:apply:{applyId}` | 赛事方入驻审核 (F5) | wait 3s, lease 10s | PartnerApplyService.approve/reject |
 | `lock:org:channelApply:{applyId}` | 渠道认证审核 (F6) | wait 3s, lease 10s | ChannelAuthApplyService.approve |
 | `lock:enroll:submit:{userId}:{contestId}` | 报名提交 (F9) | wait 3s, lease 5s | EnrollRecordService.submit |
+| `lock:enroll:team:{userId}:{contestId}` | 团队报名并发锁 (REFACTOR-TODO-P2P3) | wait 5s, lease 10s | EnrollRecordService.submitTeam |
 | `lock:enroll:audit:{enrollId}` | 报名审核 (F9) | wait 3s, lease 5s | EnrollRecordService.audit |
 | `lock:enroll:create-order:{enrollId}` | 报名→订单 1:1 防重 (C2) | wait 3s, lease 10s | OrderService.createMixedPay |
 | `lock:order:cancel:{orderId}` | 订单取消并发保护 (C2) | wait 3s, lease 5s | OrderService.cancel |

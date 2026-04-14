@@ -36,10 +36,12 @@
         微信一键登录
       </u-button>
 
-      <u-button v-if="isDev" class="login-page__button login-page__button--dev" :loading="submitting" @click="handleMockLogin">
-        Mock 登录（测试账号）
+      <u-button v-if="isDev" class="login-page__button login-page__button--dev" :loading="submitting" @click="handleMockLogin(MOCK_1003)">
+        Mock 登录（渠道测试账号）
       </u-button>
-
+<u-button v-if="isDev" class="login-page__button login-page__button--dev" :loading="submitting" @click="handleMockLogin(MOCK_9212)">
+        Mock 登录（学生测试账号）
+      </u-button>
       <text v-if="message" class="login-page__message">{{ message }}</text>
     </view>
 
@@ -86,7 +88,7 @@ export default {
       } catch (error) {}
     },
 
-    async handleMockLogin() {
+    async handleMockLogin(mock) {
       if (this.submitting) {
         return
       }
@@ -96,7 +98,7 @@ export default {
 
       try {
         const userStore = useUserStore()
-        const res = await userStore.login('MOCK_1003')
+        const res = await userStore.login(mock)
         await this.finishLogin(res)
       } catch (error) {
         this.message = '登录失败，请稍后重试'

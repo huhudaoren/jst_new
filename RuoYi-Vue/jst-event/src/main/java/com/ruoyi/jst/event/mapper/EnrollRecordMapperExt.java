@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 报名记录扩展 Mapper。
@@ -29,6 +30,25 @@ public interface EnrollRecordMapperExt {
                               @Param("excludeEnrollId") Long excludeEnrollId);
 
     int countOwnedParticipant(@Param("participantId") Long participantId, @Param("userId") Long userId);
+
+    /**
+     * 按监护人手机号查询可复用的参赛档案ID。
+     *
+     * @param phone 监护人手机号
+     * @param name  参赛人姓名（用于优先命中）
+     * @return 参赛档案ID
+     * @关联表 jst_participant
+     */
+    Long selectParticipantIdByPhone(@Param("phone") String phone, @Param("name") String name);
+
+    /**
+     * 新增临时参赛档案。
+     *
+     * @param participant 参赛档案字段Map（insert后回填 participantId）
+     * @return 影响行数
+     * @关联表 jst_participant
+     */
+    int insertTempParticipant(Map<String, Object> participant);
 
     List<EnrollListVO> selectAdminList(@Param("query") EnrollQueryReqDTO query);
 

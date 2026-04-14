@@ -40,6 +40,7 @@ import com.ruoyi.jst.event.mapper.JstEnrollFormTemplateMapper;
 import com.ruoyi.jst.event.mapper.JstEnrollRecordMapper;
 import com.ruoyi.jst.event.mapper.JstScoreItemMapper;
 import com.ruoyi.jst.event.mapper.JstScoreRecordMapper;
+import com.ruoyi.jst.event.service.ContestReviewerService;
 import com.ruoyi.jst.event.service.EnrollRecordService;
 import com.ruoyi.jst.event.vo.EnrollDetailVO;
 import com.ruoyi.jst.event.vo.EnrollListVO;
@@ -91,6 +92,7 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
     @Autowired private JstCertRecordMapper jstCertRecordMapper;
     @Autowired private BizNoGenerateService bizNoGenerateService;
     @Autowired private JstAppointmentSlotMapper jstAppointmentSlotMapper;
+    @Autowired private ContestReviewerService contestReviewerService;
 
     /**
      * 保存报名草稿。
@@ -244,6 +246,12 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
     public List<EnrollListVO> selectAdminList(EnrollQueryReqDTO query) {
         if (query == null) query = new EnrollQueryReqDTO();
         if (isPartnerUser() && query.getPartnerId() == null) query.setPartnerId(JstLoginContext.currentPartnerId());
+        if (isPartnerUser()) {
+            List<Long> reviewerContestIds = contestReviewerService.getReviewerContestIds(currentUserId());
+            if (reviewerContestIds != null && !reviewerContestIds.isEmpty()) {
+                query.setContestIds(reviewerContestIds);
+            }
+        }
         List<EnrollListVO> list = enrollRecordMapperExt.selectAdminList(query);
         for (EnrollListVO vo : list) vo.setGuardianMobileMasked(MaskUtil.mobile(vo.getGuardianMobileMasked()));
         return list;
@@ -394,7 +402,7 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
         // TX: 团队报名提交
         Long userId = currentUserId();
         // LOCK: lock:enroll:team:{userId}:{contestId}
-        return jstLockTemplate.execute("lock:enroll:team:" + userId + ":" + req.getContestId(), 3, 5, () -> {
+        return jstLockTemplate.execute("lock:enroll:team:" + userId + ":" + req.getContestId(), 5, 10, () -> {
             JstContest contest = requireContest(req.getContestId());
             assertContestSubmittable(contest);
 
@@ -443,17 +451,19 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
             Date now = DateUtils.getNowDate();
             String teamGroupNo = snowflakeIdWorker.nextBizNo("TM");
             List<Long> enrollIds = new ArrayList<>();
+            Long leaderParticipantId = resolveTeamMemberParticipantId(req.getLeader(), operator, now);
 
             // 为队长创建报名记录
             JstEnrollRecord leaderRecord = buildTeamMemberRecord(req.getContestId(), userId,
-                    req.getLeader(), teamGroupNo, "team_leader", operator, now);
+                    req.getLeader(), leaderParticipantId, teamGroupNo, "team_leader", operator, now);
             jstEnrollRecordMapper.insertJstEnrollRecord(leaderRecord);
             enrollIds.add(leaderRecord.getEnrollId());
 
             // 为每个队员创建报名记录
             for (TeamEnrollReqDTO.TeamMemberInfo member : req.getMembers()) {
+                Long memberParticipantId = resolveTeamMemberParticipantId(member, operator, now);
                 JstEnrollRecord memberRecord = buildTeamMemberRecord(req.getContestId(), userId,
-                        member, teamGroupNo, "team_member", operator, now);
+                        member, memberParticipantId, teamGroupNo, "team_member", operator, now);
                 jstEnrollRecordMapper.insertJstEnrollRecord(memberRecord);
                 enrollIds.add(memberRecord.getEnrollId());
             }
@@ -472,12 +482,14 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
      */
     private JstEnrollRecord buildTeamMemberRecord(Long contestId, Long userId,
                                                    TeamEnrollReqDTO.TeamMemberInfo member,
+                                                   Long participantId,
                                                    String teamGroupNo, String enrollSource,
                                                    String operator, Date now) {
         JstEnrollRecord record = new JstEnrollRecord();
         record.setEnrollNo(snowflakeIdWorker.nextBizNo("EN"));
         record.setContestId(contestId);
         record.setUserId(userId);
+        record.setParticipantId(participantId);
         record.setEnrollSource(enrollSource);
         record.setMaterialStatus(EnrollMaterialStatus.SUBMITTED.dbValue());
         record.setAuditStatus(EnrollAuditStatus.PENDING.dbValue());
@@ -504,6 +516,59 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
         record.setFormSnapshotJson(JSON.toJSONString(snapshot));
         record.setRemark("团队报名[" + teamGroupNo + "]");
         return record;
+    }
+
+    /**
+     * 按手机号解析团队成员 participantId。
+     * <p>
+     * 有既有档案则直接复用；无档案则创建临时档案后返回新ID。
+     *
+     * @param member   团队成员
+     * @param operator 操作人
+     * @param now      当前时间
+     * @return participantId
+     * @关联表 jst_participant
+     */
+    private Long resolveTeamMemberParticipantId(TeamEnrollReqDTO.TeamMemberInfo member, String operator, Date now) {
+        Long participantId = enrollRecordMapperExt.selectParticipantIdByPhone(
+                StringUtils.trim(member.getPhone()),
+                StringUtils.trim(member.getName()));
+        if (participantId != null) {
+            return participantId;
+        }
+        return createTempParticipant(member, operator, now);
+    }
+
+    /**
+     * 创建临时参赛档案（复用 E1-CH-7 批量创建逻辑字段）。
+     *
+     * @param member   团队成员
+     * @param operator 操作人
+     * @param now      当前时间
+     * @return 新建 participantId
+     * @关联表 jst_participant
+     */
+    private Long createTempParticipant(TeamEnrollReqDTO.TeamMemberInfo member, String operator, Date now) {
+        Map<String, Object> participant = new HashMap<>();
+        participant.put("participantType", "temporary_participant");
+        participant.put("name", StringUtils.trim(member.getName()));
+        participant.put("gender", 0);
+        participant.put("school", StringUtils.trimToNull(member.getSchool()));
+        participant.put("className", null);
+        participant.put("guardianMobile", StringUtils.trim(member.getPhone()));
+        participant.put("guardianName", null);
+        participant.put("claimStatus", "unclaimed");
+        participant.put("visibleScope", "channel_only");
+        participant.put("createBy", operator);
+        participant.put("createTime", now);
+        participant.put("updateBy", operator);
+        participant.put("updateTime", now);
+        int inserted = enrollRecordMapperExt.insertTempParticipant(participant);
+        if (inserted <= 0 || toLong(participant.get("participantId")) == null) {
+            throw new ServiceException("创建临时参赛档案失败",
+                    BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
+        }
+        return toLong(participant.get("participantId"));
     }
 
     /**
@@ -822,6 +887,17 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
 
     private String defaultDelFlag(String delFlag) {
         return StringUtils.isBlank(delFlag) ? "0" : delFlag;
+    }
+
+    private Long toLong(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        String text = String.valueOf(value);
+        return StringUtils.isBlank(text) ? null : Long.valueOf(text);
     }
 
     private Integer toInteger(Long value) {

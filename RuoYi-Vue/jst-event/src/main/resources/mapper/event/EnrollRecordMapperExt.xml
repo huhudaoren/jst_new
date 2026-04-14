@@ -127,6 +127,29 @@
             or m.user_id = #{userId})
     </select>
 
+    <select id="selectParticipantIdByPhone" resultType="java.lang.Long">
+        select p.participant_id
+        from jst_participant p
+        where p.guardian_mobile = #{phone}
+          and p.del_flag = '0'
+        order by
+            case when #{name} is not null and #{name} != '' and p.name = #{name} then 0 else 1 end,
+            p.participant_id asc
+        limit 1
+    </select>
+
+    <insert id="insertTempParticipant" parameterType="map" useGeneratedKeys="true" keyProperty="participantId">
+        insert into jst_participant (
+            participant_type, name, gender, school, class_name,
+            guardian_mobile, guardian_name, claim_status, visible_scope,
+            create_by, create_time, update_by, update_time, del_flag
+        ) values (
+            #{participantType}, #{name}, #{gender}, #{school}, #{className},
+            #{guardianMobile}, #{guardianName}, #{claimStatus}, #{visibleScope},
+            #{createBy}, #{createTime}, #{updateBy}, #{updateTime}, '0'
+        )
+    </insert>
+
     <select id="selectAdminList" resultMap="EnrollListResult">
         select er.enroll_id, er.enroll_no, er.contest_id, c.contest_name, c.partner_id, er.participant_id,
                p.name as participant_name, p.guardian_mobile, er.material_status, er.audit_status,
@@ -141,6 +164,12 @@
             </if>
             <if test="query != null and query.contestId != null">
                 and er.contest_id = #{query.contestId}
+            </if>
+            <if test="query != null and query.contestIds != null and query.contestIds.size() > 0">
+                and er.contest_id in
+                <foreach collection="query.contestIds" item="contestId" open="(" separator="," close=")">
+                    #{contestId}
+                </foreach>
             </if>
             <if test="query != null and query.auditStatus != null and query.auditStatus != ''">
                 and er.audit_status = #{query.auditStatus}

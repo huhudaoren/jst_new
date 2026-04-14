@@ -288,7 +288,11 @@ export default {
     }
   },
   onLoad(query) {
-    this.contestId = query.id || ''
+    this.contestId = query.contestId || query.id || ''
+    // 微信团队邀请落地：显示邀请提示并高亮团队报名入口
+    if (query.inviteTeam === '1') {
+      uni.showToast({ title: '好友邀请你参加团队报名', icon: 'none', duration: 3000 })
+    }
     this.fetchDetail()
   },
   // [visual-effect] 滚动视差 + 粘性导航

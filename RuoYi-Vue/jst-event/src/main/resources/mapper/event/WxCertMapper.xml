@@ -28,6 +28,35 @@
         order by cr.issue_time desc, cr.cert_id desc
     </select>
 
+    <select id="selectCertDetail" resultType="com.ruoyi.jst.event.vo.WxCertDetailVO">
+        select cr.cert_id as certId,
+               cr.cert_no as certNo,
+               ifnull(t.template_name, '获奖证书') as templateName,
+               t.layout_json as layoutJson,
+               t.bg_image as bgImage,
+               cr.issue_status as issueStatus,
+               cr.create_time as createTime,
+               cr.issue_time as issueTime,
+               cr.issue_time as issueDate,
+               cr.cert_file_url as certImageUrl,
+               cr.cert_file_url as certFileUrl,
+               c.contest_name as contestName,
+               c.category as category,
+               c.group_levels as groupLevel,
+               s.award_level as awardLevel,
+               s.score_value as scoreValue,
+               er.form_snapshot_json as formSnapshotJson
+        from jst_cert_record cr
+                 left join jst_cert_template t on t.template_id = cr.template_id and t.del_flag = '0'
+                 left join jst_enroll_record er on er.enroll_id = cr.enroll_id and er.del_flag = '0'
+                 left join jst_contest c on c.contest_id = cr.contest_id and c.del_flag = '0'
+                 left join jst_score_record s on s.score_id = cr.score_id and s.del_flag = '0'
+        where cr.del_flag = '0'
+          and cr.cert_id = #{certId}
+          and cr.user_id = #{userId}
+        limit 1
+    </select>
+
     <select id="selectPublicCertVerify" parameterType="com.ruoyi.jst.event.dto.PublicCertVerifyQueryDTO"
             resultType="com.ruoyi.jst.event.vo.PublicCertVerifyVO">
         select cr.cert_no as certNo,
