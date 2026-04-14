@@ -103,6 +103,24 @@ public interface PartnerCertMapper {
      * @param updateTime 更新时间
      * @return 更新行数
      */
+    /**
+     * 按报名ID统计已有证书数量。
+     *
+     * @param enrollId 报名ID
+     * @return 数量
+     */
+    int countCertByEnrollId(@Param("enrollId") Long enrollId);
+
+    /**
+     * 按报名ID列表查询已审核通过的报名记录引用信息。
+     *
+     * @param contestId 赛事ID
+     * @param enrollIds 报名ID列表
+     * @return 报名引用列表
+     */
+    List<CertScoreRefVO> selectApprovedEnrollsForCert(@Param("contestId") Long contestId,
+                                                       @Param("enrollIds") List<Long> enrollIds);
+
     int updateIssueStatusByExpected(@Param("certId") Long certId,
                                     @Param("expectedIssueStatus") String expectedIssueStatus,
                                     @Param("targetIssueStatus") String targetIssueStatus,

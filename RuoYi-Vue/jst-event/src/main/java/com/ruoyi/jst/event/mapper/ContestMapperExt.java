@@ -69,4 +69,30 @@ public interface ContestMapperExt {
                                                               @Param("limit") Integer limit);
 
     List<ContestRecommendCourseVO> selectHotCourses(@Param("limit") Integer limit);
+
+    /**
+     * 查询赛事是否有已发布成绩。
+     *
+     * @param contestId 赛事ID
+     * @return 1=有已发布成绩，0=无
+     */
+    int countPublishedScores(@Param("contestId") Long contestId);
+
+    /**
+     * 查询用户在该赛事的总分。
+     *
+     * @param contestId 赛事ID
+     * @param userId    用户ID
+     * @return 总分，无成绩返回 null
+     */
+    java.math.BigDecimal selectUserTotalScore(@Param("contestId") Long contestId, @Param("userId") Long userId);
+
+    /**
+     * 查询用户在该赛事的证书记录。
+     *
+     * @param contestId 赛事ID
+     * @param userId    用户ID
+     * @return 证书记录，无则 null
+     */
+    com.ruoyi.jst.event.domain.JstCertRecord selectUserCert(@Param("contestId") Long contestId, @Param("userId") Long userId);
 }

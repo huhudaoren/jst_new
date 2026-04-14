@@ -14,6 +14,7 @@ import com.ruoyi.jst.common.lock.JstLockTemplate;
 import com.ruoyi.jst.common.security.SecurityCheck;
 import com.ruoyi.jst.common.util.MaskUtil;
 import com.ruoyi.jst.common.service.BizNoGenerateService;
+import com.ruoyi.jst.event.domain.JstAppointmentSlot;
 import com.ruoyi.jst.event.domain.JstCertRecord;
 import com.ruoyi.jst.event.domain.JstContest;
 import com.ruoyi.jst.event.domain.JstEnrollFormTemplate;
@@ -26,11 +27,13 @@ import com.ruoyi.jst.event.dto.EnrollQueryReqDTO;
 import com.ruoyi.jst.event.dto.EnrollSubmitDTO;
 import com.ruoyi.jst.event.dto.EnrollSupplementDTO;
 import com.ruoyi.jst.event.dto.ScoreItemReqDTO;
+import com.ruoyi.jst.event.dto.TeamEnrollReqDTO;
 import com.ruoyi.jst.event.enums.ContestAuditStatus;
 import com.ruoyi.jst.event.enums.ContestBizStatus;
 import com.ruoyi.jst.event.enums.EnrollAuditStatus;
 import com.ruoyi.jst.event.enums.EnrollMaterialStatus;
 import com.ruoyi.jst.event.mapper.EnrollRecordMapperExt;
+import com.ruoyi.jst.event.mapper.JstAppointmentSlotMapper;
 import com.ruoyi.jst.event.mapper.JstCertRecordMapper;
 import com.ruoyi.jst.event.mapper.JstContestMapper;
 import com.ruoyi.jst.event.mapper.JstEnrollFormTemplateMapper;
@@ -41,6 +44,7 @@ import com.ruoyi.jst.event.service.EnrollRecordService;
 import com.ruoyi.jst.event.vo.EnrollDetailVO;
 import com.ruoyi.jst.event.vo.EnrollListVO;
 import com.ruoyi.jst.event.vo.EnrollSubmitResVO;
+import com.ruoyi.jst.event.vo.TeamEnrollResVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -86,6 +90,7 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
     @Autowired private JstScoreRecordMapper jstScoreRecordMapper;
     @Autowired private JstCertRecordMapper jstCertRecordMapper;
     @Autowired private BizNoGenerateService bizNoGenerateService;
+    @Autowired private JstAppointmentSlotMapper jstAppointmentSlotMapper;
 
     /**
      * 保存报名草稿。
@@ -367,6 +372,138 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
             count++;
         }
         return count;
+    }
+
+    /**
+     * 团队报名提交。
+     * <p>
+     * 1. 校验赛事支持团队报名（team_min_size > 0）
+     * 2. 校验团队人数范围
+     * 3. 校验手机号不重复
+     * 4. 为队长和每个队员创建报名记录
+     * 5. 如有 slotId，乐观锁扣减预约时段容量
+     *
+     * @param req 团队报名请求
+     * @return 团队报名结果
+     * @关联表 jst_enroll_record, jst_contest, jst_appointment_slot
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @OperateLog(module = "赛事", action = "TEAM_ENROLL_SUBMIT", target = "#{req.contestId}", recordResult = true)
+    public TeamEnrollResVO submitTeam(TeamEnrollReqDTO req) {
+        // TX: 团队报名提交
+        Long userId = currentUserId();
+        // LOCK: lock:enroll:team:{userId}:{contestId}
+        return jstLockTemplate.execute("lock:enroll:team:" + userId + ":" + req.getContestId(), 3, 5, () -> {
+            JstContest contest = requireContest(req.getContestId());
+            assertContestSubmittable(contest);
+
+            // 校验赛事支持团队报名
+            if (contest.getTeamMinSize() == null || contest.getTeamMinSize() <= 0) {
+                throw new ServiceException(BizErrorCode.JST_EVENT_TEAM_NOT_SUPPORTED.message(),
+                        BizErrorCode.JST_EVENT_TEAM_NOT_SUPPORTED.code());
+            }
+
+            // 校验团队人数（队长 + 队员）
+            int teamSize = 1 + req.getMembers().size();
+            if (teamSize < contest.getTeamMinSize()) {
+                throw new ServiceException("团队人数不足，最少需要 " + contest.getTeamMinSize() + " 人",
+                        BizErrorCode.JST_EVENT_TEAM_SIZE_INVALID.code());
+            }
+            if (contest.getTeamMaxSize() != null && contest.getTeamMaxSize() > 0 && teamSize > contest.getTeamMaxSize()) {
+                throw new ServiceException("团队人数超出，最多允许 " + contest.getTeamMaxSize() + " 人",
+                        BizErrorCode.JST_EVENT_TEAM_SIZE_INVALID.code());
+            }
+
+            // 校验手机号不重复
+            Set<String> phones = new LinkedHashSet<>();
+            phones.add(req.getLeader().getPhone());
+            for (TeamEnrollReqDTO.TeamMemberInfo member : req.getMembers()) {
+                if (!phones.add(member.getPhone())) {
+                    throw new ServiceException("团队成员手机号重复: " + member.getPhone(),
+                            BizErrorCode.JST_EVENT_TEAM_PHONE_DUPLICATE.code());
+                }
+            }
+
+            // 如有 slotId，乐观锁扣减预约时段容量
+            if (req.getSlotId() != null) {
+                JstAppointmentSlot slot = jstAppointmentSlotMapper.selectBySlotId(req.getSlotId());
+                if (slot == null || !Objects.equals(slot.getContestId(), req.getContestId())) {
+                    throw new ServiceException("预约时段不存在或不属于当前赛事",
+                            BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+                }
+                int updated = jstAppointmentSlotMapper.incrementBookedCount(req.getSlotId(), teamSize);
+                if (updated == 0) {
+                    throw new ServiceException(BizErrorCode.JST_EVENT_SLOT_CAPACITY_FULL.message(),
+                            BizErrorCode.JST_EVENT_SLOT_CAPACITY_FULL.code());
+                }
+            }
+
+            String operator = currentOperatorName();
+            Date now = DateUtils.getNowDate();
+            String teamGroupNo = snowflakeIdWorker.nextBizNo("TM");
+            List<Long> enrollIds = new ArrayList<>();
+
+            // 为队长创建报名记录
+            JstEnrollRecord leaderRecord = buildTeamMemberRecord(req.getContestId(), userId,
+                    req.getLeader(), teamGroupNo, "team_leader", operator, now);
+            jstEnrollRecordMapper.insertJstEnrollRecord(leaderRecord);
+            enrollIds.add(leaderRecord.getEnrollId());
+
+            // 为每个队员创建报名记录
+            for (TeamEnrollReqDTO.TeamMemberInfo member : req.getMembers()) {
+                JstEnrollRecord memberRecord = buildTeamMemberRecord(req.getContestId(), userId,
+                        member, teamGroupNo, "team_member", operator, now);
+                jstEnrollRecordMapper.insertJstEnrollRecord(memberRecord);
+                enrollIds.add(memberRecord.getEnrollId());
+            }
+
+            TeamEnrollResVO vo = new TeamEnrollResVO();
+            vo.setLeaderEnrollId(leaderRecord.getEnrollId());
+            vo.setLeaderEnrollNo(leaderRecord.getEnrollNo());
+            vo.setEnrollIds(enrollIds);
+            vo.setTeamSize(teamSize);
+            return vo;
+        });
+    }
+
+    /**
+     * 构建团队成员报名记录。
+     */
+    private JstEnrollRecord buildTeamMemberRecord(Long contestId, Long userId,
+                                                   TeamEnrollReqDTO.TeamMemberInfo member,
+                                                   String teamGroupNo, String enrollSource,
+                                                   String operator, Date now) {
+        JstEnrollRecord record = new JstEnrollRecord();
+        record.setEnrollNo(snowflakeIdWorker.nextBizNo("EN"));
+        record.setContestId(contestId);
+        record.setUserId(userId);
+        record.setEnrollSource(enrollSource);
+        record.setMaterialStatus(EnrollMaterialStatus.SUBMITTED.dbValue());
+        record.setAuditStatus(EnrollAuditStatus.PENDING.dbValue());
+        record.setSubmitTime(now);
+        record.setDelFlag("0");
+        record.setCreateBy(operator);
+        record.setCreateTime(now);
+        record.setUpdateBy(operator);
+        record.setUpdateTime(now);
+        // 将成员信息存入 form_snapshot_json
+        Map<String, Object> snapshot = new LinkedHashMap<>();
+        snapshot.put("teamGroupNo", teamGroupNo);
+        snapshot.put("enrollSource", enrollSource);
+        Map<String, Object> formData = new LinkedHashMap<>();
+        formData.put("name", member.getName());
+        formData.put("phone", member.getPhone());
+        if (StringUtils.isNotBlank(member.getIdCard())) {
+            formData.put("idCard", member.getIdCard());
+        }
+        if (StringUtils.isNotBlank(member.getSchool())) {
+            formData.put("school", member.getSchool());
+        }
+        snapshot.put("formData", formData);
+        record.setFormSnapshotJson(JSON.toJSONString(snapshot));
+        record.setRemark("团队报名[" + teamGroupNo + "]");
+        return record;
     }
 
     /**

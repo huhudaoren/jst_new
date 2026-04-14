@@ -210,6 +210,32 @@
           and del_flag = '0'
     </select>
 
+    <select id="countCertByEnrollId" resultType="int">
+        select count(1)
+        from jst_cert_record
+        where enroll_id = #{enrollId}
+          and issue_status != 'voided'
+          and del_flag = '0'
+    </select>
+
+    <select id="selectApprovedEnrollsForCert" resultType="com.ruoyi.jst.event.vo.CertScoreRefVO">
+        select
+            er.enroll_id AS enrollId,
+            er.contest_id AS contestId,
+            er.user_id AS userId,
+            er.participant_id AS participantId,
+            sr.score_id AS scoreId
+        from jst_enroll_record er
+        left join jst_score_record sr on sr.enroll_id = er.enroll_id and sr.del_flag = '0'
+        where er.contest_id = #{contestId}
+          and er.audit_status = 'approved'
+          and er.del_flag = '0'
+          and er.enroll_id in
+          <foreach collection="enrollIds" item="id" open="(" separator="," close=")">
+              #{id}
+          </foreach>
+    </select>
+
     <insert id="insertCert" parameterType="com.ruoyi.jst.event.domain.JstCertRecord"
             useGeneratedKeys="true" keyProperty="certId">
         insert into jst_cert_record (

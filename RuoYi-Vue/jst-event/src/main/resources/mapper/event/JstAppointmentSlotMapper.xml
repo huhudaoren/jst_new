@@ -91,4 +91,25 @@
         delete from jst_appointment_slot where contest_id = #{contestId}
     </delete>
 
+    <!-- 乐观锁增加已预约人数，capacity >= booked_count + increment 才更新 -->
+    <update id="incrementBookedCount">
+        update jst_appointment_slot
+        set booked_count = booked_count + #{increment},
+            update_time = now()
+        where slot_id = #{slotId}
+          and del_flag = '0'
+          and status = 1
+          and capacity >= booked_count + #{increment}
+    </update>
+
+    <!-- 查询赛事所有启用时间段列表 -->
+    <select id="selectEnabledByContestId" resultMap="JstAppointmentSlotResult">
+        select <include refid="BaseColumns"/>
+        from jst_appointment_slot
+        where contest_id = #{contestId}
+          and status = 1
+          and del_flag = '0'
+        order by slot_date asc, start_time asc, slot_id asc
+    </select>
+
 </mapper>

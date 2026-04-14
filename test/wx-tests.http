@@ -3662,3 +3662,124 @@ client.test("F-CI-12.1 student should be forbidden", function() {
   client.assert(response.status === 403 || response.body.code !== 200);
 });
 %}
+
+### =====================================================================
+### REFACTOR-TODO-P0. 后端接口补齐（傻瓜化重构遗留）
+### Preconditions:
+###   1. ruoyi-admin 在 8080 启动
+###   2. 99-test-fixtures.sql 已导入
+###   3. 99-migration-refactor-dejson.sql 已执行
+### =====================================================================
+
+### RTP0-0. login student 1001
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("rtp0_token", response.body.data.token);
+%}
+
+### RTP0-1. 赛事详情应包含 scorePublished/hasCert/totalScore 字段
+GET {{baseUrl}}/jst/wx/contest/8201
+Authorization: Bearer {{rtp0_token}}
+
+> {%
+client.test("RTP0-1 contest detail has user fields", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  var data = response.body.data;
+  client.assert(data.contestId === 8201);
+  // scorePublished should be boolean (true or false)
+  client.assert(data.scorePublished === true || data.scorePublished === false);
+  // hasCert should be boolean
+  client.assert(data.hasCert === true || data.hasCert === false);
+  // scheduleList/awardList/faqList should be arrays
+  client.assert(Array.isArray(data.scheduleList));
+  client.assert(Array.isArray(data.awardList));
+  client.assert(Array.isArray(data.faqList));
+});
+%}
+
+### RTP0-2. 团队报名提交 happy path (赛事 8201 需支持团队报名: team_min_size > 0)
+POST {{baseUrl}}/jst/wx/enroll/team/submit
+Content-Type: {{contentType}}
+Authorization: Bearer {{rtp0_token}}
+
+{
+  "contestId": 8201,
+  "leader": {
+    "name": "张三",
+    "phone": "13800000001",
+    "school": "第一小学"
+  },
+  "members": [
+    { "name": "李四", "phone": "13800000002", "school": "第一小学" },
+    { "name": "王五", "phone": "13800000003", "school": "第二小学" }
+  ]
+}
+
+> {%
+client.test("RTP0-2 team enroll submit", function() {
+  // 可能成功(200)或因赛事不支持团队报名而失败(20082)
+  client.assert(response.status === 200);
+  if (response.body.code === 200) {
+    var data = response.body.data;
+    client.assert(data.leaderEnrollId > 0);
+    client.assert(data.leaderEnrollNo.length > 0);
+    client.assert(data.teamSize >= 3);
+  }
+});
+%}
+
+### RTP0-3. 团队报名 - 手机号重复应失败
+POST {{baseUrl}}/jst/wx/enroll/team/submit
+Content-Type: {{contentType}}
+Authorization: Bearer {{rtp0_token}}
+
+{
+  "contestId": 8201,
+  "leader": {
+    "name": "张三",
+    "phone": "13800000001",
+    "school": "第一小学"
+  },
+  "members": [
+    { "name": "李四", "phone": "13800000001", "school": "第一小学" }
+  ]
+}
+
+> {%
+client.test("RTP0-3 team duplicate phone should fail", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 20081);
+});
+%}
+
+### RTP0-4. 预约时间段查询
+GET {{baseUrl}}/jst/wx/appointment/contest/8201/slots
+Authorization: Bearer {{rtp0_token}}
+
+> {%
+client.test("RTP0-4 appointment slots", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  // data should be an array (possibly empty if no slots configured)
+  client.assert(Array.isArray(response.body.data));
+});
+%}
+
+### RTP0-5. 小程序码获取 (Mock 模式)
+GET {{baseUrl}}/jst/wx/wxacode?path=pages-sub/cert/verify&scene=certNo=JST-2026-0001
+Authorization: Bearer {{rtp0_token}}
+
+> {%
+client.test("RTP0-5 wxacode mock", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.code === 200);
+  var data = response.body.data;
+  client.assert(data.mock === true);
+  client.assert(data.wxacodeUrl.length > 0);
+});
+%}

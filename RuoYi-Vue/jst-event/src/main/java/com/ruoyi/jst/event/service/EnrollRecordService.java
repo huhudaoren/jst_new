@@ -6,9 +6,11 @@ import com.ruoyi.jst.event.dto.EnrollQueryReqDTO;
 import com.ruoyi.jst.event.dto.EnrollSubmitDTO;
 import com.ruoyi.jst.event.dto.EnrollSupplementDTO;
 import com.ruoyi.jst.event.dto.ScoreItemReqDTO;
+import com.ruoyi.jst.event.dto.TeamEnrollReqDTO;
 import com.ruoyi.jst.event.vo.EnrollDetailVO;
 import com.ruoyi.jst.event.vo.EnrollListVO;
 import com.ruoyi.jst.event.vo.EnrollSubmitResVO;
+import com.ruoyi.jst.event.vo.TeamEnrollResVO;
 
 import java.util.List;
 
@@ -94,4 +96,13 @@ public interface EnrollRecordService {
      * @return 成功处理数量
      */
     int batchAudit(List<Long> enrollIds, String auditStatus, String remark, List<ScoreItemReqDTO> scores);
+
+    /**
+     * 团队报名提交。
+     *
+     * @param req 团队报名请求
+     * @return 团队报名结果
+     * @关联表 jst_enroll_record, jst_contest, jst_appointment_slot
+     */
+    TeamEnrollResVO submitTeam(TeamEnrollReqDTO req);
 }

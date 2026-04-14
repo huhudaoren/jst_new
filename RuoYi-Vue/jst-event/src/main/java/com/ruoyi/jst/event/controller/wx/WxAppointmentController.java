@@ -5,7 +5,9 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.jst.common.exception.BizErrorCode;
+import com.ruoyi.jst.event.domain.JstAppointmentSlot;
 import com.ruoyi.jst.event.dto.AppointmentApplyDTO;
+import com.ruoyi.jst.event.mapper.JstAppointmentSlotMapper;
 import com.ruoyi.jst.event.service.AppointmentService;
 import com.ruoyi.jst.event.vo.AppointmentApplyResVO;
 import com.ruoyi.jst.event.vo.AppointmentDetailVO;
@@ -38,6 +40,9 @@ public class WxAppointmentController extends BaseController {
     @Autowired
     private AppointmentService appointmentService;
 
+    @Autowired
+    private JstAppointmentSlotMapper appointmentSlotMapper;
+
     @PreAuthorize("@ss.hasRole('jst_student') or @ss.hasPermi('jst:event:appointment:apply')")
     @PostMapping("/apply")
     public AjaxResult apply(@Valid @RequestBody AppointmentApplyDTO req) {
@@ -49,6 +54,20 @@ public class WxAppointmentController extends BaseController {
     @PostMapping("/{appointmentId}/cancel")
     public AjaxResult cancel(@PathVariable("appointmentId") Long appointmentId) {
         return AjaxResult.success(appointmentService.cancelIndividual(currentUserId(), appointmentId));
+    }
+
+    /**
+     * 查询赛事所有启用预约时间段列表，按 slot_date ASC, start_time ASC 排序。
+     *
+     * @param contestId 赛事ID
+     * @return 启用时间段列表
+     * @关联表 jst_appointment_slot
+     */
+    @PreAuthorize("@ss.hasRole('jst_student') or @ss.hasPermi('jst:event:appointment:my')")
+    @GetMapping("/contest/{contestId}/slots")
+    public AjaxResult slots(@PathVariable("contestId") Long contestId) {
+        List<JstAppointmentSlot> list = appointmentSlotMapper.selectEnabledByContestId(contestId);
+        return AjaxResult.success(list);
     }
 
     @PreAuthorize("@ss.hasRole('jst_student') or @ss.hasPermi('jst:event:appointment:my')")

@@ -45,6 +45,11 @@ public enum BizErrorCode {
     JST_EVENT_CERT_BATCH_EMPTY(20063, "没有可生成证书的已发布成绩"),
     JST_EVENT_REVIEWER_NOT_FOUND(20070, "评审老师不存在"),
     JST_EVENT_REVIEWER_DUPLICATE(20071, "评审老师重复配置"),
+    JST_EVENT_TEAM_SIZE_INVALID(20080, "团队人数不满足要求"),
+    JST_EVENT_TEAM_PHONE_DUPLICATE(20081, "团队成员手机号重复"),
+    JST_EVENT_TEAM_NOT_SUPPORTED(20082, "当前赛事不支持团队报名"),
+    JST_EVENT_SLOT_CAPACITY_FULL(20083, "预约时段名额不足"),
+    JST_EVENT_CERT_GENERATE_NO_ENROLL(20084, "报名记录不存在或未通过审核"),
 
     // ========== jst-order (3xxxx) ==========
     JST_ORDER_NOT_FOUND(30001, "订单不存在"),

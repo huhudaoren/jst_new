@@ -1,6 +1,7 @@
 package com.ruoyi.jst.event.service;
 
 import com.ruoyi.jst.event.dto.CertBatchGrantReqDTO;
+import com.ruoyi.jst.event.dto.CertGenerateReqDTO;
 import com.ruoyi.jst.event.dto.CertQueryReqDTO;
 import com.ruoyi.jst.event.dto.CertSubmitReviewReqDTO;
 import com.ruoyi.jst.event.dto.CertTemplateReqDTO;
@@ -66,4 +67,12 @@ public interface PartnerCertService {
      * @return 预览图
      */
     CertPreviewResVO preview(Long certId);
+
+    /**
+     * 按报名ID列表逐个生成证书记录（简化版，仅创建记录+编号，不做 PDF 渲染）。
+     *
+     * @param req 生成请求，关联 jst_cert_record, jst_enroll_record
+     * @return 生成结果
+     */
+    CertBatchGrantResVO generate(CertGenerateReqDTO req);
 }

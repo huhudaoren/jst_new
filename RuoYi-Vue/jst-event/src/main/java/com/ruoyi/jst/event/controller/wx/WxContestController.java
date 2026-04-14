@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.jst.event.dto.WxContestQueryDTO;
 import com.ruoyi.jst.event.service.ContestService;
 import com.ruoyi.jst.event.vo.CategoryStatVO;
@@ -58,6 +59,14 @@ public class WxContestController extends BaseController {
     @GetMapping("/{contestId}")
     public AjaxResult detail(@PathVariable("contestId") Long contestId) {
         WxContestDetailVO vo = contestService.getWxDetail(contestId);
+        // 缓存外填充当前用户相关字段（成绩/证书），未登录则 userId 为 null
+        Long userId = null;
+        try {
+            userId = SecurityUtils.getUserId();
+        } catch (Exception ignored) {
+            // @Anonymous 接口，未登录时 getUserId 可能抛异常
+        }
+        contestService.fillUserFields(vo, userId);
         return AjaxResult.success(vo);
     }
 

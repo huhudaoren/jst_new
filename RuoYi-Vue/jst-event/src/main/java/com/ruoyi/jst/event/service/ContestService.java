@@ -52,4 +52,14 @@ public interface ContestService {
     ContestRecommendVO getWxRecommend(Long contestId);
 
     List<CategoryStatVO> selectCategoryStats();
+
+    /**
+     * 填充赛事详情中与当前用户相关的字段（成绩/证书）。
+     * <p>
+     * 因赛事详情本体被缓存且为公开接口，用户相关字段必须在缓存外填充。
+     *
+     * @param vo     已填充的赛事详情 VO
+     * @param userId 当前用户ID，null 表示未登录
+     */
+    void fillUserFields(WxContestDetailVO vo, Long userId);
 }

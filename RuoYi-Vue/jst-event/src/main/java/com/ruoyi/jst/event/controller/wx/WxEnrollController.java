@@ -5,9 +5,11 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.jst.event.dto.EnrollDraftDTO;
 import com.ruoyi.jst.event.dto.EnrollSubmitDTO;
 import com.ruoyi.jst.event.dto.EnrollSupplementDTO;
+import com.ruoyi.jst.event.dto.TeamEnrollReqDTO;
 import com.ruoyi.jst.event.service.EnrollRecordService;
 import com.ruoyi.jst.event.vo.EnrollDetailVO;
 import com.ruoyi.jst.event.vo.EnrollSubmitResVO;
+import com.ruoyi.jst.event.vo.TeamEnrollResVO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -80,6 +82,20 @@ public class WxEnrollController extends BaseController {
     @GetMapping("/my")
     public AjaxResult myList(@org.springframework.web.bind.annotation.RequestParam(required = false) String auditStatus) {
         return AjaxResult.success(enrollRecordService.selectMyList(auditStatus));
+    }
+
+    /**
+     * 团队报名提交。
+     *
+     * @param req 团队报名请求
+     * @return 团队报名结果
+     * @关联表 jst_enroll_record, jst_contest, jst_appointment_slot
+     */
+    @PreAuthorize("@ss.hasRole('jst_student')")
+    @PostMapping("/team/submit")
+    public AjaxResult teamSubmit(@Valid @RequestBody TeamEnrollReqDTO req) {
+        TeamEnrollResVO vo = enrollRecordService.submitTeam(req);
+        return AjaxResult.success(vo);
     }
 
     /**

@@ -669,4 +669,37 @@
         order by d.dict_sort asc, d.dict_code asc
     </select>
 
+    <!-- 查询赛事是否有已发布成绩 -->
+    <select id="countPublishedScores" resultType="int">
+        select count(1) from jst_score_record
+        where contest_id = #{contestId}
+          and publish_status = 'published'
+          and del_flag = '0'
+        limit 1
+    </select>
+
+    <!-- 查询用户在该赛事的总分 -->
+    <select id="selectUserTotalScore" resultType="java.math.BigDecimal">
+        select sr.score_value
+        from jst_score_record sr
+        inner join jst_enroll_record er on er.enroll_id = sr.enroll_id and er.del_flag = '0'
+        where sr.contest_id = #{contestId}
+          and er.user_id = #{userId}
+          and sr.publish_status = 'published'
+          and sr.del_flag = '0'
+        order by sr.score_value desc
+        limit 1
+    </select>
+
+    <!-- 查询用户在该赛事的证书记录 -->
+    <select id="selectUserCert" resultType="com.ruoyi.jst.event.domain.JstCertRecord">
+        select cr.cert_id, cr.cert_no, cr.cert_file_url, cr.issue_status
+        from jst_cert_record cr
+        where cr.contest_id = #{contestId}
+          and cr.user_id = #{userId}
+          and cr.del_flag = '0'
+        order by cr.create_time desc
+        limit 1
+    </select>
+
 </mapper>

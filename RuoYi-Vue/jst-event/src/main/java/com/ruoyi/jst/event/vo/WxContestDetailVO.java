@@ -71,6 +71,47 @@ public class WxContestDetailVO {
     private List<JstScoreItem> scoreItemList;
     private List<JstAppointmentSlot> appointmentSlotList;
 
+    /** 该赛事是否已发布成绩（至少有 1 条 published 的 score_record）。 */
+    private Boolean scorePublished;
+    /** 当前用户是否有该赛事的证书。 */
+    private Boolean hasCert;
+    /** 当前用户的证书图片 URL（如有）。 */
+    private String certImageUrl;
+    /** 当前用户在该赛事的总分（如有）。 */
+    private java.math.BigDecimal totalScore;
+
+    public Boolean getScorePublished() {
+        return scorePublished;
+    }
+
+    public void setScorePublished(Boolean scorePublished) {
+        this.scorePublished = scorePublished;
+    }
+
+    public Boolean getHasCert() {
+        return hasCert;
+    }
+
+    public void setHasCert(Boolean hasCert) {
+        this.hasCert = hasCert;
+    }
+
+    public String getCertImageUrl() {
+        return certImageUrl;
+    }
+
+    public void setCertImageUrl(String certImageUrl) {
+        this.certImageUrl = certImageUrl;
+    }
+
+    public java.math.BigDecimal getTotalScore() {
+        return totalScore;
+    }
+
+    public void setTotalScore(java.math.BigDecimal totalScore) {
+        this.totalScore = totalScore;
+    }
+
     public Long getContestId() {
         return contestId;
     }

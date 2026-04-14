@@ -641,6 +641,42 @@ public class ContestServiceImpl implements ContestService {
     }
 
     /**
+     * 填充赛事详情中与当前用户相关的字段。
+     * <p>
+     * scorePublished: 赛事级别，查 jst_score_record 是否有 published 记录。
+     * hasCert/certImageUrl/totalScore: 用户级别，按 userId 查。
+     *
+     * @param vo     赛事详情 VO
+     * @param userId 当前用户ID，null 表示未登录
+     */
+    @Override
+    public void fillUserFields(WxContestDetailVO vo, Long userId) {
+        if (vo == null) {
+            return;
+        }
+        Long contestId = vo.getContestId();
+        // 赛事级别：是否有已发布成绩
+        vo.setScorePublished(contestMapperExt.countPublishedScores(contestId) > 0);
+        if (userId == null) {
+            vo.setHasCert(false);
+            vo.setCertImageUrl(null);
+            vo.setTotalScore(null);
+            return;
+        }
+        // 用户级别：总分
+        vo.setTotalScore(contestMapperExt.selectUserTotalScore(contestId, userId));
+        // 用户级别：证书
+        com.ruoyi.jst.event.domain.JstCertRecord cert = contestMapperExt.selectUserCert(contestId, userId);
+        if (cert != null) {
+            vo.setHasCert(true);
+            vo.setCertImageUrl(cert.getCertFileUrl());
+        } else {
+            vo.setHasCert(false);
+            vo.setCertImageUrl(null);
+        }
+    }
+
+    /**
      * 查询热门赛事（缓存 5 分钟）。
      *
      * @param limit 限制数量

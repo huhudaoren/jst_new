@@ -7,6 +7,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.jst.common.annotation.PartnerDataScope;
 import com.ruoyi.jst.common.controller.BasePartnerController;
 import com.ruoyi.jst.event.dto.CertBatchGrantReqDTO;
+import com.ruoyi.jst.event.dto.CertGenerateReqDTO;
 import com.ruoyi.jst.event.dto.CertQueryReqDTO;
 import com.ruoyi.jst.event.dto.CertSubmitReviewReqDTO;
 import com.ruoyi.jst.event.dto.CertTemplateReqDTO;
@@ -115,6 +116,19 @@ public class PartnerCertController extends BasePartnerController {
     @PostMapping("/batch-grant")
     public AjaxResult batchGrant(@Valid @RequestBody CertBatchGrantReqDTO req) {
         return AjaxResult.success(partnerCertService.batchGrant(req));
+    }
+
+    /**
+     * 按报名ID批量生成证书记录（简化版，仅创建记录+编号，不做 PDF 渲染）。
+     *
+     * @param req 生成请求
+     * @return 生成结果
+     */
+    @Log(title = "赛事方生成证书", businessType = BusinessType.INSERT)
+    @PreAuthorize("@ss.hasPermi('jst:event:cert_record:add')")
+    @PostMapping("/generate")
+    public AjaxResult generate(@Valid @RequestBody CertGenerateReqDTO req) {
+        return AjaxResult.success(partnerCertService.generate(req));
     }
 
     /**

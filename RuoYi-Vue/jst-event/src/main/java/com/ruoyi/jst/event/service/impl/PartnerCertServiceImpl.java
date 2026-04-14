@@ -13,7 +13,9 @@ import com.ruoyi.jst.common.util.MaskUtil;
 import com.ruoyi.jst.event.domain.JstCertRecord;
 import com.ruoyi.jst.event.domain.JstCertTemplate;
 import com.ruoyi.jst.event.domain.JstContest;
+import com.ruoyi.jst.common.service.BizNoGenerateService;
 import com.ruoyi.jst.event.dto.CertBatchGrantReqDTO;
+import com.ruoyi.jst.event.dto.CertGenerateReqDTO;
 import com.ruoyi.jst.event.dto.CertQueryReqDTO;
 import com.ruoyi.jst.event.dto.CertSubmitReviewReqDTO;
 import com.ruoyi.jst.event.dto.CertTemplateReqDTO;
@@ -70,6 +72,9 @@ public class PartnerCertServiceImpl implements PartnerCertService {
 
     @Autowired
     private SnowflakeIdWorker snowflakeIdWorker;
+
+    @Autowired
+    private BizNoGenerateService bizNoGenerateService;
 
     /**
      * Saves a partner-owned certificate template.
@@ -233,6 +238,71 @@ public class PartnerCertServiceImpl implements PartnerCertService {
         vo.setCertNo(detail.getCertNo());
         vo.setPreviewImage(renderPreview(detail));
         return vo;
+    }
+
+    /**
+     * 按报名ID列表逐个生成证书记录（简化版）。
+     * <p>
+     * 1. 校验赛事归属 + 模板存在
+     * 2. 对每个 enrollId，查报名记录（需已通过审核），生成证书编号，创建 jst_cert_record
+     * 3. 本期不做 PDF 渲染
+     *
+     * @param req 生成请求
+     * @return 生成结果
+     * @关联表 jst_cert_record, jst_enroll_record
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @OperateLog(module = "cert", action = "CERT_GENERATE", target = "#{req.contestId}", recordResult = true)
+    public CertBatchGrantResVO generate(CertGenerateReqDTO req) {
+        // TX: 按 enrollId 批量生成证书记录
+        JstContest contest = getRequiredContest(req.getContestId());
+        assertContestOwnership(contest);
+        JstCertTemplate template = getRequiredTemplate(req.getTemplateId());
+        assertTemplateUsable(template);
+
+        List<CertScoreRefVO> enrollRefs = partnerCertMapper.selectApprovedEnrollsForCert(req.getContestId(), req.getEnrollIds());
+        if (enrollRefs.isEmpty()) {
+            throw new ServiceException(BizErrorCode.JST_EVENT_CERT_GENERATE_NO_ENROLL.message(),
+                    BizErrorCode.JST_EVENT_CERT_GENERATE_NO_ENROLL.code());
+        }
+
+        Date now = DateUtils.getNowDate();
+        CertBatchGrantResVO result = new CertBatchGrantResVO();
+        result.setCreatedCount(0);
+        result.setSkippedCount(0);
+        List<Long> certIds = new ArrayList<>();
+
+        for (CertScoreRefVO ref : enrollRefs) {
+            // 跳过已有证书的报名
+            if (partnerCertMapper.countCertByEnrollId(ref.getEnrollId()) > 0) {
+                result.setSkippedCount(result.getSkippedCount() + 1);
+                continue;
+            }
+            String certNo = bizNoGenerateService.nextNo("cert_no");
+            JstCertRecord cert = new JstCertRecord();
+            cert.setCertNo(certNo);
+            cert.setContestId(ref.getContestId());
+            cert.setScoreId(ref.getScoreId());
+            cert.setEnrollId(ref.getEnrollId());
+            cert.setUserId(ref.getUserId());
+            cert.setParticipantId(ref.getParticipantId());
+            cert.setTemplateId(template.getTemplateId());
+            cert.setIssueStatus("pending");
+            cert.setVerifyCode("VC" + Math.abs(snowflakeIdWorker.nextId()));
+            cert.setCreateBy(currentOperatorName());
+            cert.setCreateTime(now);
+            cert.setUpdateBy(currentOperatorName());
+            cert.setUpdateTime(now);
+            cert.setDelFlag("0");
+            partnerCertMapper.insertCert(cert);
+            if (cert.getCertId() != null) {
+                certIds.add(cert.getCertId());
+            }
+            result.setCreatedCount(result.getCreatedCount() + 1);
+        }
+        result.setCertIds(certIds);
+        return result;
     }
 
     private void validateTemplateReq(CertTemplateReqDTO req) {

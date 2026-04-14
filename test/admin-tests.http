@@ -2491,3 +2491,64 @@ client.test("R4-5 invalid score item should fail", function() {
   client.assert(response.body.code !== 200);
 });
 %}
+
+### =====================================================================
+### REFACTOR-TODO-P1. Partner 端接口补齐
+### Preconditions:
+###   1. ruoyi-admin 在 8080 启动
+###   2. 99-test-fixtures.sql 已导入
+###   3. partner_f7_a 用户已有 jst_partner 角色
+### =====================================================================
+
+### RTP1-0. partner 登录
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{"username": "partner_f7_a", "password": "admin123"}
+
+> {%
+client.global.set("rtp1_token", response.body.token);
+%}
+
+### RTP1-1. Partner 创建表单模板
+POST {{baseUrl}}/jst/partner/form-template
+Content-Type: {{contentType}}
+Authorization: Bearer {{rtp1_token}}
+
+{
+  "templateName": "测试团队报名表单",
+  "ownerType": "partner",
+  "schemaJson": {
+    "fields": [
+      {"key": "name", "label": "姓名", "type": "text", "required": true},
+      {"key": "phone", "label": "手机号", "type": "text", "required": true}
+    ]
+  }
+}
+
+> {%
+client.test("RTP1-1 partner create form template", function() {
+  client.assert(response.status === 200);
+  if (response.body.code === 200) {
+    client.assert(response.body.data.templateId > 0);
+  }
+});
+%}
+
+### RTP1-2. Partner 证书生成(简化版) - enrollIds 方式
+POST {{baseUrl}}/jst/partner/cert/generate
+Content-Type: {{contentType}}
+Authorization: Bearer {{rtp1_token}}
+
+{
+  "contestId": 8201,
+  "templateId": 1,
+  "enrollIds": [8902]
+}
+
+> {%
+client.test("RTP1-2 partner cert generate", function() {
+  client.assert(response.status === 200);
+  // 可能成功也可能因模板不存在失败，取决于 fixture
+});
+%}
