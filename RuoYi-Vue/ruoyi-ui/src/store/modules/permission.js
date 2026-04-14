@@ -276,6 +276,7 @@ function groupJstRootChildren(routes) {
     .filter(group => groupedBuckets[group.key].length > 0)
     .map(group => ({
       path: `group-${group.key}`,
+      component: ParentView,
       hidden: false,
       alwaysShow: true,
       redirect: 'noRedirect',
