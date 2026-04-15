@@ -1,0 +1,56 @@
+name: 赛事列表浏览与筛选
+description: 验证赛事列表页的展示、分类Tab切换、搜索筛选、赛事卡片信息完整性
+login: MOCK_1001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_contest WHERE status = 'enrolling' AND del_flag = '0'"
+    expect: "cnt >= 1"
+    fix_sql: "UPDATE jst_contest SET status = 'enrolling' WHERE contest_id = 8201 AND del_flag = '0'"
+steps:
+  - name: 进入赛事列表页
+    action: reLaunch
+    path: /pages/contest/list
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".contest-list-page__search-box"
+        expect: exists
+      - element: ".contest-list-page__cat-tabs"
+        expect: exists
+      - product_review:
+          - "赛事列表页的第一印象如何？搜索栏、分类Tab、筛选按钮的布局是否符合信息检索场景？"
+          - "页面顶部的吸顶区域（搜索+Tab+筛选）是否占用过多屏幕空间？留给内容列表的区域是否充足？"
+
+  - name: 查看赛事卡片信息
+    action: wait
+    wait: 500
+    check:
+      - element: ".contest-list-page__result-bar"
+        expect: exists
+      - element: ".contest-list-page__list"
+        expect: exists
+      - product_review:
+          - "赛事卡片上是否展示了用户最关心的信息：赛事名称、报名价格、报名截止时间、已报名人数？"
+          - "卡片的视觉层次是否合理？关键信息（价格/状态）是否足够醒目？"
+          - "结果数量提示'共找到X个赛事'是否准确？对用户决策是否有帮助？"
+
+  - name: 切换分类Tab
+    action: tap
+    selector: ".contest-list-page__cat-tab:nth-child(2)"
+    wait: 1500
+    check:
+      - screenshot: true
+      - product_review:
+          - "切换分类后，列表是否正确刷新？加载过程中是否有反馈？"
+          - "当前选中的分类Tab是否有明确的视觉高亮？用户能否清楚知道正在查看哪个分类？"
+
+  - name: 向下滚动加载更多
+    action: scroll
+    direction: down
+    distance: 800
+    wait: 1500
+    check:
+      - screenshot: true
+      - product_review:
+          - "滚动加载更多的体验是否流畅？是否有'加载更多'的提示或自动触底加载？"
+          - "如果当前分类下没有更多赛事，底部提示是否友好？"
+          - "赛事卡片的入场动画是否增强了浏览体验还是分散了注意力？"

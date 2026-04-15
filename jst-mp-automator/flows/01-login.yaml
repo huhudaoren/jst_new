@@ -1,0 +1,51 @@
+name: 登录页展示与Mock登录
+description: 验证登录页品牌展示、按钮可用性、隐私协议提示，并完成Mock登录跳转
+login: null
+steps:
+  - name: 打开登录页
+    action: reLaunch
+    path: /pages/login/login
+    wait: 1500
+    check:
+      - screenshot: true
+      - element: ".login-page__title"
+        expect: exists
+      - element: ".login-page__button--wx"
+        expect: exists
+      - product_review:
+          - "用户第一次打开登录页，品牌Logo和名称是否清晰可辨，能否立刻理解这是什么产品？"
+          - "登录页的视觉层次是否合理？品牌区、登录卡片、底部协议三个区域是否有明确的空间划分？"
+
+  - name: 检查隐私协议与辅助文案
+    action: wait
+    wait: 500
+    check:
+      - element: ".login-page__footer-line"
+        expect: exists
+      - element: ".login-page__subtitle"
+        expect: exists
+      - product_review:
+          - "底部的用户协议和隐私政策提示是否清晰可见？用户能否感知到点击即同意的法律含义？"
+          - "副标题'一站式竞赛服务平台'是否准确传达了产品定位？对目标用户（家长/学生）是否有吸引力？"
+
+  - name: 检查开发模式Mock按钮
+    action: wait
+    wait: 500
+    check:
+      - element: ".login-page__button--dev"
+        expect: exists
+      - element: ".login-page__card-title"
+        expect: exists
+      - product_review:
+          - "登录卡片内的欢迎文案和描述是否让用户感到友好和安全？"
+          - "微信一键登录按钮是否足够醒目，位于视觉焦点区域？按钮尺寸是否适合单手操作？"
+
+  - name: 执行Mock登录并验证跳转
+    action: tap
+    selector: ".login-page__button--dev"
+    wait: 3000
+    check:
+      - screenshot: true
+      - product_review:
+          - "登录成功后是否有加载反馈（loading状态）？用户能否感知到登录正在进行？"
+          - "登录成功后跳转目标是否合理？是否直接到达了用户最常使用的页面？"

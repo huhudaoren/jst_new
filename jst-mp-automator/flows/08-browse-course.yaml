@@ -1,0 +1,53 @@
+name: 课程列表浏览与筛选
+description: 验证课程列表页的展示、类型Tab切换、分类筛选、课程卡片信息完整性
+login: MOCK_1001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_course WHERE status = 'on' AND del_flag = '0'"
+    expect: "cnt >= 1"
+    fix_sql: "UPDATE jst_course SET status = 'on', audit_status = 'approved' WHERE course_id = 7201 AND del_flag = '0'"
+steps:
+  - name: 进入课程列表页
+    action: reLaunch
+    path: /pages/course/list
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".course-list-page__title"
+        expect: exists
+      - element: ".course-list-page__segment"
+        expect: exists
+      - product_review:
+          - "课程页的Hero区标题和副标题是否传达了课程的价值主张？'名师讲解 精准备赛'是否吸引目标用户？"
+          - "搜索栏在Hero区内的设计是否美观且易用？搜索框占位文字是否引导用户操作？"
+
+  - name: 查看课程类型Tab和分类筛选
+    action: wait
+    wait: 500
+    check:
+      - element: ".course-list-page__segment-item"
+        expect: exists
+      - product_review:
+          - "课程类型Tab（全部/精品/AI课程等）的分类是否清晰？用户能否理解每个分类的含义？"
+          - "分类筛选胶囊的横滑交互是否流畅？当前选中状态是否有明确的视觉反馈？"
+
+  - name: 查看课程卡片
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 1000
+    check:
+      - screenshot: true
+      - product_review:
+          - "课程卡片是否展示了核心信息：课程名称、价格、讲师、课时数、学习人数？"
+          - "卡片封面图的比例和质量是否影响浏览体验？无封面时的兜底展示是否美观？"
+          - "免费课程和付费课程在视觉上是否有区分？价格展示是否符合用户预期？"
+
+  - name: 切换课程类型
+    action: tap
+    selector: ".course-list-page__segment-item:nth-child(2)"
+    wait: 1500
+    check:
+      - screenshot: true
+      - product_review:
+          - "切换类型后，课程列表是否正确筛选？Tab的选中态是否清晰？"
+          - "如果某个类型下没有课程，空状态提示是否引导用户查看其他类型？"

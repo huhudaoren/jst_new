@@ -1,0 +1,44 @@
+name: 渠道绑定关系查看
+description: 验证学生用户可以查看当前渠道绑定状态、绑定详情和历史绑定记录
+login: MOCK_1001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_user_binding WHERE user_id = 1001 AND status = 'active' AND del_flag = '0'"
+    expect: "cnt >= 1"
+steps:
+  - name: 进入我的绑定页面
+    action: navigate
+    path: /pages-sub/my/binding
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".binding-page__nav-title"
+        expect: exists
+      - product_review:
+          - "页面加载后，用户能否立刻理解'绑定'是什么含义？标题和说明文案是否通俗易懂？"
+          - "导航栏返回按钮是否可见？整体页面风格是否与小程序其他页面一致？"
+
+  - name: 查看当前绑定状态
+    action: wait
+    wait: 500
+    check:
+      - element: ".binding-page__hero"
+        expect: exists
+      - element: ".binding-page__hero-name"
+        expect: exists
+      - product_review:
+          - "当前绑定渠道方的名称、类型、绑定时间等信息是否展示完整？家长能否确认绑定的是正确的老师/机构？"
+          - "更换渠道方和解除绑定两个操作按钮是否有明确的视觉区分？危险操作（解除绑定）是否有警示色？"
+
+  - name: 向下滚动查看规则说明和历史记录
+    action: scroll
+    direction: down
+    distance: 500
+    wait: 1000
+    check:
+      - screenshot: true
+      - element: ".binding-page__card-title"
+        expect: exists
+      - product_review:
+          - "绑定规则说明是否通俗易懂？家长能否理解'同一时间仅能保留一个绑定'的含义？"
+          - "历史绑定记录是否按时间排列？每条记录的信息是否足够辨识（渠道名称、绑定/解绑时间）？"
+          - "如果没有历史绑定记录，空状态提示是否友好？"

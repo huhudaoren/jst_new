@@ -1,0 +1,56 @@
+name: 我的课程列表
+description: 验证已购课程列表展示、学习进度、Tab切换、课程卡片信息
+login: MOCK_1001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_course_learn_record WHERE user_id = 1001 AND del_flag = '0'"
+    expect: "cnt >= 1"
+    fix_sql: "INSERT INTO jst_course_learn_record (learn_id, course_id, user_id, progress, duration_seconds, complete_status, create_by, create_time, del_flag) VALUES (7301, 7201, 1001, 68.50, 1800, 'learning', 'fixture', NOW(), '0') ON DUPLICATE KEY UPDATE del_flag = '0'"
+steps:
+  - name: 进入我的课程页面
+    action: navigate
+    path: /pages-sub/my/course
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".my-course-page__nav-title"
+        expect: exists
+      - element: ".my-course-page__tabs"
+        expect: exists
+      - product_review:
+          - "我的课程页面是否提供了'去选课'的快捷入口？对于课程数量少的用户，是否引导其发现更多课程？"
+          - "状态Tab（全部/学习中/已完成）的分类是否清晰？默认Tab选择是否合理？"
+
+  - name: 查看学习统计摘要
+    action: wait
+    wait: 500
+    check:
+      - element: ".my-course-page__summary"
+        expect: exists
+      - product_review:
+          - "四格统计（已购/学习中/已完成/学习分钟）的数据是否准确？是否给用户成就感？"
+          - "学习分钟的展示是否友好？是否需要自动转换为'小时'单位当数值较大时？"
+
+  - name: 查看课程卡片
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 1000
+    check:
+      - screenshot: true
+      - element: ".my-course-page__card"
+        expect: exists
+      - product_review:
+          - "课程卡片是否展示了课程名称、类型、学习进度、学习时长等关键信息？"
+          - "课程封面图是否在卡片上展示？无封面时的兜底样式是否区分了普通课和AI课？"
+          - "学习进度是否有可视化展示（如进度条）？用户能否直观感知学了多少？"
+
+  - name: 切换到已完成Tab
+    action: tap
+    selector: ".my-course-page__tab:last-child"
+    wait: 1500
+    check:
+      - screenshot: true
+      - product_review:
+          - "切换到'已完成'Tab后，列表是否正确筛选？已完成课程的卡片是否展示了完成时间和成绩？"
+          - "如果没有已完成的课程，空状态提示是否有激励性（如'继续学习，完成你的第一门课程'）？"
+          - "从'我的课程'页面，用户能否快速继续上次学习中断的课程？是否有'继续学习'的快捷入口？"

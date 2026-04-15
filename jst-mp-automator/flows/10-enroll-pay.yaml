@@ -1,0 +1,75 @@
+name: 赛事报名（付费赛事）
+description: 验证付费赛事报名的完整流程——参赛人选择、动态表单、费用展示、提交
+login: MOCK_1001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_contest WHERE contest_id = 8201 AND status = 'enrolling' AND del_flag = '0'"
+    expect: "cnt >= 1"
+  - sql: "SELECT COUNT(*) as cnt FROM jst_participant WHERE user_id = 1001 AND del_flag = '0'"
+    expect: "cnt >= 1"
+    fix_sql: "INSERT INTO jst_participant (participant_id, user_id, name, gender, age, school, class_name, create_by, create_time, del_flag) VALUES (3001, 1001, '测试学生A', 'male', 12, '测试小学', '六年级1班', 'fixture', NOW(), '0') ON DUPLICATE KEY UPDATE del_flag = '0'"
+steps:
+  - name: 进入报名页面
+    action: navigate
+    path: /pages-sub/contest/enroll
+    query:
+      contestId: "8201"
+    wait: 2500
+    check:
+      - screenshot: true
+      - element: ".enroll-page__hero-title"
+        expect: exists
+      - element: ".enroll-page__card--summary"
+        expect: exists
+      - product_review:
+          - "报名页顶部是否清晰展示了赛事名称、报名时间、比赛时间、费用等关键信息？"
+          - "页面的提示文案'先填写报名资料，本期提交后仅进入审核，不直接创建订单'是否让用户理解了报名流程？"
+
+  - name: 查看参赛人选择区域
+    action: scroll
+    direction: down
+    distance: 200
+    wait: 800
+    check:
+      - element: ".enroll-page__participant-list"
+        expect: exists
+      - product_review:
+          - "参赛人列表是否清晰展示了每个档案的姓名、学校、班级等信息？用户能否快速辨别并选择正确的参赛人？"
+          - "如果没有可用的参赛档案，提示文案是否引导用户先去创建/认领档案？跳转链接是否可用？"
+          - "单选交互是否明确？选中状态的视觉反馈是否足够？"
+
+  - name: 选择参赛人
+    action: tap
+    selector: ".enroll-page__participant:first-child"
+    wait: 1000
+    check:
+      - screenshot: true
+      - element: ".enroll-page__participant--active"
+        expect: exists
+      - product_review:
+          - "选择参赛人后，选中状态是否立即反馈？卡片标题处是否显示了选中的参赛人名称？"
+
+  - name: 查看动态表单和填写提醒
+    action: scroll
+    direction: down
+    distance: 500
+    wait: 800
+    check:
+      - screenshot: true
+      - element: ".enroll-page__card--tip"
+        expect: exists
+      - product_review:
+          - "填写提醒区域是否醒目？'带*为必填项'的提示是否足够显眼？"
+          - "动态表单的字段布局是否合理？表单字段类型（文本/选择/上传）是否直观易操作？"
+          - "文件上传区域是否有格式说明和大小限制提示？"
+
+  - name: 滚动到底部查看费用和提交按钮
+    action: scroll
+    direction: down
+    distance: 800
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "报名费用展示是否清晰？如果支持积分抵扣或优惠券，相关入口是否可见？"
+          - "提交按钮的文案是否准确传达了操作含义（如'提交报名'而非'立即支付'）？"
+          - "用户在提交前能否回顾已填信息？是否需要确认弹窗防止误操作？"

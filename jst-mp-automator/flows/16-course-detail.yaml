@@ -1,0 +1,61 @@
+name: 课程详情页浏览
+description: 验证课程详情页所有区块展示（封面/标题/讲师/章节/课程描述/购买按钮）
+login: MOCK_1001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_course WHERE course_id = 7201 AND status = 'on' AND del_flag = '0'"
+    expect: "cnt >= 1"
+steps:
+  - name: 进入课程详情页
+    action: navigate
+    path: /pages-sub/course/detail
+    query:
+      id: "7201"
+    wait: 2500
+    check:
+      - screenshot: true
+      - element: ".cd-hero"
+        expect: exists
+      - element: ".cd-title-card__name"
+        expect: exists
+      - product_review:
+          - "课程封面区的视觉效果是否吸引人？封面图加载失败时的兜底展示是否美观？"
+          - "课程名称是否完整展示？标签（精品课/AI课/免费）是否在视觉上辅助用户判断？"
+
+  - name: 查看统计数据和讲师信息
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 800
+    check:
+      - element: ".cd-stats"
+        expect: exists
+      - element: ".cd-teacher"
+        expect: exists
+      - product_review:
+          - "课时数/学习人数/总时长三个统计数据是否直观？数据格式化是否友好（如'1580人已学'而非'1580'）？"
+          - "讲师卡片的信息是否增强了课程的可信度？头像/姓名/简介是否完整？"
+          - "讲师简介的篇幅是否合适？过长时是否有收起/展开交互？"
+
+  - name: 查看章节目录
+    action: scroll
+    direction: down
+    distance: 600
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "章节目录是否清晰列出了所有章节和课时？每课时是否标注了时长和免费/付费标识？"
+          - "免费试听的课时是否有醒目的'免费'标签？用户能否直接点击试听？"
+          - "章节的展开/折叠交互是否符合预期？"
+
+  - name: 滚动至底部查看购买区域
+    action: scroll
+    direction: down
+    distance: 800
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "底部固定的价格和购买按钮是否始终可见？价格展示是否醒目？"
+          - "课程简介/详情描述区域的内容是否丰富？富文本内容是否正确渲染？"
+          - "从浏览到购买的整个路径是否流畅？用户获取的信息是否足以做出购买决策？"

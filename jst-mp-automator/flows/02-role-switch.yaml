@@ -1,0 +1,51 @@
+name: 角色切换（学生/渠道方）
+description: 验证具有双角色的用户在"我的"页面可以在学生和渠道方视角之间切换，菜单随之变化
+login: MOCK_1003
+steps:
+  - name: 进入我的页面
+    action: navigate
+    path: /pages/my/index
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".my-page__switcher"
+        expect: exists
+      - element: ".my-page__name"
+        expect: exists
+      - product_review:
+          - "用户头像、昵称、手机号是否完整展示？未设置昵称时的默认文案是否友好？"
+          - "角色切换器（学生/渠道方）是否在视觉上足够醒目？用户能否第一时间发现可以切换身份？"
+
+  - name: 查看学生视角内容
+    action: wait
+    wait: 500
+    check:
+      - element: ".my-page__summary"
+        expect: exists
+      - element: ".my-page__level-card"
+        expect: exists
+      - product_review:
+          - "学生视角下的四格统计（报名记录/成绩/证书/课程）数据是否有意义？数字为0时展示是否合理？"
+          - "等级卡片和积分信息是否对青少年用户有激励作用？进度条是否直观？"
+
+  - name: 切换到渠道方视角
+    action: tap
+    selector: ".my-page__switcher-item:last-child"
+    wait: 1000
+    check:
+      - screenshot: true
+      - element: ".my-page__workbench-btn"
+        expect: exists
+      - product_review:
+          - "切换到渠道方视角后，界面变化是否明显？用户能否清楚地知道当前处于哪个身份？"
+          - "渠道方专属菜单（工作台入口、渠道认证等）是否展示完整？操作路径是否清晰？"
+
+  - name: 切换回学生视角
+    action: tap
+    selector: ".my-page__switcher-item:first-child"
+    wait: 1000
+    check:
+      - screenshot: true
+      - product_review:
+          - "从渠道方切回学生视角后，菜单和内容是否完整恢复？切换过程是否有闪烁或布局跳动？"
+          - "频繁切换角色时，数据是否正确加载？是否存在数据串混的风险？"

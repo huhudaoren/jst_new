@@ -1,0 +1,49 @@
+name: 退款记录列表
+description: 验证退款记录列表的展示、状态Tab、退款卡片信息完整性
+login: MOCK_1001
+steps:
+  - name: 进入我的退款页面
+    action: navigate
+    path: /pages-sub/my/refund-list
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".refund-list-page__nav-title"
+        expect: exists
+      - element: ".refund-list-page__tabs"
+        expect: exists
+      - product_review:
+          - "退款列表页的状态Tab是否涵盖了关键状态（全部/审核中/已通过/已驳回/已退款）？"
+          - "页面标题'我的退款'是否准确？导航返回是否正确指向来源页面？"
+
+  - name: 查看退款卡片信息
+    action: wait
+    wait: 500
+    check:
+      - screenshot: true
+      - product_review:
+          - "退款卡片是否展示了核心信息：赛事名称、退款单号、关联订单号、申请金额、申请时间？"
+          - "退款金额是否使用醒目的红色或特殊样式展示？用户能否快速看到退了多少钱？"
+          - "如果有审核说明（驳回原因等），是否在卡片上直接可见，而非需要点进详情才能看到？"
+
+  - name: 切换状态Tab
+    action: tap
+    selector: ".refund-list-page__tab:nth-child(2)"
+    wait: 1500
+    check:
+      - screenshot: true
+      - product_review:
+          - "Tab切换后列表是否正确筛选？切换动画是否流畅？"
+          - "如果没有对应状态的退款记录，空状态提示是否友好？是否引导用户了解退款政策？"
+
+  - name: 向下滚动查看更多
+    action: scroll
+    direction: down
+    distance: 500
+    wait: 1000
+    check:
+      - screenshot: true
+      - product_review:
+          - "退款记录按时间排序是否合理？最新的退款是否在最前面？"
+          - "每张退款卡片是否可点击进入详情页？点击热区和交互反馈是否明确？"
+          - "用户能否在列表页就判断退款进度，还是必须逐条点开详情才能了解？"

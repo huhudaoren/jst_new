@@ -1,0 +1,73 @@
+name: 赛事详情页完整浏览
+description: 验证赛事详情页所有区块展示（Hero/基本信息/赛程/奖项/FAQ/报名按钮）
+login: MOCK_1001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_contest WHERE contest_id = 8201 AND status = 'enrolling' AND del_flag = '0'"
+    expect: "cnt >= 1"
+steps:
+  - name: 进入赛事详情页
+    action: navigate
+    path: /pages-sub/contest/detail
+    query:
+      id: "8201"
+    wait: 2500
+    check:
+      - screenshot: true
+      - element: ".contest-detail-page__hero-title"
+        expect: exists
+      - element: ".contest-detail-page__hero-tags"
+        expect: exists
+      - product_review:
+          - "赛事详情的Hero区是否有冲击力？Banner图/分类标签/状态标识是否同屏展示？"
+          - "赛事名称和主办方信息是否清晰可读？在深色背景上的文字对比度是否足够？"
+
+  - name: 查看价格和基本信息
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 800
+    check:
+      - element: ".contest-detail-page__price-card"
+        expect: exists
+      - element: "#section-info"
+        expect: exists
+      - product_review:
+          - "报名费用是否醒目展示？对于免费赛事，价格标注是否调整为'免费'而非'0元'？"
+          - "基本信息区（报名时间/比赛时间/参赛组别）是否完整？时间格式是否易于理解？"
+          - "赛事状态（报名中/已截止/已结束）是否通过颜色或标签清晰传达？"
+
+  - name: 查看锚点导航和赛程安排
+    action: scroll
+    direction: down
+    distance: 600
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "粘性锚点导航是否出现？各锚点（信息/赛程/奖项/FAQ）是否可点击跳转？"
+          - "赛程安排的时间线展示是否直观？家长能否快速了解整个比赛流程？"
+
+  - name: 滚动至奖项和FAQ区域
+    action: scroll
+    direction: down
+    distance: 800
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "奖项设置是否清晰展示？奖项名称、比例、奖励内容是否完整？"
+          - "FAQ部分的问答是否实用？能否解答家长最常见的疑问（退费/证书/资格）？"
+
+  - name: 查看底部报名按钮
+    action: scroll
+    direction: down
+    distance: 500
+    wait: 800
+    check:
+      - screenshot: true
+      - element: ".contest-detail-page"
+        expect: exists
+      - product_review:
+          - "底部固定的报名按钮是否始终可见？按钮状态是否与赛事状态一致（可报名/已截止/已报满）？"
+          - "从浏览详情到点击报名，用户获取到的信息是否足以做出报名决策？是否缺少关键信息？"
+          - "整个详情页从头到尾的信息架构是否合理？重要信息是否在靠前位置？"

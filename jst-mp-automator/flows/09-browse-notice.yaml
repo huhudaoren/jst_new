@@ -1,0 +1,57 @@
+name: 公告资讯列表浏览
+description: 验证公告列表页的展示、分类Tab、置顶公告、搜索功能、卡片信息
+login: MOCK_1001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_notice WHERE status = 'published' AND del_flag = '0'"
+    expect: "cnt >= 1"
+    fix_sql: "UPDATE jst_notice SET status = 'published' WHERE notice_id = 7001 AND del_flag = '0'"
+steps:
+  - name: 进入公告列表页
+    action: reLaunch
+    path: /pages/notice/list
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".notice-page__title"
+        expect: exists
+      - element: ".notice-page__tabs"
+        expect: exists
+      - product_review:
+          - "公告页的标题和副标题是否清晰说明了本页的内容范围（平台公告/赛事通知/成绩发布）？"
+          - "分类Tab的数量和名称是否合理？用户能否快速找到自己关心的公告类型？"
+
+  - name: 查看置顶公告
+    action: wait
+    wait: 500
+    check:
+      - element: ".notice-page__top"
+        expect: exists
+      - product_review:
+          - "置顶公告是否在视觉上与普通公告有明显区分？'置顶'标签是否醒目？"
+          - "置顶公告的标题和摘要是否足够吸引用户点击查看详情？"
+
+  - name: 查看公告列表并滚动
+    action: scroll
+    direction: down
+    distance: 500
+    wait: 1000
+    check:
+      - screenshot: true
+      - element: ".notice-page__list"
+        expect: exists
+      - product_review:
+          - "公告卡片是否展示了关键信息：标题、发布时间、分类、摘要？信息层次是否清晰？"
+          - "公告的发布时间格式是否友好（如'2小时前'vs'2026-04-10'）？"
+          - "列表的加载动画是否流畅？滚动到底部时是否有'没有更多了'的提示？"
+
+  - name: 点击搜索图标
+    action: tap
+    selector: ".notice-page__search"
+    wait: 1000
+    check:
+      - screenshot: true
+      - element: ".notice-page__search-bar"
+        expect: exists
+      - product_review:
+          - "搜索栏展开后是否自动获取焦点？取消按钮是否方便用户退出搜索模式？"
+          - "搜索功能对于公告场景是否必要？用户更可能通过分类还是搜索来找到需要的公告？"

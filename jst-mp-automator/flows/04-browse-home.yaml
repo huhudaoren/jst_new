@@ -1,0 +1,67 @@
+name: 首页浏览完整体验
+description: 验证首页所有区块（品牌/搜索/Banner/公告条/金刚区/热门标签/推荐赛事/推荐课程）完整展示
+login: MOCK_1001
+steps:
+  - name: 进入首页
+    action: reLaunch
+    path: /pages/index/index
+    wait: 2500
+    check:
+      - screenshot: true
+      - element: ".home-page__brand-title"
+        expect: exists
+      - element: ".home-page__search"
+        expect: exists
+      - product_review:
+          - "首页加载后的第一屏信息密度是否合适？用户能否在3秒内理解页面结构？"
+          - "品牌Logo和搜索栏的布局是否符合微信小程序的操作习惯？搜索栏位置是否便于单手操作？"
+
+  - name: 检查Banner和公告条
+    action: wait
+    wait: 1000
+    check:
+      - element: ".home-page__banner"
+        expect: exists
+      - element: ".home-page__notice-strip"
+        expect: exists
+      - product_review:
+          - "Banner轮播图是否自动播放？切换动画是否流畅？图片比例是否适配屏幕？"
+          - "公告条的滚动播报是否引人注目但不干扰阅读？'查看更多'入口是否容易发现？"
+
+  - name: 查看金刚区快捷入口
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 800
+    check:
+      - screenshot: true
+      - element: ".home-page__entry-grid"
+        expect: exists
+      - product_review:
+          - "金刚区图标的含义是否一目了然？图标+文字的组合能否让用户快速理解每个入口的功能？"
+          - "金刚区的入口数量是否合适？对于青少年竞赛场景，核心入口（赛事/报名/课程/成绩）是否在前排？"
+
+  - name: 滚动查看推荐赛事和课程
+    action: scroll
+    direction: down
+    distance: 800
+    wait: 1000
+    check:
+      - screenshot: { full_page: true }
+      - element: ".home-page__section-title"
+        expect: exists
+      - product_review:
+          - "热门赛事和推荐课程的卡片信息是否完整（名称/价格/报名人数/时间）？卡片是否吸引用户点击？"
+          - "页面底部是否有'到底了'的提示？整体滚动体验是否流畅无卡顿？"
+          - "页面各区块之间的间距和分隔是否合理？内容层次是否清晰？"
+
+  - name: 滚动至页面底部
+    action: scroll
+    direction: down
+    distance: 1200
+    wait: 1000
+    check:
+      - screenshot: true
+      - product_review:
+          - "页面最底部的内容是否完整？是否有合理的底部留白，避免内容被TabBar遮挡？"
+          - "从首页能否快速到达所有核心功能？是否存在信息死角或不可达的功能入口？"

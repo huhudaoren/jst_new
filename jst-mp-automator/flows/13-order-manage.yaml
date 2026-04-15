@@ -1,0 +1,61 @@
+name: 订单列表与详情查看
+description: 验证订单列表页的展示、状态Tab切换、金额展示、订单详情跳转
+login: MOCK_1001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_order_main WHERE user_id = 1001 AND del_flag = '0'"
+    expect: "cnt >= 1"
+steps:
+  - name: 进入我的订单页面
+    action: navigate
+    path: /pages-sub/my/order-list
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".order-list-page__nav-title"
+        expect: exists
+      - element: ".order-list-page__tabs"
+        expect: exists
+      - product_review:
+          - "订单列表页的状态Tab是否涵盖了所有关键状态（全部/待支付/已支付/退款中/已完成）？"
+          - "Tab是否支持横向滑动？在小屏设备上所有Tab是否都可访问？"
+
+  - name: 查看订单卡片信息
+    action: wait
+    wait: 500
+    check:
+      - element: ".order-list-page__card"
+        expect: exists
+      - element: ".order-list-page__amount-value"
+        expect: exists
+      - product_review:
+          - "订单卡片是否展示了用户最关心的信息：赛事名称、订单号、参赛人、支付方式、实付金额？"
+          - "金额展示是否使用了货币格式（带¥符号、小数点）？金额是否醒目突出？"
+          - "订单状态标签是否用颜色区分了不同状态？用户能否快速识别待处理的订单？"
+
+  - name: 点击订单卡片进入详情
+    action: tap
+    selector: ".order-list-page__card:first-child"
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".order-detail-page__hero"
+        expect: exists
+      - element: ".order-detail-page__hero-amount"
+        expect: exists
+      - product_review:
+          - "订单详情页的Hero区是否突出展示了订单状态和金额？信息层次是否清晰？"
+          - "金额明细（标价/优惠券/积分抵扣/实付）是否完整展示？家长能否理解每一项扣减？"
+
+  - name: 滚动查看订单详细信息
+    action: scroll
+    direction: down
+    distance: 600
+    wait: 800
+    check:
+      - screenshot: true
+      - element: ".order-detail-page__card-title"
+        expect: exists
+      - product_review:
+          - "订单信息区是否展示了赛事名称、参赛人、创建时间、支付时间等完整信息？"
+          - "订单底部的操作按钮（申请退款/取消订单/再次支付等）是否与当前订单状态匹配？"
+          - "整个订单详情页的信息是否足以解答用户关于'我付了多少钱、给谁报的名'的问题？"

@@ -1,0 +1,41 @@
+name: 退款申请流程
+description: 验证从订单详情发起退款的操作入口和退款表单展示
+login: MOCK_1001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_order_main WHERE order_id = 9301 AND user_id = 1001 AND allow_self_refund = 1 AND order_status = 'paid' AND refund_status = 'none' AND del_flag = '0'"
+    expect: "cnt >= 1"
+steps:
+  - name: 进入可退款的订单详情
+    action: navigate
+    path: /pages-sub/my/order-detail
+    query:
+      orderId: "9301"
+    wait: 2500
+    check:
+      - screenshot: true
+      - element: ".order-detail-page__hero"
+        expect: exists
+      - product_review:
+          - "订单详情页是否正确加载了订单9301的信息？状态是否显示为'已支付'？"
+          - "页面是否展示了退款相关操作入口（申请退款按钮）？按钮位置是否容易找到？"
+
+  - name: 滚动查看操作按钮区域
+    action: scroll
+    direction: down
+    distance: 800
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "退款按钮是否在视觉上有适当的警示（如红色/橙色边框）？避免用户误触？"
+          - "如果订单超出售后期限，退款按钮是否正确禁用？提示信息是否说明了原因？"
+          - "用户是否能理解'全额退款'的含义？退款金额是否在点击前就展示了预估值？"
+
+  - name: 查看退款相关提示
+    action: wait
+    wait: 500
+    check:
+      - screenshot: true
+      - product_review:
+          - "退款政策说明是否清晰？用户能否了解退款后的影响（报名取消/积分回退/优惠券状态）？"
+          - "从用户角度看，整个退款入口是否'可发现但不突兀'？既不鼓励退款，也不让需要退款的用户找不到入口？"

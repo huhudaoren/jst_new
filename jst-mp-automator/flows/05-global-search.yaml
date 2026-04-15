@@ -1,0 +1,42 @@
+name: 全局搜索功能
+description: 验证从首页发起搜索的完整体验，包括搜索入口、输入、结果展示
+login: MOCK_1001
+steps:
+  - name: 从首页点击搜索栏
+    action: reLaunch
+    path: /pages/index/index
+    wait: 2000
+    check:
+      - element: ".home-page__search"
+        expect: exists
+
+  - name: 点击搜索入口
+    action: tap
+    selector: ".home-page__search"
+    wait: 1500
+    check:
+      - screenshot: true
+      - product_review:
+          - "点击搜索后，搜索界面是否立即响应？搜索框是否自动聚焦并弹出键盘？"
+          - "是否展示搜索历史或热门搜索推荐？对于新用户，空搜索页面的引导是否友好？"
+
+  - name: 输入搜索关键词
+    action: input
+    selector: ".contest-list-page__search-input"
+    value: "测试"
+    wait: 1500
+    check:
+      - screenshot: true
+      - product_review:
+          - "输入关键词后是否有实时搜索建议或需要点击确认？搜索体验是否符合用户预期？"
+          - "搜索结果的加载速度是否可接受？是否有加载中的反馈？"
+          - "如果没有搜索结果，空状态提示是否友好？是否提供了替代建议？"
+
+  - name: 查看搜索结果
+    action: wait
+    wait: 1000
+    check:
+      - screenshot: true
+      - product_review:
+          - "搜索结果列表的信息展示是否充分？用户能否根据结果判断哪个是自己想要的？"
+          - "搜索关键词是否在结果中有高亮标记？排序逻辑是否合理（相关性/时间/热度）？"
