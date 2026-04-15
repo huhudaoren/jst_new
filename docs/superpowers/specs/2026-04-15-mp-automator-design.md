@@ -9,7 +9,7 @@
 
 构建一个 MCP Server（`jst-mp-automator`），让 Claude Code 能通过微信开发者工具对小程序执行：
 
-1. **全链路功能闭环测试** — 28 条业务链路自动执行
+1. **全链路功能闭环测试** — 34 条业务链路自动执行
 2. **产品体验审计** — 以高级产品经理和用户视角审视每个页面
 3. **截图 + 数据库双重校验** — UI 表现与后端数据一致性验证
 
@@ -311,56 +311,88 @@ Claude 在分析每张截图时，按以下 5 个维度评审：
 
 ---
 
-## 六、28 条链路脚本清单
+## 六、34 条链路脚本清单
 
 ### 游客链路（2 条）
 
 | # | 文件 | 描述 | 测试账号 |
 |---|---|---|---|
-| 25 | `25-public-query.yaml` | 公开成绩查询 + 证书验真 | 无需登录 |
-| 26 | `26-partner-apply.yaml` | 赛事方入驻申请（4 步表单） | 无需登录 |
+| 31 | `31-public-query.yaml` | 公开成绩查询 + 证书验真 | 无需登录 |
+| 32 | `32-partner-apply.yaml` | 赛事方入驻申请（4 步表单） | 无需登录 |
 
-### 学生链路（19 条）
+### 学生链路 — 浏览与信息（5 条）
 
 | # | 文件 | 描述 | 测试账号 |
 |---|---|---|---|
 | 01 | `01-browse-home.yaml` | 首页浏览：Banner / 公告条 / 宫格 / 推荐赛事 / 课程 | MOCK_1001 |
 | 02 | `02-browse-contest.yaml` | 赛事列表：搜索 / 分类 Tab / 多级筛选 | MOCK_1001 |
-| 03 | `03-contest-detail.yaml` | 赛事详情：基本信息 / 赛程 / 奖项 / FAQ | MOCK_1001 |
-| 04 | `04-enroll-pay.yaml` | 报名 → 选参赛人 → 填表 → 提交 → 支付 | MOCK_1001 |
-| 05 | `05-my-enroll.yaml` | 我的报名：状态筛选 / 编辑草稿 / 重新提交 | MOCK_1001 |
-| 06 | `06-order-manage.yaml` | 我的订单：状态筛选 / 订单详情 / 金额校验 | MOCK_1001 |
-| 07 | `07-refund.yaml` | 退款申请 → 选原因 → 提交 → 查看进度 | MOCK_1001 |
-| 08 | `08-browse-course.yaml` | 课程列表：搜索 / 类型筛选 / 课程详情 / 目录 | MOCK_1001 |
-| 09 | `09-browse-notice.yaml` | 公告列表 → 公告详情 → 富文本展示 | MOCK_1001 |
-| 10 | `10-profile-manage.yaml` | 个人资料编辑：头像 / 昵称 / 学校 / 年级 | MOCK_1001 |
-| 11 | `11-address-manage.yaml` | 收货地址：新增 / 编辑 / 删除 / 设默认 | MOCK_1001 |
-| 12 | `12-points-center.yaml` | 积分中心：余额 / 等级 / 成长值 / 积分明细 | MOCK_9001 |
-| 13 | `13-points-mall.yaml` | 积分商城：浏览 → 详情 → 兑换 → 我的兑换 | MOCK_9001 |
-| 14 | `14-coupon.yaml` | 优惠券：领券中心 / 我的优惠券 / 状态筛选 | MOCK_1001 |
-| 15 | `15-rights.yaml` | 权益中心：查看权益 / 申请核销 / 核销记录 | MOCK_1001 |
-| 16 | `16-appointment.yaml` | 个人预约：选时段 → 确认 → 我的预约 → 二维码 | MOCK_1001 |
-| 24 | `24-score-cert.yaml` | 我的成绩（雷达图）→ 我的证书（Canvas 海报）| MOCK_1001 |
-| 28 | `28-binding-manage.yaml` | 绑定关系查看与管理 | MOCK_9212 |
+| 03 | `03-contest-detail.yaml` | 赛事详情：基本信息 / 赛程 / 奖项 / FAQ / 分享 | MOCK_1001 |
+| 04 | `04-browse-course.yaml` | 课程列表：搜索 / 类型筛选（普通/AI） | MOCK_1001 |
+| 05 | `05-browse-notice.yaml` | 公告列表 → 公告详情 → 富文本展示 → 分享 | MOCK_1001 |
 
-### 渠道方链路（7 条）
+### 学生链路 — 核心交易（4 条）
 
 | # | 文件 | 描述 | 测试账号 |
 |---|---|---|---|
-| 17 | `17-channel-auth.yaml` | 渠道认证申请：选类型 → 填材料 → 提交 | MOCK_1001 |
-| 18 | `18-channel-workspace.yaml` | 工作台首页：KPI 统计 / 快捷入口 / 近期订单 | MOCK_1003 |
-| 19 | `19-channel-rebate.yaml` | 返点中心 7 Tab + 提现结算申请 | MOCK_1003 |
-| 20 | `20-channel-student.yaml` | 学生管理：绑定学生列表 / 成绩 / 证书 | MOCK_1003 |
-| 21 | `21-channel-order.yaml` | 渠道订单：多维筛选 / 订单详情 / 返点金额 | MOCK_1003 |
-| 22 | `22-channel-batch-enroll.yaml` | 批量报名：选赛事 → 添加学生 → 提交 | MOCK_1003 |
-| 23 | `23-team-booking.yaml` | 团队预约：3 步向导 → 成员管理 → 签到状态 | MOCK_1003 |
-| 27 | `27-contract-invoice.yaml` | 合同查看 + 发票申请 | MOCK_1003 |
+| 06 | `06-enroll-pay.yaml` | 报名 → 选参赛人 → 动态表单 → 提交 → 支付 | MOCK_1001 |
+| 07 | `07-my-enroll.yaml` | 我的报名：状态筛选 / 编辑草稿 / 重新提交 | MOCK_1001 |
+| 08 | `08-order-manage.yaml` | 我的订单：状态筛选 / 订单详情 / 金额校验 | MOCK_1001 |
+| 09 | `09-refund.yaml` | 退款申请 → 选原因 → 提交 → 查看进度 | MOCK_1001 |
+
+### 学生链路 — 课程学习（2 条）
+
+| # | 文件 | 描述 | 测试账号 |
+|---|---|---|---|
+| 10 | `10-course-detail.yaml` | 课程详情 → 讲师信息 → 课程目录 → 课程介绍 | MOCK_1001 |
+| 11 | `11-my-course.yaml` | 我的课程：已购列表 / 学习进度 / 继续学习 | MOCK_1001 |
+
+### 学生链路 — 个人中心（8 条）
+
+| # | 文件 | 描述 | 测试账号 |
+|---|---|---|---|
+| 12 | `12-my-index.yaml` | 个人中心首页：信息卡 / 快捷入口 / 入口完整性 / 角色切换器 | MOCK_1001 |
+| 13 | `13-profile-edit.yaml` | 个人资料编辑：头像 / 昵称 / 学校 / 年级 | MOCK_1001 |
+| 14 | `14-participant-manage.yaml` | 参赛人档案：新建 / 编辑 / 删除 / 列表 | MOCK_1001 |
+| 15 | `15-address-manage.yaml` | 收货地址：新增 / 编辑 / 删除 / 设默认 | MOCK_1001 |
+| 16 | `16-binding-manage.yaml` | 绑定关系查看与管理 | MOCK_9212 |
+| 17 | `17-score-cert.yaml` | 我的成绩（雷达图）→ 我的证书（Canvas 海报 / 保存相册）| MOCK_1001 |
+| 18 | `18-settings.yaml` | 设置页：消息提醒 / 账号安全 / 隐私政策 | MOCK_1001 |
+| 19 | `19-help-support.yaml` | 客服与帮助：FAQ 列表 / 问题详情 / 在线咨询入口 | MOCK_1001 |
+
+### 学生链路 — 积分与营销（4 条）
+
+| # | 文件 | 描述 | 测试账号 |
+|---|---|---|---|
+| 20 | `20-points-center.yaml` | 积分中心：余额 / 等级 / 成长值 / 积分明细 | MOCK_9001 |
+| 21 | `21-points-mall.yaml` | 积分商城：浏览 → 详情 → 兑换 → 我的兑换 | MOCK_9001 |
+| 22 | `22-coupon.yaml` | 优惠券：领券中心 / 我的优惠券 / 状态筛选 | MOCK_1001 |
+| 23 | `23-rights.yaml` | 权益中心：查看权益 / 申请核销 / 核销记录 | MOCK_1001 |
+
+### 学生链路 — 预约与核销（2 条）
+
+| # | 文件 | 描述 | 测试账号 |
+|---|---|---|---|
+| 24 | `24-appointment.yaml` | 个人预约：日历选时段 → 确认 → 我的预约 → 二维码 | MOCK_1001 |
+| 25 | `25-writeoff-station.yaml` | 核销工作台：扫码入口 / 核销记录 / 核销状态 | MOCK_1003 |
+
+### 渠道方链路（8 条）
+
+| # | 文件 | 描述 | 测试账号 |
+|---|---|---|---|
+| 26 | `26-channel-auth.yaml` | 渠道认证申请：选类型 → 填材料 → 上传资质 → 提交 | MOCK_1001 |
+| 27 | `27-channel-workspace.yaml` | 工作台首页：KPI 统计 / 快捷入口 / 近期订单 | MOCK_1003 |
+| 28 | `28-channel-rebate.yaml` | 返点中心 7 Tab + 提现结算申请 | MOCK_1003 |
+| 29 | `29-channel-student.yaml` | 学生管理：绑定学生列表 / 成绩 / 证书 | MOCK_1003 |
+| 30 | `30-channel-order.yaml` | 渠道订单：多维筛选 / 订单详情 / 返点金额 | MOCK_1003 |
+| 33 | `33-channel-batch-enroll.yaml` | 批量报名：选赛事 → 添加学生 → 提交 | MOCK_1003 |
+| 34 | `34-team-booking.yaml` | 团队预约：3 步向导 → 成员管理 → 签到状态 / 合同与开票 | MOCK_1003 |
+| 35 | `35-contract-invoice.yaml` | 合同查看（状态筛选 / 下载）+ 发票申请 | MOCK_1003 |
 
 ### 全量回归
 
 | 文件 | 描述 |
 |---|---|
-| `_full-regression.yaml` | 按依赖顺序串联全部 28 条链路，先游客 → 学生 → 渠道方 |
+| `_full-regression.yaml` | 按依赖顺序串联全部 34 条链路，先游客 → 学生 → 渠道方 |
 
 ---
 
@@ -501,10 +533,42 @@ D:\coding\jst_v1\
 │   │   ├── reporter.js                # 报告生成器
 │   │   ├── db.js                      # MySQL 连接池
 │   │   └── config.js                  # 配置（超时/重试/数据库）
-│   ├── flows\                         # 28 条 YAML 链路 + 全量回归
-│   │   ├── 01-browse-home.yaml
-│   │   ├── ...
-│   │   ├── 28-binding-manage.yaml
+│   ├── flows\                         # 34 条 YAML 链路 + 全量回归
+│   │   ├── 01-browse-home.yaml        # 首页浏览
+│   │   ├── 02-browse-contest.yaml     # 赛事列表
+│   │   ├── 03-contest-detail.yaml     # 赛事详情
+│   │   ├── 04-browse-course.yaml      # 课程列表
+│   │   ├── 05-browse-notice.yaml      # 公告浏览
+│   │   ├── 06-enroll-pay.yaml         # 报名支付
+│   │   ├── 07-my-enroll.yaml          # 我的报名
+│   │   ├── 08-order-manage.yaml       # 我的订单
+│   │   ├── 09-refund.yaml             # 退款
+│   │   ├── 10-course-detail.yaml      # 课程详情+目录
+│   │   ├── 11-my-course.yaml          # 我的课程+学习进度
+│   │   ├── 12-my-index.yaml           # 个人中心首页
+│   │   ├── 13-profile-edit.yaml       # 个人资料编辑
+│   │   ├── 14-participant-manage.yaml # 参赛人档案CRUD
+│   │   ├── 15-address-manage.yaml     # 收货地址
+│   │   ├── 16-binding-manage.yaml     # 绑定关系
+│   │   ├── 17-score-cert.yaml         # 成绩+证书
+│   │   ├── 18-settings.yaml           # 设置
+│   │   ├── 19-help-support.yaml       # 客服与帮助
+│   │   ├── 20-points-center.yaml      # 积分中心
+│   │   ├── 21-points-mall.yaml        # 积分商城
+│   │   ├── 22-coupon.yaml             # 优惠券
+│   │   ├── 23-rights.yaml             # 权益
+│   │   ├── 24-appointment.yaml        # 个人预约
+│   │   ├── 25-writeoff-station.yaml   # 核销工作台
+│   │   ├── 26-channel-auth.yaml       # 渠道认证
+│   │   ├── 27-channel-workspace.yaml  # 渠道工作台
+│   │   ├── 28-channel-rebate.yaml     # 返点中心
+│   │   ├── 29-channel-student.yaml    # 渠道学生管理
+│   │   ├── 30-channel-order.yaml      # 渠道订单
+│   │   ├── 31-public-query.yaml       # 公开查询
+│   │   ├── 32-partner-apply.yaml      # 赛事方入驻
+│   │   ├── 33-channel-batch-enroll.yaml # 批量报名
+│   │   ├── 34-team-booking.yaml       # 团队预约
+│   │   ├── 35-contract-invoice.yaml   # 合同开票
 │   │   └── _full-regression.yaml
 │   ├── reports\                       # 测试报告输出
 │   └── screenshots\                   # 截图输出
@@ -548,7 +612,7 @@ D:\coding\jst_v1\
 | 3 | 实现 4 个观察检测工具 | `screenshot/get-page-data/get-element/get-console` |
 | 4 | 实现 3 个登录与数据工具 | `mock-login/query-db/exec-db` |
 | 5 | 实现 YAML Flow 引擎 + 报告生成 | `flow-engine.js` + `reporter.js` |
-| 6 | 编写 28 条链路脚本 | `flows/*.yaml` |
+| 6 | 编写 34 条链路脚本 | `flows/*.yaml` |
 | 7 | MCP 注册 + 端到端验证 | 跑通一条完整链路 |
 | 8 | 全量回归 + 产品体验审计 | 首份全量报告 |
 
@@ -558,11 +622,11 @@ D:\coding\jst_v1\
 
 | Mock Code | 用户名 | 角色 | 用于链路 |
 |---|---|---|---|
-| `MOCK_1001` | 测试_张妈妈 | student | 01-11, 14-17, 24 |
-| `MOCK_1003` | 测试_王老师 | student + channel | 18-23, 27 |
-| `MOCK_9001` | 积分中心用户 | student | 12, 13 |
-| `MOCK_9212` | FCD_STUDENT_B | student（已绑渠道） | 28 |
-| 无需登录 | — | 游客 | 25, 26 |
+| `MOCK_1001` | 测试_张妈妈 | student | 01-15, 17-19, 22-24, 26 |
+| `MOCK_1003` | 测试_王老师 | student + channel | 25, 27-30, 33-35 |
+| `MOCK_9001` | 积分中心用户 | student | 20, 21 |
+| `MOCK_9212` | FCD_STUDENT_B | student（已绑渠道） | 16 |
+| 无需登录 | — | 游客 | 31, 32 |
 
 ---
 
