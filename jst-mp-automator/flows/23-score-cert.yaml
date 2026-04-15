@@ -1,0 +1,55 @@
+name: 成绩与证书查看
+description: 验证成绩列表、雷达图、证书列表、下载分享功能
+login: MOCK_1001
+steps:
+  - name: 进入成绩列表页
+    action: navigate
+    path: /pages-sub/my/score
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".score-page__content"
+        expect: exists
+      - product_review:
+          - "成绩列表页是否按赛事维度清晰展示了各项成绩？卡片是否包含赛事名称、参赛人、总分等信息？"
+          - "如果用户暂无成绩记录，空状态提示是否友好？是否引导用户去报名参赛？"
+
+  - name: 查看成绩详情与雷达图
+    action: tap
+    selector: ".score-page__card:first-child"
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".score-detail-page__radar"
+        expect: exists
+      - element: ".score-detail-page__items"
+        expect: exists
+      - product_review:
+          - "雷达图是否正确展示了各评分维度？图形是否清晰可读、颜色是否区分度够高？"
+          - "各评分项的具体分数是否在雷达图下方以列表形式展示？总分是否醒目突出？"
+          - "用户能否理解每个评分维度的含义？是否有简要说明？"
+
+  - name: 返回并进入证书列表
+    action: navigate
+    path: /pages-sub/my/cert
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".cert-page__content"
+        expect: exists
+      - product_review:
+          - "证书列表页是否按赛事或获奖等级分类展示？每张证书卡片是否展示了赛事名、证书编号、获奖等级？"
+          - "证书卡片的缩略图是否清晰？用户能否通过缩略图识别出证书类型？"
+
+  - name: 查看证书详情
+    action: tap
+    selector: ".cert-page__card:first-child"
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".cert-detail-page__image"
+        expect: exists
+      - product_review:
+          - "证书详情页是否展示了完整的证书图片？图片是否支持手势缩放查看？"
+          - "保存到相册和分享按钮是否在显眼位置？按钮图标和文案是否直观？"
+          - "证书验证码或编号是否在页面底部展示，方便需要时查阅？"

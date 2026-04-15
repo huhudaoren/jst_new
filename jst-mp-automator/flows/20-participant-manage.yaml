@@ -1,0 +1,52 @@
+name: 参赛档案管理
+description: 验证参赛档案列表展示、添加按钮、档案卡片信息、空状态处理
+login: MOCK_1001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_participant WHERE user_id = 1001 AND del_flag = '0'"
+    expect: "cnt >= 1"
+steps:
+  - name: 进入参赛档案页面
+    action: navigate
+    path: /pages-sub/my/participant
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".participant-page__list"
+        expect: exists
+      - element: ".participant-page__btn-add"
+        expect: exists
+      - product_review:
+          - "参赛档案列表页是否清晰展示了所有已添加的参赛人？页面标题和说明文案是否让用户理解本页用途？"
+          - "'新增参赛人'按钮是否在显眼位置？用户能否快速找到添加入口？"
+
+  - name: 查看档案卡片详细信息
+    action: wait
+    wait: 500
+    check:
+      - element: ".participant-page__card"
+        expect: exists
+      - element: ".participant-page__card-name"
+        expect: exists
+      - product_review:
+          - "每张档案卡片是否展示了姓名、学校、年级/班级、性别等核心信息？信息排版是否便于快速浏览？"
+          - "卡片上是否有编辑和删除操作入口？删除操作是否有二次确认防误触？"
+          - "如果参赛人已关联了报名记录，删除时是否提示'该档案已用于报名，无法删除'？"
+
+  - name: 检查档案编辑交互
+    action: tap
+    selector: ".participant-page__card:first-child"
+    wait: 1500
+    check:
+      - screenshot: true
+      - product_review:
+          - "点击档案卡片后是否进入了编辑页面？已有信息是否正确预填？"
+          - "编辑表单的字段（姓名/性别/年龄/学校/班级）是否与报名所需信息一致？用户是否理解每个字段的用途？"
+
+  - name: 返回列表检查空状态
+    action: navigateBack
+    wait: 1000
+    check:
+      - screenshot: true
+      - product_review:
+          - "如果用户删除所有档案后，空状态页面是否有引导文案和插图？是否有'立即添加'按钮？"
+          - "多个档案卡片之间的间距是否合理？卡片能否方便地上下滚动浏览？"

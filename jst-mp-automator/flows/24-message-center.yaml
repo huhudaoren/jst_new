@@ -1,0 +1,47 @@
+name: 消息中心
+description: 验证消息列表的分类Tab、未读指示、消息卡片、点击跳转
+login: MOCK_1001
+steps:
+  - name: 进入消息中心
+    action: navigate
+    path: /pages-sub/my/message
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".message-page__tabs"
+        expect: exists
+      - element: ".message-page__content"
+        expect: exists
+      - product_review:
+          - "消息中心的分类Tab（全部/系统/赛事/订单等）是否清晰？默认选中的Tab是否合理？"
+          - "Tab上的未读数量角标是否正确显示？用户能否一眼看出哪个分类有新消息？"
+
+  - name: 查看消息卡片内容
+    action: wait
+    wait: 500
+    check:
+      - element: ".message-page__card"
+        expect: exists
+      - product_review:
+          - "每条消息卡片是否展示了标题、摘要、时间？未读消息是否有明确的视觉标记（如红点/加粗）？"
+          - "消息时间的展示格式是否友好（今天/昨天/具体日期）？而非统一展示完整时间戳？"
+          - "不同类型的消息（审核通知/支付成功/退款结果）是否有对应的图标区分？"
+
+  - name: 点击消息卡片测试跳转
+    action: tap
+    selector: ".message-page__card:first-child"
+    wait: 1500
+    check:
+      - screenshot: true
+      - product_review:
+          - "点击消息后是否跳转到了对应的详情页（如报名详情/订单详情）？跳转是否准确无误？"
+          - "返回消息列表后，刚才点击的消息是否已标记为已读？红点是否消失？"
+
+  - name: 检查空状态和全部已读
+    action: navigateBack
+    wait: 1000
+    check:
+      - screenshot: true
+      - product_review:
+          - "如果某个分类无消息，空状态提示是否友好（如'暂无消息，有新动态会及时通知你'）？"
+          - "是否有'全部已读'按钮？该功能是否便于用户批量清除未读标记？"

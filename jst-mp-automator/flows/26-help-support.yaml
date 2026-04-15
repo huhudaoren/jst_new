@@ -1,0 +1,48 @@
+name: 帮助中心
+description: 验证FAQ列表、可展开折叠项、联系方式、搜索功能
+login: MOCK_1001
+steps:
+  - name: 进入帮助中心
+    action: navigate
+    path: /pages-sub/public/help
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".help-page__content"
+        expect: exists
+      - product_review:
+          - "帮助中心页面是否有清晰的标题和分类（如报名相关/支付相关/退款相关/账户相关）？"
+          - "页面顶部是否有搜索框，方便用户直接搜索问题关键词？"
+
+  - name: 查看FAQ列表项
+    action: wait
+    wait: 500
+    check:
+      - element: ".help-page__faq-item"
+        expect: exists
+      - product_review:
+          - "FAQ问题列表的文字大小是否易于阅读？每个问题是否有展开/收起的箭头图标？"
+          - "问题分类（报名/支付/退款/渠道）是否覆盖了用户最常遇到的场景？"
+          - "是否有'联系客服'入口？联系方式（电话/微信）是否可一键拨打或复制？"
+
+  - name: 展开一个FAQ项查看答案
+    action: tap
+    selector: ".help-page__faq-item:first-child"
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "FAQ展开后答案内容是否完整清晰？文字排版是否舒适（行高、段落间距）？"
+          - "答案中如果涉及操作步骤，是否有分步说明（1、2、3）而非一大段文字？"
+          - "展开一个问题后再点击是否能收起？多个问题是否支持同时展开？"
+
+  - name: 滚动查看更多FAQ和联系方式
+    action: scroll
+    direction: down
+    distance: 600
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "页面底部的联系方式区域是否包含客服电话、工作时间、微信公众号等完整信息？"
+          - "从用户角度看，帮助中心的内容是否真的能解答常见疑问？还是仅仅是占位内容？"

@@ -1,0 +1,48 @@
+name: 收货地址管理
+description: 验证收货地址列表、默认标记、新增/编辑/删除操作
+login: MOCK_1001
+steps:
+  - name: 进入地址列表页
+    action: navigate
+    path: /pages-sub/my/address-list
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".address-list-page__content"
+        expect: exists
+      - element: ".address-list-page__btn-add"
+        expect: exists
+      - product_review:
+          - "地址列表页是否正确展示了用户已保存的收货地址？每条地址的收件人、电话、详细地址是否完整？"
+          - "'新增地址'按钮是否在底部固定区域，便于随时添加？"
+
+  - name: 检查地址卡片和默认标记
+    action: wait
+    wait: 500
+    check:
+      - element: ".address-list-page__card"
+        expect: exists
+      - product_review:
+          - "默认地址是否有醒目标记（如'默认'标签）？用户能否一眼区分默认地址和其他地址？"
+          - "每条地址卡片是否提供了编辑和删除入口？操作入口是否足够小以避免误触但又不至于难以点击？"
+          - "地址信息的层次是否清晰（收件人+电话在上，地址在下）？长地址是否正确折行而非截断？"
+
+  - name: 点击新增地址按钮
+    action: tap
+    selector: ".address-list-page__btn-add"
+    wait: 1500
+    check:
+      - screenshot: true
+      - product_review:
+          - "新增地址页的表单是否包含收件人、手机号、省市区选择器、详细地址、设为默认等字段？"
+          - "省市区选择器的交互方式是否符合微信小程序的原生体验？层级联动是否流畅？"
+          - "手机号格式校验和详细地址长度限制是否有明确提示？"
+
+  - name: 返回地址列表
+    action: navigateBack
+    wait: 1000
+    check:
+      - screenshot: true
+      - product_review:
+          - "如果用户无任何地址记录，空状态是否有友好提示和引导添加按钮？"
+          - "地址数量较多时列表是否支持滚动？是否有地址数量上限提示？"

@@ -1,0 +1,53 @@
+name: 渠道绑定管理
+description: 验证渠道绑定关系展示、渠道名称显示、解绑操作
+login: MOCK_9212
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_channel_binding WHERE user_id = 9212 AND del_flag = '0'"
+    expect: "cnt >= 1"
+steps:
+  - name: 进入绑定管理页面
+    action: navigate
+    path: /pages-sub/my/binding
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".binding-page__content"
+        expect: exists
+      - product_review:
+          - "绑定管理页是否正确加载了当前用户的渠道绑定信息？页面标题和说明是否让用户理解绑定含义？"
+          - "对于已有绑定的用户，绑定信息卡片是否清晰展示了渠道名称、绑定时间？"
+
+  - name: 检查绑定卡片详情
+    action: wait
+    wait: 500
+    check:
+      - element: ".binding-page__card"
+        expect: exists
+      - element: ".binding-page__channel-name"
+        expect: exists
+      - product_review:
+          - "渠道名称是否完整展示？如果渠道名称较长是否正确省略并可展开查看？"
+          - "绑定状态标签（已绑定/已解绑）是否有明确的视觉区分？"
+          - "用户能否理解绑定渠道的价值（如获得专属优惠、返点等）？页面是否有简要说明？"
+
+  - name: 检查解绑操作入口
+    action: wait
+    wait: 300
+    check:
+      - element: ".binding-page__btn-unbind"
+        expect: exists
+      - product_review:
+          - "解绑按钮是否存在但不过分突出？按钮颜色是否使用警告色（红/橙）暗示操作不可逆？"
+          - "用户点击解绑后是否有二次确认弹窗，说明解绑后的影响（如失去专属价格）？"
+          - "如果渠道绑定有锁定期限制，是否显示了剩余锁定天数并禁用解绑按钮？"
+
+  - name: 整体布局检查
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 500
+    check:
+      - screenshot: { full_page: true }
+      - product_review:
+          - "未绑定渠道的用户访问此页面时，是否展示空状态引导（如扫码绑定渠道的说明）？"
+          - "页面整体的信息架构是否简洁明了？用户是否能在10秒内理解自己的绑定状况？"

@@ -1,0 +1,51 @@
+name: 优惠券中心
+description: 验证优惠券分类Tab、卡片展示、领券页面
+login: MOCK_1001
+steps:
+  - name: 进入优惠券中心
+    action: navigate
+    path: /pages-sub/coupon/center
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".coupon-center-page__tabs"
+        expect: exists
+      - element: ".coupon-center-page__content"
+        expect: exists
+      - product_review:
+          - "优惠券中心的Tab分类（可用/已使用/已过期）是否清晰？默认选中'可用'是否合理？"
+          - "如果用户无可用优惠券，空状态是否引导用户去领券页面？"
+
+  - name: 查看优惠券卡片样式
+    action: wait
+    wait: 500
+    check:
+      - element: ".coupon-center-page__card"
+        expect: exists
+      - product_review:
+          - "优惠券卡片的样式是否有'票券'的视觉感？是否有锯齿边缘或独立的面额区域？"
+          - "卡片是否清晰展示了面额、使用条件（满X减Y）、有效期、适用范围？"
+          - "即将过期的优惠券是否有醒目提示（如'明天过期'红色标签）？促使用户尽快使用？"
+
+  - name: 切换到已使用Tab
+    action: tap
+    selector: ".coupon-center-page__tab:nth-child(2)"
+    wait: 1500
+    check:
+      - screenshot: true
+      - product_review:
+          - "已使用的优惠券卡片是否以灰色/暗色展示？与可用券形成明确的视觉区分？"
+          - "已使用券是否展示了使用时间和关联订单信息？方便用户追溯？"
+
+  - name: 进入领券中心
+    action: navigate
+    path: /pages-sub/coupon/claimable
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".claimable-page__content"
+        expect: exists
+      - product_review:
+          - "领券页面是否展示了当前可领取的优惠券列表？每张券是否有'立即领取'按钮？"
+          - "已领取的券是否显示'已领取'灰色状态？限领次数是否有说明（如每人限领1张）？"
+          - "领取成功后是否有即时反馈（如toast或按钮变为'已领取'）？无需跳转即可继续领其他券？"

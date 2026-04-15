@@ -1,0 +1,51 @@
+name: 权益中心
+description: 验证权益列表展示、详情页、核销申请流程
+login: MOCK_1001
+steps:
+  - name: 进入权益中心
+    action: navigate
+    path: /pages-sub/rights/center
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".rights-center-page__content"
+        expect: exists
+      - product_review:
+          - "权益中心页面的Tab分类（可用/待生效/已过期）是否清晰？用户能否理解'权益'的含义？"
+          - "如果用户暂无权益，空状态是否解释了权益的获取途径（积分兑换/购买课程赠送等）？"
+
+  - name: 查看权益卡片
+    action: wait
+    wait: 500
+    check:
+      - element: ".rights-center-page__card"
+        expect: exists
+      - product_review:
+          - "权益卡片是否展示了权益名称、类型（线下体验/赛事优先报名等）、有效期、使用说明？"
+          - "可用权益和已过期权益的视觉区分是否明确？过期权益是否灰显？"
+          - "权益卡片是否有'去使用'按钮？用户能否理解点击后的操作流程？"
+
+  - name: 进入权益详情页
+    action: tap
+    selector: ".rights-center-page__card:first-child"
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".rights-detail-page__info"
+        expect: exists
+      - product_review:
+          - "权益详情页是否完整展示了使用规则、有效时间、核销方式？"
+          - "核销方式说明（线下出示/扫码等）是否清晰？用户是否知道去哪里核销？"
+          - "使用记录区域是否展示了历史核销信息（如已使用1次/共3次）？"
+
+  - name: 检查核销申请入口
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "核销申请按钮是否在详情页底部固定展示？按钮文案是否明确（如'申请核销'）？"
+          - "核销流程是否有步骤提示（提交申请→工作人员确认→核销完成）？"
+          - "用户对权益的核销流程是否可能产生困惑？说明文案是否足够通俗易懂？"

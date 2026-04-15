@@ -1,0 +1,53 @@
+name: 预约管理
+description: 验证预约列表、状态展示、详情页、二维码、取消操作
+login: MOCK_1001
+steps:
+  - name: 进入我的预约列表
+    action: navigate
+    path: /pages-sub/appointment/my-list
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".appointment-list-page__content"
+        expect: exists
+      - product_review:
+          - "我的预约列表是否按时间倒序展示了所有预约记录？页面标题和导航是否清晰？"
+          - "如果用户暂无预约，空状态是否引导用户去赛事页面预约？"
+
+  - name: 查看预约卡片信息
+    action: wait
+    wait: 500
+    check:
+      - element: ".appointment-list-page__card"
+        expect: exists
+      - product_review:
+          - "预约卡片是否展示了赛事名称、预约时间段、预约状态、参赛人等核心信息？"
+          - "预约状态标签（待核销/已核销/已取消/已过期）的颜色区分是否合理？"
+          - "即将到来的预约是否有时间倒计提示（如'明天下午 14:00'）？帮助用户合理安排时间？"
+
+  - name: 进入预约详情页
+    action: tap
+    selector: ".appointment-list-page__card:first-child"
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".appointment-detail-page__info"
+        expect: exists
+      - element: ".appointment-detail-page__qrcode"
+        expect: exists
+      - product_review:
+          - "预约详情页是否展示了完整的预约信息（赛事、时间、地点、参赛人、预约编号）？"
+          - "核销二维码是否清晰展示在页面中央？二维码下方是否有'请出示此码完成核销'的提示？"
+          - "二维码是否支持点击放大？在光线不好的场景下扫码是否有亮度增强功能？"
+
+  - name: 检查取消预约操作
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "取消预约按钮是否在页面底部展示？按钮颜色是否使用灰色或警告色？"
+          - "点击取消后是否有二次确认弹窗？弹窗是否说明取消后的影响（如名额释放、不可恢复）？"
+          - "已核销或已过期的预约详情页是否隐藏了取消按钮？状态变更是否有时间线展示？"

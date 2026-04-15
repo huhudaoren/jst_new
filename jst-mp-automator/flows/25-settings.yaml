@@ -1,0 +1,54 @@
+name: 设置页面
+description: 验证通知开关、账户安全、隐私政策链接、退出登录功能
+login: MOCK_1001
+steps:
+  - name: 进入设置页面
+    action: navigate
+    path: /pages-sub/my/settings
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".settings-page__content"
+        expect: exists
+      - product_review:
+          - "设置页面的分组是否合理（消息通知/账户安全/关于/退出）？各组之间是否有明确的视觉分隔？"
+          - "页面加载后各设置项的当前状态是否正确反映了用户的实际设置？"
+
+  - name: 检查通知设置开关
+    action: wait
+    wait: 500
+    check:
+      - element: ".settings-page__switch--notification"
+        expect: exists
+      - product_review:
+          - "消息通知开关是否以Switch组件展示？当前状态（开/关）是否一目了然？"
+          - "关闭通知时是否有提示告知用户可能错过重要信息（如审核结果、支付通知）？"
+          - "各通知类别（赛事/订单/系统）是否支持分别控制？还是仅有总开关？"
+
+  - name: 检查隐私和协议入口
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 500
+    check:
+      - element: ".settings-page__cell--privacy"
+        expect: exists
+      - element: ".settings-page__cell--agreement"
+        expect: exists
+      - product_review:
+          - "隐私政策和用户协议入口是否可点击跳转？链接文字是否使用了标准法律文案？"
+          - "'关于我们'区域是否展示了应用版本号？便于用户反馈问题时提供版本信息？"
+
+  - name: 检查退出登录按钮
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 500
+    check:
+      - screenshot: true
+      - element: ".settings-page__btn-logout"
+        expect: exists
+      - product_review:
+          - "退出登录按钮是否在页面底部，使用红色或警告色以示重要性？"
+          - "点击退出登录后是否有二次确认弹窗？弹窗文案是否明确（'确定退出当前账号？'）？"
+          - "退出后是否正确清除登录态并跳转到登录页？TabBar上的个人中心是否恢复未登录状态？"

@@ -1,0 +1,81 @@
+name: 个人中心首页
+description: 验证个人中心的个人资料卡、角色切换、功能入口完整性、徽标计数
+login: MOCK_1001
+steps:
+  - name: 进入个人中心
+    action: reLaunch
+    path: /pages/my/index
+    wait: 2500
+    check:
+      - screenshot: true
+      - element: ".my-page__profile-card"
+        expect: exists
+      - element: ".my-page__entry-grid"
+        expect: exists
+      - product_review:
+          - "个人资料卡是否展示了头像、昵称、手机号等关键信息？用户能否一眼确认当前登录身份？"
+          - "页面首屏的信息密度是否合适？功能入口是否分类清晰（报名/订单/资产/管理/服务）？"
+
+  - name: 检查核心功能入口完整性
+    action: wait
+    wait: 800
+    check:
+      - element: ".my-page__entry--enroll"
+        expect: exists
+      - element: ".my-page__entry--order"
+        expect: exists
+      - element: ".my-page__entry--score"
+        expect: exists
+      - element: ".my-page__entry--cert"
+        expect: exists
+      - product_review:
+          - "报名、订单、成绩、证书四个核心入口是否在最显眼的位置？图标和文字是否语义清晰？"
+          - "各入口上方的数字徽标（待审核/待支付等）是否正确展示？无数据时是否隐藏徽标而非显示0？"
+
+  - name: 滚动查看更多功能入口
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - screenshot: true
+      - element: ".my-page__entry--points"
+        expect: exists
+      - element: ".my-page__entry--coupon"
+        expect: exists
+      - element: ".my-page__entry--rights"
+        expect: exists
+      - element: ".my-page__entry--address"
+        expect: exists
+      - element: ".my-page__entry--participant"
+        expect: exists
+      - element: ".my-page__entry--binding"
+        expect: exists
+      - element: ".my-page__entry--settings"
+        expect: exists
+      - product_review:
+          - "积分、优惠券、权益、地址、档案、绑定、设置等二级入口是否全部可见？是否存在遗漏的功能入口？"
+          - "课程入口是否在合理位置？用户的已购课程能否方便地找到？"
+
+  - name: 检查角色切换器
+    action: scroll
+    direction: up
+    distance: 400
+    wait: 500
+    check:
+      - element: ".my-page__role-switcher"
+        expect: exists
+      - product_review:
+          - "角色切换器（学生/渠道方/赛事方）是否可见？当前选中的角色是否有明确的高亮状态？"
+          - "对于仅有学生身份的用户，渠道方/赛事方入口是否以'去申请'的引导形式展示而非隐藏？"
+
+  - name: 整体页面截图
+    action: scroll
+    direction: down
+    distance: 800
+    wait: 800
+    check:
+      - screenshot: { full_page: true }
+      - product_review:
+          - "个人中心的整体视觉风格是否与首页、赛事页保持一致？色调和间距是否统一？"
+          - "页面底部是否有足够留白避免被TabBar遮挡？所有入口是否可触达无死角？"

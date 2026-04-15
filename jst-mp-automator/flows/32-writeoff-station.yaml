@@ -1,0 +1,51 @@
+name: 核销工作台
+description: 验证渠道方扫码核销入口和核销记录页面
+login: MOCK_1003
+steps:
+  - name: 进入扫码核销页面
+    action: navigate
+    path: /pages-sub/appointment/scan
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".scan-page__content"
+        expect: exists
+      - element: ".scan-page__btn-scan"
+        expect: exists
+      - product_review:
+          - "核销工作台页面是否清晰展示了扫码核销的功能入口？页面设计是否适合工作人员快速操作？"
+          - "扫码按钮是否足够大且在页面中央？按钮样式是否暗示'点击即可扫码'的操作？"
+
+  - name: 检查核销功能区域
+    action: wait
+    wait: 500
+    check:
+      - element: ".scan-page__stats"
+        expect: exists
+      - product_review:
+          - "页面是否展示了今日核销统计（已核销数/待核销数）？帮助工作人员了解整体进度？"
+          - "是否支持手动输入核销码作为扫码的备选方案？输入框是否在扫码按钮附近？"
+          - "核销操作是否仅限于有权限的渠道方/赛事方用户？普通学生用户能否访问此页面？"
+
+  - name: 进入核销记录页面
+    action: navigate
+    path: /pages-sub/appointment/writeoff-record
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".writeoff-record-page__list"
+        expect: exists
+      - product_review:
+          - "核销记录列表是否按时间倒序展示？每条记录是否包含参赛人姓名、赛事名、核销时间？"
+          - "记录列表是否支持按日期或赛事筛选？方便工作人员查找特定核销记录？"
+          - "核销记录是否有明确的状态标识（成功/异常）？异常核销是否有原因说明？"
+
+  - name: 检查核销记录详情
+    action: tap
+    selector: ".writeoff-record-page__item:first-child"
+    wait: 1000
+    check:
+      - screenshot: true
+      - product_review:
+          - "核销记录的详情是否展示了完整信息（预约编号、参赛人、核销码、核销时间、操作人）？"
+          - "从工作人员的角度看，核销工作台的整体操作流程是否高效？是否需要在不同页面间频繁切换？"

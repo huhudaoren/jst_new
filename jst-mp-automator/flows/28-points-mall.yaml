@@ -1,0 +1,59 @@
+name: 积分商城
+description: 验证商品列表、详情页、兑换流程、兑换记录
+login: MOCK_9001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_points_account WHERE user_id = 9001 AND del_flag = '0'"
+    expect: "cnt >= 1"
+  - sql: "SELECT COUNT(*) as cnt FROM jst_points_goods WHERE status = '1' AND del_flag = '0'"
+    expect: "cnt >= 1"
+steps:
+  - name: 进入积分商城列表
+    action: navigate
+    path: /pages-sub/mall/list
+    wait: 2500
+    check:
+      - screenshot: true
+      - element: ".mall-list-page__content"
+        expect: exists
+      - product_review:
+          - "积分商城列表页是否展示了可兑换的商品卡片？每张卡片是否包含商品图、名称、所需积分？"
+          - "用户当前的积分余额是否在页面顶部展示？方便用户判断能兑换哪些商品？"
+
+  - name: 查看商品卡片详情
+    action: wait
+    wait: 500
+    check:
+      - element: ".mall-list-page__card"
+        expect: exists
+      - product_review:
+          - "商品卡片的布局是否美观（图片在上、信息在下）？积分价格是否比商品名称更醒目？"
+          - "库存不足或已下架的商品是否有灰色/售罄标记？避免用户点进去才发现无法兑换？"
+          - "是否有商品分类筛选（虚拟/实物/优惠券）？帮助用户快速定位目标商品？"
+
+  - name: 进入商品详情页
+    action: tap
+    selector: ".mall-list-page__card:first-child"
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".mall-detail-page__info"
+        expect: exists
+      - element: ".mall-detail-page__btn-exchange"
+        expect: exists
+      - product_review:
+          - "商品详情页是否展示了完整的商品图片、名称、描述、所需积分、库存数量？"
+          - "兑换按钮的文案是否明确（如'立即兑换（200积分）'）？积分不足时按钮是否禁用并提示？"
+          - "虚拟商品（如优惠券）和实物商品是否有不同的描述模板？实物是否提示需要填写收货地址？"
+
+  - name: 进入兑换记录
+    action: navigate
+    path: /pages-sub/mall/exchange-list
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".exchange-list-page__content"
+        expect: exists
+      - product_review:
+          - "兑换记录是否按时间倒序展示？每条记录是否包含商品名、兑换积分、兑换时间、状态？"
+          - "不同状态的兑换记录（待发货/已完成/已取消）是否有清晰的状态标签区分？"
+          - "实物商品的兑换记录是否展示了物流信息或发货状态？"

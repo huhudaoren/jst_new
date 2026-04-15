@@ -1,0 +1,57 @@
+name: 个人资料编辑
+description: 验证个人资料编辑页的表单预填、头像上传、保存校验
+login: MOCK_1001
+steps:
+  - name: 进入个人资料编辑页
+    action: navigate
+    path: /pages-sub/my/profile-edit
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".profile-edit-page__form"
+        expect: exists
+      - element: ".profile-edit-page__avatar"
+        expect: exists
+      - product_review:
+          - "个人资料编辑页是否正确预填了当前用户的昵称、手机号等已有信息？"
+          - "头像区域是否展示了当前头像并有明确的'更换'提示？点击热区是否足够大？"
+
+  - name: 检查表单字段完整性
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 800
+    check:
+      - screenshot: true
+      - element: ".profile-edit-page__field--nickname"
+        expect: exists
+      - element: ".profile-edit-page__field--phone"
+        expect: exists
+      - product_review:
+          - "所有可编辑字段（昵称、性别、生日等）是否都有清晰的标签和占位提示？"
+          - "手机号字段是否以脱敏形式展示（如138****1234）？修改手机号是否需要额外验证流程？"
+          - "只读字段（如微信openid）是否以灰色/禁用态展示，避免用户误以为可编辑？"
+
+  - name: 检查保存按钮和表单校验
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 500
+    check:
+      - element: ".profile-edit-page__btn-save"
+        expect: exists
+      - product_review:
+          - "保存按钮是否在页面底部固定位置，方便用户修改后立即保存？"
+          - "如果用户未修改任何字段直接点保存，是否给出'无修改'的提示而非执行无意义的请求？"
+          - "昵称是否有长度限制和敏感词提示？用户能否理解校验失败的原因？"
+
+  - name: 整体表单布局检查
+    action: scroll
+    direction: up
+    distance: 600
+    wait: 500
+    check:
+      - screenshot: { full_page: true }
+      - product_review:
+          - "表单各字段的间距、字体大小是否统一？输入框和标签的对齐是否规范？"
+          - "从用户角度看，编辑资料的流程是否足够简洁？是否存在不必要的步骤或字段？"

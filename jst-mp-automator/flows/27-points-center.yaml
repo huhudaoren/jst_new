@@ -1,0 +1,68 @@
+name: 积分中心
+description: 验证积分余额、等级、成长进度、任务列表、积分明细
+login: MOCK_9001
+precondition:
+  - sql: "SELECT COUNT(*) as cnt FROM jst_points_account WHERE user_id = 9001 AND del_flag = '0'"
+    expect: "cnt >= 1"
+steps:
+  - name: 进入积分中心
+    action: navigate
+    path: /pages-sub/points/center
+    wait: 2500
+    check:
+      - screenshot: true
+      - element: ".points-center-page__balance"
+        expect: exists
+      - element: ".points-center-page__level"
+        expect: exists
+      - product_review:
+          - "积分余额是否在页面顶部醒目展示？数字字体是否足够大、能让用户一眼看到？"
+          - "当前等级和成长进度条是否清晰？用户能否理解距离下一等级还需多少积分？"
+
+  - name: 查看等级成长进度
+    action: wait
+    wait: 500
+    check:
+      - element: ".points-center-page__growth-bar"
+        expect: exists
+      - product_review:
+          - "成长进度条的视觉设计是否直观？进度百分比和文字说明是否同时展示？"
+          - "等级名称（如青铜/白银/黄金）是否让用户有动力去提升？等级权益说明是否可见？"
+
+  - name: 查看赚取积分任务列表
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - screenshot: true
+      - element: ".points-center-page__task-list"
+        expect: exists
+      - product_review:
+          - "赚积分的任务列表是否清晰展示了每个任务的名称、奖励积分数和完成状态？"
+          - "已完成的任务是否有明确标记（如灰色+勾选）？未完成任务是否有'去完成'按钮？"
+          - "任务列表是否包含每日签到、完善资料、报名参赛等核心场景？"
+
+  - name: 进入积分明细
+    action: navigate
+    path: /pages-sub/points/detail
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".points-detail-page__list"
+        expect: exists
+      - product_review:
+          - "积分明细是否按时间倒序展示？每条记录是否包含来源/用途描述、积分变动值（+/-）和时间？"
+          - "积分增加（+）和消耗（-）是否用不同颜色区分（如绿色/红色）？"
+          - "明细列表是否支持下拉加载更多？数据较多时滚动是否流畅？"
+
+  - name: 检查积分明细筛选
+    action: scroll
+    direction: down
+    distance: 500
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "积分明细是否支持按类型筛选（全部/获取/消耗）？筛选交互是否便捷？"
+          - "每条明细记录是否可点击查看详情（如关联的订单号或任务名称）？"
