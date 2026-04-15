@@ -226,6 +226,21 @@ D:\coding\jst_v1\
 | REFACTOR-9-MP-BOOKING | 预约时间段选择 + 团队报名 3 步向导 + 7 项防呆 | ✅ 完成 |
 | REFACTOR-10-MP-VISUAL | C 端视觉重塑 15 页 + 8 组件 + 15 Token + 8 动画 | ✅ 完成 |
 | REFACTOR-11-MP-CERT | 成绩雷达图 + 证书海报 Canvas + 一键保存相册 + 3 入口 | ✅ 完成 |
+| **傻瓜化收尾** | | |
+| REFACTOR-TODO-P0 | 后端 6 接口补齐（团队报名/VO 字段/预约/表单/证书/小程序码） | ✅ 完成 |
+| REFACTOR-TODO-CERT-RENDER | 证书客户端渲染引擎（cert-renderer.js + 后端 layoutJson 返回） | ✅ 完成 |
+| REFACTOR-TODO-P2P3 | 评审过滤 + Redis Key + participantId 关联 + 旧组件清理 | ✅ 完成 |
+| NOT NULL 默认值修复 | 7 表 NOT NULL 字段加 DEFAULT 防 INSERT 失败 | ✅ 完成 |
+| Mapper 映射修复 | JstContestMapper.xml 补齐 21 个字段映射 | ✅ 完成 |
+| **管理端全量精品化** | | |
+| ADMIN-POLISH-BE | 10 Mapper LEFT JOIN 补齐关联名称 | ✅ 完成 |
+| ADMIN-POLISH-BATCH1 | 17 页精品化（订单/渠道/营销 + 编号规则页） | ✅ 完成 |
+| ADMIN-POLISH-BATCH2 | 13 页精品化（积分/赛事数据 + 商品缩略图/分数高亮） | ✅ 完成 |
+| ADMIN-POLISH-BATCH3 | 10 页精品化（财务/风控/消息 + 16 字典 SQL） | ✅ 完成 |
+| ADMIN-FIX-FINAL | 路由末段匹配 + 功能导航 + 渠道链路 + JSON 可视化 + 参赛档案接口 | ✅ 完成 |
+| 菜单架构优化 | 赛事管理中心(操作) + 平台数据管理(数据) 职责分离 | ✅ 完成 |
+| 首页重定向 | 登录→运营看板 + 系统菜单隐藏 | ✅ 完成 |
+| 角色体系 | 6 个业务角色（运营主管/财务/客服/营销/风控/分析师） | ✅ 完成 |
 | DATA-MIGRATION | 旧数据迁移方案与脚本 | ⏸️ 搁置至 5 月中旬 |
 
 ---
@@ -274,7 +289,7 @@ D:\coding\jst_v1\
 
 ## 六、已知问题与待办
 
-> 最后更新：2026-04-14 傻瓜化重构 11 卡全部完成
+> 最后更新：2026-04-15 全量精品化 + 菜单架构优化 + 角色体系完成
 
 ### 已完成总览
 
@@ -294,7 +309,9 @@ D:\coding\jst_v1\
 | 修复 | FIX-1~5 + FIX-COMPILE + 断链 + 权限 + 样式 | 全部 ✅ |
 | 测试 | TEST-ROUND1 (81%/95%) → TEST-ROUND2 (93%/98%) | 全部 ✅ |
 | 安全+性能 | SECURITY-FIX(11项) + PERF-INDEX(7索引) + PERF-CACHE(13缓存) | 全部 ✅ |
-| **傻瓜化重构** | **11 卡：DDL去JSON + 字典翻译 + 赛事编辑 + 审核评审 + 证书设计器 + 编号引擎 + 菜单清理 + 动态表单 + 预约团队 + 视觉重塑 + 成绩证书** | **全部 ✅** |
+| **傻瓜化重构** | **11 卡 + 收尾 4 卡：DDL/字典/赛事编辑/审核/证书/编号/菜单/表单/预约/视觉/成绩** | **全部 ✅** |
+| **管理端精品化** | 40 页全量精品化 + JSON 可视化 + 渠道链路 + 功能导航 + 16 字典 | 全部 ✅ |
+| **菜单与角色** | 菜单职责分离 + 首页重定向 + 6 业务角色 + admin 全量权限 | 全部 ✅ |
 
 ### 傻瓜化重构成果汇总（2026-04-14）
 
@@ -314,22 +331,26 @@ D:\coding\jst_v1\
 | C 端视觉重塑 | 15 页极简高级灰 + 8 组件 + 15 Token + 8 动画 |
 | 成绩证书 | 雷达图 + Canvas 海报 + 一键保存相册 + 验证公开页 |
 
-### 重构遗留 TODO（后端接口补齐）
+### 已解决的遗留项
 
-| 优先级 | 项 | 来源卡 | 说明 |
-|---|---|---|---|
-| **P0** | 后端 VO 补充字段 | 卡 11 | scorePublished/hasCert/totalScore/certImageUrl 需在 wx 详情接口返回 |
-| **P0** | 团队报名后端接口 | 卡 9 | `POST /jst/wx/enroll/team/submit`（前端已就绪） |
-| **P1** | 证书生成引擎 | 卡 5 | `POST /jst/partner/cert/generate`（读取 layout_json → 渲染 PDF/PNG） |
-| **P1** | 预约时间段接口 | 卡 9 | `GET /jst/wx/appointment/contest/{id}/slots`（前端有兜底方案） |
-| **P1** | 小程序码生成 | 卡 11 | 海报中小程序码需后端 wxacode 接口 |
-| **P1** | 表单模板 partner 端点 | 卡 3 | 当前复用 admin API，partner 角色需补独立 create 端点 |
-| **P1** | 真机兼容性验证 | 卡 10 | backdrop-filter/视差/sticky 在 iOS/Android 微信实测 |
-| **P2** | 评审老师自动过滤 | 卡 4 | 评审老师登录后只看负责赛事的报名（REFACTOR-4b） |
-| **P2** | 微信邀请自动加入 | 卡 9 | 当前仅传 contestId，被邀请者需手动进入 |
-| **P3** | 旧组件清理 | 卡 8 | jst-form-render 组件仍保留（其他页面可能引用） |
-| **P3** | 证书对齐辅助线 | 卡 5 | Fabric.js guideline 插件 |
-| **P3** | OSS 真实上传 | 卡 5 | 底图/印章目前 dataURL，待 OSS 配置后接入 |
+所有 P0/P1 遗留项已在收尾卡中解决：
+- ✅ 后端 VO 字段（scorePublished/hasCert 等）
+- ✅ 团队报名接口 + 预约时间段接口 + 表单模板 partner 端点 + 证书生成接口 + 小程序码
+- ✅ 证书客户端渲染引擎（cert-renderer.js，零服务器压力）
+- ✅ 评审老师自动过滤 + Redis Key 登记 + participantId 关联
+- ✅ 旧 jst-form-render 组件删除
+- ✅ JstContestMapper 字段映射补齐 + NOT NULL 默认值修复
+- ✅ 参赛档案 Admin Controller + 路由末段匹配 + JSON 可视化
+- ✅ 菜单职责分离 + 首页重定向 + 系统菜单隐藏
+
+### 仍待处理（非阻塞）
+
+| 优先级 | 项 | 说明 |
+|---|---|---|
+| **P1** | 真机兼容性验证 | backdrop-filter/视差/sticky 在 iOS/Android 微信实测 |
+| **P2** | 微信邀请自动加入团队 | 需新建 pending_team 状态机 + join 接口（功能设计） |
+| **P3** | 证书对齐辅助线 | Fabric.js guideline 插件（锦上添花） |
+| **P3** | OSS 真实上传 | 底图/印章目前 dataURL，待 OSS 配置后接入 |
 
 ### 其他待办
 
@@ -348,6 +369,39 @@ D:\coding\jst_v1\
 | OSS 上传组件集成 | 待真实 OSS 配置后接入 |
 | select * 替换（15 处） | 性能审计建议，非阻塞 |
 
+### 管理端菜单架构（2026-04-15 最终）
+
+```
+赛事管理中心 (9700) ← 操作入口（精品页，admin 看全量/partner 看自己的）
+├── 工作台首页、赛事管理、报名审核、成绩管理
+├── 证书管理（Fabric.js 拖拽设计器）
+├── 结算中心、现场核销、账号设置
+
+平台数据管理 (9800) ← 数据查看（40 页全量精品化）
+├── 运营数据看板（登录默认首页 + 8 分组导航）
+├── 订单交易（9761）：订单/退款/支付/预约/团队/核销
+├── 用户渠道（9762）：用户/档案/渠道/认证/提现/绑定
+├── 营销权益（9753）：优惠券/权益/批次/核销记录
+├── 积分商城（9754）：积分/规则/等级/商城/兑换
+├── 公告/消息
+├── 赛事数据（9755）：成绩/证书/模板/赛事方/学习记录
+├── 财务管理（9756）：打款/合同/发票
+└── 风控审计（9757）：规则/告警/黑名单/案例/审计
+```
+
+### 角色体系（8 个）
+
+| 角色 | role_key | 说明 |
+|---|---|---|
+| 超级管理员 | admin | 全部菜单 |
+| 运营主管 | jst_operator | 赛事+订单+用户+渠道+公告+消息+赛事管理中心 |
+| 财务专员 | jst_finance | 看板+订单+财务 |
+| 客服专员 | jst_support | 看板+用户+赛事+订单+消息（只读为主） |
+| 营销专员 | jst_marketing | 看板+优惠券+权益+积分+商城 |
+| 风控专员 | jst_risk | 看板+风控+用户渠道 |
+| 数据分析师 | jst_analyst | 看板+全部页面只读 |
+| 赛事方 | jst_partner | 仅赛事管理中心（PartnerScope 数据隔离） |
+
 ### 生产部署就绪清单
 
 | 项 | 状态 | 说明 |
@@ -356,6 +410,8 @@ D:\coding\jst_v1\
 | 数据库索引 | ✅ | 7 组合索引 + 连接池优化 |
 | 缓存层 | ✅ | 13 热点缓存 + 穿透/雪崩防护 |
 | 测试服务器 | ✅ | 39.107.69.244（jstadmin.esget.cn + jstapp.esget.cn） |
+| 管理端精品化 | ✅ | 40 页全量精品化 + JSON 可视化 + 功能导航 |
+| 小程序端重塑 | ✅ | 15 页视觉重塑 + 动态表单 + 团队报名 + 证书 |
 | 微信支付 | ⏳ | 需商户账号 + SDK 接入 |
 | 微信登录 | ⏳ | 需 appid/secret |
 | 短信服务 | ⏳ | 需阿里云 SMS 配置 |
@@ -402,7 +458,9 @@ D:\coding\jst_v1\
 | 99-migration-refactor-menus.sql | ⭐ 傻瓜化：菜单重命名+隐藏+合并 |
 | 99-migration-biz-no-rule.sql | ⭐ 傻瓜化：编号规则表+序列表+3预置规则 |
 | 99-migration-contest-reviewer.sql | ⭐ 傻瓜化：评审老师表 |
-| 99-test-fixtures.sql | 测试数据 |
+| 99-migration-admin-polish-dict.sql | ⭐ 精品化：16 字典类型 99 条数据 |
+| 99-migration-fix-not-null-defaults.sql | 修复：7 表 NOT NULL 加 DEFAULT |
+| 99-test-fixtures.sql | 测试数据（含团队赛事 8206 + 预约时间段） |
 
 ---
 
@@ -475,7 +533,7 @@ D:\coding\jst_v1\
 2. `git log --oneline -20` 查看最近代码变更
 3. 检查 §六 当前执行中任务 + 待办
 4. 查看 `subagent/tasks/任务报告/` 是否有新报告需要 review
-5. 当前阶段：SECURITY-FIX + PERF 完成 → TEST-ROUND3 → 生产部署准备
+5. 当前阶段：傻瓜化重构 + 管理端精品化全部完成 → 生产部署准备（等外部配置：微信/SMS/OSS）
 
 ## 十、PRD 版本规则
 
