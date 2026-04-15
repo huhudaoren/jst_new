@@ -195,16 +195,16 @@
           </el-descriptions>
 
           <div class="section-title">资质材料</div>
-          <pre class="json-box">{{ prettyJson(detailData.qualificationJson) }}</pre>
+          <JsonDisplay :value="detailData.qualificationJson" />
 
           <div class="section-title">结算信息</div>
-          <pre class="json-box">{{ prettyJson(detailData.settlementInfoJson) }}</pre>
+          <JsonDisplay :value="detailData.settlementInfoJson" :label-map="settlementLabelMap" />
 
           <div class="section-title">开票信息</div>
-          <pre class="json-box">{{ prettyJson(detailData.invoiceInfoJson) }}</pre>
+          <JsonDisplay :value="detailData.invoiceInfoJson" :label-map="invoiceLabelMap" />
 
           <div class="section-title">合同文件</div>
-          <pre class="json-box">{{ prettyJson(detailData.contractFilesJson) }}</pre>
+          <JsonDisplay :value="detailData.contractFilesJson" />
         </template>
         <JstEmptyState v-else description="暂无申请详情" />
       </div>
@@ -268,7 +268,16 @@ export default {
         { label: '已通过', value: 'approved' },
         { label: '已驳回', value: 'rejected' },
         { label: '待补充', value: 'supplement' }
-      ]
+      ],
+      settlementLabelMap: {
+        accountName: '户名', bankAccount: '银行账号', bankName: '开户行',
+        accountType: '账户类型', bankBranch: '支行', swiftCode: 'SWIFT'
+      },
+      invoiceLabelMap: {
+        invoiceType: '发票类型', taxNo: '税号', companyName: '公司名称',
+        bankAccount: '银行账号', bankName: '开户行', address: '地址',
+        phone: '电话'
+      }
     }
   },
   computed: {

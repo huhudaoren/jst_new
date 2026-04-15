@@ -87,8 +87,8 @@
           <el-descriptions-item label="状态">
             <el-tag size="small" :type="statusType(detailData.status)">{{ statusLabel(detailData.status) }}</el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="目标JSON">
-            <pre class="json-block">{{ formatJson(detailData.targetJson) }}</pre>
+          <el-descriptions-item label="目标用户">
+            <JsonDisplay :value="detailData.targetJson" :label-map="{ userId: '用户ID', userName: '用户名', mobile: '手机号', role: '角色', tag: '标签' }" />
           </el-descriptions-item>
           <el-descriptions-item label="备注">{{ detailData.remark || '--' }}</el-descriptions-item>
         </el-descriptions>

@@ -38,6 +38,7 @@ import DictData from '@/components/DictData'
 // 业务公共组件
 import JstStatusBadge from '@/components/JstStatusBadge'
 import JstEmptyState from '@/components/JstEmptyState'
+import JsonDisplay from '@/components/JsonDisplay'
 
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts
@@ -60,6 +61,7 @@ Vue.component('ImageUpload', ImageUpload)
 Vue.component('ImagePreview', ImagePreview)
 Vue.component('JstStatusBadge', JstStatusBadge)
 Vue.component('JstEmptyState', JstEmptyState)
+Vue.component('JsonDisplay', JsonDisplay)
 
 Vue.use(directive)
 Vue.use(plugins)

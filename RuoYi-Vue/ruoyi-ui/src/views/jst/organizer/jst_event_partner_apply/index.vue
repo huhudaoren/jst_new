@@ -150,10 +150,18 @@
       <el-table-column label="联系人" align="center" prop="contactName" />
       <el-table-column label="联系电话" align="center" prop="contactMobile" />
       <el-table-column label="营业执照号" align="center" prop="businessLicenseNo" />
-      <el-table-column label="资质材料JSON" align="center" prop="qualificationJson" />
-      <el-table-column label="结算信息JSON" align="center" prop="settlementInfoJson" />
-      <el-table-column label="发票信息JSON" align="center" prop="invoiceInfoJson" />
-      <el-table-column label="合同附件JSON" align="center" prop="contractFilesJson" />
+      <el-table-column label="资质材料" align="center" prop="qualificationJson" width="120" show-overflow-tooltip>
+        <template slot-scope="scope">{{ scope.row.qualificationJson ? '已上传' : '--' }}</template>
+      </el-table-column>
+      <el-table-column label="结算信息" align="center" prop="settlementInfoJson" width="120" show-overflow-tooltip>
+        <template slot-scope="scope">{{ scope.row.settlementInfoJson ? '已填写' : '--' }}</template>
+      </el-table-column>
+      <el-table-column label="发票信息" align="center" prop="invoiceInfoJson" width="120" show-overflow-tooltip>
+        <template slot-scope="scope">{{ scope.row.invoiceInfoJson ? '已填写' : '--' }}</template>
+      </el-table-column>
+      <el-table-column label="合同附件" align="center" prop="contractFilesJson" width="120" show-overflow-tooltip>
+        <template slot-scope="scope">{{ scope.row.contractFilesJson ? '已上传' : '--' }}</template>
+      </el-table-column>
       <el-table-column label="状态" align="center" prop="applyStatus">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.jst_audit_status" :value="scope.row.applyStatus" />

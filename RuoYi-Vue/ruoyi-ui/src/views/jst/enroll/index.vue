@@ -187,14 +187,14 @@
           </el-descriptions>
 
           <div class="section-title">表单快照</div>
-          <div class="snapshot-box">{{ prettySnapshot(detailData.formSnapshotJson) }}</div>
+          <JsonDisplay :value="detailData.formSnapshotJson" />
         </template>
         <JstEmptyState v-else description="暂无详情数据" />
       </div>
     </el-drawer>
 
     <el-dialog title="表单快照" :visible.sync="snapshotVisible" width="760px" append-to-body>
-      <pre class="snapshot-pre">{{ prettySnapshot(snapshotData) }}</pre>
+      <JsonDisplay :value="snapshotData" />
       <div slot="footer">
         <el-button type="primary" @click="snapshotVisible = false">关闭</el-button>
       </div>

@@ -37,10 +37,22 @@ export function collectAvailablePaths(permissionRoutes) {
 
 export function resolveFirstAvailablePath(candidates, availableSet) {
   if (!Array.isArray(candidates) || !availableSet) return null
+  // 第一轮：精确匹配
   for (let i = 0; i < candidates.length; i += 1) {
     const path = normalizePath(candidates[i])
     if (availableSet.has(path)) {
       return path
+    }
+  }
+  // 第二轮：末段匹配（兼容菜单分组后路径变化）
+  for (let i = 0; i < candidates.length; i += 1) {
+    const path = normalizePath(candidates[i])
+    const segments = path.split('/').filter(Boolean)
+    const lastSegment = segments[segments.length - 1]
+    if (!lastSegment) continue
+    const suffix = '/' + lastSegment
+    for (const available of availableSet) {
+      if (available.endsWith(suffix)) return available
     }
   }
   return null

@@ -82,6 +82,27 @@
       </el-row>
     </el-card>
 
+    <!-- 功能导航 -->
+    <el-card shadow="never" class="section-card">
+      <div slot="header" class="section-header">
+        <span>功能导航</span>
+        <span class="section-header__hint">按业务分组快速进入对应管理模块</span>
+      </div>
+      <el-row :gutter="16">
+        <el-col v-for="item in navGroups" :key="item.key" :xs="12" :sm="8" :md="6">
+          <button class="nav-group-entry" :class="{ 'is-disabled': !item.enabled }" type="button" @click="handleEntryClick(item)">
+            <div class="nav-group-entry__icon" :class="item.theme">
+              <i :class="item.icon" />
+            </div>
+            <div class="nav-group-entry__body">
+              <div class="nav-group-entry__title">{{ item.title }}</div>
+              <div class="nav-group-entry__desc">{{ item.desc }}</div>
+            </div>
+          </button>
+        </el-col>
+      </el-row>
+    </el-card>
+
     <!-- 排行榜 -->
     <el-row :gutter="20" class="section-row">
       <el-col :xs="24" :md="12">
@@ -152,6 +173,16 @@ export default {
         pendingPartnerApply: 0,
         pendingChannelAuth: 0
       },
+      navGroupConfigs: [
+        { key: 'contest', title: '赛事运营', desc: '赛事管理、报名审核、课程管理、入驻审核', icon: 'el-icon-trophy', theme: 'theme-blue', candidates: ['/jst/contest', '/jst/group-contest/contest'] },
+        { key: 'order', title: '订单交易', desc: '订单管理、退款处理、预约记录', icon: 'el-icon-shopping-bag-1', theme: 'theme-green', candidates: ['/jst/order/admin-order', '/jst/group-order/order/admin-order'] },
+        { key: 'user', title: '用户渠道', desc: '用户管理、参赛档案、渠道管理、绑定关系', icon: 'el-icon-user', theme: 'theme-purple', candidates: ['/jst/user', '/jst/group-user/user'] },
+        { key: 'marketing', title: '营销权益', desc: '优惠券、权益模板、发放管理', icon: 'el-icon-present', theme: 'theme-orange', candidates: ['/jst/coupon/template', '/jst/group-marketing/coupon/template'] },
+        { key: 'points', title: '积分商城', desc: '积分账户、规则配置、商城商品、兑换订单', icon: 'el-icon-coin', theme: 'theme-blue', candidates: ['/jst/points/points-account', '/jst/group-points/points/points-account'] },
+        { key: 'event', title: '赛事数据', desc: '成绩记录、证书管理、表单模板', icon: 'el-icon-document', theme: 'theme-green', candidates: ['/jst/event/score-record', '/jst/group-event/event/score-record'] },
+        { key: 'finance', title: '财务管理', desc: '打款记录、合同管理、发票管理', icon: 'el-icon-wallet', theme: 'theme-purple', candidates: ['/jst/finance/payout', '/jst/group-finance/finance/payout'] },
+        { key: 'risk', title: '风控审计', desc: '风控规则、告警处理、黑名单、审计日志', icon: 'el-icon-warning', theme: 'theme-orange', candidates: ['/jst/risk/risk-rule', '/jst/group-risk/risk/risk-rule'] }
+      ],
       todoItemConfigs: [
         {
           key: 'contest',
@@ -159,7 +190,7 @@ export default {
           countKey: 'pendingContestAudit',
           icon: 'el-icon-s-flag',
           theme: 'theme-blue',
-          candidates: ['/jst/contest']
+          candidates: ['/jst/contest', '/jst/group-contest/contest']
         },
         {
           key: 'enroll',
@@ -167,7 +198,7 @@ export default {
           countKey: 'pendingEnrollAudit',
           icon: 'el-icon-edit-outline',
           theme: 'theme-green',
-          candidates: ['/jst/enroll']
+          candidates: ['/jst/enroll', '/jst/group-contest/enroll']
         },
         {
           key: 'refund',
@@ -175,7 +206,7 @@ export default {
           countKey: 'pendingRefund',
           icon: 'el-icon-coin',
           theme: 'theme-orange',
-          candidates: ['/jst/order/admin-refund']
+          candidates: ['/jst/order/admin-refund', '/jst/group-order/order/admin-refund']
         },
         {
           key: 'withdraw',
@@ -183,7 +214,7 @@ export default {
           countKey: 'pendingWithdraw',
           icon: 'el-icon-wallet',
           theme: 'theme-purple',
-          candidates: ['/jst/channel/admin-withdraw']
+          candidates: ['/jst/channel/admin-withdraw', '/jst/group-user/channel/admin-withdraw']
         },
         {
           key: 'partner',
@@ -191,7 +222,7 @@ export default {
           countKey: 'pendingPartnerApply',
           icon: 'el-icon-office-building',
           theme: 'theme-blue',
-          candidates: ['/jst/partner-apply']
+          candidates: ['/jst/partner-apply', '/jst/group-contest/partner-apply']
         },
         {
           key: 'channel',
@@ -199,7 +230,7 @@ export default {
           countKey: 'pendingChannelAuth',
           icon: 'el-icon-postcard',
           theme: 'theme-green',
-          candidates: ['/jst/channel-auth']
+          candidates: ['/jst/channel-auth', '/jst/group-user/channel-auth']
         }
       ],
       quickActionConfigs: [
@@ -209,7 +240,7 @@ export default {
           desc: '按 6 个模块快速发起新赛事',
           icon: 'el-icon-plus',
           theme: 'theme-blue',
-          candidates: ['/jst/contest-edit']
+          candidates: ['/jst/contest-edit', '/jst/group-contest/contest-edit']
         },
         {
           key: 'auditEnroll',
@@ -217,7 +248,7 @@ export default {
           desc: '处理通过、驳回与补充材料',
           icon: 'el-icon-edit-outline',
           theme: 'theme-green',
-          candidates: ['/jst/enroll']
+          candidates: ['/jst/enroll', '/jst/group-contest/enroll']
         },
         {
           key: 'dealRefund',
@@ -225,7 +256,7 @@ export default {
           desc: '优先审核待处理退款申请',
           icon: 'el-icon-money',
           theme: 'theme-orange',
-          candidates: ['/jst/order/admin-refund']
+          candidates: ['/jst/order/admin-refund', '/jst/group-order/order/admin-refund']
         },
         {
           key: 'auditWithdraw',
@@ -233,7 +264,7 @@ export default {
           desc: '审核后执行渠道打款流程',
           icon: 'el-icon-wallet',
           theme: 'theme-purple',
-          candidates: ['/jst/channel/admin-withdraw']
+          candidates: ['/jst/channel/admin-withdraw', '/jst/group-user/channel/admin-withdraw']
         },
         {
           key: 'publishNotice',
@@ -241,7 +272,7 @@ export default {
           desc: '统一发布平台与赛事公告',
           icon: 'el-icon-bell',
           theme: 'theme-blue',
-          candidates: ['/jst/notice']
+          candidates: ['/jst/notice', '/jst/group-contest/notice']
         },
         {
           key: 'viewChannel',
@@ -249,7 +280,7 @@ export default {
           desc: '查看渠道状态和关键数据',
           icon: 'el-icon-user-solid',
           theme: 'theme-green',
-          candidates: ['/jst/channel']
+          candidates: ['/jst/channel', '/jst/group-user/channel']
         }
       ],
       contestRank: [],
@@ -274,6 +305,12 @@ export default {
       const sidebarSet = collectAvailablePaths(this.$store.getters.sidebarRouters || [])
       sidebarSet.forEach(path => routeSet.add(path))
       return routeSet
+    },
+    navGroups() {
+      return this.navGroupConfigs.map(item => {
+        const targetPath = resolveFirstAvailablePath(item.candidates, this.availablePathSet)
+        return { ...item, targetPath, enabled: Boolean(targetPath) }
+      })
     },
     todoItems() {
       return this.todoItemConfigs.map(item => {
@@ -617,6 +654,81 @@ export default {
   font-size: 12px;
   color: #7d8da0;
   line-height: 1.5;
+}
+
+/* 功能导航 */
+.nav-group-entry {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 80px;
+  margin-bottom: 16px;
+  padding: 16px 14px;
+  text-align: left;
+  background: #f8fbff;
+  border: 1px solid #e7eff8;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-group-entry:hover {
+  border-color: #86abdc;
+  box-shadow: 0 8px 18px rgba(31, 91, 168, 0.1);
+  transform: translateY(-2px);
+}
+
+.nav-group-entry.is-disabled {
+  border-color: #e5eaf2;
+  background: #f7f9fc;
+  cursor: not-allowed;
+}
+
+.nav-group-entry.is-disabled:hover {
+  border-color: #e5eaf2;
+  box-shadow: none;
+  transform: none;
+}
+
+.nav-group-entry__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  margin-right: 12px;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.nav-group-entry__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-group-entry__title {
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #223043;
+}
+
+.nav-group-entry__desc {
+  font-size: 12px;
+  color: #7d8da0;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.nav-group-entry.is-disabled .nav-group-entry__title,
+.nav-group-entry.is-disabled .nav-group-entry__desc {
+  color: #a0acbd;
 }
 
 /* 排行榜 */

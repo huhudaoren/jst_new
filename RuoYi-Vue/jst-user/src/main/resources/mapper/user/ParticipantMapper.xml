@@ -44,6 +44,40 @@
         <result column="createTime"            property="createTime"/>
     </resultMap>
 
+    <resultMap id="AdminParticipantListResMap" type="com.ruoyi.jst.user.vo.ParticipantAdminListResVO">
+        <id     column="participant_id"         property="participantId"/>
+        <result column="name"                   property="name"/>
+        <result column="age"                    property="age"/>
+        <result column="school"                 property="school"/>
+        <result column="claim_status"           property="claimStatus"/>
+        <result column="claimed_user_id"        property="claimedUserId"/>
+        <result column="user_name"              property="userName"/>
+        <result column="guardian_mobile"        property="guardianMobile"/>
+        <result column="created_by_channel_id"  property="createdByChannelId"/>
+        <result column="created_by_channel_name" property="createdByChannelName"/>
+        <result column="claimed_time"           property="claimedTime"/>
+        <result column="create_time"            property="createTime"/>
+    </resultMap>
+
+    <resultMap id="AdminParticipantDetailResMap" type="com.ruoyi.jst.user.vo.ParticipantAdminDetailResVO">
+        <id     column="participant_id"         property="participantId"/>
+        <result column="name"                   property="name"/>
+        <result column="gender"                 property="gender"/>
+        <result column="age"                    property="age"/>
+        <result column="guardian_name"          property="guardianName"/>
+        <result column="guardian_mobile"        property="guardianMobile"/>
+        <result column="school"                 property="school"/>
+        <result column="organization"           property="organization"/>
+        <result column="class_name"             property="className"/>
+        <result column="claim_status"           property="claimStatus"/>
+        <result column="claimed_user_id"        property="claimedUserId"/>
+        <result column="user_name"              property="userName"/>
+        <result column="claimed_time"           property="claimedTime"/>
+        <result column="created_by_channel_id"  property="createdByChannelId"/>
+        <result column="created_by_channel_name" property="createdByChannelName"/>
+        <result column="create_time"            property="createTime"/>
+    </resultMap>
+
     <sql id="Base_Column_List">
         participant_id, user_id, participant_type, name, gender, birthday, age,
         guardian_name, guardian_mobile, school, organization, class_name,
@@ -124,6 +158,70 @@
         where participant_id = #{participantId}
           and create_by = #{createBy}
           and del_flag = '0'
+        limit 1
+    </select>
+
+    <select id="selectAdminParticipantList"
+            parameterType="com.ruoyi.jst.user.dto.ParticipantAdminQueryReqDTO"
+            resultMap="AdminParticipantListResMap">
+        select p.participant_id,
+               p.name,
+               p.age,
+               p.school,
+               p.claim_status,
+               p.claimed_user_id,
+               coalesce(nullif(u.real_name, ''), nullif(u.nickname, ''), u.mobile) as user_name,
+               p.guardian_mobile,
+               p.created_by_channel_id,
+               c.channel_name as created_by_channel_name,
+               p.claimed_time,
+               p.create_time
+        from jst_participant p
+                 left join jst_user u
+                           on u.user_id = p.claimed_user_id
+                          and u.del_flag = '0'
+                 left join jst_channel c
+                           on c.channel_id = p.created_by_channel_id
+                          and c.del_flag = '0'
+        where p.del_flag = '0'
+        <if test="name != null and name != ''">
+            and p.name like concat('%', #{name}, '%')
+        </if>
+        <if test="guardianMobile != null and guardianMobile != ''">
+            and p.guardian_mobile like concat('%', #{guardianMobile}, '%')
+        </if>
+        <if test="claimStatus != null and claimStatus != ''">
+            and p.claim_status = #{claimStatus}
+        </if>
+        order by p.create_time desc, p.participant_id desc
+    </select>
+
+    <select id="selectAdminParticipantDetail" resultMap="AdminParticipantDetailResMap">
+        select p.participant_id,
+               p.name,
+               p.gender,
+               p.age,
+               p.guardian_name,
+               p.guardian_mobile,
+               p.school,
+               p.organization,
+               p.class_name,
+               p.claim_status,
+               p.claimed_user_id,
+               coalesce(nullif(u.real_name, ''), nullif(u.nickname, ''), u.mobile) as user_name,
+               p.claimed_time,
+               p.created_by_channel_id,
+               c.channel_name as created_by_channel_name,
+               p.create_time
+        from jst_participant p
+                 left join jst_user u
+                           on u.user_id = p.claimed_user_id
+                          and u.del_flag = '0'
+                 left join jst_channel c
+                           on c.channel_id = p.created_by_channel_id
+                          and c.del_flag = '0'
+        where p.participant_id = #{participantId}
+          and p.del_flag = '0'
         limit 1
     </select>
 

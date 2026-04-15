@@ -165,7 +165,9 @@
       <el-table-column label="报名来源：self自助/channel_single渠道单条/channel_batch渠道批量" align="center" prop="enrollSource" />
       <el-table-column label="使用的表单模板ID" align="center" prop="templateId" />
       <el-table-column label="表单模板版本号" align="center" prop="templateVersion" />
-      <el-table-column label="报名字段全量快照JSON：动态字段值+附件URL" align="center" prop="formSnapshotJson" />
+      <el-table-column label="表单快照" align="center" prop="formSnapshotJson" width="120" show-overflow-tooltip>
+        <template slot-scope="scope">{{ scope.row.formSnapshotJson ? '已填写' : '--' }}</template>
+      </el-table-column>
       <el-table-column label="关联订单ID" align="center" prop="orderId" />
       <el-table-column label="资料状态：draft/submitted/supplement" align="center" prop="materialStatus" />
       <el-table-column label="审核状态" align="center" prop="auditStatus">

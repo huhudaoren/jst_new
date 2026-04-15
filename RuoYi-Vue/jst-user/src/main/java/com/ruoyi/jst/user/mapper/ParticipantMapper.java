@@ -1,7 +1,10 @@
 package com.ruoyi.jst.user.mapper;
 
 import com.ruoyi.jst.user.domain.Participant;
+import com.ruoyi.jst.user.dto.ParticipantAdminQueryReqDTO;
 import com.ruoyi.jst.user.vo.ChannelParticipantResVO;
+import com.ruoyi.jst.user.vo.ParticipantAdminDetailResVO;
+import com.ruoyi.jst.user.vo.ParticipantAdminListResVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -49,4 +52,20 @@ public interface ParticipantMapper {
                                      @Param("updateBy") String updateBy);
 
     int insertParticipant(Participant participant);
+
+    /**
+     * 管理端查询参赛档案列表（姓名/手机号模糊）。
+     *
+     * @param query 查询条件
+     * @return 列表
+     */
+    List<ParticipantAdminListResVO> selectAdminParticipantList(ParticipantAdminQueryReqDTO query);
+
+    /**
+     * 管理端查询参赛档案详情。
+     *
+     * @param participantId 参赛档案ID
+     * @return 详情
+     */
+    ParticipantAdminDetailResVO selectAdminParticipantDetail(@Param("participantId") Long participantId);
 }

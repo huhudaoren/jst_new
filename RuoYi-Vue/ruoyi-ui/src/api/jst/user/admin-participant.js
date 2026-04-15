@@ -3,7 +3,7 @@
 // 管理端-参赛档案列表
 export function listAdminParticipants(query) {
   return request({
-    url: '/system/jst_participant/list',
+    url: '/jst/admin/participant/list',
     method: 'get',
     params: query
   })
@@ -12,7 +12,7 @@ export function listAdminParticipants(query) {
 // 管理端-参赛档案详情
 export function getAdminParticipant(participantId) {
   return request({
-    url: '/system/jst_participant/' + participantId,
+    url: '/jst/admin/participant/' + participantId,
     method: 'get'
   })
 }
@@ -41,7 +41,7 @@ export function revokeParticipantClaim(participantId, reason) {
 // 管理端-认领映射列表
 export function listParticipantUserMaps(query) {
   return request({
-    url: '/system/jst_participant_user_map/list',
+    url: '/jst/admin/participant-user-map/list',
     method: 'get',
     params: query
   })

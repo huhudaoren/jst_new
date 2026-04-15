@@ -72,26 +72,45 @@
     <!-- 详情抽屉 -->
     <el-drawer title="渠道详情" :visible.sync="detailOpen" :size="drawerSize" direction="rtl">
       <div style="padding: 20px;" v-if="detailData">
-        <el-descriptions :column="1" border size="medium">
-          <el-descriptions-item label="渠道ID">{{ detailData.channelId }}</el-descriptions-item>
-          <el-descriptions-item label="渠道名称">{{ detailData.channelName }}</el-descriptions-item>
-          <el-descriptions-item label="渠道类型">{{ detailData.channelType === 'institution' ? '机构' : '个人' }}</el-descriptions-item>
-          <el-descriptions-item label="联系手机">{{ detailData.contactMobile }}</el-descriptions-item>
-          <el-descriptions-item label="证件号">{{ detailData.idCardNo }}</el-descriptions-item>
-          <el-descriptions-item label="营业执照号" v-if="detailData.businessLicenseNo">{{ detailData.businessLicenseNo }}</el-descriptions-item>
-          <el-descriptions-item label="认证状态">
-            <el-tag size="mini" :type="detailData.authStatus === 'approved' ? 'success' : 'info'">{{ detailData.authStatus === 'approved' ? '已认证' : '未认证' }}</el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="认证时间">{{ parseTime(detailData.authTime) }}</el-descriptions-item>
-          <el-descriptions-item label="绑定学生数">{{ detailData.bindStudentCount || 0 }}</el-descriptions-item>
-          <el-descriptions-item label="累计返点">{{ formatMoney(detailData.totalRebate) }} 元</el-descriptions-item>
-          <el-descriptions-item label="渠道标签" v-if="detailData.tags">{{ detailData.tags }}</el-descriptions-item>
-          <el-descriptions-item label="风控标记">
-            <el-tag size="mini" :type="riskTagType(detailData.riskFlag)">{{ riskLabel(detailData.riskFlag) }}</el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="审核备注" v-if="detailData.authRemark">{{ detailData.authRemark }}</el-descriptions-item>
-          <el-descriptions-item label="创建时间">{{ parseTime(detailData.createTime) }}</el-descriptions-item>
-        </el-descriptions>
+        <el-tabs v-model="detailTab">
+          <el-tab-pane label="渠道信息" name="info">
+            <el-descriptions :column="1" border size="medium">
+              <el-descriptions-item label="渠道ID">{{ detailData.channelId }}</el-descriptions-item>
+              <el-descriptions-item label="渠道名称">{{ detailData.channelName }}</el-descriptions-item>
+              <el-descriptions-item label="渠道类型">{{ detailData.channelType === 'institution' ? '机构' : '个人' }}</el-descriptions-item>
+              <el-descriptions-item label="联系手机">{{ detailData.contactMobile }}</el-descriptions-item>
+              <el-descriptions-item label="证件号">{{ detailData.idCardNo }}</el-descriptions-item>
+              <el-descriptions-item label="营业执照号" v-if="detailData.businessLicenseNo">{{ detailData.businessLicenseNo }}</el-descriptions-item>
+              <el-descriptions-item label="认证状态">
+                <el-tag size="mini" :type="detailData.authStatus === 'approved' ? 'success' : 'info'">{{ detailData.authStatus === 'approved' ? '已认证' : '未认证' }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item label="认证时间">{{ parseTime(detailData.authTime) }}</el-descriptions-item>
+              <el-descriptions-item label="绑定学生数">{{ detailData.bindStudentCount || 0 }}</el-descriptions-item>
+              <el-descriptions-item label="累计返点">{{ formatMoney(detailData.totalRebate) }} 元</el-descriptions-item>
+              <el-descriptions-item label="渠道标签" v-if="detailData.tags">{{ detailData.tags }}</el-descriptions-item>
+              <el-descriptions-item label="风控标记">
+                <el-tag size="mini" :type="riskTagType(detailData.riskFlag)">{{ riskLabel(detailData.riskFlag) }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item label="审核备注" v-if="detailData.authRemark">{{ detailData.authRemark }}</el-descriptions-item>
+              <el-descriptions-item label="创建时间">{{ parseTime(detailData.createTime) }}</el-descriptions-item>
+            </el-descriptions>
+          </el-tab-pane>
+          <el-tab-pane label="绑定用户" name="bindings">
+            <el-table :data="channelBindings" v-loading="bindingLoading" border stripe size="small">
+              <el-table-column label="学生姓名" prop="studentName" min-width="100" show-overflow-tooltip />
+              <el-table-column label="手机号" prop="mobile" width="130" align="center" />
+              <el-table-column label="绑定时间" prop="bindTime" width="160" align="center">
+                <template slot-scope="scope">{{ parseTime(scope.row.bindTime || scope.row.createTime) }}</template>
+              </el-table-column>
+              <el-table-column label="操作" width="100" align="center">
+                <template slot-scope="scope">
+                  <el-button size="mini" type="text" icon="el-icon-view" @click="viewParticipant(scope.row)">查看档案</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-empty v-if="!bindingLoading && !channelBindings.length" description="暂无绑定用户" :image-size="60" />
+          </el-tab-pane>
+        </el-tabs>
       </div>
     </el-drawer>
   </div>
@@ -99,6 +118,7 @@
 
 <script>
 import { listChannel, getChannel, updateChannel } from '@/api/admin/channel'
+import { listBinding } from '@/api/admin/binding'
 import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 export default {
@@ -118,6 +138,9 @@ export default {
       },
       detailOpen: false,
       detailData: null,
+      detailTab: 'info',
+      channelBindings: [],
+      bindingLoading: false,
       lastAutoOpenKey: ''
     }
   },
@@ -135,6 +158,11 @@ export default {
         this.tryAutoOpenFromRoute()
       },
       deep: true
+    },
+    detailTab(val) {
+      if (val === 'bindings' && this.detailData) {
+        this.loadBindings(this.detailData.channelId)
+      }
     }
   },
   methods: {
@@ -170,10 +198,31 @@ export default {
     },
     handleDetail(row) {
       this.detailData = row
+      this.detailTab = 'info'
+      this.channelBindings = []
       this.detailOpen = true
       getChannel(row.channelId).then(res => {
         this.detailData = res.data || row
       }).catch(() => {})
+    },
+    loadBindings(channelId) {
+      if (!channelId) return
+      this.bindingLoading = true
+      listBinding({ channelId, pageNum: 1, pageSize: 200 }).then(res => {
+        this.channelBindings = res.rows || []
+      }).catch(() => {
+        this.channelBindings = []
+      }).finally(() => {
+        this.bindingLoading = false
+      })
+    },
+    viewParticipant(row) {
+      const participantId = row.participantId || row.studentId
+      if (participantId) {
+        this.$router.push({ path: '/jst/participant', query: { autoOpen: '1', participantId } })
+      } else {
+        this.$message.info('该用户暂无参赛档案')
+      }
     },
     tryAutoOpenFromRoute() {
       const query = this.$route.query || {}

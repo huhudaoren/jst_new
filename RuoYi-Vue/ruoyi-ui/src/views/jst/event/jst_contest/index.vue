@@ -232,8 +232,12 @@
       <el-table-column label="是否支持渠道代报名：0否 1是" align="center" prop="supportChannelEnroll" />
       <el-table-column label="是否支持积分抵扣：0否 1是" align="center" prop="supportPointsDeduct" />
       <el-table-column label="是否支持线下预约：0否 1是" align="center" prop="supportAppointment" />
-      <el-table-column label="证书发放规则JSON" align="center" prop="certRuleJson" />
-      <el-table-column label="成绩规则JSON" align="center" prop="scoreRuleJson" />
+      <el-table-column label="证书规则" align="center" prop="certRuleJson" width="100" show-overflow-tooltip>
+        <template slot-scope="scope">{{ scope.row.certRuleJson ? '已配置' : '--' }}</template>
+      </el-table-column>
+      <el-table-column label="成绩规则" align="center" prop="scoreRuleJson" width="100" show-overflow-tooltip>
+        <template slot-scope="scope">{{ scope.row.scoreRuleJson ? '已配置' : '--' }}</template>
+      </el-table-column>
       <el-table-column label="默认报名表单模板ID，FK→jst_enroll_form_template" align="center" prop="formTemplateId" />
       <el-table-column label="售后宽限天数" align="center" prop="aftersaleDays" />
       <el-table-column label="审核状态" align="center" prop="auditStatus">

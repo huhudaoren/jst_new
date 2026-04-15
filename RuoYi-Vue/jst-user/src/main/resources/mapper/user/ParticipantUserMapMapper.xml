@@ -19,6 +19,18 @@
         <result column="remark"         property="remark"/>
     </resultMap>
 
+    <resultMap id="AdminListResultMap" type="com.ruoyi.jst.user.vo.ParticipantUserMapAdminResVO">
+        <id     column="map_id"         property="mapId"/>
+        <result column="participant_id" property="participantId"/>
+        <result column="participant_name" property="participantName"/>
+        <result column="user_id"        property="userId"/>
+        <result column="user_name"      property="userName"/>
+        <result column="claim_method"   property="claimMethod"/>
+        <result column="claim_time"     property="claimTime"/>
+        <result column="status"         property="status"/>
+        <result column="revoke_reason"  property="revokeReason"/>
+    </resultMap>
+
     <insert id="insert" parameterType="com.ruoyi.jst.user.domain.ParticipantUserMap"
             useGeneratedKeys="true" keyProperty="mapId">
         INSERT INTO jst_participant_user_map (
@@ -50,5 +62,34 @@
             update_time = NOW()
         WHERE map_id = #{mapId} AND status = 'active'
     </update>
+
+    <select id="selectAdminList"
+            parameterType="com.ruoyi.jst.user.dto.ParticipantUserMapQueryReqDTO"
+            resultMap="AdminListResultMap">
+        SELECT m.map_id,
+               m.participant_id,
+               p.name as participant_name,
+               m.user_id,
+               coalesce(nullif(u.real_name, ''), nullif(u.nickname, ''), u.mobile) as user_name,
+               m.claim_method,
+               m.claim_time,
+               m.status,
+               m.revoke_reason
+        FROM jst_participant_user_map m
+                 LEFT JOIN jst_participant p
+                           ON p.participant_id = m.participant_id
+                          AND p.del_flag = '0'
+                 LEFT JOIN jst_user u
+                           ON u.user_id = m.user_id
+                          AND u.del_flag = '0'
+        WHERE m.del_flag = '0'
+        <if test="participantId != null">
+            AND m.participant_id = #{participantId}
+        </if>
+        <if test="userId != null">
+            AND m.user_id = #{userId}
+        </if>
+        ORDER BY m.claim_time DESC, m.map_id DESC
+    </select>
 
 </mapper>
