@@ -11,6 +11,8 @@ import com.ruoyi.jst.event.dto.ContestSaveReqDTO;
 import com.ruoyi.jst.event.dto.ReviewerSaveReqDTO;
 import com.ruoyi.jst.event.service.ContestReviewerService;
 import com.ruoyi.jst.event.service.ContestService;
+import com.ruoyi.jst.event.service.JstScoreItemService;
+import com.ruoyi.jst.event.domain.JstScoreItem;
 import com.ruoyi.jst.event.vo.ContestDetailVO;
 import com.ruoyi.jst.event.vo.ContestListVO;
 import com.ruoyi.jst.event.vo.ReviewerVO;
@@ -49,6 +51,19 @@ public class PartnerContestController extends BasePartnerController {
 
     @Autowired
     private ContestReviewerService contestReviewerService;
+
+    @Autowired
+    private JstScoreItemService jstScoreItemService;
+
+    /**
+     * 查询赛事的成绩项列表。
+     */
+    @PreAuthorize("@ss.hasRole('jst_partner')")
+    @GetMapping("/{contestId}/score-items")
+    public AjaxResult listScoreItems(@PathVariable("contestId") Long contestId) {
+        List<JstScoreItem> items = jstScoreItemService.selectByContestId(contestId);
+        return AjaxResult.success(items != null ? items : Collections.emptyList());
+    }
 
     /**
      * 查询赛事方赛事列表。
