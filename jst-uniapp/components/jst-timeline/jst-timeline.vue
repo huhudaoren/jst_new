@@ -11,7 +11,7 @@
       }"
     >
       <view class="jst-timeline__rail">
-        <view class="jst-timeline__dot" :class="getDotClass(index)">
+        <view class="jst-timeline__dot" :class="{ 'jst-timeline__dot--active': index === activeIndex, 'jst-timeline__dot--done': index < activeIndex }">
           <text v-if="index < activeIndex" class="jst-timeline__dot-check">&#10003;</text>
         </view>
         <view v-if="index < items.length - 1" class="jst-timeline__line" :class="{ 'jst-timeline__line--done': index < activeIndex }"></view>
