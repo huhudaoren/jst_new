@@ -1,0 +1,49 @@
+name: 公开查询（成绩与证书验真）
+description: 验证无需登录的成绩公开查询和证书验真页面
+login: null
+steps:
+  - name: 进入成绩公开查询页
+    action: reLaunch
+    path: /pages-sub/public/score-query
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".score-query-page"
+        expect: exists
+      - element: ".score-query-page__hero"
+        expect: exists
+      - element: ".score-query-page__form"
+        expect: exists
+      - product_review:
+          - "成绩查询页的Hero区是否清晰传达了'无需登录即可查询'的信息？降低用户使用门槛？"
+          - "查询方式Tab（手机号/证件号/报名编号）是否直观？用户能否快速选择合适的查询方式？"
+
+  - name: 检查查询表单与提交
+    action: wait
+    wait: 500
+    check:
+      - element: ".score-query-page__mode-tabs"
+        expect: exists
+      - element: ".score-query-page__input"
+        expect: exists
+      - element: ".score-query-page__submit"
+        expect: exists
+      - product_review:
+          - "查询输入框的占位文案是否根据选择的查询方式动态变化？输入体验是否友好？"
+          - "赛事名称筛选是否标注了'选填'？帮助用户理解不填则查询全部赛事？"
+          - "查询按钮的样式是否醒目？按钮文案'查询成绩'是否语义明确？"
+
+  - name: 进入证书验真页
+    action: reLaunch
+    path: /pages-sub/public/cert-verify
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".cert-verify-page"
+        expect: exists
+      - element: ".cert-verify-page__header-title"
+        expect: exists
+      - product_review:
+          - "证书验真页面的标题'证书验真结果'是否清晰？页面是否需要先输入证书编号才展示结果？"
+          - "验证通过时是否用绿色勾号和'证书验证通过'的文案给予明确正向反馈？"
+          - "验证结果展示的证书信息（获奖情况/获奖人/赛事名称/证书编号）是否完整且排列清晰？"

@@ -1,0 +1,59 @@
+name: 渠道认证申请
+description: 验证渠道认证入口类型选择、表单填写、材料上传、提交、状态查询全链路
+login: MOCK_1001
+steps:
+  - name: 进入渠道认证入口页
+    action: reLaunch
+    path: /pages-sub/channel/apply-entry
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".ae-page"
+        expect: exists
+      - element: ".ae-hero__title"
+        expect: exists
+      - product_review:
+          - "渠道认证入口页是否清晰展示了三种认证类型（老师/机构/个人）？用户能否快速理解各类型适用场景？"
+          - "页面顶部的权益说明（场地减免/专属课程/客服特权/返点结算）是否有吸引力？能否促进用户完成认证？"
+
+  - name: 选择老师认证进入表单页
+    action: tap
+    selector: ".ae-card:first-child"
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".af-page"
+        expect: exists
+      - element: ".af-hero__title"
+        expect: exists
+      - element: ".af-form"
+        expect: exists
+      - product_review:
+          - "认证表单页是否按照分区展示（基本信息/教师材料）？必填项和选填项的标识是否清晰？"
+          - "材料上传区域是否直观易用？用户能否理解需要上传什么类型的文件？"
+
+  - name: 检查表单必填项与提交按钮
+    action: scroll
+    direction: down
+    distance: 500
+    wait: 800
+    check:
+      - screenshot: true
+      - element: ".af-submit"
+        expect: exists
+      - product_review:
+          - "提交按钮是否在页面底部固定可见？按钮文案是否明确（如'提交认证申请'）？"
+          - "必填项未填写时，提交按钮是否禁用或给出验证提示？防止用户提交不完整的申请？"
+
+  - name: 进入认证状态页检查审核进度
+    action: reLaunch
+    path: /pages-sub/channel/apply-status
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".as-page"
+        expect: exists
+      - product_review:
+          - "状态页是否用图标和颜色清晰区分审核状态（审核中/已通过/已驳回/已锁定）？"
+          - "审核中的申请是否展示了撤回按钮？被驳回的申请是否展示驳回原因和重新提交入口？"
+          - "认证通过的用户是否有'进入渠道工作台'的快捷按钮？引导用户开始使用渠道功能？"

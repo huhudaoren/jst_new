@@ -1,0 +1,44 @@
+name: 渠道方绑定二维码
+description: 验证渠道方工作台中的绑定二维码入口、学生管理页的二维码卡片、复制链接、分享功能
+login: MOCK_1003
+steps:
+  - name: 进入工作台查看二维码入口
+    action: reLaunch
+    path: /pages-sub/channel/home
+    wait: 2500
+    check:
+      - screenshot: true
+      - element: ".ch-qr-entry"
+        expect: exists
+      - element: ".ch-qr-entry__title"
+        expect: exists
+      - product_review:
+          - "工作台上的绑定二维码入口卡片是否醒目？'学生扫码完成一对一绑定'的说明是否清晰？"
+          - "二维码入口的位置是否合理？渠道方能否快速找到并分享给学生？"
+
+  - name: 进入学生管理页查看二维码卡片
+    action: navigate
+    path: /pages-sub/channel/students
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".stu-qr__card"
+        expect: exists
+      - element: ".stu-qr__title"
+        expect: exists
+      - product_review:
+          - "学生管理页顶部的二维码卡片是否完整展示了渠道方专属信息（名称/学校）？"
+          - "二维码区域是否清晰可辨？是否配有'仅认证账号可见'的安全提示？"
+
+  - name: 检查复制链接与分享功能
+    action: wait
+    wait: 500
+    check:
+      - element: ".stu-qr__btns"
+        expect: exists
+      - element: ".stu-qr__btn"
+        expect: exists
+      - product_review:
+          - "复制链接按钮和保存图片按钮是否都可见？按钮样式是否足够醒目？"
+          - "复制链接后是否有成功反馈（如Toast提示）？保存图片功能是否便于发到微信群或朋友圈？"
+          - "手动绑定入口按钮是否在页面右上角？渠道方能否方便地通过多种方式绑定学生？"

@@ -1,0 +1,60 @@
+name: 渠道方返点与提现
+description: 验证返点中心KPI、7状态Tab、返点明细卡片、提现申请全流程
+login: MOCK_1003
+steps:
+  - name: 进入返点中心
+    action: reLaunch
+    path: /pages-sub/channel/rebate
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".rebate-page"
+        expect: exists
+      - element: ".rebate-hero__kpi"
+        expect: exists
+      - product_review:
+          - "返点中心顶部是否展示了4个KPI（可提现余额/审核中/累计已打款/历史退款回退）？数据格式是否统一？"
+          - "可提现余额是否使用醒目的金色字体？右上角的'提现单'入口是否容易找到？"
+
+  - name: 检查状态Tab筛选
+    action: wait
+    wait: 800
+    check:
+      - element: ".rebate-tabs"
+        expect: exists
+      - element: ".rebate-tabs__item"
+        expect: exists
+      - product_review:
+          - "7个状态Tab（可提现/审核中/已打款/已回退/全部/结算中/冻结中）是否全部可见？水平滚动是否流畅？"
+          - "选中Tab的高亮样式是否明确？切换Tab后列表是否即时刷新？"
+
+  - name: 检查返点明细卡片
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 800
+    check:
+      - element: ".rebate-card"
+        expect: exists
+      - element: ".rebate-card__contest"
+        expect: exists
+      - element: ".rebate-card__amount"
+        expect: exists
+      - product_review:
+          - "返点明细卡片是否展示了赛事名称、订单号、返点金额、状态标签？信息层次是否清晰？"
+          - "负向回退的返点是否使用红色金额和'回退'标签区分？用户能否理解回退的原因？"
+
+  - name: 进入提现申请页面
+    action: navigate
+    path: /pages-sub/channel/withdraw-apply
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".apply-page"
+        expect: exists
+      - element: ".apply-hero__amount"
+        expect: exists
+      - product_review:
+          - "提现申请页是否展示了可提现总余额？返点条目勾选列表是否清晰？全选功能是否可用？"
+          - "收款账户表单（开户行/银行账号/户名）是否完整？必填项是否有明确标识？"
+          - "提交按钮是否在底部固定展示？提交前是否有金额确认？防止误操作？"

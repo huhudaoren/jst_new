@@ -1,0 +1,56 @@
+name: 渠道方数据统计
+description: 验证报名数据看板的时间周期切换、KPI展示、状态分布、排行榜
+login: MOCK_1003
+steps:
+  - name: 进入报名数据页面
+    action: reLaunch
+    path: /pages-sub/channel/data
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".data-page"
+        expect: exists
+      - element: ".data-header__title"
+        expect: exists
+      - element: ".data-time__chips"
+        expect: exists
+      - product_review:
+          - "报名数据页面的渠道方名称是否在页面标题下方展示？帮助多渠道管理者区分身份？"
+          - "时间周期选择器（本周/本月/本季/全年）是否清晰可切换？选中状态是否有高亮？"
+
+  - name: 检查KPI核心指标
+    action: wait
+    wait: 800
+    check:
+      - element: ".data-kpi"
+        expect: exists
+      - element: ".data-kpi__card"
+        expect: exists
+      - product_review:
+          - "4格KPI（代报名总数/累计支付金额/退款金额/返点金额）数据是否正确加载？"
+          - "KPI卡片是否展示了趋势对比（如较上月增减）？趋势箭头的颜色是否语义正确（上升绿/下降红）？"
+          - "每个KPI的二级指标（绑定学生数/本月金额/退款笔数/待结算）是否提供了有效的补充信息？"
+
+  - name: 检查报名状态分布
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - element: ".data-status-grid"
+        expect: exists
+      - product_review:
+          - "学生报名状态分布（已报名/待支付/审核中）是否清晰展示？各状态数字颜色是否差异化？"
+          - "'管理学生'快捷跳转是否在状态分布区域的右上角？便于渠道方从数据视角进入管理页面？"
+
+  - name: 检查排行榜与趋势数据
+    action: scroll
+    direction: down
+    distance: 500
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "赛事排行榜和学生排行榜是否展示了Top赛事/学生的报名量或金额？帮助渠道方定位重点？"
+          - "趋势数据表格是否按时间维度展示了报名量变化？替代图表的表格方案是否易读？"
+          - "整体页面的数据密度是否适中？渠道方能否从这个页面快速获取经营全貌？"

@@ -1,0 +1,59 @@
+name: 赛事方入驻申请
+description: 验证赛事方入驻申请的步骤指引、表单填写、资质上传、提交流程
+login: null
+steps:
+  - name: 进入赛事方入驻页面
+    action: reLaunch
+    path: /pages-sub/public/partner-apply
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".partner-apply-page"
+        expect: exists
+      - element: ".partner-apply-page__steps"
+        expect: exists
+      - element: ".partner-apply-page__nav-title"
+        expect: exists
+      - product_review:
+          - "赛事方入驻页面顶部的步骤指引是否清晰展示了申请流程的各个阶段？当前步骤是否有高亮？"
+          - "页面标题'赛事方入驻申请'是否准确传达了页面功能？导航返回按钮是否可用？"
+
+  - name: 检查公司基本信息表单
+    action: wait
+    wait: 800
+    check:
+      - element: ".partner-apply-page__card"
+        expect: exists
+      - element: ".partner-apply-page__field"
+        expect: exists
+      - element: ".partner-apply-page__input"
+        expect: exists
+      - product_review:
+          - "公司基本信息表单是否包含公司名称、联系人、手机号、营业执照号等必要字段？"
+          - "必填项和选填项的区分是否清晰？字段校验（如手机号格式）是否即时反馈？"
+          - "表单的视觉分区（基本信息卡片/上传资质卡片）是否帮助用户理解填写进度？"
+
+  - name: 检查资质上传区域
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - screenshot: true
+      - element: ".partner-apply-page__upload"
+        expect: exists
+      - product_review:
+          - "资质材料上传区域是否有明确的上传引导？用户能否理解需要上传什么类型的文件？"
+          - "上传区域的点击响应是否流畅？上传后的文件预览是否清晰可辨？"
+
+  - name: 检查提交与草稿保存
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "页面底部是否有提交和保存草稿两个按钮？按钮的主次关系是否清晰（提交为主/草稿为次）？"
+          - "提交前是否有信息确认环节？防止用户遗漏必填信息或上传错误的文件？"
+          - "整个入驻申请流程是否对非注册用户友好？无需登录是否能顺利完成全部操作？"

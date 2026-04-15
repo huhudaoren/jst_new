@@ -1,0 +1,55 @@
+name: 渠道方订单管理
+description: 验证渠道订单列表的统计横条、状态Tab筛选、搜索、订单卡片、详情页、返点金额展示
+login: MOCK_1003
+steps:
+  - name: 进入渠道订单页面
+    action: reLaunch
+    path: /pages-sub/channel/orders
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".ord-page"
+        expect: exists
+      - element: ".ord-stats"
+        expect: exists
+      - product_review:
+          - "顶部统计横条是否展示了全部订单数、待支付数、已支付数和累计金额？数据是否正确加载？"
+          - "统计横条中的数字是否使用了差异化颜色（待支付警告色/已支付成功色）帮助快速识别？"
+
+  - name: 检查状态Tab与搜索筛选
+    action: wait
+    wait: 800
+    check:
+      - element: ".ord-tabs"
+        expect: exists
+      - element: ".ord-filter"
+        expect: exists
+      - product_review:
+          - "状态Tab（全部/待支付/已支付/退款中等）是否完整？选中状态是否有明确的高亮样式？"
+          - "搜索框是否支持按学生姓名和订单号搜索？筛选条件切换是否即时刷新列表？"
+
+  - name: 检查订单卡片与返点信息
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 800
+    check:
+      - element: ".ord-card"
+        expect: exists
+      - element: ".ord-card__contest"
+        expect: exists
+      - product_review:
+          - "订单卡片是否展示了赛事名称、学生姓名、订单金额、订单状态等核心信息？"
+          - "每笔订单的返点金额是否有独立展示？渠道方能否快速了解每笔订单的返点收益？"
+          - "订单卡片点击是否能跳转到订单详情页？详情页的信息是否比列表更完整？"
+
+  - name: 检查空状态与加载更多
+    action: scroll
+    direction: down
+    distance: 500
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "当特定状态下无订单时，空状态提示是否友好？是否引导渠道方去代报名创建订单？"
+          - "订单列表的触底加载体验是否流畅？加载过程中是否有明确的loading提示？"

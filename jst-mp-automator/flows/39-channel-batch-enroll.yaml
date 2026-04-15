@@ -1,0 +1,54 @@
+name: 渠道方批量报名
+description: 验证批量报名的赛事选择、三种添加方式（绑定学生/手动新增/导入）、提交流程
+login: MOCK_1003
+steps:
+  - name: 进入批量报名页面
+    action: reLaunch
+    path: /pages-sub/channel/batch-enroll
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".be-page"
+        expect: exists
+      - element: ".be-header__title"
+        expect: exists
+      - element: ".be-contest"
+        expect: exists
+      - product_review:
+          - "批量报名页面的赛事选择区域是否直观？点击后是否弹出赛事选择器？"
+          - "页面标题'批量报名'是否清晰传达了该功能的用途？导航返回按钮是否可用？"
+
+  - name: 检查三Tab添加方式
+    action: wait
+    wait: 800
+    check:
+      - element: ".be-tabs"
+        expect: exists
+      - element: ".be-tab"
+        expect: exists
+      - product_review:
+          - "三个添加方式Tab（从已绑定学生选择/手动新增/导入）是否全部可见？选中状态是否有高亮？"
+          - "已绑定学生列表是否展示了学生姓名和学校信息？复选框样式是否清晰可辨？"
+
+  - name: 检查手动新增临时档案表单
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "手动新增参赛人的表单是否包含姓名、性别、手机号等必要字段？字段校验是否即时反馈？"
+          - "多个参赛人的添加和删除操作是否方便？删除按钮是否在明显位置且有防误触设计？"
+          - "底部的报名人数统计和总费用展示是否清晰？提交按钮是否在底部固定？"
+
+  - name: 检查空学生状态与提交区域
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "当无已绑定学生时，空状态提示是否引导渠道方先邀请学生绑定？"
+          - "底部的费用汇总和提交按钮区域是否足够醒目？未选择赛事时提交按钮是否禁用？"

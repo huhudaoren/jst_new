@@ -1,0 +1,45 @@
+name: 边界场景验证
+description: 验证已关闭赛事、空列表、过期场景等边界情况的用户体验
+login: MOCK_1001
+preconditions:
+  - "contestId=8202 赛事处于已结束或已关闭状态"
+steps:
+  - name: 查看已关闭赛事详情
+    action: navigate
+    path: /pages-sub/contest/detail?id=8202
+    wait: 2000
+    check:
+      - screenshot: true
+      - product_review:
+          - "已关闭/已结束的赛事详情页是否正常展示内容？赛事状态是否有醒目的标识（如'已结束'横幅）？"
+          - "报名按钮是否禁用或隐藏？按钮文案是否变更为'报名已截止'或'赛事已结束'？"
+          - "用户点击禁用的报名按钮时是否有友好提示？避免用户困惑为什么无法操作？"
+
+  - name: 检查空报名列表
+    action: reLaunch
+    path: /pages-sub/enroll/my-list
+    wait: 2000
+    check:
+      - screenshot: true
+      - product_review:
+          - "新用户或无报名记录时，我的报名列表是否展示了空状态插图和引导文案？"
+          - "空状态是否提供'去报名'的快捷按钮？引导用户跳转到赛事列表页？"
+
+  - name: 检查空订单列表
+    action: reLaunch
+    path: /pages-sub/order/list
+    wait: 2000
+    check:
+      - screenshot: true
+      - product_review:
+          - "无订单记录时，订单列表页是否展示了友好的空状态？空状态插图是否与品牌风格一致？"
+          - "空状态文案是否区分了'暂无订单'和'加载失败'两种场景？避免用户误解？"
+
+  - name: 网络异常与加载状态
+    action: wait
+    wait: 1000
+    check:
+      - product_review:
+          - "页面加载过程中是否有骨架屏或loading动画？让用户感知到页面正在加载而非无响应？"
+          - "接口超时或返回错误时，页面是否展示了错误提示和重试按钮？避免用户停留在空白页面？"
+          - "页面间切换时是否有过渡动画？整体浏览体验是否流畅无卡顿？"

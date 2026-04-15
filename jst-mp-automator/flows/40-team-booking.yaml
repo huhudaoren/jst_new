@@ -1,0 +1,58 @@
+name: 团队预约
+description: 验证团队预约的赛事选择、日期场次、成员管理、额外人数、分享邀请、预约状态
+login: MOCK_1003
+steps:
+  - name: 进入团队预约页面
+    action: reLaunch
+    path: /pages-sub/channel/appointment
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".ta-page"
+        expect: exists
+      - element: ".ta-header__title"
+        expect: exists
+      - element: ".ta-section__title"
+        expect: exists
+      - product_review:
+          - "团队预约页面的赛事选择区域是否引导用户选择支持团队预约的赛事？"
+          - "页面标题是否根据当前模式（创建/详情）动态切换？导航结构是否清晰？"
+
+  - name: 检查日期场次与名额信息
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 800
+    check:
+      - element: ".ta-field"
+        expect: exists
+      - product_review:
+          - "日期选择器和场次选择器是否使用原生picker组件？操作是否便捷？"
+          - "剩余名额信息是否实时展示？已满/可预约状态标签的颜色区分是否合理？"
+          - "选择场次后名额容量是否立即更新？帮助渠道方判断是否还有足够的位置？"
+
+  - name: 检查成员选择与额外人数
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - screenshot: true
+      - element: ".ta-check-item"
+        expect: exists
+      - product_review:
+          - "从已绑定学生列表中选择成员的操作是否流畅？复选框状态变化是否有即时反馈？"
+          - "额外参赛人数输入和备注名单文本框是否仅在额外人数大于0时显示？交互逻辑是否合理？"
+          - "总人数统计是否实时更新？超出名额限制时是否给出警告提示？"
+
+  - name: 检查提交区域与详情模式
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - screenshot: true
+      - product_review:
+          - "提交按钮是否在底部固定展示？按钮文案是否明确（如'创建团队预约'）？"
+          - "预约创建成功后是否自动切换到详情模式？详情模式是否展示预约编号和成员二维码？"
+          - "分享邀请功能是否可用？渠道方能否将预约链接分享给团队成员？"

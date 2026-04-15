@@ -1,0 +1,62 @@
+name: 渠道方工作台
+description: 验证渠道方工作台首页的KPI统计、快捷入口、返点横幅、最近订单展示
+login: MOCK_1003
+steps:
+  - name: 进入渠道方工作台
+    action: reLaunch
+    path: /pages-sub/channel/home
+    wait: 2500
+    check:
+      - screenshot: true
+      - element: ".ch-home"
+        expect: exists
+      - element: ".ch-hero__identity"
+        expect: exists
+      - element: ".ch-hero__name"
+        expect: exists
+      - product_review:
+          - "工作台首页的身份卡片是否展示了渠道方名称、认证状态徽章、所属学校等关键信息？"
+          - "顶部导航是否包含返回按钮和消息通知入口？视觉层级是否清晰？"
+
+  - name: 检查KPI统计与返点横幅
+    action: wait
+    wait: 800
+    check:
+      - element: ".ch-stats"
+        expect: exists
+      - element: ".ch-stats__cell"
+        expect: exists
+      - element: ".ch-rebate-banner"
+        expect: exists
+      - product_review:
+          - "4格KPI（新增学生/订单数/预估返点/累计支付）数据是否正确加载？数字格式是否统一？"
+          - "返点横幅是否突出展示可提现余额？金额是否使用醒目的金色字体？点击能否跳转到返点中心？"
+
+  - name: 检查功能宫格与快捷入口
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - screenshot: true
+      - element: ".ch-func-grid"
+        expect: exists
+      - element: ".ch-func-item"
+        expect: exists
+      - product_review:
+          - "功能宫格是否完整展示了所有核心功能入口（学生管理/代报名/订单管理/返点中心/提现结算/报名数据/经营分析/团队预约）？"
+          - "每个功能入口的图标和文字是否语义清晰？布局是否整齐美观？"
+
+  - name: 检查权益与最近订单
+    action: scroll
+    direction: down
+    distance: 400
+    wait: 800
+    check:
+      - screenshot: true
+      - element: ".ch-section"
+        expect: exists
+      - product_review:
+          - "权益区域是否展示了当前可用的渠道专属权益？剩余配额是否清晰标注？"
+          - "待支付订单列表是否展示了最近的订单信息？每条订单是否包含赛事名、学生名、金额？"
+          - "页面底部是否有足够留白？整体信息密度是否适中，不会让渠道方感到信息过载？"

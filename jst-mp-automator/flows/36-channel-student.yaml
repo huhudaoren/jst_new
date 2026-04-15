@@ -1,0 +1,45 @@
+name: 渠道方学生管理
+description: 验证学生列表、搜索筛选、学生卡片操作（代报名/查成绩/查证书/解绑）
+login: MOCK_1003
+steps:
+  - name: 进入学生管理页面
+    action: reLaunch
+    path: /pages-sub/channel/students
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".stu-page"
+        expect: exists
+      - element: ".stu-header__title"
+        expect: exists
+      - product_review:
+          - "学生管理页面是否展示了绑定学生总数？页面标题和顶部手动绑定入口是否清晰？"
+          - "搜索栏的占位文案是否引导用户按姓名或手机号搜索？搜索体验是否流畅？"
+
+  - name: 检查筛选Tab与学生卡片
+    action: scroll
+    direction: down
+    distance: 300
+    wait: 800
+    check:
+      - element: ".stu-tabs"
+        expect: exists
+      - element: ".stu-card"
+        expect: exists
+      - element: ".stu-card__name"
+        expect: exists
+      - product_review:
+          - "筛选Tab（全部/已报名/未报名等）是否完整展示？每个Tab是否标注了对应的学生数量？"
+          - "学生卡片是否展示了头像首字母、姓名、学校、联系方式等核心信息？排列是否整齐？"
+          - "每个学生卡片是否提供了快捷操作（代报名/查成绩/查证书）？操作按钮是否语义清晰？"
+
+  - name: 检查学生详情操作区域
+    action: wait
+    wait: 500
+    check:
+      - element: ".stu-card__main"
+        expect: exists
+      - product_review:
+          - "学生卡片点击后是否展开操作区域？解绑按钮是否有二次确认防止误操作？"
+          - "空状态（无绑定学生）的提示是否引导渠道方去分享二维码绑定学生？"
+          - "列表是否支持触底加载更多？加载中和无更多数据的状态提示是否友好？"

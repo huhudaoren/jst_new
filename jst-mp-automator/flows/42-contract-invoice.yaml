@@ -1,0 +1,54 @@
+name: 合同与发票
+description: 验证合同列表查看、状态筛选和发票列表查看、申请开票流程
+login: MOCK_1003
+steps:
+  - name: 进入合同中心
+    action: reLaunch
+    path: /pages-sub/channel/contract-list
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".cl-page"
+        expect: exists
+      - element: ".cl-header__title"
+        expect: exists
+      - element: ".cl-tabs"
+        expect: exists
+      - product_review:
+          - "合同中心的状态筛选Tab是否清晰可切换？各状态下的合同列表是否正确加载？"
+          - "合同卡片是否展示了合同编号、类型标签、生效日期、签署时间等关键信息？"
+
+  - name: 检查合同卡片与空状态
+    action: wait
+    wait: 800
+    check:
+      - product_review:
+          - "合同卡片的状态标签颜色是否与合同状态对应（已签署成功色/待签署警告色/已过期信息色）？"
+          - "无合同记录时的空状态提示是否友好？是否说明合同何时会自动生成？"
+
+  - name: 进入发票中心
+    action: reLaunch
+    path: /pages-sub/channel/invoice-list
+    wait: 2000
+    check:
+      - screenshot: true
+      - element: ".il-page"
+        expect: exists
+      - element: ".il-header__title"
+        expect: exists
+      - element: ".il-header__action"
+        expect: exists
+      - product_review:
+          - "发票中心右上角的'申请开票'按钮是否醒目？渠道方能否快速找到开票入口？"
+          - "发票列表是否展示了发票编号、抬头、金额、状态等核心信息？卡片排列是否整齐？"
+
+  - name: 检查发票筛选与开票引导
+    action: wait
+    wait: 800
+    check:
+      - element: ".il-tabs"
+        expect: exists
+      - product_review:
+          - "发票状态筛选Tab是否完整（全部/待审核/已开具/已驳回）？切换是否即时刷新？"
+          - "无发票记录时的空状态是否引导渠道方了解开票条件（如需达到一定金额才可申请）？"
+          - "从申请开票到发票开具完成，整个流程的状态追踪是否清晰？"
