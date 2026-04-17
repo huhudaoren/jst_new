@@ -1,7 +1,12 @@
 -- =====================================================
 -- 销售管理字典数据
--- 关联 spec §1
--- 字典段：jst_sales_*（避免与既有字典冲突）
+-- 关联 spec §1 / 关联 plan-01 Task 3
+-- 字典段：jst_sales_* + jst_channel_share_scene（避免与既有字典冲突）
+--
+-- ⚠️ 一次性迁移文件：dict_type 是唯一键，重跑会因 Duplicate 报错。
+-- 回滚命令：
+--   DELETE FROM sys_dict_data WHERE dict_type LIKE 'jst_sales_%' OR dict_type='jst_channel_share_scene';
+--   DELETE FROM sys_dict_type WHERE dict_type LIKE 'jst_sales_%' OR dict_type='jst_channel_share_scene';
 -- =====================================================
 SET NAMES utf8mb4;
 

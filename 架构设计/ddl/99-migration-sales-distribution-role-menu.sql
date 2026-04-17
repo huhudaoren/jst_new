@@ -1,7 +1,22 @@
 -- =====================================================
 -- 销售管理：角色 / 菜单 / 权限点
--- 角色：jst_sales (501) / jst_sales_manager (502)
--- 菜单段：9785 (销售工作台) / 9762xx (admin 销售管理)
+-- 关联 spec §5.1 / 关联 plan-01 Task 5
+--
+-- ID 段约定（避免与既有数据冲突）：
+--   - 角色 ID：501 jst_sales / 502 jst_sales_manager
+--     （CLAUDE.md 既有角色 ID 1=admin、2-7=运营/财务/客服/营销/风控/分析师、8=jst_partner，
+--      501-502 留出充足缓冲区）
+--   - 菜单 ID：9785 / 978500-978599（销售工作台子菜单及按钮）
+--                976210-976299（admin 销售管理子菜单及按钮，挂在 9762 用户渠道下）
+--     （既有菜单段：9700 赛事管理中心、9800 平台数据管理；选 978/976 段不冲突）
+--
+-- ⚠️ 一次性迁移文件：role_id / menu_id 是 PK，重跑会因 Duplicate 报错。
+-- 回滚命令：
+--   DELETE FROM sys_role_menu WHERE role_id IN (501,502);
+--   DELETE FROM sys_role WHERE role_id IN (501,502);
+--   DELETE FROM sys_menu WHERE menu_id BETWEEN 978500 AND 978599;
+--   DELETE FROM sys_menu WHERE menu_id BETWEEN 976210 AND 976299;
+--   DELETE FROM sys_menu WHERE menu_id = 9785;
 -- =====================================================
 SET NAMES utf8mb4;
 

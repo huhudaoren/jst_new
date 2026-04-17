@@ -1,5 +1,11 @@
 -- =====================================================
 -- 销售管理系统参数（admin 在系统参数页可调）
+-- 关联 spec §5.7 / 关联 plan-01 Task 4
+-- 命名空间：jst.sales.*（与 Java @Value("${jst.sales.xxx:default}") 对应）
+--
+-- ⚠️ 一次性迁移文件：config_key 是唯一键，重跑会因 Duplicate 报错。
+-- 回滚命令：
+--   DELETE FROM sys_config WHERE config_key LIKE 'jst.sales.%';
 -- =====================================================
 SET NAMES utf8mb4;
 
