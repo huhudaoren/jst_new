@@ -94,6 +94,31 @@
 
 ---
 
+## 📱 小程序专属 Task 索引（前端开发者快速定位）
+
+> 整个 SALES-DISTRIBUTION 子系统的小程序触点都集中在本计划，全部围绕"渠道方视角的渠道分销链路"。销售/销售主管/admin 全部用 Web 管理端，**不进小程序**；学生对销售提成无感知。
+
+| Task | 内容 | 涉及文件 | 依赖 |
+|---|---|---|---|
+| **Task 8** | 渠道注册流程后端：ReqDTO 加 `inviteCode/businessNo` 字段 + publish ChannelRegisteredEvent | 后端（用户模块） | 无 |
+| **Task 9** | 小程序 3 页 + 后端 WxChannelInviteController API | `jst-uniapp/api/invite.js`、`pages-sub/channel/invite-code.vue`、`invite-list.vue`、`distribution.vue`、`pages.json`、`controller/wx/WxChannelInviteController.java` | 依赖 Task 2/3/4 的 InviteCodeService、ChannelInviteService、ChannelDistributionService |
+| **Task 10** | 渠道注册页接 invite_code（分享链接自动回填）+ business_no 选填字段 | `jst-uniapp/pages-sub/public/partner-apply.vue`（或对应渠道注册页） | 依赖 Task 8 后端 ReqDTO |
+
+**小程序需要的 SDK / 配置**：
+- 复用现有 jst-uniapp 工程（无需新依赖）
+- uView 2.0 + Design Token + jst-empty 组件已在工程内
+- `uni.share` 微信分享 + `onShareAppMessage` 自带功能（无需 SDK）
+- 提现复用现有渠道方提现页（C5b，无需新建）
+
+**小程序专项验收**：
+- HBuilderX 编译无错误
+- 微信开发者工具预览：3 页面 UI 正常 + 微信分享带 `invite_code` 参数
+- 端到端：渠道 A 分享 → 渠道 B 通过分享链接进入注册页 → invite_code 自动填入 → 注册成功后 jst_channel_invite 表写入对应行
+
+**小程序工作量预估**：~2 人日（后端 0.5 + 前端 1.5）
+
+---
+
 ## Task 1: 准备分支 + 检查前置
 
 - [ ] **Step 1: 拉 main 开新分支**
