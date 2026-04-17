@@ -1,12 +1,14 @@
 package com.ruoyi.jst.user.service.impl;
 
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.jst.common.audit.OperateLog;
 import com.ruoyi.jst.common.exception.BizErrorCode;
 import com.ruoyi.jst.common.lock.JstLockTemplate;
 import com.ruoyi.jst.user.domain.Participant;
 import com.ruoyi.jst.user.domain.ParticipantUserMap;
+import com.ruoyi.jst.user.dto.SelfCreateParticipantReqDTO;
 import com.ruoyi.jst.user.enums.ClaimStatus;
 import com.ruoyi.jst.user.mapper.ParticipantMapper;
 import com.ruoyi.jst.user.mapper.ParticipantUserMapMapper;
@@ -128,6 +130,79 @@ public class ParticipantClaimServiceImpl implements ParticipantClaimService {
             log.info("[ClaimRevoke] 撤销成功 participantId={} reason={}", participantId, reason);
             return null;
         });
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @OperateLog(module = "用户", action = "CLAIM_SELF_CREATE", target = "#{userId}")
+    public ParticipantClaimResVO selfCreate(Long userId, SelfCreateParticipantReqDTO req) {
+        if (userId == null || req == null) {
+            throw new ServiceException(BizErrorCode.JST_COMMON_PARAM_INVALID.message(),
+                    BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+        }
+        String name = req.getName() == null ? null : req.getName().trim();
+        if (name == null || name.isEmpty()) {
+            throw new ServiceException("参赛人姓名不能为空",
+                    BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+        }
+
+        // 防刷：同一 userId 下已有同名有效档案则拒绝
+        List<ParticipantUserMap> activeMaps = mapMapper.selectActiveByUserId(userId);
+        for (ParticipantUserMap m : activeMaps) {
+            Participant exist = participantMapper.selectByPk(m.getParticipantId());
+            if (exist != null && name.equals(exist.getName())) {
+                throw new ServiceException("您已存在同名档案：" + name + "，请勿重复创建",
+                        BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+            }
+        }
+
+        Date now = DateUtils.getNowDate();
+        String operator = String.valueOf(userId);
+
+        // 1. 写 participant(创建即认领,直接落 manual_claimed)
+        Participant p = new Participant();
+        p.setParticipantType("registered_participant");
+        p.setName(name);
+        p.setGender(req.getGender());
+        p.setBirthday(req.getBirthday());
+        p.setAge(req.getAge());
+        p.setSchool(req.getSchool());
+        p.setClassName(req.getClassName());
+        p.setGuardianName(req.getGuardianName());
+        p.setGuardianMobile(req.getGuardianMobile());
+        p.setIdCardType(req.getIdCardType());
+        p.setIdCardNo(req.getIdCardNo());
+        p.setClaimStatus(ClaimStatus.MANUAL_CLAIMED.dbValue());
+        p.setClaimedUserId(userId);
+        p.setClaimedTime(now);
+        p.setVisibleScope("platform");
+        p.setCreateBy(operator);
+        p.setCreateTime(now);
+        p.setUpdateBy(operator);
+        p.setUpdateTime(now);
+        participantMapper.insertParticipant(p);
+
+        // 2. 写 map
+        ParticipantUserMap map = new ParticipantUserMap();
+        map.setParticipantId(p.getParticipantId());
+        map.setUserId(userId);
+        map.setClaimMethod("self_create");
+        map.setClaimTime(now);
+        map.setOperatorId(userId);
+        map.setStatus("active");
+        map.setCreateBy(operator);
+        mapMapper.insert(map);
+
+        log.info("[SelfCreate] 学生自建档案 userId={} participantId={} name={}",
+                userId, p.getParticipantId(), name);
+
+        ParticipantClaimResVO vo = new ParticipantClaimResVO();
+        vo.setParticipantId(p.getParticipantId());
+        vo.setUserId(userId);
+        vo.setClaimMethod("self_create");
+        vo.setClaimTime(now);
+        vo.setResultMessage("创建成功");
+        return vo;
     }
 
     // ========== private helpers ==========

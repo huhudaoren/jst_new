@@ -13,6 +13,7 @@ import com.ruoyi.jst.user.dto.BatchCreateParticipantReqDTO;
 import com.ruoyi.jst.user.dto.BatchEnrollReqDTO;
 import com.ruoyi.jst.user.dto.ChannelParticipantQueryReqDTO;
 import com.ruoyi.jst.user.dto.ChannelParticipantUpdateReqDTO;
+import com.ruoyi.jst.user.dto.SelfCreateParticipantReqDTO;
 import com.ruoyi.jst.user.mapper.ParticipantMapper;
 import com.ruoyi.jst.user.mapper.ParticipantUserMapMapper;
 import com.ruoyi.jst.user.service.ChannelParticipantService;
@@ -130,6 +131,27 @@ public class WxParticipantController extends BaseController {
         Long userId = SecurityUtils.getUserId();
         channelParticipantService.deleteParticipant(userId, participantId);
         return AjaxResult.success();
+    }
+
+    /**
+     * 学生自建参赛档案(创建即认领)
+     * <p>
+     * 用于"我的档案"页用户自行新增档案。入参仅需姓名必填，其余可选。
+     *
+     * @param req 档案入参
+     * @return 创建结果(含 participantId)
+     * @关联表 jst_participant / jst_participant_user_map
+     * @关联状态机 SM-14
+     */
+    @PostMapping("/jst/wx/participant/self-create")
+    public AjaxResult selfCreate(@Valid @RequestBody SelfCreateParticipantReqDTO req) {
+        Long userId = SecurityUtils.getUserId();
+        if (userId == null) {
+            throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
+                    BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+        }
+        ParticipantClaimResVO vo = claimService.selfCreate(userId, req);
+        return AjaxResult.success(vo);
     }
 
     /**

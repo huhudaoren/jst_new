@@ -21,3 +21,12 @@ export function claimParticipant(participantId) {
 export function getParticipantDetail(participantId) {
   return request({ url: `/jst/wx/participant/${participantId}`, method: 'GET' })
 }
+
+/** 学生自建参赛档案(创建即认领) */
+export function selfCreateParticipant(data) {
+  return request({
+    url: '/jst/wx/participant/self-create',
+    method: 'POST',
+    data
+  })
+}

@@ -1,5 +1,6 @@
 package com.ruoyi.jst.user.service;
 
+import com.ruoyi.jst.user.dto.SelfCreateParticipantReqDTO;
 import com.ruoyi.jst.user.vo.ParticipantClaimResVO;
 
 /**
@@ -50,4 +51,21 @@ public interface ParticipantClaimService {
      * @param reason        撤销原因
      */
     void revokeClaim(Long participantId, String reason);
+
+    /**
+     * 学生自建参赛档案(创建即认领)
+     * <p>
+     * 用于"我的档案"页用户自行新增档案。落库时：
+     * <ul>
+     *   <li>jst_participant: claim_status=manual_claimed, participant_type=registered_participant,
+     *       visible_scope=platform, claimed_user_id=userId</li>
+     *   <li>jst_participant_user_map: claim_method=self_create, status=active</li>
+     * </ul>
+     * 防刷：同一 userId 下已存在同名有效档案时拒绝创建。
+     *
+     * @param userId 当前登录用户ID
+     * @param req    档案入参
+     * @return 认领结果(含新建的 participantId)
+     */
+    ParticipantClaimResVO selfCreate(Long userId, SelfCreateParticipantReqDTO req);
 }
