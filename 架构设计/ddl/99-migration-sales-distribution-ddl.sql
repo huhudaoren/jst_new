@@ -61,6 +61,8 @@ CREATE TABLE jst_sales_pre_register (
   renew_count         TINYINT         NOT NULL DEFAULT 0      COMMENT '已续期次数（最多 2）',
   create_by           VARCHAR(64)     NULL,
   create_time         DATETIME        NULL,
+  update_by           VARCHAR(64)     NULL,
+  update_time         DATETIME        NULL,
   PRIMARY KEY (pre_id),
   -- 仅 status='pending' 的同一手机号唯一（用生成列模拟 partial index）
   pending_flag TINYINT GENERATED ALWAYS AS (IF(status='pending', 1, NULL)) VIRTUAL,
@@ -81,6 +83,8 @@ CREATE TABLE jst_sales_channel_binding (
   bind_remark     VARCHAR(255)    NULL                    COMMENT 'admin 转移时填写的原因',
   operator_id     BIGINT          NULL                    COMMENT '触发人 sys_user_id',
   create_time     DATETIME        NULL,
+  update_by       VARCHAR(64)     NULL,
+  update_time     DATETIME        NULL,
   PRIMARY KEY (binding_id),
   -- 同渠道当前只有一行 current（条件唯一索引模拟）
   is_current TINYINT GENERATED ALWAYS AS (IF(effective_to IS NULL, 1, NULL)) VIRTUAL,
@@ -100,6 +104,8 @@ CREATE TABLE jst_channel_invite (
   invited_at          DATETIME        NOT NULL                COMMENT '邀请关系建立时间',
   status              VARCHAR(32)     NOT NULL DEFAULT 'active' COMMENT 'active / unbound',
   create_time         DATETIME        NULL,
+  update_by           VARCHAR(64)     NULL,
+  update_time         DATETIME        NULL,
   PRIMARY KEY (invite_id),
   -- 同一下级在同一时刻只能 active 一次
   active_flag TINYINT GENERATED ALWAYS AS (IF(status='active', 1, NULL)) VIRTUAL,
@@ -109,6 +115,9 @@ CREATE TABLE jst_channel_invite (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='渠道邀请关系';
 
 -- ========== 1.6 jst_channel 老表加字段 ==========
+-- ⚠️ 注意：本 ALTER 段不是幂等的（MySQL 5.7 ADD COLUMN 无 IF NOT EXISTS）。
+-- 二次执行会因列已存在报错并中止整个事务。
+-- 如需重新跑：先手工 DROP 这 5 列再执行，或通过运维 DBA 走单独的迁移流水线。
 ALTER TABLE jst_channel
   ADD COLUMN business_no              VARCHAR(32)  NULL COMMENT '渠道注册时填的销售业务编号' AFTER status,
   ADD COLUMN invite_code              VARCHAR(32)  NULL COMMENT '本渠道分享出去的邀请码（注册自动生成）' AFTER business_no,
@@ -160,12 +169,16 @@ CREATE TABLE jst_sales_commission_settlement (
   pay_voucher     VARCHAR(255)    NULL                    COMMENT '打款流水号',
   reject_reason   VARCHAR(255)    NULL,
   create_time     DATETIME        NULL,
+  update_by       VARCHAR(64)     NULL,
+  update_time     DATETIME        NULL,
   PRIMARY KEY (settlement_id),
   UNIQUE KEY uk_sales_period (sales_id, period),
   KEY idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='销售月结单';
 
 -- ========== 1.9 jst_channel_distribution_ledger 渠道分销提成台账 ==========
+-- 注：渠道分销提成不区分业务类型 (enroll/course/mall/...)，
+-- 统一按 jst_channel_invite.commission_rate 或系统默认 1.5% 计算。
 DROP TABLE IF EXISTS jst_channel_distribution_ledger;
 CREATE TABLE jst_channel_distribution_ledger (
   ledger_id            BIGINT          NOT NULL                COMMENT 'PK（雪花）',
@@ -175,9 +188,9 @@ CREATE TABLE jst_channel_distribution_ledger (
   order_no             VARCHAR(64)     NOT NULL                COMMENT '订单号',
   base_amount          DECIMAL(12,2)   NOT NULL                COMMENT '实付金额',
   applied_rate         DECIMAL(5,4)    NOT NULL                COMMENT 'invite 表上的费率（回退默认）',
-  raw_amount           DECIMAL(12,2)   NOT NULL,
-  compress_ratio       DECIMAL(5,4)    NOT NULL DEFAULT 1.0000,
-  amount               DECIMAL(12,2)   NOT NULL,
+  raw_amount           DECIMAL(12,2)   NOT NULL                COMMENT '压缩前 = base × applied_rate',
+  compress_ratio       DECIMAL(5,4)    NOT NULL DEFAULT 1.0000 COMMENT '上限压缩系数（与销售提成共享同一 ratio）',
+  amount               DECIMAL(12,2)   NOT NULL                COMMENT '最终入账 = raw × ratio',
   status               VARCHAR(32)     NOT NULL DEFAULT 'pending',
   accrue_at            DATETIME        NOT NULL,
   accrued_at           DATETIME        NULL,
@@ -219,7 +232,7 @@ CREATE TABLE jst_sales_channel_tag (
   channel_id   BIGINT          NOT NULL,
   tag_code     VARCHAR(64)     NOT NULL                COMMENT '字典 + 自定义（custom: 前缀）',
   tag_color    VARCHAR(16)     NULL,
-  create_by    BIGINT          NULL,
+  create_by    VARCHAR(64)     NULL,
   create_time  DATETIME        NULL,
   PRIMARY KEY (id),
   UNIQUE KEY uk_channel_tag (channel_id, tag_code),
@@ -258,6 +271,8 @@ CREATE TABLE jst_sales_attribution_conflict (
   resolved_at          DATETIME        NULL,
   resolution_remark    VARCHAR(500)    NULL,
   create_time          DATETIME        NULL,
+  update_by            VARCHAR(64)     NULL,
+  update_time          DATETIME        NULL,
   PRIMARY KEY (conflict_id),
   KEY idx_status (status),
   KEY idx_channel (channel_id)
