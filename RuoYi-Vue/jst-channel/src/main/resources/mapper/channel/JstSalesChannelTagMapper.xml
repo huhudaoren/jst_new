@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.JstSalesChannelTagMapper">
+
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSalesChannelTag" id="JstSalesChannelTagResult">
+        <id     property="id"          column="id"/>
+        <result property="channelId"   column="channel_id"/>
+        <result property="tagCode"     column="tag_code"/>
+        <result property="tagColor"    column="tag_color"/>
+        <result property="createBy"    column="create_by"/>
+        <result property="createTime"  column="create_time"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, channel_id, tag_code, tag_color, create_by, create_time
+    </sql>
+
+    <select id="selectJstSalesChannelTagById" parameterType="Long" resultMap="JstSalesChannelTagResult">
+        SELECT <include refid="cols"/> FROM jst_sales_channel_tag WHERE id = #{id}
+    </select>
+
+    <select id="selectJstSalesChannelTagList" parameterType="com.ruoyi.jst.channel.domain.JstSalesChannelTag" resultMap="JstSalesChannelTagResult">
+        SELECT <include refid="cols"/> FROM jst_sales_channel_tag
+        <where>
+            <if test="channelId != null">AND channel_id = #{channelId}</if>
+            <if test="tagCode != null and tagCode != ''">AND tag_code = #{tagCode}</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insertJstSalesChannelTag" parameterType="com.ruoyi.jst.channel.domain.JstSalesChannelTag">
+        INSERT INTO jst_sales_channel_tag (
+            id, channel_id, tag_code, tag_color, create_by, create_time
+        ) VALUES (
+            #{id}, #{channelId}, #{tagCode}, #{tagColor}, #{createBy}, NOW()
+        )
+    </insert>
+
+    <update id="updateJstSalesChannelTag" parameterType="com.ruoyi.jst.channel.domain.JstSalesChannelTag">
+        UPDATE jst_sales_channel_tag
+        <set>
+            <if test="channelId != null">channel_id = #{channelId},</if>
+            <if test="tagCode != null">tag_code = #{tagCode},</if>
+            <if test="tagColor != null">tag_color = #{tagColor},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteJstSalesChannelTagById" parameterType="Long">
+        DELETE FROM jst_sales_channel_tag WHERE id = #{id}
+    </delete>
+
+</mapper>

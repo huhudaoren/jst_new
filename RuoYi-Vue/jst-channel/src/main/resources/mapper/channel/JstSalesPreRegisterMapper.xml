@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.JstSalesPreRegisterMapper">
+
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSalesPreRegister" id="JstSalesPreRegisterResult">
+        <id     property="preId"           column="pre_id"/>
+        <result property="salesId"         column="sales_id"/>
+        <result property="phone"           column="phone"/>
+        <result property="targetName"      column="target_name"/>
+        <result property="status"          column="status"/>
+        <result property="matchedChannelId" column="matched_channel_id"/>
+        <result property="matchedAt"       column="matched_at"/>
+        <result property="expireAt"        column="expire_at"/>
+        <result property="renewCount"      column="renew_count"/>
+        <result property="createBy"        column="create_by"/>
+        <result property="createTime"      column="create_time"/>
+        <result property="updateBy"        column="update_by"/>
+        <result property="updateTime"      column="update_time"/>
+    </resultMap>
+
+    <sql id="cols">
+        pre_id, sales_id, phone, target_name, status, matched_channel_id, matched_at,
+        expire_at, renew_count, create_by, create_time, update_by, update_time
+    </sql>
+
+    <select id="selectJstSalesPreRegisterByPreId" parameterType="Long" resultMap="JstSalesPreRegisterResult">
+        SELECT <include refid="cols"/> FROM jst_sales_pre_register WHERE pre_id = #{preId}
+    </select>
+
+    <select id="selectJstSalesPreRegisterList" parameterType="com.ruoyi.jst.channel.domain.JstSalesPreRegister" resultMap="JstSalesPreRegisterResult">
+        SELECT <include refid="cols"/> FROM jst_sales_pre_register
+        <where>
+            <if test="salesId != null">AND sales_id = #{salesId}</if>
+            <if test="phone != null and phone != ''">AND phone = #{phone}</if>
+            <if test="status != null and status != ''">AND status = #{status}</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insertJstSalesPreRegister" parameterType="com.ruoyi.jst.channel.domain.JstSalesPreRegister">
+        INSERT INTO jst_sales_pre_register (
+            pre_id, sales_id, phone, target_name, status, matched_channel_id, matched_at,
+            expire_at, renew_count, create_by, create_time
+        ) VALUES (
+            #{preId}, #{salesId}, #{phone}, #{targetName}, #{status}, #{matchedChannelId},
+            #{matchedAt}, #{expireAt}, #{renewCount}, #{createBy}, NOW()
+        )
+    </insert>
+
+    <update id="updateJstSalesPreRegister" parameterType="com.ruoyi.jst.channel.domain.JstSalesPreRegister">
+        UPDATE jst_sales_pre_register
+        <set>
+            <if test="salesId != null">sales_id = #{salesId},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="targetName != null">target_name = #{targetName},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="matchedChannelId != null">matched_channel_id = #{matchedChannelId},</if>
+            <if test="matchedAt != null">matched_at = #{matchedAt},</if>
+            <if test="expireAt != null">expire_at = #{expireAt},</if>
+            <if test="renewCount != null">renew_count = #{renewCount},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE pre_id = #{preId}
+    </update>
+
+    <delete id="deleteJstSalesPreRegisterByPreId" parameterType="Long">
+        DELETE FROM jst_sales_pre_register WHERE pre_id = #{preId}
+    </delete>
+
+</mapper>

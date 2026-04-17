@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.JstSalesChannelBindingMapper">
+
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSalesChannelBinding" id="JstSalesChannelBindingResult">
+        <id     property="bindingId"    column="binding_id"/>
+        <result property="channelId"   column="channel_id"/>
+        <result property="salesId"     column="sales_id"/>
+        <result property="effectiveFrom" column="effective_from"/>
+        <result property="effectiveTo" column="effective_to"/>
+        <result property="bindSource"  column="bind_source"/>
+        <result property="bindRemark"  column="bind_remark"/>
+        <result property="operatorId"  column="operator_id"/>
+        <result property="createTime"  column="create_time"/>
+        <result property="updateBy"    column="update_by"/>
+        <result property="updateTime"  column="update_time"/>
+    </resultMap>
+
+    <sql id="cols">
+        binding_id, channel_id, sales_id, effective_from, effective_to,
+        bind_source, bind_remark, operator_id, create_time, update_by, update_time
+    </sql>
+
+    <select id="selectJstSalesChannelBindingByBindingId" parameterType="Long" resultMap="JstSalesChannelBindingResult">
+        SELECT <include refid="cols"/> FROM jst_sales_channel_binding WHERE binding_id = #{bindingId}
+    </select>
+
+    <select id="selectJstSalesChannelBindingList" parameterType="com.ruoyi.jst.channel.domain.JstSalesChannelBinding" resultMap="JstSalesChannelBindingResult">
+        SELECT <include refid="cols"/> FROM jst_sales_channel_binding
+        <where>
+            <if test="channelId != null">AND channel_id = #{channelId}</if>
+            <if test="salesId != null">AND sales_id = #{salesId}</if>
+            <if test="bindSource != null and bindSource != ''">AND bind_source = #{bindSource}</if>
+        </where>
+        ORDER BY effective_from DESC
+    </select>
+
+    <insert id="insertJstSalesChannelBinding" parameterType="com.ruoyi.jst.channel.domain.JstSalesChannelBinding">
+        INSERT INTO jst_sales_channel_binding (
+            binding_id, channel_id, sales_id, effective_from, effective_to,
+            bind_source, bind_remark, operator_id, create_time
+        ) VALUES (
+            #{bindingId}, #{channelId}, #{salesId}, #{effectiveFrom}, #{effectiveTo},
+            #{bindSource}, #{bindRemark}, #{operatorId}, NOW()
+        )
+    </insert>
+
+    <update id="updateJstSalesChannelBinding" parameterType="com.ruoyi.jst.channel.domain.JstSalesChannelBinding">
+        UPDATE jst_sales_channel_binding
+        <set>
+            <if test="channelId != null">channel_id = #{channelId},</if>
+            <if test="salesId != null">sales_id = #{salesId},</if>
+            <if test="effectiveFrom != null">effective_from = #{effectiveFrom},</if>
+            <if test="effectiveTo != null">effective_to = #{effectiveTo},</if>
+            <if test="bindSource != null">bind_source = #{bindSource},</if>
+            <if test="bindRemark != null">bind_remark = #{bindRemark},</if>
+            <if test="operatorId != null">operator_id = #{operatorId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE binding_id = #{bindingId}
+    </update>
+
+    <delete id="deleteJstSalesChannelBindingByBindingId" parameterType="Long">
+        DELETE FROM jst_sales_channel_binding WHERE binding_id = #{bindingId}
+    </delete>
+
+</mapper>

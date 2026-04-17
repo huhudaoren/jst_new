@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.JstSalesCommissionRateMapper">
+
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSalesCommissionRate" id="JstSalesCommissionRateResult">
+        <id     property="id"            column="id"/>
+        <result property="salesId"       column="sales_id"/>
+        <result property="businessType"  column="business_type"/>
+        <result property="rate"          column="rate"/>
+        <result property="effectiveFrom" column="effective_from"/>
+        <result property="createBy"      column="create_by"/>
+        <result property="createTime"    column="create_time"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, sales_id, business_type, rate, effective_from, create_by, create_time
+    </sql>
+
+    <select id="selectJstSalesCommissionRateById" parameterType="Long" resultMap="JstSalesCommissionRateResult">
+        SELECT <include refid="cols"/> FROM jst_sales_commission_rate WHERE id = #{id}
+    </select>
+
+    <select id="selectJstSalesCommissionRateList" parameterType="com.ruoyi.jst.channel.domain.JstSalesCommissionRate" resultMap="JstSalesCommissionRateResult">
+        SELECT <include refid="cols"/> FROM jst_sales_commission_rate
+        <where>
+            <if test="salesId != null">AND sales_id = #{salesId}</if>
+            <if test="businessType != null and businessType != ''">AND business_type = #{businessType}</if>
+        </where>
+        ORDER BY sales_id, business_type, effective_from DESC
+    </select>
+
+    <insert id="insertJstSalesCommissionRate" parameterType="com.ruoyi.jst.channel.domain.JstSalesCommissionRate">
+        INSERT INTO jst_sales_commission_rate (
+            id, sales_id, business_type, rate, effective_from, create_by, create_time
+        ) VALUES (
+            #{id}, #{salesId}, #{businessType}, #{rate}, #{effectiveFrom}, #{createBy}, NOW()
+        )
+    </insert>
+
+    <update id="updateJstSalesCommissionRate" parameterType="com.ruoyi.jst.channel.domain.JstSalesCommissionRate">
+        UPDATE jst_sales_commission_rate
+        <set>
+            <if test="salesId != null">sales_id = #{salesId},</if>
+            <if test="businessType != null">business_type = #{businessType},</if>
+            <if test="rate != null">rate = #{rate},</if>
+            <if test="effectiveFrom != null">effective_from = #{effectiveFrom},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteJstSalesCommissionRateById" parameterType="Long">
+        DELETE FROM jst_sales_commission_rate WHERE id = #{id}
+    </delete>
+
+</mapper>
