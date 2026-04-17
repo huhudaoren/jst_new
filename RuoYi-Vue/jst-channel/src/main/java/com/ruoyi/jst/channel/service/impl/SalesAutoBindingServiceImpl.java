@@ -80,6 +80,11 @@ public class SalesAutoBindingServiceImpl implements SalesAutoBindingService {
 
     private Long tryStep1ByPhone(Long channelId, String registeredPhone) {
         if (registeredPhone == null || registeredPhone.isEmpty()) return null;
+        // Note: spec §2.1 Step 1 提到"命中多条 → 写 jst_sales_attribution_conflict 不绑"，
+        // 但 jst_sales_pre_register 的 uk_phone_pending 唯一索引（DDL 中通过生成列模拟 partial unique）
+        // 已在 DB 层保证：同 phone 只能有 1 条 status='pending' 行。
+        // 因此 selectByPhonePending LIMIT 1 是安全简化，多命中场景不会发生，无需写 conflict 表。
+        // 若未来取消唯一索引（如允许同手机号被多销售竞争预录），需补 conflict 写入逻辑。
         JstSalesPreRegister pre = preRegisterService.findActiveByPhone(registeredPhone);
         if (pre == null) return null;
 
