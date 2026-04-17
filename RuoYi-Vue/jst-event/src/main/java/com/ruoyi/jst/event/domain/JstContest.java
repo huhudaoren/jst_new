@@ -176,6 +176,26 @@ public class JstContest extends BaseEntity
     @Excel(name = "比赛地址")
     private String eventAddress;
 
+    /** 主办方 LOGO */
+    @Excel(name = "主办方LOGO")
+    private String organizerLogo;
+
+    /** 主办方简介 */
+    @Excel(name = "主办方简介")
+    private String organizerDesc;
+
+    /** 咨询电话 */
+    @Excel(name = "咨询电话")
+    private String contactPhone;
+
+    /** 咨询微信 */
+    @Excel(name = "咨询微信")
+    private String contactWechat;
+
+    /** 咨询邮箱 */
+    @Excel(name = "咨询邮箱")
+    private String contactEmail;
+
     /** 赛程JSON */
     @Deprecated
     @Excel(name = "赛程JSON")
@@ -564,6 +584,21 @@ public class JstContest extends BaseEntity
         this.eventAddress = eventAddress;
     }
 
+    public String getOrganizerLogo() { return organizerLogo; }
+    public void setOrganizerLogo(String organizerLogo) { this.organizerLogo = organizerLogo; }
+
+    public String getOrganizerDesc() { return organizerDesc; }
+    public void setOrganizerDesc(String organizerDesc) { this.organizerDesc = organizerDesc; }
+
+    public String getContactPhone() { return contactPhone; }
+    public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
+
+    public String getContactWechat() { return contactWechat; }
+    public void setContactWechat(String contactWechat) { this.contactWechat = contactWechat; }
+
+    public String getContactEmail() { return contactEmail; }
+    public void setContactEmail(String contactEmail) { this.contactEmail = contactEmail; }
+
     public void setScheduleJson(String scheduleJson)
     {
         this.scheduleJson = scheduleJson;
@@ -705,6 +740,11 @@ public class JstContest extends BaseEntity
             .append("organizer", getOrganizer())
             .append("coOrganizer", getCoOrganizer())
             .append("eventAddress", getEventAddress())
+            .append("organizerLogo", getOrganizerLogo())
+            .append("organizerDesc", getOrganizerDesc())
+            .append("contactPhone", getContactPhone())
+            .append("contactWechat", getContactWechat())
+            .append("contactEmail", getContactEmail())
             .append("scheduleJson", getScheduleJson())
             .append("awardsJson", getAwardsJson())
             .append("faqJson", getFaqJson())

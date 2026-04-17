@@ -339,7 +339,7 @@ export default {
   align-items: center;
   height: 100rpx;
   padding: 0 $jst-page-padding;
-  background: linear-gradient(135deg, $jst-success 0%, lighten($jst-success, 8%) 100%);
+  background: $jst-brand-gradient;
 }
 
 .partner-apply-page__back,
@@ -398,7 +398,7 @@ export default {
 }
 
 .partner-apply-page__step--active::after {
-  background: rgba(39, 174, 96, 0.18);
+  background: $jst-brand-light;
 }
 
 .partner-apply-page__step-circle {
@@ -418,8 +418,8 @@ export default {
 }
 
 .partner-apply-page__step--active .partner-apply-page__step-circle {
-  border-color: $jst-success;
-  color: $jst-success;
+  border-color: $jst-brand;
+  color: $jst-brand;
 }
 
 .partner-apply-page__step-label {
@@ -429,7 +429,7 @@ export default {
 
 .partner-apply-page__step--active .partner-apply-page__step-label {
   font-weight: 600;
-  color: $jst-success;
+  color: $jst-brand;
 }
 
 .partner-apply-page__body {
@@ -458,7 +458,7 @@ export default {
   height: 28rpx;
   margin-right: 10rpx;
   border-radius: 999rpx;
-  background: $jst-success;
+  background: $jst-brand;
 }
 
 .partner-apply-page__card-head {
@@ -498,6 +498,7 @@ export default {
 
 .partner-apply-page__input,
 .partner-apply-page__textarea {
+  box-sizing: border-box;
   width: 100%;
   padding: 22rpx 24rpx;
   border: 2rpx solid $jst-border;
@@ -617,8 +618,8 @@ export default {
 }
 
 .partner-apply-page__agreement-check--active {
-  border-color: $jst-success;
-  background: $jst-success;
+  border-color: $jst-brand;
+  background: $jst-brand;
 }
 
 .partner-apply-page__agreement-text {
@@ -632,7 +633,7 @@ export default {
   display: block;
   margin: 20rpx 6rpx 0;
   font-size: 22rpx;
-  color: $jst-success;
+  color: $jst-brand;
 }
 
 .partner-apply-page__last-apply {
@@ -669,7 +670,7 @@ export default {
 
 .partner-apply-page__submit {
   flex: 1;
-  background: linear-gradient(135deg, $jst-success 0%, lighten($jst-success, 10%) 100%);
+  background: $jst-brand-gradient;
   color: $jst-text-inverse;
   transition: opacity $jst-duration-fast $jst-easing;
 }

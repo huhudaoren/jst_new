@@ -7,7 +7,10 @@
     <view class="participant-page__header">
       <view class="participant-page__back" @tap="handleBack">←</view>
       <text class="participant-page__title">我的档案</text>
-      <u-button class="participant-page__action" size="mini" shape="circle" @click="openClaimDialog">+ 认领新档案</u-button>
+      <view class="participant-page__actions">
+        <u-button class="participant-page__action participant-page__action--primary" size="mini" shape="circle" @click="openCreateDialog">+ 新建</u-button>
+        <u-button class="participant-page__action" size="mini" shape="circle" @click="openClaimDialog">认领</u-button>
+      </view>
     </view>
 
     <view class="participant-page__intro">
@@ -49,6 +52,100 @@
       text="暂无已认领档案，通过老师或赛事方分享的档案编号完成认领"
       icon="📭"
     />
+
+    <view v-if="createDialogVisible" class="participant-page__mask" @tap="closeCreateDialog">
+      <view class="participant-page__dialog" @tap.stop="">
+        <text class="participant-page__dialog-title">新建参赛档案</text>
+        <text class="participant-page__dialog-text">用于赛事报名时选择的参赛人信息，创建后可在报名流程中复用。</text>
+
+        <view class="participant-page__form-row">
+          <text class="participant-page__form-label">姓名<text class="participant-page__form-required">*</text></text>
+          <input
+            v-model="createForm.name"
+            class="participant-page__dialog-input"
+            maxlength="32"
+            placeholder="请输入参赛人真实姓名"
+            placeholder-class="participant-page__placeholder"
+          />
+        </view>
+
+        <view class="participant-page__form-row">
+          <text class="participant-page__form-label">性别</text>
+          <view class="participant-page__gender-group">
+            <view
+              v-for="opt in genderOptions"
+              :key="opt.value"
+              class="participant-page__gender-item"
+              :class="{ 'participant-page__gender-item--active': createForm.gender === opt.value }"
+              @tap="createForm.gender = opt.value"
+            >{{ opt.label }}</view>
+          </view>
+        </view>
+
+        <view class="participant-page__form-row">
+          <text class="participant-page__form-label">生日</text>
+          <picker mode="date" :value="createForm.birthday" :end="todayStr" @change="onBirthdayChange">
+            <view class="participant-page__picker">
+              <text :class="createForm.birthday ? 'participant-page__picker-value' : 'participant-page__placeholder'">
+                {{ createForm.birthday || '选择出生日期' }}
+              </text>
+            </view>
+          </picker>
+        </view>
+
+        <view class="participant-page__form-row">
+          <text class="participant-page__form-label">学校</text>
+          <input
+            v-model="createForm.school"
+            class="participant-page__dialog-input"
+            maxlength="64"
+            placeholder="选填，如 XX小学"
+            placeholder-class="participant-page__placeholder"
+          />
+        </view>
+
+        <view class="participant-page__form-row">
+          <text class="participant-page__form-label">班级</text>
+          <input
+            v-model="createForm.className"
+            class="participant-page__dialog-input"
+            maxlength="32"
+            placeholder="选填，如 三年级2班"
+            placeholder-class="participant-page__placeholder"
+          />
+        </view>
+
+        <view class="participant-page__form-row">
+          <text class="participant-page__form-label">监护人姓名</text>
+          <input
+            v-model="createForm.guardianName"
+            class="participant-page__dialog-input"
+            maxlength="32"
+            placeholder="选填"
+            placeholder-class="participant-page__placeholder"
+          />
+        </view>
+
+        <view class="participant-page__form-row">
+          <text class="participant-page__form-label">监护人手机号</text>
+          <input
+            v-model="createForm.guardianMobile"
+            class="participant-page__dialog-input"
+            type="number"
+            maxlength="11"
+            placeholder="选填"
+            placeholder-class="participant-page__placeholder"
+          />
+        </view>
+
+        <view class="participant-page__dialog-actions">
+          <u-button class="participant-page__dialog-button participant-page__dialog-button--ghost" @click="closeCreateDialog">
+            取消
+          </u-button>
+          <u-button class="participant-page__dialog-button participant-page__dialog-button--primary" :loading="createSubmitting" @click="submitCreate">确认创建</u-button>
+        </view>
+      </view>
+    </view>
 
     <view v-if="claimDialogVisible" class="participant-page__mask" @tap="closeClaimDialog">
       <view class="participant-page__dialog" @tap.stop="">
@@ -108,7 +205,7 @@
 </template>
 
 <script>
-import { claimParticipant, getParticipantDetail, myParticipants } from '@/api/participant'
+import { claimParticipant, getParticipantDetail, myParticipants, selfCreateParticipant } from '@/api/participant'
 import { useUserStore } from '@/store/user'
 import JstEmpty from '@/components/jst-empty/jst-empty.vue'
 import JstLoading from '@/components/jst-loading/jst-loading.vue'
@@ -127,12 +224,37 @@ export default {
       claimForm: {
         participantId: ''
       },
+      createDialogVisible: false,
+      createSubmitting: false,
+      createForm: {
+        name: '',
+        gender: 0,
+        birthday: '',
+        school: '',
+        className: '',
+        guardianName: '',
+        guardianMobile: ''
+      },
+      genderOptions: [
+        { value: 0, label: '未设置' },
+        { value: 1, label: '男' },
+        { value: 2, label: '女' }
+      ],
       detailVisible: false,
       detailLoading: false,
       currentParticipant: {},
       detail: {},
       // POLISH-E: pick 模式, 由外部页面 (如 appointment/apply) 通过 ?mode=pick 进入, 选中后回传
       pickMode: false
+    }
+  },
+  computed: {
+    todayStr() {
+      const d = new Date()
+      const y = d.getFullYear()
+      const m = `${d.getMonth() + 1}`.padStart(2, '0')
+      const day = `${d.getDate()}`.padStart(2, '0')
+      return `${y}-${m}-${day}`
     }
   },
   onLoad(query) {
@@ -180,6 +302,76 @@ export default {
       }
 
       this.claimDialogVisible = false
+    },
+
+    openCreateDialog() {
+      this.createForm = {
+        name: '',
+        gender: 0,
+        birthday: '',
+        school: '',
+        className: '',
+        guardianName: '',
+        guardianMobile: ''
+      }
+      this.createDialogVisible = true
+    },
+
+    closeCreateDialog() {
+      if (this.createSubmitting) {
+        return
+      }
+      this.createDialogVisible = false
+    },
+
+    onBirthdayChange(e) {
+      this.createForm.birthday = e.detail.value
+    },
+
+    async submitCreate() {
+      if (this.createSubmitting) {
+        return
+      }
+
+      const name = (this.createForm.name || '').trim()
+      if (!name) {
+        uni.showToast({ title: '请输入参赛人姓名', icon: 'none' })
+        return
+      }
+      const mobile = (this.createForm.guardianMobile || '').trim()
+      if (mobile && !/^1\d{10}$/.test(mobile)) {
+        uni.showToast({ title: '监护人手机号格式不正确', icon: 'none' })
+        return
+      }
+
+      const payload = {
+        name,
+        gender: this.createForm.gender || 0,
+        birthday: this.createForm.birthday || null,
+        school: (this.createForm.school || '').trim() || null,
+        className: (this.createForm.className || '').trim() || null,
+        guardianName: (this.createForm.guardianName || '').trim() || null,
+        guardianMobile: mobile || null
+      }
+
+      this.createSubmitting = true
+
+      try {
+        const res = await selfCreateParticipant(payload)
+        // 中文注释: 明确提示档案已保存并可用于报名, 让用户理解下一步
+        uni.showToast({ title: '创建成功，可用于赛事报名', icon: 'success', duration: 1800 })
+        this.createDialogVisible = false
+
+        if (this.pickMode && res && res.participantId) {
+          uni.setStorageSync('ap_picked_participant', { id: res.participantId, name })
+          setTimeout(() => uni.navigateBack(), 500)
+          return
+        }
+
+        await this.loadParticipants()
+      } finally {
+        this.createSubmitting = false
+      }
     },
 
     async submitClaim() {
@@ -240,7 +432,8 @@ export default {
       const mapper = {
         auto_phone_name: '自动认领',
         manual_admin: '管理员认领',
-        manual_user: '主动认领'
+        manual_user: '主动认领',
+        self_create: '自建档案'
       }
       return mapper[value] || '已认领'
     },
@@ -436,7 +629,9 @@ export default {
 }
 
 .participant-page__dialog {
+  max-height: 85vh;
   padding: $jst-space-xl $jst-page-padding;
+  overflow-y: auto;
 }
 
 .participant-page__dialog-title,
@@ -530,13 +725,77 @@ export default {
   font-weight: $jst-weight-semibold;
 }
 
+.participant-page__actions {
+  display: flex;
+  gap: $jst-space-sm;
+}
+
 ::v-deep .participant-page__action.u-button {
-  min-width: 170rpx;
+  min-width: 120rpx;
   height: 62rpx;
   padding: 0 $jst-space-md;
   border: none;
   background: $jst-brand-light;
   color: $jst-brand;
+}
+
+::v-deep .participant-page__action--primary.u-button {
+  background: $jst-brand-gradient;
+  color: $jst-text-inverse;
+}
+
+.participant-page__form-row {
+  margin-top: $jst-space-lg;
+}
+
+.participant-page__form-label {
+  display: block;
+  margin-bottom: 12rpx;
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
+}
+
+.participant-page__form-required {
+  margin-left: 6rpx;
+  color: $jst-danger;
+}
+
+.participant-page__gender-group {
+  display: flex;
+  gap: $jst-space-sm;
+}
+
+.participant-page__gender-item {
+  flex: 1;
+  height: 72rpx;
+  line-height: 72rpx;
+  text-align: center;
+  border: 2rpx solid $jst-border;
+  border-radius: $jst-radius-md;
+  font-size: $jst-font-base;
+  color: $jst-text-secondary;
+  background: $jst-bg-page;
+}
+
+.participant-page__gender-item--active {
+  border-color: $jst-brand;
+  color: $jst-brand;
+  background: $jst-brand-light;
+}
+
+.participant-page__picker {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 $jst-page-padding;
+  line-height: 88rpx;
+  border: 2rpx solid $jst-border;
+  border-radius: $jst-radius-md;
+  background: $jst-bg-page;
+}
+
+.participant-page__picker-value {
+  font-size: $jst-font-base;
+  color: $jst-text-primary;
 }
 
 ::v-deep .participant-page__card-tag .u-tag {

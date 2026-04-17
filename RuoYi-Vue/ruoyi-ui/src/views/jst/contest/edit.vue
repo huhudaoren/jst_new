@@ -155,6 +155,64 @@
             </el-row>
           </el-tab-pane>
 
+          <el-tab-pane label="主办方 / 联系方式" name="organizer">
+            <el-alert
+              type="info"
+              :closable="false"
+              title="这里的信息会显示在小程序赛事详情页的主办方卡和联系咨询卡上。"
+              style="margin-bottom: 16px;"
+            />
+            <el-row :gutter="24">
+              <el-col :span="12">
+                <el-form-item label="主办方名称">
+                  <el-input v-model="form.organizer" maxlength="200" show-word-limit placeholder="如：清华大学计算机系" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="协办方">
+                  <el-input v-model="form.coOrganizer" maxlength="200" show-word-limit placeholder="如：北京 XX 教育集团" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="主办方 LOGO">
+                  <ImageUpload v-model="form.organizerLogo" :limit="1" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="比赛地址">
+                  <el-input v-model="form.eventAddress" maxlength="500" show-word-limit placeholder="如：北京市海淀区清华大学 XX 体育馆" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="主办方简介">
+                  <el-input
+                    v-model="form.organizerDesc"
+                    type="textarea"
+                    :rows="3"
+                    maxlength="500"
+                    show-word-limit
+                    placeholder="简要介绍主办方的背景、资质、过往赛事组织经验等"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="咨询电话">
+                  <el-input v-model="form.contactPhone" maxlength="32" placeholder="如：400-123-5678" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="咨询微信">
+                  <el-input v-model="form.contactWechat" maxlength="64" placeholder="如：jst_service" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="咨询邮箱">
+                  <el-input v-model="form.contactEmail" maxlength="128" placeholder="如：service@jst.com" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-tab-pane>
+
           <el-tab-pane label="赛程安排" name="schedule">
             <div class="table-action">
               <el-button type="primary" size="mini" icon="el-icon-plus" @click="addScheduleRow">新增赛程</el-button>
@@ -421,7 +479,16 @@ function createDefaultForm() {
     faqJson: '[]',
     recommendTags: '',
     formTemplateId: null,
-    aftersaleDays: 0
+    aftersaleDays: 0,
+    // 主办方与联系方式（B3）
+    organizer: '',
+    coOrganizer: '',
+    eventAddress: '',
+    organizerLogo: '',
+    organizerDesc: '',
+    contactPhone: '',
+    contactWechat: '',
+    contactEmail: ''
   }
 }
 

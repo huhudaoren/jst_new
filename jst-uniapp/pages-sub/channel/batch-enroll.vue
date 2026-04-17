@@ -404,13 +404,23 @@ export default {
         })
 
         // 批量报名
-        await batchEnroll({
+        const enrollRes = await batchEnroll({
           contestId: this.selectedContest.contestId,
           participantIds
         })
 
-        uni.showToast({ title: '批量报名成功', icon: 'success' })
-        setTimeout(() => { uni.navigateBack() }, 1500)
+        // 中文注释: 批量报名完成后展示明确的成功/失败汇总而非直接静默返回
+        const successCount = (enrollRes && (enrollRes.validCount || enrollRes.successCount)) || participantIds.length
+        const failCount = (enrollRes && (enrollRes.invalidCount || enrollRes.failCount)) || 0
+        uni.showModal({
+          title: '批量报名完成',
+          content: `成功 ${successCount} 人 / 失败 ${failCount} 人${failCount ? '\n失败名单请在"报名审核"中查看。' : ''}`,
+          confirmText: '返回',
+          showCancel: false,
+          success: () => {
+            uni.navigateBack()
+          }
+        })
       } catch (e) {
         // toast 已在 request 层处理
       }

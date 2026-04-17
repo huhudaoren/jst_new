@@ -74,6 +74,39 @@
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :md="12">
+                <el-form-item label="主办方 LOGO" prop="organizerLogo">
+                  <ImageUpload v-model="form.organizerLogo" :limit="1" />
+                  <div class="field-help">会展示在小程序赛事详情"主办方"卡片</div>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="主办方简介" prop="organizerDesc">
+                  <el-input
+                    v-model="form.organizerDesc"
+                    type="textarea"
+                    :rows="3"
+                    maxlength="500"
+                    show-word-limit
+                    placeholder="简要介绍主办方的背景、资质、过往赛事组织经验等"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :md="8">
+                <el-form-item label="咨询电话" prop="contactPhone">
+                  <el-input v-model="form.contactPhone" maxlength="32" placeholder="如：400-123-5678" />
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :md="8">
+                <el-form-item label="咨询微信" prop="contactWechat">
+                  <el-input v-model="form.contactWechat" maxlength="64" placeholder="如：jst_service" />
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :md="8">
+                <el-form-item label="咨询邮箱" prop="contactEmail">
+                  <el-input v-model="form.contactEmail" maxlength="128" placeholder="如：service@jst.com" />
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :md="12">
                 <el-form-item label="总名额" prop="totalQuota">
                   <el-input-number v-model="form.totalQuota" :min="0" :max="999999" controls-position="right" class="full-width" />
                   <div class="field-help">0 表示不限名额</div>
@@ -763,6 +796,12 @@ const DEFAULT_FORM = {
   organizer: '',
   coOrganizer: '',
   eventAddress: '',
+  // 主办方与联系方式（B3 补齐）
+  organizerLogo: '',
+  organizerDesc: '',
+  contactPhone: '',
+  contactWechat: '',
+  contactEmail: '',
   totalQuota: 0,
   perUserLimit: 1,
   enrollStartTime: null,
@@ -1269,6 +1308,11 @@ export default {
         organizer: this.form.organizer,
         coOrganizer: this.form.coOrganizer,
         eventAddress: this.form.eventAddress,
+        organizerLogo: this.form.organizerLogo,
+        organizerDesc: this.form.organizerDesc,
+        contactPhone: this.form.contactPhone,
+        contactWechat: this.form.contactWechat,
+        contactEmail: this.form.contactEmail,
         totalQuota: this.form.totalQuota,
         perUserLimit: this.form.perUserLimit,
         enrollStartTime: this.form.enrollStartTime,

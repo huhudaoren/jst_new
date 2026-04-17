@@ -83,7 +83,9 @@
     <jst-empty
       v-else-if="!pageLoading"
       icon="📦"
-      text="当前筛选下还没有订单记录。"
+      :text="emptyText"
+      button-text="去浏览赛事"
+      button-url="switchTab:/pages/contest/list"
     />
   </view>
 </template>
@@ -128,6 +130,20 @@ export default {
         return '加载中...'
       }
       return this.hasMore ? '上拉加载更多' : '没有更多了'
+    },
+    // 根据当前 tab 动态显示空态文案，给用户更清晰的上下文
+    emptyText() {
+      const mapper = {
+        '': '还没有订单记录，去浏览赛事报名试试',
+        'pending_pay': '暂无待支付订单',
+        'paid': '暂无已支付订单',
+        'in_service': '暂无进行中的订单',
+        'aftersale': '暂无售后订单',
+        'completed': '暂无已完成订单',
+        'cancelled': '暂无已取消订单',
+        'refunding': '暂无退款中的订单'
+      }
+      return mapper[this.currentTab] || '当前筛选下还没有订单记录'
     }
   },
   onLoad(query) {

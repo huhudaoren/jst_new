@@ -65,6 +65,16 @@ public class WxContestDetailVO {
     private String organizer;
     private String coOrganizer;
     private String eventAddress;
+    /** 主办方 LOGO URL */
+    private String organizerLogo;
+    /** 主办方简介 */
+    private String organizerDesc;
+    /** 咨询电话 */
+    private String contactPhone;
+    /** 咨询微信 */
+    private String contactWechat;
+    /** 咨询邮箱 */
+    private String contactEmail;
     private List<JstContestSchedule> scheduleList;
     private List<JstContestAward> awardList;
     private List<JstContestFaq> faqList;
@@ -455,6 +465,21 @@ public class WxContestDetailVO {
     public void setEventAddress(String eventAddress) {
         this.eventAddress = eventAddress;
     }
+
+    public String getOrganizerLogo() { return organizerLogo; }
+    public void setOrganizerLogo(String organizerLogo) { this.organizerLogo = organizerLogo; }
+
+    public String getOrganizerDesc() { return organizerDesc; }
+    public void setOrganizerDesc(String organizerDesc) { this.organizerDesc = organizerDesc; }
+
+    public String getContactPhone() { return contactPhone; }
+    public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
+
+    public String getContactWechat() { return contactWechat; }
+    public void setContactWechat(String contactWechat) { this.contactWechat = contactWechat; }
+
+    public String getContactEmail() { return contactEmail; }
+    public void setContactEmail(String contactEmail) { this.contactEmail = contactEmail; }
 
     public List<JstContestSchedule> getScheduleList() {
         return scheduleList;

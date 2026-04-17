@@ -25,16 +25,20 @@
         </view>
       </jst-hero-banner>
 
-      <!-- 2. 粘性锚点导航 -->
-      <view v-if="showStickyNav" class="contest-detail-page__sticky-nav jst-anim-sticky-enter">
-        <scroll-view scroll-x class="contest-detail-page__sticky-scroll" :show-scrollbar="false">
+      <!-- 2. 常驻吸顶锚点导航（5 个固定 tab，无数据时置灰） -->
+      <view class="contest-detail-page__sticky-nav">
+        <scroll-view scroll-x class="contest-detail-page__sticky-scroll" :show-scrollbar="false" :scroll-into-view="scrollIntoTabId" scroll-with-animation>
           <view class="contest-detail-page__sticky-inner">
             <view
-              v-for="(sec, si) in navSections"
+              v-for="sec in navSections"
               :key="sec.id"
+              :id="'tab-' + sec.id"
               class="contest-detail-page__sticky-item"
-              :class="{ 'contest-detail-page__sticky-item--active': activeSection === sec.id }"
-              @tap="scrollToSection(sec.id)"
+              :class="{
+                'contest-detail-page__sticky-item--active': activeSection === sec.id,
+                'contest-detail-page__sticky-item--disabled': sec.disabled
+              }"
+              @tap="sec.disabled ? null : scrollToSection(sec.id)"
             >
               <text>{{ sec.label }}</text>
             </view>
@@ -44,6 +48,32 @@
 
       <!-- 3. 内容区 -->
       <view class="contest-detail-page__body">
+        <!-- 倒计时条（报名进行中时显示） -->
+        <view v-if="countdown.show" class="contest-detail-page__countdown jst-anim-fade-up">
+          <text class="contest-detail-page__countdown-label">距报名截止</text>
+          <view class="contest-detail-page__countdown-timer">
+            <view class="contest-detail-page__countdown-item">
+              <text class="contest-detail-page__countdown-num">{{ countdown.days }}</text>
+              <text class="contest-detail-page__countdown-unit">天</text>
+            </view>
+            <text class="contest-detail-page__countdown-sep">:</text>
+            <view class="contest-detail-page__countdown-item">
+              <text class="contest-detail-page__countdown-num">{{ countdown.hours }}</text>
+              <text class="contest-detail-page__countdown-unit">时</text>
+            </view>
+            <text class="contest-detail-page__countdown-sep">:</text>
+            <view class="contest-detail-page__countdown-item">
+              <text class="contest-detail-page__countdown-num">{{ countdown.minutes }}</text>
+              <text class="contest-detail-page__countdown-unit">分</text>
+            </view>
+            <text class="contest-detail-page__countdown-sep">:</text>
+            <view class="contest-detail-page__countdown-item">
+              <text class="contest-detail-page__countdown-num">{{ countdown.seconds }}</text>
+              <text class="contest-detail-page__countdown-unit">秒</text>
+            </view>
+          </view>
+        </view>
+
         <!-- 价格卡 -->
         <view class="contest-detail-page__price-card jst-anim-fade-up">
           <text class="contest-detail-page__price-label">报名费用</text>
@@ -93,6 +123,36 @@
           </view>
         </view>
 
+        <!-- 主办方信息卡（B4.3） -->
+        <view v-if="hasOrganizerCard" class="contest-detail-page__card jst-anim-fade-up">
+          <text class="contest-detail-page__card-title">主办方</text>
+          <view class="contest-detail-page__organizer">
+            <image
+              v-if="detail.organizerLogo"
+              class="contest-detail-page__organizer-logo"
+              :src="detail.organizerLogo"
+              mode="aspectFill"
+            />
+            <view v-else class="contest-detail-page__organizer-logo contest-detail-page__organizer-logo--placeholder">
+              <text>🏛</text>
+            </view>
+            <view class="contest-detail-page__organizer-body">
+              <text v-if="detail.organizer" class="contest-detail-page__organizer-name">{{ detail.organizer }}</text>
+              <text v-if="detail.coOrganizer" class="contest-detail-page__organizer-co">协办：{{ detail.coOrganizer }}</text>
+              <text v-if="detail.organizerDesc" class="contest-detail-page__organizer-desc">{{ detail.organizerDesc }}</text>
+            </view>
+          </view>
+          <view
+            v-if="detail.eventAddress"
+            class="contest-detail-page__organizer-address"
+            @tap="copyAddress"
+          >
+            <text class="contest-detail-page__organizer-address-icon">📍</text>
+            <text class="contest-detail-page__organizer-address-text">{{ detail.eventAddress }}</text>
+            <text class="contest-detail-page__organizer-address-copy">复制</text>
+          </view>
+        </view>
+
         <!-- 赛事介绍 -->
         <view id="section-intro" class="contest-detail-page__card jst-anim-fade-up">
           <text class="contest-detail-page__card-title">赛事介绍</text>
@@ -108,14 +168,22 @@
           <jst-timeline :items="scheduleTimelineItems" :active-index="currentScheduleIndex" />
         </view>
 
-        <!-- 奖项设置 -->
+        <!-- 奖项设置（B4.5：表格式布局） -->
         <view v-if="awardList.length" id="section-awards" class="contest-detail-page__card jst-anim-fade-up">
           <text class="contest-detail-page__card-title">奖项设置</text>
-          <view class="contest-detail-page__award-grid">
-            <view v-for="(award, ai) in awardList" :key="ai" class="contest-detail-page__award-item">
-              <text class="contest-detail-page__award-icon">{{ getAwardIcon(award.level || award.name) }}</text>
-              <text class="contest-detail-page__award-name">{{ award.name || award.level || '奖项' }}</text>
-              <text v-if="award.description || award.desc" class="contest-detail-page__award-desc">{{ award.description || award.desc }}</text>
+          <view class="contest-detail-page__award-table">
+            <view class="contest-detail-page__award-row contest-detail-page__award-row--head">
+              <text class="contest-detail-page__award-cell contest-detail-page__award-cell--lv">奖项</text>
+              <text class="contest-detail-page__award-cell contest-detail-page__award-cell--qty">名额</text>
+              <text class="contest-detail-page__award-cell contest-detail-page__award-cell--desc">奖励内容</text>
+            </view>
+            <view v-for="(award, ai) in awardList" :key="ai" class="contest-detail-page__award-row">
+              <view class="contest-detail-page__award-cell contest-detail-page__award-cell--lv">
+                <text class="contest-detail-page__award-icon">{{ getAwardIcon(award.level || award.name) }}</text>
+                <text class="contest-detail-page__award-name">{{ award.name || award.level || '奖项' }}</text>
+              </view>
+              <text class="contest-detail-page__award-cell contest-detail-page__award-cell--qty">{{ award.quota || award.num || '--' }}</text>
+              <text class="contest-detail-page__award-cell contest-detail-page__award-cell--desc">{{ award.description || award.desc || award.reward || '--' }}</text>
             </view>
           </view>
         </view>
@@ -136,6 +204,95 @@
               <text class="contest-detail-page__faq-answer">{{ faq.answer || faq.a || '' }}</text>
             </u-collapse-item>
           </u-collapse>
+        </view>
+
+        <!-- 联系咨询卡（B4.4） -->
+        <view v-if="hasContactCard" class="contest-detail-page__card jst-anim-fade-up">
+          <text class="contest-detail-page__card-title">联系咨询</text>
+          <view
+            v-if="detail.contactPhone"
+            class="contest-detail-page__contact-row"
+            @tap="handleContactPhone"
+          >
+            <text class="contest-detail-page__contact-icon">📞</text>
+            <view class="contest-detail-page__contact-body">
+              <text class="contest-detail-page__contact-label">咨询电话</text>
+              <text class="contest-detail-page__contact-value">{{ detail.contactPhone }}</text>
+            </view>
+            <text class="contest-detail-page__contact-action">拨打</text>
+          </view>
+          <view
+            v-if="detail.contactWechat"
+            class="contest-detail-page__contact-row"
+            @tap="handleCopy(detail.contactWechat, '微信号已复制')"
+          >
+            <text class="contest-detail-page__contact-icon">💬</text>
+            <view class="contest-detail-page__contact-body">
+              <text class="contest-detail-page__contact-label">咨询微信</text>
+              <text class="contest-detail-page__contact-value">{{ detail.contactWechat }}</text>
+            </view>
+            <text class="contest-detail-page__contact-action">复制</text>
+          </view>
+          <view
+            v-if="detail.contactEmail"
+            class="contest-detail-page__contact-row"
+            @tap="handleCopy(detail.contactEmail, '邮箱已复制')"
+          >
+            <text class="contest-detail-page__contact-icon">✉️</text>
+            <view class="contest-detail-page__contact-body">
+              <text class="contest-detail-page__contact-label">咨询邮箱</text>
+              <text class="contest-detail-page__contact-value">{{ detail.contactEmail }}</text>
+            </view>
+            <text class="contest-detail-page__contact-action">复制</text>
+          </view>
+        </view>
+
+        <!-- 相似赛事（B4.6） -->
+        <view v-if="relatedContests.length" class="contest-detail-page__card jst-anim-fade-up">
+          <text class="contest-detail-page__card-title">相似赛事</text>
+          <scroll-view scroll-x class="contest-detail-page__recommend-scroll" :show-scrollbar="false">
+            <view class="contest-detail-page__recommend-inner">
+              <view
+                v-for="rc in relatedContests"
+                :key="'rc-' + rc.contestId"
+                class="contest-detail-page__recommend-card"
+                @tap="openRelatedContest(rc)"
+              >
+                <image
+                  class="contest-detail-page__recommend-cover"
+                  :src="rc.coverImage || rc.bannerImage || ''"
+                  mode="aspectFill"
+                />
+                <text class="contest-detail-page__recommend-name">{{ rc.contestName || '赛事' }}</text>
+                <text class="contest-detail-page__recommend-meta">{{ rc.category || '' }}</text>
+                <text class="contest-detail-page__recommend-price">{{ formatPrice(rc.price) }}</text>
+              </view>
+            </view>
+          </scroll-view>
+        </view>
+
+        <!-- 推荐课程 -->
+        <view v-if="relatedCourses.length" class="contest-detail-page__card jst-anim-fade-up">
+          <text class="contest-detail-page__card-title">推荐课程</text>
+          <scroll-view scroll-x class="contest-detail-page__recommend-scroll" :show-scrollbar="false">
+            <view class="contest-detail-page__recommend-inner">
+              <view
+                v-for="cc in relatedCourses"
+                :key="'cc-' + cc.courseId"
+                class="contest-detail-page__recommend-card"
+                @tap="openRelatedCourse(cc)"
+              >
+                <image
+                  class="contest-detail-page__recommend-cover"
+                  :src="cc.coverImage || ''"
+                  mode="aspectFill"
+                />
+                <text class="contest-detail-page__recommend-name">{{ cc.courseName || '课程' }}</text>
+                <text class="contest-detail-page__recommend-meta">{{ cc.teacher || cc.level || '' }}</text>
+                <text class="contest-detail-page__recommend-price">{{ formatPrice(cc.price) }}</text>
+              </view>
+            </view>
+          </scroll-view>
         </view>
         <!-- 成绩查询入口（赛事已结束或已出成绩时显示） -->
         <view v-if="detail.scorePublished" class="contest-detail-page__card jst-anim-fade-up">
@@ -190,7 +347,7 @@
 </template>
 
 <script>
-import { getContestDetail } from '@/api/contest'
+import { getContestDetail, getContestRecommend } from '@/api/contest'
 import JstEmptyState from '@/components/jst-empty-state/jst-empty-state.vue'
 import JstHeroBanner from '@/components/jst-hero-banner/jst-hero-banner.vue'
 import JstSkeletonPlus from '@/components/jst-skeleton-plus/jst-skeleton-plus.vue'
@@ -204,7 +361,7 @@ import {
   getContestEnrollAction,
   getContestCategoryIcon
 } from '@/utils/contest'
-import { throttle, stickyNavState } from '@/utils/visual-effects'
+import { throttle } from '@/utils/visual-effects'
 
 export default {
   components: {
@@ -222,7 +379,16 @@ export default {
       // [visual-effect] 视觉状态
       heroScrollTop: 0,
       showStickyNav: false,
-      activeSection: 'section-info'
+      activeSection: 'section-info',
+      // 倒计时
+      countdown: { show: false, days: '0', hours: '00', minutes: '00', seconds: '00' },
+      countdownTimer: null,
+      // 推荐赛事/课程（B4.6）
+      relatedContests: [],
+      relatedCourses: [],
+      // section 偏移缓存（onPageScroll 自动高亮用，避免频繁 query）
+      sectionOffsets: {},
+      scrollIntoTabId: ''
     }
   },
   computed: {
@@ -277,14 +443,25 @@ export default {
     currentScheduleIndex() {
       return -1
     },
-    // [visual-effect] 粘性导航 sections
+    // [visual-effect] 粘性导航：固定 5 tab，无数据置灰
     navSections() {
-      var secs = [{ id: 'section-info', label: '基本信息' }, { id: 'section-intro', label: '赛事介绍' }]
-      if (this.scheduleList.length) secs.push({ id: 'section-schedule', label: '赛程安排' })
-      if (this.awardList.length) secs.push({ id: 'section-awards', label: '奖项设置' })
-      if (this.scoreItemList.length) secs.push({ id: 'section-score', label: '评分维度' })
-      if (this.faqList.length) secs.push({ id: 'section-faq', label: '常见问题' })
-      return secs
+      return [
+        { id: 'section-info', label: '基本信息', disabled: false },
+        { id: 'section-intro', label: '赛事介绍', disabled: !this.detailDescription },
+        { id: 'section-schedule', label: '赛程', disabled: !this.scheduleList.length },
+        { id: 'section-awards', label: '奖项', disabled: !this.awardList.length },
+        { id: 'section-faq', label: '常见问题', disabled: !this.faqList.length }
+      ]
+    },
+    // B4.3 主办方卡显示条件：至少有 organizer / logo / desc / eventAddress 之一
+    hasOrganizerCard() {
+      if (!this.detail) return false
+      return !!(this.detail.organizer || this.detail.organizerLogo || this.detail.organizerDesc || this.detail.coOrganizer || this.detail.eventAddress)
+    },
+    // B4.4 联系咨询卡显示条件
+    hasContactCard() {
+      if (!this.detail) return false
+      return !!(this.detail.contactPhone || this.detail.contactWechat || this.detail.contactEmail)
     }
   },
   onLoad(query) {
@@ -295,12 +472,15 @@ export default {
     }
     this.fetchDetail()
   },
-  // [visual-effect] 滚动视差 + 粘性导航
+  // [visual-effect] 滚动视差 + 自动高亮当前 section
   onPageScroll: throttle(function(e) {
-    this.heroScrollTop = e.scrollTop || 0
-    var state = stickyNavState(e.scrollTop, 460)
-    this.showStickyNav = state.show
-  }, 16),
+    var scrollTop = e.scrollTop || 0
+    this.heroScrollTop = scrollTop
+    this.updateActiveSectionByScroll(scrollTop)
+  }, 80),
+  onUnload() {
+    this.stopCountdown()
+  },
   methods: {
     async fetchDetail() {
       if (!this.contestId) {
@@ -312,13 +492,155 @@ export default {
 
       try {
         const response = await getContestDetail(this.contestId, { silent: true })
-        this.detail = normalizeContestCard(response || {})
+        // 中文注释: 保留原始后端字段（organizerLogo/contactPhone 等），再合并 card 规范化结果
+        const card = normalizeContestCard(response || {})
+        this.detail = Object.assign({}, response || {}, card)
+        // 启动倒计时（报名进行中）
+        this.startCountdown()
+        // 异步并发拉推荐
+        this.fetchRecommend()
+        // 首屏后测量 section 偏移（等 DOM 渲染完成）
+        this.$nextTick(() => {
+          setTimeout(() => this.measureSectionOffsets(), 300)
+        })
       } catch (error) {
         uni.showToast({ title: '加载失败，请重试', icon: 'none' })
         this.detail = null
       } finally {
         this.pageLoading = false
       }
+    },
+
+    // 中文注释: 拉推荐赛事和相关课程（B4.6），失败不影响主流程
+    async fetchRecommend() {
+      try {
+        const res = await getContestRecommend(this.contestId, { silent: true })
+        const data = res || {}
+        this.relatedContests = Array.isArray(data.relatedContests) ? data.relatedContests : []
+        this.relatedCourses = Array.isArray(data.relatedCourses) ? data.relatedCourses : []
+      } catch (e) {
+        this.relatedContests = []
+        this.relatedCourses = []
+      }
+    },
+
+    // 中文注释: 启动报名倒计时（B4.2）
+    startCountdown() {
+      this.stopCountdown()
+      if (!this.detail || !this.detail.enrollEndTime) return
+      const end = new Date(this.detail.enrollEndTime).getTime()
+      if (!end || isNaN(end)) return
+      const update = () => {
+        const now = Date.now()
+        const diff = end - now
+        if (diff <= 0) {
+          this.countdown = { show: false, days: '0', hours: '00', minutes: '00', seconds: '00' }
+          this.stopCountdown()
+          return
+        }
+        const d = Math.floor(diff / 86400000)
+        const h = Math.floor((diff % 86400000) / 3600000)
+        const m = Math.floor((diff % 3600000) / 60000)
+        const s = Math.floor((diff % 60000) / 1000)
+        const pad = (n) => (n < 10 ? '0' + n : '' + n)
+        this.countdown = {
+          show: true,
+          days: String(d),
+          hours: pad(h),
+          minutes: pad(m),
+          seconds: pad(s)
+        }
+      }
+      update()
+      this.countdownTimer = setInterval(update, 1000)
+    },
+    stopCountdown() {
+      if (this.countdownTimer) {
+        clearInterval(this.countdownTimer)
+        this.countdownTimer = null
+      }
+    },
+
+    // 中文注释: 测量 5 个 section 的绝对位置，供滚动高亮用
+    measureSectionOffsets() {
+      const ids = ['section-info', 'section-intro', 'section-schedule', 'section-awards', 'section-faq']
+      const query = uni.createSelectorQuery().in(this)
+      ids.forEach((id) => {
+        query.select('#' + id).boundingClientRect()
+      })
+      query.selectViewport().scrollOffset()
+      query.exec((results) => {
+        if (!results) return
+        const viewport = results[results.length - 1] || { scrollTop: 0 }
+        const baseScroll = viewport.scrollTop || 0
+        const offsets = {}
+        ids.forEach((id, idx) => {
+          const rect = results[idx]
+          if (rect && typeof rect.top === 'number') {
+            // 相对于文档顶部的位置
+            offsets[id] = rect.top + baseScroll
+          }
+        })
+        this.sectionOffsets = offsets
+      })
+    },
+
+    // 中文注释: 滚动时自动切换 activeSection
+    updateActiveSectionByScroll(scrollTop) {
+      const offsets = this.sectionOffsets
+      const ids = ['section-info', 'section-intro', 'section-schedule', 'section-awards', 'section-faq']
+      const anchor = scrollTop + 120 // sticky nav 高度偏移
+      let current = this.activeSection
+      for (let i = ids.length - 1; i >= 0; i--) {
+        const id = ids[i]
+        if (offsets[id] != null && anchor >= offsets[id]) {
+          current = id
+          break
+        }
+      }
+      if (current !== this.activeSection) {
+        this.activeSection = current
+        // 让 tab bar 把当前项滚到可视范围
+        this.scrollIntoTabId = 'tab-' + current
+      }
+    },
+
+    // 中文注释: 跳转到推荐赛事/课程
+    openRelatedContest(rc) {
+      if (!rc || !rc.contestId) return
+      uni.redirectTo({ url: '/pages-sub/contest/detail?id=' + rc.contestId })
+    },
+    openRelatedCourse(cc) {
+      if (!cc || !cc.courseId) return
+      uni.navigateTo({ url: '/pages-sub/course/detail?id=' + cc.courseId })
+    },
+    formatPrice(price) {
+      const n = Number(price)
+      if (!n && n !== 0) return '免费'
+      if (n === 0) return '免费'
+      return '¥' + n.toFixed(2)
+    },
+
+    // 中文注释: 联系咨询交互
+    handleContactPhone() {
+      if (!this.detail || !this.detail.contactPhone) return
+      uni.makePhoneCall({
+        phoneNumber: String(this.detail.contactPhone),
+        fail: () => {}
+      })
+    },
+    handleCopy(text, toastText) {
+      if (!text) return
+      uni.setClipboardData({
+        data: String(text),
+        success: () => {
+          uni.showToast({ title: toastText || '已复制', icon: 'success' })
+        }
+      })
+    },
+    copyAddress() {
+      if (!this.detail || !this.detail.eventAddress) return
+      this.handleCopy(this.detail.eventAddress, '地址已复制')
     },
 
     handleBack() {
@@ -360,13 +682,18 @@ export default {
       })
     },
 
-    // [visual-effect] 锚点跳转
+    // [visual-effect] 锚点跳转（优先用缓存的 offset，失败回退实时测量）
     scrollToSection(sectionId) {
       this.activeSection = sectionId
+      const cached = this.sectionOffsets[sectionId]
+      if (cached != null) {
+        uni.pageScrollTo({ scrollTop: Math.max(0, cached - 100), duration: 300 })
+        return
+      }
       var query = uni.createSelectorQuery().in(this)
-      query.select('#' + sectionId).boundingClientRect(function(rect) {
+      query.select('#' + sectionId).boundingClientRect((rect) => {
         if (rect) {
-          uni.pageScrollTo({ scrollTop: rect.top + (uni.getSystemInfoSync().windowHeight ? 0 : 0) - 100, duration: 300 })
+          uni.pageScrollTo({ scrollTop: rect.top - 100, duration: 300 })
         }
       }).exec()
     },
@@ -455,6 +782,304 @@ export default {
   color: $jst-brand;
   font-weight: $jst-weight-semibold;
   border-bottom-color: $jst-brand;
+}
+
+.contest-detail-page__sticky-item--disabled {
+  color: $jst-text-placeholder;
+  opacity: 0.5;
+}
+
+// 倒计时条
+.contest-detail-page__countdown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $jst-space-lg;
+  padding: $jst-space-md $jst-space-lg;
+  border-radius: $jst-radius-card;
+  background: $jst-brand-gradient;
+  box-shadow: $jst-shadow-lift;
+}
+
+.contest-detail-page__countdown-label {
+  font-size: $jst-font-sm;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.contest-detail-page__countdown-timer {
+  display: flex;
+  align-items: baseline;
+  gap: $jst-space-xs;
+}
+
+.contest-detail-page__countdown-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2rpx;
+}
+
+.contest-detail-page__countdown-num {
+  font-size: 36rpx;
+  font-weight: $jst-weight-bold;
+  color: $jst-text-inverse;
+  min-width: 40rpx;
+  text-align: center;
+}
+
+.contest-detail-page__countdown-unit {
+  font-size: $jst-font-xs;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.contest-detail-page__countdown-sep {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+// 主办方卡
+.contest-detail-page__organizer {
+  display: flex;
+  align-items: flex-start;
+  gap: $jst-space-md;
+}
+
+.contest-detail-page__organizer-logo {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: $jst-radius-md;
+  background: $jst-bg-grey;
+  flex-shrink: 0;
+}
+
+.contest-detail-page__organizer-logo--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  color: $jst-brand;
+  background: $jst-brand-light;
+}
+
+.contest-detail-page__organizer-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.contest-detail-page__organizer-name {
+  display: block;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
+}
+
+.contest-detail-page__organizer-co {
+  display: block;
+  margin-top: 6rpx;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
+}
+
+.contest-detail-page__organizer-desc {
+  display: block;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-sm;
+  line-height: 1.7;
+  color: $jst-text-regular;
+}
+
+.contest-detail-page__organizer-address {
+  display: flex;
+  align-items: center;
+  gap: $jst-space-sm;
+  margin-top: $jst-space-md;
+  padding: $jst-space-sm $jst-space-md;
+  border-radius: $jst-radius-sm;
+  background: $jst-bg-grey;
+}
+
+.contest-detail-page__organizer-address-icon {
+  font-size: $jst-font-base;
+  flex-shrink: 0;
+}
+
+.contest-detail-page__organizer-address-text {
+  flex: 1;
+  font-size: $jst-font-sm;
+  color: $jst-text-regular;
+  line-height: 1.5;
+}
+
+.contest-detail-page__organizer-address-copy {
+  font-size: $jst-font-xs;
+  color: $jst-brand;
+  flex-shrink: 0;
+}
+
+// 奖项表格
+.contest-detail-page__award-table {
+  border: 2rpx solid $jst-border;
+  border-radius: $jst-radius-md;
+  overflow: hidden;
+}
+
+.contest-detail-page__award-row {
+  display: flex;
+  align-items: center;
+  min-height: 80rpx;
+  border-top: 2rpx solid $jst-border;
+}
+
+.contest-detail-page__award-row:first-child {
+  border-top: none;
+}
+
+.contest-detail-page__award-row--head {
+  background: $jst-bg-grey;
+  font-weight: $jst-weight-semibold;
+}
+
+.contest-detail-page__award-cell {
+  padding: $jst-space-sm $jst-space-md;
+  font-size: $jst-font-sm;
+  color: $jst-text-primary;
+  box-sizing: border-box;
+}
+
+.contest-detail-page__award-cell--lv {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.contest-detail-page__award-cell--qty {
+  flex: 1;
+  text-align: center;
+  color: $jst-text-regular;
+}
+
+.contest-detail-page__award-cell--desc {
+  flex: 3;
+  color: $jst-text-regular;
+  line-height: 1.5;
+}
+
+.contest-detail-page__award-row--head .contest-detail-page__award-cell {
+  color: $jst-text-secondary;
+  font-size: $jst-font-xs;
+}
+
+// 联系咨询
+.contest-detail-page__contact-row {
+  display: flex;
+  align-items: center;
+  gap: $jst-space-md;
+  padding: $jst-space-md 0;
+  border-top: 2rpx solid $jst-border;
+}
+
+.contest-detail-page__contact-row:first-of-type {
+  border-top: none;
+}
+
+.contest-detail-page__contact-icon {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: $jst-brand-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  flex-shrink: 0;
+}
+
+.contest-detail-page__contact-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.contest-detail-page__contact-label {
+  display: block;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
+}
+
+.contest-detail-page__contact-value {
+  display: block;
+  margin-top: 4rpx;
+  font-size: $jst-font-sm;
+  color: $jst-text-primary;
+  font-weight: $jst-weight-medium;
+}
+
+.contest-detail-page__contact-action {
+  font-size: $jst-font-xs;
+  color: $jst-brand;
+  padding: 8rpx 18rpx;
+  border-radius: $jst-radius-round;
+  background: $jst-brand-light;
+  flex-shrink: 0;
+}
+
+// 推荐赛事/课程
+.contest-detail-page__recommend-scroll {
+  white-space: nowrap;
+  margin: 0 -#{$jst-space-md};
+  padding: 0 $jst-space-md;
+}
+
+.contest-detail-page__recommend-inner {
+  display: inline-flex;
+  gap: $jst-space-md;
+}
+
+.contest-detail-page__recommend-card {
+  display: inline-flex;
+  flex-direction: column;
+  width: 260rpx;
+  padding: $jst-space-sm;
+  border-radius: $jst-radius-md;
+  background: $jst-bg-grey;
+  flex-shrink: 0;
+  transition: transform $jst-duration-fast $jst-easing;
+  &:active { transform: scale(0.97); }
+}
+
+.contest-detail-page__recommend-cover {
+  width: 100%;
+  height: 160rpx;
+  border-radius: $jst-radius-sm;
+  background: $jst-border;
+}
+
+.contest-detail-page__recommend-name {
+  display: block;
+  margin-top: $jst-space-sm;
+  font-size: $jst-font-sm;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contest-detail-page__recommend-meta {
+  display: block;
+  margin-top: 4rpx;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contest-detail-page__recommend-price {
+  display: block;
+  margin-top: 6rpx;
+  font-size: $jst-font-sm;
+  color: $jst-brand;
+  font-weight: $jst-weight-bold;
 }
 
 // 内容区

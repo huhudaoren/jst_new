@@ -78,6 +78,8 @@
       v-else-if="!pageLoading"
       icon="📄"
       text="当前筛选下还没有报名记录。"
+      button-text="去浏览赛事"
+      button-url="switchTab:/pages/contest/list"
     />
   </view>
 </template>

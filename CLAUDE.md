@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次更新：2026-04-17（B1 + B2 + B3 全部完成 + 表单白名单放行 phone/idcard + 9883 菜单去重与 banner）
+> 会话恢复文件。上次更新：2026-04-17（档案自建 + 小程序视觉/UX 疏通 + 赛事详情重塑 + ADMIN-UX-B1~B3 + 表单白名单放行 phone/idcard + 9883 菜单去重与 banner）
 
 ---
 
@@ -249,6 +249,12 @@ D:\coding\jst_v1\
 | **路由修复** | | |
 | partner/contest-edit 404 | 删除 `dynamicRoutes` 多余的 `meta: { roles: ['jst_partner'] }`，admin 可访问编辑页 | ✅ 完成（2026-04-17） |
 | DATA-MIGRATION | 旧数据迁移方案与脚本 | ⏸️ 搁置至 5 月中旬 |
+| **档案自建（WX-PART-SELF）** | `POST /jst/wx/participant/self-create` + 小程序"我的档案"新建弹层（姓名/性别/生日/学校/班级/监护人）；解决学生首次使用无档案可选导致无法报名 | ✅ 完成 |
+| **MP-THEME-FIX** | partner-apply 主题色 `$jst-success` → `$jst-brand`（8 处）+ input `box-sizing: border-box` 修 placeholder 截断 | ✅ 完成 |
+| **MP-EMPTY-CTA** | jst-empty 组件加 `buttonText/buttonUrl/@action` prop + 5 页空态接入（首页/筛选/报名历史/订单/报名） | ✅ 完成 |
+| **MP-SUCCESS-FLOW** | 5 处成功态加跳转/modal 引导：支付/批量报名/创建档案/预约/订单详情 | ✅ 完成 |
+| **CONTEST-ORGANIZER-CONTACT** | DDL 5 字段（organizer_logo/organizer_desc/contact_phone/contact_wechat/contact_email）+ Domain/VO/Mapper/Service/DTO/管理端编辑 Tab 全链路 | ✅ 完成 |
+| **CONTEST-DETAIL-RESHAPE** | 小程序赛事详情页：sticky tab 常驻吸顶+自动高亮、报名倒计时条、主办方卡、联系咨询卡（拨打/复制）、奖项改表格、相似赛事+推荐课程横滑（调已存在的 `getContestRecommend`） | ✅ 完成 |
 
 ---
 
@@ -477,6 +483,7 @@ D:\coding\jst_v1\
 | 99-migration-fix-not-null-defaults.sql | 修复：7 表 NOT NULL 加 DEFAULT |
 | 99-migration-admin-ux-b1-dict.sql | ⭐ B1：`jst_form_field_type` + `jst_message_scene` 字典 |
 | 99-migration-menu-dedup-formtemplate.sql | ⭐ 隐藏 9883 "报名表单模板"（与 9842 重复） |
+| 99-migration-contest-organizer-contact.sql | ⭐ 赛事详情重塑：主办方 logo/简介 + 咨询电话/微信/邮箱 5 字段 + 8801/8802 mock 数据 |
 | 99-test-fixtures.sql | 测试数据（含团队赛事 8206 + 预约时间段） |
 
 ---

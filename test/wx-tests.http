@@ -557,6 +557,92 @@ client.test("跨用户越权应被拒绝", function() {
 });
 %}
 
+### B6. 学生自建档案(创建即认领) - 1002
+### 说明：姓名使用时间戳保证唯一，避免 fixtures 重跑冲突
+POST {{baseUrl}}/jst/wx/participant/self-create
+Authorization: Bearer {{other_token}}
+Content-Type: {{contentType}}
+
+{
+  "name": "SELF_{{$timestamp}}",
+  "gender": 1,
+  "birthday": "2015-06-01",
+  "school": "XX小学",
+  "className": "三年级2班",
+  "guardianName": "张监护",
+  "guardianMobile": "13800000002"
+}
+
+> {%
+client.test("self-create 应成功并返回 participantId", function() {
+    client.assert(response.body.code === 200);
+    client.assert(response.body.data && response.body.data.participantId);
+    client.global.set("self_created_pid", response.body.data.participantId);
+});
+%}
+
+### B6-verify. 档案列表应包含新建的档案
+GET {{baseUrl}}/jst/wx/participant/my
+Authorization: Bearer {{other_token}}
+
+> {%
+client.test("列表应包含 self_created_pid", function() {
+    const pid = client.global.get("self_created_pid");
+    const hit = (response.body.data || []).some(x => String(x.participantId) === String(pid));
+    client.assert(hit, "新建的档案未出现在列表");
+});
+%}
+
+### B7. 同一用户下重名创建应被拒绝 - 1002
+### 先创建固定姓名一份（幂等：若已存在会 400，忽略结果即可）
+POST {{baseUrl}}/jst/wx/participant/self-create
+Authorization: Bearer {{other_token}}
+Content-Type: {{contentType}}
+
+{
+  "name": "DUP_CHECK_FIXED_NAME",
+  "gender": 2
+}
+
+> {%
+client.test("首次或已存在均可", function() {
+    // 允许通过或"同名"拒绝，都代表固定姓名已在库
+    client.assert(response.body.code === 200 || (response.body.msg && response.body.msg.indexOf("同名") >= 0));
+});
+%}
+
+### B7b. 再次创建同名应失败
+POST {{baseUrl}}/jst/wx/participant/self-create
+Authorization: Bearer {{other_token}}
+Content-Type: {{contentType}}
+
+{
+  "name": "DUP_CHECK_FIXED_NAME",
+  "gender": 2
+}
+
+> {%
+client.test("重名应被拒绝", function() {
+    client.assert(response.body.code !== 200, "重名创建竟然成功了");
+    client.assert(response.body.msg && response.body.msg.indexOf("同名") >= 0, "错误信息应包含'同名'");
+});
+%}
+
+### B8. 缺姓名应校验失败
+POST {{baseUrl}}/jst/wx/participant/self-create
+Authorization: Bearer {{other_token}}
+Content-Type: {{contentType}}
+
+{
+  "gender": 1
+}
+
+> {%
+client.test("姓名必填校验", function() {
+    client.assert(response.body.code !== 200);
+});
+%}
+
 
 ### =====================================================================
 ### C. 学生-渠道绑定 (jst-user / WxBindingController) - F4
