@@ -34,6 +34,37 @@
           </el-descriptions-item>
         </el-descriptions>
 
+        <el-descriptions
+          v-if="hasOrganizerBlock"
+          title="主办方 / 联系方式"
+          :column="isMobile ? 1 : 2"
+          border
+          class="organizer-block"
+        >
+          <el-descriptions-item label="主办方">{{ detail.organizer || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="协办方">{{ detail.coOrganizer || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="主办方 LOGO" :span="isMobile ? 1 : 2">
+            <el-image
+              v-if="detail.organizerLogo"
+              :src="detail.organizerLogo"
+              fit="cover"
+              style="width: 96px; height: 96px; border-radius: 8px;"
+            />
+            <span v-else>--</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="主办方简介" :span="isMobile ? 1 : 2">
+            {{ detail.organizerDesc || '--' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="比赛地址" :span="isMobile ? 1 : 2">
+            {{ detail.eventAddress || '--' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="咨询电话">{{ detail.contactPhone || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="咨询微信">{{ detail.contactWechat || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="咨询邮箱" :span="isMobile ? 1 : 2">
+            {{ detail.contactEmail || '--' }}
+          </el-descriptions-item>
+        </el-descriptions>
+
         <div class="section-title">赛事说明</div>
         <div class="desc-card" v-html="detail.description || '--'" />
 
@@ -125,6 +156,12 @@ export default {
     },
     isMobile() {
       return this.$store.state.app.device === 'mobile'
+    },
+    // 中文注释: 主办方/联系方式 block 是否有任意字段，决定整块是否显示
+    hasOrganizerBlock() {
+      const d = this.detail || {}
+      return !!(d.organizer || d.coOrganizer || d.organizerLogo || d.organizerDesc ||
+                d.eventAddress || d.contactPhone || d.contactWechat || d.contactEmail)
     }
   },
   watch: {
@@ -230,6 +267,10 @@ export default {
   font-size: 15px;
   font-weight: 700;
   color: #172033;
+}
+
+.organizer-block {
+  margin-top: 16px;
 }
 
 .desc-card {
