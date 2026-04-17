@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次更新：2026-04-18（**销售管理 + 渠道分销** 设计稿完成，spec 已落 `docs/superpowers/specs/2026-04-18-sales-channel-distribution-design.md`，下一步进 writing-plans）
+> 会话恢复文件。上次更新：2026-04-18（**销售管理 + 渠道分销** 设计稿 + 4 实施计划全部写出，等待用户选择执行模式 subagent-driven / inline。spec + 4 plans 全在 `docs/superpowers/`）
 
 ---
 
@@ -255,7 +255,7 @@ D:\coding\jst_v1\
 | **MP-SUCCESS-FLOW** | 5 处成功态加跳转/modal 引导：支付/批量报名/创建档案/预约/订单详情 | ✅ 完成 |
 | **CONTEST-ORGANIZER-CONTACT** | DDL 5 字段（organizer_logo/organizer_desc/contact_phone/contact_wechat/contact_email）+ Domain/VO/Mapper/Service/DTO/管理端编辑 Tab 全链路 | ✅ 完成 |
 | **CONTEST-DETAIL-RESHAPE** | 小程序赛事详情页：sticky tab 常驻吸顶+自动高亮、报名倒计时条、主办方卡、联系咨询卡（拨打/复制）、奖项改表格、相似赛事+推荐课程横滑（调已存在的 `getContestRecommend`） | ✅ 完成 |
-| **SALES-DISTRIBUTION（设计阶段）** | 销售管理 + 渠道分销 + CRM 完整设计稿。8 大决策（角色/绑定/提成/结算/分销/离职/层级/兜底）+ CRM 标准版 + 9 张新表 + 56 边界 + 4 阶段提成管线 + 3 阶段离职防带客户 + 销售金额全脱敏 + SalesScope 切面（复刻 PartnerScope）+ 8 Quartz + 6 Spring 事件。spec：`docs/superpowers/specs/2026-04-18-sales-channel-distribution-design.md`（commit `ebe17a7`）。**§6 实施次序拆为 4 个独立子任务**：①DDL+基础架构 ②销售管理核心 ③CRM 子模块 ④渠道分销+admin 后台。 | 🟡 设计完成（2026-04-18），等待 writing-plans |
+| **SALES-DISTRIBUTION（4 计划已就绪）** | 销售管理 + 渠道分销 + CRM 完整子系统。spec + 4 实施计划全部写出（2026-04-18），未开始执行。spec：`docs/superpowers/specs/2026-04-18-sales-channel-distribution-design.md`（commit `ebe17a7`）。4 计划：①plan-01-ddl-infra（DDL 9 表+jst-common 切面族 16 task，commit `c50984d`）②plan-02-sales-core（销售核心+提成管线+6 Quartz+离职 3 阶段 20 task，commit `d9250e1`）③plan-03-crm（CRM+销售工作台前端 7 页 15 task，commit `4f385a9`）④plan-04-distribution-admin（分销+admin 后台 5 页+小程序 3 页+反带客户 17 task，commit `2d3a747`）。共 ~68 task / ~7600 行 plan / 100+ TDD 单测。**4 计划严格依赖顺序：01→02→{03,04 可并行}**。等待用户选择执行模式（subagent-driven 或 inline）。 | 🟡 4 计划已写出，等待执行 |
 
 ---
 
