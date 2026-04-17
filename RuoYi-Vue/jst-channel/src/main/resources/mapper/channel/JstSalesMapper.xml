@@ -88,4 +88,24 @@
         DELETE FROM jst_sales WHERE sales_id = #{salesId}
     </delete>
 
+    <select id="selectBySysUserId" parameterType="Long" resultMap="JstSalesResult">
+        SELECT <include refid="cols"/> FROM jst_sales WHERE sys_user_id = #{sysUserId}
+    </select>
+
+    <select id="selectBySalesNo" parameterType="String" resultMap="JstSalesResult">
+        SELECT <include refid="cols"/> FROM jst_sales WHERE sales_no = #{salesNo}
+    </select>
+
+    <select id="selectByManagerId" parameterType="Long" resultMap="JstSalesResult">
+        SELECT <include refid="cols"/> FROM jst_sales
+        WHERE manager_id = #{managerId} AND status IN ('active','resign_apply','resigned_pending_settle')
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectActiveTeamIds" parameterType="Long" resultType="Long">
+        SELECT sales_id FROM jst_sales
+        WHERE (sales_id = #{managerId} OR manager_id = #{managerId})
+          AND status IN ('active','resign_apply','resigned_pending_settle')
+    </select>
+
 </mapper>
