@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次更新：2026-04-17（档案自建 + 小程序视觉/UX 疏通 + 赛事详情重塑 + ADMIN-UX-B1~B3 + 表单白名单放行 phone/idcard + 9883 菜单去重与 banner）
+> 会话恢复文件。上次更新：2026-04-18（**销售管理 + 渠道分销** 设计稿完成，spec 已落 `docs/superpowers/specs/2026-04-18-sales-channel-distribution-design.md`，下一步进 writing-plans）
 
 ---
 
@@ -255,6 +255,7 @@ D:\coding\jst_v1\
 | **MP-SUCCESS-FLOW** | 5 处成功态加跳转/modal 引导：支付/批量报名/创建档案/预约/订单详情 | ✅ 完成 |
 | **CONTEST-ORGANIZER-CONTACT** | DDL 5 字段（organizer_logo/organizer_desc/contact_phone/contact_wechat/contact_email）+ Domain/VO/Mapper/Service/DTO/管理端编辑 Tab 全链路 | ✅ 完成 |
 | **CONTEST-DETAIL-RESHAPE** | 小程序赛事详情页：sticky tab 常驻吸顶+自动高亮、报名倒计时条、主办方卡、联系咨询卡（拨打/复制）、奖项改表格、相似赛事+推荐课程横滑（调已存在的 `getContestRecommend`） | ✅ 完成 |
+| **SALES-DISTRIBUTION（设计阶段）** | 销售管理 + 渠道分销 + CRM 完整设计稿。8 大决策（角色/绑定/提成/结算/分销/离职/层级/兜底）+ CRM 标准版 + 9 张新表 + 56 边界 + 4 阶段提成管线 + 3 阶段离职防带客户 + 销售金额全脱敏 + SalesScope 切面（复刻 PartnerScope）+ 8 Quartz + 6 Spring 事件。spec：`docs/superpowers/specs/2026-04-18-sales-channel-distribution-design.md`（commit `ebe17a7`）。**§6 实施次序拆为 4 个独立子任务**：①DDL+基础架构 ②销售管理核心 ③CRM 子模块 ④渠道分销+admin 后台。 | 🟡 设计完成（2026-04-18），等待 writing-plans |
 
 ---
 
@@ -376,6 +377,7 @@ D:\coding\jst_v1\
 | **P1 ✅** | FIX-FORM-FIELD-WHITELIST | ✅ 完成（2026-04-17） | 后端 `FormTemplateServiceImpl.ALLOWED_FIELD_TYPES` 加 `phone, idcard`；前端 `FormSchemaEditor.vue` `VISUAL_ALLOWED_TYPES` + `BACKEND_ALLOWED_TYPES` 同步加入，`BACKEND_BLOCKED_VISUAL_TYPES` 清空；`FieldEditDrawer.vue` `UNSUPPORTED_VISUAL_TYPES` 只剩 `group, conditional`。mvn + npm run build:prod 绿。 |
 | **P2 ✅** | FIX-MENU-DEDUP-FORMTEMPLATE | ✅ 完成（2026-04-17） | 隐藏 9883 "报名表单模板"（visible=1），保留 9842 "表单模板管理" 为唯一入口。Migration `架构设计/ddl/99-migration-menu-dedup-formtemplate.sql`。3039 父链（2000 竞赛通业务）本已隐藏，无需处理。页面文件本身暂未删，等 ADMIN-UX-B2 主线 C 决定 banner 或删除。 |
 | **P1 ✅** | ADMIN-UX-B3 | ✅ 完成（2026-04-17） | Web Admin Agent 交付三主线：①主线 A 赛事 offline→online 状态机回路（`ContestAuditStatus.java` L37 开放 `EnumSet.of(ONLINE)` + `PartnerContestController.goOnline` 端点 + `contest-list.vue` 「重新上线」按钮 + `onlinePartnerContest` API）；②主线 B 报名按用户所属渠道分层（`EnrollListVO` 加 `boundChannelId/boundChannelName` + `EnrollQueryReqDTO` 加 `boundChannelId/hasChannel` + `EnrollRecordMapperExt.xml` 加 3 LEFT JOIN + `EnrollChannelGroupVO` + `EnrollRecordController.channelGroups` 端点 `/jst/event/enroll/channel-groups` + `jst/enroll/index.vue` 三 Tab「全部/个人/按渠道 expand」+「所属渠道」列 + 赛事 ID 筛选）；③主线 C contest-edit 「查看」按钮复用 B1 产出的 `SchemaPreview` drawer + 证书模板预览 Dialog（有 bgImage 显缩略图、否则跳 `/partner/cert-manage`）。3 条可接受偏离：channel-groups 挂管理端 Controller 路径 `/jst/event/enroll/channel-groups`（避免新增权限点）、SchemaPreview 是 drawer 非 dialog（按组件实际 prop 调）、channel 跳转改为 `/channel?channelId=` + catch 兜底（菜单无 admin-list 路径）。红线严守：未动 `jst_enroll_record` 表、未新增菜单 SQL、未改 cert-manage 设计器、未在 SchemaPreview 加编辑、未顺手重构其他列。mvn jst-event clean compile 19s 绿 + npm run build:prod 绿。报告 `subagent/tasks/任务报告/ADMIN-UX-B3-报告.md`。 |
+| **P0 🟡** | SALES-DISTRIBUTION | 🟡 设计完成（2026-04-18），spec 已 commit `ebe17a7` | **销售管理 + 渠道分销 + CRM 完整子系统**。spec：`docs/superpowers/specs/2026-04-18-sales-channel-distribution-design.md`。8 大决策 + 9 张新表 + 56 边界 + 4 阶段提成管线（实付为基数+个性化费率+业务类型差异化+7 天售后期+月结）+ 3 阶段离职防带客户（限权阶段+账号停权+财务过渡）+ 销售金额全脱敏+手机号常态脱敏+导出水印 + SalesScope 切面（复刻 PartnerScope）+ 邀请永久绑定+1 级穿透+单笔分润 15% 上限 + CRM 标准版（跟进/标签/任务）。**§6 实施次序拆为 4 个独立可上线子任务**：①DDL+基础架构 ②销售管理核心+提成管线 ③CRM 子模块 ④渠道分销+admin 后台。下一步进 writing-plans。 |
 | **P2** | MP-KEY-FIX | ⏳ | 小程序 `:key` 表达式警告批量修复（约 20 处复杂表达式改 computed 稳定 ID，非阻塞） |
 | **P2** | DATA-MIGRATION | ⏸️ 5 月中旬 | 旧数据迁移（等旧库信息） |
 | **P2** | TEST-ROUND3 | ⏳ | 全量回归测试（等遗留 TODO 补齐后） |
