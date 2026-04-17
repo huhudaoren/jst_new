@@ -140,6 +140,21 @@ public class ContestSaveReqDTO {
     @Size(max = 500, message = "比赛地址长度不能超过500")
     private String eventAddress;
 
+    @Size(max = 500, message = "主办方 LOGO URL 长度不能超过500")
+    private String organizerLogo;
+
+    @Size(max = 500, message = "主办方简介长度不能超过500")
+    private String organizerDesc;
+
+    @Size(max = 32, message = "咨询电话长度不能超过32")
+    private String contactPhone;
+
+    @Size(max = 64, message = "咨询微信号长度不能超过64")
+    private String contactWechat;
+
+    @Size(max = 128, message = "咨询邮箱长度不能超过128")
+    private String contactEmail;
+
     @Deprecated
     private String scheduleJson;
 
@@ -455,6 +470,21 @@ public class ContestSaveReqDTO {
     public String getEventAddress() {
         return eventAddress;
     }
+
+    public String getOrganizerLogo() { return organizerLogo; }
+    public void setOrganizerLogo(String organizerLogo) { this.organizerLogo = organizerLogo; }
+
+    public String getOrganizerDesc() { return organizerDesc; }
+    public void setOrganizerDesc(String organizerDesc) { this.organizerDesc = organizerDesc; }
+
+    public String getContactPhone() { return contactPhone; }
+    public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
+
+    public String getContactWechat() { return contactWechat; }
+    public void setContactWechat(String contactWechat) { this.contactWechat = contactWechat; }
+
+    public String getContactEmail() { return contactEmail; }
+    public void setContactEmail(String contactEmail) { this.contactEmail = contactEmail; }
 
     public void setEventAddress(String eventAddress) {
         this.eventAddress = eventAddress;

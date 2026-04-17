@@ -50,6 +50,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="organizer"    column="organizer"    />
         <result property="coOrganizer"    column="co_organizer"    />
         <result property="eventAddress"    column="event_address"    />
+        <result property="organizerLogo"    column="organizer_logo"    />
+        <result property="organizerDesc"    column="organizer_desc"    />
+        <result property="contactPhone"    column="contact_phone"    />
+        <result property="contactWechat"    column="contact_wechat"    />
+        <result property="contactEmail"    column="contact_email"    />
         <result property="appointmentCapacity"    column="appointment_capacity"    />
         <result property="writeoffConfig"    column="writeoff_config"    />
         <result property="allowRepeatAppointment"    column="allow_repeat_appointment"    />
@@ -66,6 +71,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         writeoff_mode, need_sign_in, team_min_size, team_max_size,
         team_leader_fields, team_member_fields, score_publish_time, aftersale_deadline,
         organizer, co_organizer, event_address,
+        organizer_logo, organizer_desc, contact_phone, contact_wechat, contact_email,
         audit_status, status, created_user_id, create_by, create_time, update_by, update_time, remark, del_flag
         from jst_contest
     </sql>

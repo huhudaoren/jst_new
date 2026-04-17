@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次更新：2026-04-13（全量完成 + 安全审计 + 性能优化进行中）
+> 会话恢复文件。上次更新：2026-04-17（档案自建 + 小程序视觉/UX 疏通 + 赛事详情重塑）
 
 ---
 
@@ -242,6 +242,12 @@ D:\coding\jst_v1\
 | 首页重定向 | 登录→运营看板 + 系统菜单隐藏 | ✅ 完成 |
 | 角色体系 | 6 个业务角色（运营主管/财务/客服/营销/风控/分析师） | ✅ 完成 |
 | DATA-MIGRATION | 旧数据迁移方案与脚本 | ⏸️ 搁置至 5 月中旬 |
+| **档案自建（WX-PART-SELF）** | `POST /jst/wx/participant/self-create` + 小程序"我的档案"新建弹层（姓名/性别/生日/学校/班级/监护人）；解决学生首次使用无档案可选导致无法报名 | ✅ 完成 |
+| **MP-THEME-FIX** | partner-apply 主题色 `$jst-success` → `$jst-brand`（8 处）+ input `box-sizing: border-box` 修 placeholder 截断 | ✅ 完成 |
+| **MP-EMPTY-CTA** | jst-empty 组件加 `buttonText/buttonUrl/@action` prop + 5 页空态接入（首页/筛选/报名历史/订单/报名） | ✅ 完成 |
+| **MP-SUCCESS-FLOW** | 5 处成功态加跳转/modal 引导：支付/批量报名/创建档案/预约/订单详情 | ✅ 完成 |
+| **CONTEST-ORGANIZER-CONTACT** | DDL 5 字段（organizer_logo/organizer_desc/contact_phone/contact_wechat/contact_email）+ Domain/VO/Mapper/Service/DTO/管理端编辑 Tab 全链路 | ✅ 完成 |
+| **CONTEST-DETAIL-RESHAPE** | 小程序赛事详情页：sticky tab 常驻吸顶+自动高亮、报名倒计时条、主办方卡、联系咨询卡（拨打/复制）、奖项改表格、相似赛事+推荐课程横滑（调已存在的 `getContestRecommend`） | ✅ 完成 |
 
 ---
 
@@ -460,6 +466,7 @@ D:\coding\jst_v1\
 | 99-migration-contest-reviewer.sql | ⭐ 傻瓜化：评审老师表 |
 | 99-migration-admin-polish-dict.sql | ⭐ 精品化：16 字典类型 99 条数据 |
 | 99-migration-fix-not-null-defaults.sql | 修复：7 表 NOT NULL 加 DEFAULT |
+| 99-migration-contest-organizer-contact.sql | ⭐ 赛事详情重塑：主办方 logo/简介 + 咨询电话/微信/邮箱 5 字段 + 8801/8802 mock 数据 |
 | 99-test-fixtures.sql | 测试数据（含团队赛事 8206 + 预约时间段） |
 
 ---

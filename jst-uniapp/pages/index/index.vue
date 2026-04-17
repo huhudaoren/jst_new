@@ -195,6 +195,8 @@
             v-else
             text="暂无推荐赛事"
             icon="🎯"
+            button-text="浏览全部赛事"
+            button-url="switchTab:/pages/contest/list"
           />
         </view>
 
@@ -226,6 +228,8 @@
             v-else
             text="暂无精选赛事"
             icon="🏆"
+            button-text="浏览全部赛事"
+            button-url="switchTab:/pages/contest/list"
           />
         </view>
 
@@ -267,6 +271,8 @@
             v-else
             text="暂无推荐课程"
             icon="📚"
+            button-text="浏览全部课程"
+            button-url="switchTab:/pages/course/list"
           />
         </view>
 

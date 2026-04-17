@@ -43,6 +43,11 @@
         <result property="organizer" column="organizer"/>
         <result property="coOrganizer" column="co_organizer"/>
         <result property="eventAddress" column="event_address"/>
+        <result property="organizerLogo" column="organizer_logo"/>
+        <result property="organizerDesc" column="organizer_desc"/>
+        <result property="contactPhone" column="contact_phone"/>
+        <result property="contactWechat" column="contact_wechat"/>
+        <result property="contactEmail" column="contact_email"/>
         <result property="scheduleJson" column="schedule_json"/>
         <result property="awardsJson" column="awards_json"/>
         <result property="faqJson" column="faq_json"/>
@@ -99,6 +104,11 @@
         c.organizer,
         c.co_organizer,
         c.event_address,
+        c.organizer_logo,
+        c.organizer_desc,
+        c.contact_phone,
+        c.contact_wechat,
+        c.contact_email,
         c.schedule_json,
         c.awards_json,
         c.faq_json,
@@ -180,6 +190,11 @@
             organizer,
             co_organizer,
             event_address,
+            organizer_logo,
+            organizer_desc,
+            contact_phone,
+            contact_wechat,
+            contact_email,
             schedule_json,
             awards_json,
             faq_json,
@@ -230,6 +245,11 @@
             #{contest.organizer},
             #{contest.coOrganizer},
             #{contest.eventAddress},
+            #{contest.organizerLogo},
+            #{contest.organizerDesc},
+            #{contest.contactPhone},
+            #{contest.contactWechat},
+            #{contest.contactEmail},
             #{contest.scheduleJson},
             #{contest.awardsJson},
             #{contest.faqJson},
@@ -282,6 +302,11 @@
             organizer = #{contest.organizer},
             co_organizer = #{contest.coOrganizer},
             event_address = #{contest.eventAddress},
+            organizer_logo = #{contest.organizerLogo},
+            organizer_desc = #{contest.organizerDesc},
+            contact_phone = #{contest.contactPhone},
+            contact_wechat = #{contest.contactWechat},
+            contact_email = #{contest.contactEmail},
             schedule_json = #{contest.scheduleJson},
             awards_json = #{contest.awardsJson},
             faq_json = #{contest.faqJson},
@@ -427,6 +452,11 @@
         c.organizer AS organizer,
         c.co_organizer AS coOrganizer,
         c.event_address AS eventAddress,
+        c.organizer_logo AS organizerLogo,
+        c.organizer_desc AS organizerDesc,
+        c.contact_phone AS contactPhone,
+        c.contact_wechat AS contactWechat,
+        c.contact_email AS contactEmail,
         c.schedule_json AS scheduleJson,
         c.awards_json AS awardsJson,
         c.faq_json AS faqJson,
@@ -550,7 +580,12 @@
         c.aftersale_deadline AS aftersaleDeadline,
         c.organizer AS organizer,
         c.co_organizer AS coOrganizer,
-        c.event_address AS eventAddress
+        c.event_address AS eventAddress,
+        c.organizer_logo AS organizerLogo,
+        c.organizer_desc AS organizerDesc,
+        c.contact_phone AS contactPhone,
+        c.contact_wechat AS contactWechat,
+        c.contact_email AS contactEmail
         from jst_contest c
         left join jst_event_partner p on p.partner_id = c.partner_id and p.del_flag = '0'
         where c.contest_id = #{contestId}

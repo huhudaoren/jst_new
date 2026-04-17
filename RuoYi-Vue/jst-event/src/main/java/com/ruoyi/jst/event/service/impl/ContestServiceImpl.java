@@ -148,6 +148,11 @@ public class ContestServiceImpl implements ContestService {
         contest.setOrganizer(req.getOrganizer());
         contest.setCoOrganizer(req.getCoOrganizer());
         contest.setEventAddress(req.getEventAddress());
+        contest.setOrganizerLogo(req.getOrganizerLogo());
+        contest.setOrganizerDesc(req.getOrganizerDesc());
+        contest.setContactPhone(req.getContactPhone());
+        contest.setContactWechat(req.getContactWechat());
+        contest.setContactEmail(req.getContactEmail());
         contest.setScheduleJson(req.getScheduleJson());
         contest.setAwardsJson(req.getAwardsJson());
         contest.setFaqJson(req.getFaqJson());
@@ -235,6 +240,11 @@ public class ContestServiceImpl implements ContestService {
         update.setOrganizer(req.getOrganizer());
         update.setCoOrganizer(req.getCoOrganizer());
         update.setEventAddress(req.getEventAddress());
+        update.setOrganizerLogo(req.getOrganizerLogo());
+        update.setOrganizerDesc(req.getOrganizerDesc());
+        update.setContactPhone(req.getContactPhone());
+        update.setContactWechat(req.getContactWechat());
+        update.setContactEmail(req.getContactEmail());
         update.setScheduleJson(req.getScheduleJson());
         update.setAwardsJson(req.getAwardsJson());
         update.setFaqJson(req.getFaqJson());
@@ -543,6 +553,11 @@ public class ContestServiceImpl implements ContestService {
         copy.setOrganizer(source.getOrganizer());
         copy.setCoOrganizer(source.getCoOrganizer());
         copy.setEventAddress(source.getEventAddress());
+        copy.setOrganizerLogo(source.getOrganizerLogo());
+        copy.setOrganizerDesc(source.getOrganizerDesc());
+        copy.setContactPhone(source.getContactPhone());
+        copy.setContactWechat(source.getContactWechat());
+        copy.setContactEmail(source.getContactEmail());
         copy.setScheduleJson(source.getScheduleJson());
         copy.setAwardsJson(source.getAwardsJson());
         copy.setFaqJson(source.getFaqJson());

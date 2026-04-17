@@ -77,7 +77,13 @@
         </view>
       </view>
 
-      <jst-empty v-else-if="!pageLoading && !listLoading" icon="🏆" text="暂无符合条件的赛事" />
+      <jst-empty
+        v-else-if="!pageLoading && !listLoading"
+        icon="🏆"
+        text="暂无符合条件的赛事"
+        :button-text="hasActiveFilter ? '清除筛选' : ''"
+        @action="clearAllFilters"
+      />
 
       <u-loadmore
         v-if="contestList.length"
@@ -163,6 +169,13 @@ export default {
       this.keyword = decodeURIComponent(query.keyword)
     }
     this.initializePage()
+  },
+  computed: {
+    // 当前是否有任何激活的筛选条件（用于控制空态 CTA 是否显示"清除筛选"）
+    hasActiveFilter() {
+      return !!(this.keyword || this.filterValue.category || this.filterValue.eventType ||
+        (this.filterValue.sortBy && this.filterValue.sortBy !== 'default'))
+    }
   },
   onPullDownRefresh() {
     this.initializePage()
@@ -268,6 +281,13 @@ export default {
 
     onClearSearch() {
       this.keyword = ''
+      this.resetAndLoadList()
+    },
+
+    // 中文注释: 清空全部筛选条件（空态 CTA 调用）
+    clearAllFilters() {
+      this.keyword = ''
+      this.filterValue = { category: '', sortBy: 'default', eventType: '' }
       this.resetAndLoadList()
     },
 

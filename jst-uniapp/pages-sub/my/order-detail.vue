@@ -307,7 +307,21 @@ export default {
         // TODO: 接入真实微信 JSAPI 支付
         await mockPaySuccess(this.orderId)
         uni.showToast({ title: '支付成功', icon: 'success' })
-        this.fetchDetail()
+        await this.fetchDetail()
+        // 中文注释: 支付成功后给出明确的"下一步"指引，避免用户不知道该去哪里看进度
+        setTimeout(() => {
+          uni.showModal({
+            title: '支付成功',
+            content: '您的订单已支付成功，是否前往"我的报名"查看审核进度？',
+            confirmText: '去查看',
+            cancelText: '留在当前页',
+            success: (res) => {
+              if (res.confirm) {
+                uni.redirectTo({ url: '/pages-sub/my/enroll' })
+              }
+            }
+          })
+        }, 800)
       } catch (error) {}
     },
 

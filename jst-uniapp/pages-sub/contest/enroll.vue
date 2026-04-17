@@ -55,8 +55,8 @@
         </view>
 
         <view v-else class="enroll-page__participant-empty">
-          <text class="enroll-page__participant-empty-text">还没有可用的参赛档案，请先到“我的档案”完成认领。</text>
-          <u-button class="enroll-page__participant-empty-btn" @click="navigateParticipant">去认领档案</u-button>
+          <text class="enroll-page__participant-empty-text">还没有可用的参赛档案，可自行新建或认领老师/赛事方分享的档案。</text>
+          <u-button class="enroll-page__participant-empty-btn" @click="navigateParticipant">去创建档案</u-button>
         </view>
       </view>
 
