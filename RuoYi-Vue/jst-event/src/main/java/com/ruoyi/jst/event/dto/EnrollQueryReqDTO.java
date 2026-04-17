@@ -38,6 +38,18 @@ public class EnrollQueryReqDTO extends BaseEntity {
      */
     private List<Long> contestIds;
 
+    /**
+     * 按用户绑定渠道精确筛选。
+     * 关联任务：ADMIN-UX-B3 主线 B。
+     */
+    private Long boundChannelId;
+
+    /**
+     * 是否仅筛选"有绑定渠道"/"无绑定渠道"的报名。
+     * true=仅有绑定；false=仅无绑定；null=不限。
+     */
+    private Boolean hasChannel;
+
     public Long getContestId() {
         return contestId;
     }
@@ -100,5 +112,21 @@ public class EnrollQueryReqDTO extends BaseEntity {
 
     public void setContestIds(List<Long> contestIds) {
         this.contestIds = contestIds;
+    }
+
+    public Long getBoundChannelId() {
+        return boundChannelId;
+    }
+
+    public void setBoundChannelId(Long boundChannelId) {
+        this.boundChannelId = boundChannelId;
+    }
+
+    public Boolean getHasChannel() {
+        return hasChannel;
+    }
+
+    public void setHasChannel(Boolean hasChannel) {
+        this.hasChannel = hasChannel;
     }
 }

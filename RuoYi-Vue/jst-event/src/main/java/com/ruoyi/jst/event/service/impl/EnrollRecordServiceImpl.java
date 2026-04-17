@@ -42,6 +42,7 @@ import com.ruoyi.jst.event.mapper.JstScoreItemMapper;
 import com.ruoyi.jst.event.mapper.JstScoreRecordMapper;
 import com.ruoyi.jst.event.service.ContestReviewerService;
 import com.ruoyi.jst.event.service.EnrollRecordService;
+import com.ruoyi.jst.event.vo.EnrollChannelGroupVO;
 import com.ruoyi.jst.event.vo.EnrollDetailVO;
 import com.ruoyi.jst.event.vo.EnrollListVO;
 import com.ruoyi.jst.event.vo.EnrollSubmitResVO;
@@ -475,6 +476,18 @@ public class EnrollRecordServiceImpl implements EnrollRecordService {
             vo.setTeamSize(teamSize);
             return vo;
         });
+    }
+
+    /**
+     * 按"用户所属渠道"聚合指定赛事的报名记录。
+     *
+     * @param contestId 赛事 ID
+     * @return 聚合结果
+     * @关联任务 ADMIN-UX-B3 主线 B
+     */
+    @Override
+    public List<EnrollChannelGroupVO> groupByBoundChannel(Long contestId) {
+        return enrollRecordMapperExt.selectChannelGroupsByContest(contestId);
     }
 
     /**

@@ -34,6 +34,17 @@ public class EnrollListVO {
 
     private Date updateTime;
 
+    /**
+     * 用户当前绑定渠道 ID（来源：user.bound_channel_id 优先，其次 participant.created_by_channel_id）。
+     * 关联任务：ADMIN-UX-B3 主线 B。
+     */
+    private Long boundChannelId;
+
+    /**
+     * 用户当前绑定渠道名称（列表直接展示用）。
+     */
+    private String boundChannelName;
+
     public Long getEnrollId() {
         return enrollId;
     }
@@ -128,5 +139,21 @@ public class EnrollListVO {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Long getBoundChannelId() {
+        return boundChannelId;
+    }
+
+    public void setBoundChannelId(Long boundChannelId) {
+        this.boundChannelId = boundChannelId;
+    }
+
+    public String getBoundChannelName() {
+        return boundChannelName;
+    }
+
+    public void setBoundChannelName(String boundChannelName) {
+        this.boundChannelName = boundChannelName;
     }
 }

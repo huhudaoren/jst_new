@@ -173,6 +173,26 @@ public class PartnerContestController extends BasePartnerController {
     }
 
     /**
+     * 赛事方/运营 将已下线的赛事重新上线。
+     * <p>
+     * 状态机 SM-5a：offline -> online（前置已审核过，不再走 pending）。
+     * 关联任务：ADMIN-UX-B3 主线 A。
+     *
+     * @param contestId 赛事ID
+     * @return 操作结果
+     * @关联表 jst_contest
+     * @关联状态机 SM-5
+     * @关联权限 hasAnyRoles('jst_partner,admin,jst_operator')
+     */
+    @Log(title = "赛事重新上线", businessType = BusinessType.UPDATE)
+    @PreAuthorize("@ss.hasAnyRoles('jst_partner,admin,jst_operator')")
+    @PutMapping("/{contestId}/online")
+    public AjaxResult goOnline(@PathVariable("contestId") Long contestId) {
+        contestService.onlineContest(contestId);
+        return AjaxResult.success();
+    }
+
+    /**
      * 赛事方删除草稿赛事。
      *
      * @param contestId 赛事ID

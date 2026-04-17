@@ -42,6 +42,14 @@
         <result property="auditStatus" column="audit_status"/>
         <result property="submitTime" column="submit_time"/>
         <result property="updateTime" column="update_time"/>
+        <result property="boundChannelId" column="bound_channel_id"/>
+        <result property="boundChannelName" column="bound_channel_name"/>
+    </resultMap>
+
+    <resultMap id="EnrollChannelGroupResult" type="com.ruoyi.jst.event.vo.EnrollChannelGroupVO">
+        <result property="channelId" column="channel_id"/>
+        <result property="channelName" column="channel_name"/>
+        <result property="enrollCount" column="enroll_count"/>
     </resultMap>
 
     <resultMap id="EnrollDetailResult" type="com.ruoyi.jst.event.vo.EnrollDetailVO">
@@ -151,12 +159,18 @@
     </insert>
 
     <select id="selectAdminList" resultMap="EnrollListResult">
+        <!-- ADMIN-UX-B3 主线 B：追加 user/participant/channel JOIN 以展示"用户所属渠道" -->
         select er.enroll_id, er.enroll_no, er.contest_id, c.contest_name, c.partner_id, er.participant_id,
                p.name as participant_name, p.guardian_mobile, er.material_status, er.audit_status,
-               er.submit_time, er.update_time
+               er.submit_time, er.update_time,
+               ch.channel_id as bound_channel_id,
+               ch.channel_name as bound_channel_name
         from jst_enroll_record er
                  left join jst_contest c on c.contest_id = er.contest_id and c.del_flag = '0'
                  left join jst_participant p on p.participant_id = er.participant_id and p.del_flag = '0'
+                 left join jst_user u on u.user_id = er.user_id and u.del_flag = '0'
+                 left join jst_channel ch on ch.channel_id = coalesce(u.bound_channel_id, p.created_by_channel_id)
+                                          and ch.del_flag = '0'
         <where>
             er.del_flag = '0'
             <if test="query != null and query.partnerId != null">
@@ -186,11 +200,44 @@
             <if test="query != null and query.guardianMobile != null and query.guardianMobile != ''">
                 and p.guardian_mobile like concat('%', #{query.guardianMobile}, '%')
             </if>
+            <!-- ADMIN-UX-B3 主线 B：按用户绑定渠道精确筛选 -->
+            <if test="query != null and query.boundChannelId != null">
+                and coalesce(u.bound_channel_id, p.created_by_channel_id) = #{query.boundChannelId}
+            </if>
+            <!-- ADMIN-UX-B3 主线 B：hasChannel 布尔筛选（true 仅有绑定，false 仅无绑定） -->
+            <if test="query != null and query.hasChannel != null">
+                <choose>
+                    <when test="query.hasChannel == true">
+                        and coalesce(u.bound_channel_id, p.created_by_channel_id) is not null
+                    </when>
+                    <otherwise>
+                        and coalesce(u.bound_channel_id, p.created_by_channel_id) is null
+                    </otherwise>
+                </choose>
+            </if>
             <if test="query != null and query.params != null and query.params.dataScope != null and query.params.dataScope != ''">
                 ${query.params.dataScope}
             </if>
         </where>
         order by er.update_time desc, er.enroll_id desc
+    </select>
+
+    <!-- ADMIN-UX-B3 主线 B：按"用户所属渠道"聚合某赛事的报名记录 -->
+    <select id="selectChannelGroupsByContest" resultMap="EnrollChannelGroupResult">
+        select
+            coalesce(u.bound_channel_id, p.created_by_channel_id) as channel_id,
+            ch.channel_name as channel_name,
+            count(*) as enroll_count
+        from jst_enroll_record er
+                 left join jst_user u on u.user_id = er.user_id and u.del_flag = '0'
+                 left join jst_participant p on p.participant_id = er.participant_id and p.del_flag = '0'
+                 left join jst_channel ch on ch.channel_id = coalesce(u.bound_channel_id, p.created_by_channel_id)
+                                          and ch.del_flag = '0'
+        where er.contest_id = #{contestId}
+          and er.del_flag = '0'
+          and coalesce(u.bound_channel_id, p.created_by_channel_id) is not null
+        group by channel_id, channel_name
+        order by enroll_count desc
     </select>
 
     <select id="selectAdminDetail" resultMap="EnrollDetailResult">

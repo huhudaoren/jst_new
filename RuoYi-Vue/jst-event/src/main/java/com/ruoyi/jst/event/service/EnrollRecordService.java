@@ -7,6 +7,7 @@ import com.ruoyi.jst.event.dto.EnrollSubmitDTO;
 import com.ruoyi.jst.event.dto.EnrollSupplementDTO;
 import com.ruoyi.jst.event.dto.ScoreItemReqDTO;
 import com.ruoyi.jst.event.dto.TeamEnrollReqDTO;
+import com.ruoyi.jst.event.vo.EnrollChannelGroupVO;
 import com.ruoyi.jst.event.vo.EnrollDetailVO;
 import com.ruoyi.jst.event.vo.EnrollListVO;
 import com.ruoyi.jst.event.vo.EnrollSubmitResVO;
@@ -105,4 +106,13 @@ public interface EnrollRecordService {
      * @关联表 jst_enroll_record, jst_contest, jst_appointment_slot
      */
     TeamEnrollResVO submitTeam(TeamEnrollReqDTO req);
+
+    /**
+     * 按"用户所属渠道"聚合指定赛事的报名记录，用于管理端「按渠道查看」Tab。
+     *
+     * @param contestId 赛事 ID
+     * @return 聚合结果列表
+     * @关联任务 ADMIN-UX-B3 主线 B
+     */
+    List<EnrollChannelGroupVO> groupByBoundChannel(Long contestId);
 }

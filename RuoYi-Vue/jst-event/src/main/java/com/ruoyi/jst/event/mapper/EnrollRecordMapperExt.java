@@ -2,6 +2,7 @@ package com.ruoyi.jst.event.mapper;
 
 import com.ruoyi.jst.event.domain.JstEnrollRecord;
 import com.ruoyi.jst.event.dto.EnrollQueryReqDTO;
+import com.ruoyi.jst.event.vo.EnrollChannelGroupVO;
 import com.ruoyi.jst.event.vo.EnrollDetailVO;
 import com.ruoyi.jst.event.vo.EnrollListVO;
 import org.apache.ibatis.annotations.Param;
@@ -73,4 +74,14 @@ public interface EnrollRecordMapperExt {
                               @Param("updateTime") Date updateTime);
 
     int updateSupplementRecord(JstEnrollRecord record);
+
+    /**
+     * 按"用户所属渠道"聚合指定赛事的报名数。
+     *
+     * @param contestId 赛事 ID
+     * @return 聚合结果（channelId / channelName / enrollCount）
+     * @关联表 jst_enroll_record, jst_user, jst_channel, jst_participant
+     * @关联任务 ADMIN-UX-B3 主线 B
+     */
+    List<EnrollChannelGroupVO> selectChannelGroupsByContest(@Param("contestId") Long contestId);
 }

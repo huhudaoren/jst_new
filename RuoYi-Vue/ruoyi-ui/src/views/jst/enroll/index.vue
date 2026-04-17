@@ -20,6 +20,12 @@
       </div>
     </div>
 
+    <el-tabs v-model="activeTab" class="enroll-tabs" @tab-click="handleTabChange">
+      <el-tab-pane label="全部" name="all" />
+      <el-tab-pane label="个人报名" name="personal" />
+      <el-tab-pane label="按渠道查看" name="channel" />
+    </el-tabs>
+
     <el-form
       ref="queryForm"
       :model="queryParams"
@@ -28,6 +34,16 @@
       label-width="78px"
       class="query-panel"
     >
+      <el-form-item label="赛事ID" prop="contestId">
+        <el-input-number
+          v-model="queryParams.contestId"
+          :min="1"
+          :controls="false"
+          placeholder="赛事ID"
+          class="contest-id-input"
+          @change="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="赛事名称" prop="contestName">
         <el-input v-model="queryParams.contestName" placeholder="请输入赛事名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
@@ -55,7 +71,52 @@
       </el-form-item>
     </el-form>
 
-    <div v-if="isMobile" v-loading="loading" class="mobile-list">
+    <!-- 按渠道查看：一级行 = 渠道分组，展开显示本渠道报名明细 -->
+    <el-table
+      v-if="activeTab === 'channel'"
+      v-loading="channelGroupLoading"
+      :data="channelGroupList"
+      class="channel-group-table"
+      @expand-change="onChannelExpand"
+    >
+      <el-table-column type="expand">
+        <template slot-scope="props">
+          <div class="channel-sub-wrap" v-loading="!!channelSubLoading[channelKey(props.row)]">
+            <el-table :data="channelSubData[channelKey(props.row)] || []" size="small" border>
+              <el-table-column label="报名ID" prop="enrollId" min-width="90" />
+              <el-table-column label="参赛人" prop="participantName" min-width="120" />
+              <el-table-column label="审核状态" min-width="100">
+                <template slot-scope="s">
+                  <JstStatusBadge :status="String(s.row.auditStatus || '')" :status-map="auditStatusMap" />
+                </template>
+              </el-table-column>
+              <el-table-column label="提交时间" min-width="160">
+                <template slot-scope="s">{{ parseTime(s.row.submitTime || s.row.createTime) || '--' }}</template>
+              </el-table-column>
+              <el-table-column label="操作" min-width="100" fixed="right">
+                <template slot-scope="s">
+                  <el-button type="text" @click="openDetail(s.row)">详情</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="渠道ID" prop="channelId" min-width="110">
+        <template slot-scope="scope">{{ scope.row.channelId || '未绑定渠道' }}</template>
+      </el-table-column>
+      <el-table-column label="渠道名称" prop="channelName" min-width="200">
+        <template slot-scope="scope">
+          <el-link v-if="scope.row.channelId" type="primary" @click="goChannel(scope.row.channelId)">
+            {{ scope.row.channelName || '—' }}
+          </el-link>
+          <span v-else>{{ scope.row.channelName || '无渠道（自然流量）' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="本渠道报名数" prop="enrollCount" min-width="130" />
+    </el-table>
+
+    <div v-else-if="isMobile" v-loading="loading" class="mobile-list">
       <div v-if="enrollList.length">
         <div v-for="row in enrollList" :key="row.enrollId" class="mobile-card">
           <div class="mobile-card-top">
@@ -71,6 +132,11 @@
             <JstStatusBadge :status="String(row.materialStatus || '')" :status-map="materialStatusMap" />
           </div>
           <div class="mobile-info-row">提交时间：{{ parseTime(row.submitTime || row.createTime) || '--' }}</div>
+          <div class="mobile-info-row">
+            所属渠道：
+            <el-link v-if="row.boundChannelId" type="primary" @click="goChannel(row.boundChannelId)">{{ row.boundChannelName || '—' }}</el-link>
+            <span v-else>—</span>
+          </div>
           <div class="mobile-actions">
             <el-button type="text" @click="openDetail(row)">详情</el-button>
             <el-button type="text" @click="openSnapshot(row)">表单快照</el-button>
@@ -92,6 +158,14 @@
       <el-table-column label="报名ID" prop="enrollId" min-width="90" />
       <el-table-column label="赛事名称" prop="contestName" min-width="220" show-overflow-tooltip />
       <el-table-column label="参赛人" prop="participantName" min-width="130" />
+      <el-table-column label="所属渠道" min-width="140">
+        <template slot-scope="scope">
+          <el-link v-if="scope.row.boundChannelId" type="primary" @click="goChannel(scope.row.boundChannelId)">
+            {{ scope.row.boundChannelName || '—' }}
+          </el-link>
+          <span v-else>—</span>
+        </template>
+      </el-table-column>
       <el-table-column label="审核状态" min-width="110">
         <template slot-scope="scope">
           <JstStatusBadge :status="String(scope.row.auditStatus || '')" :status-map="auditStatusMap" />
@@ -122,7 +196,7 @@
     </el-table>
 
     <pagination
-      v-show="total > 0"
+      v-show="total > 0 && activeTab !== 'channel'"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
@@ -203,7 +277,7 @@
 </template>
 
 <script>
-import { auditAdminEnroll, getAdminEnrollDetail, listAdminEnrolls } from '@/api/jst/event/admin-enroll'
+import { auditAdminEnroll, getAdminEnrollDetail, listAdminEnrolls, listEnrollChannelGroups } from '@/api/jst/event/admin-enroll'
 
 export default {
   name: 'JstAdminEnrollIndex',
@@ -215,12 +289,20 @@ export default {
       total: 0,
       enrollList: [],
       submitTimeRange: [],
+      activeTab: 'all',
+      channelGroupLoading: false,
+      channelGroupList: [],
+      channelSubData: {},
+      channelSubLoading: {},
       queryParams: {
         pageNum: 1,
         pageSize: 10,
+        contestId: undefined,
         contestName: undefined,
         participantName: undefined,
-        auditStatus: undefined
+        auditStatus: undefined,
+        hasChannel: undefined,
+        boundChannelId: undefined
       },
       auditVisible: false,
       auditForm: {
@@ -270,6 +352,9 @@ export default {
     }
   },
   created() {
+    if (this.$route && this.$route.query && this.$route.query.contestId) {
+      this.queryParams.contestId = Number(this.$route.query.contestId) || undefined
+    }
     this.getList()
   },
   methods: {
@@ -365,6 +450,76 @@ export default {
       } catch (e) {
         return String(value)
       }
+    },
+    handleTabChange() {
+      if (this.activeTab === 'all') {
+        this.queryParams.hasChannel = undefined
+        this.queryParams.boundChannelId = undefined
+        this.queryParams.pageNum = 1
+        this.getList()
+      } else if (this.activeTab === 'personal') {
+        this.queryParams.hasChannel = false
+        this.queryParams.boundChannelId = undefined
+        this.queryParams.pageNum = 1
+        this.getList()
+      } else if (this.activeTab === 'channel') {
+        if (!this.queryParams.contestId) {
+          this.$modal.msgWarning('请先在搜索区填写「赛事ID」，以按赛事维度查看渠道分组')
+          this.channelGroupList = []
+          return
+        }
+        this.loadChannelGroups()
+      }
+    },
+    async loadChannelGroups() {
+      this.channelGroupLoading = true
+      this.channelSubData = {}
+      this.channelSubLoading = {}
+      try {
+        const res = await listEnrollChannelGroups(this.queryParams.contestId)
+        this.channelGroupList = Array.isArray(res.data) ? res.data : []
+      } catch (e) {
+        this.channelGroupList = []
+      } finally {
+        this.channelGroupLoading = false
+      }
+    },
+    channelKey(row) {
+      return row && row.channelId != null ? row.channelId : '__none__'
+    },
+    async onChannelExpand(row, expanded) {
+      const isExpanded = Array.isArray(expanded) ? expanded.indexOf(row) >= 0 : !!expanded
+      if (!isExpanded) return
+      const key = this.channelKey(row)
+      if (this.channelSubData[key]) return
+      this.$set(this.channelSubLoading, key, true)
+      try {
+        const params = {
+          contestId: this.queryParams.contestId,
+          pageNum: 1,
+          pageSize: 100
+        }
+        if (row.channelId != null) {
+          params.boundChannelId = row.channelId
+        } else {
+          params.hasChannel = false
+        }
+        const res = await listAdminEnrolls(params)
+        this.$set(this.channelSubData, key, Array.isArray(res.rows) ? res.rows : [])
+      } catch (e) {
+        this.$set(this.channelSubData, key, [])
+      } finally {
+        this.$set(this.channelSubLoading, key, false)
+      }
+    },
+    goChannel(channelId) {
+      if (!channelId) return
+      // ADMIN-UX-B3: 跳转渠道列表并按 channelId 预筛选。
+      // 已有菜单中渠道列表 component=jst/channel/index，常见路径为 /channel（9845 父菜单）或 /channel-list（9902 父菜单，已隐藏）。
+      // 这里走 /channel 兜底，目标页支持 query.channelId 自动展示（若未支持亦不影响查看）。
+      this.$router.push({ path: '/channel', query: { channelId } }).catch(() => {
+        this.$router.push({ path: '/channel-list', query: { channelId } }).catch(() => {})
+      })
     }
   }
 }
@@ -435,6 +590,26 @@ export default {
   background: #ffffff;
   border: 1px solid #e5eaf2;
   border-radius: 8px;
+}
+
+.enroll-tabs {
+  margin-bottom: 12px;
+  padding: 0 16px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.contest-id-input ::v-deep .el-input__inner {
+  text-align: left;
+}
+
+.channel-group-table {
+  margin-bottom: 16px;
+}
+
+.channel-sub-wrap {
+  padding: 10px 18px 4px;
 }
 
 .mobile-list {

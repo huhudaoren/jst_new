@@ -34,7 +34,9 @@ public enum ContestAuditStatus {
         ALLOWED.put(APPROVED, EnumSet.of(ONLINE));
         ALLOWED.put(REJECTED, EnumSet.of(PENDING));
         ALLOWED.put(ONLINE, EnumSet.of(OFFLINE));
-        ALLOWED.put(OFFLINE, Collections.emptySet());
+        // offline 下线的赛事允许直接回到 online（前置已审核过，不再走 pending）
+        // 关联任务：ADMIN-UX-B3 主线 A
+        ALLOWED.put(OFFLINE, EnumSet.of(ONLINE));
     }
 
     private final String dbValue;

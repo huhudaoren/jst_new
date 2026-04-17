@@ -25,3 +25,12 @@ export function auditAdminEnroll(enrollId, data) {
     data
   })
 }
+
+// 管理端-按渠道聚合（ADMIN-UX-B3 主线 B）
+export function listEnrollChannelGroups(contestId) {
+  return request({
+    url: '/jst/event/enroll/channel-groups',
+    method: 'get',
+    params: { contestId }
+  })
+}

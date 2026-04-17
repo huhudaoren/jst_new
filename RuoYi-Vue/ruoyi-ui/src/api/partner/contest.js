@@ -45,6 +45,13 @@ export function offlinePartnerContest(id) {
   })
 }
 
+export function onlinePartnerContest(id) {
+  return request({
+    url: `/jst/partner/contest/${id}/online`,
+    method: 'put'
+  })
+}
+
 export function copyPartnerContest(id) {
   return request({
     url: `/jst/partner/contest/copy/${id}`,

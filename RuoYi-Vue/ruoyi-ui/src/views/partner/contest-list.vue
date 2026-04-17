@@ -76,6 +76,7 @@
             <el-button type="text" size="mini" @click="handleCopy(row)">复制</el-button>
             <el-button v-if="canSubmit(row)" type="text" size="mini" @click="handleSubmit(row)">提交审核</el-button>
             <el-button v-if="canOffline(row)" type="text" size="mini" @click="handleOffline(row)">下线</el-button>
+            <el-button v-if="canOnline(row)" type="success" size="mini" @click="handleOnline(row)">重新上线</el-button>
             <el-button type="text" size="mini" @click="handleViewEnroll(row)">查看报名</el-button>
             <el-button v-if="canDelete(row)" type="text" size="mini" class="danger-text" @click="handleDelete(row)">删除</el-button>
           </div>
@@ -113,6 +114,7 @@
           <el-button type="text" size="mini" @click="handleCopy(scope.row)">复制</el-button>
           <el-button v-if="canSubmit(scope.row)" type="text" size="mini" @click="handleSubmit(scope.row)">提交审核</el-button>
           <el-button v-if="canOffline(scope.row)" type="text" size="mini" @click="handleOffline(scope.row)">下线</el-button>
+          <el-button v-if="canOnline(scope.row)" type="success" size="mini" @click="handleOnline(scope.row)">重新上线</el-button>
           <el-button type="text" size="mini" @click="handleViewEnroll(scope.row)">查看报名</el-button>
           <el-button v-if="canDelete(scope.row)" type="text" size="mini" class="danger-text" @click="handleDelete(scope.row)">删除</el-button>
         </template>
@@ -130,7 +132,7 @@
 </template>
 
 <script>
-import { listPartnerContests, offlinePartnerContest, submitPartnerContest, copyPartnerContest } from '@/api/partner/contest'
+import { listPartnerContests, offlinePartnerContest, onlinePartnerContest, submitPartnerContest, copyPartnerContest } from '@/api/partner/contest'
 import { parseTime } from '@/utils/ruoyi'
 
 const AUDIT_STATUS_META = {
@@ -231,6 +233,16 @@ export default {
         this.getList()
       }).catch(() => {})
     },
+    async handleOnline(row) {
+      try {
+        await this.$modal.confirm(`确认将赛事「${row.contestName || row.contestId}」重新上线？`)
+        await onlinePartnerContest(row.contestId)
+        this.$modal.msgSuccess('已重新上线')
+        this.getList()
+      } catch (e) {
+        // user cancel or request failed
+      }
+    },
     handleCopy(row) {
       this.$modal.confirm(`确认复制赛事「${row.contestName || row.contestId}」吗？`).then(() => {
         return copyPartnerContest(row.contestId)
@@ -252,6 +264,9 @@ export default {
     },
     canOffline(row) {
       return row.auditStatus === 'online'
+    },
+    canOnline(row) {
+      return row.auditStatus === 'offline'
     },
     canDelete(row) {
       return row.auditStatus === 'draft'

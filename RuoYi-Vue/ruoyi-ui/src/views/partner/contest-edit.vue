@@ -212,6 +212,7 @@
                       />
                     </el-select>
                     <el-button type="primary" plain size="small" icon="el-icon-plus" @click="showFormTemplateDrawer = true">新建表单</el-button>
+                    <el-button :disabled="!form.formTemplateId" size="small" icon="el-icon-view" @click="previewFormTemplate">查看</el-button>
                   </div>
                 </el-form-item>
               </el-col>
@@ -337,6 +338,7 @@
                       />
                     </el-select>
                     <el-button type="primary" plain size="small" icon="el-icon-plus" @click="showCertDrawer = true">新建模板</el-button>
+                    <el-button :disabled="!certTemplateIds || certTemplateIds.length === 0" size="small" icon="el-icon-view" @click="previewCertTemplates">查看已选</el-button>
                   </div>
                   <div class="field-help">未选择模板时可先保存草稿，后续在证书管理里补充完善。</div>
                 </el-form-item>
@@ -662,6 +664,38 @@
       </div>
     </el-drawer>
 
+    <!-- ==================== 报名表单预览 Drawer (ADMIN-UX-B3) ==================== -->
+    <SchemaPreview
+      v-if="schemaPreviewVisible"
+      :visible="schemaPreviewVisible"
+      :schema="schemaPreviewData"
+      :is-mobile="false"
+      @close="schemaPreviewVisible = false"
+    />
+
+    <!-- ==================== 证书模板预览 Dialog (ADMIN-UX-B3) ==================== -->
+    <el-dialog title="证书模板预览" :visible.sync="certPreviewVisible" width="900px" append-to-body>
+      <div v-if="certPreviewList.length" class="cert-preview-grid">
+        <div v-for="t in certPreviewList" :key="t && t.templateId" class="cert-preview-card">
+          <img
+            v-if="t && (t.bgImage || t.backgroundUrl || t.backgroundImage)"
+            :src="t.bgImage || t.backgroundUrl || t.backgroundImage"
+            alt="证书底图"
+            class="cert-preview-img"
+          />
+          <div v-else class="cert-preview-placeholder">
+            <p>未配置底图</p>
+            <el-button type="primary" size="small" @click="$router.push('/partner/cert-manage')">打开设计器查看</el-button>
+          </div>
+          <div class="cert-preview-name">{{ (t && (t.templateName || t.name)) || '未命名模板' }}</div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无已选模板" :image-size="88" />
+      <div slot="footer">
+        <el-button type="primary" @click="certPreviewVisible = false">关闭</el-button>
+      </div>
+    </el-dialog>
+
     <!-- ==================== 批量生成时间段 Dialog ==================== -->
     <el-dialog title="批量生成预约时间段" :visible.sync="showSlotGenerator" width="520px" append-to-body>
       <el-form :model="slotGenForm" label-width="100px" size="small">
@@ -713,8 +747,10 @@ import {
   searchSystemUsers
 } from '@/api/partner/contest'
 import { listCertTemplates, saveCertTemplate } from '@/api/partner/cert'
+import { getJst_enroll_form_template } from '@/api/jst/event/jst_enroll_form_template'
 import ContestPreview from './components/ContestPreview'
 import CertDesigner from './components/CertDesigner/index.vue'
+import SchemaPreview from '@/components/JstJsonEditor/SchemaPreview.vue'
 
 const DEFAULT_FORM = {
   contestId: null,
@@ -760,7 +796,7 @@ const DEFAULT_FORM = {
 
 export default {
   name: 'PartnerContestEdit',
-  components: { ContestPreview, CertDesigner },
+  components: { ContestPreview, CertDesigner, SchemaPreview },
   dicts: ['jst_contest_category'],
   data() {
     return {
@@ -799,6 +835,11 @@ export default {
       certTemplateRules: {
         templateName: [{ required: true, message: '请输入证书模板名称', trigger: 'blur' }]
       },
+      // Preview: ADMIN-UX-B3 查看已选
+      schemaPreviewVisible: false,
+      schemaPreviewData: null,
+      certPreviewVisible: false,
+      certPreviewList: [],
       // Slot generator dialog
       showSlotGenerator: false,
       slotGenForm: {
@@ -1280,6 +1321,40 @@ export default {
     },
     goBack() {
       this.$router.push('/partner/contest-list')
+    },
+    // ==================== ADMIN-UX-B3 查看已选 ====================
+    async previewFormTemplate() {
+      if (!this.form.formTemplateId) return
+      const selected = this.formTemplateOptions.find(o => o.templateId === this.form.formTemplateId)
+      let schemaRaw = selected && (selected.schemaJson || selected.fieldsJson)
+      try {
+        if (!schemaRaw) {
+          const res = await getJst_enroll_form_template(this.form.formTemplateId)
+          const data = res && res.data ? res.data : {}
+          schemaRaw = data.schemaJson || data.fieldsJson || null
+        }
+        this.schemaPreviewData = this.parseSchema(schemaRaw)
+      } catch (e) {
+        this.schemaPreviewData = null
+      }
+      this.schemaPreviewVisible = true
+    },
+    parseSchema(raw) {
+      if (!raw) return null
+      if (typeof raw !== 'string') return raw
+      try {
+        return JSON.parse(raw)
+      } catch (e) {
+        return null
+      }
+    },
+    previewCertTemplates() {
+      const ids = this.certTemplateIds || []
+      if (!ids.length) return
+      this.certPreviewList = ids
+        .map(id => this.certTemplateOptions.find(o => o.templateId === id))
+        .filter(Boolean)
+      this.certPreviewVisible = true
     }
   }
 }
@@ -1425,6 +1500,51 @@ export default {
   color: #606266;
   font-size: 13px;
   line-height: 1.6;
+}
+
+.cert-preview-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.cert-preview-card {
+  border: 1px solid #e8edf4;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fafcff;
+  text-align: center;
+}
+
+.cert-preview-img {
+  width: 100%;
+  height: 160px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 6px;
+}
+
+.cert-preview-placeholder {
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #909399;
+  font-size: 13px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.cert-preview-name {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #303133;
+  word-break: break-all;
 }
 
 .reviewer-save-row {

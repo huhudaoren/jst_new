@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次更新：2026-04-13（全量完成 + 安全审计 + 性能优化进行中）
+> 会话恢复文件。上次更新：2026-04-17（B1 + B2 + B3 全部完成 + 表单白名单放行 phone/idcard + 9883 菜单去重与 banner）
 
 ---
 
@@ -241,6 +241,13 @@ D:\coding\jst_v1\
 | 菜单架构优化 | 赛事管理中心(操作) + 平台数据管理(数据) 职责分离 | ✅ 完成 |
 | 首页重定向 | 登录→运营看板 + 系统菜单隐藏 | ✅ 完成 |
 | 角色体系 | 6 个业务角色（运营主管/财务/客服/营销/风控/分析师） | ✅ 完成 |
+| **管理端 UX 深度优化** | | |
+| ADMIN-UX-B1 | JSON 可视化编辑器组件族（FormSchema/FieldDrawer/SchemaPreview/Threshold/MessageTemplate/variable-map）+ 表单模板/风控/消息模板 3 页改造 + 2 字典 SQL | ✅ 完成（2026-04-17） |
+| ADMIN-UX-B2 | 弹窗分区（11 页 form-section + el-divider）+ JSON 尾单审计（仅 cert_template.layoutJson 1 处改造为 summary panel + 跳证书设计器）+ 9883 旧报名表单模板 banner 跳转新版 | ✅ 完成（2026-04-17） |
+| ADMIN-UX-B3 | 赛事状态机 offline→online 回路 + 报名按用户所属渠道三 Tab 分层（全部/个人/按渠道 expand）+ contest-edit 报名表单「查看」+ 证书「查看已选」预览。后端 9 文件（Mapper/Service/Controller 桥接 + VO/DTO/Mapper.xml 预置）+ 前端 5 文件（2 API + contest-list/contest-edit/enroll/index 三页）。复用权限点不新增菜单 SQL。mvn + npm build:prod 绿。 | ✅ 完成（2026-04-17） |
+| FIX-PARTNER-SCOPE-READONLY | `/jst/partner/form-template/list` 与 `/jst/partner/cert/template/list` 放行 admin/jst_operator。改动：`BasePartnerController` 类级 `@PreAuthorize` → `hasAnyRoles('jst_partner,admin,jst_operator')`；`PartnerScopeUtils` 新增 `currentPartnerIdAllowPlatformOp()` 对平台运营返 null；`FormTemplateServiceImpl.selectPartnerAvailableList` + `PartnerCertServiceImpl.listTemplates` 容忍 null；两张 Mapper XML 在 partnerId=null 时展开为看全部 partner 模板。写路径 (create/update) 仍保留方法级 `hasRole('jst_partner')` 不受影响。 | ✅ 完成（2026-04-17） |
+| **路由修复** | | |
+| partner/contest-edit 404 | 删除 `dynamicRoutes` 多余的 `meta: { roles: ['jst_partner'] }`，admin 可访问编辑页 | ✅ 完成（2026-04-17） |
 | DATA-MIGRATION | 旧数据迁移方案与脚本 | ⏸️ 搁置至 5 月中旬 |
 
 ---
@@ -356,6 +363,14 @@ D:\coding\jst_v1\
 
 | 优先级 | 项 | 状态 | 说明 |
 |---|---|---|---|
+| **P0 ✅** | ADMIN-UX-B1 | ✅ 完成（2026-04-17） | JSON 可视化编辑器组件族 6 件（FormSchemaEditor/FieldEditDrawer/SchemaPreview/ThresholdEditor/MessageTemplateEditor/variable-map.js）+ 表单模板/风控规则/消息模板 3 页改造 + `99-migration-admin-ux-b1-dict.sql`（`jst_form_field_type` / `jst_message_scene`）。验收 B1-1~B1-6 全过（raw JSON 文本证据，环境原因未出截图）。`npm run build:prod` 绿。报告 `subagent/tasks/任务报告/ADMIN-UX-B1-报告.md`。**遗留**见下两条。 |
+| **P0 ✅** | FIX-PARTNER-OP-PERMISSION | ✅ 完成（2026-04-17，与 B1 并行落地） | 修运营/admin 无法代操作 partner 表单模板。改动：①`FormTemplateSaveReqDTO` 加 `ownerId` 字段；②`FormTemplateServiceImpl.resolveOwnerId(String, Long)` — partner 强制取自己的 partnerId 防越权，admin/运营 必须传 ownerId；③`updateTemplate` 允许 admin 改归属，partner 锁死；④`PartnerScopeUtils.isPlatformOp()` 白名单加 `jst_operator`（不扩展到 finance/support/marketing/risk/analyst）；⑤`form-template/index.vue` 归属配置区加赛事方远程搜索选择器，partner 登录隐藏整个区。V1-V10+F1-F5 逻辑核对全绿，mvn/npm build 通过。报告 `subagent/tasks/任务报告/FIX-PARTNER-OP-PERMISSION-报告.md`。**遗留**：jst_operator 角色需补 `jst:event:jst_event_partner:list` 权限点（未动菜单 SQL） |
+| **P0 ✅** | FIX-PARTNER-SCOPE-READONLY | ✅ 完成（2026-04-17） | 修 admin 从 `views/partner/contest-edit.vue` 调 `/jst/partner/form-template/list` 与 `/jst/partner/cert/template/list` 返 99902。改动：①`BasePartnerController` 类级 `@PreAuthorize` → `hasAnyRoles('jst_partner,admin,jst_operator')`（方法级 `hasRole('jst_partner')` 的写路径不受影响）；②`PartnerScopeUtils.currentPartnerIdAllowPlatformOp()` — 平台运营返 null，否则走 `requireCurrentPartnerId`；③Base `currentPartnerId()` 改用新 helper；④`FormTemplateServiceImpl.selectPartnerAvailableList` + `PartnerCertServiceImpl.listTemplates` 容忍 null partnerId；⑤`FormTemplateMapperExt.xml` + `PartnerCertMapper.xml` 在 `partnerId IS NULL` 时展开为看全部 partner 模板。mvn compile 绿。 |
+| **P1 ✅** | ADMIN-UX-B2 | ✅ 完成（2026-04-17） | Web Admin Agent 交付：①主线 A 11 页 Dialog/Drawer 分区（points_rule / level_config / mall_goods / coupon_template / rights_template / cert_template / cert_record / event_partner / score_record / biz-no-rule / notice），统一 `.form-section` + `.form-section__title` + 蓝色左边框 + media query 移动端收敛；②主线 B JSON 尾单审计 33 处 textarea，仅 `jst_cert_template.layoutJson` 1 处改造为 summary panel（元素数/画布尺寸）+ 「前往证书设计器」跳转 `/partner/cert-manage?templateId=xxx` + 只读 raw JSON dialog + 清空布局，严守「不做可视化编辑器」红线；③主线 C 9883 页首屏 `el-alert warning` + 跳转 `/jst/form-template` 按钮。12 文件改动，无新组件/依赖/后端。`npm run build:prod` 绿。报告 `subagent/tasks/任务报告/ADMIN-UX-B2-报告.md`。 |
+| **P1 ✅** | FIX-FORM-FIELD-WHITELIST | ✅ 完成（2026-04-17） | 后端 `FormTemplateServiceImpl.ALLOWED_FIELD_TYPES` 加 `phone, idcard`；前端 `FormSchemaEditor.vue` `VISUAL_ALLOWED_TYPES` + `BACKEND_ALLOWED_TYPES` 同步加入，`BACKEND_BLOCKED_VISUAL_TYPES` 清空；`FieldEditDrawer.vue` `UNSUPPORTED_VISUAL_TYPES` 只剩 `group, conditional`。mvn + npm run build:prod 绿。 |
+| **P2 ✅** | FIX-MENU-DEDUP-FORMTEMPLATE | ✅ 完成（2026-04-17） | 隐藏 9883 "报名表单模板"（visible=1），保留 9842 "表单模板管理" 为唯一入口。Migration `架构设计/ddl/99-migration-menu-dedup-formtemplate.sql`。3039 父链（2000 竞赛通业务）本已隐藏，无需处理。页面文件本身暂未删，等 ADMIN-UX-B2 主线 C 决定 banner 或删除。 |
+| **P1 ✅** | ADMIN-UX-B3 | ✅ 完成（2026-04-17） | Web Admin Agent 交付三主线：①主线 A 赛事 offline→online 状态机回路（`ContestAuditStatus.java` L37 开放 `EnumSet.of(ONLINE)` + `PartnerContestController.goOnline` 端点 + `contest-list.vue` 「重新上线」按钮 + `onlinePartnerContest` API）；②主线 B 报名按用户所属渠道分层（`EnrollListVO` 加 `boundChannelId/boundChannelName` + `EnrollQueryReqDTO` 加 `boundChannelId/hasChannel` + `EnrollRecordMapperExt.xml` 加 3 LEFT JOIN + `EnrollChannelGroupVO` + `EnrollRecordController.channelGroups` 端点 `/jst/event/enroll/channel-groups` + `jst/enroll/index.vue` 三 Tab「全部/个人/按渠道 expand」+「所属渠道」列 + 赛事 ID 筛选）；③主线 C contest-edit 「查看」按钮复用 B1 产出的 `SchemaPreview` drawer + 证书模板预览 Dialog（有 bgImage 显缩略图、否则跳 `/partner/cert-manage`）。3 条可接受偏离：channel-groups 挂管理端 Controller 路径 `/jst/event/enroll/channel-groups`（避免新增权限点）、SchemaPreview 是 drawer 非 dialog（按组件实际 prop 调）、channel 跳转改为 `/channel?channelId=` + catch 兜底（菜单无 admin-list 路径）。红线严守：未动 `jst_enroll_record` 表、未新增菜单 SQL、未改 cert-manage 设计器、未在 SchemaPreview 加编辑、未顺手重构其他列。mvn jst-event clean compile 19s 绿 + npm run build:prod 绿。报告 `subagent/tasks/任务报告/ADMIN-UX-B3-报告.md`。 |
+| **P2** | MP-KEY-FIX | ⏳ | 小程序 `:key` 表达式警告批量修复（约 20 处复杂表达式改 computed 稳定 ID，非阻塞） |
 | **P2** | DATA-MIGRATION | ⏸️ 5 月中旬 | 旧数据迁移（等旧库信息） |
 | **P2** | TEST-ROUND3 | ⏳ | 全量回归测试（等遗留 TODO 补齐后） |
 | **P3** | F-RISK | ⏸️ | 风控规则引擎（CRUD 已有，缺评估逻辑） |
@@ -460,6 +475,8 @@ D:\coding\jst_v1\
 | 99-migration-contest-reviewer.sql | ⭐ 傻瓜化：评审老师表 |
 | 99-migration-admin-polish-dict.sql | ⭐ 精品化：16 字典类型 99 条数据 |
 | 99-migration-fix-not-null-defaults.sql | 修复：7 表 NOT NULL 加 DEFAULT |
+| 99-migration-admin-ux-b1-dict.sql | ⭐ B1：`jst_form_field_type` + `jst_message_scene` 字典 |
+| 99-migration-menu-dedup-formtemplate.sql | ⭐ 隐藏 9883 "报名表单模板"（与 9842 重复） |
 | 99-test-fixtures.sql | 测试数据（含团队赛事 8206 + 预约时间段） |
 
 ---
@@ -530,10 +547,11 @@ D:\coding\jst_v1\
 ## 九、恢复会话后第一步
 
 1. 读取此 CLAUDE.md
-2. `git log --oneline -20` 查看最近代码变更
-3. 检查 §六 当前执行中任务 + 待办
-4. 查看 `subagent/tasks/任务报告/` 是否有新报告需要 review
-5. 当前阶段：傻瓜化重构 + 管理端精品化全部完成 → 生产部署准备（等外部配置：微信/SMS/OSS）
+2. **⭐ 若用户提到 "MCP 链路" / 跑 flow / 自动化测试**：立刻读 `jst-mp-automator/MCP-CHAIN-STATE.md`（环境前置 + 45 条 flow 进度表 + 续跑指令 + 问题日志）。每推进一步都要更新那个文件，避免重启后失忆。
+3. `git log --oneline -20` 查看最近代码变更
+4. 检查 §六 当前执行中任务 + 待办
+5. 查看 `subagent/tasks/任务报告/` 是否有新报告需要 review
+6. 当前阶段：傻瓜化重构 + 管理端精品化全部完成 → 生产部署准备（等外部配置：微信/SMS/OSS）+ 小程序 MCP 自动化链路测试
 
 ## 十、PRD 版本规则
 
@@ -542,7 +560,8 @@ D:\coding\jst_v1\
 - 修改业务规则/状态/字段时，必须同步更新所有相关附录文档
 
 ## 测试信息
-- 测试数据库
-  - url: jdbc:mysql://59.110.53.165:3306/jst_new?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-  - username: jst_new
-  - password: J8zZpAa4zG8y6a7e
+- 测试数据库（本地）
+  - url: jdbc:mysql://127.0.0.1:3306/jst?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+  - username: root
+  - password: 123456
+  - 库名: jst（本地，已从远程 jst_new 迁回）

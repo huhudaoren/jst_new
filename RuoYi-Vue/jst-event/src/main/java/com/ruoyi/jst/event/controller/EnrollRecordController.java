@@ -7,6 +7,7 @@ import com.ruoyi.jst.common.scope.PartnerScope;
 import com.ruoyi.jst.event.dto.EnrollAuditReqDTO;
 import com.ruoyi.jst.event.dto.EnrollQueryReqDTO;
 import com.ruoyi.jst.event.service.EnrollRecordService;
+import com.ruoyi.jst.event.vo.EnrollChannelGroupVO;
 import com.ruoyi.jst.event.vo.EnrollDetailVO;
 import com.ruoyi.jst.event.vo.EnrollListVO;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -76,5 +78,19 @@ public class EnrollRecordController extends BaseController {
     public AjaxResult audit(@PathVariable("enrollId") Long enrollId, @Valid @RequestBody EnrollAuditReqDTO req) {
         enrollRecordService.audit(enrollId, req);
         return AjaxResult.success();
+    }
+
+    /**
+     * 按"用户所属渠道"聚合指定赛事的报名记录，用于管理端「按渠道查看」Tab 一级行。
+     *
+     * @param contestId 赛事 ID
+     * @return 聚合结果列表
+     * @关联任务 ADMIN-UX-B3 主线 B
+     */
+    @PreAuthorize("@ss.hasPermi('jst:event:enrollRecord:list')")
+    @GetMapping("/channel-groups")
+    public AjaxResult channelGroups(@RequestParam Long contestId) {
+        List<EnrollChannelGroupVO> list = enrollRecordService.groupByBoundChannel(contestId);
+        return AjaxResult.success(list);
     }
 }
