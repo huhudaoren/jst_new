@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.JstSalesFollowupRecordMapper">
+
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSalesFollowupRecord" id="JstSalesFollowupRecordResult">
+        <id     property="recordId"       column="record_id"/>
+        <result property="salesId"        column="sales_id"/>
+        <result property="channelId"      column="channel_id"/>
+        <result property="followupType"   column="followup_type"/>
+        <result property="followupAt"     column="followup_at"/>
+        <result property="content"        column="content"/>
+        <result property="attachmentUrls" column="attachment_urls"/>
+        <result property="mood"           column="mood"/>
+        <result property="nextFollowupAt" column="next_followup_at"/>
+        <result property="canEditUntil"   column="can_edit_until"/>
+        <result property="createBy"       column="create_by"/>
+        <result property="createTime"     column="create_time"/>
+        <result property="updateBy"       column="update_by"/>
+        <result property="updateTime"     column="update_time"/>
+    </resultMap>
+
+    <sql id="cols">
+        record_id, sales_id, channel_id, followup_type, followup_at, content,
+        attachment_urls, mood, next_followup_at, can_edit_until,
+        create_by, create_time, update_by, update_time
+    </sql>
+
+    <select id="selectJstSalesFollowupRecordByRecordId" parameterType="Long" resultMap="JstSalesFollowupRecordResult">
+        SELECT <include refid="cols"/> FROM jst_sales_followup_record WHERE record_id = #{recordId}
+    </select>
+
+    <select id="selectJstSalesFollowupRecordList" parameterType="com.ruoyi.jst.channel.domain.JstSalesFollowupRecord" resultMap="JstSalesFollowupRecordResult">
+        SELECT <include refid="cols"/> FROM jst_sales_followup_record
+        <where>
+            <if test="salesId != null">AND sales_id = #{salesId}</if>
+            <if test="channelId != null">AND channel_id = #{channelId}</if>
+            <if test="followupType != null and followupType != ''">AND followup_type = #{followupType}</if>
+        </where>
+        ORDER BY followup_at DESC
+    </select>
+
+    <insert id="insertJstSalesFollowupRecord" parameterType="com.ruoyi.jst.channel.domain.JstSalesFollowupRecord">
+        INSERT INTO jst_sales_followup_record (
+            record_id, sales_id, channel_id, followup_type, followup_at, content,
+            attachment_urls, mood, next_followup_at, can_edit_until, create_by, create_time
+        ) VALUES (
+            #{recordId}, #{salesId}, #{channelId}, #{followupType}, #{followupAt}, #{content},
+            #{attachmentUrls}, #{mood}, #{nextFollowupAt}, #{canEditUntil}, #{createBy}, NOW()
+        )
+    </insert>
+
+    <update id="updateJstSalesFollowupRecord" parameterType="com.ruoyi.jst.channel.domain.JstSalesFollowupRecord">
+        UPDATE jst_sales_followup_record
+        <set>
+            <if test="salesId != null">sales_id = #{salesId},</if>
+            <if test="channelId != null">channel_id = #{channelId},</if>
+            <if test="followupType != null">followup_type = #{followupType},</if>
+            <if test="followupAt != null">followup_at = #{followupAt},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="attachmentUrls != null">attachment_urls = #{attachmentUrls},</if>
+            <if test="mood != null">mood = #{mood},</if>
+            <if test="nextFollowupAt != null">next_followup_at = #{nextFollowupAt},</if>
+            <if test="canEditUntil != null">can_edit_until = #{canEditUntil},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE record_id = #{recordId}
+    </update>
+
+    <delete id="deleteJstSalesFollowupRecordByRecordId" parameterType="Long">
+        DELETE FROM jst_sales_followup_record WHERE record_id = #{recordId}
+    </delete>
+
+</mapper>

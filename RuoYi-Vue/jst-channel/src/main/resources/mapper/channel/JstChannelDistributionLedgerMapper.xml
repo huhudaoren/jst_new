@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.JstChannelDistributionLedgerMapper">
+
+    <resultMap type="com.ruoyi.jst.channel.domain.JstChannelDistributionLedger" id="JstChannelDistributionLedgerResult">
+        <id     property="ledgerId"          column="ledger_id"/>
+        <result property="inviterChannelId"  column="inviter_channel_id"/>
+        <result property="inviteeChannelId"  column="invitee_channel_id"/>
+        <result property="orderId"           column="order_id"/>
+        <result property="orderNo"           column="order_no"/>
+        <result property="baseAmount"        column="base_amount"/>
+        <result property="appliedRate"       column="applied_rate"/>
+        <result property="rawAmount"         column="raw_amount"/>
+        <result property="compressRatio"     column="compress_ratio"/>
+        <result property="amount"            column="amount"/>
+        <result property="status"            column="status"/>
+        <result property="accrueAt"          column="accrue_at"/>
+        <result property="accruedAt"         column="accrued_at"/>
+        <result property="createTime"        column="create_time"/>
+        <result property="updateTime"        column="update_time"/>
+    </resultMap>
+
+    <sql id="cols">
+        ledger_id, inviter_channel_id, invitee_channel_id, order_id, order_no,
+        base_amount, applied_rate, raw_amount, compress_ratio, amount, status,
+        accrue_at, accrued_at, create_time, update_time
+    </sql>
+
+    <select id="selectJstChannelDistributionLedgerByLedgerId" parameterType="Long" resultMap="JstChannelDistributionLedgerResult">
+        SELECT <include refid="cols"/> FROM jst_channel_distribution_ledger WHERE ledger_id = #{ledgerId}
+    </select>
+
+    <select id="selectJstChannelDistributionLedgerList" parameterType="com.ruoyi.jst.channel.domain.JstChannelDistributionLedger" resultMap="JstChannelDistributionLedgerResult">
+        SELECT <include refid="cols"/> FROM jst_channel_distribution_ledger
+        <where>
+            <if test="inviterChannelId != null">AND inviter_channel_id = #{inviterChannelId}</if>
+            <if test="inviteeChannelId != null">AND invitee_channel_id = #{inviteeChannelId}</if>
+            <if test="status != null and status != ''">AND status = #{status}</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insertJstChannelDistributionLedger" parameterType="com.ruoyi.jst.channel.domain.JstChannelDistributionLedger">
+        INSERT INTO jst_channel_distribution_ledger (
+            ledger_id, inviter_channel_id, invitee_channel_id, order_id, order_no,
+            base_amount, applied_rate, raw_amount, compress_ratio, amount, status,
+            accrue_at, accrued_at, create_time
+        ) VALUES (
+            #{ledgerId}, #{inviterChannelId}, #{inviteeChannelId}, #{orderId}, #{orderNo},
+            #{baseAmount}, #{appliedRate}, #{rawAmount}, #{compressRatio}, #{amount}, #{status},
+            #{accrueAt}, #{accruedAt}, NOW()
+        )
+    </insert>
+
+    <update id="updateJstChannelDistributionLedger" parameterType="com.ruoyi.jst.channel.domain.JstChannelDistributionLedger">
+        UPDATE jst_channel_distribution_ledger
+        <set>
+            <if test="inviterChannelId != null">inviter_channel_id = #{inviterChannelId},</if>
+            <if test="inviteeChannelId != null">invitee_channel_id = #{inviteeChannelId},</if>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="orderNo != null">order_no = #{orderNo},</if>
+            <if test="baseAmount != null">base_amount = #{baseAmount},</if>
+            <if test="appliedRate != null">applied_rate = #{appliedRate},</if>
+            <if test="rawAmount != null">raw_amount = #{rawAmount},</if>
+            <if test="compressRatio != null">compress_ratio = #{compressRatio},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="accrueAt != null">accrue_at = #{accrueAt},</if>
+            <if test="accruedAt != null">accrued_at = #{accruedAt},</if>
+            update_time = NOW()
+        </set>
+        WHERE ledger_id = #{ledgerId}
+    </update>
+
+    <delete id="deleteJstChannelDistributionLedgerByLedgerId" parameterType="Long">
+        DELETE FROM jst_channel_distribution_ledger WHERE ledger_id = #{ledgerId}
+    </delete>
+
+</mapper>

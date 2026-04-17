@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.JstSalesFollowupTaskMapper">
+
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSalesFollowupTask" id="JstSalesFollowupTaskResult">
+        <id     property="taskId"          column="task_id"/>
+        <result property="assigneeSalesId" column="assignee_sales_id"/>
+        <result property="assignerId"      column="assigner_id"/>
+        <result property="channelId"       column="channel_id"/>
+        <result property="title"           column="title"/>
+        <result property="description"     column="description"/>
+        <result property="dueDate"         column="due_date"/>
+        <result property="status"          column="status"/>
+        <result property="completedAt"     column="completed_at"/>
+        <result property="linkedRecordId"  column="linked_record_id"/>
+        <result property="createTime"      column="create_time"/>
+        <result property="updateTime"      column="update_time"/>
+    </resultMap>
+
+    <sql id="cols">
+        task_id, assignee_sales_id, assigner_id, channel_id, title, description,
+        due_date, status, completed_at, linked_record_id, create_time, update_time
+    </sql>
+
+    <select id="selectJstSalesFollowupTaskByTaskId" parameterType="Long" resultMap="JstSalesFollowupTaskResult">
+        SELECT <include refid="cols"/> FROM jst_sales_followup_task WHERE task_id = #{taskId}
+    </select>
+
+    <select id="selectJstSalesFollowupTaskList" parameterType="com.ruoyi.jst.channel.domain.JstSalesFollowupTask" resultMap="JstSalesFollowupTaskResult">
+        SELECT <include refid="cols"/> FROM jst_sales_followup_task
+        <where>
+            <if test="assigneeSalesId != null">AND assignee_sales_id = #{assigneeSalesId}</if>
+            <if test="channelId != null">AND channel_id = #{channelId}</if>
+            <if test="status != null and status != ''">AND status = #{status}</if>
+        </where>
+        ORDER BY due_date ASC
+    </select>
+
+    <insert id="insertJstSalesFollowupTask" parameterType="com.ruoyi.jst.channel.domain.JstSalesFollowupTask">
+        INSERT INTO jst_sales_followup_task (
+            task_id, assignee_sales_id, assigner_id, channel_id, title, description,
+            due_date, status, completed_at, linked_record_id, create_time
+        ) VALUES (
+            #{taskId}, #{assigneeSalesId}, #{assignerId}, #{channelId}, #{title}, #{description},
+            #{dueDate}, #{status}, #{completedAt}, #{linkedRecordId}, NOW()
+        )
+    </insert>
+
+    <update id="updateJstSalesFollowupTask" parameterType="com.ruoyi.jst.channel.domain.JstSalesFollowupTask">
+        UPDATE jst_sales_followup_task
+        <set>
+            <if test="assigneeSalesId != null">assignee_sales_id = #{assigneeSalesId},</if>
+            <if test="assignerId != null">assigner_id = #{assignerId},</if>
+            <if test="channelId != null">channel_id = #{channelId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="dueDate != null">due_date = #{dueDate},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="completedAt != null">completed_at = #{completedAt},</if>
+            <if test="linkedRecordId != null">linked_record_id = #{linkedRecordId},</if>
+            update_time = NOW()
+        </set>
+        WHERE task_id = #{taskId}
+    </update>
+
+    <delete id="deleteJstSalesFollowupTaskByTaskId" parameterType="Long">
+        DELETE FROM jst_sales_followup_task WHERE task_id = #{taskId}
+    </delete>
+
+</mapper>

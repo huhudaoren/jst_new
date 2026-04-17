@@ -5,6 +5,7 @@ import com.ruoyi.jst.common.context.JstLoginEnricher;
 import com.ruoyi.jst.user.mapper.JstChannelMapper;
 import com.ruoyi.jst.user.mapper.JstUserMapper;
 import com.ruoyi.jst.user.mapper.PartnerLookupMapper;
+import com.ruoyi.jst.user.mapper.SalesLookupMapper;
 import com.ruoyi.jst.user.domain.JstChannel;
 import com.ruoyi.jst.user.domain.JstUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ public class JstLoginEnricherImpl implements JstLoginEnricher {
     @Autowired
     private PartnerLookupMapper partnerLookupMapper;
 
+    @Autowired
+    private SalesLookupMapper salesLookupMapper;
+
     @Override
     public void enrich(Long userId, JstLoginContext ctx) {
         if (userId == null) return;
@@ -57,5 +61,9 @@ public class JstLoginEnricherImpl implements JstLoginEnricher {
         // 3. 查 jst_event_partner 拿 partnerId (通过 PartnerLookupMapper 跨域 SQL,无需依赖 jst-event)
         Long partnerId = partnerLookupMapper.selectPartnerIdByUserId(userId);
         ctx.setPartnerId(partnerId);
+
+        // 4. 查 jst_sales 拿 salesId（销售/销售主管角色）
+        Long salesId = salesLookupMapper.selectSalesIdByUserId(userId);
+        ctx.setSalesId(salesId);
     }
 }

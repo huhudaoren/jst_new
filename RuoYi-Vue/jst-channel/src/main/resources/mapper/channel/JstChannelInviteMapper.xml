@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.JstChannelInviteMapper">
+
+    <resultMap type="com.ruoyi.jst.channel.domain.JstChannelInvite" id="JstChannelInviteResult">
+        <id     property="inviteId"          column="invite_id"/>
+        <result property="inviterChannelId"  column="inviter_channel_id"/>
+        <result property="inviteeChannelId"  column="invitee_channel_id"/>
+        <result property="inviteCode"        column="invite_code"/>
+        <result property="shareScene"        column="share_scene"/>
+        <result property="commissionRate"    column="commission_rate"/>
+        <result property="invitedAt"         column="invited_at"/>
+        <result property="status"            column="status"/>
+        <result property="createTime"        column="create_time"/>
+        <result property="updateBy"          column="update_by"/>
+        <result property="updateTime"        column="update_time"/>
+    </resultMap>
+
+    <sql id="cols">
+        invite_id, inviter_channel_id, invitee_channel_id, invite_code, share_scene,
+        commission_rate, invited_at, status, create_time, update_by, update_time
+    </sql>
+
+    <select id="selectJstChannelInviteByInviteId" parameterType="Long" resultMap="JstChannelInviteResult">
+        SELECT <include refid="cols"/> FROM jst_channel_invite WHERE invite_id = #{inviteId}
+    </select>
+
+    <select id="selectJstChannelInviteList" parameterType="com.ruoyi.jst.channel.domain.JstChannelInvite" resultMap="JstChannelInviteResult">
+        SELECT <include refid="cols"/> FROM jst_channel_invite
+        <where>
+            <if test="inviterChannelId != null">AND inviter_channel_id = #{inviterChannelId}</if>
+            <if test="inviteeChannelId != null">AND invitee_channel_id = #{inviteeChannelId}</if>
+            <if test="status != null and status != ''">AND status = #{status}</if>
+            <if test="inviteCode != null and inviteCode != ''">AND invite_code = #{inviteCode}</if>
+        </where>
+        ORDER BY invited_at DESC
+    </select>
+
+    <insert id="insertJstChannelInvite" parameterType="com.ruoyi.jst.channel.domain.JstChannelInvite">
+        INSERT INTO jst_channel_invite (
+            invite_id, inviter_channel_id, invitee_channel_id, invite_code, share_scene,
+            commission_rate, invited_at, status, create_time
+        ) VALUES (
+            #{inviteId}, #{inviterChannelId}, #{inviteeChannelId}, #{inviteCode}, #{shareScene},
+            #{commissionRate}, #{invitedAt}, #{status}, NOW()
+        )
+    </insert>
+
+    <update id="updateJstChannelInvite" parameterType="com.ruoyi.jst.channel.domain.JstChannelInvite">
+        UPDATE jst_channel_invite
+        <set>
+            <if test="inviterChannelId != null">inviter_channel_id = #{inviterChannelId},</if>
+            <if test="inviteeChannelId != null">invitee_channel_id = #{inviteeChannelId},</if>
+            <if test="inviteCode != null">invite_code = #{inviteCode},</if>
+            <if test="shareScene != null">share_scene = #{shareScene},</if>
+            <if test="commissionRate != null">commission_rate = #{commissionRate},</if>
+            <if test="invitedAt != null">invited_at = #{invitedAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE invite_id = #{inviteId}
+    </update>
+
+    <delete id="deleteJstChannelInviteByInviteId" parameterType="Long">
+        DELETE FROM jst_channel_invite WHERE invite_id = #{inviteId}
+    </delete>
+
+</mapper>

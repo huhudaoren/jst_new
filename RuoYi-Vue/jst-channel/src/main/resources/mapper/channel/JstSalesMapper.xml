@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.channel.mapper.JstSalesMapper">
+
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSales" id="JstSalesResult">
+        <id     property="salesId"               column="sales_id"/>
+        <result property="sysUserId"             column="sys_user_id"/>
+        <result property="salesNo"               column="sales_no"/>
+        <result property="salesName"             column="sales_name"/>
+        <result property="phone"                 column="phone"/>
+        <result property="managerId"             column="manager_id"/>
+        <result property="isManager"             column="is_manager"/>
+        <result property="status"                column="status"/>
+        <result property="resignApplyDate"       column="resign_apply_date"/>
+        <result property="expectedResignDate"    column="expected_resign_date"/>
+        <result property="actualResignDate"      column="actual_resign_date"/>
+        <result property="transitionEndDate"     column="transition_end_date"/>
+        <result property="commissionRateDefault" column="commission_rate_default"/>
+        <result property="managerCommissionRate" column="manager_commission_rate"/>
+        <result property="createBy"              column="create_by"/>
+        <result property="createTime"            column="create_time"/>
+        <result property="updateBy"              column="update_by"/>
+        <result property="updateTime"            column="update_time"/>
+    </resultMap>
+
+    <sql id="cols">
+        sales_id, sys_user_id, sales_no, sales_name, phone, manager_id, is_manager, status,
+        resign_apply_date, expected_resign_date, actual_resign_date, transition_end_date,
+        commission_rate_default, manager_commission_rate,
+        create_by, create_time, update_by, update_time
+    </sql>
+
+    <select id="selectJstSalesBySalesId" parameterType="Long" resultMap="JstSalesResult">
+        SELECT <include refid="cols"/> FROM jst_sales WHERE sales_id = #{salesId}
+    </select>
+
+    <select id="selectJstSalesList" parameterType="com.ruoyi.jst.channel.domain.JstSales" resultMap="JstSalesResult">
+        SELECT <include refid="cols"/> FROM jst_sales
+        <where>
+            <if test="status != null and status != ''">AND status = #{status}</if>
+            <if test="managerId != null">AND manager_id = #{managerId}</if>
+            <if test="isManager != null">AND is_manager = #{isManager}</if>
+            <if test="salesName != null and salesName != ''">AND sales_name LIKE CONCAT('%', #{salesName}, '%')</if>
+            <if test="phone != null and phone != ''">AND phone = #{phone}</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insertJstSales" parameterType="com.ruoyi.jst.channel.domain.JstSales">
+        INSERT INTO jst_sales (
+            sales_id, sys_user_id, sales_no, sales_name, phone, manager_id, is_manager, status,
+            resign_apply_date, expected_resign_date, actual_resign_date, transition_end_date,
+            commission_rate_default, manager_commission_rate,
+            create_by, create_time
+        ) VALUES (
+            #{salesId}, #{sysUserId}, #{salesNo}, #{salesName}, #{phone}, #{managerId},
+            #{isManager}, #{status},
+            #{resignApplyDate}, #{expectedResignDate}, #{actualResignDate}, #{transitionEndDate},
+            #{commissionRateDefault}, #{managerCommissionRate},
+            #{createBy}, NOW()
+        )
+    </insert>
+
+    <update id="updateJstSales" parameterType="com.ruoyi.jst.channel.domain.JstSales">
+        UPDATE jst_sales
+        <set>
+            <if test="sysUserId != null">sys_user_id = #{sysUserId},</if>
+            <if test="salesNo != null">sales_no = #{salesNo},</if>
+            <if test="salesName != null">sales_name = #{salesName},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="managerId != null">manager_id = #{managerId},</if>
+            <if test="isManager != null">is_manager = #{isManager},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="resignApplyDate != null">resign_apply_date = #{resignApplyDate},</if>
+            <if test="expectedResignDate != null">expected_resign_date = #{expectedResignDate},</if>
+            <if test="actualResignDate != null">actual_resign_date = #{actualResignDate},</if>
+            <if test="transitionEndDate != null">transition_end_date = #{transitionEndDate},</if>
+            <if test="commissionRateDefault != null">commission_rate_default = #{commissionRateDefault},</if>
+            <if test="managerCommissionRate != null">manager_commission_rate = #{managerCommissionRate},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE sales_id = #{salesId}
+    </update>
+
+    <delete id="deleteJstSalesBySalesId" parameterType="Long">
+        DELETE FROM jst_sales WHERE sales_id = #{salesId}
+    </delete>
+
+</mapper>
