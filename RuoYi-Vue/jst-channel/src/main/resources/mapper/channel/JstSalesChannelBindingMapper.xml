@@ -66,4 +66,28 @@
         DELETE FROM jst_sales_channel_binding WHERE binding_id = #{bindingId}
     </delete>
 
+    <select id="selectCurrentByChannelId" parameterType="Long" resultMap="JstSalesChannelBindingResult">
+        SELECT <include refid="cols"/> FROM jst_sales_channel_binding
+         WHERE channel_id = #{channelId} AND effective_to IS NULL LIMIT 1
+    </select>
+
+    <select id="selectAtTime" resultMap="JstSalesChannelBindingResult">
+        SELECT <include refid="cols"/> FROM jst_sales_channel_binding
+         WHERE channel_id = #{channelId}
+           AND effective_from &lt;= #{atTime}
+           AND (effective_to IS NULL OR effective_to &gt; #{atTime})
+         LIMIT 1
+    </select>
+
+    <update id="closeBinding">
+        UPDATE jst_sales_channel_binding
+           SET effective_to = #{closeAt}, update_time = NOW()
+         WHERE binding_id = #{bindingId} AND effective_to IS NULL
+    </update>
+
+    <select id="selectCurrentByOwnerSales" parameterType="Long" resultMap="JstSalesChannelBindingResult">
+        SELECT <include refid="cols"/> FROM jst_sales_channel_binding
+         WHERE sales_id = #{salesId} AND effective_to IS NULL
+    </select>
+
 </mapper>
