@@ -33,6 +33,9 @@ public class JstLoginContext {
     /** 关联渠道方ID (若当前用户为渠道方账号) */
     private Long channelId;
 
+    /** 关联销售档案ID (若当前用户为销售/销售主管) */
+    private Long salesId;
+
     /** 业务用户类型: student/parent/channel/partner/admin */
     private String userType;
 
@@ -72,6 +75,11 @@ public class JstLoginContext {
         return current().channelId;
     }
 
+    /** 当前销售ID(平台运营/学生/渠道时为 null) */
+    public static Long currentSalesId() {
+        return current().salesId;
+    }
+
     /** 当前用户ID(可能为 null) */
     public static Long currentUserId() {
         return current().userId;
@@ -84,6 +92,8 @@ public class JstLoginContext {
     public void setPartnerId(Long partnerId) { this.partnerId = partnerId; }
     public Long getChannelId() { return channelId; }
     public void setChannelId(Long channelId) { this.channelId = channelId; }
+    public Long getSalesId() { return salesId; }
+    public void setSalesId(Long salesId) { this.salesId = salesId; }
     public String getUserType() { return userType; }
     public void setUserType(String userType) { this.userType = userType; }
     public List<String> getRoleKeys() { return roleKeys; }
