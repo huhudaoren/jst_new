@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次更新：2026-04-18（**销售管理 + 渠道分销** 设计稿 + 4 实施计划全部写出，等待用户选择执行模式 subagent-driven / inline。spec + 4 plans 全在 `docs/superpowers/`）
+> 会话恢复文件。上次更新：2026-04-18（**销售管理 + 渠道分销** plan-01 完成 → DDL+基础架构落地，plan-02 待启动）
 
 ---
 
@@ -255,7 +255,7 @@ D:\coding\jst_v1\
 | **MP-SUCCESS-FLOW** | 5 处成功态加跳转/modal 引导：支付/批量报名/创建档案/预约/订单详情 | ✅ 完成 |
 | **CONTEST-ORGANIZER-CONTACT** | DDL 5 字段（organizer_logo/organizer_desc/contact_phone/contact_wechat/contact_email）+ Domain/VO/Mapper/Service/DTO/管理端编辑 Tab 全链路 | ✅ 完成 |
 | **CONTEST-DETAIL-RESHAPE** | 小程序赛事详情页：sticky tab 常驻吸顶+自动高亮、报名倒计时条、主办方卡、联系咨询卡（拨打/复制）、奖项改表格、相似赛事+推荐课程横滑（调已存在的 `getContestRecommend`） | ✅ 完成 |
-| **SALES-DISTRIBUTION（4 计划已就绪）** | 销售管理 + 渠道分销 + CRM 完整子系统。spec + 4 实施计划全部写出（2026-04-18），未开始执行。spec：`docs/superpowers/specs/2026-04-18-sales-channel-distribution-design.md`（commit `ebe17a7`）。4 计划：①plan-01-ddl-infra（DDL 9 表+jst-common 切面族 16 task，commit `c50984d`）②plan-02-sales-core（销售核心+提成管线+6 Quartz+离职 3 阶段 20 task，commit `d9250e1`）③plan-03-crm（CRM+销售工作台前端 7 页 15 task，commit `4f385a9`）④plan-04-distribution-admin（分销+admin 后台 5 页+小程序 3 页+反带客户 17 task，commit `2d3a747`）。共 ~68 task / ~7600 行 plan / 100+ TDD 单测。**4 计划严格依赖顺序：01→02→{03,04 可并行}**。等待用户选择执行模式（subagent-driven 或 inline）。 | 🟡 4 计划已写出，等待执行 |
+| **SALES-DISTRIBUTION** | 销售管理 + 渠道分销 + CRM 完整子系统。spec + 4 实施计划已写出，**plan-01 已执行完毕**（2026-04-18 subagent-driven）。spec：`docs/superpowers/specs/2026-04-18-sales-channel-distribution-design.md`。4 计划：①plan-01-ddl-infra ✅②plan-02-sales-core ⏳③plan-03-crm ⏳④plan-04-distribution-admin ⏳。**plan-01 实际产出**（feature/sales-distribution-01-ddl-infra 分支，待 merge main）：12 张新表 + jst_channel 5 字段 + 9 字典类型 43 数据 + 8 系统参数 + 2 角色（jst_sales 501 / jst_sales_manager 502）+ 9785 销售工作台菜单段 19 行 + 9762 admin 销售管理 14 行；jst-common 模块 7 文件（SalesScopeUtils + BaseSalesController + @Sensitive + SensitiveMasker + MaskSalaryAspect + SalesExportWatermarkInterceptor + SalesScopeWebConfig + JstLoginContext 加 salesId）+ 3 单测类（26 测试全绿）；jst-user 加 SalesLookupMapper；jst-channel 12 套 Domain+Mapper+XML（36 文件 1488 行）。mvn 全模块编译绿；spring context 加载成功（仅 8080 端口被占未绑端口）。15 个 commit，待 merge。下一步 plan-02 待启动。 | 🟢 plan-01 完成，待 merge + plan-02 启动 |
 
 ---
 
