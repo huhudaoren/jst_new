@@ -156,8 +156,9 @@ jst:
   security:
     aes-key: ${JST_AES_KEY:please-set-in-env}
   # CORS 白名单（各环境 yml 覆盖）
+  # 默认值仅 dev/test 用；生产必须通过 JST_CORS_ORIGINS 环境变量显式覆盖
   cors:
-    allowed-origins: ${JST_CORS_ORIGINS:http://localhost:80,http://localhost:1024}
+    allowed-origins: ${JST_CORS_ORIGINS:http://localhost:*,http://127.0.0.1:*}
   # 阿里云 OSS:文件上传(图片/凭证/合同附件等)
   oss:
     endpoint: ${JST_OSS_ENDPOINT:oss-cn-hangzhou.aliyuncs.com}

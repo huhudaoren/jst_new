@@ -50,7 +50,7 @@ jst:
   security:
     aes-key: ${JST_AES_KEY:bE8Ru+Z5tKOwHQG5c+gogb4tC3C/QbehGpKL1dot1TQ=}
   cors:
-    allowed-origins: ${JST_CORS_ORIGINS:http://localhost:80,http://localhost:1024}
+    allowed-origins: ${JST_CORS_ORIGINS:http://localhost:*,http://127.0.0.1:*}
   wxauth:
     mock: ${JST_WXAUTH_MOCK:true}
 

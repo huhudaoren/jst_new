@@ -43,8 +43,9 @@ jst:
   security:
     aes-key: "bE8Ru+Z5tKOwHQG5c+gogb4tC3C/QbehGpKL1dot1TQ="
   cors:
-    # 开发环境 CORS 白名单：同时覆盖 localhost / 127.0.0.1、默认 80 端口（浏览器会省略）以及常见 dev-server 端口
-    allowed-origins: "http://localhost,http://localhost:80,http://localhost:1024,http://localhost:8080,http://localhost:3000,http://127.0.0.1,http://127.0.0.1:80,http://127.0.0.1:1024,http://127.0.0.1:8080,http://127.0.0.1:3000"
+    # 开发环境 CORS 白名单：用 Spring CorsConfiguration#addAllowedOriginPattern 通配
+    # 任意端口的 localhost / 127.0.0.1 都允许（dev 专用，prod 仍走严格白名单）
+    allowed-origins: "http://localhost:*,http://127.0.0.1:*,http://localhost,http://127.0.0.1"
   wxauth:
     mock: true
 
