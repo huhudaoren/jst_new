@@ -156,6 +156,11 @@ public class SalesServiceImpl implements SalesService {
         salesMapper.updateJstSales(s);
     }
 
+    @Override
+    public List<JstSales> listForAdmin(JstSales query) {
+        return salesMapper.selectJstSalesList(query);
+    }
+
     private JstSales requireSales(Long salesId) {
         JstSales s = salesMapper.selectJstSalesBySalesId(salesId);
         if (s == null) throw new ServiceException("销售不存在: " + salesId);

@@ -27,4 +27,7 @@ public interface SalesService {
     void applyResign(Long salesId, Date expectedResignDate);
     void executeResign(Long salesId);
     void endTransition(Long salesId);
+
+    /** Admin 全量查询（用 JstSales 作查询参数，走 Mapper 的 selectJstSalesList） */
+    List<JstSales> listForAdmin(JstSales query);
 }
