@@ -155,9 +155,10 @@ LEFT JOIN jst_coupon_template c ON c.id = cu.template_id
 
 ## 二、Round 2B · 新表新端点（下批做，单独 PR）
 
-> **B1 + B3 已完成**：2026-04-19，分支 `feat/backend-round-2b-b1-b3`。
+> **B1 + B3 已完成**：2026-04-19，分支 `feat/backend-round-2b-b1-b3`，commit `837f4b5`。
 > B2（通知偏好）/ B4（账号注销）仍待做。
 > 报告：`subagent/tasks/任务报告/BACKEND-UX-POLISH-ROUND-2B-B1-B3-报告.md`。
+> DDL：`架构设计/ddl/99-migration-invoice-title.sql`（本地 DESC 已验证）。
 
 ### ✅ B1. POST `/jst/wx/channel/orders/batch-pay` 批量支付
 
