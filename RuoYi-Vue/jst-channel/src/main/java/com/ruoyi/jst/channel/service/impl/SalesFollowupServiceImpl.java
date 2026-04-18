@@ -104,6 +104,7 @@ public class SalesFollowupServiceImpl implements SalesFollowupService {
             dateFrom = query.getDateFrom();
             dateTo = query.getDateTo();
         }
+        // salesId==null 表示 admin 视角，listMineWithFilter 在 salesId 为 null 时不加 sales_id 过滤
         return followupMapper.listMineWithFilter(salesId, channelId, followupType, dateFrom, dateTo);
     }
 

@@ -28,7 +28,7 @@ public class SalesPerformanceController extends BaseSalesController {
     @GetMapping
     @PreAuthorize("@ss.hasPermi('sales:me:performance:view')")
     public AjaxResult getMine(@RequestParam(required = false) String month) {
-        Long salesId = SalesScopeUtils.currentSalesIdRequired();
+        Long salesId = SalesScopeUtils.currentSalesIdOrAllowAdminView();
         SalesPerformanceVO vo = performanceService.aggregate(salesId, month);
         return AjaxResult.success(vo);
     }

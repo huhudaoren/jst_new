@@ -79,4 +79,10 @@ public interface JstSalesCommissionLedgerMapper {
     List<java.util.Map<String, Object>> selectSalesRanking(@Param("periodStart") java.util.Date periodStart,
                                                             @Param("periodEnd") java.util.Date periodEnd,
                                                             @Param("limit") int limit);
+
+    /**
+     * 渠道画像：按渠道统计各业务类型订单数（accrued/settled/paid 状态）。
+     * 返回 [{businessType, orderCount}]。
+     */
+    List<java.util.Map<String, Object>> selectOrderStatsByChannel(@Param("channelId") Long channelId);
 }

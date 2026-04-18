@@ -32,8 +32,11 @@ public class SalesPreRegisterController extends BaseSalesController {
     @GetMapping("/list")
     @PreAuthorize("@ss.hasPermi('sales:me:prereg:list')")
     public TableDataInfo list() {
-        Long salesId = SalesScopeUtils.currentSalesIdRequired();
+        Long salesId = SalesScopeUtils.currentSalesIdOrAllowAdminView();
         startPage();
+        if (salesId == null) {
+            return getDataTable(preRegisterService.listAllForAdmin());
+        }
         return getDataTable(preRegisterService.listMine(salesId));
     }
 

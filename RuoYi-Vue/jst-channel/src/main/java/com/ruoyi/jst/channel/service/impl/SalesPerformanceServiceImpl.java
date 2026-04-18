@@ -30,6 +30,7 @@ public class SalesPerformanceServiceImpl implements SalesPerformanceService {
         Date start = Date.from(ym.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date end = Date.from(ym.plusMonths(1).atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
 
+        // salesId==null 时 aggregatePerformance 的 SQL 不加 sales_id 过滤，汇总全部
         Map<String, Object> m = ledgerMapper.aggregatePerformance(salesId, start, end);
         SalesPerformanceVO vo = new SalesPerformanceVO();
         if (m != null) {

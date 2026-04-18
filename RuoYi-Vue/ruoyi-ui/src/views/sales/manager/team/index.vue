@@ -4,19 +4,55 @@
       <div>
         <p class="hero-eyebrow">销售主管</p>
         <h2>团队管理</h2>
-        <p class="hero-desc">查看下属销售业绩，派发跟进任务。完整团队看板将在 plan-04 补充。</p>
+        <p class="hero-desc">查看团队成员本月业绩，派发跟进任务。</p>
       </div>
       <el-button type="primary" icon="el-icon-plus" @click="openAssignTask">派发任务</el-button>
     </div>
 
-    <el-alert
-      type="info"
-      title="团队业绩汇总表和下属管理功能将在 plan-04 完善（Admin 销售管理 API 补齐后接入）。"
-      :closable="false"
-      style="margin-bottom:16px"
-    />
+    <!-- 月份选择 -->
+    <el-row :gutter="12" style="margin-bottom:16px">
+      <el-col :span="6" :xs="12">
+        <el-date-picker
+          v-model="selectedMonth"
+          type="month"
+          value-format="yyyy-MM"
+          placeholder="选择月份"
+          style="width:100%"
+          @change="loadTeam"
+        />
+      </el-col>
+    </el-row>
 
-    <!-- 派发任务快捷入口 -->
+    <!-- 团队成员表 -->
+    <el-card shadow="never" style="margin-bottom:16px">
+      <div slot="header">团队成员业绩</div>
+      <div v-loading="teamLoading">
+        <el-table :data="teamList" border stripe size="small">
+          <el-table-column label="姓名" prop="salesName" min-width="90" show-overflow-tooltip />
+          <el-table-column label="销售编号" prop="salesNo" width="110" align="center" />
+          <el-table-column label="状态" prop="status" width="90" align="center">
+            <template slot-scope="scope">
+              <el-tag size="mini" :type="statusType(scope.row.status)">{{ statusLabel(scope.row.status) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="本月订单" prop="monthOrderCount" width="90" align="center" />
+          <el-table-column label="本月 GMV" min-width="110" align="right">
+            <template slot-scope="scope">¥{{ formatAmount(scope.row.monthGmv) }}</template>
+          </el-table-column>
+          <el-table-column label="本月提成" min-width="110" align="right">
+            <template slot-scope="scope">¥{{ formatAmount(scope.row.monthCommission) }}</template>
+          </el-table-column>
+          <el-table-column label="操作" width="100" align="center" fixed="right">
+            <template slot-scope="scope">
+              <el-button size="mini" type="text" @click="assignToSales(scope.row)">派任务</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-empty v-if="!teamLoading && teamList.length === 0" description="暂无团队成员数据" :image-size="60" />
+      </div>
+    </el-card>
+
+    <!-- 已派任务 -->
     <el-card shadow="never">
       <div slot="header">已派任务</div>
       <div v-loading="tasksLoading">
@@ -71,11 +107,15 @@
 
 <script>
 import { assignTask, listAssignedByMe } from '@/api/sales/manager/task'
+import { listTeam } from '@/api/sales/manager/team'
 
 export default {
   name: 'SalesManagerTeam',
   data() {
     return {
+      selectedMonth: this.currentMonth(),
+      teamLoading: false,
+      teamList: [],
       tasksLoading: false,
       saving: false,
       assignedTasks: [],
@@ -95,14 +135,31 @@ export default {
     }
   },
   created() {
+    this.loadTeam()
     this.loadAssignedTasks()
   },
   methods: {
+    currentMonth() {
+      const d = new Date()
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    },
+    loadTeam() {
+      this.teamLoading = true
+      listTeam(this.selectedMonth).then(res => {
+        this.teamList = res.data || []
+      }).catch(() => {
+        this.$message.error('加载团队数据失败')
+      }).finally(() => { this.teamLoading = false })
+    },
     loadAssignedTasks() {
       this.tasksLoading = true
       listAssignedByMe().then(res => {
         this.assignedTasks = res.rows || []
       }).catch(() => {}).finally(() => { this.tasksLoading = false })
+    },
+    assignToSales(row) {
+      this.assignForm.assigneeSalesId = row.salesId
+      this.assignVisible = true
     },
     openAssignTask() {
       this.assignVisible = true
@@ -122,6 +179,14 @@ export default {
       this.assignForm = { assigneeSalesId: null, channelId: null, title: '', description: '', dueDate: '' }
       this.$refs.assignForm && this.$refs.assignForm.resetFields()
     },
+    statusType(s) {
+      const map = { active: 'success', resign_apply: 'warning', resigned_pending_settle: 'info', resigned_final: 'danger' }
+      return map[s] || 'info'
+    },
+    statusLabel(s) {
+      const map = { active: '在职', resign_apply: '申请离职', resigned_pending_settle: '过渡期', resigned_final: '已离职' }
+      return map[s] || s
+    },
     taskStatusType(s) {
       const map = { pending: 'warning', in_progress: 'primary', completed: 'success', overdue: 'danger' }
       return map[s] || 'info'
@@ -133,6 +198,10 @@ export default {
     formatDate(val) {
       if (!val) return '--'
       return String(val).substring(0, 10)
+    },
+    formatAmount(v) {
+      if (v == null) return '0.00'
+      return Number(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     }
   }
 }

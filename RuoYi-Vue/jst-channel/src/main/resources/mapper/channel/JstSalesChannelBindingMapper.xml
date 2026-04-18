@@ -90,4 +90,11 @@
          WHERE sales_id = #{salesId} AND effective_to IS NULL
     </select>
 
+    <select id="selectAllCurrent" resultMap="JstSalesChannelBindingResult">
+        SELECT <include refid="cols"/> FROM jst_sales_channel_binding
+         WHERE effective_to IS NULL
+         ORDER BY effective_from DESC
+         LIMIT #{limit}
+    </select>
+
 </mapper>

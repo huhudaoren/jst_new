@@ -169,6 +169,7 @@
     </update>
 
 
+    <!-- salesId=null 时不加 sales_id 过滤，汇总全部（admin 视角） -->
     <select id="aggregatePerformance" resultType="java.util.LinkedHashMap">
         SELECT
             COUNT(DISTINCT order_id) AS orderCount,
@@ -178,10 +179,13 @@
             COALESCE(SUM(CASE WHEN status IN ('pending','accrued') THEN amount ELSE 0 END), 0) AS pendingCommission,
             COALESCE(SUM(CASE WHEN status IN ('settled','paid') THEN amount ELSE 0 END), 0) AS settledCommission
           FROM jst_sales_commission_ledger
-         WHERE sales_id = #{salesId}
-           AND create_time &gt;= #{periodStart} AND create_time &lt; #{periodEnd}
+         <where>
+            <if test="salesId != null">AND sales_id = #{salesId}</if>
+            AND create_time &gt;= #{periodStart} AND create_time &lt; #{periodEnd}
+         </where>
     </select>
 
+    <!-- salesId=null 时不加 sales_id 过滤（admin 视角全汇总） -->
     <select id="aggregateByBusinessType" resultType="java.util.LinkedHashMap">
         SELECT
             business_type AS businessType,
@@ -189,8 +193,10 @@
             COALESCE(SUM(base_amount), 0) AS gmv,
             COALESCE(SUM(amount), 0) AS commission
           FROM jst_sales_commission_ledger
-         WHERE sales_id = #{salesId}
-           AND create_time &gt;= #{periodStart} AND create_time &lt; #{periodEnd}
+         <where>
+            <if test="salesId != null">AND sales_id = #{salesId}</if>
+            AND create_time &gt;= #{periodStart} AND create_time &lt; #{periodEnd}
+         </where>
          GROUP BY business_type
     </select>
 
@@ -216,13 +222,25 @@
         SELECT l.sales_id AS salesId,
                s.sales_name AS salesName,
                COUNT(DISTINCT l.order_id) AS orderCount,
-               COALESCE(SUM(l.amount), 0) AS commission
+               COALESCE(SUM(l.base_amount), 0) AS gmv,
+               COALESCE(SUM(l.amount), 0) AS commission,
+               COALESCE(SUM(l.amount), 0) AS commissionAmount
           FROM jst_sales_commission_ledger l
           LEFT JOIN jst_sales s ON s.sales_id = l.sales_id
          WHERE l.create_time &gt;= #{periodStart} AND l.create_time &lt; #{periodEnd}
          GROUP BY l.sales_id, s.sales_name
          ORDER BY commission DESC
          LIMIT #{limit}
+    </select>
+
+    <!-- 渠道画像：按渠道统计各业务类型的成交订单数 -->
+    <select id="selectOrderStatsByChannel" resultType="java.util.LinkedHashMap">
+        SELECT business_type AS businessType,
+               COUNT(DISTINCT order_id) AS orderCount
+          FROM jst_sales_commission_ledger
+         WHERE channel_id = #{channelId}
+           AND status IN ('accrued', 'settled', 'paid')
+         GROUP BY business_type
     </select>
 
 </mapper>

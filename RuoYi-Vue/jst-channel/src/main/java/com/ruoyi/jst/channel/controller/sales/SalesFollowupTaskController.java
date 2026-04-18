@@ -26,14 +26,14 @@ public class SalesFollowupTaskController extends BaseSalesController {
     private SalesFollowupTaskService taskService;
 
     /**
-     * 我的任务列表。
+     * 我的任务列表。admin / jst_operator 时返全量（salesId=null）。
      *
      * @param status 状态过滤（pending / in_progress / completed / overdue），可为空查全部
      */
     @GetMapping("/list")
     @PreAuthorize("@ss.hasPermi('sales:me:tasks:list')")
     public TableDataInfo list(@RequestParam(required = false) String status) {
-        Long salesId = SalesScopeUtils.currentSalesIdRequired();
+        Long salesId = SalesScopeUtils.currentSalesIdOrAllowAdminView();
         startPage();
         return getDataTable(taskService.listMine(salesId, status));
     }

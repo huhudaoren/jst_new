@@ -31,11 +31,12 @@ public class SalesFollowupController extends BaseSalesController {
 
     /**
      * 销售本人跟进记录列表（支持过滤：channelId / followupType / dateFrom / dateTo）。
+     * admin / jst_operator 时 salesId 为 null，返全量。
      */
     @GetMapping("/list")
     @PreAuthorize("@ss.hasPermi('sales:me:followup:list')")
     public TableDataInfo list(FollowupQueryReqDTO query) {
-        Long salesId = SalesScopeUtils.currentSalesIdRequired();
+        Long salesId = SalesScopeUtils.currentSalesIdOrAllowAdminView();
         startPage();
         return getDataTable(followupService.listMine(salesId, query));
     }
