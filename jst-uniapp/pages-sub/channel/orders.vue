@@ -243,7 +243,7 @@ export default {
     clearCheckedOrders() { this.checkedOrderIds = [] },
     goBatchPay() {
       if (!this.checkedOrderCount) return
-      // TODO(backend): 需要 POST /jst/wx/channel/orders/batch-pay 接口（入参 orderIds[]）
+      // TODO(backend-round-2b): 需要 POST /jst/wx/channel/orders/batch-pay 接口（入参 orderIds[]）
       // 当前暂走提示 + 跳到批量报名页同参
       const ids = this.checkedOrderIds.join(',')
       uni.showModal({

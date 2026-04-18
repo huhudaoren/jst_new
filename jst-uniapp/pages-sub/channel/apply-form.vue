@@ -126,7 +126,7 @@
 </template>
 
 <script>
-import { submitChannelApply, resubmitChannelApply, getMyChannelApply } from '@/api/channel'
+import { submitChannelApply, resubmitChannelApply, getMyChannelApply, getChannelAuthById } from '@/api/channel'
 import { getDict } from '@/api/dict'
 
 const TYPE_LABEL = { teacher: '老师', organization: '机构', individual: '个人' }
@@ -205,14 +205,25 @@ export default {
       if (hit) this.form.regionLabel = hit.label
     },
 
-    // 中文注释: edit 模式 — 通过 getMyChannelApply 获取最新驳回记录，回填表单 + 显示驳回原因
+    // 中文注释: edit 模式 — 优先按 rejectedId 直查 (getChannelAuthById)，失败回退 getMyChannelApply
     async loadRejectedApply() {
       try {
-        const apply = await getMyChannelApply()
+        let apply = null
+        // 优先走 applyId 直查接口 (后端已提供)
+        if (this.rejectedId) {
+          try {
+            apply = await getChannelAuthById(this.rejectedId)
+          } catch (e) {
+            // 后端未合入 / 权限校验失败 → 降级到 getMyChannelApply
+            apply = null
+          }
+        }
+        if (!apply) {
+          apply = await getMyChannelApply()
+        }
         if (!apply) return
-        // TODO(backend): 建议提供按 applyId 直查的接口 GET /jst/wx/channel/auth/{id}，
-        // 目前只能取「我的最新」— 若用户发起新申请会导致旧 rejectedId 取不到，已做 id 校验
-        if (this.rejectedId && String(apply.applyId) !== String(this.rejectedId)) {
+        // 若走 getMyChannelApply 回退路径，仍做 id 一致性校验以防取到新记录
+        if (this.rejectedId && apply.applyId && String(apply.applyId) !== String(this.rejectedId)) {
           this.rejectReasonText = '审核未通过，请重新提交'
           return
         }
@@ -230,8 +241,7 @@ export default {
         } catch (e) {}
         if (apply.inviteCode) this.form.inviteCode = apply.inviteCode
         if (apply.businessNo) this.form.businessNo = apply.businessNo
-        // 驳回原因
-        // TODO(backend): 建议独立 rejectReason 字段，目前复用 auditRemark
+        // 驳回原因: 优先 rejectReason (后端新字段)，其次 auditRemark
         this.rejectReasonText = apply.rejectReason || apply.auditRemark || '审核未通过，请重新提交'
         // 自动同步 resubmitId 走 resubmit 接口
         if (!this.resubmitId) this.resubmitId = apply.applyId

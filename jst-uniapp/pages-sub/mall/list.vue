@@ -67,10 +67,9 @@ import { getMallGoodsList } from '@/api/mall'
 import { useUserStore } from '@/store/user'
 
 // 中文注释: 对齐 V4.0 原型 points-mall.html 的 4 Tab 分类
-// 虚拟 = 优惠券 + 权益（后端 goodsType ∈ [coupon, rights/right]）
+// 虚拟 = 优惠券 + 权益（后端支持 goodsType='virtual' 等价于 [coupon, rights]）
 // 实物 = 实体奖品（后端 goodsType = physical）
 // 我可兑换 = 所需积分 ≤ 当前可用积分（前端根据 availablePoints 过滤）
-// TODO(backend): 后端若支持直接按 "virtual" 过滤可简化前端逻辑
 const TABS = [
   { value: 'all', label: '全部' },
   { value: 'virtual', label: '虚拟' },
@@ -104,19 +103,23 @@ export default {
   },
   onReachBottom() { if (this.hasMore && !this.loading) this.load(false) },
   methods: {
-    // 中文注释: 把前端 Tab 值映射成后端支持的 goodsType 参数（后端仅识别 coupon/rights/right/physical）
+    // 中文注释: 把前端 Tab 值映射成后端支持的 goodsType 参数
+    // physical → 后端直接过滤; virtual → 后端 goodsType='virtual' (等价于 [coupon, rights])
+    // 若后端尚未合入 virtual 支持, applyClientFilter 会兜底前端过滤
     buildLoadParams() {
       const params = { pageNum: this.pageNum, pageSize: this.pageSize }
-      // 全部 / 虚拟（多类型合并）/ 我可兑换：后端不传类型，前端再过滤
       if (this.activeType === 'physical') {
         params.goodsType = 'physical'
+      } else if (this.activeType === 'virtual') {
+        params.goodsType = 'virtual'
       }
       return params
     },
-    // 中文注释: Tab = 虚拟 → 前端过滤 type ∈ [coupon, rights, right]；Tab = 我可兑换 → 过滤所需积分 ≤ 可用积分
+    // 中文注释: Tab = 虚拟 → 前端过滤 type ∈ [coupon, rights, right] 兜底；Tab = 我可兑换 → 过滤所需积分 ≤ 可用积分
     applyClientFilter(rows) {
       if (!Array.isArray(rows)) return []
       if (this.activeType === 'virtual') {
+        // 兜底: 即使后端未支持 virtual 过滤, 前端仍能按 goodsType 筛出
         return rows.filter((r) => {
           const t = (r && r.goodsType) || ''
           return t === 'coupon' || t === 'rights' || t === 'right'

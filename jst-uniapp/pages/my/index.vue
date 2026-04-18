@@ -360,7 +360,7 @@ export default {
         const monthly = await getChannelMonthly()
         // rebateSummary 已在 loadRebateSummary 拉取, 这里直接复用
         this.channelSummary = {
-          bindingCount: (monthly && monthly.newStudentCount) || 0, // TODO(backend): 期望返回累计绑定学生数 totalStudentCount
+          bindingCount: (monthly && (monthly.totalStudentCount || monthly.newStudentCount)) || 0,
           orderCount: (monthly && monthly.orderCount) || 0,
           pendingAmount: this.sumAmount(this.rebateSummary.withdrawableAmount, this.rebateSummary.reviewingAmount),
           paidAmount: this.rebateSummary.paidAmount || '0.00'

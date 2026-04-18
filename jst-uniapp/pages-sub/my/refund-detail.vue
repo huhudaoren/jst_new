@@ -67,16 +67,14 @@
             ¥{{ formatAmount(detail.orderNetPay || detail.originalOrderAmount) }}
           </text>
         </view>
-        <!-- 行2: 积分原路回 (v-if) -->
-        <!-- TODO(backend): 需要 pointsRefund 字段（整数） -->
+        <!-- 行2: 积分原路回 (v-if, 后端返回 pointsRefund 时启用) -->
         <view v-if="hasPointsRefund" class="refund-detail-page__info-row">
           <text class="refund-detail-page__info-key">② 积分原路回</text>
           <text class="refund-detail-page__info-value refund-detail-page__info-value--return">
             +{{ pointsRefundValue }} 积分（冻结→可用）
           </text>
         </view>
-        <!-- 行3: 券原路回 (v-if) -->
-        <!-- TODO(backend): 需要 couponRefund: { couponName, faceAmount, couponStatus } -->
+        <!-- 行3: 券原路回 (v-if, 后端返回 couponRefund 对象时启用) -->
         <view v-if="hasCouponRefund" class="refund-detail-page__info-row">
           <text class="refund-detail-page__info-key">③ 券原路回</text>
           <text class="refund-detail-page__info-value refund-detail-page__info-value--return">
@@ -197,15 +195,15 @@ export default {
       }
       return mapper[this.detail.status] || 'active'
     },
-    // 中文注释: 积分/券/现金 字段归一化（缺字段走 TODO 降级）
+    // 中文注释: 积分/券/现金 字段归一化 — 后端新字段优先, 旧字段兜底
     hasPointsRefund() {
       return this.pointsRefundValue > 0
     },
+    // 优先后端 pointsRefund (整数), 缺失时 fallback actualPoints / applyPoints
     pointsRefundValue() {
-      // TODO(backend): 优先 pointsRefund（整数），其次 actualPoints，最后 applyPoints
-      const refund = Number(this.detail.pointsRefund)
-      if (!Number.isNaN(refund) && refund > 0) {
-        return refund
+      if (this.detail.pointsRefund != null) {
+        const refund = Number(this.detail.pointsRefund)
+        if (!Number.isNaN(refund) && refund > 0) return refund
       }
       const actual = Number(this.detail.actualPoints)
       if (!Number.isNaN(actual) && actual > 0) {
@@ -213,20 +211,20 @@ export default {
       }
       return Number(this.detail.applyPoints) || 0
     },
+    // 优先后端 couponRefund 对象, 兼容旧 couponReturned 标志
     hasCouponRefund() {
-      // TODO(backend): 推荐 couponRefund: { couponName, faceAmount }，兼容 couponReturned 标志
-      const cr = this.detail.couponRefund
+      const cr = this.detail.couponRefund || (this.detail.couponReturned ? { couponName: '优惠券已退回' } : null)
       if (cr && (cr.couponName || cr.faceAmount)) {
         return true
       }
       return !!this.detail.couponReturned
     },
     couponRefundLabel() {
-      const cr = this.detail.couponRefund
+      const cr = this.detail.couponRefund || (this.detail.couponReturned ? { couponName: '优惠券已退回' } : null)
       if (cr && cr.couponName) {
         const face = Number(cr.faceAmount)
         if (!Number.isNaN(face) && face > 0) {
-          return `${cr.couponName} · 面额 ¥${face.toFixed(2)}`
+          return `${cr.couponName} ¥${face.toFixed(2)}`
         }
         return cr.couponName
       }
@@ -249,9 +247,8 @@ export default {
       }
       return parts.join(' + ')
     },
-    // 中文注释: 预计到账时间 — 已到账显示实际时间；进行中显示 T+1~7 工作日文案
+    // 中文注释: 预计到账时间 — 优先后端 expectedArrivalTime; 已到账显示实际时间; 进行中兜底 T+1~7 工作日
     arrivalEtaText() {
-      // TODO(backend): 推荐 expectedArrivalTime 字段；缺字段时根据状态显示兜底文案
       if (this.detail.expectedArrivalTime) {
         return this.formatDateTime(this.detail.expectedArrivalTime)
       }

@@ -120,7 +120,7 @@
         </view>
 
         <!-- 线下预约强化卡（Wave 2 P1-3：左边红色 6rpx 边框 + 剩余名额/截止日期标签） -->
-        <!-- TODO(backend): 字段 offlineReserveRemaining / offlineReserveDeadline 暂未返回，UI 先做静态保留 -->
+        <!-- 动态名额/截止时间由后端返回, 无则走兜底 -->
         <view
           v-if="showAppointmentEntry"
           class="contest-detail-page__offline-card jst-anim-fade-up"
@@ -490,15 +490,13 @@ export default {
       if (!this.detail) return false
       return !!(this.detail.contactPhone || this.detail.contactWechat || this.detail.contactEmail)
     },
-    // 中文注释: 线下预约剩余名额标签 — 仅在 remaining ≤ 10 时显示
-    // TODO(backend): 后端需返回 detail.offlineReserveRemaining (Number)
+    // 中文注释: 线下预约剩余名额标签 — 仅在 remaining ≤ 10 时显示 (字段由后端返回)
     offlineRemainingBadge() {
       const n = this.detail && Number(this.detail.offlineReserveRemaining)
       if (!isFinite(n) || n <= 0 || n > 10) return ''
       return String(n)
     },
-    // 中文注释: 线下预约截止日期标签 — 仅在距截止 ≤ 3 天时显示
-    // TODO(backend): 后端需返回 detail.offlineReserveDeadline (yyyy-MM-dd HH:mm:ss)
+    // 中文注释: 线下预约截止日期标签 — 仅在距截止 ≤ 3 天时显示 (字段由后端返回)
     offlineDeadlineBadge() {
       const raw = this.detail && this.detail.offlineReserveDeadline
       if (!raw) return ''

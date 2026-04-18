@@ -196,7 +196,7 @@ export default {
   },
   methods: {
     // 中文注释: 从本地读取通知偏好（后端暂无此接口，本地存储为权宜之计）
-    // TODO(backend): 后端需提供 GET/POST /jst/wx/user/notify-prefs 同步偏好
+    // TODO(backend-round-2b): 后端需提供 GET/POST /jst/wx/user/notify-prefs 同步偏好
     loadNotifyPrefs() {
       try {
         const raw = uni.getStorageSync(NOTIFY_STORAGE_KEY)
@@ -245,14 +245,14 @@ export default {
     },
     navigateBinding() { uni.navigateTo({ url: '/pages-sub/my/binding' }) },
     navigateAddressList() { uni.navigateTo({ url: '/pages-sub/my/address-list' }) },
-    // TODO(backend): 发票抬头管理后端接口未实现（缺 GET/POST /jst/wx/invoice-title），先占位
+    // TODO(backend-round-2b): 发票抬头管理后端接口未实现（缺 GET/POST /jst/wx/invoice-title），先占位
     navigateInvoiceTitle() {
       uni.showToast({ title: '发票抬头管理开发中', icon: 'none' })
     },
     navigateSettlement() { uni.navigateTo({ url: '/pages-sub/channel/settlement' }) },
     navigateHelp() { uni.navigateTo({ url: '/pages-sub/public/help' }) },
     // 中文注释: 注销账号 — 微信小程序合规要求，需人工审核
-    // TODO(backend): 后端需提供 POST /jst/wx/user/deactivate 接口（走客服审核流程）
+    // TODO(backend-round-2b): 后端需提供 POST /jst/wx/user/deactivate 接口（走客服审核流程）
     handleDeactivate() {
       uni.showModal({
         title: '注销账号',

@@ -214,3 +214,12 @@ export function updateParticipant(id, body) {
 export function deleteParticipant(id) {
   return request({ url: `/jst/wx/channel/participant/${id}`, method: 'DELETE' })
 }
+
+/**
+ * 按 applyId 直查认证申请 (Round 2A · A3)
+ * 后端校验: applyId 必须属于当前 userId, 否则 403
+ * 前端使用: apply-form.vue edit 模式按 rejectedId 查历史
+ */
+export function getChannelAuthById(id) {
+  return request({ url: `/jst/wx/channel/auth/${id}`, method: 'GET' })
+}

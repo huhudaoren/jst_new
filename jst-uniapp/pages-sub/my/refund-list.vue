@@ -49,14 +49,12 @@
               ¥{{ formatAmount(getCashAmount(item)) }}
             </text>
           </view>
-          <!-- 中文注释: 券原路回行 — 仅当涉及券时显示 -->
-          <!-- TODO(backend): 需要返回 couponRefund: { couponName, faceAmount } -->
+          <!-- 中文注释: 券原路回行 — 仅当涉及券时显示 (后端返回 couponRefund 对象) -->
           <view v-if="hasCouponRefund(item)" class="refund-list-page__meta-row">
             <text class="refund-list-page__meta-key">🎟️ 券原路回</text>
             <text class="refund-list-page__meta-value">{{ formatCouponRefund(item) }}</text>
           </view>
-          <!-- 中文注释: 积分回退行 — 仅当涉及积分时显示 -->
-          <!-- TODO(backend): 需要返回 pointsRefund（整数），或至少 actualPoints / applyPoints -->
+          <!-- 中文注释: 积分回退行 — 仅当涉及积分时显示 (后端返回 pointsRefund, 缺失时兜底) -->
           <view v-if="hasPointsRefund(item)" class="refund-list-page__meta-row">
             <text class="refund-list-page__meta-key">⭐ 积分回退</text>
             <text class="refund-list-page__meta-value">+{{ getPointsRefund(item) }} 积分</text>
@@ -271,40 +269,37 @@ export default {
       return item.applyCash
     },
 
-    // 中文注释: 积分回退字段兼容取值
+    // 中文注释: 积分回退 — 优先后端 pointsRefund (整数), 缺失时 fallback actualPoints / applyPoints
     getPointsRefund(item) {
-      // TODO(backend): 优先 pointsRefund，其次 actualPoints，最后 applyPoints
-      const pointsRefund = Number(item.pointsRefund)
-      if (!Number.isNaN(pointsRefund) && pointsRefund > 0) {
-        return pointsRefund
+      if (item && item.pointsRefund != null) {
+        const n = Number(item.pointsRefund)
+        if (!Number.isNaN(n) && n > 0) return n
       }
-      const actualPoints = Number(item.actualPoints)
+      const actualPoints = Number(item && item.actualPoints)
       if (!Number.isNaN(actualPoints) && actualPoints > 0) {
         return actualPoints
       }
-      return Number(item.applyPoints) || 0
+      return Number(item && item.applyPoints) || 0
     },
 
     hasPointsRefund(item) {
       return this.getPointsRefund(item) > 0
     },
 
-    // 中文注释: 判断是否含券回退（couponRefund 对象 或 couponReturned 标志）
+    // 中文注释: 判断是否含券回退 — 优先后端 couponRefund 对象, 兼容旧 couponReturned 标志
     hasCouponRefund(item) {
-      // TODO(backend): 推荐结构 couponRefund: { couponName, faceAmount }
-      if (item && item.couponRefund && (item.couponRefund.couponName || item.couponRefund.faceAmount)) {
-        return true
-      }
+      const cr = item && (item.couponRefund || (item.couponReturned ? { couponName: '优惠券已退回' } : null))
+      if (cr && (cr.couponName || cr.faceAmount)) return true
       return !!(item && item.couponReturned)
     },
 
+    // 中文注释: 后端返回 couponRefund 对象 → 显示 "券名 ¥面额"; 否则降级提示已返还
     formatCouponRefund(item) {
-      // TODO(backend): 若返回 couponRefund 对象则显示 "券名 ¥面额"，否则降级提示已返还
-      const cr = item && item.couponRefund
+      const cr = (item && item.couponRefund) || (item && item.couponReturned ? { couponName: '优惠券已退回' } : null)
       if (cr && cr.couponName) {
         const face = Number(cr.faceAmount)
         if (!Number.isNaN(face) && face > 0) {
-          return `${cr.couponName} (面额 ¥${face.toFixed(2)})`
+          return `${cr.couponName} ¥${face.toFixed(2)}`
         }
         return cr.couponName
       }

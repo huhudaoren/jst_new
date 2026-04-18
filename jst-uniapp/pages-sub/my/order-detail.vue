@@ -305,19 +305,21 @@ export default {
       const deduct = Number(this.detail.pointsDeductAmount) || 0
       return used > 0 || deduct > 0
     },
+    // 中文注释: 优先后端 pointsUsed (整数积分), 缺失时按 pointsAmount × 100 估算 (100 积分 = 1 元)
     pointsUsedLabel() {
-      const used = Number(this.detail.pointsUsed) || 0
+      const used = this.detail.pointsUsed != null
+        ? Number(this.detail.pointsUsed)
+        : Math.round((Number(this.detail.pointsAmount) || 0) * 100)
       if (used > 0) {
         return `-${used} 积分`
       }
-      // TODO(backend): 优先返回 pointsUsed（整数积分数），否则回退到金额
       return `-¥${this.formatAmount(this.detail.pointsDeductAmount)}`
     },
     // 中文注释: 退款规则卡显示条件：refundEnabled && status ∈ [paid, refunding]
+    // refundEnabled 后端已返回, 缺失时仍按 true 兜底
     showRefundRules() {
       const status = this.detail.orderStatus
       const eligibleStatus = status === 'paid' || this.isRefunding
-      // TODO(backend): refundEnabled 字段后端需返回，缺失时按 true 兜底展示规则
       const refundEnabled = this.detail.refundEnabled !== false
       return eligibleStatus && refundEnabled
     }

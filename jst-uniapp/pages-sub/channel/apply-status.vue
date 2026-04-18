@@ -90,10 +90,9 @@ export default {
       if (!this.apply) return false
       return this.apply.lockedForManual === 1 || this.apply.applyStatus === 'locked_for_manual' || (this.apply.rejectCount >= 3 && this.apply.applyStatus === 'rejected')
     },
-    // 中文注释: 驳回原因优先取 rejectReason，其次 auditRemark，否则通用兜底
+    // 中文注释: 驳回原因优先取 rejectReason（后端新字段），其次 auditRemark，否则通用兜底
     rejectReasonText() {
       if (!this.apply) return ''
-      // TODO(backend): 建议新增独立 rejectReason 字段（业务语义），目前复用 auditRemark
       return this.apply.rejectReason || this.apply.auditRemark || '审核未通过，请重新提交'
     }
   },
