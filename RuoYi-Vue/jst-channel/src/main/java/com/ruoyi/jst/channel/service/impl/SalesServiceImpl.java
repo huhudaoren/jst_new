@@ -1,11 +1,17 @@
 package com.ruoyi.jst.channel.service.impl;
 
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.jst.channel.domain.JstSales;
+import com.ruoyi.jst.channel.dto.SalesCreateOnestopReqDTO;
 import com.ruoyi.jst.channel.mapper.JstSalesMapper;
 import com.ruoyi.jst.channel.service.SalesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,8 +26,24 @@ import java.util.Random;
 @Service
 public class SalesServiceImpl implements SalesService {
 
+    private static final String ROLE_KEY_SALES = "jst_sales";
+    private static final String ROLE_KEY_SALES_MANAGER = "jst_sales_manager";
+
     @Autowired
     private JstSalesMapper salesMapper;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    /**
+     * Lazy 注入避开循环依赖：
+     * SalesServiceImpl -> PasswordEncoder（由 SecurityConfig 定义）
+     * -> SecurityConfig -> permitAllUrl -> WebMvcAutoConfiguration -> ChannelWebConfig
+     * -> RestrictedSalesActionInterceptor -> SalesService
+     */
+    @Autowired
+    @Lazy
+    private PasswordEncoder passwordEncoder;
 
     @Value("${jst.sales.resign_apply_max_days:7}")
     private int resignMaxDays;
@@ -83,6 +105,75 @@ public class SalesServiceImpl implements SalesService {
         if (row.getManagerCommissionRate() == null) row.setManagerCommissionRate(BigDecimal.ZERO);
         salesMapper.insertJstSales(row);
         return row;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createOnestop(SalesCreateOnestopReqDTO req) {
+        // 1) user_name 唯一性
+        Integer existCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM sys_user WHERE user_name = ? AND del_flag = '0'",
+                Integer.class, req.getUserName());
+        if (existCount != null && existCount > 0) {
+            throw new ServiceException("用户名 " + req.getUserName() + " 已存在");
+        }
+        // 2) 手机号在 jst_sales 唯一
+        Integer phoneCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM jst_sales WHERE phone = ?",
+                Integer.class, req.getPhone());
+        if (phoneCount != null && phoneCount > 0) {
+            throw new ServiceException("手机号 " + req.getPhone() + " 已被其他销售占用");
+        }
+
+        // 3) 查 role_id
+        String roleKey = Boolean.TRUE.equals(req.getAsManager()) ? ROLE_KEY_SALES_MANAGER : ROLE_KEY_SALES;
+        Long roleId;
+        try {
+            roleId = jdbcTemplate.queryForObject(
+                    "SELECT role_id FROM sys_role WHERE role_key = ? AND status = '0' AND del_flag = '0' LIMIT 1",
+                    Long.class, roleKey);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ServiceException("销售角色 " + roleKey + " 不存在，请先初始化角色");
+        }
+        if (roleId == null) {
+            throw new ServiceException("销售角色 " + roleKey + " 不存在，请先初始化角色");
+        }
+
+        // 4) INSERT sys_user
+        String hashedPwd = passwordEncoder.encode(req.getInitPassword());
+        String currentUserName;
+        try {
+            currentUserName = SecurityUtils.getUsername();
+        } catch (Exception e) {
+            currentUserName = "system";
+        }
+        jdbcTemplate.update(
+                "INSERT INTO sys_user (user_name, nick_name, phonenumber, password, user_type, status, del_flag, create_by, create_time) " +
+                        "VALUES (?, ?, ?, ?, '00', '0', '0', ?, NOW())",
+                req.getUserName(), req.getSalesName(), req.getPhone(), hashedPwd, currentUserName);
+
+        Long newUserId = jdbcTemplate.queryForObject(
+                "SELECT user_id FROM sys_user WHERE user_name = ? AND del_flag = '0'",
+                Long.class, req.getUserName());
+        if (newUserId == null) {
+            throw new ServiceException("创建系统用户失败");
+        }
+
+        // 5) INSERT sys_user_role
+        jdbcTemplate.update(
+                "INSERT INTO sys_user_role (user_id, role_id) VALUES (?, ?)",
+                newUserId, roleId);
+
+        // 6) INSERT jst_sales（复用 create() 的默认值/校验逻辑）
+        JstSales row = new JstSales();
+        row.setSysUserId(newUserId);
+        row.setSalesName(req.getSalesName());
+        row.setPhone(req.getPhone());
+        row.setManagerId(req.getManagerId());
+        row.setCommissionRateDefault(req.getCommissionRateDefault());
+        row.setIsManager(Boolean.TRUE.equals(req.getAsManager()) ? 1 : 0);
+        JstSales saved = create(row);
+        return saved.getSalesId();
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.ruoyi.jst.channel.service.SalesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class SalesResignationServiceImpl implements SalesResignationService {
     @Autowired private SalesService salesService;
     @Autowired private SalesChannelBindingService bindingService;
     @Autowired private SalesPreRegisterService preRegisterService;
+    @Autowired private JdbcTemplate jdbcTemplate;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -55,12 +57,14 @@ public class SalesResignationServiceImpl implements SalesResignationService {
         int expired = preRegisterService.expireBySales(salesId);
         log.info("[Resign] sales={} 失效 {} 条 pending 预录入", salesId, expired);
 
-        // 4. sys_user 禁用 TODO: 跨模块 (jst-channel 不能直接依赖 ruoyi-system)
-        // 临时方案：admin 在阶段 2 触发后手工在系统用户管理里禁用对应 sys_user。
-        // 长期：发 UserDisableEvent，ruoyi-admin 中的 listener 调 ISysUserService.updateUserStatus
+        // 4. sys_user 禁用（PATCH-7 顺手补：之前的 TODO）
+        // 用 JdbcTemplate 直接 UPDATE 避开跨模块依赖；status='1' = 停用
         if (s.getSysUserId() != null) {
-            log.info("[Resign] sales={} sysUser={} 需要 admin 手工禁用（跨模块暂未自动）",
-                    salesId, s.getSysUserId());
+            int affected = jdbcTemplate.update(
+                    "UPDATE sys_user SET status = '1', update_time = NOW() WHERE user_id = ? AND del_flag = '0'",
+                    s.getSysUserId());
+            log.info("[Resign] sales={} sysUser={} 已停用（affected={}）",
+                    salesId, s.getSysUserId(), affected);
         }
     }
 

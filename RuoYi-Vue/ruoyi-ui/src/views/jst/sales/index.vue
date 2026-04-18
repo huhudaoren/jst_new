@@ -79,34 +79,45 @@
     <!-- 分页 -->
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
 
-    <!-- 新建销售 dialog -->
-    <el-dialog title="新建销售档案" :visible.sync="createOpen" width="600px" append-to-body>
-      <el-form :model="createForm" ref="createForm" :rules="createRules" label-width="110px">
+    <!-- 新建销售 dialog（PATCH-7 一站式：同事务建 sys_user + sys_user_role + jst_sales） -->
+    <el-dialog title="新建销售档案" :visible.sync="createOpen" width="620px" append-to-body>
+      <el-alert
+        title="提交后将自动创建对应的系统账号，新销售可立即登录"
+        type="info"
+        :closable="false"
+        show-icon
+        style="margin-bottom:16px;"
+      />
+      <el-form :model="createForm" ref="createForm" :rules="createRules" label-width="120px">
         <div class="form-section">
-          <div class="form-section__title">基本信息</div>
-          <el-form-item label="关联系统用户" prop="sysUserId">
-            <user-picker v-model="createForm.sysUserId" placeholder="搜索用户名或昵称" style="width:100%" />
+          <div class="form-section__title">账号信息（自动建 sys_user）</div>
+          <el-form-item label="登录用户名" prop="userName">
+            <el-input v-model="createForm.userName" placeholder="字母/数字/下划线，4-30 位" maxlength="30" />
           </el-form-item>
-          <el-form-item label="销售姓名" prop="salesName">
-            <el-input v-model="createForm.salesName" placeholder="请输入销售姓名" maxlength="64" />
-          </el-form-item>
-          <el-form-item label="手机号" prop="phone">
-            <el-input v-model="createForm.phone" placeholder="请输入 11 位手机号" maxlength="11" />
+          <el-form-item label="初始密码" prop="initPassword">
+            <el-input v-model="createForm.initPassword" show-password placeholder="6-20 位" maxlength="20" />
+            <div class="el-form-item__tip">新销售首次登录后请提示修改密码</div>
           </el-form-item>
         </div>
         <el-divider />
         <div class="form-section">
-          <div class="form-section__title">归属与费率</div>
-          <el-form-item label="直属主管">
-            <el-select v-model="createForm.managerId" placeholder="请选择直属主管（可选）" clearable style="width:100%">
-              <el-option v-for="m in managerOptions" :key="m.salesId" :label="m.salesName" :value="m.salesId" />
-            </el-select>
+          <div class="form-section__title">销售业务字段</div>
+          <el-form-item label="销售姓名" prop="salesName">
+            <el-input v-model="createForm.salesName" placeholder="将同时写入 sys_user.昵称" maxlength="64" />
+          </el-form-item>
+          <el-form-item label="手机号" prop="phone">
+            <el-input v-model="createForm.phone" placeholder="请输入 11 位手机号" maxlength="11" />
           </el-form-item>
           <el-form-item label="默认提成费率" prop="commissionRateDefault">
-            <el-input-number v-model="createForm.commissionRateDefault" :min="0" :max="1" :step="0.001" :precision="4" style="width:100%" placeholder="如 0.05 表示 5%" />
+            <el-input-number v-model="createForm.commissionRateDefault" :min="0" :max="1" :step="0.001" :precision="4" style="width:220px" placeholder="如 0.05 表示 5%" />
+            <span style="margin-left:8px;color:#909399;font-size:12px;">约 {{ (Number(createForm.commissionRateDefault || 0) * 100).toFixed(2) }}%</span>
           </el-form-item>
-          <el-form-item label="是否主管">
-            <el-checkbox v-model="createForm.asManager">设为主管</el-checkbox>
+          <el-form-item label="是否设为主管">
+            <el-switch v-model="createForm.asManager" />
+            <div class="el-form-item__tip">主管自动绑定 jst_sales_manager 角色，可看团队数据</div>
+          </el-form-item>
+          <el-form-item v-if="!createForm.asManager" label="直属主管">
+            <sales-picker v-model="createForm.managerId" placeholder="可选，选择直属销售主管" style="width:100%" />
           </el-form-item>
         </div>
       </el-form>
@@ -148,7 +159,7 @@
 </template>
 
 <script>
-import { listSales, createSales, updateRate, updateManager, resignApply, resignExecute, transitionEnd } from '@/api/admin/sales/index'
+import { listSales, createSalesOnestop, updateRate, updateManager, resignApply, resignExecute, transitionEnd } from '@/api/admin/sales/index'
 
 export default {
   name: 'SalesList',
@@ -165,10 +176,11 @@ export default {
         phone: undefined,
         status: undefined
       },
-      // 新建
+      // 新建（PATCH-7 一站式）
       createOpen: false,
       createForm: {
-        sysUserId: undefined,
+        userName: '',
+        initPassword: '',
         salesName: '',
         phone: '',
         managerId: undefined,
@@ -176,11 +188,18 @@ export default {
         asManager: false
       },
       createRules: {
-        sysUserId: [{ required: true, message: '请选择关联系统用户', trigger: 'change' }],
+        userName: [
+          { required: true, message: '请输入登录用户名', trigger: 'blur' },
+          { pattern: /^[a-zA-Z0-9_]{4,30}$/, message: '4-30 位字母、数字、下划线', trigger: 'blur' }
+        ],
+        initPassword: [
+          { required: true, message: '请输入初始密码', trigger: 'blur' },
+          { min: 6, max: 20, message: '密码 6-20 位', trigger: 'blur' }
+        ],
         salesName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
         phone: [
           { required: true, message: '请输入手机号', trigger: 'blur' },
-          { pattern: /^1\d{10}$/, message: '手机号格式不正确', trigger: 'blur' }
+          { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }
         ],
         commissionRateDefault: [{ required: true, message: '请输入费率', trigger: 'blur' }]
       },
@@ -225,7 +244,7 @@ export default {
     },
     handleCreate() {
       this.createForm = {
-        sysUserId: undefined, salesName: '', phone: '',
+        userName: '', initPassword: '', salesName: '', phone: '',
         managerId: undefined, commissionRateDefault: 0.05, asManager: false
       }
       this.createOpen = true
@@ -235,8 +254,12 @@ export default {
       this.$refs.createForm.validate(valid => {
         if (!valid) return
         this.submitting = true
-        createSales(this.createForm).then(() => {
-          this.$modal.msgSuccess('创建成功')
+        // asManager=true 时不传 managerId（业务上主管没有主管）
+        const payload = { ...this.createForm }
+        if (payload.asManager) payload.managerId = null
+        createSalesOnestop(payload).then(res => {
+          const salesId = res && res.data != null ? res.data : ''
+          this.$modal.msgSuccess(`销售已创建（ID: ${salesId}），账号 ${this.createForm.userName} 可立即登录`)
           this.createOpen = false
           this.getList()
         }).catch(() => {}).finally(() => { this.submitting = false })

@@ -6,6 +6,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.jst.channel.domain.JstSales;
+import com.ruoyi.jst.channel.dto.SalesCreateOnestopReqDTO;
 import com.ruoyi.jst.channel.dto.SalesCreateReqDTO;
 import com.ruoyi.jst.channel.dto.SalesResignApplyReqDTO;
 import com.ruoyi.jst.channel.dto.SalesSetManagerReqDTO;
@@ -65,6 +66,19 @@ public class AdminSalesController extends BaseController {
         row.setCommissionRateDefault(req.getCommissionRateDefault());
         row.setIsManager(Boolean.TRUE.equals(req.getAsManager()) ? 1 : 0);
         return AjaxResult.success(salesService.create(row));
+    }
+
+    /**
+     * 一站式新建销售：同事务建 sys_user + sys_user_role + jst_sales。
+     * <p>
+     * 原 {@link #create} 端点仍保留（要求调用方已有 sys_user_id），本端点为前端主流入口。
+     */
+    @PostMapping("/onestop")
+    @PreAuthorize("@ss.hasPermi('jst:sales:add')")
+    @Log(title = "销售一站式新建", businessType = BusinessType.INSERT)
+    public AjaxResult createOnestop(@Valid @RequestBody SalesCreateOnestopReqDTO req) {
+        Long salesId = salesService.createOnestop(req);
+        return AjaxResult.success(salesId);
     }
 
     @PutMapping("/{salesId}/rate")

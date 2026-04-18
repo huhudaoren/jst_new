@@ -1,6 +1,7 @@
 package com.ruoyi.jst.channel.service;
 
 import com.ruoyi.jst.channel.domain.JstSales;
+import com.ruoyi.jst.channel.dto.SalesCreateOnestopReqDTO;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -18,6 +19,11 @@ public interface SalesService {
 
     /** 创建销售（必须先有 sys_user，自动生成 sales_no） */
     JstSales create(JstSales row);
+    /**
+     * 一站式新建：同事务里 INSERT sys_user + sys_user_role（按 asManager 绑角色）+ jst_sales。
+     * @return 新建的 sales_id
+     */
+    Long createOnestop(SalesCreateOnestopReqDTO req);
     /** 修改默认费率（仅 admin 调） */
     void updateDefaultRate(Long salesId, BigDecimal rate);
     /** 设置主管 */

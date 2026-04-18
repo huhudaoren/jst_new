@@ -10,9 +10,14 @@ export function getSales(id) {
   return request({ url: `/admin/sales/${id}`, method: 'get' })
 }
 
-// 新建销售档案
+// 新建销售档案（旧版：要求已传 sys_user_id，保留兼容）
 export function createSales(data) {
   return request({ url: '/admin/sales', method: 'post', data })
+}
+
+// 一站式新建销售（PATCH-7：自动建 sys_user + sys_user_role + jst_sales）
+export function createSalesOnestop(data) {
+  return request({ url: '/admin/sales/onestop', method: 'post', data })
 }
 
 // 修改默认费率
