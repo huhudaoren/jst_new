@@ -24,7 +24,7 @@
 
     <!-- 骨架屏 -->
     <view v-if="loading && !list.length" class="ml-grid">
-      <view v-for="i in 4" :key="'sk'+i" class="ml-card">
+      <view v-for="i in 4" :key="i" class="ml-card">
         <u-skeleton rows="0" loading :title="false">
           <view class="ml-card__img ml-card__img--placeholder"></view>
         </u-skeleton>

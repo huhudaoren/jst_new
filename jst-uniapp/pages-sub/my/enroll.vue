@@ -76,7 +76,10 @@
 
     <jst-empty
       v-else-if="!pageLoading"
-      v-bind="EMPTY_ENROLL"
+      :illustration="EMPTY_ENROLL.illustration"
+      :text="EMPTY_ENROLL.text"
+      :button-text="EMPTY_ENROLL.buttonText"
+      :button-url="EMPTY_ENROLL.buttonUrl"
     />
   </view>
 </template>

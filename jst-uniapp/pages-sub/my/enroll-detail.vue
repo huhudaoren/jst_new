@@ -66,7 +66,7 @@
         <text class="enroll-detail-page__card-title">附件列表</text>
         <view
           v-for="(item, index) in attachments"
-          :key="`${item}-${index}`"
+          :key="index"
           class="enroll-detail-page__attachment"
         >
           <text class="enroll-detail-page__attachment-text">{{ item }}</text>

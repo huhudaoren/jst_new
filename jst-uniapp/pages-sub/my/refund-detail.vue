@@ -123,7 +123,7 @@
         <text class="refund-detail-page__card-title">状态时间轴</text>
         <view
           v-for="(item, index) in timeline"
-          :key="`${item.label}-${index}`"
+          :key="index"
           class="refund-detail-page__timeline-item"
           :class="{
             'refund-detail-page__timeline-item--done': item.done,

@@ -1,6 +1,11 @@
 // ═══════════════════════════════════════════
 // 空态预设 Preset — 13 场景标准化文案 + CTA + 插画
-// 用法: <jst-empty v-bind="EMPTY_ORDERS" />
+// 用法（uniapp 小程序端不支持 v-bind="" 展开对象，需显式绑定各字段）：
+//   <jst-empty
+//     :illustration="EMPTY_ORDERS.illustration"
+//     :text="EMPTY_ORDERS.text"
+//     :button-text="EMPTY_ORDERS.buttonText"
+//     :button-url="EMPTY_ORDERS.buttonUrl" />
 // ═══════════════════════════════════════════
 
 // 订单空态

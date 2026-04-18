@@ -105,7 +105,7 @@
 
       <view class="order-detail-page__card">
         <text class="order-detail-page__card-title">进度时间轴</text>
-        <view v-for="(item, index) in timeline" :key="`${item.label}-${index}`" class="order-detail-page__timeline-item">
+        <view v-for="(item, index) in timeline" :key="index" class="order-detail-page__timeline-item">
           <view class="order-detail-page__timeline-dot"></view>
           <view class="order-detail-page__timeline-main">
             <text class="order-detail-page__timeline-label">{{ item.label }}</text>

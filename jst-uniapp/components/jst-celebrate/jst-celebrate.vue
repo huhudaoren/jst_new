@@ -15,10 +15,10 @@
         <text class="jst-celebrate__disc-emoji">🏆</text>
       </view>
       <view
-        v-for="n in 14"
-        :key="'spark-' + n"
+        v-for="(style, idx) in sparkleStyles"
+        :key="idx"
         class="jst-celebrate__sparkle"
-        :style="sparkleStyle(n)"
+        :style="style"
       ></view>
       <text v-if="title" class="jst-celebrate__title jst-celebrate__title--light">{{ title }}</text>
       <text v-if="subtitle" class="jst-celebrate__subtitle jst-celebrate__subtitle--light">{{ subtitle }}</text>
@@ -27,10 +27,10 @@
     <!-- ============ money-rain ============ -->
     <view v-else-if="preset === 'money-rain'" class="jst-celebrate__stage jst-celebrate__stage--money" @tap.stop>
       <view
-        v-for="n in 24"
-        :key="'coin-' + n"
+        v-for="(style, idx) in coinStyles"
+        :key="idx"
         class="jst-celebrate__coin"
-        :style="coinStyle(n)"
+        :style="style"
       >
         <text class="jst-celebrate__coin-emoji">💰</text>
       </view>
@@ -43,10 +43,10 @@
     <!-- ============ ribbon ============ -->
     <view v-else-if="preset === 'ribbon'" class="jst-celebrate__stage jst-celebrate__stage--ribbon" @tap.stop>
       <view
-        v-for="n in 7"
-        :key="'rib-' + n"
+        v-for="(style, idx) in ribbonStyles"
+        :key="idx"
         class="jst-celebrate__ribbon"
-        :style="ribbonStyle(n)"
+        :style="style"
       ></view>
       <view class="jst-celebrate__check">
         <text class="jst-celebrate__check-emoji">✅</text>
@@ -97,6 +97,40 @@ export default {
   watch: {
     visible(val) { val ? this.enqueue() : this.close() }
   },
+  computed: {
+    // 稀疏光点预计算数组：绕圆盘发散（uniapp 不支持 :style 函数调用，改为 computed 数组）
+    sparkleStyles() {
+      return Array.from({ length: 14 }, (_, i) => {
+        const n = i + 1
+        const angle = (n * 360) / 14
+        const delay = (n % 5) * 60
+        return `--angle: ${angle}deg; animation-delay: ${delay}ms;`
+      })
+    },
+    // 金币预计算数组：x 随机、delay 随机、duration 随机
+    coinStyles() {
+      return Array.from({ length: 24 }, (_, i) => {
+        const n = i + 1
+        const left = (n * 37) % 90 + 2          // 2%~92%
+        const delay = (n * 71) % 900             // 0~900ms
+        const dur = 2000 + ((n * 53) % 1200)     // 2000~3200ms
+        const rot = (n * 47) % 360
+        return `left: ${left}%; animation-delay: ${delay}ms; animation-duration: ${dur}ms; --start-rot: ${rot}deg;`
+      })
+    },
+    // 彩带预计算数组：多色斜飘
+    ribbonStyles() {
+      const colors = ['#FF6B6B', '#FFD54F', '#4FC3F7', '#81C784', '#BA68C8', '#FFB74D', '#F06292']
+      return Array.from({ length: 7 }, (_, i) => {
+        const n = i + 1
+        const left = (n - 1) * 14 + 2
+        const delay = ((n - 1) % 4) * 120
+        const dur = 1800 + ((n * 83) % 600)
+        const skew = (n % 2 === 0 ? 1 : -1) * (15 + (n * 3) % 10)
+        return `left: ${left}%; background: ${colors[n - 1] || '#FFD54F'}; animation-delay: ${delay}ms; animation-duration: ${dur}ms; --skew: ${skew}deg;`
+      })
+    }
+  },
   methods: {
     enqueue() {
       if (_current && _current !== this) { _queue.push(this); return }
@@ -118,30 +152,7 @@ export default {
         next && setTimeout(() => next.enqueue(), 300)
       }
     },
-    onMaskTap() { if (this.showClose) this.close() },
-    // 稀疏光点：绕圆盘发散
-    sparkleStyle(n) {
-      const angle = (n * 360) / 14
-      const delay = (n % 5) * 60
-      return `--angle: ${angle}deg; animation-delay: ${delay}ms;`
-    },
-    // 金币：x 随机、delay 随机、duration 随机
-    coinStyle(n) {
-      const left = (n * 37) % 90 + 2          // 2%~92%
-      const delay = (n * 71) % 900             // 0~900ms
-      const dur = 2000 + ((n * 53) % 1200)     // 2000~3200ms
-      const rot = (n * 47) % 360
-      return `left: ${left}%; animation-delay: ${delay}ms; animation-duration: ${dur}ms; --start-rot: ${rot}deg;`
-    },
-    // 彩带：多色斜飘
-    ribbonStyle(n) {
-      const colors = ['#FF6B6B', '#FFD54F', '#4FC3F7', '#81C784', '#BA68C8', '#FFB74D', '#F06292']
-      const left = (n - 1) * 14 + 2            // 2, 16, 30, ...
-      const delay = ((n - 1) % 4) * 120
-      const dur = 1800 + ((n * 83) % 600)
-      const skew = (n % 2 === 0 ? 1 : -1) * (15 + (n * 3) % 10)
-      return `left: ${left}%; background: ${colors[n - 1] || '#FFD54F'}; animation-delay: ${delay}ms; animation-duration: ${dur}ms; --skew: ${skew}deg;`
-    }
+    onMaskTap() { if (this.showClose) this.close() }
   },
   mounted() { if (this.visible) this.enqueue() },
   beforeDestroy() {

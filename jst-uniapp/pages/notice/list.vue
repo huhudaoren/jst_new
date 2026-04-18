@@ -61,7 +61,13 @@
           <jst-notice-card class="notice-page__card" :notice="notice" @item-tap="openNotice" />
         </view>
 
-        <jst-empty v-if="!firstLoading && !noticeList.length" v-bind="EMPTY_MESSAGES" text="暂无公告数据" />
+        <jst-empty
+          v-if="!firstLoading && !noticeList.length"
+          :illustration="EMPTY_MESSAGES.illustration"
+          text="暂无公告数据"
+          :button-text="EMPTY_MESSAGES.buttonText"
+          :button-url="EMPTY_MESSAGES.buttonUrl"
+        />
 
         <u-loadmore
           v-if="noticeList.length"

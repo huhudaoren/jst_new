@@ -37,7 +37,7 @@
  *         <view v-for="item in list" :key="item.id">...</view>
  *         <u-loadmore :status="loadMoreStatus" />
  *       </block>
- *       <jst-empty v-else v-bind="EMPTY_ORDERS" />
+ *       <jst-empty v-else :illustration="EMPTY_ORDERS.illustration" :text="EMPTY_ORDERS.text" :button-text="EMPTY_ORDERS.buttonText" :button-url="EMPTY_ORDERS.buttonUrl" />
  *     </view>
  *   </template>
  *

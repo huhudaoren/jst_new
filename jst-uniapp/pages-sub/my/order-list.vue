@@ -82,7 +82,9 @@
 
     <jst-empty
       v-else-if="!pageLoading"
-      v-bind="EMPTY_ORDERS"
+      :illustration="EMPTY_ORDERS.illustration"
+      :button-text="EMPTY_ORDERS.buttonText"
+      :button-url="EMPTY_ORDERS.buttonUrl"
       :text="emptyText"
     />
   </view>

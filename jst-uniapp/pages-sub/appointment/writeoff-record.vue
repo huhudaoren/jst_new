@@ -25,7 +25,7 @@
       <block v-if="mode === 'user'">
         <view
           v-for="item in filteredList"
-          :key="'user-' + item.recordId"
+          :key="item.recordId"
           :id="'record-' + item.recordId"
           :class="['wr-card', 'wr-card--' + (item.status || 'pending'), highlightId === item.recordId && 'wr-card--highlight']"
         >
@@ -60,7 +60,7 @@
       <block v-if="mode === 'staff'">
         <view
           v-for="item in list"
-          :key="'staff-' + item.writeoffItemId"
+          :key="item.writeoffItemId"
           class="wr-card"
         >
           <view class="wr-card__head">
