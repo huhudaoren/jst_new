@@ -21,6 +21,14 @@
         <result property="updateTime"        column="update_time"/>
     </resultMap>
 
+    <!-- 带下级渠道名称/认证状态的结果集（小程序 distribution 用） -->
+    <resultMap type="com.ruoyi.jst.channel.domain.JstChannelDistributionLedger" id="JstChannelDistributionLedgerEnrichedResult"
+               extends="JstChannelDistributionLedgerResult">
+        <result property="inviteeChannelName" column="invitee_channel_name"/>
+        <result property="authType"           column="auth_type"/>
+        <result property="avatarUrl"          column="avatar_url"/>
+    </resultMap>
+
     <sql id="cols">
         ledger_id, inviter_channel_id, invitee_channel_id, order_id, order_no,
         base_amount, applied_rate, raw_amount, compress_ratio, amount, status,
@@ -117,13 +125,23 @@
            AND status = 'pending'
     </update>
 
-    <select id="selectByInviter" resultMap="JstChannelDistributionLedgerResult">
-        SELECT <include refid="cols"/> FROM jst_channel_distribution_ledger
-         WHERE inviter_channel_id = #{inviterChannelId}
+    <select id="selectByInviter" resultMap="JstChannelDistributionLedgerEnrichedResult">
+        SELECT
+            dl.ledger_id, dl.inviter_channel_id, dl.invitee_channel_id, dl.order_id, dl.order_no,
+            dl.base_amount, dl.applied_rate, dl.raw_amount, dl.compress_ratio, dl.amount, dl.status,
+            dl.accrue_at, dl.accrued_at, dl.create_time, dl.update_time,
+            invc.channel_name AS invitee_channel_name,
+            invc.auth_status  AS auth_type,
+            NULL              AS avatar_url
+        FROM jst_channel_distribution_ledger dl
+        LEFT JOIN jst_channel invc
+               ON invc.channel_id = dl.invitee_channel_id
+              AND invc.del_flag = '0'
+        WHERE dl.inviter_channel_id = #{inviterChannelId}
         <if test="status != null and status != ''">
-           AND status = #{status}
+           AND dl.status = #{status}
         </if>
-         ORDER BY create_time DESC
+        ORDER BY dl.create_time DESC
     </select>
 
     <select id="sumAmountByInviter" resultType="java.math.BigDecimal">
@@ -132,6 +150,14 @@
         <if test="status != null and status != ''">
            AND status = #{status}
         </if>
+    </select>
+
+    <!-- 本月分销收益汇总（accrue_at &gt;= 本月 1 日 00:00） -->
+    <select id="sumMonthAmountByInviter" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0)
+          FROM jst_channel_distribution_ledger
+         WHERE inviter_channel_id = #{inviterChannelId}
+           AND accrue_at &gt;= DATE_FORMAT(NOW(), '%Y-%m-01 00:00:00')
     </select>
 
 </mapper>

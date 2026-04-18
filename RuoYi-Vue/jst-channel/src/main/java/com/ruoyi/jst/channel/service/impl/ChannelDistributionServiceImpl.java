@@ -153,6 +153,13 @@ public class ChannelDistributionServiceImpl implements ChannelDistributionServic
         return sum != null ? sum : BigDecimal.ZERO;
     }
 
+    @Override
+    public BigDecimal sumMonthAmountByInviter(Long channelId) {
+        if (channelId == null) return BigDecimal.ZERO;
+        BigDecimal sum = ledgerMapper.sumMonthAmountByInviter(channelId);
+        return sum != null ? sum : BigDecimal.ZERO;
+    }
+
     // ===
 
     private static Date addDays(Date base, int days) {

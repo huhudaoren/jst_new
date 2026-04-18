@@ -17,6 +17,14 @@
         <result property="updateTime"        column="update_time"/>
     </resultMap>
 
+    <!-- 带下级渠道名称/认证状态的结果集（小程序 invite/list 用） -->
+    <resultMap type="com.ruoyi.jst.channel.domain.JstChannelInvite" id="JstChannelInviteEnrichedResult"
+               extends="JstChannelInviteResult">
+        <result property="inviteeChannelName" column="invitee_channel_name"/>
+        <result property="authType"           column="auth_type"/>
+        <result property="avatarUrl"          column="avatar_url"/>
+    </resultMap>
+
     <sql id="cols">
         invite_id, inviter_channel_id, invitee_channel_id, invite_code, share_scene,
         commission_rate, invited_at, status, create_time, update_by, update_time
@@ -83,10 +91,20 @@
          LIMIT 1
     </select>
 
-    <select id="selectByInviter" resultMap="JstChannelInviteResult">
-        SELECT <include refid="cols"/> FROM jst_channel_invite
-         WHERE inviter_channel_id = #{inviterChannelId}
-         ORDER BY invited_at DESC
+    <select id="selectByInviter" resultMap="JstChannelInviteEnrichedResult">
+        SELECT
+            inv.invite_id, inv.inviter_channel_id, inv.invitee_channel_id, inv.invite_code,
+            inv.share_scene, inv.commission_rate, inv.invited_at, inv.status,
+            inv.create_time, inv.update_by, inv.update_time,
+            invc.channel_name AS invitee_channel_name,
+            invc.auth_status  AS auth_type,
+            NULL              AS avatar_url
+        FROM jst_channel_invite inv
+        LEFT JOIN jst_channel invc
+               ON invc.channel_id = inv.invitee_channel_id
+              AND invc.del_flag = '0'
+        WHERE inv.inviter_channel_id = #{inviterChannelId}
+        ORDER BY inv.invited_at DESC
     </select>
 
     <update id="unbindActive">

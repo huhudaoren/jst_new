@@ -60,6 +60,14 @@ public interface ChannelDistributionService {
     BigDecimal sumAmountByInviter(Long channelId, String status);
 
     /**
+     * 汇总某上级渠道本月（accrue_at 落在当月）的分销收益。
+     *
+     * @param channelId 上级渠道 ID
+     * @return 本月金额
+     */
+    BigDecimal sumMonthAmountByInviter(Long channelId);
+
+    /**
      * 订单付款上下文（分销计算入参）。
      */
     class OrderPaidContext {

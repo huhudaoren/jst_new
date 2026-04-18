@@ -58,4 +58,12 @@ public interface JstChannelDistributionLedgerMapper {
      */
     BigDecimal sumAmountByInviter(@Param("inviterChannelId") Long inviterChannelId,
                                    @Param("status") String status);
+
+    /**
+     * 汇总上级渠道的本月分销收益（accrue_at &gt;= 本月 1 日 00:00）。
+     *
+     * @param inviterChannelId 上级渠道 ID
+     * @return 本月累计金额（无记录时返回 null）
+     */
+    BigDecimal sumMonthAmountByInviter(@Param("inviterChannelId") Long inviterChannelId);
 }
