@@ -35,6 +35,7 @@ import java.util.*;
  *   <li>jst_cert_template: template_id, template_name, owner_type, owner_id, bg_image, audit_status</li>
  *   <li>jst_coupon_template: coupon_template_id, coupon_name, coupon_type, threshold_amount, status</li>
  *   <li>jst_rights_template: rights_template_id, rights_name, rights_type, quota_mode, quota_value, status</li>
+ *   <li>jst_course: course_id, course_name, course_type (非 category), status (on/off), del_flag</li>
  * </ul>
  *
  * @author jst
@@ -97,6 +98,7 @@ public class EntityBriefController extends BaseController {
             case "certTemplate":        return searchCertTemplate(kw, limit);
             case "couponTemplate":      return searchCouponTemplate(kw, limit);
             case "rightsTemplate":      return searchRightsTemplate(kw, limit);
+            case "course":              return searchCourse(kw, limit);
             default:                    return Collections.emptyList();
         }
     }
@@ -310,6 +312,21 @@ public class EntityBriefController extends BaseController {
         return jdbcTemplate.queryForList(base + "ORDER BY rights_template_id DESC LIMIT ?", limit);
     }
 
+    /**
+     * jst_course: course_id, course_name, course_type (非 category), status (on/off)
+     */
+    private List<Map<String, Object>> searchCourse(String kw, int limit) {
+        String base = "SELECT course_id AS id, course_name AS name, course_type AS subtitle, status AS statusTag"
+                + " FROM jst_course WHERE del_flag = '0' ";
+        if (StringUtils.isNotBlank(kw)) {
+            String like = "%" + kw + "%";
+            return jdbcTemplate.queryForList(
+                    base + "AND course_name LIKE ? ORDER BY course_id DESC LIMIT ?",
+                    like, limit);
+        }
+        return jdbcTemplate.queryForList(base + "ORDER BY course_id DESC LIMIT ?", limit);
+    }
+
     // ============================================================
     // Private: brief 派发
     // ============================================================
@@ -385,6 +402,9 @@ public class EntityBriefController extends BaseController {
                         + "CONCAT(rights_type, ' · ', quota_mode, ':', CAST(IFNULL(quota_value, 0) AS CHAR)) AS subtitle, "
                         + "status AS statusTag "
                         + "FROM jst_rights_template WHERE del_flag = '0' AND rights_template_id = ?";
+            case "course":
+                return "SELECT course_id AS id, course_name AS name, course_type AS subtitle, status AS statusTag"
+                        + " FROM jst_course WHERE del_flag = '0' AND course_id = ?";
             default:
                 return null;
         }

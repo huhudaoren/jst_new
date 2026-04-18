@@ -171,8 +171,8 @@
 
     <el-dialog :title="title" :visible.sync="open" width="560px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="课程ID" prop="courseId">
-          <el-input v-model="form.courseId" placeholder="请输入课程ID" />
+        <el-form-item label="课程" prop="courseId">
+          <course-picker v-model="form.courseId" />
         </el-form-item>
         <el-form-item label="用户" prop="userId">
           <user-picker v-model="form.userId" />

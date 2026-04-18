@@ -11,7 +11,8 @@ export const ENTITY_ROUTE_MAP = {
   formTemplate:   { path: '/jst/form-template',           perm: 'jst:event:enroll_form_template:list', queryKey: 'templateId' },
   certTemplate:   { path: '/partner/cert-manage',         perm: 'jst:event:cert_template:list', queryKey: 'templateId' },
   couponTemplate: { path: '/jst/coupon/template',         perm: 'jst:marketing:coupon_template:list', queryKey: 'couponTemplateId' },
-  rightsTemplate: { path: '/jst/rights/template',         perm: 'jst:marketing:rights_template:list', queryKey: 'rightsTemplateId' }
+  rightsTemplate: { path: '/jst/rights/template',         perm: 'jst:marketing:rights_template:list', queryKey: 'rightsTemplateId' },
+  course:         { path: '/jst/course',                  perm: 'jst:event:course:list' }
 }
 
 export function resolveEntityRoute(entity, id) {

@@ -57,6 +57,7 @@ import FormTemplatePicker from '@/components/RelationPicker/FormTemplatePicker.v
 import CertTemplatePicker from '@/components/RelationPicker/CertTemplatePicker.vue'
 import CouponTemplatePicker from '@/components/RelationPicker/CouponTemplatePicker.vue'
 import RightsTemplatePicker from '@/components/RelationPicker/RightsTemplatePicker.vue'
+import CoursePicker from '@/components/RelationPicker/CoursePicker.vue'
 
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts
@@ -96,6 +97,7 @@ Vue.component('FormTemplatePicker', FormTemplatePicker)
 Vue.component('CertTemplatePicker', CertTemplatePicker)
 Vue.component('CouponTemplatePicker', CouponTemplatePicker)
 Vue.component('RightsTemplatePicker', RightsTemplatePicker)
+Vue.component('CoursePicker', CoursePicker)
 
 Vue.use(directive)
 Vue.use(plugins)
