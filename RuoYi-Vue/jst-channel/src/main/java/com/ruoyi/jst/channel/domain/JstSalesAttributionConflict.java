@@ -14,6 +14,7 @@ public class JstSalesAttributionConflict extends BaseEntity {
     private Long resolvedBy;
     private Date resolvedAt;
     private String resolutionRemark;
+    private String channelName;
 
     public Long getConflictId() { return conflictId; }
     public void setConflictId(Long conflictId) { this.conflictId = conflictId; }
@@ -31,4 +32,6 @@ public class JstSalesAttributionConflict extends BaseEntity {
     public void setResolvedAt(Date resolvedAt) { this.resolvedAt = resolvedAt; }
     public String getResolutionRemark() { return resolutionRemark; }
     public void setResolutionRemark(String resolutionRemark) { this.resolutionRemark = resolutionRemark; }
+    public String getChannelName() { return channelName; }
+    public void setChannelName(String channelName) { this.channelName = channelName; }
 }

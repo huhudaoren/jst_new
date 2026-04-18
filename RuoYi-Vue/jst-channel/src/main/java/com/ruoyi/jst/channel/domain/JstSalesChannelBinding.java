@@ -14,6 +14,8 @@ public class JstSalesChannelBinding extends BaseEntity {
     private String bindSource;
     private String bindRemark;
     private Long operatorId;
+    private String salesName;
+    private String channelName;
 
     public Long getBindingId() { return bindingId; }
     public void setBindingId(Long bindingId) { this.bindingId = bindingId; }
@@ -31,4 +33,8 @@ public class JstSalesChannelBinding extends BaseEntity {
     public void setBindRemark(String bindRemark) { this.bindRemark = bindRemark; }
     public Long getOperatorId() { return operatorId; }
     public void setOperatorId(Long operatorId) { this.operatorId = operatorId; }
+    public String getSalesName() { return salesName; }
+    public void setSalesName(String salesName) { this.salesName = salesName; }
+    public String getChannelName() { return channelName; }
+    public void setChannelName(String channelName) { this.channelName = channelName; }
 }

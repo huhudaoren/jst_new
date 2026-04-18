@@ -61,6 +61,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="allowAppointmentRefund"    column="allow_appointment_refund"    />
     </resultMap>
 
+    <resultMap type="JstContest" id="JstContestListResult" extends="JstContestResult">
+        <result property="partnerName" column="partner_name_join" />
+    </resultMap>
+
     <sql id="selectJstContestVo">
         select contest_id, contest_name, source_type, partner_id, category, group_levels, cover_image, description,
         enroll_start_time, enroll_end_time, event_start_time, event_end_time, price,
@@ -76,31 +80,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from jst_contest
     </sql>
 
-    <select id="selectJstContestList" parameterType="JstContest" resultMap="JstContestResult">
-        <include refid="selectJstContestVo"/>
+    <sql id="selectJstContestListVo">
+        select c.*, ep.partner_name as partner_name_join
+        from jst_contest c
+        left join jst_event_partner ep on c.partner_id = ep.partner_id and ep.del_flag = '0'
+    </sql>
+
+    <select id="selectJstContestList" parameterType="JstContest" resultMap="JstContestListResult">
+        <include refid="selectJstContestListVo"/>
         <where>  
-            <if test="contestName != null  and contestName != ''"> and contest_name like concat('%', #{contestName}, '%')</if>
-            <if test="sourceType != null  and sourceType != ''"> and source_type = #{sourceType}</if>
-            <if test="partnerId != null "> and partner_id = #{partnerId}</if>
-            <if test="category != null  and category != ''"> and category = #{category}</if>
-            <if test="groupLevels != null  and groupLevels != ''"> and group_levels = #{groupLevels}</if>
-            <if test="coverImage != null  and coverImage != ''"> and cover_image = #{coverImage}</if>
-            <if test="description != null  and description != ''"> and description = #{description}</if>
-            <if test="enrollStartTime != null "> and enroll_start_time = #{enrollStartTime}</if>
-            <if test="enrollEndTime != null "> and enroll_end_time = #{enrollEndTime}</if>
-            <if test="eventStartTime != null "> and event_start_time = #{eventStartTime}</if>
-            <if test="eventEndTime != null "> and event_end_time = #{eventEndTime}</if>
-            <if test="price != null "> and price = #{price}</if>
-            <if test="supportChannelEnroll != null "> and support_channel_enroll = #{supportChannelEnroll}</if>
-            <if test="supportPointsDeduct != null "> and support_points_deduct = #{supportPointsDeduct}</if>
-            <if test="supportAppointment != null "> and support_appointment = #{supportAppointment}</if>
-            <if test="certRuleJson != null  and certRuleJson != ''"> and cert_rule_json = #{certRuleJson}</if>
-            <if test="scoreRuleJson != null  and scoreRuleJson != ''"> and score_rule_json = #{scoreRuleJson}</if>
-            <if test="formTemplateId != null "> and form_template_id = #{formTemplateId}</if>
-            <if test="aftersaleDays != null "> and aftersale_days = #{aftersaleDays}</if>
-            <if test="auditStatus != null  and auditStatus != ''"> and audit_status = #{auditStatus}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="createdUserId != null "> and created_user_id = #{createdUserId}</if>
+            <if test="contestName != null  and contestName != ''"> and c.contest_name like concat('%', #{contestName}, '%')</if>
+            <if test="sourceType != null  and sourceType != ''"> and c.source_type = #{sourceType}</if>
+            <if test="partnerId != null "> and c.partner_id = #{partnerId}</if>
+            <if test="category != null  and category != ''"> and c.category = #{category}</if>
+            <if test="groupLevels != null  and groupLevels != ''"> and c.group_levels = #{groupLevels}</if>
+            <if test="coverImage != null  and coverImage != ''"> and c.cover_image = #{coverImage}</if>
+            <if test="description != null  and description != ''"> and c.description = #{description}</if>
+            <if test="enrollStartTime != null "> and c.enroll_start_time = #{enrollStartTime}</if>
+            <if test="enrollEndTime != null "> and c.enroll_end_time = #{enrollEndTime}</if>
+            <if test="eventStartTime != null "> and c.event_start_time = #{eventStartTime}</if>
+            <if test="eventEndTime != null "> and c.event_end_time = #{eventEndTime}</if>
+            <if test="price != null "> and c.price = #{price}</if>
+            <if test="supportChannelEnroll != null "> and c.support_channel_enroll = #{supportChannelEnroll}</if>
+            <if test="supportPointsDeduct != null "> and c.support_points_deduct = #{supportPointsDeduct}</if>
+            <if test="supportAppointment != null "> and c.support_appointment = #{supportAppointment}</if>
+            <if test="certRuleJson != null  and certRuleJson != ''"> and c.cert_rule_json = #{certRuleJson}</if>
+            <if test="scoreRuleJson != null  and scoreRuleJson != ''"> and c.score_rule_json = #{scoreRuleJson}</if>
+            <if test="formTemplateId != null "> and c.form_template_id = #{formTemplateId}</if>
+            <if test="aftersaleDays != null "> and c.aftersale_days = #{aftersaleDays}</if>
+            <if test="auditStatus != null  and auditStatus != ''"> and c.audit_status = #{auditStatus}</if>
+            <if test="status != null  and status != ''"> and c.status = #{status}</if>
+            <if test="createdUserId != null "> and c.created_user_id = #{createdUserId}</if>
         </where>
     </select>
     

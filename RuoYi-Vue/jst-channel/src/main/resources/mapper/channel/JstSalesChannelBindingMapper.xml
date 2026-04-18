@@ -17,6 +17,11 @@
         <result property="updateTime"  column="update_time"/>
     </resultMap>
 
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSalesChannelBinding" id="JstSalesChannelBindingListResult" extends="JstSalesChannelBindingResult">
+        <result property="salesName" column="sales_name_join"/>
+        <result property="channelName" column="channel_name_join"/>
+    </resultMap>
+
     <sql id="cols">
         binding_id, channel_id, sales_id, effective_from, effective_to,
         bind_source, bind_remark, operator_id, create_time, update_by, update_time
@@ -26,14 +31,19 @@
         SELECT <include refid="cols"/> FROM jst_sales_channel_binding WHERE binding_id = #{bindingId}
     </select>
 
-    <select id="selectJstSalesChannelBindingList" parameterType="com.ruoyi.jst.channel.domain.JstSalesChannelBinding" resultMap="JstSalesChannelBindingResult">
-        SELECT <include refid="cols"/> FROM jst_sales_channel_binding
+    <select id="selectJstSalesChannelBindingList" parameterType="com.ruoyi.jst.channel.domain.JstSalesChannelBinding" resultMap="JstSalesChannelBindingListResult">
+        SELECT b.*,
+               sa.sales_name AS sales_name_join,
+               ch.channel_name AS channel_name_join
+          FROM jst_sales_channel_binding b
+          LEFT JOIN jst_sales sa ON b.sales_id = sa.sales_id
+          LEFT JOIN jst_channel ch ON b.channel_id = ch.channel_id AND ch.del_flag = '0'
         <where>
-            <if test="channelId != null">AND channel_id = #{channelId}</if>
-            <if test="salesId != null">AND sales_id = #{salesId}</if>
-            <if test="bindSource != null and bindSource != ''">AND bind_source = #{bindSource}</if>
+            <if test="channelId != null">AND b.channel_id = #{channelId}</if>
+            <if test="salesId != null">AND b.sales_id = #{salesId}</if>
+            <if test="bindSource != null and bindSource != ''">AND b.bind_source = #{bindSource}</if>
         </where>
-        ORDER BY effective_from DESC
+        ORDER BY b.effective_from DESC
     </select>
 
     <insert id="insertJstSalesChannelBinding" parameterType="com.ruoyi.jst.channel.domain.JstSalesChannelBinding">
@@ -85,15 +95,25 @@
          WHERE binding_id = #{bindingId} AND effective_to IS NULL
     </update>
 
-    <select id="selectCurrentByOwnerSales" parameterType="Long" resultMap="JstSalesChannelBindingResult">
-        SELECT <include refid="cols"/> FROM jst_sales_channel_binding
-         WHERE sales_id = #{salesId} AND effective_to IS NULL
+    <select id="selectCurrentByOwnerSales" parameterType="Long" resultMap="JstSalesChannelBindingListResult">
+        SELECT b.*,
+               sa.sales_name AS sales_name_join,
+               ch.channel_name AS channel_name_join
+          FROM jst_sales_channel_binding b
+          LEFT JOIN jst_sales sa ON b.sales_id = sa.sales_id
+          LEFT JOIN jst_channel ch ON b.channel_id = ch.channel_id AND ch.del_flag = '0'
+         WHERE b.sales_id = #{salesId} AND b.effective_to IS NULL
     </select>
 
-    <select id="selectAllCurrent" resultMap="JstSalesChannelBindingResult">
-        SELECT <include refid="cols"/> FROM jst_sales_channel_binding
-         WHERE effective_to IS NULL
-         ORDER BY effective_from DESC
+    <select id="selectAllCurrent" resultMap="JstSalesChannelBindingListResult">
+        SELECT b.*,
+               sa.sales_name AS sales_name_join,
+               ch.channel_name AS channel_name_join
+          FROM jst_sales_channel_binding b
+          LEFT JOIN jst_sales sa ON b.sales_id = sa.sales_id
+          LEFT JOIN jst_channel ch ON b.channel_id = ch.channel_id AND ch.del_flag = '0'
+         WHERE b.effective_to IS NULL
+         ORDER BY b.effective_from DESC
          LIMIT #{limit}
     </select>
 

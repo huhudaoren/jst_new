@@ -21,10 +21,11 @@
         <result property="updateTime"        column="update_time"/>
     </resultMap>
 
-    <!-- 带下级渠道名称/认证状态的结果集（小程序 distribution 用） -->
-    <resultMap type="com.ruoyi.jst.channel.domain.JstChannelDistributionLedger" id="JstChannelDistributionLedgerEnrichedResult"
+    <!-- 带上下级渠道名称/认证状态的结果集（小程序 distribution + admin 列表用） -->
+    <resultMap type="com.ruoyi.jst.channel.domain.JstChannelDistributionLedger" id="JstChannelDistributionLedgerListResult"
                extends="JstChannelDistributionLedgerResult">
-        <result property="inviteeChannelName" column="invitee_channel_name"/>
+        <result property="inviterChannelName" column="inviter_channel_name_join"/>
+        <result property="inviteeChannelName" column="invitee_channel_name_join"/>
         <result property="authType"           column="auth_type"/>
         <result property="avatarUrl"          column="avatar_url"/>
     </resultMap>
@@ -39,14 +40,19 @@
         SELECT <include refid="cols"/> FROM jst_channel_distribution_ledger WHERE ledger_id = #{ledgerId}
     </select>
 
-    <select id="selectJstChannelDistributionLedgerList" parameterType="com.ruoyi.jst.channel.domain.JstChannelDistributionLedger" resultMap="JstChannelDistributionLedgerResult">
-        SELECT <include refid="cols"/> FROM jst_channel_distribution_ledger
+    <select id="selectJstChannelDistributionLedgerList" parameterType="com.ruoyi.jst.channel.domain.JstChannelDistributionLedger" resultMap="JstChannelDistributionLedgerListResult">
+        SELECT d.*,
+               ic.channel_name AS inviter_channel_name_join,
+               ec.channel_name AS invitee_channel_name_join
+          FROM jst_channel_distribution_ledger d
+          LEFT JOIN jst_channel ic ON d.inviter_channel_id = ic.channel_id AND ic.del_flag = '0'
+          LEFT JOIN jst_channel ec ON d.invitee_channel_id = ec.channel_id AND ec.del_flag = '0'
         <where>
-            <if test="inviterChannelId != null">AND inviter_channel_id = #{inviterChannelId}</if>
-            <if test="inviteeChannelId != null">AND invitee_channel_id = #{inviteeChannelId}</if>
-            <if test="status != null and status != ''">AND status = #{status}</if>
+            <if test="inviterChannelId != null">AND d.inviter_channel_id = #{inviterChannelId}</if>
+            <if test="inviteeChannelId != null">AND d.invitee_channel_id = #{inviteeChannelId}</if>
+            <if test="status != null and status != ''">AND d.status = #{status}</if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY d.create_time DESC
     </select>
 
     <insert id="insertJstChannelDistributionLedger" parameterType="com.ruoyi.jst.channel.domain.JstChannelDistributionLedger">
@@ -125,23 +131,20 @@
            AND status = 'pending'
     </update>
 
-    <select id="selectByInviter" resultMap="JstChannelDistributionLedgerEnrichedResult">
-        SELECT
-            dl.ledger_id, dl.inviter_channel_id, dl.invitee_channel_id, dl.order_id, dl.order_no,
-            dl.base_amount, dl.applied_rate, dl.raw_amount, dl.compress_ratio, dl.amount, dl.status,
-            dl.accrue_at, dl.accrued_at, dl.create_time, dl.update_time,
-            invc.channel_name AS invitee_channel_name,
-            invc.auth_status  AS auth_type,
-            NULL              AS avatar_url
-        FROM jst_channel_distribution_ledger dl
-        LEFT JOIN jst_channel invc
-               ON invc.channel_id = dl.invitee_channel_id
-              AND invc.del_flag = '0'
-        WHERE dl.inviter_channel_id = #{inviterChannelId}
+    <select id="selectByInviter" resultMap="JstChannelDistributionLedgerListResult">
+        SELECT d.*,
+               ic.channel_name AS inviter_channel_name_join,
+               ec.channel_name AS invitee_channel_name_join,
+               ec.auth_status  AS auth_type,
+               NULL            AS avatar_url
+          FROM jst_channel_distribution_ledger d
+          LEFT JOIN jst_channel ic ON d.inviter_channel_id = ic.channel_id AND ic.del_flag = '0'
+          LEFT JOIN jst_channel ec ON d.invitee_channel_id = ec.channel_id AND ec.del_flag = '0'
+         WHERE d.inviter_channel_id = #{inviterChannelId}
         <if test="status != null and status != ''">
-           AND dl.status = #{status}
+           AND d.status = #{status}
         </if>
-        ORDER BY dl.create_time DESC
+         ORDER BY d.create_time DESC
     </select>
 
     <select id="sumAmountByInviter" resultType="java.math.BigDecimal">

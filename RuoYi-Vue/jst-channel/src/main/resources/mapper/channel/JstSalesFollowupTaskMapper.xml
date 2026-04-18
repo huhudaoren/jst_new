@@ -18,6 +18,10 @@
         <result property="updateTime"      column="update_time"/>
     </resultMap>
 
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSalesFollowupTask" id="JstSalesFollowupTaskListResult" extends="JstSalesFollowupTaskResult">
+        <result property="assigneeSalesName" column="assignee_sales_name_join"/>
+    </resultMap>
+
     <sql id="cols">
         task_id, assignee_sales_id, assigner_id, channel_id, title, description,
         due_date, status, completed_at, linked_record_id, create_time, update_time
@@ -27,14 +31,16 @@
         SELECT <include refid="cols"/> FROM jst_sales_followup_task WHERE task_id = #{taskId}
     </select>
 
-    <select id="selectJstSalesFollowupTaskList" parameterType="com.ruoyi.jst.channel.domain.JstSalesFollowupTask" resultMap="JstSalesFollowupTaskResult">
-        SELECT <include refid="cols"/> FROM jst_sales_followup_task
+    <select id="selectJstSalesFollowupTaskList" parameterType="com.ruoyi.jst.channel.domain.JstSalesFollowupTask" resultMap="JstSalesFollowupTaskListResult">
+        SELECT t.*, s.sales_name AS assignee_sales_name_join
+        FROM jst_sales_followup_task t
+        LEFT JOIN jst_sales s ON t.assignee_sales_id = s.sales_id
         <where>
-            <if test="assigneeSalesId != null">AND assignee_sales_id = #{assigneeSalesId}</if>
-            <if test="channelId != null">AND channel_id = #{channelId}</if>
-            <if test="status != null and status != ''">AND status = #{status}</if>
+            <if test="assigneeSalesId != null">AND t.assignee_sales_id = #{assigneeSalesId}</if>
+            <if test="channelId != null">AND t.channel_id = #{channelId}</if>
+            <if test="status != null and status != ''">AND t.status = #{status}</if>
         </where>
-        ORDER BY due_date ASC
+        ORDER BY t.due_date ASC
     </select>
 
     <insert id="insertJstSalesFollowupTask" parameterType="com.ruoyi.jst.channel.domain.JstSalesFollowupTask">
@@ -70,21 +76,25 @@
 
 
     <!-- listMine：salesId=null 时查全量（admin 视角） -->
-    <select id="listMine" resultMap="JstSalesFollowupTaskResult">
-        SELECT <include refid="cols"/> FROM jst_sales_followup_task
+    <select id="listMine" resultMap="JstSalesFollowupTaskListResult">
+        SELECT t.*, s.sales_name AS assignee_sales_name_join
+        FROM jst_sales_followup_task t
+        LEFT JOIN jst_sales s ON t.assignee_sales_id = s.sales_id
         <where>
-            <if test="salesId != null">AND assignee_sales_id = #{salesId}</if>
-            <if test="status != null and status != ''">AND status = #{status}</if>
+            <if test="salesId != null">AND t.assignee_sales_id = #{salesId}</if>
+            <if test="status != null and status != ''">AND t.status = #{status}</if>
         </where>
-        ORDER BY due_date ASC
+        ORDER BY t.due_date ASC
     </select>
 
     <!-- listAssignedBy -->
-    <select id="listAssignedBy" resultMap="JstSalesFollowupTaskResult">
-        SELECT <include refid="cols"/> FROM jst_sales_followup_task
-        WHERE assigner_id = #{userId}
-        <if test="status != null and status != ''">AND status = #{status}</if>
-        ORDER BY due_date ASC
+    <select id="listAssignedBy" resultMap="JstSalesFollowupTaskListResult">
+        SELECT t.*, s.sales_name AS assignee_sales_name_join
+        FROM jst_sales_followup_task t
+        LEFT JOIN jst_sales s ON t.assignee_sales_id = s.sales_id
+        WHERE t.assigner_id = #{userId}
+        <if test="status != null and status != ''">AND t.status = #{status}</if>
+        ORDER BY t.due_date ASC
     </select>
 
     <!-- selectOverdueTaskIds -->

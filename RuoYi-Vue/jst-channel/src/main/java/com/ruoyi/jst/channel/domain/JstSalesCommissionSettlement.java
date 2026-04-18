@@ -18,6 +18,7 @@ public class JstSalesCommissionSettlement extends BaseEntity {
     private Date paidAt;
     private String payVoucher;
     private String rejectReason;
+    private String salesName;
 
     public Long getSettlementId() { return settlementId; }
     public void setSettlementId(Long settlementId) { this.settlementId = settlementId; }
@@ -41,4 +42,6 @@ public class JstSalesCommissionSettlement extends BaseEntity {
     public void setPayVoucher(String payVoucher) { this.payVoucher = payVoucher; }
     public String getRejectReason() { return rejectReason; }
     public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
+    public String getSalesName() { return salesName; }
+    public void setSalesName(String salesName) { this.salesName = salesName; }
 }

@@ -20,8 +20,9 @@ public class JstChannelDistributionLedger extends BaseEntity {
     private String status;
     private Date accrueAt;
     private Date accruedAt;
-
     // ==== 冗余字段（LEFT JOIN jst_channel 带出，非持久化）====
+    /** 上级渠道名称（LEFT JOIN jst_channel.channel_name） */
+    private String inviterChannelName;
     /** 下级渠道名称（LEFT JOIN jst_channel.channel_name） */
     private String inviteeChannelName;
     /** 下级渠道认证状态 */
@@ -56,6 +57,8 @@ public class JstChannelDistributionLedger extends BaseEntity {
     public Date getAccruedAt() { return accruedAt; }
     public void setAccruedAt(Date accruedAt) { this.accruedAt = accruedAt; }
 
+    public String getInviterChannelName() { return inviterChannelName; }
+    public void setInviterChannelName(String inviterChannelName) { this.inviterChannelName = inviterChannelName; }
     public String getInviteeChannelName() { return inviteeChannelName; }
     public void setInviteeChannelName(String inviteeChannelName) { this.inviteeChannelName = inviteeChannelName; }
     public String getAuthType() { return authType; }

@@ -8,6 +8,7 @@ public class JstSalesFollowupTask extends BaseEntity {
 
     private Long taskId;
     private Long assigneeSalesId;
+    private String assigneeSalesName;
     private Long assignerId;
     private Long channelId;
     private String title;
@@ -21,6 +22,8 @@ public class JstSalesFollowupTask extends BaseEntity {
     public void setTaskId(Long taskId) { this.taskId = taskId; }
     public Long getAssigneeSalesId() { return assigneeSalesId; }
     public void setAssigneeSalesId(Long assigneeSalesId) { this.assigneeSalesId = assigneeSalesId; }
+    public String getAssigneeSalesName() { return assigneeSalesName; }
+    public void setAssigneeSalesName(String assigneeSalesName) { this.assigneeSalesName = assigneeSalesName; }
     public Long getAssignerId() { return assignerId; }
     public void setAssignerId(Long assignerId) { this.assignerId = assignerId; }
     public Long getChannelId() { return channelId; }
