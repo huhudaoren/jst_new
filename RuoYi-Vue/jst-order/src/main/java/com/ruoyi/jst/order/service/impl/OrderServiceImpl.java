@@ -723,6 +723,14 @@ public class OrderServiceImpl implements OrderService {
         LinkedHashMap<String, Object> extraData = new LinkedHashMap<>();
         extraData.put("orderNo", order.getOrderNo());
         extraData.put("payAmount", safeAmount(order.getNetPayAmount()));
+        // SALES-DISTRIBUTION plan-02: 销售提成计算需要的字段
+        extraData.put("channelId", order.getChannelId());
+        extraData.put("businessType", order.getBusinessType());
+        extraData.put("payTime", order.getPayTime());
+        extraData.put("paidAmount", safeAmount(order.getNetPayAmount()));
+        // 渠道返点 / 分销提成金额留到 plan-04 由上游 service 传入，此处默认 0
+        extraData.put("channelRebateAmount", java.math.BigDecimal.ZERO);
+        extraData.put("distributionAmount", java.math.BigDecimal.ZERO);
         return new OrderPaidEvent(this, order.getUserId(), order.getOrderId(), "order_paid", extraData);
     }
 

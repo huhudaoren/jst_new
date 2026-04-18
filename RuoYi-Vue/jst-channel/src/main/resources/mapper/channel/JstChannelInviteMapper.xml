@@ -67,4 +67,12 @@
         DELETE FROM jst_channel_invite WHERE invite_id = #{inviteId}
     </delete>
 
+    <select id="selectActiveByInviteeAtTime" resultMap="JstChannelInviteResult">
+        SELECT <include refid="cols"/> FROM jst_channel_invite
+         WHERE invitee_channel_id = #{inviteeChannelId}
+           AND status = 'active'
+           AND invited_at &lt;= #{atTime}
+         LIMIT 1
+    </select>
+
 </mapper>

@@ -85,4 +85,113 @@
         DELETE FROM jst_sales_commission_ledger WHERE ledger_id = #{ledgerId}
     </delete>
 
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO jst_sales_commission_ledger (
+            ledger_id, sales_id, order_id, order_no, channel_id, binding_type, business_type,
+            base_amount, applied_rate, raw_amount, compress_ratio, amount,
+            status, accrue_at, create_time
+        ) VALUES
+        <foreach collection="list" item="r" separator=",">
+            (#{r.ledgerId},#{r.salesId},#{r.orderId},#{r.orderNo},#{r.channelId},#{r.bindingType},
+             #{r.businessType},#{r.baseAmount},#{r.appliedRate},#{r.rawAmount},#{r.compressRatio},
+             #{r.amount},#{r.status},#{r.accrueAt},NOW())
+        </foreach>
+    </insert>
+
+    <select id="selectByOrderId" parameterType="Long" resultMap="JstSalesCommissionLedgerResult">
+        SELECT <include refid="cols"/> FROM jst_sales_commission_ledger WHERE order_id = #{orderId}
+    </select>
+
+    <select id="selectPendingForAccrue" resultType="Long">
+        SELECT ledger_id FROM jst_sales_commission_ledger
+         WHERE status = 'pending' AND accrue_at &lt;= NOW()
+         LIMIT 1000
+    </select>
+
+    <update id="markAccruedBatch">
+        UPDATE jst_sales_commission_ledger
+           SET status = 'accrued', accrued_at = NOW(), update_time = NOW()
+         WHERE ledger_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+        AND status = 'pending'
+    </update>
+
+    <update id="cancelPendingByOrder">
+        UPDATE jst_sales_commission_ledger
+           SET status = 'cancelled', update_time = NOW()
+         WHERE order_id = #{orderId} AND status = 'pending'
+    </update>
+
+    <!-- 兜底补偿：最近 7 天 paid 且 channelId 非空 但尚无 ledger 行的订单 -->
+    <select id="selectPaidOrdersNeedRepair" resultType="java.util.LinkedHashMap">
+        SELECT o.order_id        AS orderId,
+               o.order_no        AS orderNo,
+               o.channel_id      AS channelId,
+               o.business_type   AS businessType,
+               o.net_pay_amount  AS netPayAmount,
+               o.pay_time        AS payTime
+          FROM jst_order_main o
+         WHERE o.order_status = 'paid'
+           AND o.channel_id IS NOT NULL
+           AND o.pay_time &gt;= DATE_SUB(NOW(), INTERVAL 7 DAY)
+           AND NOT EXISTS (
+               SELECT 1 FROM jst_sales_commission_ledger l
+                WHERE l.order_id = o.order_id
+           )
+         LIMIT 200
+    </select>
+
+    <!-- 月结用：按销售+时间段汇总 accrued 行 -->
+    <select id="selectAccruedByPeriod" resultMap="JstSalesCommissionLedgerResult">
+        SELECT <include refid="cols"/> FROM jst_sales_commission_ledger
+         WHERE sales_id = #{salesId} AND status = 'accrued'
+           AND accrued_at &gt;= #{periodStart} AND accrued_at &lt; #{periodEnd}
+    </select>
+
+    <!-- 月结：accrued 行绑定到 settlement + status → settled -->
+    <update id="bindToSettlement">
+        UPDATE jst_sales_commission_ledger
+           SET status = 'settled', settlement_id = #{settlementId}, update_time = NOW()
+         WHERE sales_id = #{salesId} AND status = 'accrued'
+           AND accrued_at &gt;= #{periodStart} AND accrued_at &lt; #{periodEnd}
+    </update>
+
+    <update id="markSettledAsPaid">
+        UPDATE jst_sales_commission_ledger
+           SET status = 'paid', update_time = NOW()
+         WHERE settlement_id = #{settlementId} AND status = 'settled'
+    </update>
+
+    <update id="rollbackSettledToAccrued">
+        UPDATE jst_sales_commission_ledger
+           SET status = 'accrued', settlement_id = NULL, update_time = NOW()
+         WHERE settlement_id = #{settlementId} AND status = 'settled'
+    </update>
+
+
+    <select id="aggregatePerformance" resultType="java.util.LinkedHashMap">
+        SELECT
+            COUNT(DISTINCT order_id) AS orderCount,
+            COUNT(DISTINCT channel_id) AS channelCount,
+            COALESCE(SUM(base_amount), 0) AS totalGmv,
+            COALESCE(SUM(amount), 0) AS totalCommission,
+            COALESCE(SUM(CASE WHEN status IN ('pending','accrued') THEN amount ELSE 0 END), 0) AS pendingCommission,
+            COALESCE(SUM(CASE WHEN status IN ('settled','paid') THEN amount ELSE 0 END), 0) AS settledCommission
+          FROM jst_sales_commission_ledger
+         WHERE sales_id = #{salesId}
+           AND create_time &gt;= #{periodStart} AND create_time &lt; #{periodEnd}
+    </select>
+
+    <select id="aggregateByBusinessType" resultType="java.util.LinkedHashMap">
+        SELECT
+            business_type AS businessType,
+            COUNT(*) AS orderCount,
+            COALESCE(SUM(base_amount), 0) AS gmv,
+            COALESCE(SUM(amount), 0) AS commission
+          FROM jst_sales_commission_ledger
+         WHERE sales_id = #{salesId}
+           AND create_time &gt;= #{periodStart} AND create_time &lt; #{periodEnd}
+         GROUP BY business_type
+    </select>
+
 </mapper>

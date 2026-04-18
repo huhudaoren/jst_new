@@ -662,6 +662,8 @@ public class RefundServiceImpl implements RefundService {
         LinkedHashMap<String, Object> extraData = new LinkedHashMap<>();
         extraData.put("refundNo", refund.getRefundNo());
         extraData.put("refundAmount", safeAmount(actualCash));
+        // SALES-DISTRIBUTION plan-02: 销售提成 Listener 按 orderId 撤销 pending ledger
+        extraData.put("orderId", order.getOrderId());
         return new RefundSuccessEvent(this, order.getUserId(), refund.getRefundId(), "refund_success", extraData);
     }
 

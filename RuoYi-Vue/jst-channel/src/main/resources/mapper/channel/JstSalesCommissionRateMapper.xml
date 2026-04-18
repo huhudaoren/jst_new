@@ -53,4 +53,12 @@
         DELETE FROM jst_sales_commission_rate WHERE id = #{id}
     </delete>
 
+    <select id="selectLatestRate" resultType="java.math.BigDecimal">
+        SELECT rate FROM jst_sales_commission_rate
+         WHERE sales_id = #{salesId}
+           AND business_type = #{businessType}
+           AND effective_from &lt;= #{atTime}
+         ORDER BY effective_from DESC LIMIT 1
+    </select>
+
 </mapper>

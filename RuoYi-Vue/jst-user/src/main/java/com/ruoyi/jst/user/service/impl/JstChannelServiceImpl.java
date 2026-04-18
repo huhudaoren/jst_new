@@ -2,8 +2,11 @@ package com.ruoyi.jst.user.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.jst.common.event.ChannelRegisteredEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.ruoyi.jst.user.mapper.JstChannelMapper;
 import com.ruoyi.jst.user.domain.JstChannel;
 import com.ruoyi.jst.user.service.IJstChannelService;
@@ -19,6 +22,9 @@ public class JstChannelServiceImpl implements IJstChannelService
 {
     @Autowired
     private JstChannelMapper jstChannelMapper;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     /**
      * 查询渠道方档案
@@ -51,10 +57,23 @@ public class JstChannelServiceImpl implements IJstChannelService
      * @return 结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int insertJstChannel(JstChannel jstChannel)
     {
         jstChannel.setCreateTime(DateUtils.getNowDate());
-        return jstChannelMapper.insertJstChannel(jstChannel);
+        int rows = jstChannelMapper.insertJstChannel(jstChannel);
+        // 发布渠道注册事件 → 触发销售自动绑定 (plan-02 Task 7 SalesAutoBindingService)
+        // 以及未来 plan-04 的渠道邀请关系建立 (ChannelInviteBindingListener)。
+        // businessNo / inviteCode 暂传 null，plan-04 Task 8 wire DTO 字段后填入。
+        if (rows > 0 && jstChannel.getChannelId() != null) {
+            eventPublisher.publishEvent(new ChannelRegisteredEvent(this,
+                jstChannel.getChannelId(),
+                jstChannel.getContactMobile(),   // 渠道联系手机号
+                null,   // filledBusinessNo: plan-04 wire
+                null    // filledInviteCode: plan-04 wire
+            ));
+        }
+        return rows;
     }
 
     /**
