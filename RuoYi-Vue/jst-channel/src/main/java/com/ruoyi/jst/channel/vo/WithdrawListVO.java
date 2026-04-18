@@ -18,6 +18,11 @@ public class WithdrawListVO {
     private String status;
     private String invoiceStatus;
 
+    /** 关联返点台账条数（子查询） */
+    private Long ledgerCount;
+    /** 关联合同编号（LEFT JOIN jst_contract_record.contract_no） */
+    private String contractNo;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date applyTime;
 
@@ -78,6 +83,22 @@ public class WithdrawListVO {
 
     public void setInvoiceStatus(String invoiceStatus) {
         this.invoiceStatus = invoiceStatus;
+    }
+
+    public Long getLedgerCount() {
+        return ledgerCount;
+    }
+
+    public void setLedgerCount(Long ledgerCount) {
+        this.ledgerCount = ledgerCount;
+    }
+
+    public String getContractNo() {
+        return contractNo;
+    }
+
+    public void setContractNo(String contractNo) {
+        this.contractNo = contractNo;
     }
 
     public Date getApplyTime() {

@@ -23,6 +23,17 @@ public class InvoiceRecordVO {
     private Date issueTime;
     private Date createTime;
 
+    /** 关联结算单 ID（通过 ref_settlement_no LEFT JOIN 查出） */
+    private Long settlementId;
+    /** 关联结算单号（= refSettlementNo，冗余以保持字段命名一致） */
+    private String settlementNo;
+    /** 快递公司 */
+    private String trackingCompany;
+    /** 快递单号 */
+    private String trackingNo;
+    /** 投递邮箱（已脱敏） */
+    private String deliveryEmail;
+
     public Long getInvoiceId() {
         return invoiceId;
     }
@@ -110,4 +121,15 @@ public class InvoiceRecordVO {
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
+
+    public Long getSettlementId() { return settlementId; }
+    public void setSettlementId(Long settlementId) { this.settlementId = settlementId; }
+    public String getSettlementNo() { return settlementNo; }
+    public void setSettlementNo(String settlementNo) { this.settlementNo = settlementNo; }
+    public String getTrackingCompany() { return trackingCompany; }
+    public void setTrackingCompany(String trackingCompany) { this.trackingCompany = trackingCompany; }
+    public String getTrackingNo() { return trackingNo; }
+    public void setTrackingNo(String trackingNo) { this.trackingNo = trackingNo; }
+    public String getDeliveryEmail() { return deliveryEmail; }
+    public void setDeliveryEmail(String deliveryEmail) { this.deliveryEmail = deliveryEmail; }
 }

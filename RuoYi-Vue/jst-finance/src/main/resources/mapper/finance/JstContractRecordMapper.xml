@@ -16,6 +16,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="effectiveTime"    column="effective_time"    />
         <result property="signTime"    column="sign_time"    />
         <result property="refSettlementId"    column="ref_settlement_id"    />
+        <result property="partyA"        column="party_a"/>
+        <result property="partyAName"    column="party_a_name"/>
+        <result property="partyB"        column="party_b"/>
+        <result property="partyBName"    column="party_b_name"/>
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
@@ -25,7 +29,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectJstContractRecordVo">
-        select contract_id, contract_no, contract_type, target_type, target_id, template_id, file_url, status, effective_time, sign_time, ref_settlement_id, create_by, create_time, update_by, update_time, remark, del_flag from jst_contract_record
+        select contract_id, contract_no, contract_type, target_type, target_id, template_id, file_url, status, effective_time, sign_time, ref_settlement_id, party_a, party_a_name, party_b, party_b_name, create_by, create_time, update_by, update_time, remark, del_flag from jst_contract_record
     </sql>
 
     <select id="selectJstContractRecordList" parameterType="JstContractRecord" resultMap="JstContractRecordResult">

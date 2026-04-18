@@ -101,4 +101,36 @@ public interface JstInvoiceRecordMapper
      */
     BigDecimal selectEventSettlementFinalAmount(@Param("settlementNo") String settlementNo,
                                                 @Param("partnerId") Long partnerId);
+
+    /**
+     * 按结算单 ID 查询渠道提现单号（反查 settlementNo）。
+     *
+     * @param settlementId 提现单 ID
+     * @return 结算单号，查无返回 null
+     */
+    String selectRebateSettlementNoById(@Param("settlementId") Long settlementId);
+
+    /**
+     * 按结算单 ID 查询赛事方结算单号。
+     *
+     * @param settlementId 结算单 ID
+     * @return 结算单号，查无返回 null
+     */
+    String selectEventSettlementNoById(@Param("settlementId") Long settlementId);
+
+    /**
+     * 按结算单号反查渠道提现单 ID。
+     *
+     * @param settlementNo 提现单号
+     * @return 提现单 ID，查无返回 null
+     */
+    Long selectRebateSettlementIdByNo(@Param("settlementNo") String settlementNo);
+
+    /**
+     * 按结算单号反查赛事方结算单 ID。
+     *
+     * @param settlementNo 结算单号
+     * @return 结算单 ID，查无返回 null
+     */
+    Long selectEventSettlementIdByNo(@Param("settlementNo") String settlementNo);
 }

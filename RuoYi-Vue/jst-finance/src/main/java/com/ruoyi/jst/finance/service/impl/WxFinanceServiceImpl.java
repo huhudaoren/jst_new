@@ -197,6 +197,33 @@ public class WxFinanceServiceImpl implements WxFinanceService {
         vo.setSignTime(record.getSignTime());
         vo.setRemark(record.getRemark());
         vo.setCreateTime(record.getCreateTime());
+        // 甲乙方字段（容错：新字段可能 null）
+        try {
+            vo.setPartyA(record.getPartyA());
+            vo.setPartyAName(record.getPartyAName());
+            vo.setPartyB(record.getPartyB());
+            vo.setPartyBName(record.getPartyBName());
+        } catch (Exception ignored) {
+            // 字段未落地时忽略
+        }
+        // 关联结算单：contractId 反查 refSettlementId → settlementNo
+        Long refSettlementId = record.getRefSettlementId();
+        if (refSettlementId != null) {
+            vo.setSettlementId(refSettlementId);
+            // 根据 target_type 决定查 rebate 还是 event
+            try {
+                String targetType = record.getTargetType();
+                String settlementNo = null;
+                if ("channel".equals(targetType)) {
+                    settlementNo = jstInvoiceRecordMapper.selectRebateSettlementNoById(refSettlementId);
+                } else if ("partner".equals(targetType)) {
+                    settlementNo = jstInvoiceRecordMapper.selectEventSettlementNoById(refSettlementId);
+                }
+                vo.setSettlementNo(settlementNo);
+            } catch (Exception ignored) {
+                // 查不到静默
+            }
+        }
         return vo;
     }
 
@@ -213,7 +240,47 @@ public class WxFinanceServiceImpl implements WxFinanceService {
         vo.setExpressStatus(record.getExpressStatus());
         vo.setIssueTime(record.getIssueTime());
         vo.setCreateTime(record.getCreateTime());
+        // 物流与邮箱字段（容错）
+        try {
+            vo.setTrackingCompany(record.getTrackingCompany());
+            vo.setTrackingNo(record.getTrackingNo());
+            vo.setDeliveryEmail(maskEmail(record.getDeliveryEmail()));
+        } catch (Exception ignored) {
+            // 字段未落地时忽略
+        }
+        // settlementNo = refSettlementNo（冗余对齐命名）
+        vo.setSettlementNo(record.getRefSettlementNo());
+        // 反查 settlementId
+        if (record.getRefSettlementNo() != null && !record.getRefSettlementNo().isBlank()) {
+            try {
+                Long id = null;
+                String targetType = record.getTargetType();
+                if ("channel".equals(targetType)) {
+                    id = jstInvoiceRecordMapper.selectRebateSettlementIdByNo(record.getRefSettlementNo());
+                } else if ("partner".equals(targetType)) {
+                    id = jstInvoiceRecordMapper.selectEventSettlementIdByNo(record.getRefSettlementNo());
+                }
+                vo.setSettlementId(id);
+            } catch (Exception ignored) {
+                // 静默
+            }
+        }
         return vo;
+    }
+
+    /**
+     * 邮箱脱敏：前 2 字符 + *** + @domain。
+     */
+    private String maskEmail(String email) {
+        if (email == null || email.isEmpty()) return email;
+        int atIndex = email.indexOf('@');
+        if (atIndex <= 0) return email;
+        String prefix = email.substring(0, atIndex);
+        String domain = email.substring(atIndex);
+        if (prefix.length() <= 2) {
+            return prefix.charAt(0) + "***" + domain;
+        }
+        return prefix.substring(0, 2) + "***" + domain;
     }
 
     private String currentOperator() {
