@@ -155,14 +155,23 @@ LEFT JOIN jst_coupon_template c ON c.id = cu.template_id
 
 ## 二、Round 2B · 新表新端点（下批做，单独 PR）
 
-### B1. POST `/jst/wx/channel/orders/batch-pay` 批量支付
+> **B1 + B3 已完成**：2026-04-19，分支 `feat/backend-round-2b-b1-b3`。
+> B2（通知偏好）/ B4（账号注销）仍待做。
+> 报告：`subagent/tasks/任务报告/BACKEND-UX-POLISH-ROUND-2B-B1-B3-报告.md`。
 
-**新端点**：入参 `{ orderIds: List<Long> }`
-**逻辑**：
-1. 校验所有订单属于当前渠道方 + status=pending_pay
-2. 聚合 totalAmount
-3. 发起合并支付单 `jst_batch_pay_order`（新表）或调用 WxPayService 聚合
-4. 返回 `{ batchPayNo, totalAmount, merchantPayParams }`
+### ✅ B1. POST `/jst/wx/channel/orders/batch-pay` 批量支付
+
+**已采用**：简化聚合方案（每单独立 prepay，不建 `jst_batch_pay_order` 表）。真合单支付作为 TODO 留给后续优化。
+
+**实现路径**：
+- Controller：`jst-order/controller/wx/WxChannelOrderController.java`（路径 `/jst/wx/channel/orders/batch-pay`）
+- Service：`jst-order/service/WxChannelOrderService.java` + `WxChannelOrderServiceImpl.java`
+- DTO：`jst-order/dto/BatchPayOrderReqDTO.java`（orderIds @NotEmpty @Size max=50）
+- VO：`jst-order/vo/BatchPayResVO.java` + `BatchPayItemVO.java`
+
+**校验链**：订单存在 → 属于当前 channelId → status=pending_pay → netPayAmount>0；任一失败整批拒绝。
+
+**返回**：`{ batchPayNo, totalAmount, count, items: [{ orderId, orderNo, payAmount, merchantPayParams }] }`
 
 **前端位置**：`channel/orders.vue:246`
 
@@ -190,26 +199,41 @@ CREATE TABLE jst_user_notify_prefs (
 
 ---
 
-### B3. 发票抬头 `jst_invoice_title`
+### ✅ B3. 发票抬头 `jst_invoice_title`
 
-**DDL**：
+**DDL**：`架构设计/ddl/99-migration-invoice-title.sql`
 ```sql
-CREATE TABLE jst_invoice_title (
-  title_id    BIGINT       PRIMARY KEY AUTO_INCREMENT,
-  user_id     BIGINT       NOT NULL,
-  title_type  VARCHAR(16)  COMMENT 'personal / company',
-  title_name  VARCHAR(128),
-  tax_no      VARCHAR(64),
-  is_default  TINYINT(1)   DEFAULT 0,
-  create_time DATETIME,
-  del_flag    CHAR(1)      DEFAULT '0',
-  INDEX idx_user (user_id)
-);
+CREATE TABLE IF NOT EXISTS jst_invoice_title (
+  title_id     BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id      BIGINT       NOT NULL,
+  title_type   VARCHAR(16)  NOT NULL DEFAULT 'personal' COMMENT 'personal/company',
+  title_name   VARCHAR(128) NOT NULL,
+  tax_no       VARCHAR(64)  NULL,
+  is_default   TINYINT(1)   NOT NULL DEFAULT 0,
+  create_by    VARCHAR(64)  DEFAULT '',
+  create_time  DATETIME     DEFAULT CURRENT_TIMESTAMP,
+  update_by    VARCHAR(64)  DEFAULT '',
+  update_time  DATETIME     ON UPDATE CURRENT_TIMESTAMP,
+  del_flag     CHAR(1)      NOT NULL DEFAULT '0',
+  KEY idx_user (user_id, del_flag)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
-**端点**：
-- `GET /jst/wx/invoice-title/list`
-- `POST /jst/wx/invoice-title` (新增/更新)
-- `DELETE /jst/wx/invoice-title/{id}`
+
+**实现路径（jst-finance 模块）**：
+- Domain：`domain/JstInvoiceTitle.java`
+- VO：`vo/InvoiceTitleVO.java`
+- DTO：`dto/InvoiceTitleSaveReqDTO.java`（company + taxNo 非空校验）
+- Mapper：`mapper/JstInvoiceTitleMapper.java` + `mapper/finance/JstInvoiceTitleMapper.xml`
+- Service：`service/InvoiceTitleService.java` + `service/impl/InvoiceTitleServiceImpl.java`
+- Controller：`controller/wx/WxInvoiceTitleController.java`
+
+**端点**（路径前缀 `/jst/wx/user/invoice-title`）：
+- `GET /list` → 当前用户全部抬头
+- `POST /` → 新增/更新（titleId 非空=更新）
+- `DELETE /{id}` → 软删
+- `POST /{id}/default` → 切换默认（事务内清旧 + 标新）
+
+**归属强校验**：所有写操作通过 `SecurityUtils.getUserId()` 取 userId，Service 层 `requireOwned(userId,titleId)` 越权抛 99902。
 
 **前端位置**：`my/settings.vue:248`
 

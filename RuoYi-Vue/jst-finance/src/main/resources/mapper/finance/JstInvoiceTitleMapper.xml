@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.jst.finance.mapper.JstInvoiceTitleMapper">
+
+    <resultMap id="JstInvoiceTitleResult" type="com.ruoyi.jst.finance.domain.JstInvoiceTitle">
+        <id     property="titleId"    column="title_id"    />
+        <result property="userId"     column="user_id"     />
+        <result property="titleType"  column="title_type"  />
+        <result property="titleName"  column="title_name"  />
+        <result property="taxNo"      column="tax_no"      />
+        <result property="isDefault"  column="is_default"  />
+        <result property="createBy"   column="create_by"   />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy"   column="update_by"   />
+        <result property="updateTime" column="update_time" />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectAllColumns">
+        select title_id, user_id, title_type, title_name, tax_no, is_default,
+               create_by, create_time, update_by, update_time, del_flag
+        from jst_invoice_title
+    </sql>
+
+    <select id="selectByTitleId" resultMap="JstInvoiceTitleResult">
+        <include refid="selectAllColumns"/>
+        where title_id = #{titleId}
+    </select>
+
+    <select id="selectByUserId" resultMap="JstInvoiceTitleResult">
+        <include refid="selectAllColumns"/>
+        where user_id = #{userId}
+          and del_flag = '0'
+        order by is_default desc, create_time desc, title_id desc
+    </select>
+
+    <insert id="insert" parameterType="com.ruoyi.jst.finance.domain.JstInvoiceTitle"
+            useGeneratedKeys="true" keyProperty="titleId">
+        insert into jst_invoice_title
+        (user_id, title_type, title_name, tax_no, is_default,
+         create_by, create_time, update_by, update_time, del_flag)
+        values
+        (#{userId}, #{titleType}, #{titleName}, #{taxNo},
+         <choose>
+           <when test="isDefault != null">#{isDefault}</when>
+           <otherwise>0</otherwise>
+         </choose>,
+         #{createBy}, #{createTime}, #{updateBy}, #{updateTime},
+         <choose>
+           <when test="delFlag != null and delFlag != ''">#{delFlag}</when>
+           <otherwise>'0'</otherwise>
+         </choose>)
+    </insert>
+
+    <update id="update" parameterType="com.ruoyi.jst.finance.domain.JstInvoiceTitle">
+        update jst_invoice_title
+        <set>
+            <if test="titleType  != null and titleType  != ''">title_type  = #{titleType},</if>
+            <if test="titleName  != null and titleName  != ''">title_name  = #{titleName},</if>
+            <if test="taxNo      != null">tax_no      = #{taxNo},</if>
+            <if test="updateBy   != null">update_by   = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        where title_id = #{titleId}
+          and del_flag = '0'
+    </update>
+
+    <update id="softDelete">
+        update jst_invoice_title
+        set del_flag    = '2',
+            update_by   = #{updateBy},
+            update_time = #{updateTime}
+        where title_id = #{titleId}
+          and del_flag = '0'
+    </update>
+
+    <update id="clearDefaultByUserId">
+        update jst_invoice_title
+        set is_default  = 0,
+            update_by   = #{updateBy},
+            update_time = #{updateTime}
+        where user_id   = #{userId}
+          and del_flag  = '0'
+          and is_default = 1
+    </update>
+
+    <update id="markDefault">
+        update jst_invoice_title
+        set is_default  = 1,
+            update_by   = #{updateBy},
+            update_time = #{updateTime}
+        where title_id = #{titleId}
+          and del_flag = '0'
+    </update>
+
+</mapper>
