@@ -10,11 +10,11 @@
     </div>
 
     <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
-      <el-form-item label="渠道ID" prop="channelId">
-        <el-input v-model="queryParams.channelId" placeholder="请输入渠道ID" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="渠道" prop="channelId">
+        <channel-picker v-model="queryParams.channelId" clearable />
       </el-form-item>
-      <el-form-item label="订单ID" prop="orderId">
-        <el-input v-model="queryParams.orderId" placeholder="请输入订单ID" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="订单" prop="orderId">
+        <order-picker v-model="queryParams.orderId" clearable />
       </el-form-item>
       <el-form-item label="方向" prop="direction">
         <el-select v-model="queryParams.direction" placeholder="全部" clearable>
