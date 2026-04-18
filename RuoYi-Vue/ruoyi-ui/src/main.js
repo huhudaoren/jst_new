@@ -39,6 +39,20 @@ import DictData from '@/components/DictData'
 import JstStatusBadge from '@/components/JstStatusBadge'
 import JstEmptyState from '@/components/JstEmptyState'
 import JsonDisplay from '@/components/JsonDisplay'
+// Plan-06 UX 精品化基础组件
+import PageHeader from '@/components/PageHeader.vue'
+import EmptyStateCTA from '@/components/EmptyStateCTA.vue'
+import EntityLink from '@/components/EntityLink.vue'
+import StatCardGroup from '@/components/StatCardGroup.vue'
+import FieldLabelPlugin from '@/plugins/field-label'
+// Plan-06 RelationPicker 族
+import ChannelPicker from '@/components/RelationPicker/ChannelPicker.vue'
+import UserPicker from '@/components/RelationPicker/UserPicker.vue'
+import SalesPicker from '@/components/RelationPicker/SalesPicker.vue'
+import ContestPicker from '@/components/RelationPicker/ContestPicker.vue'
+import ParticipantPicker from '@/components/RelationPicker/ParticipantPicker.vue'
+import PartnerPicker from '@/components/RelationPicker/PartnerPicker.vue'
+import OrderPicker from '@/components/RelationPicker/OrderPicker.vue'
 
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts
@@ -62,6 +76,18 @@ Vue.component('ImagePreview', ImagePreview)
 Vue.component('JstStatusBadge', JstStatusBadge)
 Vue.component('JstEmptyState', JstEmptyState)
 Vue.component('JsonDisplay', JsonDisplay)
+Vue.component('PageHeader', PageHeader)
+Vue.component('EmptyStateCTA', EmptyStateCTA)
+Vue.component('EntityLink', EntityLink)
+Vue.component('StatCardGroup', StatCardGroup)
+Vue.use(FieldLabelPlugin)
+Vue.component('ChannelPicker', ChannelPicker)
+Vue.component('UserPicker', UserPicker)
+Vue.component('SalesPicker', SalesPicker)
+Vue.component('ContestPicker', ContestPicker)
+Vue.component('ParticipantPicker', ParticipantPicker)
+Vue.component('PartnerPicker', PartnerPicker)
+Vue.component('OrderPicker', OrderPicker)
 
 Vue.use(directive)
 Vue.use(plugins)

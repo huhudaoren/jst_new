@@ -13,8 +13,8 @@
       <el-form-item label="申请编号" prop="applyNo">
         <el-input v-model="queryParams.applyNo" placeholder="请输入申请编号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="用户ID" prop="userId">
-        <el-input v-model="queryParams.userId" placeholder="请输入用户ID" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="用户" prop="userId">
+        <user-picker v-model="queryParams.userId" clearable />
       </el-form-item>
       <el-form-item label="审核状态" prop="applyStatus">
         <el-select v-model="queryParams.applyStatus" placeholder="全部" clearable>

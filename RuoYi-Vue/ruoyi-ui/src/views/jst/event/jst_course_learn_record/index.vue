@@ -174,8 +174,8 @@
         <el-form-item label="课程ID" prop="courseId">
           <el-input v-model="form.courseId" placeholder="请输入课程ID" />
         </el-form-item>
-        <el-form-item label="用户ID" prop="userId">
-          <el-input v-model="form.userId" placeholder="请输入用户ID" />
+        <el-form-item label="用户" prop="userId">
+          <user-picker v-model="form.userId" />
         </el-form-item>
         <el-form-item label="学习进度" prop="progress">
           <el-input v-model="form.progress" placeholder="请输入学习进度百分比" />

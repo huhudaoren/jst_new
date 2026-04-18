@@ -36,8 +36,11 @@
         <div slot="header">提成明细（共 {{ ledgers.length }} 笔）</div>
         <el-table :data="ledgers" border stripe size="small">
           <el-table-column label="订单号" prop="orderNo" min-width="160" show-overflow-tooltip />
-          <el-table-column label="渠道名" prop="channelName" min-width="110" show-overflow-tooltip>
-            <template slot-scope="scope">{{ scope.row.channelName || scope.row.channelId || '-' }}</template>
+          <el-table-column label="渠道" min-width="140">
+            <template slot-scope="scope">
+              <entity-link v-if="scope.row.channelId" entity="channel" :id="scope.row.channelId" :name="scope.row.channelName" />
+              <span v-else>-</span>
+            </template>
           </el-table-column>
           <el-table-column label="业务类型" prop="businessType" width="110" align="center">
             <template slot-scope="scope">{{ scope.row.businessType || '-' }}</template>
@@ -57,7 +60,7 @@
           </el-table-column>
         </el-table>
       </el-card>
-      <el-empty v-if="!loading && !ledgers.length" description="暂无明细数据" :image-size="60" />
+      <empty-state-cta v-if="!loading && !ledgers.length" title="暂无提成明细" description="本月结单暂无关联提成台账" :image-size="60" />
     </div>
     <el-empty v-if="!loading && !settlement" description="结算单不存在" :image-size="80" />
   </div>

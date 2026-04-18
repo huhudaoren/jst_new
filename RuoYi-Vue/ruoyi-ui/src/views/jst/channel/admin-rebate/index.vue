@@ -20,8 +20,8 @@
       <el-form-item label="渠道名称" prop="channelName">
         <el-input v-model="queryParams.channelName" placeholder="请输入渠道名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="订单ID" prop="orderId">
-        <el-input v-model="queryParams.orderId" placeholder="请输入订单ID" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="订单" prop="orderId">
+        <order-picker v-model="queryParams.orderId" clearable />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>

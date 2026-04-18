@@ -10,8 +10,8 @@
     </div>
 
     <el-form ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
-      <el-form-item label="赛事ID" prop="contestId">
-        <el-input v-model="queryParams.contestId" placeholder="请输入赛事ID" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="赛事" prop="contestId">
+        <contest-picker v-model="queryParams.contestId" clearable />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>
@@ -110,11 +110,11 @@
     <!-- 编辑弹窗 -->
     <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" :width="isMobile ? '95%' : '600px'" append-to-body>
       <el-form ref="editForm" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="赛事ID" prop="contestId">
-          <el-input v-model="form.contestId" placeholder="请输入赛事ID" />
+        <el-form-item label="赛事" prop="contestId">
+          <contest-picker v-model="form.contestId" />
         </el-form-item>
-        <el-form-item label="渠道ID" prop="channelId">
-          <el-input v-model="form.channelId" placeholder="留空为默认规则" />
+        <el-form-item label="渠道" prop="channelId">
+          <channel-picker v-model="form.channelId" placeholder="留空为默认规则" />
         </el-form-item>
         <el-form-item label="返点模式" prop="rebateMode">
           <el-select v-model="form.rebateMode" placeholder="请选择" style="width: 100%">

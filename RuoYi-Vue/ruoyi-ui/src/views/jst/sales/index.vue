@@ -84,8 +84,8 @@
       <el-form :model="createForm" ref="createForm" :rules="createRules" label-width="110px">
         <div class="form-section">
           <div class="form-section__title">基本信息</div>
-          <el-form-item label="关联系统用户ID" prop="sysUserId">
-            <el-input-number v-model="createForm.sysUserId" :min="1" style="width:100%" placeholder="请输入 sys_user.user_id" />
+          <el-form-item label="关联系统用户" prop="sysUserId">
+            <user-picker v-model="createForm.sysUserId" placeholder="搜索用户名或昵称" style="width:100%" />
           </el-form-item>
           <el-form-item label="销售姓名" prop="salesName">
             <el-input v-model="createForm.salesName" placeholder="请输入销售姓名" maxlength="64" />
@@ -176,7 +176,7 @@ export default {
         asManager: false
       },
       createRules: {
-        sysUserId: [{ required: true, message: '请输入系统用户ID', trigger: 'blur' }],
+        sysUserId: [{ required: true, message: '请选择关联系统用户', trigger: 'change' }],
         salesName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
         phone: [
           { required: true, message: '请输入手机号', trigger: 'blur' },

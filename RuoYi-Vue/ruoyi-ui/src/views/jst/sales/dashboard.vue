@@ -13,6 +13,32 @@
       />
     </div>
 
+    <!-- 扩展筛选器 -->
+    <el-card class="filter-card" shadow="never" style="margin-bottom: 12px">
+      <el-form :inline="true" size="small">
+        <el-form-item label="日期范围">
+          <el-date-picker
+            v-model="dateRangeArr"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始"
+            end-placeholder="结束"
+            value-format="yyyy-MM-dd"
+            style="width: 240px"
+            @change="loadAll"
+          />
+        </el-form-item>
+        <el-form-item label="业务类型">
+          <el-select v-model="businessType" clearable placeholder="全部" @change="loadAll" style="width: 140px">
+            <el-option v-for="d in businessTypeDict" :key="d.value" :label="d.label" :value="d.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="地区">
+          <el-input v-model="region" placeholder="省/市关键字" clearable @change="loadAll" style="width: 160px" />
+        </el-form-item>
+      </el-form>
+    </el-card>
+
     <!-- 4 stat-card -->
     <el-row :gutter="16" class="stat-row">
       <el-col :xs="12" :sm="6">
@@ -63,7 +89,7 @@
               </template>
             </el-table-column>
           </el-table>
-          <el-empty v-if="!loadingOverview && !salesRankList.length" description="暂无数据" :image-size="60" />
+          <empty-state-cta v-if="!loadingOverview && !salesRankList.length" title="暂无业绩数据" description="本月尚无成交记录" :image-size="60" />
         </el-card>
       </el-col>
 
@@ -74,7 +100,7 @@
             <span>跟进活跃度</span>
           </div>
           <div ref="barChart" style="height: 300px;" />
-          <el-empty v-if="!loadingActivity && !activityData.length" description="暂无数据" :image-size="60" />
+          <empty-state-cta v-if="!loadingActivity && !activityData.length" title="暂无跟进活跃度" description="本月尚无跟进记录" :image-size="60" />
         </el-card>
       </el-col>
     </el-row>
@@ -102,6 +128,10 @@ export default {
   data() {
     return {
       selectedMonth: this.currentMonth(),
+      dateRangeArr: [],
+      businessType: '',
+      region: '',
+      businessTypeDict: [],
       overview: {},
       salesRankList: [],
       activityData: [],
@@ -120,6 +150,7 @@ export default {
   },
   created() {
     this.loadAll()
+    this.getDicts('jst_sales_business_type').then(r => { this.businessTypeDict = r.data || [] }).catch(() => {})
   },
   beforeDestroy() {
     if (this.chart) this.chart.dispose()

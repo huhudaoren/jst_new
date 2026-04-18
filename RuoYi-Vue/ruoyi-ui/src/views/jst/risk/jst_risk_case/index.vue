@@ -18,8 +18,8 @@
           <el-option v-for="item in dict.type.jst_risk_case_status" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
-      <el-form-item label="处理人ID" prop="assigneeId">
-        <el-input v-model="queryParams.assigneeId" placeholder="请输入处理人ID" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="处理人" prop="assigneeId">
+        <user-picker v-model="queryParams.assigneeId" clearable />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>

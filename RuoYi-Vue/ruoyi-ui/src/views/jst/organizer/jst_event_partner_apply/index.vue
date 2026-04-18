@@ -219,8 +219,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="通过后生成的赛事方ID" prop="partnerId">
-              <el-input v-model="form.partnerId" placeholder="请输入通过后生成的赛事方ID" />
+            <el-form-item label="关联赛事方" prop="partnerId">
+              <partner-picker v-model="form.partnerId" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -254,8 +254,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="审核员ID" prop="auditUserId">
-              <el-input v-model="form.auditUserId" placeholder="请输入审核员ID" />
+            <el-form-item label="审核员" prop="auditUserId">
+              <user-picker v-model="form.auditUserId" />
             </el-form-item>
           </el-col>
           <el-col :span="24">

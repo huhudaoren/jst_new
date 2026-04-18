@@ -31,7 +31,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-empty v-if="!loading && settlementList.length === 0" description="暂无月结数据" :image-size="80" />
+        <empty-state-cta v-if="!loading && settlementList.length === 0" title="本月无月结单" description="月结单在每月 1 日自动生成" :image-size="80" />
       </div>
       <pagination
         v-show="total > 0"

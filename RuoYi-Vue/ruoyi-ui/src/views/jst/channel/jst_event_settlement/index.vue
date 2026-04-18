@@ -13,8 +13,8 @@
       <el-form-item label="结算单号" prop="settlementNo">
         <el-input v-model="queryParams.settlementNo" placeholder="请输入结算单号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="赛事方ID" prop="partnerId">
-        <el-input v-model="queryParams.partnerId" placeholder="请输入赛事方ID" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="赛事方" prop="partnerId">
+        <partner-picker v-model="queryParams.partnerId" clearable />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>

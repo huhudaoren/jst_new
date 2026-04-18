@@ -286,8 +286,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="所属赛事方ID，FK→jst_event_partner" prop="partnerId">
-              <el-input v-model="form.partnerId" placeholder="请输入所属赛事方ID，FK→jst_event_partner" />
+            <el-form-item label="所属赛事方" prop="partnerId">
+              <partner-picker v-model="form.partnerId" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -381,8 +381,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="创建人用户ID" prop="createdUserId">
-              <el-input v-model="form.createdUserId" placeholder="请输入创建人用户ID" />
+            <el-form-item label="创建人" prop="createdUserId">
+              <user-picker v-model="form.createdUserId" />
             </el-form-item>
           </el-col>
           <el-col :span="24">

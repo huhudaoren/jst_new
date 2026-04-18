@@ -30,8 +30,10 @@
     <!-- 表格 -->
     <el-table v-loading="loading" :data="list" border stripe>
       <el-table-column label="结算单ID" prop="settlementId" width="100" />
-      <el-table-column label="销售姓名" prop="salesName" min-width="100" show-overflow-tooltip>
-        <template slot-scope="scope">{{ scope.row.salesName || scope.row.salesId }}</template>
+      <el-table-column label="销售" min-width="130">
+        <template slot-scope="scope">
+          <entity-link entity="sales" :id="scope.row.salesId" :name="scope.row.salesName" />
+        </template>
       </el-table-column>
       <el-table-column label="结算月份" prop="period" width="110" align="center" />
       <el-table-column label="成交笔数" prop="orderCount" width="90" align="center" />

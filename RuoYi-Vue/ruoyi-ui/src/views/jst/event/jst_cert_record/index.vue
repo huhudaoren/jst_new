@@ -207,8 +207,8 @@
           <div class="form-section__title">关联赛事 / 成绩 / 报名</div>
           <el-row :gutter="12">
             <el-col :xs="24" :sm="12">
-              <el-form-item label="赛事ID" prop="contestId">
-                <el-input v-model="form.contestId" placeholder="请输入赛事ID" />
+              <el-form-item label="赛事" prop="contestId">
+                <contest-picker v-model="form.contestId" />
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12">
@@ -224,8 +224,8 @@
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12">
-              <el-form-item label="参赛人ID" prop="participantId">
-                <el-input v-model="form.participantId" placeholder="请输入参赛人ID" />
+              <el-form-item label="参赛人" prop="participantId">
+                <participant-picker v-model="form.participantId" />
               </el-form-item>
             </el-col>
           </el-row>

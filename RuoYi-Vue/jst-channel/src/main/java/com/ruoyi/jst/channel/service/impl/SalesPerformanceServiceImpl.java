@@ -5,10 +5,10 @@ import com.ruoyi.jst.channel.dto.SalesPerformanceVO.SalesPerformanceByTypeVO;
 import com.ruoyi.jst.channel.mapper.JstSalesCommissionLedgerMapper;
 import com.ruoyi.jst.channel.service.SalesPerformanceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -21,6 +21,9 @@ public class SalesPerformanceServiceImpl implements SalesPerformanceService {
 
     @Autowired
     private JstSalesCommissionLedgerMapper ledgerMapper;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     public SalesPerformanceVO aggregate(Long salesId, String yearMonth) {
@@ -72,4 +75,34 @@ public class SalesPerformanceServiceImpl implements SalesPerformanceService {
     }
 
     private String strValue(Object v) { return v == null ? null : v.toString(); }
+
+    @Override
+    public List<Map<String, Object>> listInactiveChannels(Long salesId, int days) {
+        String sql = "SELECT b.channel_id AS channelId, c.channel_name AS channelName, MAX(f.followup_at) AS lastFollowupAt " +
+                     "FROM jst_sales_channel_binding b " +
+                     "LEFT JOIN jst_channel c ON c.channel_id = b.channel_id " +
+                     "LEFT JOIN jst_sales_followup_record f ON f.channel_id = b.channel_id " +
+                     "WHERE b.effective_to IS NULL " +
+                     (salesId != null ? "AND b.sales_id = ? " : "") +
+                     "GROUP BY b.channel_id, c.channel_name " +
+                     "HAVING lastFollowupAt IS NULL OR lastFollowupAt < DATE_SUB(NOW(), INTERVAL ? DAY) " +
+                     "LIMIT 50";
+        if (salesId != null) {
+            return jdbcTemplate.queryForList(sql, salesId, days);
+        }
+        return jdbcTemplate.queryForList(sql, days);
+    }
+
+    @Override
+    public List<Map<String, Object>> listExpiringPreReg(Long salesId, int days) {
+        String sql = "SELECT pre_id AS preId, phone, target_name AS targetName, expire_at AS expireAt " +
+                     "FROM jst_sales_pre_register " +
+                     "WHERE status='pending' AND expire_at <= DATE_ADD(NOW(), INTERVAL ? DAY) " +
+                     (salesId != null ? "AND sales_id = ? " : "") +
+                     "ORDER BY expire_at ASC LIMIT 50";
+        if (salesId != null) {
+            return jdbcTemplate.queryForList(sql, days, salesId);
+        }
+        return jdbcTemplate.queryForList(sql, days);
+    }
 }

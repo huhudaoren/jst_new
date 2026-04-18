@@ -27,9 +27,9 @@
       <el-table-column label="已续期" prop="renewCount" width="80" align="center">
         <template slot-scope="scope">{{ scope.row.renewCount || 0 }} / 2</template>
       </el-table-column>
-      <el-table-column label="已匹配渠道" prop="matchedChannelId" width="120" align="center">
+      <el-table-column label="已匹配渠道" width="160">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.matchedChannelId" size="mini" type="success">已匹配 #{{ scope.row.matchedChannelId }}</el-tag>
+          <entity-link v-if="scope.row.matchedChannelId" entity="channel" :id="scope.row.matchedChannelId" :name="scope.row.matchedChannelName" />
           <span v-else style="color:#909399">--</span>
         </template>
       </el-table-column>

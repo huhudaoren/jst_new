@@ -36,6 +36,11 @@
             <if test="salesId != null">AND sales_id = #{salesId}</if>
             <if test="period != null and period != ''">AND period = #{period}</if>
             <if test="status != null and status != ''">AND status = #{status}</if>
+            <!-- Plan-06 Task 21: 主管登录时 Controller 注入 scopeSalesIds 限制下属范围 -->
+            <if test="params.scopeSalesIds != null and params.scopeSalesIds.size() > 0">
+                AND sales_id IN
+                <foreach collection="params.scopeSalesIds" item="id" open="(" separator="," close=")">#{id}</foreach>
+            </if>
         </where>
         ORDER BY period DESC
     </select>

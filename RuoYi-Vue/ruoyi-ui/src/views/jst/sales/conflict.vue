@@ -25,7 +25,11 @@
     <!-- 表格 -->
     <el-table v-loading="loading" :data="list" border stripe>
       <el-table-column label="冲突ID" prop="conflictId" width="90" />
-      <el-table-column label="渠道ID" prop="channelId" width="90" align="center" />
+      <el-table-column label="渠道" width="160">
+        <template slot-scope="scope">
+          <entity-link entity="channel" :id="scope.row.channelId" :name="scope.row.channelName" />
+        </template>
+      </el-table-column>
       <el-table-column label="候选销售" prop="candidateSalesIds" min-width="160" show-overflow-tooltip>
         <template slot-scope="scope">
           <span>{{ formatCandidates(scope.row) }}</span>

@@ -23,8 +23,8 @@
           <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
-      <el-form-item label="用户ID" prop="targetUserId">
-        <el-input v-model="queryParams.targetUserId" placeholder="请输入用户ID" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="用户" prop="targetUserId">
+        <user-picker v-model="queryParams.targetUserId" clearable />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>

@@ -381,8 +381,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="当前有效绑定渠道方ID，FK→jst_channel.channel_id" prop="boundChannelId">
-              <el-input v-model="form.boundChannelId" placeholder="请输入当前有效绑定渠道方ID，FK→jst_channel.channel_id" />
+            <el-form-item label="绑定渠道" prop="boundChannelId">
+              <channel-picker v-model="form.boundChannelId" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
