@@ -31,12 +31,27 @@ const isPartnerUser = () => {
   return store.getters.roles.includes('jst_partner')
 }
 
+const isSalesManager = () => {
+  return store.getters.roles.includes('jst_sales_manager')
+}
+
+const isSalesUser = () => {
+  return store.getters.roles.includes('jst_sales')
+}
+
 const shouldUsePartnerHome = (to) => {
   return isPartnerUser() && (to.path === '/' || to.path === '/index')
 }
 
+const shouldUseSalesHome = (to) => {
+  return !isPartnerUser() && (isSalesUser() || isSalesManager()) && (to.path === '/' || to.path === '/index')
+}
+
 const getDefaultHomePath = () => {
-  return isPartnerUser() ? '/partner/home' : '/'
+  if (isPartnerUser()) return '/partner/home'
+  if (isSalesManager()) return '/sales-workbench/manager-dashboard'
+  if (isSalesUser()) return '/sales-workbench/index'
+  return '/'
 }
 
 const APP_TITLE = '竞赛通'
@@ -81,6 +96,8 @@ router.beforeEach((to, from, next) => {
           router.addRoutes(accessRoutes)
           if (shouldUsePartnerHome(to)) {
             next({ path: '/partner/home', replace: true })
+          } else if (shouldUseSalesHome(to)) {
+            next({ path: getDefaultHomePath(), replace: true })
           } else {
             next({ ...to, replace: true })
           }
@@ -93,6 +110,9 @@ router.beforeEach((to, from, next) => {
       })
     } else if (shouldUsePartnerHome(to)) {
       next({ path: '/partner/home', replace: true })
+      NProgress.done()
+    } else if (shouldUseSalesHome(to)) {
+      next({ path: getDefaultHomePath(), replace: true })
       NProgress.done()
     } else {
       next()
