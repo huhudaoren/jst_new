@@ -39,21 +39,31 @@
         </view>
       </view>
 
-      <!-- ===== Summary 4格 ===== -->
+      <!-- ===== Summary 4格 (按视角切换数据: 学生=报名/成绩/证书/课程 · 渠道=学生/代报名/待结算/累计返点) ===== -->
       <view class="my-page__summary">
-        <view class="my-page__summary-item" @tap="navigateMyEnroll"><text class="my-page__summary-num">{{ animatedSummary.enroll }}</text><text class="my-page__summary-label">报名记录</text></view>
-        <view class="my-page__summary-item" @tap="navigateMyScore"><text class="my-page__summary-num">{{ animatedSummary.score }}</text><text class="my-page__summary-label">我的成绩</text></view>
-        <view class="my-page__summary-item" @tap="navigateMyCert"><text class="my-page__summary-num">{{ animatedSummary.cert }}</text><text class="my-page__summary-label">我的证书</text></view>
-        <view class="my-page__summary-item" @tap="navigateMyCourse"><text class="my-page__summary-num">{{ animatedSummary.course }}</text><text class="my-page__summary-label">我的课程</text></view>
+        <view
+          v-for="(item, idx) in summaryItems"
+          :key="idx"
+          class="my-page__summary-item"
+          @tap="handleSummaryTap(item.tap)"
+        >
+          <text class="my-page__summary-num" :class="item.highlight ? 'my-page__summary-num--gold' : ''">{{ item.num }}</text>
+          <text class="my-page__summary-label">{{ item.label }}</text>
+        </view>
       </view>
 
-      <!-- ===== 等级卡 ===== -->
-      <view class="my-page__level-card" @tap="navigatePointsCenter">
+      <!-- ===== 等级卡 (按等级动态配色: 新手/青铜/白银/黄金/铂金/钻石/星耀/王者) ===== -->
+      <view class="my-page__level-card" :style="{ background: levelTheme.gradient }" @tap="navigatePointsCenter">
         <view class="my-page__level-header">
-          <text class="my-page__level-badge">{{ profile.levelName || ('Lv.' + (profile.currentLevelId || 0)) }}</text>
+          <text class="my-page__level-badge" :style="{ background: levelTheme.badgeBg, color: levelTheme.badgeText }">
+            <text class="my-page__level-badge-icon">{{ levelTheme.icon }}</text>
+            {{ profile.levelName || levelTheme.name }}
+          </text>
           <view class="my-page__level-progress">
             <text class="my-page__level-progress-text">成长值进度 · 距下一级还差 {{ nextLevelGap }}</text>
-            <view class="my-page__level-bar"><view class="my-page__level-bar-fill" :style="{ width: levelProgress + '%' }"></view></view>
+            <view class="my-page__level-bar" :style="{ background: levelTheme.barBg }">
+              <view class="my-page__level-bar-fill" :style="{ width: levelProgress + '%', background: levelTheme.barFill }"></view>
+            </view>
           </view>
         </view>
         <view class="my-page__level-stats">
@@ -61,14 +71,6 @@
           <view class="my-page__level-stat"><text class="my-page__level-stat-num">{{ profile.frozenPoints || 0 }}</text><text class="my-page__level-stat-label">冻结积分</text></view>
           <view class="my-page__level-stat"><text class="my-page__level-stat-num">{{ profile.totalPoints || 0 }}</text><text class="my-page__level-stat-label">累计获取</text></view>
         </view>
-      </view>
-
-      <!-- ===== 快捷标签 ===== -->
-      <view class="my-page__quick-tags">
-        <view class="my-page__quick-tag" @tap="navigateMall">🎁 积分商城</view>
-        <view class="my-page__quick-tag" @tap="navigatePointsCenter">📊 积分明细</view>
-        <view class="my-page__quick-tag" @tap="navigateCouponCenter">🎫 我的优惠券</view>
-        <view class="my-page__quick-tag" @tap="navigateRightsCenter">🎖 我的权益</view>
       </view>
 
       <!-- ===== 渠道绑定卡 (已绑定时显示) ===== -->
@@ -126,26 +128,31 @@
           </view>
         </view>
 
-        <!-- 基础管理 -->
+        <!-- 财务与结算 (仅 my 页独有, 学生管理/订单/返点/提现/经营分析等运营功能全部挪入工作台) -->
         <view class="my-page__section">
-          <text class="my-page__section-title">基础管理</text>
+          <text class="my-page__section-title">财务与结算</text>
           <view class="my-page__card">
-            <view class="my-page__cell" @tap="navigateChannelStudents"><view class="my-page__cell-icon my-page__cell-icon--teal">👥</view><view class="my-page__cell-body"><text class="my-page__cell-title">学生管理</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell" @tap="navigateChannelOrders"><view class="my-page__cell-icon my-page__cell-icon--orange">📋</view><view class="my-page__cell-body"><text class="my-page__cell-title">订单管理</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell" @tap="navigateChannelRebate"><view class="my-page__cell-icon my-page__cell-icon--gold">💰</view><view class="my-page__cell-body"><text class="my-page__cell-title">返点中心</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell" @tap="navigateChannelWithdrawList"><view class="my-page__cell-icon my-page__cell-icon--blue">🏦</view><view class="my-page__cell-body"><text class="my-page__cell-title">提现结算</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell" @tap="navigateChannelData"><view class="my-page__cell-icon my-page__cell-icon--purple">📊</view><view class="my-page__cell-body"><text class="my-page__cell-title">经营分析</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell" @tap="navigateContractList"><view class="my-page__cell-icon my-page__cell-icon--blue">📄</view><view class="my-page__cell-body"><text class="my-page__cell-title">合同中心</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell" @tap="navigateInvoiceList"><view class="my-page__cell-icon my-page__cell-icon--orange">🧾</view><view class="my-page__cell-body"><text class="my-page__cell-title">开票中心</text></view><text class="my-page__cell-arrow">›</text></view>
+            <view class="my-page__cell" @tap="navigateContractList"><view class="my-page__cell-icon my-page__cell-icon--blue">📄</view><view class="my-page__cell-body"><text class="my-page__cell-title">合同中心</text><text class="my-page__cell-desc">签约合同管理</text></view><text class="my-page__cell-arrow">›</text></view>
+            <view class="my-page__cell" @tap="navigateInvoiceList"><view class="my-page__cell-icon my-page__cell-icon--orange">🧾</view><view class="my-page__cell-body"><text class="my-page__cell-title">开票中心</text><text class="my-page__cell-desc">发票申请与查看</text></view><text class="my-page__cell-arrow">›</text></view>
           </view>
         </view>
 
-        <!-- 其他 -->
+        <!-- 消息与互动 -->
         <view class="my-page__section">
+          <text class="my-page__section-title">消息与互动</text>
           <view class="my-page__card">
-            <view class="my-page__cell" @tap="navigateChannelApplyStatus"><view class="my-page__cell-icon my-page__cell-icon--teal">✅</view><view class="my-page__cell-body"><text class="my-page__cell-title">认证信息</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell" @tap="navigateHelp"><view class="my-page__cell-icon my-page__cell-icon--blue">💬</view><view class="my-page__cell-body"><text class="my-page__cell-title">客服与帮助</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell" @tap="navigateSettings"><view class="my-page__cell-icon my-page__cell-icon--gray">⚙️</view><view class="my-page__cell-body"><text class="my-page__cell-title">设置</text></view><text class="my-page__cell-arrow">›</text></view>
+            <view class="my-page__cell" @tap="navigateMessage"><view class="my-page__cell-icon my-page__cell-icon--orange">🔔</view><view class="my-page__cell-body"><text class="my-page__cell-title">业务消息</text><text class="my-page__cell-desc">订单/返点/结算/审核通知</text></view><view v-if="profile.unreadMsgCount" class="my-page__cell-badge">{{ profile.unreadMsgCount > 99 ? '99+' : profile.unreadMsgCount }}</view><text class="my-page__cell-arrow">›</text></view>
+            <view class="my-page__cell" @tap="navigateChannelApplyStatus"><view class="my-page__cell-icon my-page__cell-icon--teal">✅</view><view class="my-page__cell-body"><text class="my-page__cell-title">认证信息</text><text class="my-page__cell-desc">渠道方认证详情</text></view><text class="my-page__cell-arrow">›</text></view>
+          </view>
+        </view>
+
+        <!-- 帮助与设置 -->
+        <view class="my-page__section">
+          <text class="my-page__section-title">帮助与设置</text>
+          <view class="my-page__card">
+            <view class="my-page__cell" @tap="navigateProfileEdit"><view class="my-page__cell-icon my-page__cell-icon--blue">👤</view><view class="my-page__cell-body"><text class="my-page__cell-title">个人资料</text><text class="my-page__cell-desc">头像、昵称</text></view><text class="my-page__cell-arrow">›</text></view>
+            <view class="my-page__cell" @tap="navigateHelp"><view class="my-page__cell-icon my-page__cell-icon--blue">💬</view><view class="my-page__cell-body"><text class="my-page__cell-title">客服与帮助</text><text class="my-page__cell-desc">常见问题 & 在线咨询</text></view><text class="my-page__cell-arrow">›</text></view>
+            <view class="my-page__cell" @tap="navigateSettings"><view class="my-page__cell-icon my-page__cell-icon--gray">⚙️</view><view class="my-page__cell-body"><text class="my-page__cell-title">设置</text><text class="my-page__cell-desc">消息提醒 & 账号安全</text></view><text class="my-page__cell-arrow">›</text></view>
           </view>
         </view>
       </template>
@@ -161,16 +168,13 @@
           </view>
         </view>
 
-        <!-- 我的服务 -->
+        <!-- 我的服务 (精简: 成绩/证书/课程 上方 4 格统计已提供入口, 此处只保留交易类) -->
         <view class="my-page__section">
           <text class="my-page__section-title">我的服务</text>
           <view class="my-page__card">
             <view class="my-page__cell" @tap="navigateMyEnroll"><view class="my-page__cell-icon my-page__cell-icon--orange">📝</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的报名</text><text class="my-page__cell-desc">查看报名进度与审核状态</text></view><text class="my-page__cell-arrow">›</text></view>
             <view class="my-page__cell" @tap="navigateOrderList"><view class="my-page__cell-icon my-page__cell-icon--blue">📦</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的订单</text><text class="my-page__cell-desc">赛事订单 & 课程订单</text></view><text class="my-page__cell-arrow">›</text></view>
             <view class="my-page__cell" @tap="navigateRefundList"><view class="my-page__cell-icon my-page__cell-icon--red">↩️</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的退款</text><text class="my-page__cell-desc">退款进度查询</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell" @tap="navigateMyScore"><view class="my-page__cell-icon my-page__cell-icon--gold">🏆</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的成绩</text><text class="my-page__cell-desc">查看参赛成绩与排名</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell" @tap="navigateMyCert"><view class="my-page__cell-icon my-page__cell-icon--green">🏅</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的证书</text><text class="my-page__cell-desc">查看与下载获奖证书</text></view><text class="my-page__cell-arrow">›</text></view>
-            <view class="my-page__cell" @tap="navigateMyCourse"><view class="my-page__cell-icon my-page__cell-icon--teal">📚</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的课程</text><text class="my-page__cell-desc">课程学习中</text></view><text class="my-page__cell-arrow">›</text></view>
           </view>
         </view>
 
@@ -190,7 +194,7 @@
         <view class="my-page__section">
           <text class="my-page__section-title">消息与互动</text>
           <view class="my-page__card">
-            <view class="my-page__cell" @tap="navigateMessage"><view class="my-page__cell-icon my-page__cell-icon--orange">🔔</view><view class="my-page__cell-body"><text class="my-page__cell-title">我的消息</text><text class="my-page__cell-desc">订单/积分/权益/物流消息</text></view><view v-if="profile.unreadMsgCount" class="my-page__cell-badge">{{ profile.unreadMsgCount > 99 ? '99+' : profile.unreadMsgCount }}</view><text class="my-page__cell-arrow">›</text></view>
+            <view class="my-page__cell" @tap="navigateMessage"><view class="my-page__cell-icon my-page__cell-icon--orange">🔔</view><view class="my-page__cell-body"><text class="my-page__cell-title">业务消息</text><text class="my-page__cell-desc">订单/积分/权益/物流通知</text></view><view v-if="profile.unreadMsgCount" class="my-page__cell-badge">{{ profile.unreadMsgCount > 99 ? '99+' : profile.unreadMsgCount }}</view><text class="my-page__cell-arrow">›</text></view>
             <view class="my-page__cell" @tap="navigateBinding"><view class="my-page__cell-icon my-page__cell-icon--teal">🔗</view><view class="my-page__cell-body"><text class="my-page__cell-title">绑定关系</text><text class="my-page__cell-desc">管理与渠道方的绑定</text></view><text class="my-page__cell-arrow">›</text></view>
           </view>
         </view>
@@ -238,9 +242,11 @@
 import { useUserStore } from '@/store/user'
 import { pinia } from '@/store/index'
 import JstLoading from '@/components/jst-loading/jst-loading.vue'
-import { getRebateSummary } from '@/api/channel'
+import { getRebateSummary, getChannelMonthly } from '@/api/channel'
 // [visual-effect]
 import { countUp } from '@/utils/visual-effects'
+// [Wave 3] 等级动态主题色 (8 个等级: 新手/青铜/白银/黄金/铂金/钻石/星耀/王者)
+import { getLevelTheme } from '@/utils/level-theme'
 
 export default {
   components: { JstLoading },
@@ -252,6 +258,8 @@ export default {
       animatedSummary: { enroll: 0, score: 0, cert: 0, course: 0 }, // [visual-effect]
       summaryAnimCancels: [], // [visual-effect]
       rebateSummary: { withdrawableAmount: '0.00', reviewingAmount: '0.00', paidAmount: '0.00' },
+      // [Wave 1] 渠道方视角的 4 格统计数据 (绑定学生/本月代报名/待结算返点/累计已打款)
+      channelSummary: { bindingCount: 0, orderCount: 0, pendingAmount: '0.00', paidAmount: '0.00' },
       logoutStyle: { margin: '48rpx 32rpx 0' } // [visual-effect] u-button custom style
     }
   },
@@ -305,9 +313,31 @@ export default {
       const g = this.profile.growthValue || 0
       const next = this.profile.nextLevelGrowth || 100
       return Math.max(0, next - g)
+    },
+    // [Wave 3] 等级主题 (按 levelName 关键词匹配, levelId 兜底)
+    levelTheme() {
+      return getLevelTheme(this.profile.levelName, this.profile.currentLevelId)
+    },
+    // [Wave 1] 4 格 summary 按视角切换数据源
+    summaryItems() {
+      if (this.currentView === 'channel' && this.isChannelUser) {
+        const s = this.channelSummary
+        return [
+          { num: s.bindingCount || 0, label: '绑定学生', tap: 'navigateChannelStudents' },
+          { num: s.orderCount || 0, label: '本月代报名', tap: 'navigateChannelOrders' },
+          { num: '¥' + this.formatMoneyShort(s.pendingAmount), label: '待结算返点', tap: 'navigateChannelRebate', highlight: true },
+          { num: '¥' + this.formatMoneyShort(s.paidAmount), label: '累计返点', tap: 'navigateChannelWithdrawList' }
+        ]
+      }
+      return [
+        { num: this.animatedSummary.enroll, label: '报名记录', tap: 'navigateMyEnroll' },
+        { num: this.animatedSummary.score, label: '我的成绩', tap: 'navigateMyScore' },
+        { num: this.animatedSummary.cert, label: '我的证书', tap: 'navigateMyCert' },
+        { num: this.animatedSummary.course, label: '我的课程', tap: 'navigateMyCourse' }
+      ]
     }
   },
-  onShow() { this.ensureLogin(); this.loadProfile(); this.initView(); this.loadRebateSummary() },
+  onShow() { this.ensureLogin(); this.loadProfile(); this.initView(); this.loadRebateSummary(); this.loadChannelSummary() },
   // [visual-effect] start
   beforeDestroy() {
     this.summaryAnimCancels.forEach(fn => fn && fn())
@@ -322,6 +352,37 @@ export default {
         const data = await getRebateSummary()
         if (data) this.rebateSummary = { withdrawableAmount: data.withdrawableAmount || '0.00', reviewingAmount: data.reviewingAmount || '0.00', paidAmount: data.paidAmount || '0.00' }
       } catch (e) { /* 静默：取不到显示 0 */ }
+    },
+    // [Wave 1] 渠道方视角 4 格数据: 绑定学生(累计)/本月代报名/待结算返点/累计返点
+    async loadChannelSummary() {
+      if (!this.isChannelUser || this.channelAuthStatus !== 'approved') return
+      try {
+        const monthly = await getChannelMonthly()
+        // rebateSummary 已在 loadRebateSummary 拉取, 这里直接复用
+        this.channelSummary = {
+          bindingCount: (monthly && monthly.newStudentCount) || 0, // TODO(backend): 期望返回累计绑定学生数 totalStudentCount
+          orderCount: (monthly && monthly.orderCount) || 0,
+          pendingAmount: this.sumAmount(this.rebateSummary.withdrawableAmount, this.rebateSummary.reviewingAmount),
+          paidAmount: this.rebateSummary.paidAmount || '0.00'
+        }
+      } catch (e) { /* 静默 */ }
+    },
+    // 金额字符串相加 (避免浮点误差)
+    sumAmount(a, b) {
+      const na = parseFloat(a) || 0
+      const nb = parseFloat(b) || 0
+      return (na + nb).toFixed(2)
+    },
+    // 简化金额: >=10000 显示 "1.2w", >=1000 显示 "1.2k"
+    formatMoneyShort(v) {
+      const n = parseFloat(v) || 0
+      if (n >= 10000) return (n / 10000).toFixed(1) + 'w'
+      if (n >= 1000) return (n / 1000).toFixed(1) + 'k'
+      return n.toFixed(0)
+    },
+    // [Wave 1] 4 格 summary 点击路由分发
+    handleSummaryTap(method) {
+      if (typeof this[method] === 'function') this[method]()
     },
     // 初始化默认视角: 渠道用户默认渠道方视角
     initView() { if (this.isChannelUser) { this.currentView = 'channel' } },
@@ -420,26 +481,23 @@ export default {
 .my-page__summary-item { flex: 1; text-align: center; transition: transform $jst-duration-fast $jst-easing; }
 .my-page__summary-item:active { transform: scale(0.95); }
 .my-page__summary-num { display: block; font-size: $jst-font-xxl; font-weight: $jst-weight-bold; color: $jst-text-primary; font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+.my-page__summary-num--gold { color: $jst-gold; } /* [Wave 1] 渠道视角待结算返点用金色突出 */
 .my-page__summary-label { display: block; margin-top: $jst-space-xs; font-size: $jst-font-xs; color: $jst-text-secondary; }
 
-/* === 等级卡 === */
-.my-page__level-card { margin: $jst-space-lg $jst-space-xl 0; padding: $jst-space-lg; border-radius: $jst-radius-card; background: $jst-hero-gradient-dark; border: 1rpx solid rgba(255, 255, 255, 0.08); box-shadow: $jst-shadow-ring, $jst-shadow-lift; transition: transform $jst-duration-fast $jst-easing; }
+/* === 等级卡 === [Wave 3] background/badge/bar 均由 :style 动态绑定 level-theme 变量 */
+.my-page__level-card { margin: $jst-space-lg $jst-space-xl 0; padding: $jst-space-lg; border-radius: $jst-radius-card; border: 1rpx solid rgba(255, 255, 255, 0.08); box-shadow: $jst-shadow-ring, $jst-shadow-lift; transition: transform $jst-duration-fast $jst-easing, background 0.5s ease; }
 .my-page__level-card:active { transform: scale(0.99); }
 .my-page__level-header { display: flex; align-items: flex-start; gap: $jst-space-lg; }
-.my-page__level-badge { flex-shrink: 0; padding: $jst-space-xs $jst-space-lg; border-radius: $jst-radius-round; background: rgba(255, 200, 100, 0.25); font-size: $jst-font-sm; font-weight: $jst-weight-semibold; color: $jst-gold; }
+.my-page__level-badge { flex-shrink: 0; padding: $jst-space-xs $jst-space-lg; border-radius: $jst-radius-round; font-size: $jst-font-sm; font-weight: $jst-weight-semibold; display: inline-flex; align-items: center; gap: 6rpx; transition: all 0.4s ease; }
+.my-page__level-badge-icon { font-size: $jst-font-base; line-height: 1; }
 .my-page__level-progress { flex: 1; }
-.my-page__level-progress-text { display: block; font-size: $jst-font-xs; color: rgba(255, 255, 255, 0.7); margin-bottom: $jst-space-sm; }
-.my-page__level-bar { height: 10rpx; border-radius: 5rpx; background: rgba(255, 255, 255, 0.18); overflow: hidden; }
-.my-page__level-bar-fill { height: 100%; border-radius: 5rpx; background: linear-gradient(90deg, $jst-gold, darken($jst-gold, 10%)); transition: width 0.8s $jst-easing; }
-.my-page__level-stats { display: flex; margin-top: $jst-space-lg; padding-top: $jst-space-lg; border-top: 2rpx solid rgba(255, 255, 255, 0.1); }
+.my-page__level-progress-text { display: block; font-size: $jst-font-xs; color: rgba(255, 255, 255, 0.75); margin-bottom: $jst-space-sm; }
+.my-page__level-bar { height: 10rpx; border-radius: 5rpx; overflow: hidden; transition: background 0.4s ease; }
+.my-page__level-bar-fill { height: 100%; border-radius: 5rpx; transition: width 0.8s $jst-easing, background 0.4s ease; }
+.my-page__level-stats { display: flex; margin-top: $jst-space-lg; padding-top: $jst-space-lg; border-top: 2rpx solid rgba(255, 255, 255, 0.15); }
 .my-page__level-stat { flex: 1; text-align: center; }
 .my-page__level-stat-num { display: block; font-size: $jst-font-xl; font-weight: $jst-weight-semibold; color: $jst-text-inverse; font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
-.my-page__level-stat-label { display: block; margin-top: 6rpx; font-size: $jst-font-xs; color: rgba(255, 255, 255, 0.6); }
-
-/* === 快捷标签 === */
-.my-page__quick-tags { display: flex; gap: $jst-space-sm; margin: $jst-space-lg $jst-space-xl 0; flex-wrap: wrap; }
-.my-page__quick-tag { padding: $jst-space-xs 22rpx; border-radius: $jst-radius-round; background: $jst-brand-light; font-size: $jst-font-xs; font-weight: $jst-weight-medium; color: $jst-brand; transition: transform $jst-duration-fast $jst-easing; }
-.my-page__quick-tag:active { transform: scale(0.95); }
+.my-page__level-stat-label { display: block; margin-top: 6rpx; font-size: $jst-font-xs; color: rgba(255, 255, 255, 0.65); }
 
 /* === Section === */
 .my-page__section { margin: $jst-space-xl $jst-space-xl 0; }
