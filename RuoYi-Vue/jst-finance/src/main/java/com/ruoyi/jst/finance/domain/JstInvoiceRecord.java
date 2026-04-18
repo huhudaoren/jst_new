@@ -61,6 +61,15 @@ public class JstInvoiceRecord extends BaseEntity
     @Excel(name = "快递状态")
     private String expressStatus;
 
+    /** 快递公司 */
+    private String trackingCompany;
+
+    /** 快递单号 */
+    private String trackingNo;
+
+    /** 投递邮箱 */
+    private String deliveryEmail;
+
     /** 开票时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "开票时间", width = 30, dateFormat = "yyyy-MM-dd")
@@ -169,15 +178,22 @@ public class JstInvoiceRecord extends BaseEntity
         return fileUrl;
     }
 
-    public void setExpressStatus(String expressStatus) 
+    public void setExpressStatus(String expressStatus)
     {
         this.expressStatus = expressStatus;
     }
 
-    public String getExpressStatus() 
+    public String getExpressStatus()
     {
         return expressStatus;
     }
+
+    public String getTrackingCompany() { return trackingCompany; }
+    public void setTrackingCompany(String trackingCompany) { this.trackingCompany = trackingCompany; }
+    public String getTrackingNo() { return trackingNo; }
+    public void setTrackingNo(String trackingNo) { this.trackingNo = trackingNo; }
+    public String getDeliveryEmail() { return deliveryEmail; }
+    public void setDeliveryEmail(String deliveryEmail) { this.deliveryEmail = deliveryEmail; }
 
     public void setIssueTime(Date issueTime) 
     {

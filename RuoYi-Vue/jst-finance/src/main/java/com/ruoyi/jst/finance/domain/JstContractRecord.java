@@ -62,6 +62,15 @@ public class JstContractRecord extends BaseEntity
     @Excel(name = "关联结算单ID")
     private Long refSettlementId;
 
+    /** 甲方标识（默认 jst） */
+    private String partyA;
+    /** 甲方名称快照 */
+    private String partyAName;
+    /** 乙方标识（partner:ID / channel:ID） */
+    private String partyB;
+    /** 乙方名称快照 */
+    private String partyBName;
+
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
@@ -165,15 +174,24 @@ public class JstContractRecord extends BaseEntity
         return signTime;
     }
 
-    public void setRefSettlementId(Long refSettlementId) 
+    public void setRefSettlementId(Long refSettlementId)
     {
         this.refSettlementId = refSettlementId;
     }
 
-    public Long getRefSettlementId() 
+    public Long getRefSettlementId()
     {
         return refSettlementId;
     }
+
+    public String getPartyA() { return partyA; }
+    public void setPartyA(String partyA) { this.partyA = partyA; }
+    public String getPartyAName() { return partyAName; }
+    public void setPartyAName(String partyAName) { this.partyAName = partyAName; }
+    public String getPartyB() { return partyB; }
+    public void setPartyB(String partyB) { this.partyB = partyB; }
+    public String getPartyBName() { return partyBName; }
+    public void setPartyBName(String partyBName) { this.partyBName = partyBName; }
 
     public void setDelFlag(String delFlag) 
     {

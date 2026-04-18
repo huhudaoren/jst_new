@@ -21,9 +21,13 @@
         <result property="updateTime"        column="update_time"/>
     </resultMap>
 
-    <resultMap type="com.ruoyi.jst.channel.domain.JstChannelDistributionLedger" id="JstChannelDistributionLedgerListResult" extends="JstChannelDistributionLedgerResult">
+    <!-- 带上下级渠道名称/认证状态的结果集（小程序 distribution + admin 列表用） -->
+    <resultMap type="com.ruoyi.jst.channel.domain.JstChannelDistributionLedger" id="JstChannelDistributionLedgerListResult"
+               extends="JstChannelDistributionLedgerResult">
         <result property="inviterChannelName" column="inviter_channel_name_join"/>
         <result property="inviteeChannelName" column="invitee_channel_name_join"/>
+        <result property="authType"           column="auth_type"/>
+        <result property="avatarUrl"          column="avatar_url"/>
     </resultMap>
 
     <sql id="cols">
@@ -130,7 +134,9 @@
     <select id="selectByInviter" resultMap="JstChannelDistributionLedgerListResult">
         SELECT d.*,
                ic.channel_name AS inviter_channel_name_join,
-               ec.channel_name AS invitee_channel_name_join
+               ec.channel_name AS invitee_channel_name_join,
+               ec.auth_status  AS auth_type,
+               NULL            AS avatar_url
           FROM jst_channel_distribution_ledger d
           LEFT JOIN jst_channel ic ON d.inviter_channel_id = ic.channel_id AND ic.del_flag = '0'
           LEFT JOIN jst_channel ec ON d.invitee_channel_id = ec.channel_id AND ec.del_flag = '0'
@@ -147,6 +153,14 @@
         <if test="status != null and status != ''">
            AND status = #{status}
         </if>
+    </select>
+
+    <!-- 本月分销收益汇总（accrue_at &gt;= 本月 1 日 00:00） -->
+    <select id="sumMonthAmountByInviter" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0)
+          FROM jst_channel_distribution_ledger
+         WHERE inviter_channel_id = #{inviterChannelId}
+           AND accrue_at &gt;= DATE_FORMAT(NOW(), '%Y-%m-01 00:00:00')
     </select>
 
 </mapper>

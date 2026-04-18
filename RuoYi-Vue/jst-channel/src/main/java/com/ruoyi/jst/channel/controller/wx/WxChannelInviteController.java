@@ -101,7 +101,7 @@ public class WxChannelInviteController extends BaseController {
     /**
      * 我的分销收益汇总
      *
-     * @return { totalAmount, pendingAmount, accruedAmount }
+     * @return { totalAmount, pendingAmount, accruedAmount, monthAmount }
      */
     @GetMapping("/distribution/summary")
     public AjaxResult distributionSummary() {
@@ -113,11 +113,14 @@ public class WxChannelInviteController extends BaseController {
                 channelDistributionService.sumAmountByInviter(channelId, "pending"));
         BigDecimal accruedAmount = nullToZero(
                 channelDistributionService.sumAmountByInviter(channelId, "accrued"));
+        BigDecimal monthAmount = nullToZero(
+                channelDistributionService.sumMonthAmountByInviter(channelId));
 
         Map<String, Object> summary = new HashMap<>();
         summary.put("totalAmount", totalAmount);
         summary.put("pendingAmount", pendingAmount);
         summary.put("accruedAmount", accruedAmount);
+        summary.put("monthAmount", monthAmount);
         return AjaxResult.success(summary);
     }
 

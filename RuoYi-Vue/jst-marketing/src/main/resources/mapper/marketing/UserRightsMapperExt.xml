@@ -78,6 +78,16 @@
                         end
                         ) in ('expired', 'voided', 'rejected')
                     </when>
+                    <when test="status == 'invalid'">
+                        <!-- 已失效聚合：used + expired + voided + rejected -->
+                        and (
+                        case
+                            when ur.valid_end <![CDATA[<]]> #{now} and ur.status in ('available', 'approved', 'applying') then 'expired'
+                            when ur.status = 'revoked' then 'voided'
+                            else ur.status
+                        end
+                        ) in ('used', 'expired', 'voided', 'rejected')
+                    </when>
                 </choose>
             </if>
         </where>
@@ -116,5 +126,48 @@
         where user_rights_id = #{userRightsId}
           and del_flag = '0'
         order by create_time desc, record_id desc
+    </select>
+
+    <!--
+      用户核销记录列表（跨权益）— 解决前端 N+1 聚合降级。
+      支持 status=invalid（语义 = used+expired+rolled_back）。
+    -->
+    <select id="selectMyWriteoffRecords" resultType="java.util.LinkedHashMap">
+        select
+            wr.record_id     as recordId,
+            ur.user_rights_id as rightsId,
+            rt.rights_template_id as rightsTemplateId,
+            rt.rights_name   as rightsName,
+            rt.rights_type   as rightsType,
+            wr.writeoff_no   as writeoffNo,
+            wr.use_amount    as amount,
+            wr.apply_remark  as remark,
+            wr.status        as status,
+            wr.audit_user_id as auditUserId,
+            wr.audit_remark  as auditRemark,
+            wr.writeoff_time as auditTime,
+            wr.create_time   as applyTime
+        from jst_rights_writeoff_record wr
+        inner join jst_user_rights ur on ur.user_rights_id = wr.user_rights_id
+        inner join jst_rights_template rt on rt.rights_template_id = ur.rights_template_id
+        where wr.del_flag = '0'
+          and ur.del_flag = '0'
+          and rt.del_flag = '0'
+          and ur.owner_type = #{ownerType}
+          and ur.owner_id = #{ownerId}
+        <if test="userRightsId != null">
+            and wr.user_rights_id = #{userRightsId}
+        </if>
+        <if test="status != null and status != ''">
+            <choose>
+                <when test="status == 'invalid'">
+                    and wr.status in ('used', 'expired', 'rolled_back')
+                </when>
+                <otherwise>
+                    and wr.status = #{status}
+                </otherwise>
+            </choose>
+        </if>
+        order by wr.create_time desc, wr.record_id desc
     </select>
 </mapper>

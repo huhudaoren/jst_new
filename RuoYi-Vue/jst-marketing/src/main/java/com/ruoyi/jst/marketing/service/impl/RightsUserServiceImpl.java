@@ -15,6 +15,7 @@ import com.ruoyi.jst.marketing.mapper.lookup.MarketingUserLookupMapper;
 import com.ruoyi.jst.marketing.service.RightsUserService;
 import com.ruoyi.jst.marketing.vo.MyRightsVO;
 import com.ruoyi.jst.marketing.vo.RightsDetailVO;
+import com.ruoyi.jst.marketing.vo.RightsWriteoffRecordVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +54,21 @@ public class RightsUserServiceImpl implements RightsUserService {
 
     @Autowired
     private JstLockTemplate jstLockTemplate;
+
+    /**
+     * 权益类型 → emoji 图标映射（前端展示用）。
+     */
+    private static final java.util.Map<String, String> RIGHTS_ICON_EMOJI_MAP;
+    static {
+        java.util.Map<String, String> map = new java.util.HashMap<>();
+        map.put("venue_reduce", "🏟");
+        map.put("venue_free", "🏟");
+        map.put("course_free", "🎓");
+        map.put("course_discount", "🎓");
+        map.put("support_priority", "⭐");
+        map.put("vip_channel", "👑");
+        RIGHTS_ICON_EMOJI_MAP = java.util.Collections.unmodifiableMap(map);
+    }
 
     @Override
     public List<MyRightsVO> selectMyRights(Long userId, String status) {
@@ -268,5 +284,36 @@ public class RightsUserServiceImpl implements RightsUserService {
         String timestamp = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA).format(now);
         int random = ThreadLocalRandom.current().nextInt(1000, 10000);
         return "RW" + userRightsId + timestamp + random;
+    }
+
+    @Override
+    public List<RightsWriteoffRecordVO> selectMyWriteoffRecords(Long userId, Long rightsId, String status) {
+        Map<String, Object> currentUser = requireCurrentUser(userId);
+        String ownerType = MarketingSupport.normalizeOwnerType(
+                MarketingSupport.stringValue(currentUser.get("userType")));
+        List<Map<String, Object>> rows = userRightsMapperExt.selectMyWriteoffRecords(
+                ownerType, userId, rightsId, status);
+        List<RightsWriteoffRecordVO> result = new ArrayList<>();
+        if (rows == null) return result;
+        for (Map<String, Object> row : rows) {
+            RightsWriteoffRecordVO vo = new RightsWriteoffRecordVO();
+            vo.setRecordId(MarketingSupport.longValue(row.get("recordId")));
+            vo.setRightsId(MarketingSupport.longValue(row.get("rightsId")));
+            vo.setRightsTemplateId(MarketingSupport.longValue(row.get("rightsTemplateId")));
+            vo.setRightsName(MarketingSupport.stringValue(row.get("rightsName")));
+            String type = MarketingSupport.stringValue(row.get("rightsType"));
+            vo.setRightsType(type);
+            vo.setRightsIconEmoji(RIGHTS_ICON_EMOJI_MAP.getOrDefault(type, "🎁"));
+            vo.setWriteoffNo(MarketingSupport.stringValue(row.get("writeoffNo")));
+            vo.setAmount((BigDecimal) row.get("amount"));
+            vo.setRemark(MarketingSupport.stringValue(row.get("remark")));
+            vo.setStatus(MarketingSupport.stringValue(row.get("status")));
+            vo.setAuditUserId(MarketingSupport.longValue(row.get("auditUserId")));
+            vo.setAuditRemark(MarketingSupport.stringValue(row.get("auditRemark")));
+            vo.setAuditTime(MarketingSupport.dateValue(row.get("auditTime")));
+            vo.setApplyTime(MarketingSupport.dateValue(row.get("applyTime")));
+            result.add(vo);
+        }
+        return result;
     }
 }

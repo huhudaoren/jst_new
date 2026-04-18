@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 小程序端发票申请入参。
@@ -15,9 +16,11 @@ import java.math.BigDecimal;
  */
 public class InvoiceApplyForm {
 
-    /** 关联结算/提现单号 */
-    @NotBlank(message = "关联结算单号不能为空")
+    /** 关联结算/提现单号（单选兼容字段，优先级低于 settlementIds） */
     private String refSettlementNo;
+
+    /** 关联结算单 ID 列表（多选，非空时覆盖 refSettlementNo） */
+    private List<Long> settlementIds;
 
     /** 发票抬头 */
     @NotBlank(message = "发票抬头不能为空")
@@ -42,6 +45,14 @@ public class InvoiceApplyForm {
 
     public void setRefSettlementNo(String refSettlementNo) {
         this.refSettlementNo = refSettlementNo;
+    }
+
+    public List<Long> getSettlementIds() {
+        return settlementIds;
+    }
+
+    public void setSettlementIds(List<Long> settlementIds) {
+        this.settlementIds = settlementIds;
     }
 
     public String getInvoiceTitle() {

@@ -28,6 +28,15 @@
         <u-form-item label="手机号 *" customClass="af-field">
           <u--input class="af-field__input" v-model="form.mobile" type="number" placeholder="请输入手机号" maxlength="11" border="none"></u--input>
         </u-form-item>
+        <u-form-item label="所在地区 *" customClass="af-field">
+          <u--input
+            class="af-field__input"
+            v-model="form.region"
+            placeholder="请输入省份/地区，如 北京市"
+            maxlength="64"
+            border="none"
+          ></u--input>
+        </u-form-item>
         <u-form-item label="身份证号" customClass="af-field">
           <u--input class="af-field__input" v-model="form.idCard" placeholder="选填" maxlength="18" border="none"></u--input>
         </u-form-item>
@@ -127,7 +136,7 @@ export default {
       rejectedId: null,
       rejectReasonText: '',
       showRejectBanner: true,
-      form: { applyName: '', mobile: '', idCard: '', inviteCode: '', businessNo: '' },
+      form: { applyName: '', mobile: '', idCard: '', region: '', inviteCode: '', businessNo: '' },
       materials: {},
       agreed: false,
       submitting: false,
@@ -136,7 +145,13 @@ export default {
   },
   computed: {
     typeLabel() { return TYPE_LABEL[this.channelType] || '渠道方' },
-    canSubmit() { return this.agreed && this.form.applyName && this.form.mobile && this.form.mobile.length === 11 },
+    canSubmit() {
+      return this.agreed &&
+        this.form.applyName &&
+        this.form.mobile &&
+        this.form.mobile.length === 11 &&
+        this.form.region
+    },
     isEditMode() { return this.mode === 'edit' }
   },
   onLoad(query) {
@@ -170,6 +185,7 @@ export default {
         // 回填基础字段
         if (apply.channelType) this.channelType = apply.channelType
         this.form.applyName = apply.applyName || ''
+        this.form.region = apply.region || ''
         // materialsJson 回填
         try {
           const mat = apply.materialsJson ? JSON.parse(apply.materialsJson) : {}
@@ -195,6 +211,7 @@ export default {
       const body = {
         channelType: this.channelType,
         applyName: this.form.applyName.trim(),
+        region: this.form.region.trim(),
         materialsJson: JSON.stringify(materialsObj),
         inviteCode: this.form.inviteCode || undefined,
         businessNo: this.form.businessNo || undefined

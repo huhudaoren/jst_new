@@ -49,22 +49,30 @@
 
     <select id="selectMyList" parameterType="com.ruoyi.jst.channel.dto.WithdrawQueryReqDTO"
             resultType="com.ruoyi.jst.channel.vo.WithdrawListVO">
-        select settlement_id,
-               settlement_no,
-               apply_amount,
-               negative_offset_amount,
-               actual_pay_amount,
-               status,
-               invoice_status,
-               apply_time,
-               update_time
-        from jst_rebate_settlement
-        where channel_id = #{channelId}
-          and del_flag = '0'
+        select rs.settlement_id     as settlementId,
+               rs.settlement_no     as settlementNo,
+               rs.apply_amount      as applyAmount,
+               rs.negative_offset_amount as negativeOffsetAmount,
+               rs.actual_pay_amount as actualPayAmount,
+               rs.status            as status,
+               rs.invoice_status    as invoiceStatus,
+               rs.apply_time        as applyTime,
+               rs.update_time       as updateTime,
+               (select count(1)
+                  from jst_rebate_ledger rl
+                 where rl.settlement_id = rs.settlement_id) as ledgerCount,
+               ctr.contract_no      as contractNo
+        from jst_rebate_settlement rs
+        left join jst_contract_record ctr
+               on ctr.ref_settlement_id = rs.settlement_id
+              and ctr.target_type = 'channel'
+              and ctr.del_flag = '0'
+        where rs.channel_id = #{channelId}
+          and rs.del_flag = '0'
         <if test="status != null and status != ''">
-            and status = #{status}
+            and rs.status = #{status}
         </if>
-        order by apply_time desc, settlement_id desc
+        order by rs.apply_time desc, rs.settlement_id desc
     </select>
 
     <select id="selectAdminList" parameterType="com.ruoyi.jst.channel.dto.WithdrawQueryReqDTO"

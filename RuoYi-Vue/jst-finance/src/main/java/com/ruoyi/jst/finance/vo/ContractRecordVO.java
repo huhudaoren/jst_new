@@ -20,6 +20,19 @@ public class ContractRecordVO {
     private String remark;
     private Date createTime;
 
+    /** 甲方标识（默认 jst） */
+    private String partyA;
+    /** 甲方名称快照 */
+    private String partyAName;
+    /** 乙方标识（partner:ID / channel:ID） */
+    private String partyB;
+    /** 乙方名称快照 */
+    private String partyBName;
+    /** 关联结算单 ID（同 refSettlementId，兼容 C 端字段名） */
+    private Long settlementId;
+    /** 关联结算单号（LEFT JOIN jst_rebate_settlement / jst_event_settlement） */
+    private String settlementNo;
+
     public Long getContractId() {
         return contractId;
     }
@@ -91,4 +104,17 @@ public class ContractRecordVO {
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
+
+    public String getPartyA() { return partyA; }
+    public void setPartyA(String partyA) { this.partyA = partyA; }
+    public String getPartyAName() { return partyAName; }
+    public void setPartyAName(String partyAName) { this.partyAName = partyAName; }
+    public String getPartyB() { return partyB; }
+    public void setPartyB(String partyB) { this.partyB = partyB; }
+    public String getPartyBName() { return partyBName; }
+    public void setPartyBName(String partyBName) { this.partyBName = partyBName; }
+    public Long getSettlementId() { return settlementId; }
+    public void setSettlementId(Long settlementId) { this.settlementId = settlementId; }
+    public String getSettlementNo() { return settlementNo; }
+    public void setSettlementNo(String settlementNo) { this.settlementNo = settlementNo; }
 }

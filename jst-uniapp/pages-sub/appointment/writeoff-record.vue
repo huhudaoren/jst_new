@@ -156,10 +156,23 @@ export default {
       this.loading = true
       try {
         if (this.mode === 'user') {
-          // 前端聚合, 一次拉完
-          const rows = await getMyRightsWriteoffRecords({ rightsId: this.rightsId }) || []
+          // 2026-04-18: 改用后端统一端点 /jst/wx/rights/writeoff-records
+          const res = await getMyRightsWriteoffRecords({
+            rightsId: this.rightsId,
+            pageNum: 1,
+            pageSize: 200
+          })
+          // 兼容字段差异：后端新字段 applyTime/auditTime/amount/rightsId
+          //                 旧页面字段 writeoffTime/createTime/useAmount/userRightsId
+          const rows = ((res && res.rows) || []).map(r => Object.assign({}, r, {
+            writeoffTime: r.auditTime || r.writeoffTime,
+            createTime: r.applyTime || r.createTime,
+            useAmount: r.amount != null ? r.amount : r.useAmount,
+            applyRemark: r.remark != null ? r.remark : r.applyRemark,
+            userRightsId: r.rightsId != null ? r.rightsId : r.userRightsId
+          }))
           this.list = rows
-          this.total = rows.length
+          this.total = (res && res.total) || rows.length
           this.hasMore = false
           // 如有 anchor: 切换到对应状态 Tab + 滚动定位 + 高亮
           if (this.anchor) this.$nextTick(() => this.locateAnchor())
