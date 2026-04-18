@@ -108,4 +108,20 @@
           AND status IN ('active','resign_apply','resigned_pending_settle')
     </select>
 
+
+    <select id="selectActiveSalesIdsForSettlement" resultType="Long">
+        SELECT sales_id FROM jst_sales
+         WHERE status IN ('active','resign_apply','resigned_pending_settle')
+    </select>
+
+    <select id="selectExpectedToResign" resultType="Long">
+        SELECT sales_id FROM jst_sales
+         WHERE status = 'resign_apply' AND expected_resign_date &lt;= NOW()
+    </select>
+
+    <select id="selectTransitionExpired" resultType="Long">
+        SELECT sales_id FROM jst_sales
+         WHERE status = 'resigned_pending_settle' AND transition_end_date &lt;= NOW()
+    </select>
+
 </mapper>

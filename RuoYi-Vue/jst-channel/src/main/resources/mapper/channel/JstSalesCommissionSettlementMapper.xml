@@ -73,4 +73,11 @@
         DELETE FROM jst_sales_commission_settlement WHERE settlement_id = #{settlementId}
     </delete>
 
+
+    <select id="selectBySalesAndPeriod" resultMap="JstSalesCommissionSettlementResult">
+        SELECT <include refid="cols"/> FROM jst_sales_commission_settlement
+         WHERE sales_id = #{salesId} AND period = #{period}
+         LIMIT 1
+    </select>
+
 </mapper>
