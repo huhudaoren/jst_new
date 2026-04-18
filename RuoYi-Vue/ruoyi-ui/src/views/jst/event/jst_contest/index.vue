@@ -23,11 +23,9 @@
         />
       </el-form-item>
       <el-form-item label="所属赛事方ID，FK→jst_event_partner" prop="partnerId">
-        <el-input
+        <partner-picker
           v-model="queryParams.partnerId"
-          placeholder="请输入所属赛事方ID，FK→jst_event_partner"
           clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="分类：艺术/音乐/舞蹈/美术/朗诵戏剧/文化/科技/体育" prop="category">
@@ -111,11 +109,9 @@
         />
       </el-form-item>
       <el-form-item label="默认报名表单模板ID，FK→jst_enroll_form_template" prop="formTemplateId">
-        <el-input
+        <form-template-picker
           v-model="queryParams.formTemplateId"
-          placeholder="请输入默认报名表单模板ID，FK→jst_enroll_form_template"
           clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="售后宽限天数" prop="aftersaleDays">
@@ -372,7 +368,7 @@
           </el-col>
           <el-col :span="24">
             <el-form-item label="默认报名表单模板ID，FK→jst_enroll_form_template" prop="formTemplateId">
-              <el-input v-model="form.formTemplateId" placeholder="请输入默认报名表单模板ID，FK→jst_enroll_form_template" />
+              <form-template-picker v-model="form.formTemplateId" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -407,10 +403,16 @@
 
 <script>
 import { listJst_contest, getJst_contest, delJst_contest, addJst_contest, updateJst_contest } from "@/api/jst/event/jst_contest"
+import FormTemplatePicker from "@/components/RelationPicker/FormTemplatePicker.vue"
+import PartnerPicker from "@/components/RelationPicker/PartnerPicker.vue"
 
 export default {
   name: "Jst_contest",
   dicts: ['jst_source_type', 'jst_contest_category', 'jst_audit_status'],
+  components: {
+    FormTemplatePicker,
+    PartnerPicker
+  },
   data() {
     return {
       // 遮罩层

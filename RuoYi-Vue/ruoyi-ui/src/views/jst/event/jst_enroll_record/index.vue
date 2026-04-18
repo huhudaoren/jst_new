@@ -23,35 +23,27 @@
         />
       </el-form-item>
       <el-form-item label="赛事ID，FK→jst_contest" prop="contestId">
-        <el-input
+        <contest-picker
           v-model="queryParams.contestId"
-          placeholder="请输入赛事ID，FK→jst_contest"
           clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="学生用户ID" prop="userId">
-        <el-input
+        <user-picker
           v-model="queryParams.userId"
-          placeholder="请输入学生用户ID"
           clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="参赛人ID" prop="participantId">
-        <el-input
+        <participant-picker
           v-model="queryParams.participantId"
-          placeholder="请输入参赛人ID"
           clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="关联渠道方ID" prop="channelId">
-        <el-input
+        <channel-picker
           v-model="queryParams.channelId"
-          placeholder="请输入关联渠道方ID"
           clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="报名来源：self自助/channel_single渠道单条/channel_batch渠道批量" prop="enrollSource">
@@ -63,11 +55,9 @@
         />
       </el-form-item>
       <el-form-item label="使用的表单模板ID" prop="templateId">
-        <el-input
+        <form-template-picker
           v-model="queryParams.templateId"
-          placeholder="请输入使用的表单模板ID"
           clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="表单模板版本号" prop="templateVersion">
@@ -79,11 +69,9 @@
         />
       </el-form-item>
       <el-form-item label="关联订单ID" prop="orderId">
-        <el-input
+        <order-picker
           v-model="queryParams.orderId"
-          placeholder="请输入关联订单ID"
           clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="审核备注" prop="auditRemark">
@@ -221,22 +209,22 @@
           </el-col>
           <el-col :span="24">
             <el-form-item label="赛事ID，FK→jst_contest" prop="contestId">
-              <el-input v-model="form.contestId" placeholder="请输入赛事ID，FK→jst_contest" />
+              <contest-picker v-model="form.contestId" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="学生用户ID" prop="userId">
-              <el-input v-model="form.userId" placeholder="请输入学生用户ID" />
+              <user-picker v-model="form.userId" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="参赛人ID" prop="participantId">
-              <el-input v-model="form.participantId" placeholder="请输入参赛人ID" />
+              <participant-picker v-model="form.participantId" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="关联渠道方ID" prop="channelId">
-              <el-input v-model="form.channelId" placeholder="请输入关联渠道方ID" />
+              <channel-picker v-model="form.channelId" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -246,7 +234,7 @@
           </el-col>
           <el-col :span="24">
             <el-form-item label="使用的表单模板ID" prop="templateId">
-              <el-input v-model="form.templateId" placeholder="请输入使用的表单模板ID" />
+              <form-template-picker v-model="form.templateId" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -256,7 +244,7 @@
           </el-col>
           <el-col :span="24">
             <el-form-item label="关联订单ID" prop="orderId">
-              <el-input v-model="form.orderId" placeholder="请输入关联订单ID" />
+              <order-picker v-model="form.orderId" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -296,10 +284,24 @@
 
 <script>
 import { listJst_enroll_record, getJst_enroll_record, delJst_enroll_record, addJst_enroll_record, updateJst_enroll_record } from "@/api/jst/event/jst_enroll_record"
+import ChannelPicker from "@/components/RelationPicker/ChannelPicker.vue"
+import ContestPicker from "@/components/RelationPicker/ContestPicker.vue"
+import FormTemplatePicker from "@/components/RelationPicker/FormTemplatePicker.vue"
+import OrderPicker from "@/components/RelationPicker/OrderPicker.vue"
+import ParticipantPicker from "@/components/RelationPicker/ParticipantPicker.vue"
+import UserPicker from "@/components/RelationPicker/UserPicker.vue"
 
 export default {
   name: "Jst_enroll_record",
   dicts: ['jst_enroll_audit_status'],
+  components: {
+    ChannelPicker,
+    ContestPicker,
+    FormTemplatePicker,
+    OrderPicker,
+    ParticipantPicker,
+    UserPicker
+  },
   data() {
     return {
       // 遮罩层

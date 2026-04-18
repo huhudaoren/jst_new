@@ -190,7 +190,7 @@
           <el-row :gutter="12">
             <el-col :xs="24" :sm="12">
               <el-form-item label="模板ID" prop="templateId">
-                <el-input v-model="form.templateId" placeholder="请输入模板ID" />
+                <cert-template-picker v-model="form.templateId" />
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12">
@@ -288,9 +288,13 @@ import {
   listJst_cert_record,
   updateJst_cert_record
 } from '@/api/jst/event/jst_cert_record'
+import CertTemplatePicker from '@/components/RelationPicker/CertTemplatePicker.vue'
 
 export default {
   name: 'JstCertRecord',
+  components: {
+    CertTemplatePicker
+  },
   data() {
     return {
       loading: false,

@@ -14,7 +14,7 @@
         <el-input v-model="queryParams.batchNo" placeholder="请输入批次号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="模板ID" prop="couponTemplateId">
-        <el-input v-model="queryParams.couponTemplateId" placeholder="请输入模板ID" clearable @keyup.enter.native="handleQuery" />
+        <coupon-template-picker v-model="queryParams.couponTemplateId" clearable />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>
@@ -100,6 +100,7 @@
 <script>
 import { parseTime } from '@/utils/ruoyi'
 import { listJst_coupon_issue_batch, getJst_coupon_issue_batch } from '@/api/jst/marketing/jst_coupon_issue_batch'
+import CouponTemplatePicker from '@/components/RelationPicker/CouponTemplatePicker.vue'
 
 const STATUS_META = {
   pending: { label: '待执行', type: 'warning' },
@@ -110,6 +111,9 @@ const STATUS_META = {
 
 export default {
   name: 'JstCouponIssueBatch',
+  components: {
+    CouponTemplatePicker
+  },
   data() {
     return {
       loading: false,

@@ -14,7 +14,7 @@
         <el-input v-model="queryParams.ownerId" placeholder="请输入持有者ID" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="权益模板ID" prop="rightsTemplateId">
-        <el-input v-model="queryParams.rightsTemplateId" placeholder="请输入权益模板ID" clearable @keyup.enter.native="handleQuery" />
+        <rights-template-picker v-model="queryParams.rightsTemplateId" clearable />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>
@@ -145,6 +145,7 @@
 import { parseTime } from '@/utils/ruoyi'
 import { listJst_user_rights, getJst_user_rights } from '@/api/jst/marketing/jst_user_rights'
 import { listJst_rights_writeoff_record } from '@/api/jst/marketing/jst_rights_writeoff_record'
+import RightsTemplatePicker from '@/components/RelationPicker/RightsTemplatePicker.vue'
 
 const STATUS_META = {
   active: { label: '生效', type: 'success' },
@@ -158,6 +159,9 @@ const STATUS_META = {
 
 export default {
   name: 'JstUserRights',
+  components: {
+    RightsTemplatePicker
+  },
   data() {
     return {
       loading: false,

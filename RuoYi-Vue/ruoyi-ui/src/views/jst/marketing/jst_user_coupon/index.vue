@@ -14,7 +14,7 @@
         <user-picker v-model="queryParams.userId" clearable />
       </el-form-item>
       <el-form-item label="模板ID" prop="couponTemplateId">
-        <el-input v-model="queryParams.couponTemplateId" placeholder="请输入券模板ID" clearable @keyup.enter.native="handleQuery" />
+        <coupon-template-picker v-model="queryParams.couponTemplateId" clearable />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>
@@ -145,6 +145,7 @@
 <script>
 import { parseTime } from '@/utils/ruoyi'
 import { listJst_user_coupon, getJst_user_coupon } from '@/api/jst/marketing/jst_user_coupon'
+import CouponTemplatePicker from '@/components/RelationPicker/CouponTemplatePicker.vue'
 
 const STATUS_META = {
   unused: { label: '未使用', type: 'info' },
@@ -156,6 +157,9 @@ const STATUS_META = {
 
 export default {
   name: 'JstUserCoupon',
+  components: {
+    CouponTemplatePicker
+  },
   data() {
     return {
       loading: false,
