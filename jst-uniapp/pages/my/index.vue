@@ -15,7 +15,7 @@
 
     <template v-if="!skeletonShow">
       <!-- ===== Hero ===== -->
-      <view class="my-page__hero" :style="{ paddingTop: navPaddingTop }">
+      <view :class="['my-page__hero', currentView === 'channel' && isChannelUser ? 'my-page__hero--channel' : '']" :style="{ paddingTop: navPaddingTop }">
         <view class="my-page__hero-orb"></view>
         <view class="my-page__hero-inner">
           <view class="my-page__profile-row">
@@ -83,6 +83,30 @@
 
       <!-- ===== 渠道方视角 ===== -->
       <template v-if="currentView === 'channel' && isChannelUser">
+        <!-- 返点横幅 (仅认证通过时) -->
+        <view v-if="channelAuthStatus === 'approved'" class="my-page__rebate-banner" @tap="navigateChannelRebate">
+          <view class="my-page__rebate-banner-top">
+            <text class="my-page__rebate-banner-tag">💰 返点中心</text>
+            <text class="my-page__rebate-banner-title">本月返点收益</text>
+            <text class="my-page__rebate-banner-arrow">›</text>
+          </view>
+          <view class="my-page__rebate-banner-stats">
+            <view class="my-page__rebate-banner-stat">
+              <text class="my-page__rebate-banner-num my-page__rebate-banner-num--gold">¥{{ rebateSummary.withdrawableAmount || '0.00' }}</text>
+              <text class="my-page__rebate-banner-label">可提现余额</text>
+            </view>
+            <view class="my-page__rebate-banner-stat">
+              <text class="my-page__rebate-banner-num">¥{{ rebateSummary.reviewingAmount || '0.00' }}</text>
+              <text class="my-page__rebate-banner-label">审核中</text>
+            </view>
+            <view class="my-page__rebate-banner-stat">
+              <text class="my-page__rebate-banner-num">¥{{ rebateSummary.paidAmount || '0.00' }}</text>
+              <text class="my-page__rebate-banner-label">累计已打款</text>
+            </view>
+          </view>
+          <view class="my-page__rebate-banner-btn" @tap.stop="navigateChannelWithdrawApply">💸 申请提现</view>
+        </view>
+
         <view class="my-page__section">
           <view class="my-page__cell" @tap="navigateChannelApplyStatus">
             <view class="my-page__cell-icon my-page__cell-icon--green">{{ channelAuthIcon }}</view>
@@ -99,16 +123,6 @@
             <text class="my-page__workbench-icon">🏢</text>
             <text class="my-page__workbench-text">进入我的工作台</text>
             <text class="my-page__workbench-arrow">›</text>
-          </view>
-        </view>
-
-        <view class="my-page__section">
-          <text class="my-page__section-title">快捷入口</text>
-          <view class="my-page__grid">
-            <view class="my-page__grid-item" @tap="navigateChannelStudents"><view class="my-page__grid-icon my-page__grid-icon--teal">👥</view><text class="my-page__grid-text">学生管理</text></view>
-            <view class="my-page__grid-item" @tap="navigateChannelOrders"><view class="my-page__grid-icon my-page__grid-icon--orange">🧾</view><text class="my-page__grid-text">渠道订单</text></view>
-            <view class="my-page__grid-item" @tap="navigateChannelRebate"><view class="my-page__grid-icon my-page__grid-icon--gold">💰</view><text class="my-page__grid-text">返点中心</text></view>
-            <view class="my-page__grid-item" @tap="navigateChannelWithdrawList"><view class="my-page__grid-icon my-page__grid-icon--purple">📄</view><text class="my-page__grid-text">提现结算</text></view>
           </view>
         </view>
 
@@ -224,6 +238,7 @@
 import { useUserStore } from '@/store/user'
 import { pinia } from '@/store/index'
 import JstLoading from '@/components/jst-loading/jst-loading.vue'
+import { getRebateSummary } from '@/api/channel'
 // [visual-effect]
 import { countUp } from '@/utils/visual-effects'
 
@@ -236,6 +251,7 @@ export default {
       skeletonShow: true, // [visual-effect]
       animatedSummary: { enroll: 0, score: 0, cert: 0, course: 0 }, // [visual-effect]
       summaryAnimCancels: [], // [visual-effect]
+      rebateSummary: { withdrawableAmount: '0.00', reviewingAmount: '0.00', paidAmount: '0.00' },
       logoutStyle: { margin: '48rpx 32rpx 0' } // [visual-effect] u-button custom style
     }
   },
@@ -253,6 +269,12 @@ export default {
       const store = useUserStore(pinia)
       const roles = store.roles || []
       return Array.isArray(roles) && (roles.includes('jst_partner') || roles.includes('jst_platform_op'))
+    },
+    // 渠道认证状态值
+    channelAuthStatus() {
+      const store = useUserStore(pinia)
+      const info = store.userInfo || {}
+      return info.channelAuthStatus || ''
     },
     // 渠道认证状态图标
     channelAuthIcon() {
@@ -285,7 +307,7 @@ export default {
       return Math.max(0, next - g)
     }
   },
-  onShow() { this.ensureLogin(); this.loadProfile(); this.initView() },
+  onShow() { this.ensureLogin(); this.loadProfile(); this.initView(); this.loadRebateSummary() },
   // [visual-effect] start
   beforeDestroy() {
     this.summaryAnimCancels.forEach(fn => fn && fn())
@@ -293,6 +315,14 @@ export default {
   // [visual-effect] end
   methods: {
     ensureLogin() { const userStore = useUserStore(pinia); if (!userStore.token) uni.reLaunch({ url: '/pages/login/login' }) },
+    // 渠道方返点 summary（仅认证通过时有效）
+    async loadRebateSummary() {
+      if (!this.isChannelUser || this.channelAuthStatus !== 'approved') return
+      try {
+        const data = await getRebateSummary()
+        if (data) this.rebateSummary = { withdrawableAmount: data.withdrawableAmount || '0.00', reviewingAmount: data.reviewingAmount || '0.00', paidAmount: data.paidAmount || '0.00' }
+      } catch (e) { /* 静默：取不到显示 0 */ }
+    },
     // 初始化默认视角: 渠道用户默认渠道方视角
     initView() { if (this.isChannelUser) { this.currentView = 'channel' } },
     // 切换视角
@@ -331,6 +361,7 @@ export default {
     navigateChannelHome() { uni.navigateTo({ url: '/pages-sub/channel/home' }) },
     navigateChannelRebate() { uni.navigateTo({ url: '/pages-sub/channel/rebate' }) },
     navigateChannelWithdrawList() { uni.navigateTo({ url: '/pages-sub/channel/withdraw-list' }) },
+    navigateChannelWithdrawApply() { uni.navigateTo({ url: '/pages-sub/channel/withdraw-apply' }) },
     navigateChannelStudents() { uni.navigateTo({ url: '/pages-sub/channel/students' }) },
     navigateChannelOrders() { uni.navigateTo({ url: '/pages-sub/channel/orders' }) },
     navigateChannelData() { uni.navigateTo({ url: '/pages-sub/channel/data' }) },
@@ -367,7 +398,8 @@ export default {
 .my-page__skeleton-section { margin: $jst-space-lg $jst-space-xl 0; padding: $jst-space-lg; border-radius: $jst-radius-lg; background: $jst-bg-card; }
 
 /* === Hero === */
-.my-page__hero { position: relative; padding: 80rpx $jst-space-xl 120rpx; background: $jst-hero-gradient; border-bottom-left-radius: $jst-radius-xl; border-bottom-right-radius: $jst-radius-xl; overflow: hidden; }
+.my-page__hero { position: relative; padding: 80rpx $jst-space-xl 120rpx; background: $jst-hero-gradient; border-bottom-left-radius: $jst-radius-xl; border-bottom-right-radius: $jst-radius-xl; overflow: hidden; transition: background 0.4s ease; }
+.my-page__hero--channel { background: linear-gradient(150deg, #1A237E 0%, #283593 55%, #3949AB 100%); }
 .my-page__hero-orb { position: absolute; top: -100rpx; right: -60rpx; width: 300rpx; height: 300rpx; border-radius: 50%; background: rgba(255, 255, 255, 0.06); filter: blur(30px); }
 .my-page__hero-inner { position: relative; z-index: 1; }
 .my-page__profile-row { display: flex; align-items: center; }
@@ -468,4 +500,20 @@ export default {
 .my-page__workbench-icon { font-size: 40rpx; }
 .my-page__workbench-text { flex: 1; font-size: $jst-font-md; font-weight: $jst-weight-semibold; color: $jst-brand-dark; }
 .my-page__workbench-arrow { font-size: $jst-font-lg; color: $jst-text-placeholder; }
+
+/* === 返点横幅 (渠道方视角) === */
+.my-page__rebate-banner { margin: $jst-space-lg $jst-space-xl 0; padding: $jst-space-lg; border-radius: $jst-radius-card; background: linear-gradient(135deg, #1A237E 0%, #283593 55%, #3949AB 100%); box-shadow: $jst-shadow-ring, $jst-shadow-ambient, $jst-shadow-lift; transition: transform $jst-duration-fast $jst-easing; }
+.my-page__rebate-banner:active { transform: scale(0.99); }
+.my-page__rebate-banner-top { display: flex; align-items: center; gap: $jst-space-sm; }
+.my-page__rebate-banner-tag { padding: 4rpx $jst-space-md; border-radius: $jst-radius-round; background: rgba(255, 213, 79, 0.22); font-size: $jst-font-xs; font-weight: $jst-weight-semibold; color: $jst-gold; }
+.my-page__rebate-banner-title { flex: 1; font-size: $jst-font-sm; font-weight: $jst-weight-medium; color: rgba(255, 255, 255, 0.85); }
+.my-page__rebate-banner-arrow { font-size: $jst-font-lg; color: rgba(255, 255, 255, 0.65); }
+.my-page__rebate-banner-stats { display: flex; margin-top: $jst-space-md; padding: $jst-space-md 0; }
+.my-page__rebate-banner-stat { flex: 1; text-align: center; position: relative; }
+.my-page__rebate-banner-stat + .my-page__rebate-banner-stat::before { content: ''; position: absolute; left: 0; top: 20%; width: 2rpx; height: 60%; background: rgba(255, 255, 255, 0.15); }
+.my-page__rebate-banner-num { display: block; font-size: $jst-font-lg; font-weight: $jst-weight-bold; color: $jst-text-inverse; font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+.my-page__rebate-banner-num--gold { color: $jst-gold; font-size: $jst-font-xl; }
+.my-page__rebate-banner-label { display: block; margin-top: 6rpx; font-size: $jst-font-xs; color: rgba(255, 255, 255, 0.65); }
+.my-page__rebate-banner-btn { display: flex; align-items: center; justify-content: center; height: 72rpx; margin-top: $jst-space-sm; border-radius: $jst-radius-round; background: linear-gradient(90deg, #FFD54F, #FFC107); font-size: $jst-font-sm; font-weight: $jst-weight-semibold; color: #5D4037; transition: transform $jst-duration-fast $jst-easing; }
+.my-page__rebate-banner-btn:active { transform: scale(0.97); }
 </style>
