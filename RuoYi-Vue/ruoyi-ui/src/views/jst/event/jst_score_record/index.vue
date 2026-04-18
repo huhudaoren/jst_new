@@ -188,8 +188,8 @@
           <div class="form-section__title">关联信息</div>
           <el-row :gutter="12">
             <el-col :xs="24" :sm="12">
-              <el-form-item label="赛事ID" prop="contestId">
-                <el-input v-model="form.contestId" placeholder="请输入赛事ID" />
+              <el-form-item label="赛事" prop="contestId">
+                <contest-picker v-model="form.contestId" />
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12">
@@ -200,13 +200,13 @@
           </el-row>
           <el-row :gutter="12">
             <el-col :xs="24" :sm="12">
-              <el-form-item label="用户ID" prop="userId">
-                <el-input v-model="form.userId" placeholder="请输入用户ID" />
+              <el-form-item label="用户" prop="userId">
+                <user-picker v-model="form.userId" />
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12">
-              <el-form-item label="参赛人ID" prop="participantId">
-                <el-input v-model="form.participantId" placeholder="请输入参赛人ID" />
+              <el-form-item label="参赛人" prop="participantId">
+                <participant-picker v-model="form.participantId" />
               </el-form-item>
             </el-col>
           </el-row>
