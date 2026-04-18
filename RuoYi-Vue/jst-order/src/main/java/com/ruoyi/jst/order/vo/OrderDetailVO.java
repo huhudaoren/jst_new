@@ -57,6 +57,9 @@ public class OrderDetailVO {
 
     private String refundStatus;
 
+    /** Round 2A A6: 是否允许学生自助退款（status=paid AND 在售后期 AND netPayAmount>0） */
+    private Boolean refundEnabled;
+
     private String itemName;
 
     private String paymentNo;
@@ -250,6 +253,14 @@ public class OrderDetailVO {
 
     public void setRefundStatus(String refundStatus) {
         this.refundStatus = refundStatus;
+    }
+
+    public Boolean getRefundEnabled() {
+        return refundEnabled;
+    }
+
+    public void setRefundEnabled(Boolean refundEnabled) {
+        this.refundEnabled = refundEnabled;
     }
 
     public String getItemName() {

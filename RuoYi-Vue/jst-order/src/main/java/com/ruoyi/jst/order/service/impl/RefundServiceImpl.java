@@ -125,7 +125,12 @@ public class RefundServiceImpl implements RefundService {
     public List<RefundListVO> selectMyList(RefundQueryReqDTO query) {
         RefundQueryReqDTO finalQuery = query == null ? new RefundQueryReqDTO() : query;
         finalQuery.setUserId(currentUserId());
-        return refundRecordMapperExt.selectMyList(finalQuery);
+        List<RefundListVO> list = refundRecordMapperExt.selectMyList(finalQuery);
+        // Round 2A A7: 富化 pointsRefund / couponRefund / expectedArrivalTime
+        if (list != null) {
+            list.forEach(this::enrichRefundListVO);
+        }
+        return list;
     }
 
     @Override
@@ -157,7 +162,12 @@ public class RefundServiceImpl implements RefundService {
         if (isPartnerUser() && finalQuery.getPartnerId() == null) {
             finalQuery.setPartnerId(JstLoginContext.currentPartnerId());
         }
-        return refundRecordMapperExt.selectAdminList(finalQuery);
+        List<RefundListVO> list = refundRecordMapperExt.selectAdminList(finalQuery);
+        // Round 2A A7: 富化 pointsRefund / couponRefund / expectedArrivalTime
+        if (list != null) {
+            list.forEach(this::enrichRefundListVO);
+        }
+        return list;
     }
 
     @Override
@@ -554,7 +564,79 @@ public class RefundServiceImpl implements RefundService {
             throw new ServiceException(BizErrorCode.JST_ORDER_REFUND_NOT_FOUND.message(),
                     BizErrorCode.JST_ORDER_REFUND_NOT_FOUND.code());
         }
+        // Round 2A A7: 富化 pointsRefund / couponRefund / expectedArrivalTime
+        enrichRefundDetailVO(detail);
         return detail;
+    }
+
+    /**
+     * Round 2A A7: 富化 RefundListVO 的 pointsRefund / couponRefund / expectedArrivalTime 字段。
+     */
+    private void enrichRefundListVO(RefundListVO vo) {
+        if (vo == null) {
+            return;
+        }
+        vo.setPointsRefund(vo.getActualPoints());
+        vo.setCouponRefund(buildCouponRefund(
+                vo.getCouponReturned(), vo.getCouponName(), vo.getCouponFaceAmount(), vo.getCouponStatus()));
+        vo.setExpectedArrivalTime(computeExpectedArrivalTime(vo.getStatus(), vo.getUpdateTime()));
+    }
+
+    /**
+     * Round 2A A7: 富化 RefundDetailVO 的 pointsRefund / couponRefund / expectedArrivalTime 字段。
+     */
+    private void enrichRefundDetailVO(RefundDetailVO vo) {
+        if (vo == null) {
+            return;
+        }
+        vo.setPointsRefund(vo.getActualPoints());
+        vo.setCouponRefund(buildCouponRefund(
+                vo.getCouponReturned(), vo.getCouponName(), vo.getCouponFaceAmount(), vo.getCouponStatus()));
+        vo.setExpectedArrivalTime(computeExpectedArrivalTime(vo.getStatus(), vo.getUpdateTime()));
+    }
+
+    /**
+     * Round 2A A7: 构造优惠券回退快照。
+     * <p>
+     * 无券或未回退券时返回 null（前端靠 null 判断是否显示"已回退优惠券"区块）。
+     *
+     * @param couponReturned   退款记录上的 coupon_returned 字段（1=已回退）
+     * @param couponName       券名称
+     * @param faceAmount       券面额
+     * @param couponStatus     券当前状态
+     * @return CouponRefundInfo 或 null
+     */
+    private com.ruoyi.jst.order.vo.CouponRefundInfo buildCouponRefund(Integer couponReturned,
+                                                                     String couponName,
+                                                                     BigDecimal faceAmount,
+                                                                     String couponStatus) {
+        // 仅当订单有关联券时构造对象
+        if (StringUtils.isBlank(couponName)) {
+            return null;
+        }
+        com.ruoyi.jst.order.vo.CouponRefundInfo info = new com.ruoyi.jst.order.vo.CouponRefundInfo();
+        info.setCouponName(couponName);
+        info.setFaceAmount(faceAmount);
+        info.setCouponStatus(couponStatus);
+        return info;
+    }
+
+    /**
+     * Round 2A A7: 计算退款预计到账时间。
+     * <p>
+     * 规则：refund.status = 'approved' 时 → approvedTime（用 update_time 代理）+ 7 天；
+     * 其他状态 → null（前端不展示倒计时）。
+     *
+     * @param status     退款状态
+     * @param updateTime 退款记录 update_time（approved 时为实际 approvedTime）
+     * @return 预计到账时间或 null
+     */
+    private Date computeExpectedArrivalTime(String status, Date updateTime) {
+        if (!RefundStatus.APPROVED.dbValue().equals(status) || updateTime == null) {
+            return null;
+        }
+        long sevenDays = 7L * 24L * 60L * 60L * 1000L;
+        return new Date(updateTime.getTime() + sevenDays);
     }
 
     private PointsSnapshot loadPointsSnapshot(Long userId) {

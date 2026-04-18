@@ -9,6 +9,8 @@ public class DashboardMonthlyVO {
 
     private String yearMonth;
     private Integer newStudentCount;
+    /** 截至当前该渠道累计绑定（active）学生数（Round 2A A1） */
+    private Integer totalStudentCount;
     private Integer orderCount;
     private BigDecimal orderPaidAmount;
     private BigDecimal rebateEstimatedAmount;
@@ -27,6 +29,14 @@ public class DashboardMonthlyVO {
 
     public void setNewStudentCount(Integer newStudentCount) {
         this.newStudentCount = newStudentCount;
+    }
+
+    public Integer getTotalStudentCount() {
+        return totalStudentCount;
+    }
+
+    public void setTotalStudentCount(Integer totalStudentCount) {
+        this.totalStudentCount = totalStudentCount;
     }
 
     public Integer getOrderCount() {

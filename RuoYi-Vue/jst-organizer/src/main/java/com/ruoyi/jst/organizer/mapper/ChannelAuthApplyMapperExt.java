@@ -88,6 +88,18 @@ public interface ChannelAuthApplyMapperExt {
                           @Param("lockedForManual") int lockedForManual);
 
     /**
+     * Round 2A A2: 驳回时独立写入 reject_reason 业务字段。
+     * <p>
+     * 与 updateApplyStatus 的 audit_remark 并行存在，前端优先展示 reject_reason。
+     *
+     * @param applyId      申请ID
+     * @param rejectReason 驳回原因
+     * @return 影响行数
+     */
+    int updateRejectReason(@Param("applyId") Long applyId,
+                           @Param("rejectReason") String rejectReason);
+
+    /**
      * 按预期状态推进申请
      *
      * @param applyId        申请ID

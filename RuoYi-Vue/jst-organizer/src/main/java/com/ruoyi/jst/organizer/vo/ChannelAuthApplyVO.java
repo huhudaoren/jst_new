@@ -24,6 +24,8 @@ public class ChannelAuthApplyVO {
     private String materialsJson;
     private String applyStatus;
     private String auditRemark;
+    /** Round 2A A2: 驳回原因（业务语义，区别于 audit_remark） */
+    private String rejectReason;
     private Integer rejectCount;
     private Integer lockedForManual;
     private Date submitTime;
@@ -107,6 +109,14 @@ public class ChannelAuthApplyVO {
 
     public void setAuditRemark(String auditRemark) {
         this.auditRemark = auditRemark;
+    }
+
+    public String getRejectReason() {
+        return rejectReason;
+    }
+
+    public void setRejectReason(String rejectReason) {
+        this.rejectReason = rejectReason;
     }
 
     public Integer getRejectCount() {

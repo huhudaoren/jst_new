@@ -309,15 +309,23 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
             int newRejectCount = currentRejectCount + 1;
             int lockedFlag = newRejectCount >= MAX_REJECT_COUNT ? 1 : 0;
             channelAuthApplyMapperExt.updateRejectCount(applyId, newRejectCount, lockedFlag);
+
+            // Round 2A A2: 独立写入 reject_reason（前端优先展示），null/空时回退到 audit_remark
+            String rejectReason = StringUtils.isNotBlank(req.getRejectReason())
+                    ? req.getRejectReason()
+                    : req.getAuditRemark();
+            channelAuthApplyMapperExt.updateRejectReason(applyId, rejectReason);
+
             Map<String, Object> extraData = new LinkedHashMap<>();
-            extraData.put("rejectReason", req.getAuditRemark());
+            extraData.put("rejectReason", rejectReason);
             extraData.put("rejectCount", newRejectCount);
             extraData.put("lockedForManual", lockedFlag);
             publishAfterCommit(new ChannelAuthRejectedEvent(this, apply.getUserId(), applyId,
                     "auth_rejected", extraData));
 
-            log.info("[ChannelAuthApply] 审核驳回 applyId={} userId={} rejectCount={}/{} locked={} remark={}",
-                    applyId, apply.getUserId(), newRejectCount, MAX_REJECT_COUNT, lockedFlag, req.getAuditRemark());
+            log.info("[ChannelAuthApply] 审核驳回 applyId={} userId={} rejectCount={}/{} locked={} remark={} rejectReason={}",
+                    applyId, apply.getUserId(), newRejectCount, MAX_REJECT_COUNT, lockedFlag,
+                    req.getAuditRemark(), rejectReason);
             log.info("[ChannelAuthApply] Mock 短信: userId={} 渠道认证审核未通过", apply.getUserId());
             return null;
         });
@@ -395,6 +403,31 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
     public ChannelAuthApplyVO getMyLatest(Long userId) {
         loadRequiredUser(userId);
         return channelAuthApplyMapperExt.selectLatestByUserId(userId);
+    }
+
+    /**
+     * Round 2A A3: 按 applyId 直查当前用户认证申请，含归属校验。
+     *
+     * @param applyId 申请ID
+     * @param userId  当前用户ID
+     * @return 申请详情
+     * @关联表 jst_channel_auth_apply
+     * @关联权限 hasRole('jst_student')
+     */
+    @Override
+    public ChannelAuthApplyVO getMyApplyById(Long applyId, Long userId) {
+        loadRequiredUser(userId);
+        ChannelAuthApplyVO detail = channelAuthApplyMapperExt.selectApplyDetail(applyId);
+        if (detail == null) {
+            throw new ServiceException(BizErrorCode.JST_CHANNEL_AUTH_APPLY_NOT_FOUND.message(),
+                    BizErrorCode.JST_CHANNEL_AUTH_APPLY_NOT_FOUND.code());
+        }
+        // 归属校验：禁止越权查看他人申请
+        if (detail.getUserId() == null || !detail.getUserId().equals(userId)) {
+            throw new ServiceException("无权查看该认证申请",
+                    BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+        }
+        return detail;
     }
 
     /**

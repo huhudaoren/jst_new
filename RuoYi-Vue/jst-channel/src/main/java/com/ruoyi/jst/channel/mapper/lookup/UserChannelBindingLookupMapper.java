@@ -18,5 +18,13 @@ public interface UserChannelBindingLookupMapper {
                                 @Param("startTime") Date startTime,
                                 @Param("endTime") Date endTime);
 
+    /**
+     * 统计当前渠道全部活跃（active）且未删除的绑定学生数（Round 2A A1）。
+     *
+     * @param channelId 渠道ID
+     * @return 累计绑定学生数
+     */
+    Long countTotalStudentByChannel(@Param("channelId") Long channelId);
+
     List<DashboardStudentVO> selectStudentList(ChannelDashboardQueryDTO query);
 }

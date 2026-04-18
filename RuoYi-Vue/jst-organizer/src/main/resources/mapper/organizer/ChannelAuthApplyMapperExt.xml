@@ -16,6 +16,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="materialsJson" column="materials_json"/>
         <result property="applyStatus" column="apply_status"/>
         <result property="auditRemark" column="audit_remark"/>
+        <result property="rejectReason" column="reject_reason"/>
         <result property="auditUserId" column="audit_user_id"/>
         <result property="submitTime" column="submit_time"/>
         <result property="auditTime" column="audit_time"/>
@@ -41,6 +42,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="materialsJson" column="materials_json"/>
         <result property="applyStatus" column="apply_status"/>
         <result property="auditRemark" column="audit_remark"/>
+        <result property="rejectReason" column="reject_reason"/>
         <result property="rejectCount" column="reject_count"/>
         <result property="lockedForManual" column="locked_for_manual"/>
         <result property="submitTime" column="submit_time"/>
@@ -49,7 +51,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <sql id="applyColumns">
         apply_id, apply_no, user_id, channel_id, channel_type, apply_name, region, materials_json,
-        apply_status, audit_remark, audit_user_id, submit_time, audit_time,
+        apply_status, audit_remark, reject_reason, audit_user_id, submit_time, audit_time,
         reject_count, locked_for_manual,
         create_by, create_time, update_by, update_time, remark, del_flag
     </sql>
@@ -71,7 +73,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectMyApplyList" resultMap="ChannelAuthApplyVOResult">
         select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, region, materials_json,
-               apply_status, audit_remark, reject_count, locked_for_manual, submit_time, audit_time
+               apply_status, audit_remark, reject_reason, reject_count, locked_for_manual, submit_time, audit_time
         from jst_channel_auth_apply
         where del_flag = '0'
           and user_id = #{userId}
@@ -80,7 +82,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectLatestByUserId" resultMap="ChannelAuthApplyVOResult">
         select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, region, materials_json,
-               apply_status, audit_remark, reject_count, locked_for_manual, submit_time, audit_time
+               apply_status, audit_remark, reject_reason, reject_count, locked_for_manual, submit_time, audit_time
         from jst_channel_auth_apply
         where del_flag = '0'
           and user_id = #{userId}
@@ -90,7 +92,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectAdminApplyList" resultMap="ChannelAuthApplyVOResult">
         select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, region, materials_json,
-               apply_status, audit_remark, reject_count, locked_for_manual, submit_time, audit_time
+               apply_status, audit_remark, reject_reason, reject_count, locked_for_manual, submit_time, audit_time
         from jst_channel_auth_apply
         <where>
             del_flag = '0'
@@ -115,7 +117,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectApplyDetail" resultMap="ChannelAuthApplyVOResult">
         select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, region, materials_json,
-               apply_status, audit_remark, reject_count, locked_for_manual, submit_time, audit_time
+               apply_status, audit_remark, reject_reason, reject_count, locked_for_manual, submit_time, audit_time
         from jst_channel_auth_apply
         where apply_id = #{applyId}
           and del_flag = '0'
@@ -152,6 +154,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         update jst_channel_auth_apply
         set reject_count = #{newRejectCount},
             locked_for_manual = #{lockedForManual},
+            update_time = now()
+        where apply_id = #{applyId}
+          and del_flag = '0'
+    </update>
+
+    <!-- Round 2A A2: 独立写入驳回原因 reject_reason -->
+    <update id="updateRejectReason">
+        update jst_channel_auth_apply
+        set reject_reason = #{rejectReason},
             update_time = now()
         where apply_id = #{applyId}
           and del_flag = '0'

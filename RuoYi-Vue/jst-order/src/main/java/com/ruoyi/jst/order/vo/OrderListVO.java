@@ -35,6 +35,9 @@ public class OrderListVO {
 
     private BigDecimal netPayAmount;
 
+    /** Round 2A A6: 是否允许学生自助退款（status=paid AND 在售后期 AND netPayAmount>0） */
+    private Boolean refundEnabled;
+
     private String orderType;
 
     private String payMethod;
@@ -43,6 +46,10 @@ public class OrderListVO {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date payTime;
+
+    /** Round 2A A6: 售后截止时间（用于前端倒计时 + refundEnabled 计算） */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date aftersaleDeadline;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
@@ -165,6 +172,22 @@ public class OrderListVO {
 
     public void setPayTime(Date payTime) {
         this.payTime = payTime;
+    }
+
+    public Date getAftersaleDeadline() {
+        return aftersaleDeadline;
+    }
+
+    public void setAftersaleDeadline(Date aftersaleDeadline) {
+        this.aftersaleDeadline = aftersaleDeadline;
+    }
+
+    public Boolean getRefundEnabled() {
+        return refundEnabled;
+    }
+
+    public void setRefundEnabled(Boolean refundEnabled) {
+        this.refundEnabled = refundEnabled;
     }
 
     public Date getCreateTime() {

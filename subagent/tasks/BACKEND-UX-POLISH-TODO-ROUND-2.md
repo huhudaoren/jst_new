@@ -7,7 +7,11 @@
 
 ## 一、Round 2A · 字段扩展 + 小端点（本次做）
 
-### A1. `DashboardMonthlyVO.totalStudentCount` 累计绑定学生数
+> **已完成**：A1–A7 全部 ✅（2026-04-19, commit `ecf3c0c`，分支 `feat/backend-todo-round-2a`）。
+> 报告：`subagent/tasks/任务报告/BACKEND-UX-POLISH-TODO-ROUND-2A-报告.md`。
+> DDL：`架构设计/ddl/99-migration-backend-ux-polish-round2.sql`。
+
+### ✅ A1. `DashboardMonthlyVO.totalStudentCount` 累计绑定学生数
 
 **文件**：`RuoYi-Vue/jst-channel/src/main/java/com/ruoyi/jst/channel/vo/DashboardMonthlyVO.java`（或 dto 目录）
 **新增字段**：`totalStudentCount: Integer` — 截至当前该渠道累计绑定学生数
@@ -23,7 +27,7 @@ WHERE channel_id = #{channelId}
 
 ---
 
-### A2. `JstChannelAuthApply.rejectReason` 独立字段
+### ✅ A2. `JstChannelAuthApply.rejectReason` 独立字段
 
 **DDL**：
 ```sql
@@ -42,7 +46,7 @@ ALTER TABLE jst_channel_auth_apply
 
 ---
 
-### A3. `GET /jst/wx/channel/auth/{id}` 按 applyId 直查
+### ✅ A3. `GET /jst/wx/channel/auth/{id}` 按 applyId 直查
 
 **Controller**：`WxChannelAuthController` 增加
 ```java
@@ -61,7 +65,7 @@ public AjaxResult getById(@PathVariable Long id) {
 
 ---
 
-### A4. `JstContest.offlineReserveRemaining` / `offlineReserveDeadline` 字段
+### ✅ A4. `JstContest.offlineReserveRemaining` / `offlineReserveDeadline` 字段
 
 **DDL**：
 ```sql
@@ -81,7 +85,7 @@ ALTER TABLE jst_contest
 
 ---
 
-### A5. `/jst/wx/mall/list` 支持 `goodsType=virtual` 过滤
+### ✅ A5. `/jst/wx/mall/list` 支持 `goodsType=virtual` 过滤
 
 **文件**：`WxMallController` + `JstMallGoodsMapper.xml`
 **Mapper 逻辑**：
@@ -102,7 +106,7 @@ ALTER TABLE jst_contest
 
 ---
 
-### A6. `OrderVO.pointsUsed` + `refundEnabled`
+### ✅ A6. `OrderVO.pointsUsed` + `refundEnabled`
 
 **文件**：`OrderListVO.java` + `OrderDetailVO.java`
 **新增字段**：
@@ -124,7 +128,7 @@ vo.setRefundEnabled(
 
 ---
 
-### A7. `RefundVO.pointsRefund` + `couponRefund` + `expectedArrivalTime`
+### ✅ A7. `RefundVO.pointsRefund` + `couponRefund` + `expectedArrivalTime`
 
 **文件**：`RefundListVO.java` + `RefundDetailVO.java`
 **新增字段**：

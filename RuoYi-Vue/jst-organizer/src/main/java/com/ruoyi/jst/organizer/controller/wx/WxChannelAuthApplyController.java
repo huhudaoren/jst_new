@@ -89,6 +89,25 @@ public class WxChannelAuthApplyController extends BaseController {
     }
 
     /**
+     * Round 2A A3: 按 applyId 直查当前用户某条申请（含归属校验）。
+     * <p>
+     * 主要用于重提页根据路由 rejectedId 查历史原件；越权访问他人申请返回 99902。
+     * 由于渠道申请既可能是学生状态、也可能是已升级渠道身份在查看旧申请，
+     * 权限集合为 jst_student 或 jst_channel（任一）。
+     *
+     * @param id 申请ID
+     * @return 申请详情
+     * @关联表 jst_channel_auth_apply
+     * @关联权限 hasAnyRoles('jst_student,jst_channel')
+     */
+    @PreAuthorize("@ss.hasAnyRoles('jst_student,jst_channel')")
+    @GetMapping("/{id}")
+    public AjaxResult getById(@PathVariable("id") Long id) {
+        Long userId = SecurityUtils.getUserId();
+        return AjaxResult.success(channelAuthApplyService.getMyApplyById(id, userId));
+    }
+
+    /**
      * 驳回后重提申请
      * <p>
      * Q-02: 服务端检查 rejectCount < 3，否则返回 JST_CHANNEL_AUTH_LOCKED

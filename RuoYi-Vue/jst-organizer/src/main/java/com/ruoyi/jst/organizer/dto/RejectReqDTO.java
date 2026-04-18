@@ -19,11 +19,27 @@ public class RejectReqDTO {
     @Size(max = 255, message = "审核备注长度不能超过255个字符")
     private String auditRemark;
 
+    /**
+     * Round 2A A2: 驳回原因（业务语义，前端优先展示）
+     * <p>
+     * 为空时 Service 会回退到 auditRemark，向后兼容旧调用方。
+     */
+    @Size(max = 500, message = "驳回原因长度不能超过500个字符")
+    private String rejectReason;
+
     public String getAuditRemark() {
         return auditRemark;
     }
 
     public void setAuditRemark(String auditRemark) {
         this.auditRemark = auditRemark;
+    }
+
+    public String getRejectReason() {
+        return rejectReason;
+    }
+
+    public void setRejectReason(String rejectReason) {
+        this.rejectReason = rejectReason;
     }
 }

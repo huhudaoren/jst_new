@@ -59,6 +59,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="writeoffConfig"    column="writeoff_config"    />
         <result property="allowRepeatAppointment"    column="allow_repeat_appointment"    />
         <result property="allowAppointmentRefund"    column="allow_appointment_refund"    />
+        <result property="offlineReserveRemaining"    column="offline_reserve_remaining"    />
+        <result property="offlineReserveDeadline"    column="offline_reserve_deadline"    />
     </resultMap>
 
     <resultMap type="JstContest" id="JstContestListResult" extends="JstContestResult">
@@ -70,6 +72,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         enroll_start_time, enroll_end_time, event_start_time, event_end_time, price,
         support_channel_enroll, support_points_deduct, support_appointment,
         appointment_capacity, writeoff_config, allow_repeat_appointment, allow_appointment_refund,
+        offline_reserve_remaining, offline_reserve_deadline,
         cert_rule_json, score_rule_json, form_template_id, aftersale_days,
         banner_image, total_quota, per_user_limit, score_publish_mode, cert_issue_mode,
         writeoff_mode, need_sign_in, team_min_size, team_max_size,

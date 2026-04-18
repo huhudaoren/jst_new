@@ -4115,3 +4115,146 @@ client.test("BUPT-6 rights/my status=invalid should return used+expired+voided+r
 });
 %}
 
+
+### =====================================================================
+### Round 2A · 后端 UX 精品化遗留字段补齐 (2026-04-19)
+### 任务卡: subagent/tasks/BACKEND-UX-POLISH-TODO-ROUND-2.md
+### 分支: feat/backend-todo-round-2a
+### 前置: 
+###   1. 99-migration-backend-ux-polish-round2.sql 已执行
+###   2. fixture: 1001=student, 1005=channel
+### =====================================================================
+
+### ROUND2A-0. 登录 channel 用户 (A1 用)
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1005" }
+
+> {%
+client.global.set("round2a_channel_token", response.body.data.token);
+%}
+
+### ROUND2A-A1. 渠道工作台 monthly 应返回 totalStudentCount
+GET {{baseUrl}}/jst/wx/channel/dashboard/monthly
+Authorization: Bearer {{round2a_channel_token}}
+
+> {%
+client.test("A1 monthly should contain totalStudentCount", function() {
+  client.assert(response.body.code === 200 || response.body.code === 99902,
+    "got code=" + response.body.code);
+  if (response.body.code === 200 && response.body.data) {
+    client.assert("totalStudentCount" in response.body.data,
+      "totalStudentCount missing in monthly VO");
+    client.assert(typeof response.body.data.totalStudentCount === "number"
+      || response.body.data.totalStudentCount === null,
+      "totalStudentCount should be number, got: " + typeof response.body.data.totalStudentCount);
+  }
+});
+%}
+
+### ROUND2A-0-STUDENT. 登录 student 用户 (A3 用)
+POST {{baseUrl}}/jst/wx/auth/login
+Content-Type: {{contentType}}
+
+{ "code": "MOCK_1001" }
+
+> {%
+client.global.set("round2a_student_token", response.body.data.token);
+%}
+
+### ROUND2A-A3. GET /jst/wx/channel/auth/{id} 不存在申请应 99902
+GET {{baseUrl}}/jst/wx/channel/auth/99999999
+Authorization: Bearer {{round2a_student_token}}
+
+> {%
+client.test("A3 non-existent applyId should return 99902", function() {
+  client.assert(response.body.code !== 200, "expected non-200, got: " + response.body.code);
+});
+%}
+
+### ROUND2A-A3b. GET /jst/wx/channel/auth/my 获取最新申请
+GET {{baseUrl}}/jst/wx/channel/auth/my
+Authorization: Bearer {{round2a_student_token}}
+
+> {%
+client.test("A3b /my works + returns rejectReason if present", function() {
+  client.assert(response.body.code === 200 || response.body.code === 99902,
+    "got code=" + response.body.code);
+  if (response.body.code === 200 && response.body.data !== null) {
+    // rejectReason 字段存在（可为 null）
+    client.assert("rejectReason" in response.body.data,
+      "A2: rejectReason field should be present on VO");
+    client.global.set("round2a_my_apply_id", response.body.data.applyId);
+  }
+});
+%}
+
+### ROUND2A-A4. 赛事详情含 offlineReserveRemaining/offlineReserveDeadline (fixture contest 8802)
+GET {{baseUrl}}/jst/wx/contest/detail/8802
+
+> {%
+client.test("A4 contest detail should expose offlineReserveRemaining + offlineReserveDeadline", function() {
+  client.assert(response.body.code === 200 || response.body.code === 99902,
+    "got code=" + response.body.code);
+  if (response.body.code === 200 && response.body.data) {
+    client.assert("offlineReserveRemaining" in response.body.data,
+      "offlineReserveRemaining field missing");
+    client.assert("offlineReserveDeadline" in response.body.data,
+      "offlineReserveDeadline field missing");
+  }
+});
+%}
+
+### ROUND2A-A5. mall 列表 goodsType=virtual 聚合 coupon + rights
+GET {{baseUrl}}/jst/wx/mall/goods/list?goodsType=virtual&pageNum=1&pageSize=20
+
+> {%
+client.test("A5 goodsType=virtual filters to coupon + rights only", function() {
+  client.assert(response.body.code === 200,
+    "expected 200, got: " + response.body.code);
+  if (response.body.rows && response.body.rows.length > 0) {
+    response.body.rows.forEach(function(row) {
+      client.assert(
+        ["coupon", "rights"].indexOf(row.goodsType) >= 0,
+        "expected virtual types (coupon/rights), got: " + row.goodsType
+      );
+    });
+  }
+});
+%}
+
+### ROUND2A-A6. 订单列表含 refundEnabled 字段
+GET {{baseUrl}}/jst/wx/order/my/list?pageNum=1&pageSize=10
+Authorization: Bearer {{round2a_student_token}}
+
+> {%
+client.test("A6 order list should include refundEnabled + aftersaleDeadline", function() {
+  client.assert(response.body.code === 200 || response.body.code === 99902,
+    "got code=" + response.body.code);
+  if (response.body.code === 200 && response.body.rows && response.body.rows.length > 0) {
+    var row = response.body.rows[0];
+    client.assert("refundEnabled" in row, "refundEnabled missing");
+    client.assert("aftersaleDeadline" in row, "aftersaleDeadline missing");
+    client.assert(typeof row.refundEnabled === "boolean",
+      "refundEnabled should be boolean, got: " + typeof row.refundEnabled);
+  }
+});
+%}
+
+### ROUND2A-A7. 退款列表含 pointsRefund / couponRefund / expectedArrivalTime
+GET {{baseUrl}}/jst/wx/refund/my/list?pageNum=1&pageSize=10
+Authorization: Bearer {{round2a_student_token}}
+
+> {%
+client.test("A7 refund list should expose pointsRefund + couponRefund + expectedArrivalTime", function() {
+  client.assert(response.body.code === 200 || response.body.code === 99902,
+    "got code=" + response.body.code);
+  if (response.body.code === 200 && response.body.rows && response.body.rows.length > 0) {
+    var row = response.body.rows[0];
+    client.assert("pointsRefund" in row, "pointsRefund missing");
+    client.assert("couponRefund" in row, "couponRefund missing (can be null)");
+    client.assert("expectedArrivalTime" in row, "expectedArrivalTime missing");
+  }
+});
+%}

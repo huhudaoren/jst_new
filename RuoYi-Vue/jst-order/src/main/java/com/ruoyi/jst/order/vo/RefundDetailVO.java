@@ -1,6 +1,7 @@
 package com.ruoyi.jst.order.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -47,6 +48,16 @@ public class RefundDetailVO {
 
     private Integer couponReturned;
 
+    /** Round 2A A7: 回退的积分数（别名，提高前端语义一致性，等价 actualPoints） */
+    private Long pointsRefund;
+
+    /** Round 2A A7: 回退优惠券快照（含券名、面额、当前状态），无券则 null */
+    private CouponRefundInfo couponRefund;
+
+    /** Round 2A A7: 预计到账时间（approved_time + 7 天；approved 状态才有值） */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date expectedArrivalTime;
+
     private String status;
 
     private String auditRemark;
@@ -65,6 +76,16 @@ public class RefundDetailVO {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date completeTime;
+
+    // ---- Round 2A A7: MyBatis shadow fields (不直接返给前端，Service 合成 couponRefund / expectedArrivalTime) ----
+    @JsonIgnore
+    private String couponName;
+    @JsonIgnore
+    private BigDecimal couponFaceAmount;
+    @JsonIgnore
+    private String couponStatus;
+    @JsonIgnore
+    private Date updateTime;
 
     public Long getRefundId() {
         return refundId;
@@ -202,6 +223,30 @@ public class RefundDetailVO {
         this.couponReturned = couponReturned;
     }
 
+    public Long getPointsRefund() {
+        return pointsRefund;
+    }
+
+    public void setPointsRefund(Long pointsRefund) {
+        this.pointsRefund = pointsRefund;
+    }
+
+    public CouponRefundInfo getCouponRefund() {
+        return couponRefund;
+    }
+
+    public void setCouponRefund(CouponRefundInfo couponRefund) {
+        this.couponRefund = couponRefund;
+    }
+
+    public Date getExpectedArrivalTime() {
+        return expectedArrivalTime;
+    }
+
+    public void setExpectedArrivalTime(Date expectedArrivalTime) {
+        this.expectedArrivalTime = expectedArrivalTime;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -264,5 +309,38 @@ public class RefundDetailVO {
 
     public void setCompleteTime(Date completeTime) {
         this.completeTime = completeTime;
+    }
+
+    // ---- Round 2A A7 shadow getters/setters ----
+    public String getCouponName() {
+        return couponName;
+    }
+
+    public void setCouponName(String couponName) {
+        this.couponName = couponName;
+    }
+
+    public BigDecimal getCouponFaceAmount() {
+        return couponFaceAmount;
+    }
+
+    public void setCouponFaceAmount(BigDecimal couponFaceAmount) {
+        this.couponFaceAmount = couponFaceAmount;
+    }
+
+    public String getCouponStatus() {
+        return couponStatus;
+    }
+
+    public void setCouponStatus(String couponStatus) {
+        this.couponStatus = couponStatus;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 }

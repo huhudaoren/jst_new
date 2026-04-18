@@ -50,11 +50,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                om.order_status,
                om.refund_status,
                rr.create_time,
-               rr.complete_time
+               rr.complete_time,
+               rr.update_time,
+               <!-- Round 2A A7: coupon info via om.coupon_id -> jst_user_coupon -> jst_coupon_template -->
+               cpt.coupon_name AS coupon_name,
+               cpt.face_value AS coupon_face_amount,
+               uc.status      AS coupon_status
         from jst_refund_record rr
         inner join jst_order_main om on om.order_id = rr.order_id and om.del_flag = '0'
         left join jst_contest c on c.contest_id = om.contest_id and c.del_flag = '0'
         left join jst_participant p on p.participant_id = om.participant_id and p.del_flag = '0'
+        left join jst_user_coupon uc on uc.user_coupon_id = om.coupon_id and uc.del_flag = '0'
+        left join jst_coupon_template cpt on cpt.coupon_template_id = uc.coupon_template_id and cpt.del_flag = '0'
     </sql>
 
     <select id="countBlockingByOrderId" resultType="int">
@@ -193,12 +200,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                om.pay_method,
                om.aftersale_deadline,
                rr.create_time,
-               rr.complete_time
+               rr.complete_time,
+               rr.update_time,
+               <!-- Round 2A A7: coupon info -->
+               cpt.coupon_name AS coupon_name,
+               cpt.face_value AS coupon_face_amount,
+               uc.status      AS coupon_status
         from jst_refund_record rr
         inner join jst_order_main om on om.order_id = rr.order_id and om.del_flag = '0'
         left join jst_order_item oi on oi.item_id = rr.item_id and oi.del_flag = '0'
         left join jst_contest c on c.contest_id = om.contest_id and c.del_flag = '0'
         left join jst_participant p on p.participant_id = om.participant_id and p.del_flag = '0'
+        left join jst_user_coupon uc on uc.user_coupon_id = om.coupon_id and uc.del_flag = '0'
+        left join jst_coupon_template cpt on cpt.coupon_template_id = uc.coupon_template_id and cpt.del_flag = '0'
         where rr.refund_id = #{refundId}
           and rr.del_flag = '0'
         limit 1
