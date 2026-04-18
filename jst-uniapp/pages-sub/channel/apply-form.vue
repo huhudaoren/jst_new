@@ -29,13 +29,18 @@
           <u--input class="af-field__input" v-model="form.mobile" type="number" placeholder="请输入手机号" maxlength="11" border="none"></u--input>
         </u-form-item>
         <u-form-item label="所在地区 *" customClass="af-field">
-          <u--input
-            class="af-field__input"
-            v-model="form.region"
-            placeholder="请输入省份/地区，如 北京市"
-            maxlength="64"
-            border="none"
-          ></u--input>
+          <!-- PATCH-5: 改省级字典 picker，落 dict_value（拼音），显示 dict_label -->
+          <picker
+            mode="selector"
+            :range="regionOptions"
+            range-key="label"
+            @change="onRegionChange"
+            class="af-field__picker"
+          >
+            <view :class="['af-field__picker-display', form.regionLabel ? '' : 'af-field__picker-display--placeholder']">
+              {{ form.regionLabel || '请选择所在省份' }}
+            </view>
+          </picker>
         </u-form-item>
         <u-form-item label="身份证号" customClass="af-field">
           <u--input class="af-field__input" v-model="form.idCard" placeholder="选填" maxlength="18" border="none"></u--input>
@@ -122,6 +127,7 @@
 
 <script>
 import { submitChannelApply, resubmitChannelApply, getMyChannelApply } from '@/api/channel'
+import { getDict } from '@/api/dict'
 
 const TYPE_LABEL = { teacher: '老师', organization: '机构', individual: '个人' }
 
@@ -136,11 +142,13 @@ export default {
       rejectedId: null,
       rejectReasonText: '',
       showRejectBanner: true,
-      form: { applyName: '', mobile: '', idCard: '', region: '', inviteCode: '', businessNo: '' },
+      form: { applyName: '', mobile: '', idCard: '', region: '', regionLabel: '', inviteCode: '', businessNo: '' },
       materials: {},
       agreed: false,
       submitting: false,
-      inviteCodeLocked: false
+      inviteCodeLocked: false,
+      // PATCH-5: 省级行政区字典
+      regionOptions: []
     }
   },
   computed: {
@@ -159,6 +167,8 @@ export default {
     this.resubmitId = (query && query.resubmitId) || null
     this.mode = (query && query.mode) || ''
     this.rejectedId = (query && query.rejectedId) || null
+    // PATCH-5: 加载省级字典
+    this.loadRegionDict()
     // 中文注释: edit 模式下加载最新驳回申请回填表单
     if (this.isEditMode) {
       this.loadRejectedApply()
@@ -171,6 +181,30 @@ export default {
     }
   },
   methods: {
+    // PATCH-5: 拉取 jst_region_province 字典 — 34 项省级行政区
+    async loadRegionDict() {
+      try {
+        const data = await getDict('jst_region_province')
+        const list = Array.isArray(data) ? data : (data && data.data) || []
+        this.regionOptions = list.map(item => ({ label: item.label, value: item.value }))
+        // edit 模式下字典加载晚于 loadRejectedApply，这里补齐 regionLabel 回显
+        this.syncRegionLabel()
+      } catch (e) {
+        this.regionOptions = []
+      }
+    },
+    onRegionChange(e) {
+      const idx = e && e.detail ? Number(e.detail.value) : -1
+      if (idx < 0 || !this.regionOptions[idx]) return
+      this.form.region = this.regionOptions[idx].value
+      this.form.regionLabel = this.regionOptions[idx].label
+    },
+    syncRegionLabel() {
+      if (!this.form.region || this.form.regionLabel || !this.regionOptions.length) return
+      const hit = this.regionOptions.find(o => o.value === this.form.region)
+      if (hit) this.form.regionLabel = hit.label
+    },
+
     // 中文注释: edit 模式 — 通过 getMyChannelApply 获取最新驳回记录，回填表单 + 显示驳回原因
     async loadRejectedApply() {
       try {
@@ -186,6 +220,7 @@ export default {
         if (apply.channelType) this.channelType = apply.channelType
         this.form.applyName = apply.applyName || ''
         this.form.region = apply.region || ''
+        this.syncRegionLabel()
         // materialsJson 回填
         try {
           const mat = apply.materialsJson ? JSON.parse(apply.materialsJson) : {}
@@ -326,6 +361,17 @@ export default {
   font-size: $jst-font-base;
   color: $jst-text-primary;
 }
+
+/* PATCH-5: 省份 picker 外观 — 与 u-input 视觉齐平 */
+.af-field__picker { flex: 1; }
+.af-field__picker-display {
+  display: block;
+  min-height: 56rpx;
+  line-height: 56rpx;
+  font-size: $jst-font-base;
+  color: $jst-text-primary;
+}
+.af-field__picker-display--placeholder { color: $jst-text-placeholder; }
 
 .af-agree { display: flex; align-items: center; gap: $jst-space-md; margin: $jst-space-xl $jst-space-xl 0; }
 .af-agree__icon--on { color: $jst-brand; }

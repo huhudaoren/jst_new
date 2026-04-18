@@ -27,3 +27,16 @@ export function getCourseCategories(options = {}) {
     ...options
   })
 }
+
+/**
+ * PATCH-5: 通用字典拉取（dict_type 需 jst_ 前缀）
+ * 返回 [{label, value, cssClass, listClass, ...}]
+ * @param {string} dictType 如 'jst_region_province'
+ */
+export function getDict(dictType, options = {}) {
+  return request({
+    url: `/jst/wx/dict/${dictType}`,
+    method: 'GET',
+    ...options
+  })
+}

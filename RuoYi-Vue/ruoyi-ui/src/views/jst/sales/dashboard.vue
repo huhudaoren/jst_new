@@ -190,7 +190,9 @@
         </el-col>
         <el-col :xs="24" :lg="8">
           <el-table :data="heatmapTopList" border stripe size="small" class="heatmap-table">
-            <el-table-column label="地区" prop="region" min-width="100" show-overflow-tooltip />
+            <el-table-column label="地区" prop="region" min-width="100" show-overflow-tooltip>
+              <template slot-scope="scope">{{ regionLabel(scope.row.region) }}</template>
+            </el-table-column>
             <el-table-column label="业务类型" min-width="100" show-overflow-tooltip>
               <template slot-scope="scope">{{ businessTypeLabel(scope.row.businessType) }}</template>
             </el-table-column>
@@ -255,6 +257,8 @@ export default {
         compressedRate: 0
       },
       heatmapData: [],
+      // PATCH-5: 省级行政区字典，用于热力图 region 拼音 → 中文翻译
+      regionDict: [],
       loadingOverview: false,
       loadingActivity: false,
       trendLoading: false,
@@ -303,6 +307,12 @@ export default {
       this.businessTypeDict = (res && res.data) || []
     }).catch(() => {
       this.businessTypeDict = []
+    })
+    // PATCH-5: 拉取省级行政区字典
+    this.getDicts('jst_region_province').then(res => {
+      this.regionDict = (res && res.data) || []
+    }).catch(() => {
+      this.regionDict = []
     })
   },
   mounted() {
@@ -552,7 +562,8 @@ export default {
             const business = businessAxis[params.data[0]]
             const region = regionAxis[params.data[1]]
             const raw = dataIndexMap[`${region}__${business}`] || {}
-            return `${region} × ${this.businessTypeLabel(business)}<br/>GMV：¥${this.formatAmount(raw.gmv)}<br/>渠道数：${raw.channelCount || 0}`
+            // PATCH-5: 翻译 region 拼音 → 中文
+            return `${this.regionLabel(region)} × ${this.businessTypeLabel(business)}<br/>GMV：¥${this.formatAmount(raw.gmv)}<br/>渠道数：${raw.channelCount || 0}`
           }
         },
         grid: { left: '5%', right: '8%', top: '12%', bottom: '10%', containLabel: true },
@@ -564,7 +575,8 @@ export default {
         },
         yAxis: {
           type: 'category',
-          data: regionAxis,
+          // PATCH-5: y 轴展示中文省份名（内部仍以 regionAxis 拼音索引）
+          data: regionAxis.map(r => this.regionLabel(r)),
           splitArea: { show: true }
         },
         visualMap: {
@@ -658,6 +670,12 @@ export default {
     businessTypeLabel(value) {
       const hit = (this.businessTypeDict || []).find(item => item.value === value)
       return hit ? hit.label : (value || '--')
+    },
+    // PATCH-5: region 拼音 value → 中文 label（字典外或空值兜底 "未设置"/"--"）
+    regionLabel(value) {
+      if (!value) return '未设置'
+      const hit = (this.regionDict || []).find(item => item.value === value)
+      return hit ? hit.label : value
     },
     handleResize() {
       ;['activityChart', 'trendChart', 'heatmapChart'].forEach(key => {
