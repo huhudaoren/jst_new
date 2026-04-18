@@ -85,4 +85,41 @@
         DELETE FROM jst_sales_commission_ledger WHERE ledger_id = #{ledgerId}
     </delete>
 
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO jst_sales_commission_ledger (
+            ledger_id, sales_id, order_id, order_no, channel_id, binding_type, business_type,
+            base_amount, applied_rate, raw_amount, compress_ratio, amount,
+            status, accrue_at, create_time
+        ) VALUES
+        <foreach collection="list" item="r" separator=",">
+            (#{r.ledgerId},#{r.salesId},#{r.orderId},#{r.orderNo},#{r.channelId},#{r.bindingType},
+             #{r.businessType},#{r.baseAmount},#{r.appliedRate},#{r.rawAmount},#{r.compressRatio},
+             #{r.amount},#{r.status},#{r.accrueAt},NOW())
+        </foreach>
+    </insert>
+
+    <select id="selectByOrderId" parameterType="Long" resultMap="JstSalesCommissionLedgerResult">
+        SELECT <include refid="cols"/> FROM jst_sales_commission_ledger WHERE order_id = #{orderId}
+    </select>
+
+    <select id="selectPendingForAccrue" resultType="Long">
+        SELECT ledger_id FROM jst_sales_commission_ledger
+         WHERE status = 'pending' AND accrue_at &lt;= NOW()
+         LIMIT 1000
+    </select>
+
+    <update id="markAccruedBatch">
+        UPDATE jst_sales_commission_ledger
+           SET status = 'accrued', accrued_at = NOW(), update_time = NOW()
+         WHERE ledger_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+        AND status = 'pending'
+    </update>
+
+    <update id="cancelPendingByOrder">
+        UPDATE jst_sales_commission_ledger
+           SET status = 'cancelled', update_time = NOW()
+         WHERE order_id = #{orderId} AND status = 'pending'
+    </update>
+
 </mapper>

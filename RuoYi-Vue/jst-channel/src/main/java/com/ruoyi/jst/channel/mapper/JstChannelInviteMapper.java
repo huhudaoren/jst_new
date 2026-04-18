@@ -1,6 +1,9 @@
 package com.ruoyi.jst.channel.mapper;
 
 import com.ruoyi.jst.channel.domain.JstChannelInvite;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Date;
 import java.util.List;
 
 public interface JstChannelInviteMapper {
@@ -9,4 +12,11 @@ public interface JstChannelInviteMapper {
     int insertJstChannelInvite(JstChannelInvite row);
     int updateJstChannelInvite(JstChannelInvite row);
     int deleteJstChannelInviteByInviteId(Long inviteId);
+
+    /**
+     * 查某渠道作为"下级"在某时刻的激活邀请关系（提成穿透 + 分销计算用）。
+     * 返回 null 表示该渠道无上级或上级关系已解绑。
+     */
+    JstChannelInvite selectActiveByInviteeAtTime(@Param("inviteeChannelId") Long inviteeChannelId,
+                                                  @Param("atTime") Date atTime);
 }
