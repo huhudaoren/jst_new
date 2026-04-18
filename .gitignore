@@ -41,3 +41,8 @@ test/_*.py
 jst-mp-automator/MCP-CHAIN-STATE.md
 jst-mp-automator/launch-devtools.bat
 jst-mp-automator/scripts/
+
+# Playwright 本地冒烟产物
+logs/
+test-results/
+playwright-report/
