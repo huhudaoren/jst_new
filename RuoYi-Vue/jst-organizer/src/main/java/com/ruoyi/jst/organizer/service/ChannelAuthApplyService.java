@@ -88,6 +88,18 @@ public interface ChannelAuthApplyService {
     ChannelAuthApplyVO getMyLatest(Long userId);
 
     /**
+     * Round 2A A3: 按 applyId 直查当前用户某条申请详情（带归属校验）。
+     * <p>
+     * 小程序重提页根据路由 rejectedId 查历史，避免 my latest 只有 1 条被覆盖问题。
+     *
+     * @param applyId 申请ID
+     * @param userId  当前用户ID
+     * @return 申请详情
+     * @throws com.ruoyi.common.exception.ServiceException 当申请不存在或不属于当前用户
+     */
+    ChannelAuthApplyVO getMyApplyById(Long applyId, Long userId);
+
+    /**
      * 驳回后重提申请（Q-02: rejectCount < 3 且未锁定）
      *
      * @param userId  当前用户ID

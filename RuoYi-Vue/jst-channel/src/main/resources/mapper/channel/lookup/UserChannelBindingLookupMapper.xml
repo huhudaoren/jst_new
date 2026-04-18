@@ -14,6 +14,15 @@
           and bind_time <![CDATA[ < ]]> #{endTime}
     </select>
 
+    <!-- Round 2A A1: 统计渠道当前累计绑定学生数（active + 未删） -->
+    <select id="countTotalStudentByChannel" resultType="long">
+        select count(1)
+        from jst_student_channel_binding
+        where channel_id = #{channelId}
+          and status = 'active'
+          and del_flag = '0'
+    </select>
+
     <select id="selectStudentList" parameterType="com.ruoyi.jst.channel.dto.ChannelDashboardQueryDTO"
             resultType="com.ruoyi.jst.channel.vo.DashboardStudentVO">
         select b.user_id as userId,

@@ -140,6 +140,15 @@ public class JstContest extends BaseEntity
     @Excel(name = "是否允许预约退款：0否 1是")
     private Integer allowAppointmentRefund;
 
+    /** Round 2A A4: 线下预约剩余名额（null=不限量） */
+    @Excel(name = "线下预约剩余名额")
+    private Integer offlineReserveRemaining;
+
+    /** Round 2A A4: 线下预约截止时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "线下预约截止时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date offlineReserveDeadline;
+
     /** 证书发放规则JSON */
     @Excel(name = "证书发放规则JSON")
     private String certRuleJson;
@@ -521,6 +530,22 @@ public class JstContest extends BaseEntity
         this.allowAppointmentRefund = allowAppointmentRefund;
     }
 
+    public Integer getOfflineReserveRemaining() {
+        return offlineReserveRemaining;
+    }
+
+    public void setOfflineReserveRemaining(Integer offlineReserveRemaining) {
+        this.offlineReserveRemaining = offlineReserveRemaining;
+    }
+
+    public Date getOfflineReserveDeadline() {
+        return offlineReserveDeadline;
+    }
+
+    public void setOfflineReserveDeadline(Date offlineReserveDeadline) {
+        this.offlineReserveDeadline = offlineReserveDeadline;
+    }
+
     public void setCertRuleJson(String certRuleJson)
     {
         this.certRuleJson = certRuleJson;
@@ -745,6 +770,8 @@ public class JstContest extends BaseEntity
             .append("teamMemberFields", getTeamMemberFields())
             .append("allowRepeatAppointment", getAllowRepeatAppointment())
             .append("allowAppointmentRefund", getAllowAppointmentRefund())
+            .append("offlineReserveRemaining", getOfflineReserveRemaining())
+            .append("offlineReserveDeadline", getOfflineReserveDeadline())
             .append("certRuleJson", getCertRuleJson())
             .append("certIssueMode", getCertIssueMode())
             .append("scorePublishTime", getScorePublishTime())

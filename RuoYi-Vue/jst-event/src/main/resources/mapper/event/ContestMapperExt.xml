@@ -443,6 +443,8 @@
         c.team_member_fields AS teamMemberFields,
         c.allow_repeat_appointment AS allowRepeatAppointment,
         c.allow_appointment_refund AS allowAppointmentRefund,
+        c.offline_reserve_remaining AS offlineReserveRemaining,
+        c.offline_reserve_deadline AS offlineReserveDeadline,
         c.cert_rule_json AS certRuleJson,
         c.cert_issue_mode AS certIssueMode,
         c.score_publish_time AS scorePublishTime,
@@ -585,7 +587,9 @@
         c.organizer_desc AS organizerDesc,
         c.contact_phone AS contactPhone,
         c.contact_wechat AS contactWechat,
-        c.contact_email AS contactEmail
+        c.contact_email AS contactEmail,
+        c.offline_reserve_remaining AS offlineReserveRemaining,
+        c.offline_reserve_deadline AS offlineReserveDeadline
         from jst_contest c
         left join jst_event_partner p on p.partner_id = c.partner_id and p.del_flag = '0'
         where c.contest_id = #{contestId}

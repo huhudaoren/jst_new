@@ -60,6 +60,8 @@ public class ChannelDashboardServiceImpl implements ChannelDashboardService {
         vo.setYearMonth(yearMonth.toString());
         vo.setNewStudentCount(intValue(userChannelBindingLookupMapper.countNewStudentByMonth(
                 channelId, range.getStartTime(), range.getEndTime())));
+        // Round 2A A1: 累计绑定学生数
+        vo.setTotalStudentCount(intValue(userChannelBindingLookupMapper.countTotalStudentByChannel(channelId)));
         vo.setOrderCount(intValue(orderMainLookupMapper.countOrdersByMonth(
                 channelId, range.getStartTime(), range.getEndTime())));
         vo.setOrderPaidAmount(decimalValue(orderMainLookupMapper.sumPaidAmountByMonth(

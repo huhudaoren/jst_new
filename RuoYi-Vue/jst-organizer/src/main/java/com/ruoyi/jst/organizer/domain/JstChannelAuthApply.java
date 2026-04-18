@@ -56,6 +56,10 @@ public class JstChannelAuthApply extends BaseEntity
     @Excel(name = "审核备注")
     private String auditRemark;
 
+    /** Round 2A A2: 驳回原因 (业务语义, 区别于通用 audit_remark) */
+    @Excel(name = "驳回原因")
+    private String rejectReason;
+
     /** 审核员ID */
     @Excel(name = "审核员ID")
     private Long auditUserId;
@@ -169,17 +173,25 @@ public class JstChannelAuthApply extends BaseEntity
         return applyStatus;
     }
 
-    public void setAuditRemark(String auditRemark) 
+    public void setAuditRemark(String auditRemark)
     {
         this.auditRemark = auditRemark;
     }
 
-    public String getAuditRemark() 
+    public String getAuditRemark()
     {
         return auditRemark;
     }
 
-    public void setAuditUserId(Long auditUserId) 
+    public String getRejectReason() {
+        return rejectReason;
+    }
+
+    public void setRejectReason(String rejectReason) {
+        this.rejectReason = rejectReason;
+    }
+
+    public void setAuditUserId(Long auditUserId)
     {
         this.auditUserId = auditUserId;
     }
@@ -248,6 +260,7 @@ public class JstChannelAuthApply extends BaseEntity
             .append("materialsJson", getMaterialsJson())
             .append("applyStatus", getApplyStatus())
             .append("auditRemark", getAuditRemark())
+            .append("rejectReason", getRejectReason())
             .append("auditUserId", getAuditUserId())
             .append("submitTime", getSubmitTime())
             .append("auditTime", getAuditTime())

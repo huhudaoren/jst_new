@@ -199,17 +199,60 @@ public class OrderServiceImpl implements OrderService {
             query = new OrderQueryReqDTO();
         }
         query.setUserId(currentUserId());
-        return orderMainMapperExt.selectWxList(query);
+        List<OrderListVO> list = orderMainMapperExt.selectWxList(query);
+        // Round 2A A6: 填充 refundEnabled
+        if (list != null) {
+            Date now = DateUtils.getNowDate();
+            for (OrderListVO row : list) {
+                row.setRefundEnabled(computeRefundEnabled(
+                        row.getOrderStatus(), row.getNetPayAmount(), row.getAftersaleDeadline(), now));
+            }
+        }
+        return list;
     }
 
     @Override
     public List<OrderListVO> selectAdminList(OrderQueryReqDTO query) {
-        return orderMainMapperExt.selectAdminList(query == null ? new OrderQueryReqDTO() : query);
+        List<OrderListVO> list = orderMainMapperExt.selectAdminList(query == null ? new OrderQueryReqDTO() : query);
+        // Round 2A A6: 填充 refundEnabled
+        if (list != null) {
+            Date now = DateUtils.getNowDate();
+            for (OrderListVO row : list) {
+                row.setRefundEnabled(computeRefundEnabled(
+                        row.getOrderStatus(), row.getNetPayAmount(), row.getAftersaleDeadline(), now));
+            }
+        }
+        return list;
     }
 
     @Override
     public OrderDetailVO getAdminDetail(Long orderId) {
         return requireDetail(orderId);
+    }
+
+    /**
+     * Round 2A A6: 计算订单是否允许学生自助退款。
+     * <p>
+     * 规则：order_status=paid AND 当前时间 &lt; aftersale_deadline AND net_pay_amount &gt; 0
+     *
+     * @param orderStatus        订单状态
+     * @param netPayAmount       实付现金
+     * @param aftersaleDeadline  售后截止时间
+     * @param now                当前时间
+     * @return true=允许自助退款
+     */
+    private Boolean computeRefundEnabled(String orderStatus, BigDecimal netPayAmount,
+                                         Date aftersaleDeadline, Date now) {
+        if (!OrderStatus.PAID.dbValue().equals(orderStatus)) {
+            return Boolean.FALSE;
+        }
+        if (aftersaleDeadline == null || !now.before(aftersaleDeadline)) {
+            return Boolean.FALSE;
+        }
+        if (netPayAmount == null || netPayAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
     }
 
     private Long currentUserId() {
@@ -246,6 +289,10 @@ public class OrderServiceImpl implements OrderService {
             participantSnapshot.setOriginalParticipantName(detail.getOriginalParticipantName());
             detail.setParticipantSnapshot(participantSnapshot);
         }
+        // Round 2A A6: 填充 refundEnabled（status=paid AND aftersaleDeadline 未过 AND netPayAmount>0）
+        detail.setRefundEnabled(computeRefundEnabled(
+                detail.getOrderStatus(), detail.getNetPayAmount(),
+                detail.getAftersaleDeadline(), DateUtils.getNowDate()));
         return detail;
     }
 

@@ -48,6 +48,10 @@ public class ContestDetailVO {
     private String teamMemberFields;
     private Integer allowRepeatAppointment;
     private Integer allowAppointmentRefund;
+    /** Round 2A A4: 线下预约剩余名额（null=不限量） */
+    private Integer offlineReserveRemaining;
+    /** Round 2A A4: 线下预约截止时间 */
+    private Date offlineReserveDeadline;
     private String certRuleJson;
     private String certIssueMode;
     private Date scorePublishTime;
@@ -325,6 +329,22 @@ public class ContestDetailVO {
 
     public void setAllowAppointmentRefund(Integer allowAppointmentRefund) {
         this.allowAppointmentRefund = allowAppointmentRefund;
+    }
+
+    public Integer getOfflineReserveRemaining() {
+        return offlineReserveRemaining;
+    }
+
+    public void setOfflineReserveRemaining(Integer offlineReserveRemaining) {
+        this.offlineReserveRemaining = offlineReserveRemaining;
+    }
+
+    public Date getOfflineReserveDeadline() {
+        return offlineReserveDeadline;
+    }
+
+    public void setOfflineReserveDeadline(Date offlineReserveDeadline) {
+        this.offlineReserveDeadline = offlineReserveDeadline;
     }
 
     public String getCertRuleJson() {

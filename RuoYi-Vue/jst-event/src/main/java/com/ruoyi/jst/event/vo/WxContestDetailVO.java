@@ -47,6 +47,10 @@ public class WxContestDetailVO {
     private String teamLeaderFields;
     private String teamMemberFields;
     private Integer allowRepeatAppointment;
+    /** Round 2A A4: 线下预约剩余名额（null=不限量） */
+    private Integer offlineReserveRemaining;
+    /** Round 2A A4: 线下预约截止时间 */
+    private Date offlineReserveDeadline;
     @Deprecated
     private String scheduleJson;
     @Deprecated
@@ -352,6 +356,22 @@ public class WxContestDetailVO {
 
     public void setAllowRepeatAppointment(Integer allowRepeatAppointment) {
         this.allowRepeatAppointment = allowRepeatAppointment;
+    }
+
+    public Integer getOfflineReserveRemaining() {
+        return offlineReserveRemaining;
+    }
+
+    public void setOfflineReserveRemaining(Integer offlineReserveRemaining) {
+        this.offlineReserveRemaining = offlineReserveRemaining;
+    }
+
+    public Date getOfflineReserveDeadline() {
+        return offlineReserveDeadline;
+    }
+
+    public void setOfflineReserveDeadline(Date offlineReserveDeadline) {
+        this.offlineReserveDeadline = offlineReserveDeadline;
     }
 
     public String getScheduleJson() {
