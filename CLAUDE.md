@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次更新：2026-04-18（**销售管理 + 渠道分销** **SALES-DISTRIBUTION 4 plan + 集成 plan-05 + UX 精品化 plan-06 完成** → 9 基础组件 (PageHeader/EntityLink/EmptyStateCTA/StatCardGroup + 7 RelationPicker) + 56 _id 改 Picker + 5 列表 EntityLink + 3 角色 dashboard + 菜单默认路由 + 主管 settlement scope + 删 Deprecated）
+> 会话恢复文件。上次更新：2026-04-18（**plan-06 UX 精品化收尾 + 5 张 PATCH 隐患全清** → CORS 通配修复 + 模板 Picker 自动定位记录 + CoursePicker 补齐 + EntityLink 字段对齐 + region 省级字典标准化；**重启验证 4 项 curl 全过**：cert/template/list 200/partnerName 落地/region 字典 34 项/PUT region 端点上线）
 
 ---
 
@@ -256,6 +256,17 @@ D:\coding\jst_v1\
 | **CONTEST-ORGANIZER-CONTACT** | DDL 5 字段（organizer_logo/organizer_desc/contact_phone/contact_wechat/contact_email）+ Domain/VO/Mapper/Service/DTO/管理端编辑 Tab 全链路 | ✅ 完成 |
 | **CONTEST-DETAIL-RESHAPE** | 小程序赛事详情页：sticky tab 常驻吸顶+自动高亮、报名倒计时条、主办方卡、联系咨询卡（拨打/复制）、奖项改表格、相似赛事+推荐课程横滑（调已存在的 `getContestRecommend`） | ✅ 完成 |
 | **SALES-DISTRIBUTION** | 销售管理 + 渠道分销 + CRM 完整子系统。spec + 4 实施计划已写出，**4 plan 全部完成 ✅**（2026-04-18 subagent-driven + 部分 inline）。spec：`docs/superpowers/specs/2026-04-18-sales-channel-distribution-design.md`。4 计划：①plan-01 ✅ ②plan-02 ✅ ③plan-03 ✅ ④plan-04 ✅ ④plan-04-distribution-admin ⏳。**plan-02 产出**（feature/sales-distribution-02-sales-core 分支）：@SalesDataScope 注解+Aspect（self/manager 双模）；9 个 Service：Sales/CommissionRate/PreRegister/Binding/AutoBinding(B1-B12 边界)/Commission(4 类项+N2 穿透+J 上限压缩+E3 跳过)/Settlement(月结+审核)/Resignation(3 阶段编排)/Performance(业绩聚合+脱敏)；2 Listener：SalesAutoBindingListener 订阅 ChannelRegisteredEvent 触发自动绑定；SalesCommissionListener 订阅 OrderPaid/RefundSuccess；6 Quartz Task：PreRegisterExpire/CommissionAccrue/CommissionRepair/MonthlySettlement/ResignExecute/TransitionEnd；3 Controller：AdminSales/SalesPreRegister/SalesPerformance；RestrictedSalesActionInterceptor（申请离职阶段限权）；sys_job 注册 6 Quartz 全 paused；JstChannelServiceImpl.insertJstChannel 加 publishChannelRegisteredEvent；OrderServiceImpl/RefundServiceImpl extraData 扩充 channelId/businessType/payTime/orderId。**测试 84 单测全绿**（jst-common 30 + jst-channel 54），mvn 全模块编译绿。下一步 plan-03：CRM + 销售工作台前端 5 页。 | ✅ SALES-DISTRIBUTION 子系统全部 4 plan 完成 |
+| **plan-06 收尾 + 5 PATCH 隐患全清**（2026-04-18） | | |
+| 4 张运营任务卡（POLISH-PICKER-TEMPLATE-FAMILY / POLISH-PICKER-APPLY / ADMIN-DASHBOARD-METRICS / MAPPER-NAME-JOIN） | 4 张并行派 subagent 完成：①4 个新模板 Picker（FormTemplate/CertTemplate/CouponTemplate/RightsTemplate）+ EntityBriefController 扩展 ②全站 25 处 _id → Picker 替换（含赛事/报名/参赛档案/营销批次/优惠券/权益）③admin 销售看板 3 指标（提成成本趋势 day/week/month + J 上限压缩触发率 + 渠道业绩热力图）+ 渠道申请 region 字段链路 ④8 Mapper LEFT JOIN 补关联 name + ListResult resultMap 模式（不动 byId）。**报告 4 份归档**于 `subagent/tasks/任务报告/`。 | ✅ 完成 |
+| ADMIN-DASHBOARD 关键发现 | jst_sales_commission_ledger 实际字段是 `raw_amount/amount/compress_ratio`（任务卡示例的 `commission_amount/compression_amount/original_amount` 实际不存在）。dashboard 按真实字段降级实现，未改表。**口径**：`commissionTotal=SUM(amount), originalTotal=SUM(raw_amount), compressedAmount=SUM(raw_amount-amount)`。后续维护必须以 raw_amount/amount/compress_ratio 为准。 | ✅ 已记 |
+| 渠道地区 region 字段链路 | jst_channel + jst_channel_auth_apply 加 `region varchar(64)`，DTO/VO/Mapper/Service/admin 认证页 + 小程序申请表单全链路贯通。顺手修 ChannelAuthApplyMapperExt.resubmitApply 隐性 bug（重提时表单字段未真正落库）。 | ✅ 完成 |
+| **5 PATCH 隐患修复**（commits `7fb98fc → 49de324`） | | |
+| PATCH-1 CORS dev/test 通配 | `application-dev.yml + test.yml + application.yml` 白名单改 `http://localhost:*,http://127.0.0.1:*` 通配（addAllowedOriginPattern 自然支持），修 dev server 81/5173/4173 等非默认端口下 POST/PUT 403 Invalid CORS。**prod 严格保留环境变量白名单不动**。验证 V2(81/5173)→200+Allow-Origin / V3(evil.com)→403 全过。 | ✅ commit `7fb98fc` |
+| PATCH-2 模板 Picker 自动定位记录 | 4 个目标页（form-template/cert-manage/coupon-template/rights-template）mounted 加 autoOpen 钩子双读 query（业务主键优先 + autoOpenId 兼容）。cert-manage 等 loadTemplates 完成后调 openDesigner(template) 进 Fabric 设计器。entityRouteMap.js 4 条模板路由的 queryKey 已预置（templateId/templateId/couponTemplateId/rightsTemplateId）。 | ✅ commit `2bc1c63` |
+| PATCH-3 CoursePicker 补齐 | 后端 EntityBriefController 加 course case（`jst_course` 字段是 `course_type` 非任务卡示例的 `category`，按 DDL 落地）+ CoursePicker.vue + main.js 全局注册 + entityRouteMap.js 加 course 行 + jst_course_learn_record/index.vue 替换手输 ID 框。回归扫描全库 courseId v-model 零残留。 | ✅ commit `7b440f4` |
+| PATCH-4 EntityLink 字段对齐 | Step 1 清单核对 8 Mapper：实际只 1 处需改（`views/jst/event/jst_contest/index.vue:194` partnerId 列改 EntityLink）；其余 7 处早已对齐；2 处（SalesChannelBinding/ChannelDistributionLedger）Mapper JOIN 已备但前端管理列表页未做（plan-04-distribution-admin ⏳）。Mapper resultMap 抽查全绿。**重启验证**：`contestId=8801, partnerName='测试_赛事机构A'` 真实落地。 | ✅ commit `4cb725f` |
+| PATCH-5 region 省级字典标准化 | ①字典 SQL 34 项国标简称（北京→beijing 等）`99-migration-region-dict.sql` ②回填脚本 `99-migration-region-backfill.sql`（备份 + 33 × 2 UPDATE + 兜底 NULL，注意 jst_channel_auth_apply PK 是 `apply_id` 非示例的 `id`）③admin 编辑接口 `PUT /jst/organizer/channel/apply/{applyId}/region` + RegionDictService 字典校验（valid/invalid/empty 三态全过）④小程序 apply-form region 改 picker + 新 `getDict(dictType)` API（走已有 WxDictController）⑤admin channel-auth/index.vue 加「编辑地区」按钮 + el-select 弹窗 + dict-tag 翻译 ⑥dashboard.vue 注入 regionDict、热力图 y 轴/tooltip/top 表格全用 regionLabel() 翻译。**dict_count=34 / dirty=0**。 | ✅ commits `52f5171/e61f912/e67c6bb` |
+| **重启 jvm 后运行时验证 4 项** | ①cert/template/list admin 调用 200 OK + 真实数据（**澄清 PATCH-2 报告 99902 是旧 jvm 假阳性，无需 PATCH-6**） ②jst_contest list 返 partnerName='测试_赛事机构A' ③region 字典 34 项北京→beijing ④PUT region 端点上线（返 60010 申请不存在，路由 OK）。报告 `subagent/tasks/任务报告/PATCH-RUNTIME-VERIFY-报告.md`。 | ✅ 全过 |
 
 ---
 
@@ -378,6 +389,7 @@ D:\coding\jst_v1\
 | **P2 ✅** | FIX-MENU-DEDUP-FORMTEMPLATE | ✅ 完成（2026-04-17） | 隐藏 9883 "报名表单模板"（visible=1），保留 9842 "表单模板管理" 为唯一入口。Migration `架构设计/ddl/99-migration-menu-dedup-formtemplate.sql`。3039 父链（2000 竞赛通业务）本已隐藏，无需处理。页面文件本身暂未删，等 ADMIN-UX-B2 主线 C 决定 banner 或删除。 |
 | **P1 ✅** | ADMIN-UX-B3 | ✅ 完成（2026-04-17） | Web Admin Agent 交付三主线：①主线 A 赛事 offline→online 状态机回路（`ContestAuditStatus.java` L37 开放 `EnumSet.of(ONLINE)` + `PartnerContestController.goOnline` 端点 + `contest-list.vue` 「重新上线」按钮 + `onlinePartnerContest` API）；②主线 B 报名按用户所属渠道分层（`EnrollListVO` 加 `boundChannelId/boundChannelName` + `EnrollQueryReqDTO` 加 `boundChannelId/hasChannel` + `EnrollRecordMapperExt.xml` 加 3 LEFT JOIN + `EnrollChannelGroupVO` + `EnrollRecordController.channelGroups` 端点 `/jst/event/enroll/channel-groups` + `jst/enroll/index.vue` 三 Tab「全部/个人/按渠道 expand」+「所属渠道」列 + 赛事 ID 筛选）；③主线 C contest-edit 「查看」按钮复用 B1 产出的 `SchemaPreview` drawer + 证书模板预览 Dialog（有 bgImage 显缩略图、否则跳 `/partner/cert-manage`）。3 条可接受偏离：channel-groups 挂管理端 Controller 路径 `/jst/event/enroll/channel-groups`（避免新增权限点）、SchemaPreview 是 drawer 非 dialog（按组件实际 prop 调）、channel 跳转改为 `/channel?channelId=` + catch 兜底（菜单无 admin-list 路径）。红线严守：未动 `jst_enroll_record` 表、未新增菜单 SQL、未改 cert-manage 设计器、未在 SchemaPreview 加编辑、未顺手重构其他列。mvn jst-event clean compile 19s 绿 + npm run build:prod 绿。报告 `subagent/tasks/任务报告/ADMIN-UX-B3-报告.md`。 |
 | **P0 🟡** | SALES-DISTRIBUTION | 🟡 设计完成（2026-04-18），spec 已 commit `ebe17a7` | **销售管理 + 渠道分销 + CRM 完整子系统**。spec：`docs/superpowers/specs/2026-04-18-sales-channel-distribution-design.md`。8 大决策 + 9 张新表 + 56 边界 + 4 阶段提成管线（实付为基数+个性化费率+业务类型差异化+7 天售后期+月结）+ 3 阶段离职防带客户（限权阶段+账号停权+财务过渡）+ 销售金额全脱敏+手机号常态脱敏+导出水印 + SalesScope 切面（复刻 PartnerScope）+ 邀请永久绑定+1 级穿透+单笔分润 15% 上限 + CRM 标准版（跟进/标签/任务）。**§6 实施次序拆为 4 个独立可上线子任务**：①DDL+基础架构 ②销售管理核心+提成管线 ③CRM 子模块 ④渠道分销+admin 后台。下一步进 writing-plans。 |
+| **P0 ✅** | PATCH-1 ~ PATCH-5 隐患全清 | ✅ 完成（2026-04-18） | 5 张精准补丁卡修 plan-06 + dashboard 残留隐患：①CORS dev/test :* 通配修 81/5173 等端口 403 ②4 模板 Picker autoOpen 修「跳详情但不定位」体验大坑 ③CoursePicker 补齐 + jst_course_learn_record 收尾 ④EntityLink 字段对齐（实测仅 1 处需改，其余 7 处早已对齐，2 处依赖 plan-04-distribution-admin） ⑤region 省级字典 34 项 + 回填脚本 + admin 编辑入口 + dashboard 翻译。**重启 jvm 后 4 项 curl 全过**：cert/template/list 200/partnerName 落地/region 字典/PUT region 端点。报告：`PATCH-1~5-报告.md` + `PATCH-RUNTIME-VERIFY-报告.md`。**澄清**：PATCH-2 报告里的 99902 是旧 jvm 假阳性，FIX-PARTNER-SCOPE-READONLY 早已修过，**无 PATCH-6**。 |
 | **P2** | MP-KEY-FIX | ⏳ | 小程序 `:key` 表达式警告批量修复（约 20 处复杂表达式改 computed 稳定 ID，非阻塞） |
 | **P2** | DATA-MIGRATION | ⏸️ 5 月中旬 | 旧数据迁移（等旧库信息） |
 | **P2** | TEST-ROUND3 | ⏳ | 全量回归测试（等遗留 TODO 补齐后） |
@@ -486,6 +498,9 @@ D:\coding\jst_v1\
 | 99-migration-admin-ux-b1-dict.sql | ⭐ B1：`jst_form_field_type` + `jst_message_scene` 字典 |
 | 99-migration-menu-dedup-formtemplate.sql | ⭐ 隐藏 9883 "报名表单模板"（与 9842 重复） |
 | 99-migration-contest-organizer-contact.sql | ⭐ 赛事详情重塑：主办方 logo/简介 + 咨询电话/微信/邮箱 5 字段 + 8801/8802 mock 数据 |
+| 99-migration-channel-region.sql | ⭐ PATCH-5 前置：jst_channel + jst_channel_auth_apply 加 region varchar(64) |
+| 99-migration-region-dict.sql | ⭐ PATCH-5：jst_region_province 字典 34 项国标省级简称 |
+| 99-migration-region-backfill.sql | ⭐ PATCH-5：自由文本 region 智能匹配回填到字典值 + 备份表 + 兜底 NULL |
 | 99-test-fixtures.sql | 测试数据（含团队赛事 8206 + 预约时间段） |
 
 ---
