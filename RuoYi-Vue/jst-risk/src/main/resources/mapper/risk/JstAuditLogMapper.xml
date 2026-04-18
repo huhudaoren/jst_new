@@ -65,8 +65,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="action != null and action != ''">action,</if>
             <if test="targetType != null">target_type,</if>
             <if test="targetId != null">target_id,</if>
-            <if test="beforeJson != null">before_json,</if>
-            <if test="afterJson != null">after_json,</if>
+            <if test="beforeJson != null and beforeJson != ''">before_json,</if>
+            <if test="afterJson != null and afterJson != ''">after_json,</if>
             <if test="ip != null">ip,</if>
             <if test="terminal != null">terminal,</if>
             <if test="result != null and result != ''">result,</if>
@@ -86,8 +86,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="action != null and action != ''">#{action},</if>
             <if test="targetType != null">#{targetType},</if>
             <if test="targetId != null">#{targetId},</if>
-            <if test="beforeJson != null">#{beforeJson},</if>
-            <if test="afterJson != null">#{afterJson},</if>
+            <if test="beforeJson != null and beforeJson != ''">#{beforeJson},</if>
+            <if test="afterJson != null and afterJson != ''">#{afterJson},</if>
             <if test="ip != null">#{ip},</if>
             <if test="terminal != null">#{terminal},</if>
             <if test="result != null and result != ''">#{result},</if>
@@ -111,8 +111,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="action != null and action != ''">action = #{action},</if>
             <if test="targetType != null">target_type = #{targetType},</if>
             <if test="targetId != null">target_id = #{targetId},</if>
-            <if test="beforeJson != null">before_json = #{beforeJson},</if>
-            <if test="afterJson != null">after_json = #{afterJson},</if>
+            <if test="beforeJson != null and beforeJson != ''">before_json = #{beforeJson},</if>
+            <if test="afterJson != null and afterJson != ''">after_json = #{afterJson},</if>
             <if test="ip != null">ip = #{ip},</if>
             <if test="terminal != null">terminal = #{terminal},</if>
             <if test="result != null and result != ''">result = #{result},</if>

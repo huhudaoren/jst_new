@@ -10,13 +10,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * Subclasses should place {@code @PartnerDataScope} on list/query methods whose
  * request objects extend {@code BaseEntity}.
  */
-@PreAuthorize("@ss.hasRole('jst_partner')")
+@PreAuthorize("@ss.hasAnyRoles('jst_partner,admin,jst_operator')")
 public abstract class BasePartnerController extends BaseController {
 
     /**
      * Returns the current authenticated partner id.
+     * For admin / jst_operator (platform op), returns {@code null} — endpoints that need it
+     * must either gate via {@code @PartnerDataScope} or handle null (e.g. show all data).
      */
     protected Long currentPartnerId() {
-        return PartnerScopeUtils.requireCurrentPartnerId();
+        return PartnerScopeUtils.currentPartnerIdAllowPlatformOp();
     }
 }

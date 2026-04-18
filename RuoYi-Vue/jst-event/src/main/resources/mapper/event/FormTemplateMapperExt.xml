@@ -59,14 +59,21 @@
             </if>
             and (
                 (owner_type = 'platform' and audit_status = 'approved' and status = 1)
-                or (owner_type = 'partner' and owner_id = #{partnerId})
+                <if test="partnerId != null">
+                    or (owner_type = 'partner' and owner_id = #{partnerId})
+                </if>
+                <if test="partnerId == null">
+                    or (owner_type = 'partner')
+                </if>
             )
         </where>
         order by
-            case
-                when owner_type = 'partner' and owner_id = #{partnerId} then 0
-                else 1
-            end asc,
+            <if test="partnerId != null">
+                case
+                    when owner_type = 'partner' and owner_id = #{partnerId} then 0
+                    else 1
+                end asc,
+            </if>
             update_time desc,
             template_id desc
     </select>

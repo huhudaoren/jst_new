@@ -54,7 +54,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="ownerType != null and ownerType != ''">owner_type,</if>
             <if test="ownerId != null">owner_id,</if>
             <if test="bgImage != null">bg_image,</if>
-            <if test="layoutJson != null">layout_json,</if>
+            <if test="layoutJson != null and layoutJson != ''">layout_json,</if>
             <if test="auditStatus != null and auditStatus != ''">audit_status,</if>
             <if test="status != null">status,</if>
             <if test="createBy != null">create_by,</if>
@@ -69,7 +69,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="ownerType != null and ownerType != ''">#{ownerType},</if>
             <if test="ownerId != null">#{ownerId},</if>
             <if test="bgImage != null">#{bgImage},</if>
-            <if test="layoutJson != null">#{layoutJson},</if>
+            <if test="layoutJson != null and layoutJson != ''">#{layoutJson},</if>
             <if test="auditStatus != null and auditStatus != ''">#{auditStatus},</if>
             <if test="status != null">#{status},</if>
             <if test="createBy != null">#{createBy},</if>
@@ -88,7 +88,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="ownerType != null and ownerType != ''">owner_type = #{ownerType},</if>
             <if test="ownerId != null">owner_id = #{ownerId},</if>
             <if test="bgImage != null">bg_image = #{bgImage},</if>
-            <if test="layoutJson != null">layout_json = #{layoutJson},</if>
+            <if test="layoutJson != null and layoutJson != ''">layout_json = #{layoutJson},</if>
             <if test="auditStatus != null and auditStatus != ''">audit_status = #{auditStatus},</if>
             <if test="status != null">status = #{status},</if>
             <if test="createBy != null">create_by = #{createBy},</if>

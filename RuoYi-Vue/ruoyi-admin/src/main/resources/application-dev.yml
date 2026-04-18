@@ -7,9 +7,9 @@
 spring.datasource:
   druid:
     master:
-      url: jdbc:mysql://59.110.53.165:3306/jst_new?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-      username: jst_new
-      password: J8zZpAa4zG8y6a7e
+      url: jdbc:mysql://127.0.0.1:3306/jst?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+      username: root
+      password: 123456
 
 # --- Redis（本地）---
 spring.data.redis:
@@ -43,7 +43,8 @@ jst:
   security:
     aes-key: "bE8Ru+Z5tKOwHQG5c+gogb4tC3C/QbehGpKL1dot1TQ="
   cors:
-    allowed-origins: "http://localhost:80,http://localhost:1024,http://localhost:8080,http://localhost:3000"
+    # 开发环境 CORS 白名单：同时覆盖 localhost / 127.0.0.1、默认 80 端口（浏览器会省略）以及常见 dev-server 端口
+    allowed-origins: "http://localhost,http://localhost:80,http://localhost:1024,http://localhost:8080,http://localhost:3000,http://127.0.0.1,http://127.0.0.1:80,http://127.0.0.1:1024,http://127.0.0.1:8080,http://127.0.0.1:3000"
   wxauth:
     mock: true
 

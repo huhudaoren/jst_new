@@ -10,6 +10,7 @@ import com.ruoyi.jst.common.exception.BizErrorCode;
 import com.ruoyi.jst.common.id.SnowflakeIdWorker;
 import com.ruoyi.jst.common.oss.OssService;
 import com.ruoyi.jst.common.util.MaskUtil;
+import com.ruoyi.jst.common.util.PartnerScopeUtils;
 import com.ruoyi.jst.event.domain.JstCertRecord;
 import com.ruoyi.jst.event.domain.JstCertTemplate;
 import com.ruoyi.jst.event.domain.JstContest;
@@ -101,7 +102,9 @@ public class PartnerCertServiceImpl implements PartnerCertService {
         JstCertTemplate template = new JstCertTemplate();
         template.setTemplateName(req.getTemplateName().trim());
         template.setOwnerType(OWNER_TYPE_PARTNER);
-        template.setOwnerId(partnerId);
+        if(partnerId != 0){
+            template.setOwnerId(partnerId);
+        }
         template.setBgImage(bgImage);
         template.setLayoutJson(StringUtils.isBlank(req.getLayoutJson()) ? "{}" : req.getLayoutJson());
         template.setAuditStatus(AUDIT_PENDING);
@@ -125,7 +128,9 @@ public class PartnerCertServiceImpl implements PartnerCertService {
      */
     @Override
     public List<CertTemplateResVO> listTemplates() {
-        return partnerCertMapper.selectTemplateList(currentPartnerId());
+        // 平台运营（admin/jst_operator）看到全部模板；赛事方仅看公共 + 自己的模板
+        Long partnerId = PartnerScopeUtils.currentPartnerIdAllowPlatformOp();
+        return partnerCertMapper.selectTemplateList(partnerId);
     }
 
     /**

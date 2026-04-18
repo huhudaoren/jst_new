@@ -81,7 +81,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contactMobile != null and contactMobile != ''">contact_mobile,</if>
             <if test="idCardNo != null">id_card_no,</if>
             <if test="businessLicenseNo != null">business_license_no,</if>
-            <if test="certMaterialsJson != null">cert_materials_json,</if>
+            <if test="certMaterialsJson != null and certMaterialsJson != ''">cert_materials_json,</if>
             <if test="authStatus != null and authStatus != ''">auth_status,</if>
             <if test="authTime != null">auth_time,</if>
             <if test="authRemark != null">auth_remark,</if>
@@ -106,7 +106,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contactMobile != null and contactMobile != ''">#{contactMobile},</if>
             <if test="idCardNo != null">#{idCardNo},</if>
             <if test="businessLicenseNo != null">#{businessLicenseNo},</if>
-            <if test="certMaterialsJson != null">#{certMaterialsJson},</if>
+            <if test="certMaterialsJson != null and certMaterialsJson != ''">#{certMaterialsJson},</if>
             <if test="authStatus != null and authStatus != ''">#{authStatus},</if>
             <if test="authTime != null">#{authTime},</if>
             <if test="authRemark != null">#{authRemark},</if>
@@ -135,7 +135,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contactMobile != null and contactMobile != ''">contact_mobile = #{contactMobile},</if>
             <if test="idCardNo != null">id_card_no = #{idCardNo},</if>
             <if test="businessLicenseNo != null">business_license_no = #{businessLicenseNo},</if>
-            <if test="certMaterialsJson != null">cert_materials_json = #{certMaterialsJson},</if>
+            <if test="certMaterialsJson != null and certMaterialsJson != ''">cert_materials_json = #{certMaterialsJson},</if>
             <if test="authStatus != null and authStatus != ''">auth_status = #{authStatus},</if>
             <if test="authTime != null">auth_time = #{authTime},</if>
             <if test="authRemark != null">auth_remark = #{authRemark},</if>

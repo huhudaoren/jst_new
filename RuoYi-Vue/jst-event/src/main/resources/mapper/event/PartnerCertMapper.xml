@@ -77,8 +77,13 @@
         where del_flag = '0'
           and status = 1
           and (
-              (owner_type = 'partner' and owner_id = #{partnerId})
-              or (owner_type = 'platform' and audit_status = 'approved')
+              (owner_type = 'platform' and audit_status = 'approved')
+              <if test="partnerId != null">
+                  or (owner_type = 'partner' and owner_id = #{partnerId})
+              </if>
+              <if test="partnerId == null">
+                  or (owner_type = 'partner')
+              </if>
           )
         order by create_time desc, template_id desc
     </select>

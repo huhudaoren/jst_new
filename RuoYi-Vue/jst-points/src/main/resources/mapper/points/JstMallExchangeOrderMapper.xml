@@ -74,7 +74,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="pointsUsed != null">points_used,</if>
             <if test="cashAmount != null">cash_amount,</if>
             <if test="orderId != null">order_id,</if>
-            <if test="addressSnapshotJson != null">address_snapshot_json,</if>
+            <if test="addressSnapshotJson != null and addressSnapshotJson != ''">address_snapshot_json,</if>
             <if test="status != null and status != ''">status,</if>
             <if test="logisticsCompany != null">logistics_company,</if>
             <if test="logisticsNo != null">logistics_no,</if>
@@ -96,7 +96,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="pointsUsed != null">#{pointsUsed},</if>
             <if test="cashAmount != null">#{cashAmount},</if>
             <if test="orderId != null">#{orderId},</if>
-            <if test="addressSnapshotJson != null">#{addressSnapshotJson},</if>
+            <if test="addressSnapshotJson != null and addressSnapshotJson != ''">#{addressSnapshotJson},</if>
             <if test="status != null and status != ''">#{status},</if>
             <if test="logisticsCompany != null">#{logisticsCompany},</if>
             <if test="logisticsNo != null">#{logisticsNo},</if>
@@ -122,7 +122,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="pointsUsed != null">points_used = #{pointsUsed},</if>
             <if test="cashAmount != null">cash_amount = #{cashAmount},</if>
             <if test="orderId != null">order_id = #{orderId},</if>
-            <if test="addressSnapshotJson != null">address_snapshot_json = #{addressSnapshotJson},</if>
+            <if test="addressSnapshotJson != null and addressSnapshotJson != ''">address_snapshot_json = #{addressSnapshotJson},</if>
             <if test="status != null and status != ''">status = #{status},</if>
             <if test="logisticsCompany != null">logistics_company = #{logisticsCompany},</if>
             <if test="logisticsNo != null">logistics_no = #{logisticsNo},</if>

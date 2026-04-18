@@ -127,8 +127,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="supportChannelEnroll != null">support_channel_enroll,</if>
             <if test="supportPointsDeduct != null">support_points_deduct,</if>
             <if test="supportAppointment != null">support_appointment,</if>
-            <if test="certRuleJson != null">cert_rule_json,</if>
-            <if test="scoreRuleJson != null">score_rule_json,</if>
+            <if test="certRuleJson != null and certRuleJson != ''">cert_rule_json,</if>
+            <if test="scoreRuleJson != null and scoreRuleJson != ''">score_rule_json,</if>
             <if test="formTemplateId != null">form_template_id,</if>
             <if test="aftersaleDays != null">aftersale_days,</if>
             <if test="auditStatus != null and auditStatus != ''">audit_status,</if>
@@ -157,8 +157,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="supportChannelEnroll != null">#{supportChannelEnroll},</if>
             <if test="supportPointsDeduct != null">#{supportPointsDeduct},</if>
             <if test="supportAppointment != null">#{supportAppointment},</if>
-            <if test="certRuleJson != null">#{certRuleJson},</if>
-            <if test="scoreRuleJson != null">#{scoreRuleJson},</if>
+            <if test="certRuleJson != null and certRuleJson != ''">#{certRuleJson},</if>
+            <if test="scoreRuleJson != null and scoreRuleJson != ''">#{scoreRuleJson},</if>
             <if test="formTemplateId != null">#{formTemplateId},</if>
             <if test="aftersaleDays != null">#{aftersaleDays},</if>
             <if test="auditStatus != null and auditStatus != ''">#{auditStatus},</if>
@@ -191,8 +191,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="supportChannelEnroll != null">support_channel_enroll = #{supportChannelEnroll},</if>
             <if test="supportPointsDeduct != null">support_points_deduct = #{supportPointsDeduct},</if>
             <if test="supportAppointment != null">support_appointment = #{supportAppointment},</if>
-            <if test="certRuleJson != null">cert_rule_json = #{certRuleJson},</if>
-            <if test="scoreRuleJson != null">score_rule_json = #{scoreRuleJson},</if>
+            <if test="certRuleJson != null and certRuleJson != ''">cert_rule_json = #{certRuleJson},</if>
+            <if test="scoreRuleJson != null and scoreRuleJson != ''">score_rule_json = #{scoreRuleJson},</if>
             <if test="formTemplateId != null">form_template_id = #{formTemplateId},</if>
             <if test="aftersaleDays != null">aftersale_days = #{aftersaleDays},</if>
             <if test="auditStatus != null and auditStatus != ''">audit_status = #{auditStatus},</if>

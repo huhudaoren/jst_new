@@ -18,6 +18,8 @@ public final class PartnerScopeUtils {
 
     public static final String ROLE_PARTNER = "jst_partner";
     public static final String ROLE_PLATFORM_OP = "jst_platform_op";
+    /** 运营主管：被授权代赛事方执行操作，与 admin 同等代操作能力（数据隔离白名单）。 */
+    public static final String ROLE_OPERATOR = "jst_operator";
     private static final Pattern SQL_IDENTIFIER = Pattern.compile("^[A-Za-z_][A-Za-z0-9_]*$");
 
     private PartnerScopeUtils() {
@@ -39,6 +41,18 @@ public final class PartnerScopeUtils {
         } catch (Exception ignored) {
             return null;
         }
+    }
+
+    /**
+     * Returns current partnerId for partner role, or {@code null} for platform op (admin/jst_operator).
+     * Throws 99902 for any other role. Used by read-only endpoints that platform ops need to view.
+     */
+    public static Long currentPartnerIdAllowPlatformOp() {
+        LoginUser loginUser = getLoginUserQuietly();
+        if (isPlatformOp(loginUser)) {
+            return null;
+        }
+        return requireCurrentPartnerId();
     }
 
     /**
@@ -75,7 +89,11 @@ public final class PartnerScopeUtils {
         if (loginUser.getUser() != null && loginUser.getUser().isAdmin()) {
             return true;
         }
-        return hasRole(loginUser, ROLE_PLATFORM_OP);
+        // jst_platform_op：历史遗留的平台运营角色
+        // jst_operator：运营主管，业务上被授权代赛事方执行所有操作（表单模板/赛事/报名等）
+        // 其他 5 个业务角色（finance/support/marketing/risk/analyst）按 RBAC 各看各的菜单，不进白名单
+        return hasRole(loginUser, ROLE_PLATFORM_OP)
+                || hasRole(loginUser, ROLE_OPERATOR);
     }
 
     /**

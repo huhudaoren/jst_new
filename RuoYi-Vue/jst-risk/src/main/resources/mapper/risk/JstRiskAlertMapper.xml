@@ -52,7 +52,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="riskLevel != null and riskLevel != ''">risk_level,</if>
             <if test="targetType != null and targetType != ''">target_type,</if>
             <if test="targetId != null">target_id,</if>
-            <if test="hitDetailJson != null">hit_detail_json,</if>
+            <if test="hitDetailJson != null and hitDetailJson != ''">hit_detail_json,</if>
             <if test="status != null and status != ''">status,</if>
             <if test="caseId != null">case_id,</if>
             <if test="alertTime != null">alert_time,</if>
@@ -68,7 +68,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="riskLevel != null and riskLevel != ''">#{riskLevel},</if>
             <if test="targetType != null and targetType != ''">#{targetType},</if>
             <if test="targetId != null">#{targetId},</if>
-            <if test="hitDetailJson != null">#{hitDetailJson},</if>
+            <if test="hitDetailJson != null and hitDetailJson != ''">#{hitDetailJson},</if>
             <if test="status != null and status != ''">#{status},</if>
             <if test="caseId != null">#{caseId},</if>
             <if test="alertTime != null">#{alertTime},</if>
@@ -88,7 +88,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="riskLevel != null and riskLevel != ''">risk_level = #{riskLevel},</if>
             <if test="targetType != null and targetType != ''">target_type = #{targetType},</if>
             <if test="targetId != null">target_id = #{targetId},</if>
-            <if test="hitDetailJson != null">hit_detail_json = #{hitDetailJson},</if>
+            <if test="hitDetailJson != null and hitDetailJson != ''">hit_detail_json = #{hitDetailJson},</if>
             <if test="status != null and status != ''">status = #{status},</if>
             <if test="caseId != null">case_id = #{caseId},</if>
             <if test="alertTime != null">alert_time = #{alertTime},</if>

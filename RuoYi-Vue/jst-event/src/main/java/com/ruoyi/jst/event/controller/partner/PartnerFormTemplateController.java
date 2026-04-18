@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.jst.common.controller.BasePartnerController;
 import com.ruoyi.jst.event.dto.FormTemplateQueryReqDTO;
 import com.ruoyi.jst.event.dto.FormTemplateSaveReqDTO;
@@ -65,7 +66,7 @@ public class PartnerFormTemplateController extends BasePartnerController {
      * @关联状态机 SM-25
      * @关联权限 hasRole('jst_partner')
      */
-    @PreAuthorize("@ss.hasRole('jst_partner')")
+    @PreAuthorize("@ss.hasAnyRoles('jst_partner,admin,jst_operator')")
     @GetMapping("/list")
     public TableDataInfo list(@Valid FormTemplateQueryReqDTO query) {
         startPage();

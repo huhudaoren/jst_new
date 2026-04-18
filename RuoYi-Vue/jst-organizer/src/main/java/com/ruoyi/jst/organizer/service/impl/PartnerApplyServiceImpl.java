@@ -108,10 +108,11 @@ public class PartnerApplyServiceImpl implements PartnerApplyService {
         apply.setContactName(req.getContactName());
         apply.setContactMobile(req.getContactMobile());
         apply.setBusinessLicenseNo(req.getBusinessLicenseNo());
-        apply.setQualificationJson(req.getQualificationJson());
-        apply.setSettlementInfoJson(req.getSettlementInfoJson());
-        apply.setInvoiceInfoJson(req.getInvoiceInfoJson());
-        apply.setContractFilesJson(req.getContractFilesJson());
+        // 防御：MySQL JSON 列不接受空串（"The document is empty." 错误），统一把空白字符串转成 null 交给 mapper <if> 跳过
+        apply.setQualificationJson(blankJsonToNull(req.getQualificationJson()));
+        apply.setSettlementInfoJson(blankJsonToNull(req.getSettlementInfoJson()));
+        apply.setInvoiceInfoJson(blankJsonToNull(req.getInvoiceInfoJson()));
+        apply.setContractFilesJson(blankJsonToNull(req.getContractFilesJson()));
         apply.setApplyStatus(PartnerApplyStatus.PENDING.dbValue()); // SM-4: 公开提交直接生成 pending 申请单
         apply.setSubmitTime(now);
         apply.setCreateBy("public_apply");
@@ -515,5 +516,12 @@ public class PartnerApplyServiceImpl implements PartnerApplyService {
             return number.longValue();
         }
         return null;
+    }
+
+    /**
+     * 将空白/空串形式的 JSON 字段规范化为 null，避免写入 MySQL JSON 列时触发 "The document is empty."。
+     */
+    private String blankJsonToNull(String json) {
+        return (json == null || json.isBlank()) ? null : json;
     }
 }

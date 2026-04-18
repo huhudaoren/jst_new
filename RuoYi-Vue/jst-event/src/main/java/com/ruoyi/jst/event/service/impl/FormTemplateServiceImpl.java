@@ -9,6 +9,7 @@ import com.ruoyi.jst.common.context.JstLoginContext;
 import com.ruoyi.jst.common.exception.BizErrorCode;
 import com.ruoyi.jst.common.lock.JstLockTemplate;
 import com.ruoyi.jst.common.security.SecurityCheck;
+import com.ruoyi.jst.common.util.PartnerScopeUtils;
 import com.ruoyi.jst.event.domain.JstContest;
 import com.ruoyi.jst.event.domain.JstEnrollFormTemplate;
 import com.ruoyi.jst.event.dto.AuditReqDTO;
@@ -48,7 +49,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     private static final Logger log = LoggerFactory.getLogger(FormTemplateServiceImpl.class);
 
     private static final Set<String> ALLOWED_FIELD_TYPES = Set.of(
-            "text", "textarea", "radio", "checkbox", "select", "date", "age",
+            "text", "textarea", "phone", "idcard", "radio", "checkbox", "select", "date", "age",
             "number", "image", "audio", "video", "file", "group", "conditional"
     );
 
@@ -231,7 +232,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             query = new FormTemplateQueryReqDTO();
         }
         Long currentPartnerId = partnerId != null ? partnerId : JstLoginContext.currentPartnerId();
-        if (currentPartnerId == null) {
+        // 平台运营（admin/jst_operator）没有 partnerId，放行 → mapper 层 partnerId=null 表示看所有 partner 模板
+        if (currentPartnerId == null && !PartnerScopeUtils.isPlatformOp(PartnerScopeUtils.getLoginUserQuietly())) {
             throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
                     BizErrorCode.JST_COMMON_AUTH_DENIED.code());
         }
@@ -293,7 +295,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     private Long createTemplate(FormTemplateSaveReqDTO req, String normalizedSchema) {
-        Long ownerId = resolveOwnerId(req.getOwnerType());
+        Long ownerId = resolveOwnerId(req.getOwnerType(), req.getOwnerId());
         Date now = DateUtils.getNowDate();
 
         JstEnrollFormTemplate template = new JstEnrollFormTemplate();
@@ -315,14 +317,23 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     private Long updateTemplate(FormTemplateSaveReqDTO req, String normalizedSchema) {
         JstEnrollFormTemplate template = requireTemplate(req.getTemplateId());
-        assertTemplateOwnership(template);
+        assertTemplateOwnership(template);   // partner 仍只能改自己的
 
-        Long expectedOwnerId = resolveOwnerId(req.getOwnerType());
-        if (!Objects.equals(template.getOwnerType(), req.getOwnerType())
-                || !Objects.equals(template.getOwnerId(), expectedOwnerId)) {
-            throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
-                    BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+        // admin / 运营 允许修改归属；partner 登录则下方强制校验必须一致
+        Long expectedOwnerId = resolveOwnerId(req.getOwnerType(), req.getOwnerId());
+        boolean isPartner = isPartnerUser();
+
+        if (isPartner) {
+            // partner 登录不得修改归属类型或 ID
+            if (!Objects.equals(template.getOwnerType(), req.getOwnerType())
+                    || !Objects.equals(template.getOwnerId(), expectedOwnerId)) {
+                throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
+                        BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+            }
         }
+        // admin / 运营 允许改归属，直接覆盖
+        template.setOwnerType(req.getOwnerType());
+        template.setOwnerId(expectedOwnerId);
 
         // SM-25
         FormTemplateAuditStatus currentStatus = FormTemplateAuditStatus.fromDb(template.getAuditStatus());
@@ -435,22 +446,45 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                 && !JstLoginContext.hasRole("jst_platform_op");
     }
 
-    private Long resolveOwnerId(String ownerType) {
-        Long currentPartnerId = JstLoginContext.currentPartnerId();
+    /**
+     * 解析模板归属的 ownerId。
+     * <p>
+     * 规则：
+     * <ul>
+     *     <li>partner 登录 + ownerType=partner：忽略前端传入，强制取自己的 partnerId（防越权）</li>
+     *     <li>admin / 运营 登录 + ownerType=partner：必须由前端指定合法 reqOwnerId</li>
+     *     <li>partner 登录 + ownerType=platform：AUTH_DENIED</li>
+     *     <li>admin / 运营 登录 + ownerType=platform：返回 null</li>
+     * </ul>
+     *
+     * @param ownerType  归属类型
+     * @param reqOwnerId admin/运营 指定的目标赛事方 id（partner 登录时忽略）
+     * @return 最终写入表的 owner_id
+     */
+    private Long resolveOwnerId(String ownerType, Long reqOwnerId) {
+        boolean isPartner = isPartnerUser();
+
         if ("partner".equals(ownerType)) {
-            if (currentPartnerId == null) {
-                throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
-                        BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+            if (isPartner) {
+                // partner 登录：强制取自己的 partnerId，忽略前端传入（防越权）
+                return JstLoginContext.currentPartnerId();
             }
-            return currentPartnerId;
+            // admin / 运营 登录：必须由前端指定目标 partnerId
+            if (reqOwnerId == null || reqOwnerId <= 0) {
+                throw new ServiceException("创建赛事方模板时必须指定 ownerId",
+                        BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+            }
+            return reqOwnerId;
         }
+
         if ("platform".equals(ownerType)) {
-            if (isPartnerUser()) {
+            if (isPartner) {
                 throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
                         BizErrorCode.JST_COMMON_AUTH_DENIED.code());
             }
             return null;
         }
+
         throw new ServiceException(BizErrorCode.JST_EVENT_FORM_TEMPLATE_INVALID.message(),
                 BizErrorCode.JST_EVENT_FORM_TEMPLATE_INVALID.code());
     }

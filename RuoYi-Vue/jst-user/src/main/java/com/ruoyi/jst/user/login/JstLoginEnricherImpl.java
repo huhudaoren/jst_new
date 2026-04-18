@@ -57,7 +57,6 @@ public class JstLoginEnricherImpl implements JstLoginEnricher {
         if (channels != null && !channels.isEmpty()) {
             ctx.setChannelId(channels.get(0).getChannelId());
         }
-
         // 3. 查 jst_event_partner 拿 partnerId (通过 PartnerLookupMapper 跨域 SQL,无需依赖 jst-event)
         Long partnerId = partnerLookupMapper.selectPartnerIdByUserId(userId);
         ctx.setPartnerId(partnerId);

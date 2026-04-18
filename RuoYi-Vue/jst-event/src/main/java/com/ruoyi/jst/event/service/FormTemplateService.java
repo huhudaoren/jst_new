@@ -68,6 +68,8 @@ public interface FormTemplateService {
      */
     List<FormTemplateListVO> selectPartnerAvailableList(FormTemplateQueryReqDTO query, Long partnerId);
 
+
+
     /**
      * 查询后台模板详情。
      *

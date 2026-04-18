@@ -59,7 +59,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="channelId != null">channel_id,</if>
             <if test="channelType != null and channelType != ''">channel_type,</if>
             <if test="applyName != null and applyName != ''">apply_name,</if>
-            <if test="materialsJson != null">materials_json,</if>
+            <if test="materialsJson != null and materialsJson != ''">materials_json,</if>
             <if test="applyStatus != null and applyStatus != ''">apply_status,</if>
             <if test="auditRemark != null">audit_remark,</if>
             <if test="auditUserId != null">audit_user_id,</if>
@@ -78,7 +78,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="channelId != null">#{channelId},</if>
             <if test="channelType != null and channelType != ''">#{channelType},</if>
             <if test="applyName != null and applyName != ''">#{applyName},</if>
-            <if test="materialsJson != null">#{materialsJson},</if>
+            <if test="materialsJson != null and materialsJson != ''">#{materialsJson},</if>
             <if test="applyStatus != null and applyStatus != ''">#{applyStatus},</if>
             <if test="auditRemark != null">#{auditRemark},</if>
             <if test="auditUserId != null">#{auditUserId},</if>
@@ -101,7 +101,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="channelId != null">channel_id = #{channelId},</if>
             <if test="channelType != null and channelType != ''">channel_type = #{channelType},</if>
             <if test="applyName != null and applyName != ''">apply_name = #{applyName},</if>
-            <if test="materialsJson != null">materials_json = #{materialsJson},</if>
+            <if test="materialsJson != null and materialsJson != ''">materials_json = #{materialsJson},</if>
             <if test="applyStatus != null and applyStatus != ''">apply_status = #{applyStatus},</if>
             <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
             <if test="auditUserId != null">audit_user_id = #{auditUserId},</if>

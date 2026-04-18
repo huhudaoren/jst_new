@@ -72,7 +72,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="totalPersons != null">total_persons,</if>
             <if test="memberPersons != null">member_persons,</if>
             <if test="extraPersons != null">extra_persons,</if>
-            <if test="extraListJson != null">extra_list_json,</if>
+            <if test="extraListJson != null and extraListJson != ''">extra_list_json,</if>
             <if test="writeoffPersons != null">writeoff_persons,</if>
             <if test="status != null and status != ''">status,</if>
             <if test="createBy != null">create_by,</if>
@@ -92,7 +92,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="totalPersons != null">#{totalPersons},</if>
             <if test="memberPersons != null">#{memberPersons},</if>
             <if test="extraPersons != null">#{extraPersons},</if>
-            <if test="extraListJson != null">#{extraListJson},</if>
+            <if test="extraListJson != null and extraListJson != ''">#{extraListJson},</if>
             <if test="writeoffPersons != null">#{writeoffPersons},</if>
             <if test="status != null and status != ''">#{status},</if>
             <if test="createBy != null">#{createBy},</if>
@@ -116,7 +116,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="totalPersons != null">total_persons = #{totalPersons},</if>
             <if test="memberPersons != null">member_persons = #{memberPersons},</if>
             <if test="extraPersons != null">extra_persons = #{extraPersons},</if>
-            <if test="extraListJson != null">extra_list_json = #{extraListJson},</if>
+            <if test="extraListJson != null and extraListJson != ''">extra_list_json = #{extraListJson},</if>
             <if test="writeoffPersons != null">writeoff_persons = #{writeoffPersons},</if>
             <if test="status != null and status != ''">status = #{status},</if>
             <if test="createBy != null">create_by = #{createBy},</if>

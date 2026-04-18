@@ -53,7 +53,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="batchNo != null and batchNo != ''">batch_no,</if>
             <if test="couponTemplateId != null">coupon_template_id,</if>
             <if test="targetType != null and targetType != ''">target_type,</if>
-            <if test="targetJson != null">target_json,</if>
+            <if test="targetJson != null and targetJson != ''">target_json,</if>
             <if test="totalCount != null">total_count,</if>
             <if test="successCount != null">success_count,</if>
             <if test="failCount != null">fail_count,</if>
@@ -70,7 +70,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="batchNo != null and batchNo != ''">#{batchNo},</if>
             <if test="couponTemplateId != null">#{couponTemplateId},</if>
             <if test="targetType != null and targetType != ''">#{targetType},</if>
-            <if test="targetJson != null">#{targetJson},</if>
+            <if test="targetJson != null and targetJson != ''">#{targetJson},</if>
             <if test="totalCount != null">#{totalCount},</if>
             <if test="successCount != null">#{successCount},</if>
             <if test="failCount != null">#{failCount},</if>
@@ -91,7 +91,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="batchNo != null and batchNo != ''">batch_no = #{batchNo},</if>
             <if test="couponTemplateId != null">coupon_template_id = #{couponTemplateId},</if>
             <if test="targetType != null and targetType != ''">target_type = #{targetType},</if>
-            <if test="targetJson != null">target_json = #{targetJson},</if>
+            <if test="targetJson != null and targetJson != ''">target_json = #{targetJson},</if>
             <if test="totalCount != null">total_count = #{totalCount},</if>
             <if test="successCount != null">success_count = #{successCount},</if>
             <if test="failCount != null">fail_count = #{failCount},</if>

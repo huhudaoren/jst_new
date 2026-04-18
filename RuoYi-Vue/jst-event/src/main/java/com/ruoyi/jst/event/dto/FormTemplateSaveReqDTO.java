@@ -23,6 +23,15 @@ public class FormTemplateSaveReqDTO {
     @Pattern(regexp = "platform|partner", message = "ownerType 仅支持 platform/partner")
     private String ownerType;
 
+    /**
+     * 目标赛事方 ID（仅 ownerType=partner 且当前登录为 admin/运营 时需要）。
+     * - partner 登录：忽略此字段，强制取 currentPartnerId
+     * - admin / 运营 登录 + ownerType=partner：必填
+     * - admin / 运营 登录 + ownerType=platform：忽略
+     * 不加 @NotNull，业务语义校验放在 Service 层（FormTemplateServiceImpl.resolveOwnerId）。
+     */
+    private Long ownerId;
+
     @NotNull(message = "schemaJson 不能为空")
     private Object schemaJson;
 
@@ -48,6 +57,14 @@ public class FormTemplateSaveReqDTO {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     public Object getSchemaJson() {

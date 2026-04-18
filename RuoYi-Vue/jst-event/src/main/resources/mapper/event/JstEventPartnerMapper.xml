@@ -64,10 +64,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contactName != null and contactName != ''">contact_name,</if>
             <if test="contactMobile != null and contactMobile != ''">contact_mobile,</if>
             <if test="businessLicenseNo != null">business_license_no,</if>
-            <if test="qualificationJson != null">qualification_json,</if>
-            <if test="settlementInfoJson != null">settlement_info_json,</if>
-            <if test="invoiceInfoJson != null">invoice_info_json,</if>
-            <if test="contractFilesJson != null">contract_files_json,</if>
+            <if test="qualificationJson != null and qualificationJson != ''">qualification_json,</if>
+            <if test="settlementInfoJson != null and settlementInfoJson != ''">settlement_info_json,</if>
+            <if test="invoiceInfoJson != null and invoiceInfoJson != ''">invoice_info_json,</if>
+            <if test="contractFilesJson != null and contractFilesJson != ''">contract_files_json,</if>
             <if test="auditStatus != null and auditStatus != ''">audit_status,</if>
             <if test="auditTime != null">audit_time,</if>
             <if test="auditRemark != null">audit_remark,</if>
@@ -86,10 +86,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contactName != null and contactName != ''">#{contactName},</if>
             <if test="contactMobile != null and contactMobile != ''">#{contactMobile},</if>
             <if test="businessLicenseNo != null">#{businessLicenseNo},</if>
-            <if test="qualificationJson != null">#{qualificationJson},</if>
-            <if test="settlementInfoJson != null">#{settlementInfoJson},</if>
-            <if test="invoiceInfoJson != null">#{invoiceInfoJson},</if>
-            <if test="contractFilesJson != null">#{contractFilesJson},</if>
+            <if test="qualificationJson != null and qualificationJson != ''">#{qualificationJson},</if>
+            <if test="settlementInfoJson != null and settlementInfoJson != ''">#{settlementInfoJson},</if>
+            <if test="invoiceInfoJson != null and invoiceInfoJson != ''">#{invoiceInfoJson},</if>
+            <if test="contractFilesJson != null and contractFilesJson != ''">#{contractFilesJson},</if>
             <if test="auditStatus != null and auditStatus != ''">#{auditStatus},</if>
             <if test="auditTime != null">#{auditTime},</if>
             <if test="auditRemark != null">#{auditRemark},</if>
@@ -112,10 +112,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contactName != null and contactName != ''">contact_name = #{contactName},</if>
             <if test="contactMobile != null and contactMobile != ''">contact_mobile = #{contactMobile},</if>
             <if test="businessLicenseNo != null">business_license_no = #{businessLicenseNo},</if>
-            <if test="qualificationJson != null">qualification_json = #{qualificationJson},</if>
-            <if test="settlementInfoJson != null">settlement_info_json = #{settlementInfoJson},</if>
-            <if test="invoiceInfoJson != null">invoice_info_json = #{invoiceInfoJson},</if>
-            <if test="contractFilesJson != null">contract_files_json = #{contractFilesJson},</if>
+            <if test="qualificationJson != null and qualificationJson != ''">qualification_json = #{qualificationJson},</if>
+            <if test="settlementInfoJson != null and settlementInfoJson != ''">settlement_info_json = #{settlementInfoJson},</if>
+            <if test="invoiceInfoJson != null and invoiceInfoJson != ''">invoice_info_json = #{invoiceInfoJson},</if>
+            <if test="contractFilesJson != null and contractFilesJson != ''">contract_files_json = #{contractFilesJson},</if>
             <if test="auditStatus != null and auditStatus != ''">audit_status = #{auditStatus},</if>
             <if test="auditTime != null">audit_time = #{auditTime},</if>
             <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
