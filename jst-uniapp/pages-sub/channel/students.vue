@@ -51,8 +51,14 @@
 
     <!-- 学生列表 -->
     <view class="stu-list">
-      <view v-for="stu in list" :key="stu.bindingId" class="stu-card">
+      <view v-for="stu in list" :key="stu.bindingId" class="stu-card" :class="{ 'stu-card--checked': isChecked(stu) }">
         <view class="stu-card__main">
+          <!-- 中文注释: 批量选择 checkbox -->
+          <view class="stu-card__checkbox" @tap.stop="toggleCheck(stu)">
+            <view class="stu-card__checkbox-inner" :class="{ 'stu-card__checkbox-inner--on': isChecked(stu) }">
+              <text v-if="isChecked(stu)" class="stu-card__checkbox-tick">✓</text>
+            </view>
+          </view>
           <view class="stu-card__avatar" :style="{ background: getAvatarColor(stu.studentName) }">
             <text class="stu-card__avatar-text">{{ (stu.studentName || '').slice(0, 1) }}</text>
           </view>
@@ -76,8 +82,25 @@
     </view>
 
     <!-- 底部统计 -->
-    <view v-if="list.length" class="stu-footer">
+    <view v-if="list.length && checkedCount === 0" class="stu-footer">
       <text class="stu-footer__info">共 <text class="stu-footer__bold">{{ total }}</text> 位学生</text>
+    </view>
+
+    <!-- 中文注释: 批量操作 footer — count>0 时 translateY 滑入 -->
+    <view
+      class="stu-batch-footer"
+      :class="{ 'stu-batch-footer--visible': checkedCount > 0 }"
+    >
+      <view class="stu-batch-footer__left">
+        <text class="stu-batch-footer__count">已选 <text class="stu-batch-footer__count-num">{{ checkedCount }}</text> 人</text>
+        <text class="stu-batch-footer__sep">·</text>
+        <text class="stu-batch-footer__link" @tap="selectAll">全选</text>
+        <text class="stu-batch-footer__sep">/</text>
+        <text class="stu-batch-footer__link" @tap="clearChecked">清空</text>
+      </view>
+      <view class="stu-batch-footer__right" @tap="goBatchEnroll">
+        <text class="stu-batch-footer__btn-text">📝 批量代报名</text>
+      </view>
     </view>
 
     <!-- 解绑倒计时弹窗 -->
@@ -135,8 +158,13 @@ export default {
       channelId: '',
       channelName: '',
       channelSchool: '',
-      bindCode: ''
+      bindCode: '',
+      // 中文注释: 批量选择 — 存 studentId（fallback bindingId）
+      checkedIds: []
     }
+  },
+  computed: {
+    checkedCount() { return this.checkedIds.length }
   },
   onShow() { this.initChannel(); this.pageNum = 1; this.loadList() },
   methods: {
@@ -225,6 +253,33 @@ export default {
       uni.setClipboardData({ data: link, success: () => { uni.showToast({ title: '链接已复制', icon: 'success' }) } })
     },
 
+    // 中文注释: 批量选择 helpers
+    stuKey(stu) { return stu.studentId || stu.bindingId },
+    isChecked(stu) {
+      const k = this.stuKey(stu)
+      return k != null && this.checkedIds.includes(k)
+    },
+    toggleCheck(stu) {
+      const k = this.stuKey(stu)
+      if (k == null) return
+      const idx = this.checkedIds.indexOf(k)
+      if (idx >= 0) this.checkedIds.splice(idx, 1)
+      else this.checkedIds.push(k)
+    },
+    selectAll() {
+      const all = this.list.map(s => this.stuKey(s)).filter(k => k != null)
+      // 中文注释: 去重合并（保留跨页已选，若在当前页上）
+      const set = new Set(this.checkedIds.concat(all))
+      this.checkedIds = Array.from(set)
+    },
+    clearChecked() { this.checkedIds = [] },
+    goBatchEnroll() {
+      if (!this.checkedCount) return
+      // 中文注释: 跳转传 studentIds（逗号分隔）
+      const ids = this.checkedIds.join(',')
+      uni.navigateTo({ url: `/pages-sub/channel/batch-enroll?studentIds=${ids}` })
+    },
+
     goBack() { uni.navigateBack() }
   }
 }
@@ -233,7 +288,7 @@ export default {
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
 
-.stu-page { min-height: 100vh; padding-bottom: calc(120rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
+.stu-page { min-height: 100vh; padding-bottom: calc(160rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
 
 /* 导航 */
 .stu-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; position: sticky; top: 0; z-index: 40; }
@@ -284,4 +339,92 @@ export default {
 .stu-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba($jst-bg-card, 0.97); border-top: 2rpx solid $jst-border; padding: 24rpx 32rpx; padding-bottom: calc(24rpx + env(safe-area-inset-bottom)); box-shadow: $jst-shadow-sm; display: flex; align-items: center; z-index: 50; }
 .stu-footer__info { font-size: 26rpx; color: $jst-text-secondary; }
 .stu-footer__bold { font-weight: 600; color: $jst-text-primary; }
+
+/* 批量选择 checkbox */
+.stu-card { transition: background 0.2s ease; }
+.stu-card--checked { background: $jst-brand-light; }
+.stu-card__checkbox {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.stu-card__checkbox-inner {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: $jst-radius-xs;
+  border: 3rpx solid $jst-border;
+  background: $jst-bg-card;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.stu-card__checkbox-inner--on {
+  background: $jst-brand;
+  border-color: $jst-brand;
+}
+.stu-card__checkbox-tick {
+  color: $jst-text-inverse;
+  font-size: 28rpx;
+  font-weight: $jst-weight-bold;
+  line-height: 1;
+}
+
+/* 批量操作 footer — translateY 滑入 */
+.stu-batch-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: $jst-space-md;
+  padding: $jst-space-md $jst-space-xl;
+  padding-bottom: calc(#{$jst-space-md} + env(safe-area-inset-bottom));
+  background: $jst-bg-card;
+  border-top: 2rpx solid $jst-border;
+  box-shadow: 0 -6rpx 24rpx rgba(0, 0, 0, 0.08);
+  transform: translateY(120%);
+  transition: transform 0.25s ease;
+}
+.stu-batch-footer--visible { transform: translateY(0); }
+.stu-batch-footer__left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: $jst-space-xs;
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
+}
+.stu-batch-footer__count-num {
+  color: $jst-brand;
+  font-weight: $jst-weight-bold;
+}
+.stu-batch-footer__sep {
+  color: $jst-text-placeholder;
+  margin: 0 4rpx;
+}
+.stu-batch-footer__link {
+  color: $jst-brand;
+  font-weight: $jst-weight-semibold;
+  padding: 6rpx 10rpx;
+}
+.stu-batch-footer__right {
+  display: flex;
+  align-items: center;
+  padding: 0 $jst-space-lg;
+  height: 80rpx;
+  background: linear-gradient(135deg, $jst-brand, $jst-brand-dark);
+  border-radius: $jst-radius-round;
+  color: $jst-text-inverse;
+  box-shadow: $jst-shadow-md;
+}
+.stu-batch-footer__btn-text {
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+}
 </style>

@@ -42,10 +42,33 @@
             <text class="refund-list-page__meta-key">关联订单</text>
             <text class="refund-list-page__meta-value">{{ item.orderNo || '--' }}</text>
           </view>
+          <!-- 中文注释: 现金退款行 -->
           <view class="refund-list-page__meta-row">
-            <text class="refund-list-page__meta-key">申请金额</text>
+            <text class="refund-list-page__meta-key">💰 现金退款</text>
             <text class="refund-list-page__meta-value refund-list-page__meta-value--price">
-              ¥{{ formatAmount(item.applyCash) }}
+              ¥{{ formatAmount(getCashAmount(item)) }}
+            </text>
+          </view>
+          <!-- 中文注释: 券原路回行 — 仅当涉及券时显示 -->
+          <!-- TODO(backend): 需要返回 couponRefund: { couponName, faceAmount } -->
+          <view v-if="hasCouponRefund(item)" class="refund-list-page__meta-row">
+            <text class="refund-list-page__meta-key">🎟️ 券原路回</text>
+            <text class="refund-list-page__meta-value">{{ formatCouponRefund(item) }}</text>
+          </view>
+          <!-- 中文注释: 积分回退行 — 仅当涉及积分时显示 -->
+          <!-- TODO(backend): 需要返回 pointsRefund（整数），或至少 actualPoints / applyPoints -->
+          <view v-if="hasPointsRefund(item)" class="refund-list-page__meta-row">
+            <text class="refund-list-page__meta-key">⭐ 积分回退</text>
+            <text class="refund-list-page__meta-value">+{{ getPointsRefund(item) }} 积分</text>
+          </view>
+          <!-- 中文注释: 合计退款 — 至少包含现金 (积分/券为非金额型回退) -->
+          <view class="refund-list-page__meta-row refund-list-page__meta-row--total">
+            <text class="refund-list-page__meta-key">合计退款</text>
+            <text class="refund-list-page__meta-value refund-list-page__meta-value--total">
+              ¥{{ formatAmount(getCashAmount(item)) }}
+              <text v-if="hasPointsRefund(item) || hasCouponRefund(item)" class="refund-list-page__meta-extra">
+                + {{ buildExtraLabel(item) }}
+              </text>
             </text>
           </view>
           <view class="refund-list-page__meta-row">
@@ -107,11 +130,12 @@ export default {
       loadingMore: false,
       tabs: [
         { label: '全部', value: '' },
-        { label: '待审核', value: 'pending' },
+        { label: '申请中', value: 'pending' },
+        { label: '审核中', value: 'reviewing' },
         { label: '已通过', value: 'approved' },
         { label: '已驳回', value: 'rejected' },
         { label: '退款中', value: 'refunding' },
-        { label: '已完成', value: 'completed' },
+        { label: '已到账', value: 'completed' },
         { label: '已关闭', value: 'closed' }
       ]
     }
@@ -212,12 +236,14 @@ export default {
     },
 
     getStatusText(status) {
+      // 中文注释: 5 态 chip 命名对齐 UX 要求（申请中/审核中/已通过/已到账/已驳回）
       const mapper = {
-        pending: '待审核',
+        pending: '申请中',
+        reviewing: '审核中',
         approved: '已通过',
         rejected: '已驳回',
         refunding: '退款中',
-        completed: '已完成',
+        completed: '已到账',
         closed: '已关闭'
       }
       return mapper[status] || '处理中'
@@ -226,6 +252,7 @@ export default {
     getStatusTone(status) {
       const mapper = {
         pending: 'pending',
+        reviewing: 'pending',
         approved: 'active',
         rejected: 'danger',
         refunding: 'refund',
@@ -233,6 +260,70 @@ export default {
         closed: 'gray'
       }
       return mapper[status] || 'active'
+    },
+
+    // 中文注释: 现金退款取值优先级 actualCash > applyCash
+    getCashAmount(item) {
+      const actual = Number(item.actualCash)
+      if (!Number.isNaN(actual) && actual > 0) {
+        return actual
+      }
+      return item.applyCash
+    },
+
+    // 中文注释: 积分回退字段兼容取值
+    getPointsRefund(item) {
+      // TODO(backend): 优先 pointsRefund，其次 actualPoints，最后 applyPoints
+      const pointsRefund = Number(item.pointsRefund)
+      if (!Number.isNaN(pointsRefund) && pointsRefund > 0) {
+        return pointsRefund
+      }
+      const actualPoints = Number(item.actualPoints)
+      if (!Number.isNaN(actualPoints) && actualPoints > 0) {
+        return actualPoints
+      }
+      return Number(item.applyPoints) || 0
+    },
+
+    hasPointsRefund(item) {
+      return this.getPointsRefund(item) > 0
+    },
+
+    // 中文注释: 判断是否含券回退（couponRefund 对象 或 couponReturned 标志）
+    hasCouponRefund(item) {
+      // TODO(backend): 推荐结构 couponRefund: { couponName, faceAmount }
+      if (item && item.couponRefund && (item.couponRefund.couponName || item.couponRefund.faceAmount)) {
+        return true
+      }
+      return !!(item && item.couponReturned)
+    },
+
+    formatCouponRefund(item) {
+      // TODO(backend): 若返回 couponRefund 对象则显示 "券名 ¥面额"，否则降级提示已返还
+      const cr = item && item.couponRefund
+      if (cr && cr.couponName) {
+        const face = Number(cr.faceAmount)
+        if (!Number.isNaN(face) && face > 0) {
+          return `${cr.couponName} (面额 ¥${face.toFixed(2)})`
+        }
+        return cr.couponName
+      }
+      if (cr && cr.faceAmount) {
+        return `面额 ¥${Number(cr.faceAmount).toFixed(2)}`
+      }
+      return '已原路返回'
+    },
+
+    // 中文注释: 拼接合计行右侧的「+ 券/+ 积分」附加说明
+    buildExtraLabel(item) {
+      const parts = []
+      if (this.hasCouponRefund(item)) {
+        parts.push('券 1 张')
+      }
+      if (this.hasPointsRefund(item)) {
+        parts.push(`${this.getPointsRefund(item)} 积分`)
+      }
+      return parts.join(' + ')
     },
 
     formatAmount(value) {
@@ -402,6 +493,26 @@ export default {
   font-size: 30rpx;
   font-weight: 800;
   color: $jst-warning;
+}
+
+.refund-list-page__meta-row--total {
+  border-top: 2rpx dashed $jst-border;
+  padding-top: 14rpx;
+  margin-top: 4rpx;
+}
+
+.refund-list-page__meta-value--total {
+  font-size: 30rpx;
+  font-weight: $jst-weight-bold;
+  color: $jst-warning;
+}
+
+.refund-list-page__meta-extra {
+  display: inline-block;
+  margin-left: $jst-space-xs;
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-regular;
+  color: $jst-text-secondary;
 }
 
 .refund-list-page__remark {

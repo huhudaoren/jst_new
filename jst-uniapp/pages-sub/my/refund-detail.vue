@@ -57,29 +57,51 @@
         </view>
       </view>
 
+      <!-- 中文注释: 复刻 order-detail 的费用明细结构 — 5 行清晰分解 -->
       <view class="refund-detail-page__card">
-        <text class="refund-detail-page__card-title">退款金额拆分</text>
+        <text class="refund-detail-page__card-title">退款费用明细</text>
+        <!-- 行1: 订单实付 -->
         <view class="refund-detail-page__info-row">
-          <text class="refund-detail-page__info-key">申请退现金</text>
-          <text class="refund-detail-page__info-value">¥{{ formatAmount(detail.applyCash) }}</text>
-        </view>
-        <view class="refund-detail-page__info-row">
-          <text class="refund-detail-page__info-key">申请退积分</text>
-          <text class="refund-detail-page__info-value">{{ formatPoints(detail.applyPoints) }}</text>
-        </view>
-        <view class="refund-detail-page__info-row">
-          <text class="refund-detail-page__info-key">实际退现金</text>
-          <text class="refund-detail-page__info-value refund-detail-page__info-value--price">
-            ¥{{ formatAmount(detail.actualCash) }}
+          <text class="refund-detail-page__info-key">① 订单实付</text>
+          <text class="refund-detail-page__info-value">
+            ¥{{ formatAmount(detail.orderNetPay || detail.originalOrderAmount) }}
           </text>
         </view>
-        <view class="refund-detail-page__info-row">
-          <text class="refund-detail-page__info-key">实际退积分</text>
-          <text class="refund-detail-page__info-value">{{ formatPoints(detail.actualPoints) }}</text>
+        <!-- 行2: 积分原路回 (v-if) -->
+        <!-- TODO(backend): 需要 pointsRefund 字段（整数） -->
+        <view v-if="hasPointsRefund" class="refund-detail-page__info-row">
+          <text class="refund-detail-page__info-key">② 积分原路回</text>
+          <text class="refund-detail-page__info-value refund-detail-page__info-value--return">
+            +{{ pointsRefundValue }} 积分（冻结→可用）
+          </text>
         </view>
+        <!-- 行3: 券原路回 (v-if) -->
+        <!-- TODO(backend): 需要 couponRefund: { couponName, faceAmount, couponStatus } -->
+        <view v-if="hasCouponRefund" class="refund-detail-page__info-row">
+          <text class="refund-detail-page__info-key">③ 券原路回</text>
+          <text class="refund-detail-page__info-value refund-detail-page__info-value--return">
+            {{ couponRefundLabel }}（状态 voided）
+          </text>
+        </view>
+        <!-- 行4: 现金退款 -->
         <view class="refund-detail-page__info-row">
-          <text class="refund-detail-page__info-key">优惠券返还</text>
-          <text class="refund-detail-page__info-value">{{ detail.couponReturned ? '已返还' : '未返还' }}</text>
+          <text class="refund-detail-page__info-key">④ 现金退款</text>
+          <text class="refund-detail-page__info-value refund-detail-page__info-value--price">
+            ¥{{ formatAmount(cashRefundValue) }}
+          </text>
+        </view>
+        <view class="refund-detail-page__info-row refund-detail-page__info-row--sub">
+          <text class="refund-detail-page__info-sub">（原支付路径 · {{ getPayMethodText(detail.payMethod) }}）</text>
+        </view>
+        <!-- 行5: 合计退款 -->
+        <view class="refund-detail-page__info-row refund-detail-page__info-row--total">
+          <text class="refund-detail-page__info-key refund-detail-page__info-key--total">⑤ 合计退款</text>
+          <text class="refund-detail-page__info-value refund-detail-page__info-value--total">
+            ¥{{ formatAmount(cashRefundValue) }}
+            <text v-if="hasPointsRefund || hasCouponRefund" class="refund-detail-page__info-extra">
+              + {{ extraLabel }}
+            </text>
+          </text>
         </view>
       </view>
 
@@ -99,7 +121,16 @@
 
       <view class="refund-detail-page__card">
         <text class="refund-detail-page__card-title">状态时间轴</text>
-        <view v-for="(item, index) in timeline" :key="`${item.label}-${index}`" class="refund-detail-page__timeline-item">
+        <view
+          v-for="(item, index) in timeline"
+          :key="`${item.label}-${index}`"
+          class="refund-detail-page__timeline-item"
+          :class="{
+            'refund-detail-page__timeline-item--done': item.done,
+            'refund-detail-page__timeline-item--danger': item.tone === 'danger',
+            'refund-detail-page__timeline-item--success': item.tone === 'success'
+          }"
+        >
           <view class="refund-detail-page__timeline-dot"></view>
           <view class="refund-detail-page__timeline-main">
             <text class="refund-detail-page__timeline-label">{{ item.label }}</text>
@@ -142,12 +173,14 @@ export default {
   },
   computed: {
     statusText() {
+      // 中文注释: 5 态 chip 与 refund-list 对齐
       const mapper = {
-        pending: '待审核',
+        pending: '申请中',
+        reviewing: '审核中',
         approved: '已通过',
         rejected: '已驳回',
         refunding: '退款中',
-        completed: '已完成',
+        completed: '已到账',
         closed: '已关闭'
       }
       return mapper[this.detail.status] || '处理中'
@@ -155,6 +188,7 @@ export default {
     statusTone() {
       const mapper = {
         pending: 'pending',
+        reviewing: 'pending',
         approved: 'active',
         rejected: 'danger',
         refunding: 'refund',
@@ -163,42 +197,132 @@ export default {
       }
       return mapper[this.detail.status] || 'active'
     },
-    timeline() {
-      const list = []
-      if (this.detail.createTime) {
-        list.push({
-          label: '发起退款',
-          time: this.formatDateTime(this.detail.createTime)
-        })
+    // 中文注释: 积分/券/现金 字段归一化（缺字段走 TODO 降级）
+    hasPointsRefund() {
+      return this.pointsRefundValue > 0
+    },
+    pointsRefundValue() {
+      // TODO(backend): 优先 pointsRefund（整数），其次 actualPoints，最后 applyPoints
+      const refund = Number(this.detail.pointsRefund)
+      if (!Number.isNaN(refund) && refund > 0) {
+        return refund
       }
-      if (this.detail.status === 'approved') {
-        list.push({
-          label: '审核通过',
-          time: this.formatDateTime(this.detail.completeTime || this.detail.createTime)
-        })
+      const actual = Number(this.detail.actualPoints)
+      if (!Number.isNaN(actual) && actual > 0) {
+        return actual
       }
-      if (this.detail.status === 'rejected') {
-        list.push({
-          label: '审核驳回',
-          time: this.formatDateTime(this.detail.completeTime || this.detail.createTime)
-        })
+      return Number(this.detail.applyPoints) || 0
+    },
+    hasCouponRefund() {
+      // TODO(backend): 推荐 couponRefund: { couponName, faceAmount }，兼容 couponReturned 标志
+      const cr = this.detail.couponRefund
+      if (cr && (cr.couponName || cr.faceAmount)) {
+        return true
+      }
+      return !!this.detail.couponReturned
+    },
+    couponRefundLabel() {
+      const cr = this.detail.couponRefund
+      if (cr && cr.couponName) {
+        const face = Number(cr.faceAmount)
+        if (!Number.isNaN(face) && face > 0) {
+          return `${cr.couponName} · 面额 ¥${face.toFixed(2)}`
+        }
+        return cr.couponName
+      }
+      return '原券已返还'
+    },
+    cashRefundValue() {
+      const actual = Number(this.detail.actualCash)
+      if (!Number.isNaN(actual) && actual > 0) {
+        return actual
+      }
+      return this.detail.applyCash
+    },
+    extraLabel() {
+      const parts = []
+      if (this.hasCouponRefund) {
+        parts.push('券 1 张')
+      }
+      if (this.hasPointsRefund) {
+        parts.push(`${this.pointsRefundValue} 积分`)
+      }
+      return parts.join(' + ')
+    },
+    // 中文注释: 预计到账时间 — 已到账显示实际时间；进行中显示 T+1~7 工作日文案
+    arrivalEtaText() {
+      // TODO(backend): 推荐 expectedArrivalTime 字段；缺字段时根据状态显示兜底文案
+      if (this.detail.expectedArrivalTime) {
+        return this.formatDateTime(this.detail.expectedArrivalTime)
+      }
+      if (this.detail.status === 'completed' && this.detail.completeTime) {
+        return this.formatDateTime(this.detail.completeTime)
       }
       if (this.detail.status === 'refunding') {
+        return '预计 1~7 个工作日到账'
+      }
+      return '--'
+    },
+    // 中文注释: 4 阶段时间轴 申请 → 审核 → 驳回/通过 → 到账（含预计到账）
+    timeline() {
+      const list = []
+      const status = this.detail.status
+      if (this.detail.createTime) {
         list.push({
-          label: '退款执行中',
-          time: this.formatDateTime(this.detail.completeTime || this.detail.createTime)
+          label: '① 申请退款',
+          time: this.formatDateTime(this.detail.createTime),
+          done: true
         })
       }
-      if (this.detail.completeTime) {
+      // 审核阶段
+      const reviewing = ['reviewing', 'approved', 'rejected', 'refunding', 'completed'].includes(status)
+      list.push({
+        label: '② 平台审核',
+        time: reviewing
+          ? (this.detail.auditTime ? this.formatDateTime(this.detail.auditTime) : '审核中...')
+          : '等待受理',
+        done: reviewing
+      })
+      // 审核结果
+      if (status === 'rejected') {
         list.push({
-          label: '退款完成',
-          time: this.formatDateTime(this.detail.completeTime)
+          label: '③ 审核驳回',
+          time: this.formatDateTime(this.detail.auditTime || this.detail.completeTime),
+          done: true,
+          tone: 'danger'
+        })
+      } else if (['approved', 'refunding', 'completed'].includes(status)) {
+        list.push({
+          label: '③ 审核通过',
+          time: this.formatDateTime(this.detail.auditTime || this.detail.completeTime || this.detail.createTime),
+          done: true
+        })
+      } else {
+        list.push({
+          label: '③ 审核结果',
+          time: '待审核',
+          done: false
         })
       }
-      if (!list.length) {
+      // 到账
+      if (status === 'completed') {
         list.push({
-          label: '处理中',
-          time: '--'
+          label: '④ 退款到账',
+          time: this.arrivalEtaText,
+          done: true,
+          tone: 'success'
+        })
+      } else if (['approved', 'refunding'].includes(status)) {
+        list.push({
+          label: '④ 退款到账',
+          time: this.arrivalEtaText,
+          done: false
+        })
+      } else if (status !== 'rejected' && status !== 'closed') {
+        list.push({
+          label: '④ 退款到账',
+          time: '--',
+          done: false
         })
       }
       return list
@@ -427,6 +551,78 @@ export default {
 
 .refund-detail-page__info-value--multiline {
   white-space: pre-wrap;
+}
+
+/* 费用明细 5 行样式 */
+.refund-detail-page__info-value--return {
+  color: $jst-success;
+  font-weight: $jst-weight-semibold;
+}
+
+.refund-detail-page__info-row--sub {
+  padding: 2rpx 0 14rpx;
+  border-top: none;
+}
+
+.refund-detail-page__info-sub {
+  flex: 1;
+  text-align: right;
+  font-size: $jst-font-xs;
+  color: $jst-text-placeholder;
+}
+
+.refund-detail-page__info-row--total {
+  border-top: 2rpx dashed $jst-border;
+  padding-top: 18rpx;
+  margin-top: 6rpx;
+}
+
+.refund-detail-page__info-key--total {
+  font-weight: $jst-weight-bold;
+  color: $jst-text-primary;
+}
+
+.refund-detail-page__info-value--total {
+  font-size: 34rpx;
+  font-weight: $jst-weight-bold;
+  color: $jst-warning;
+}
+
+.refund-detail-page__info-extra {
+  display: inline-block;
+  margin-left: $jst-space-xs;
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-regular;
+  color: $jst-text-secondary;
+}
+
+/* 时间轴状态变体 */
+.refund-detail-page__timeline-item--done .refund-detail-page__timeline-dot {
+  background: $jst-brand;
+}
+
+.refund-detail-page__timeline-item:not(.refund-detail-page__timeline-item--done) .refund-detail-page__timeline-dot {
+  background: $jst-text-placeholder;
+}
+
+.refund-detail-page__timeline-item--success .refund-detail-page__timeline-dot {
+  background: $jst-success;
+}
+
+.refund-detail-page__timeline-item--danger .refund-detail-page__timeline-dot {
+  background: $jst-danger;
+}
+
+.refund-detail-page__timeline-item--success .refund-detail-page__timeline-label {
+  color: $jst-success;
+}
+
+.refund-detail-page__timeline-item--danger .refund-detail-page__timeline-label {
+  color: $jst-danger;
+}
+
+.refund-detail-page__timeline-item:not(.refund-detail-page__timeline-item--done) .refund-detail-page__timeline-label {
+  color: $jst-text-secondary;
 }
 
 .refund-detail-page__timeline-item {

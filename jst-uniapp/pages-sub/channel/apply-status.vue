@@ -10,6 +10,25 @@
       <text v-if="isLocked" class="as-hero__reason">该申请已被锁定，请联系客服处理</text>
     </view>
 
+    <!-- 中文注释: 驳回原因卡（红色边框）— 仅 rejected 状态展示 -->
+    <view v-if="apply && apply.applyStatus === 'rejected'" class="as-reject-card">
+      <view class="as-reject-card__head">
+        <text class="as-reject-card__icon">❌</text>
+        <text class="as-reject-card__title">驳回原因</text>
+      </view>
+      <text class="as-reject-card__reason">{{ rejectReasonText }}</text>
+      <view class="as-reject-card__meta">
+        <view v-if="apply.auditUserName" class="as-reject-card__meta-row">
+          <text class="as-reject-card__meta-key">审核人</text>
+          <text class="as-reject-card__meta-value">{{ apply.auditUserName }}</text>
+        </view>
+        <view v-if="apply.auditTime" class="as-reject-card__meta-row">
+          <text class="as-reject-card__meta-key">审核时间</text>
+          <text class="as-reject-card__meta-value">{{ formatTime(apply.auditTime) }}</text>
+        </view>
+      </view>
+    </view>
+
     <view v-if="apply" class="as-section">
       <view class="as-section__head">
         <text class="as-section__title">申请信息</text>
@@ -32,24 +51,37 @@
 
     <view v-if="apply" class="as-actions">
       <u-button v-if="apply.applyStatus === 'pending'" class="as-actions__btn" type="primary" plain @click="onCancel">撤回申请</u-button>
-      <u-button v-if="apply.applyStatus === 'rejected' && !isLocked" class="as-actions__btn" type="primary" @click="onResubmit">修改重新提交</u-button>
+      <!-- 中文注释: 驳回态重新编辑 — 红主色按钮，跳 edit 模式 -->
+      <u-button v-if="apply.applyStatus === 'rejected' && !isLocked" class="as-actions__btn as-actions__btn--resubmit" type="error" @click="onResubmit">🔄 重新编辑提交</u-button>
       <u-button v-if="isLocked" class="as-actions__btn" type="info" :disabled="true">请联系客服</u-button>
       <u-button v-if="apply.applyStatus === 'approved'" class="as-actions__btn" type="success" @click="goChannelHome">进入渠道工作台</u-button>
     </view>
 
     <u-empty v-if="!apply && !loading" mode="data" text="暂无认证申请记录" class="as-empty"></u-empty>
+
+    <!-- 中文注释: 认证通过庆祝 ribbon，localStorage 防重复 -->
+    <jst-celebrate
+      :visible.sync="celebrateShow"
+      preset="ribbon"
+      title="认证通过"
+      subtitle="欢迎加入竞赛通渠道方"
+      :duration="3000"
+    />
   </view>
 </template>
 
 <script>
 import { getMyChannelApply, cancelChannelApply } from '@/api/channel'
+import JstCelebrate from '@/components/jst-celebrate/jst-celebrate.vue'
+import { useUserStore } from '@/store/user'
 
 const TYPE_LABEL = { teacher: '老师', organization: '机构', individual: '个人' }
 const STATUS_ICON = { pending: '⏳', approved: '✅', rejected: '❌', locked_for_manual: '🔒', cancelled: '🚫' }
 const STATUS_TITLE = { pending: '审核中', approved: '认证通过', rejected: '认证被驳回', locked_for_manual: '已锁定', cancelled: '已撤回' }
 
 export default {
-  data() { return { apply: null, loading: false, skeletonShow: true /* [visual-effect] */ } },
+  components: { JstCelebrate },
+  data() { return { apply: null, loading: false, skeletonShow: true /* [visual-effect] */, celebrateShow: false } },
   computed: {
     typeLabel() { return (this.apply && TYPE_LABEL[this.apply.channelType]) || '--' },
     statusIcon() { return (this.apply && STATUS_ICON[this.apply.applyStatus]) || '❓' },
@@ -57,6 +89,12 @@ export default {
     isLocked() {
       if (!this.apply) return false
       return this.apply.lockedForManual === 1 || this.apply.applyStatus === 'locked_for_manual' || (this.apply.rejectCount >= 3 && this.apply.applyStatus === 'rejected')
+    },
+    // 中文注释: 驳回原因优先取 rejectReason，其次 auditRemark，否则通用兜底
+    rejectReasonText() {
+      if (!this.apply) return ''
+      // TODO(backend): 建议新增独立 rejectReason 字段（业务语义），目前复用 auditRemark
+      return this.apply.rejectReason || this.apply.auditRemark || '审核未通过，请重新提交'
     }
   },
   onShow() { this.load() },
@@ -66,6 +104,19 @@ export default {
       this.loading = true
       try { this.apply = (await getMyChannelApply()) || null } catch (e) { this.apply = null }
       finally { this.loading = false }
+      this.checkApproved()
+    },
+    // 中文注释: 认证通过首次访问弹 ribbon，localStorage 防重复
+    checkApproved() {
+      try {
+        if (!this.apply || this.apply.applyStatus !== 'approved') return
+        const store = useUserStore()
+        const uid = (store.userInfo && store.userInfo.userId) || 'anon'
+        const key = 'jst-celebrate-last-ribbon-' + uid + '-' + (this.apply.applyId || '0')
+        if (uni.getStorageSync(key)) return
+        uni.setStorageSync(key, '1')
+        this.celebrateShow = true
+      } catch (e) {}
     },
     onCancel() {
       uni.showModal({
@@ -78,7 +129,8 @@ export default {
     },
     onResubmit() {
       if (!this.apply) return
-      uni.navigateTo({ url: `/pages-sub/channel/apply-form?channelType=${this.apply.channelType}&resubmitId=${this.apply.applyId}` })
+      // 中文注释: 驳回后重新编辑 — mode=edit + rejectedId 让表单页加载上次提交数据回填
+      uni.navigateTo({ url: `/pages-sub/channel/apply-form?channelType=${this.apply.channelType}&resubmitId=${this.apply.applyId}&mode=edit&rejectedId=${this.apply.applyId}` })
     },
     goChannelHome() { uni.navigateTo({ url: '/pages-sub/channel/home' }) },
     formatTime(v) { if (!v) return '--'; return String(v).replace('T', ' ').slice(0, 16) }
@@ -111,4 +163,73 @@ export default {
 .as-actions { margin: $jst-space-xl $jst-space-xl 0; display: flex; flex-direction: column; gap: 20rpx; }
 .as-actions__btn { width: 100%; }
 .as-empty { margin-top: 120rpx; }
+
+/* 驳回原因卡 */
+.as-reject-card {
+  margin: $jst-space-xl $jst-space-xl 0;
+  padding: $jst-space-lg;
+  background: $jst-danger-light;
+  border: 2rpx solid $jst-danger;
+  border-left-width: 8rpx;
+  border-radius: $jst-radius-md;
+  box-shadow: $jst-shadow-sm;
+}
+
+.as-reject-card__head {
+  display: flex;
+  align-items: center;
+  gap: $jst-space-xs;
+  margin-bottom: $jst-space-sm;
+}
+
+.as-reject-card__icon {
+  font-size: $jst-font-md;
+}
+
+.as-reject-card__title {
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-semibold;
+  color: $jst-danger;
+}
+
+.as-reject-card__reason {
+  display: block;
+  margin-top: $jst-space-xs;
+  padding: $jst-space-md;
+  background: $jst-bg-card;
+  border-radius: $jst-radius-sm;
+  font-size: $jst-font-base;
+  line-height: 1.7;
+  color: $jst-text-primary;
+  white-space: pre-wrap;
+}
+
+.as-reject-card__meta {
+  margin-top: $jst-space-md;
+  display: flex;
+  flex-direction: column;
+  gap: $jst-space-xs;
+}
+
+.as-reject-card__meta-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: $jst-font-xs;
+}
+
+.as-reject-card__meta-key {
+  color: $jst-text-secondary;
+}
+
+.as-reject-card__meta-value {
+  color: $jst-text-primary;
+  font-weight: $jst-weight-medium;
+}
+
+/* 红主色重新编辑按钮 */
+::v-deep .as-actions__btn--resubmit.u-button {
+  background: $jst-danger !important;
+  border-color: $jst-danger !important;
+  color: $jst-text-inverse !important;
+}
 </style>

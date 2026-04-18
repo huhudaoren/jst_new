@@ -51,8 +51,14 @@
 
     <!-- 订单列表 -->
     <view class="ord-list">
-      <view v-for="item in list" :key="item.orderId" class="ord-card" @tap="goDetail(item.orderId)">
+      <view v-for="item in list" :key="item.orderId" class="ord-card" :class="{ 'ord-card--checked': isOrderChecked(item) }" @tap="goDetail(item.orderId)">
         <view class="ord-card__header">
+          <!-- 中文注释: 批量选择 checkbox — 仅待支付订单显示 -->
+          <view v-if="canBatchPay(item)" class="ord-card__checkbox" @tap.stop="toggleOrderCheck(item)">
+            <view class="ord-card__checkbox-inner" :class="{ 'ord-card__checkbox-inner--on': isOrderChecked(item) }">
+              <text v-if="isOrderChecked(item)" class="ord-card__checkbox-tick">✓</text>
+            </view>
+          </view>
           <text class="ord-card__contest">{{ item.contestName || '--' }}</text>
           <u-tag
             :text="item.statusText || getStatusText(item.orderStatus)"
@@ -88,6 +94,23 @@
 
       <u-loadmore v-if="list.length" :status="loading ? 'loading' : (hasMore ? 'loadmore' : 'nomore')" @loadmore="loadMore" />
       <u-empty v-if="!list.length && !loading" mode="order" text="暂无订单"></u-empty>
+    </view>
+
+    <!-- 中文注释: 批量支付 footer — translateY 滑入 -->
+    <view
+      class="ord-batch-footer"
+      :class="{ 'ord-batch-footer--visible': checkedOrderCount > 0 }"
+    >
+      <view class="ord-batch-footer__left">
+        <text class="ord-batch-footer__count">已选 <text class="ord-batch-footer__count-num">{{ checkedOrderCount }}</text> 单</text>
+        <text class="ord-batch-footer__sep">·</text>
+        <text class="ord-batch-footer__link" @tap="selectAllOrders">全选</text>
+        <text class="ord-batch-footer__sep">/</text>
+        <text class="ord-batch-footer__link" @tap="clearCheckedOrders">清空</text>
+      </view>
+      <view class="ord-batch-footer__right" @tap="goBatchPay">
+        <text class="ord-batch-footer__btn-text">💳 批量支付</text>
+      </view>
     </view>
   </view>
 </template>
@@ -131,8 +154,13 @@ export default {
       total: 0,
       pageNum: 1,
       pageSize: 20,
-      hasMore: false
+      hasMore: false,
+      // 中文注释: 批量支付选择 — 存 orderId
+      checkedOrderIds: []
     }
+  },
+  computed: {
+    checkedOrderCount() { return this.checkedOrderIds.length }
   },
   onShow() { this.loadStats(); this.pageNum = 1; this.loadList() },
   // 触底加载
@@ -195,6 +223,40 @@ export default {
 
     formatTime(v) { return v ? String(v).replace('T', ' ').slice(0, 16) : '--' },
 
+    // 中文注释: 批量支付 helpers — 仅 pending_pay 订单可勾选
+    canBatchPay(item) { return item && item.orderStatus === 'pending_pay' },
+    isOrderChecked(item) {
+      return item && this.checkedOrderIds.includes(item.orderId)
+    },
+    toggleOrderCheck(item) {
+      if (!this.canBatchPay(item)) return
+      const id = item.orderId
+      const idx = this.checkedOrderIds.indexOf(id)
+      if (idx >= 0) this.checkedOrderIds.splice(idx, 1)
+      else this.checkedOrderIds.push(id)
+    },
+    selectAllOrders() {
+      const payable = this.list.filter(o => this.canBatchPay(o)).map(o => o.orderId)
+      const set = new Set(this.checkedOrderIds.concat(payable))
+      this.checkedOrderIds = Array.from(set)
+    },
+    clearCheckedOrders() { this.checkedOrderIds = [] },
+    goBatchPay() {
+      if (!this.checkedOrderCount) return
+      // TODO(backend): 需要 POST /jst/wx/channel/orders/batch-pay 接口（入参 orderIds[]）
+      // 当前暂走提示 + 跳到批量报名页同参
+      const ids = this.checkedOrderIds.join(',')
+      uni.showModal({
+        title: '批量支付',
+        content: `即将对 ${this.checkedOrderCount} 笔订单发起支付，是否继续？`,
+        confirmText: '确认',
+        success: (res) => {
+          if (!res.confirm) return
+          uni.navigateTo({ url: `/pages-sub/channel/batch-enroll?payOrderIds=${ids}` })
+        }
+      })
+    },
+
     goDetail(id) { uni.navigateTo({ url: '/pages-sub/channel/order-detail?id=' + id }) },
     goBack() { uni.navigateBack() }
   }
@@ -204,7 +266,7 @@ export default {
 <style scoped lang="scss">
 @import '@/styles/design-tokens.scss';
 
-.ord-page { min-height: 100vh; padding-bottom: $jst-space-xxl; background: $jst-bg-page; }
+.ord-page { min-height: 100vh; padding-bottom: calc(160rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
 
 .ord-header { display: flex; align-items: center; padding: 0 32rpx; height: 112rpx; padding-top: 88rpx; background: $jst-bg-card; border-bottom: 2rpx solid $jst-border; position: sticky; top: 0; z-index: 40; }
 .ord-header__back { width: 72rpx; height: 72rpx; border-radius: $jst-radius-sm; background: $jst-bg-page; display: flex; align-items: center; justify-content: center; font-size: 36rpx; margin-right: 24rpx; }
@@ -250,5 +312,94 @@ export default {
 .ord-card__actions { display: flex; gap: 16rpx; }
 .ord-card__btn { height: 64rpx; padding: 0 24rpx; border-radius: $jst-radius-sm; font-size: 24rpx; font-weight: 600; display: flex; align-items: center; gap: 6rpx; }
 .ord-card__btn--outline { background: transparent; color: $jst-brand; border: 3rpx solid rgba(63,81,181,0.3); }
+
+/* 批量支付 checkbox */
+.ord-card { transition: background 0.2s ease; }
+.ord-card--checked { background: $jst-brand-light; }
+.ord-card__checkbox {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: $jst-space-xs;
+}
+.ord-card__checkbox-inner {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: $jst-radius-xs;
+  border: 3rpx solid $jst-border;
+  background: $jst-bg-card;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.ord-card__checkbox-inner--on {
+  background: $jst-brand;
+  border-color: $jst-brand;
+}
+.ord-card__checkbox-tick {
+  color: $jst-text-inverse;
+  font-size: 24rpx;
+  font-weight: $jst-weight-bold;
+  line-height: 1;
+}
+
+/* 批量支付 footer — translateY 滑入 */
+.ord-batch-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: $jst-space-md;
+  padding: $jst-space-md $jst-space-xl;
+  padding-bottom: calc(#{$jst-space-md} + env(safe-area-inset-bottom));
+  background: $jst-bg-card;
+  border-top: 2rpx solid $jst-border;
+  box-shadow: 0 -6rpx 24rpx rgba(0, 0, 0, 0.08);
+  transform: translateY(120%);
+  transition: transform 0.25s ease;
+}
+.ord-batch-footer--visible { transform: translateY(0); }
+.ord-batch-footer__left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: $jst-space-xs;
+  font-size: $jst-font-sm;
+  color: $jst-text-secondary;
+}
+.ord-batch-footer__count-num {
+  color: $jst-warning;
+  font-weight: $jst-weight-bold;
+}
+.ord-batch-footer__sep {
+  color: $jst-text-placeholder;
+  margin: 0 4rpx;
+}
+.ord-batch-footer__link {
+  color: $jst-brand;
+  font-weight: $jst-weight-semibold;
+  padding: 6rpx 10rpx;
+}
+.ord-batch-footer__right {
+  display: flex;
+  align-items: center;
+  padding: 0 $jst-space-lg;
+  height: 80rpx;
+  background: linear-gradient(135deg, $jst-warning, darken($jst-warning, 10%));
+  border-radius: $jst-radius-round;
+  color: $jst-text-inverse;
+  box-shadow: $jst-shadow-md;
+}
+.ord-batch-footer__btn-text {
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+}
 
 </style>
