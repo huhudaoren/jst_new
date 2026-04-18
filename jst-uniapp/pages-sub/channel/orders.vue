@@ -116,7 +116,7 @@
 </template>
 
 <script>
-import { getChannelOrders, getChannelDashboardStats } from '@/api/channel'
+import { getChannelOrders, getChannelDashboardStats, batchPayChannelOrders } from '@/api/channel'
 
 const AVATAR_COLORS = [
   'linear-gradient(135deg, #283593, #3949AB)',
@@ -241,18 +241,48 @@ export default {
       this.checkedOrderIds = Array.from(set)
     },
     clearCheckedOrders() { this.checkedOrderIds = [] },
+    // 中文注释: 批量支付 — Round 2B · B1
+    // 后端: POST /jst/wx/channel/orders/batch-pay, 返回 { batchPayNo, totalAmount, count, items }
+    // items 每条含 merchantPayParams 可唤起 wx.requestPayment（接入商户号后启用）
+    // 当前简化: 接口返回即 toast + 跳订单列表以 batchPayNo 过滤
     goBatchPay() {
       if (!this.checkedOrderCount) return
-      // TODO(backend-round-2b): 需要 POST /jst/wx/channel/orders/batch-pay 接口（入参 orderIds[]）
-      // 当前暂走提示 + 跳到批量报名页同参
-      const ids = this.checkedOrderIds.join(',')
       uni.showModal({
         title: '批量支付',
         content: `即将对 ${this.checkedOrderCount} 笔订单发起支付，是否继续？`,
         confirmText: '确认',
-        success: (res) => {
+        success: async (res) => {
           if (!res.confirm) return
-          uni.navigateTo({ url: `/pages-sub/channel/batch-enroll?payOrderIds=${ids}` })
+          const orderIds = this.checkedOrderIds.slice()
+          uni.showLoading({ title: '创建批量支付单...' })
+          try {
+            const resp = await batchPayChannelOrders(orderIds)
+            uni.hideLoading()
+            const batchPayNo = (resp && resp.batchPayNo) || ''
+            const total = (resp && resp.totalAmount) || 0
+            const count = (resp && resp.count) || orderIds.length
+            // TODO(wxpay): 接入商户号后改为循环 resp.items 每项调 wx.requestPayment(merchantPayParams)
+            uni.showToast({
+              title: `批量支付单创建成功，共 ${count} 单 ¥${total}`,
+              icon: 'none',
+              duration: 2500
+            })
+            // 清空选择，刷新列表
+            this.checkedOrderIds = []
+            this.pageNum = 1
+            this.loadList()
+            this.loadStats()
+            // 2.5s 后跳到我的订单列表（带 batchPayNo 过滤参数）
+            setTimeout(() => {
+              const qs = batchPayNo ? `?batchPayNo=${encodeURIComponent(batchPayNo)}` : ''
+              uni.navigateTo({ url: `/pages-sub/my/order-list${qs}` })
+            }, 1800)
+          } catch (err) {
+            uni.hideLoading()
+            // 友好降级: 后端未合入 / 接口报错时给提示, 不破坏勾选状态
+            const msg = (err && (err.msg || err.message)) || '批量支付接口暂未就绪，请稍后再试'
+            uni.showToast({ title: msg, icon: 'none', duration: 2500 })
+          }
         }
       })
     },

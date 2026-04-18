@@ -141,6 +141,13 @@
           }
         },
         {
+          "path": "invoice-title-list",
+          "style": {
+            "navigationBarTitleText": "\u53d1\u7968\u62ac\u5934",
+            "navigationStyle": "custom"
+          }
+        },
+        {
           "path": "score",
           "style": {
             "navigationBarTitleText": "我的成绩",

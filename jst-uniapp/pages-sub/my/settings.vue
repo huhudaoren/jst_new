@@ -245,9 +245,9 @@ export default {
     },
     navigateBinding() { uni.navigateTo({ url: '/pages-sub/my/binding' }) },
     navigateAddressList() { uni.navigateTo({ url: '/pages-sub/my/address-list' }) },
-    // TODO(backend-round-2b): 发票抬头管理后端接口未实现（缺 GET/POST /jst/wx/invoice-title），先占位
+    // 中文注释: 发票抬头管理 — Round 2B · B3 已接入
     navigateInvoiceTitle() {
-      uni.showToast({ title: '发票抬头管理开发中', icon: 'none' })
+      uni.navigateTo({ url: '/pages-sub/my/invoice-title-list' })
     },
     navigateSettlement() { uni.navigateTo({ url: '/pages-sub/channel/settlement' }) },
     navigateHelp() { uni.navigateTo({ url: '/pages-sub/public/help' }) },

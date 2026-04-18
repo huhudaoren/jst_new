@@ -119,6 +119,20 @@ export function getChannelOrderDetail(orderId) {
   return request({ url: `/jst/wx/channel/orders/${orderId}`, method: 'GET' })
 }
 
+/**
+ * 批量支付渠道代报名订单 (Round 2B · B1)
+ * 后端: POST /jst/wx/channel/orders/batch-pay
+ * 入参: { orderIds: Long[] } — 必须全部属于当前渠道方 + status=pending_pay
+ * 返回: { batchPayNo, totalAmount, count, items: [{ orderId, merchantPayParams }] }
+ */
+export function batchPayChannelOrders(orderIds) {
+  return request({
+    url: '/jst/wx/channel/orders/batch-pay',
+    method: 'POST',
+    data: { orderIds }
+  })
+}
+
 /* ---------------- 学生管理 (E1-CH-3) ---------------- */
 
 /** 渠道绑定学生列表 */
