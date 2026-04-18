@@ -55,4 +55,54 @@ public class AdminSalesDashboardController extends BaseController {
     public AjaxResult followupActivity(@RequestParam(required = false) String month) {
         return AjaxResult.success(dashboardService.getFollowupActivity(month));
     }
+
+    /**
+     * 提成成本趋势。
+     *
+     * @param bucket       聚合粒度：day / week / month
+     * @param startDate    开始日期（yyyy-MM-dd，含）
+     * @param endDate      结束日期（yyyy-MM-dd，含）
+     * @param businessType 业务类型（可选）
+     * @param region       地区关键字（可选）
+     */
+    @GetMapping("/commission-trend")
+    public AjaxResult commissionTrend(@RequestParam(defaultValue = "day") String bucket,
+                                      @RequestParam String startDate,
+                                      @RequestParam String endDate,
+                                      @RequestParam(required = false) String businessType,
+                                      @RequestParam(required = false) String region) {
+        return AjaxResult.success(dashboardService.getCommissionTrend(bucket, startDate, endDate, businessType, region));
+    }
+
+    /**
+     * J 上限压缩统计。
+     *
+     * @param startDate    开始日期（yyyy-MM-dd，含）
+     * @param endDate      结束日期（yyyy-MM-dd，含）
+     * @param businessType 业务类型（可选）
+     * @param region       地区关键字（可选）
+     */
+    @GetMapping("/compression-stats")
+    public AjaxResult compressionStats(@RequestParam String startDate,
+                                       @RequestParam String endDate,
+                                       @RequestParam(required = false) String businessType,
+                                       @RequestParam(required = false) String region) {
+        return AjaxResult.success(dashboardService.getCompressionStats(startDate, endDate, businessType, region));
+    }
+
+    /**
+     * 渠道业绩热力图。
+     *
+     * @param startDate    开始日期（yyyy-MM-dd，含）
+     * @param endDate      结束日期（yyyy-MM-dd，含）
+     * @param businessType 业务类型（可选）
+     * @param region       地区关键字（可选）
+     */
+    @GetMapping("/channel-heatmap")
+    public AjaxResult channelHeatmap(@RequestParam String startDate,
+                                     @RequestParam String endDate,
+                                     @RequestParam(required = false) String businessType,
+                                     @RequestParam(required = false) String region) {
+        return AjaxResult.success(dashboardService.getChannelHeatmap(startDate, endDate, businessType, region));
+    }
 }

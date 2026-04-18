@@ -85,4 +85,29 @@ public interface JstSalesCommissionLedgerMapper {
      * 返回 [{businessType, orderCount}]。
      */
     List<java.util.Map<String, Object>> selectOrderStatsByChannel(@Param("channelId") Long channelId);
+
+    /**
+     * 提成成本趋势（admin 看板）。
+     */
+    List<java.util.Map<String, Object>> selectCommissionTrend(@Param("bucket") String bucket,
+                                                              @Param("periodStart") java.util.Date periodStart,
+                                                              @Param("periodEnd") java.util.Date periodEnd,
+                                                              @Param("businessType") String businessType,
+                                                              @Param("region") String region);
+
+    /**
+     * J 上限压缩统计（admin 看板）。
+     */
+    java.util.Map<String, Object> selectCompressionStats(@Param("periodStart") java.util.Date periodStart,
+                                                         @Param("periodEnd") java.util.Date periodEnd,
+                                                         @Param("businessType") String businessType,
+                                                         @Param("region") String region);
+
+    /**
+     * 渠道业绩热力图（admin 看板）。
+     */
+    List<java.util.Map<String, Object>> selectChannelHeatmap(@Param("periodStart") java.util.Date periodStart,
+                                                              @Param("periodEnd") java.util.Date periodEnd,
+                                                              @Param("businessType") String businessType,
+                                                              @Param("region") String region);
 }

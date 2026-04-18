@@ -14,3 +14,18 @@ export function getSalesDetail(salesId, month) {
 export function getFollowupActivity(month) {
   return request({ url: '/admin/sales/dashboard/followup-activity', method: 'get', params: { month } })
 }
+
+// 提成成本趋势
+export function getCommissionTrend(params) {
+  return request({ url: '/admin/sales/dashboard/commission-trend', method: 'get', params })
+}
+
+// J 上限压缩统计
+export function getCompressionStats(params) {
+  return request({ url: '/admin/sales/dashboard/compression-stats', method: 'get', params })
+}
+
+// 渠道业绩热力图
+export function getChannelHeatmap(params) {
+  return request({ url: '/admin/sales/dashboard/channel-heatmap', method: 'get', params })
+}

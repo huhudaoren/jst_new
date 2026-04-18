@@ -35,6 +35,52 @@
         accrue_at, accrued_at, settlement_id, create_time, update_time
     </sql>
 
+    <sql id="defaultAddressJoin">
+        LEFT JOIN (
+            SELECT ua.user_id,
+                   SUBSTRING_INDEX(
+                       GROUP_CONCAT(NULLIF(ua.province, '') ORDER BY ua.is_default DESC, ua.address_id DESC SEPARATOR ','),
+                       ',',
+                       1
+                   ) AS province
+              FROM jst_user_address ua
+             WHERE ua.del_flag = '0'
+             GROUP BY ua.user_id
+        ) addr ON addr.user_id = c.user_id
+    </sql>
+
+    <sql id="regionExpr">
+        COALESCE(NULLIF(c.region, ''), NULLIF(addr.province, ''), '未设置')
+    </sql>
+
+    <sql id="ledgerBucketExpr">
+        <choose>
+            <when test="bucket == 'week'">
+                DATE_FORMAT(COALESCE(l.accrued_at, l.accrue_at), '%x-W%v')
+            </when>
+            <when test="bucket == 'month'">
+                DATE_FORMAT(COALESCE(l.accrued_at, l.accrue_at), '%Y-%m')
+            </when>
+            <otherwise>
+                DATE_FORMAT(COALESCE(l.accrued_at, l.accrue_at), '%Y-%m-%d')
+            </otherwise>
+        </choose>
+    </sql>
+
+    <sql id="orderBucketExpr">
+        <choose>
+            <when test="bucket == 'week'">
+                DATE_FORMAT(o.pay_time, '%x-W%v')
+            </when>
+            <when test="bucket == 'month'">
+                DATE_FORMAT(o.pay_time, '%Y-%m')
+            </when>
+            <otherwise>
+                DATE_FORMAT(o.pay_time, '%Y-%m-%d')
+            </otherwise>
+        </choose>
+    </sql>
+
     <select id="selectJstSalesCommissionLedgerByLedgerId" parameterType="Long" resultMap="JstSalesCommissionLedgerResult">
         SELECT <include refid="cols"/> FROM jst_sales_commission_ledger WHERE ledger_id = #{ledgerId}
     </select>
@@ -256,6 +302,91 @@
          WHERE channel_id = #{channelId}
            AND status IN ('accrued', 'settled', 'paid')
          GROUP BY business_type
+    </select>
+
+    <select id="selectCommissionTrend" resultType="java.util.LinkedHashMap">
+        SELECT bucket,
+               COALESCE(SUM(commissionTotal), 0) AS commissionTotal,
+               COALESCE(SUM(orderNetTotal), 0) AS orderNetTotal
+          FROM (
+                SELECT <include refid="ledgerBucketExpr"/> AS bucket,
+                       SUM(l.amount) AS commissionTotal,
+                       0 AS orderNetTotal
+                  FROM jst_sales_commission_ledger l
+                  LEFT JOIN jst_channel c ON c.channel_id = l.channel_id
+                  <include refid="defaultAddressJoin"/>
+                 WHERE COALESCE(l.accrued_at, l.accrue_at) &gt;= #{periodStart}
+                   AND COALESCE(l.accrued_at, l.accrue_at) &lt; #{periodEnd}
+                   AND l.status IN ('accrued', 'settled', 'paid')
+                   <if test="businessType != null and businessType != ''">
+                       AND l.business_type = #{businessType}
+                   </if>
+                   <if test="region != null and region != ''">
+                       AND <include refid="regionExpr"/> LIKE CONCAT('%', #{region}, '%')
+                   </if>
+                 GROUP BY <include refid="ledgerBucketExpr"/>
+
+                UNION ALL
+
+                SELECT <include refid="orderBucketExpr"/> AS bucket,
+                       0 AS commissionTotal,
+                       SUM(o.net_pay_amount) AS orderNetTotal
+                  FROM jst_order_main o
+                  LEFT JOIN jst_channel c ON c.channel_id = o.channel_id
+                  <include refid="defaultAddressJoin"/>
+                 WHERE o.pay_time &gt;= #{periodStart}
+                   AND o.pay_time &lt; #{periodEnd}
+                   AND o.order_status = 'paid'
+                   <if test="businessType != null and businessType != ''">
+                       AND o.business_type = #{businessType}
+                   </if>
+                   <if test="region != null and region != ''">
+                       AND <include refid="regionExpr"/> LIKE CONCAT('%', #{region}, '%')
+                   </if>
+                 GROUP BY <include refid="orderBucketExpr"/>
+          ) trend
+         GROUP BY bucket
+         ORDER BY bucket ASC
+    </select>
+
+    <select id="selectCompressionStats" resultType="java.util.LinkedHashMap">
+        SELECT COUNT(*) AS totalCount,
+               SUM(CASE WHEN l.raw_amount &gt; l.amount OR l.compress_ratio &lt; 1 THEN 1 ELSE 0 END) AS triggeredCount,
+               COALESCE(SUM(CASE WHEN l.raw_amount &gt; l.amount THEN l.raw_amount - l.amount ELSE 0 END), 0) AS compressedAmount,
+               COALESCE(SUM(l.raw_amount), 0) AS originalTotal
+          FROM jst_sales_commission_ledger l
+          LEFT JOIN jst_channel c ON c.channel_id = l.channel_id
+          <include refid="defaultAddressJoin"/>
+         WHERE COALESCE(l.accrued_at, l.accrue_at) &gt;= #{periodStart}
+           AND COALESCE(l.accrued_at, l.accrue_at) &lt; #{periodEnd}
+           AND l.status IN ('accrued', 'settled', 'paid')
+           <if test="businessType != null and businessType != ''">
+               AND l.business_type = #{businessType}
+           </if>
+           <if test="region != null and region != ''">
+               AND <include refid="regionExpr"/> LIKE CONCAT('%', #{region}, '%')
+           </if>
+    </select>
+
+    <select id="selectChannelHeatmap" resultType="java.util.LinkedHashMap">
+        SELECT <include refid="regionExpr"/> AS region,
+               o.business_type AS businessType,
+               COUNT(DISTINCT o.channel_id) AS channelCount,
+               COALESCE(SUM(o.net_pay_amount), 0) AS gmv
+          FROM jst_order_main o
+          LEFT JOIN jst_channel c ON c.channel_id = o.channel_id
+          <include refid="defaultAddressJoin"/>
+         WHERE o.pay_time &gt;= #{periodStart}
+           AND o.pay_time &lt; #{periodEnd}
+           AND o.order_status = 'paid'
+           <if test="businessType != null and businessType != ''">
+               AND o.business_type = #{businessType}
+           </if>
+           <if test="region != null and region != ''">
+               AND <include refid="regionExpr"/> LIKE CONCAT('%', #{region}, '%')
+           </if>
+         GROUP BY <include refid="regionExpr"/>, o.business_type
+         ORDER BY gmv DESC, region ASC, businessType ASC
     </select>
 
 </mapper>

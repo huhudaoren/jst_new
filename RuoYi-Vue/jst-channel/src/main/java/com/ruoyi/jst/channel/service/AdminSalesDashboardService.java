@@ -37,4 +37,48 @@ public interface AdminSalesDashboardService {
      * @return [ { salesId, salesName, followupCount, coveredChannelCount } ]
      */
     List<Map<String, Object>> getFollowupActivity(String month);
+
+    /**
+     * 提成成本趋势。
+     *
+     * @param bucket       聚合粒度：day / week / month
+     * @param startDate    开始日期（yyyy-MM-dd，含）
+     * @param endDate      结束日期（yyyy-MM-dd，含）
+     * @param businessType 业务类型（可选）
+     * @param region       地区关键字（可选）
+     * @return [ { bucket, commissionTotal, orderNetTotal, costRate } ]
+     */
+    List<Map<String, Object>> getCommissionTrend(String bucket,
+                                                 String startDate,
+                                                 String endDate,
+                                                 String businessType,
+                                                 String region);
+
+    /**
+     * J 上限压缩统计。
+     *
+     * @param startDate    开始日期（yyyy-MM-dd，含）
+     * @param endDate      结束日期（yyyy-MM-dd，含）
+     * @param businessType 业务类型（可选）
+     * @param region       地区关键字（可选）
+     * @return { totalCount, triggeredCount, triggerRate, compressedAmount, originalTotal, compressedRate }
+     */
+    Map<String, Object> getCompressionStats(String startDate,
+                                            String endDate,
+                                            String businessType,
+                                            String region);
+
+    /**
+     * 渠道业绩热力图。
+     *
+     * @param startDate    开始日期（yyyy-MM-dd，含）
+     * @param endDate      结束日期（yyyy-MM-dd，含）
+     * @param businessType 业务类型（可选）
+     * @param region       地区关键字（可选）
+     * @return [ { region, businessType, channelCount, gmv } ]
+     */
+    List<Map<String, Object>> getChannelHeatmap(String startDate,
+                                                String endDate,
+                                                String businessType,
+                                                String region);
 }
