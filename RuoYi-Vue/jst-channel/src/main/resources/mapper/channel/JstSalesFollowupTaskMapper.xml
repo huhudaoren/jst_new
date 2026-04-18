@@ -68,4 +68,46 @@
         DELETE FROM jst_sales_followup_task WHERE task_id = #{taskId}
     </delete>
 
+
+    <!-- listMine -->
+    <select id="listMine" resultMap="JstSalesFollowupTaskResult">
+        SELECT <include refid="cols"/> FROM jst_sales_followup_task
+        WHERE assignee_sales_id = #{salesId}
+        <if test="status != null and status != ''">AND status = #{status}</if>
+        ORDER BY due_date ASC
+    </select>
+
+    <!-- listAssignedBy -->
+    <select id="listAssignedBy" resultMap="JstSalesFollowupTaskResult">
+        SELECT <include refid="cols"/> FROM jst_sales_followup_task
+        WHERE assigner_id = #{userId}
+        <if test="status != null and status != ''">AND status = #{status}</if>
+        ORDER BY due_date ASC
+    </select>
+
+    <!-- selectOverdueTaskIds -->
+    <select id="selectOverdueTaskIds" resultType="Long">
+        SELECT task_id FROM jst_sales_followup_task
+        WHERE status IN ('pending', 'in_progress')
+          AND due_date &lt; CURDATE()
+    </select>
+
+    <!-- markOverdueBatch -->
+    <update id="markOverdueBatch">
+        UPDATE jst_sales_followup_task
+        SET status = 'overdue', update_time = NOW()
+        WHERE task_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- selectDueToday -->
+    <select id="selectDueToday" resultMap="JstSalesFollowupTaskResult">
+        SELECT <include refid="cols"/> FROM jst_sales_followup_task
+        WHERE status IN ('pending', 'in_progress')
+          AND due_date = CURDATE()
+        ORDER BY assignee_sales_id, due_date
+    </select>
+
 </mapper>

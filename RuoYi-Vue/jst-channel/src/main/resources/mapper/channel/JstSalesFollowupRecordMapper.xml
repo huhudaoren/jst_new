@@ -72,4 +72,31 @@
         DELETE FROM jst_sales_followup_record WHERE record_id = #{recordId}
     </delete>
 
+
+    <!-- listByChannel -->
+    <select id="listByChannel" parameterType="Long" resultMap="JstSalesFollowupRecordResult">
+        SELECT <include refid="cols"/> FROM jst_sales_followup_record
+        WHERE channel_id = #{channelId}
+        ORDER BY followup_at DESC
+    </select>
+
+    <!-- listMineWithFilter -->
+    <select id="listMineWithFilter" resultMap="JstSalesFollowupRecordResult">
+        SELECT <include refid="cols"/> FROM jst_sales_followup_record
+        WHERE sales_id = #{salesId}
+        <if test="channelId != null">AND channel_id = #{channelId}</if>
+        <if test="followupType != null and followupType != ''">AND followup_type = #{followupType}</if>
+        <if test="dateFrom != null">AND followup_at &gt;= #{dateFrom}</if>
+        <if test="dateTo != null">AND followup_at &lt;= #{dateTo}</if>
+        ORDER BY followup_at DESC
+    </select>
+
+    <!-- selectDueReminders: next_followup_at in [startOfDay, endOfDay) -->
+    <select id="selectDueReminders" resultMap="JstSalesFollowupRecordResult">
+        SELECT <include refid="cols"/> FROM jst_sales_followup_record
+        WHERE next_followup_at &gt;= #{startOfDay}
+          AND next_followup_at &lt; #{endOfDay}
+        ORDER BY sales_id, next_followup_at
+    </select>
+
 </mapper>

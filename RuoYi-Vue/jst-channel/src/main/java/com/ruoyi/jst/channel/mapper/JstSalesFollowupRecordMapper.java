@@ -1,6 +1,9 @@
 package com.ruoyi.jst.channel.mapper;
 
 import com.ruoyi.jst.channel.domain.JstSalesFollowupRecord;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Date;
 import java.util.List;
 
 public interface JstSalesFollowupRecordMapper {
@@ -9,4 +12,20 @@ public interface JstSalesFollowupRecordMapper {
     int insertJstSalesFollowupRecord(JstSalesFollowupRecord row);
     int updateJstSalesFollowupRecord(JstSalesFollowupRecord row);
     int deleteJstSalesFollowupRecordByRecordId(Long recordId);
+
+    /** 按渠道查全部跟进记录，按时间倒序 */
+    List<JstSalesFollowupRecord> listByChannel(@Param("channelId") Long channelId);
+
+    /** 销售本人视角过滤查询 */
+    List<JstSalesFollowupRecord> listMineWithFilter(
+            @Param("salesId") Long salesId,
+            @Param("channelId") Long channelId,
+            @Param("followupType") String followupType,
+            @Param("dateFrom") Date dateFrom,
+            @Param("dateTo") Date dateTo);
+
+    /** 今日待提醒（next_followup_at 落在 [startOfDay, endOfDay)） */
+    List<JstSalesFollowupRecord> selectDueReminders(
+            @Param("startOfDay") Date startOfDay,
+            @Param("endOfDay") Date endOfDay);
 }
