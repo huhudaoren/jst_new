@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次更新：2026-04-18（**销售管理 + 渠道分销** **SALES-DISTRIBUTION 子系统全部 4 plan + 集成修复 plan-05 完成** → admin 全角色通行 + 占位页面 (profile/team/settlement) 全补齐）
+> 会话恢复文件。上次更新：2026-04-18（**销售管理 + 渠道分销** **SALES-DISTRIBUTION 4 plan + 集成 plan-05 + UX 精品化 plan-06 完成** → 9 基础组件 (PageHeader/EntityLink/EmptyStateCTA/StatCardGroup + 7 RelationPicker) + 56 _id 改 Picker + 5 列表 EntityLink + 3 角色 dashboard + 菜单默认路由 + 主管 settlement scope + 删 Deprecated）
 
 ---
 

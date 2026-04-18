@@ -39,10 +39,21 @@
               size="mini"
               shape="circle"
             />
+            <!-- 关联结算单 chip（可点击跳转） -->
+            <view
+              v-if="item.settlementId || item.settlementNo"
+              class="cl-card__chip"
+              @tap.stop="goSettlement(item)"
+            >
+              <text class="cl-card__chip-icon">$</text>
+              <text class="cl-card__chip-text">{{ item.settlementNo || '关联结算单' }}</text>
+              <text class="cl-card__chip-arrow">›</text>
+            </view>
           </view>
           <view class="cl-card__meta">
-            <text v-if="item.effectiveDate" class="cl-card__time">生效: {{ formatTime(item.effectiveDate) }}</text>
-            <text v-if="item.signTime" class="cl-card__time">签署: {{ formatTime(item.signTime) }}</text>
+            <text v-if="item.signTime" class="cl-card__time">签署 {{ formatDateTime(item.signTime) }}</text>
+            <text v-if="item.effectiveDate" class="cl-card__time">生效 {{ formatTime(item.effectiveDate) }}</text>
+            <text v-if="item.expireDate" class="cl-card__time">到期 {{ formatTime(item.expireDate) }}</text>
           </view>
         </view>
       </view>
@@ -123,7 +134,13 @@ export default {
     statusLabel(s) { return (STATUS_MAP[s] && STATUS_MAP[s].label) || s || '--' },
     statusType(s) { return (STATUS_MAP[s] && STATUS_MAP[s].type) || 'info' },
     typeLabel(t) { return TYPE_MAP[t] || t || '--' },
-    formatTime(v) { if (!v) return '--'; return String(v).replace('T', ' ').slice(0, 10) }
+    formatTime(v) { if (!v) return '--'; return String(v).replace('T', ' ').slice(0, 10) },
+    // 金融统一时间格式 YYYY-MM-DD HH:mm
+    formatDateTime(v) { if (!v) return '--'; const s = String(v).replace('T', ' '); return s.length >= 16 ? s.slice(0, 16) : s },
+    goSettlement(item) {
+      if (item.settlementId) uni.navigateTo({ url: '/pages-sub/channel/withdraw-detail?id=' + item.settlementId })
+      else uni.showToast({ title: '暂未关联结算单', icon: 'none' })
+    }
   }
 }
 </script>
@@ -148,7 +165,13 @@ export default {
 .cl-card__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: $jst-space-md; }
 .cl-card__no { font-size: $jst-font-sm; color: $jst-text-secondary; }
 .cl-card__body { display: flex; flex-direction: column; gap: $jst-space-sm; }
-.cl-card__row { display: flex; align-items: center; }
+.cl-card__row { display: flex; align-items: center; gap: $jst-space-sm; flex-wrap: wrap; }
 .cl-card__meta { display: flex; flex-wrap: wrap; gap: $jst-space-lg; }
 .cl-card__time { font-size: $jst-font-xs; color: $jst-text-secondary; }
+
+/* 关联结算单 chip */
+.cl-card__chip { display: flex; align-items: center; gap: 4rpx; padding: 4rpx 14rpx; background: $jst-gold-light; border-radius: $jst-radius-sm; }
+.cl-card__chip-icon { font-size: 22rpx; color: $jst-indigo; font-weight: 700; }
+.cl-card__chip-text { font-size: 22rpx; color: $jst-indigo; }
+.cl-card__chip-arrow { font-size: 22rpx; color: $jst-indigo; }
 </style>

@@ -61,6 +61,15 @@ export function getWithdrawDetail(settlementId) {
   return request({ url: `/jst/wx/channel/withdraw/${settlementId}`, method: 'GET' })
 }
 
+/**
+ * 提现打款凭证 URL（备用独立查询）
+ * TODO(后端): 若 /withdraw/{id} 已返回 payVoucherUrl 则此函数可选；主链路使用 getWithdrawDetail
+ * 后端路径建议: GET /jst/wx/channel/withdraw/{id}/voucher
+ */
+export function getWithdrawVoucher(settlementId) {
+  return request({ url: `/jst/wx/channel/withdraw/${settlementId}/voucher`, method: 'GET' })
+}
+
 /* ---------------- 渠道认证 (E1-CH-1) ---------------- */
 
 /** 查询当前用户最新认证申请 */

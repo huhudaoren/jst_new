@@ -82,10 +82,8 @@
 
     <jst-empty
       v-else-if="!pageLoading"
-      icon="📦"
+      v-bind="EMPTY_ORDERS"
       :text="emptyText"
-      button-text="去浏览赛事"
-      button-url="switchTab:/pages/contest/list"
     />
   </view>
 </template>
@@ -95,6 +93,7 @@ import { cancelOrder, getMyOrders } from '@/api/order'
 import JstEmpty from '@/components/jst-empty/jst-empty.vue'
 import JstLoading from '@/components/jst-loading/jst-loading.vue'
 import JstStatusBadge from '@/components/jst-status-badge/jst-status-badge.vue'
+import { EMPTY_ORDERS } from '@/utils/empty-state-preset'
 
 const DEFAULT_PAGE_SIZE = 10
 
@@ -106,6 +105,7 @@ export default {
   },
   data() {
     return {
+      EMPTY_ORDERS,
       pageLoading: false,
       currentTab: '',
       list: [],

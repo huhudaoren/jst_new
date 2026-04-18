@@ -8,7 +8,11 @@
     <view class="cg-hero">
       <text class="cg-hero__title">{{ campaign.title || '--' }}</text>
       <text class="cg-hero__desc">{{ campaign.description || '' }}</text>
-      <view class="cg-hero__countdown" v-if="countdownText">{{ countdownText }}</view>
+      <view
+        v-if="countdownText"
+        class="cg-hero__countdown"
+        :class="{ 'cg-hero__countdown--urgent': countdownUrgent }"
+      >{{ countdownText }}</view>
     </view>
 
     <view class="cg-section">
@@ -42,28 +46,63 @@
 <script>
 import { getCampaignDetail } from '@/api/marketing'
 import { claimCoupon } from '@/api/coupon'
+import { formatCountdown } from '@/utils/countdown'
 
 export default {
-  data() { return { campaignId: null, campaign: {}, countdownText: '' } },
+  data() {
+    return {
+      campaignId: null,
+      campaign: {},
+      countdownText: '',
+      countdownUrgent: false,
+      countdownTimer: null
+    }
+  },
   onLoad(query) {
     this.campaignId = query && query.id
     if (this.campaignId) this.load()
+  },
+  beforeDestroy() {
+    this.stopCountdown()
+  },
+  onUnload() {
+    this.stopCountdown()
   },
   methods: {
     async load() {
       try {
         this.campaign = (await getCampaignDetail(this.campaignId)) || {}
-        this.updateCountdown()
+        this.startCountdown()
       } catch (e) {}
     },
-    updateCountdown() {
-      const end = this.campaign.endTime
-      if (!end) { this.countdownText = ''; return }
-      const diff = new Date(String(end).replace(' ', 'T')).getTime() - Date.now()
-      if (diff <= 0) { this.countdownText = '活动已结束'; return }
-      const d = Math.floor(diff / 86400000)
-      const h = Math.floor((diff % 86400000) / 3600000)
-      this.countdownText = `距结束 ${d} 天 ${h} 小时`
+    // 中文注释: 每 1 秒刷新倒计时；≤1 天只显示 hh:mm:ss，>1 天显示 d天hh:mm:ss；<10 分钟进入 urgent 闪烁
+    startCountdown() {
+      this.stopCountdown()
+      const end = this.campaign && this.campaign.endTime
+      if (!end) { this.countdownText = ''; this.countdownUrgent = false; return }
+      const tick = () => {
+        const c = formatCountdown(end)
+        if (c.expired) {
+          this.countdownText = '活动已结束'
+          this.countdownUrgent = false
+          this.stopCountdown()
+          return
+        }
+        if (c.d > 0) {
+          this.countdownText = `${c.d}天${c.hh}:${c.mm}:${c.ss}`
+        } else {
+          this.countdownText = `${c.hh}:${c.mm}:${c.ss}`
+        }
+        this.countdownUrgent = !!c.urgent
+      }
+      tick()
+      this.countdownTimer = setInterval(tick, 1000)
+    },
+    stopCountdown() {
+      if (this.countdownTimer) {
+        clearInterval(this.countdownTimer)
+        this.countdownTimer = null
+      }
     },
     async onClaim(item) {
       item._claiming = true
@@ -88,7 +127,12 @@ export default {
 .cg-hero { margin: -$jst-space-xxl $jst-space-xl 0; padding: $jst-space-xl; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: $jst-shadow-sm; position: relative; }
 .cg-hero__title { display: block; font-size: $jst-font-xl; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
 .cg-hero__desc { display: block; margin-top: $jst-space-sm; font-size: $jst-font-sm; color: $jst-text-regular; line-height: 1.7; }
-.cg-hero__countdown { margin-top: $jst-space-md; display: inline-block; padding: $jst-space-xs 20rpx; border-radius: $jst-radius-round; background: $jst-danger-light; color: $jst-danger; font-size: 22rpx; font-weight: $jst-weight-semibold; }
+.cg-hero__countdown { margin-top: $jst-space-md; display: inline-block; padding: $jst-space-xs 20rpx; border-radius: $jst-radius-round; background: $jst-danger-light; color: $jst-danger; font-size: 22rpx; font-weight: $jst-weight-semibold; font-variant-numeric: tabular-nums; letter-spacing: 1rpx; }
+.cg-hero__countdown--urgent { animation: cgBlink 1s $jst-easing infinite; }
+@keyframes cgBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
 
 .cg-section { margin: $jst-space-lg $jst-space-xl 0; padding: 28rpx $jst-space-xl; background: $jst-bg-card; border-radius: $jst-radius-xl; box-shadow: $jst-shadow-sm; }
 .cg-section__title { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; margin-bottom: $jst-space-md; }

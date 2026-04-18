@@ -61,7 +61,7 @@
           <jst-notice-card class="notice-page__card" :notice="notice" @item-tap="openNotice" />
         </view>
 
-        <jst-empty v-if="!firstLoading && !noticeList.length" text="暂无公告数据" icon="📭" />
+        <jst-empty v-if="!firstLoading && !noticeList.length" v-bind="EMPTY_MESSAGES" text="暂无公告数据" />
 
         <u-loadmore
           v-if="noticeList.length"
@@ -83,6 +83,7 @@ import JstEmpty from '@/components/jst-empty/jst-empty.vue'
 import JstLoading from '@/components/jst-loading/jst-loading.vue'
 // [visual-effect]
 import { staggerDelay } from '@/utils/visual-effects'
+import { EMPTY_MESSAGES } from '@/utils/empty-state-preset'
 
 const FALLBACK_CATEGORY_TABS = [
   { label: '全部', value: '' },
@@ -96,6 +97,7 @@ export default {
   components: { JstNoticeCard, JstEmpty, JstLoading },
   data() {
     return {
+      EMPTY_MESSAGES,
       categoryTabs: FALLBACK_CATEGORY_TABS,
       currentCategory: '',
       noticeList: [],

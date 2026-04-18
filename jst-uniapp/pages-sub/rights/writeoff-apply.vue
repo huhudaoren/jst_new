@@ -31,8 +31,8 @@
     </view>
 
     <view class="wa-footer">
-      <button class="wa-footer__btn" :disabled="submitting || !canSubmit" @tap="onSubmit">
-        {{ submitting ? '提交中...' : '提交申请' }}
+      <button class="wa-footer__btn" :disabled="submitting || !canSubmit" :loading="submitting" hover-class="none" @tap="onSubmit">
+        {{ submitting ? '提交中' : '提交申请' }}
       </button>
     </view>
   </view>
@@ -65,10 +65,31 @@ export default {
       const body = { writeoffAmount: Number(this.form.writeoffAmount), remark: this.form.remark }
       this.submitting = true
       try {
-        await applyRightsWriteoff(this.userRightsId, body)
-        uni.showToast({ title: '申请已提交', icon: 'success' })
-        setTimeout(() => uni.navigateBack(), 600)
+        const res = await applyRightsWriteoff(this.userRightsId, body)
+        // 成功回流: 3 秒 toast + redirectTo 到核销记录页并锚定新记录
+        uni.showToast({ title: '申请已提交，预计 1-3 工作日审核', icon: 'success', duration: 3000 })
+        const recordId = res && res.recordId
+        setTimeout(() => {
+          uni.redirectTo({
+            url: '/pages-sub/appointment/writeoff-record' + (recordId ? ('?anchor=' + recordId) : '')
+          })
+        }, 1600)
+      } catch (e) {
+        // 友好错误提示: 命中具体错误码展示业务原因，否则兜底通用文案
+        const msg = this.resolveErrorMsg(e)
+        uni.showToast({ title: msg, icon: 'none', duration: 2500 })
       } finally { this.submitting = false }
+    },
+    resolveErrorMsg(e) {
+      const raw = (e && (e.msg || e.message)) || ''
+      const code = e && e.code
+      // 后端 BizErrorCode: JST_MARKETING_RIGHTS_EXPIRED / NO_QUOTA / REQUIRE_SCAN / STATUS_INVALID / NOT_OWNED
+      if (/expired|过期/i.test(raw) || code === 'JST_MARKETING_RIGHTS_EXPIRED') return '该权益已过期，无法申请'
+      if (/quota|额度|用完/i.test(raw) || code === 'JST_MARKETING_RIGHTS_NO_QUOTA') return '该权益余额不足，请减少核销金额'
+      if (/scan|扫码/i.test(raw) || code === 'JST_MARKETING_RIGHTS_REQUIRE_SCAN') return '该权益需扫码核销，无法在线申请'
+      if (/status|状态/i.test(raw) || code === 'JST_MARKETING_RIGHTS_STATUS_INVALID') return '当前权益状态不可申请（请检查是否审核中或已用）'
+      if (/owned|拥有/i.test(raw) || code === 'JST_MARKETING_RIGHTS_NOT_OWNED') return '权益不存在或不属于当前账号'
+      return raw || '申请失败，请稍后再试'
     }
   }
 }

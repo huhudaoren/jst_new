@@ -8,6 +8,17 @@
       <text class="apply-hero__label">可提现余额</text>
       <text class="apply-hero__amount">¥{{ formatAmount(totalWithdrawable) }}</text>
       <text class="apply-hero__hint">勾选本次需提现的返点条目，后端将按勾选项金额校验</text>
+      <!-- 信任提示：审核 + 打款时效 -->
+      <view class="apply-hero__trust">
+        <view class="apply-hero__trust-item">
+          <text class="apply-hero__trust-icon">⏱</text>
+          <text class="apply-hero__trust-text">平台审核 1-2 工作日</text>
+        </view>
+        <view class="apply-hero__trust-item">
+          <text class="apply-hero__trust-icon">🏦</text>
+          <text class="apply-hero__trust-text">银行打款 T+1 到账</text>
+        </view>
+      </view>
     </view>
 
     <view class="apply-section">
@@ -204,6 +215,10 @@ export default {
 .apply-hero__label { display: block; font-size: 24rpx; color: rgba(255, 255, 255, 0.76); }
 .apply-hero__amount { display: block; margin-top: 8rpx; font-size: 64rpx; font-weight: 600; color: $jst-gold; }
 .apply-hero__hint { display: block; margin-top: 16rpx; font-size: 22rpx; color: rgba(255, 255, 255, 0.72); }
+.apply-hero__trust { display: flex; gap: 24rpx; margin-top: 20rpx; padding: 14rpx 20rpx; background: rgba(255, 255, 255, 0.12); border-radius: $jst-radius-sm; }
+.apply-hero__trust-item { display: flex; align-items: center; gap: 8rpx; }
+.apply-hero__trust-icon { font-size: 24rpx; }
+.apply-hero__trust-text { font-size: 22rpx; color: $jst-gold; }
 
 .apply-section { margin: 24rpx 32rpx 0; padding: 28rpx 32rpx; background: $jst-bg-card; border-radius: $jst-radius-md; box-shadow: $jst-shadow-sm; }
 .apply-section__title { display: flex; align-items: center; justify-content: space-between; font-size: 28rpx; font-weight: 600; color: $jst-text-primary; margin-bottom: 16rpx; }

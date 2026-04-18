@@ -52,14 +52,26 @@
       </view>
       <u-empty v-if="!tasks.length" mode="data" text="暂无任务" />
     </view>
+
+    <!-- 中文注释: 等级升级庆祝 level-up -->
+    <jst-celebrate
+      :visible.sync="celebrateShow"
+      preset="level-up"
+      :title="celebrateTitle"
+      :subtitle="celebrateSub"
+      :duration="2800"
+    />
   </view>
 </template>
 
 <script>
 import { getPointsSummary, getPointsLevels, getPointsTasks } from '@/api/points'
+import JstCelebrate from '@/components/jst-celebrate/jst-celebrate.vue'
+import { useUserStore } from '@/store/user'
 
 export default {
-  data() { return { summary: {}, levels: [], tasks: [] } },
+  components: { JstCelebrate },
+  data() { return { summary: {}, levels: [], tasks: [], celebrateShow: false, celebrateTitle: '', celebrateSub: '' } },
   computed: {
     progressPercent() {
       const s = this.summary || {}
@@ -85,6 +97,28 @@ export default {
         this.summary = summary || {}
         this.levels = (levels && (levels.rows || levels)) || []
         this.tasks = (tasks && (tasks.rows || tasks)) || []
+        this.checkLevelUp()
+      } catch (e) {}
+    },
+    // 中文注释: 对比 localStorage 上次等级，升级时弹 level-up 庆祝
+    checkLevelUp() {
+      try {
+        const cur = this.summary && this.summary.currentLevel
+        if (!cur) return
+        const lvNo = Number(cur.levelNo || cur.levelId || 0)
+        if (!lvNo) return
+        const store = useUserStore()
+        const uid = (store.userInfo && store.userInfo.userId) || 'anon'
+        const key = 'jst-celebrate-last-level-up-' + uid
+        const last = Number(uni.getStorageSync(key) || 0)
+        if (lvNo > last) {
+          uni.setStorageSync(key, lvNo)
+          if (last > 0) { // 首次访问不弹，仅作基线记录
+            this.celebrateTitle = '恭喜升级 Lv.' + lvNo
+            this.celebrateSub = cur.levelName || '继续加油！'
+            this.celebrateShow = true
+          }
+        }
       } catch (e) {}
     },
     go(url) { uni.navigateTo({ url }) },

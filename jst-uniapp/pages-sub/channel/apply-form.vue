@@ -5,6 +5,18 @@
   <view class="af-page">
     <view class="af-hero" :style="{ paddingTop: navPaddingTop }">
       <text class="af-hero__title">{{ typeLabel }}认证</text>
+      <text v-if="isEditMode" class="af-hero__badge">重新编辑</text>
+    </view>
+
+    <!-- 中文注释: 上次驳回原因气泡卡（可关闭）— 仅 edit 模式 -->
+    <view v-if="isEditMode && showRejectBanner" class="af-reject-banner">
+      <view class="af-reject-banner__head">
+        <text class="af-reject-banner__icon">⚠️</text>
+        <text class="af-reject-banner__title">上次驳回原因</text>
+        <text class="af-reject-banner__close" @tap="showRejectBanner = false">×</text>
+      </view>
+      <text class="af-reject-banner__reason">{{ rejectReasonText }}</text>
+      <text class="af-reject-banner__tip">请根据原因修改材料后重新提交</text>
     </view>
 
     <view class="af-section">
@@ -93,14 +105,14 @@
 
     <view class="af-footer">
       <u-button class="af-footer__btn" type="primary" :disabled="submitting || !canSubmit" :loading="submitting" shape="circle" @click="onSubmit">
-        提交申请
+        {{ isEditMode ? '重新提交审核' : '提交申请' }}
       </u-button>
     </view>
   </view>
 </template>
 
 <script>
-import { submitChannelApply, resubmitChannelApply } from '@/api/channel'
+import { submitChannelApply, resubmitChannelApply, getMyChannelApply } from '@/api/channel'
 
 const TYPE_LABEL = { teacher: '老师', organization: '机构', individual: '个人' }
 
@@ -110,6 +122,11 @@ export default {
       skeletonShow: true, // [visual-effect]
       channelType: 'teacher',
       resubmitId: null,
+      // 中文注释: edit 模式 — 驳回后重新编辑，需回填上次数据 + 顶部展示驳回原因
+      mode: '',
+      rejectedId: null,
+      rejectReasonText: '',
+      showRejectBanner: true,
       form: { applyName: '', mobile: '', idCard: '', inviteCode: '', businessNo: '' },
       materials: {},
       agreed: false,
@@ -119,11 +136,18 @@ export default {
   },
   computed: {
     typeLabel() { return TYPE_LABEL[this.channelType] || '渠道方' },
-    canSubmit() { return this.agreed && this.form.applyName && this.form.mobile && this.form.mobile.length === 11 }
+    canSubmit() { return this.agreed && this.form.applyName && this.form.mobile && this.form.mobile.length === 11 },
+    isEditMode() { return this.mode === 'edit' }
   },
   onLoad(query) {
     this.channelType = (query && query.channelType) || 'teacher'
     this.resubmitId = (query && query.resubmitId) || null
+    this.mode = (query && query.mode) || ''
+    this.rejectedId = (query && query.rejectedId) || null
+    // 中文注释: edit 模式下加载最新驳回申请回填表单
+    if (this.isEditMode) {
+      this.loadRejectedApply()
+    }
     // 分享链接自动回填邀请码
     if (query && query.invite_code) {
       this.form.inviteCode = query.invite_code
@@ -132,6 +156,39 @@ export default {
     }
   },
   methods: {
+    // 中文注释: edit 模式 — 通过 getMyChannelApply 获取最新驳回记录，回填表单 + 显示驳回原因
+    async loadRejectedApply() {
+      try {
+        const apply = await getMyChannelApply()
+        if (!apply) return
+        // TODO(backend): 建议提供按 applyId 直查的接口 GET /jst/wx/channel/auth/{id}，
+        // 目前只能取「我的最新」— 若用户发起新申请会导致旧 rejectedId 取不到，已做 id 校验
+        if (this.rejectedId && String(apply.applyId) !== String(this.rejectedId)) {
+          this.rejectReasonText = '审核未通过，请重新提交'
+          return
+        }
+        // 回填基础字段
+        if (apply.channelType) this.channelType = apply.channelType
+        this.form.applyName = apply.applyName || ''
+        // materialsJson 回填
+        try {
+          const mat = apply.materialsJson ? JSON.parse(apply.materialsJson) : {}
+          this.materials = mat || {}
+          if (mat && mat.mobile) this.form.mobile = mat.mobile
+          if (mat && mat.idCard) this.form.idCard = mat.idCard
+        } catch (e) {}
+        if (apply.inviteCode) this.form.inviteCode = apply.inviteCode
+        if (apply.businessNo) this.form.businessNo = apply.businessNo
+        // 驳回原因
+        // TODO(backend): 建议独立 rejectReason 字段，目前复用 auditRemark
+        this.rejectReasonText = apply.rejectReason || apply.auditRemark || '审核未通过，请重新提交'
+        // 自动同步 resubmitId 走 resubmit 接口
+        if (!this.resubmitId) this.resubmitId = apply.applyId
+      } catch (e) {
+        this.rejectReasonText = '审核未通过，请重新提交'
+      }
+    },
+
     async onSubmit() {
       if (!this.canSubmit) return
       const materialsObj = { ...this.materials, mobile: this.form.mobile, idCard: this.form.idCard }
@@ -146,7 +203,7 @@ export default {
       try {
         if (this.resubmitId) await resubmitChannelApply(this.resubmitId, body)
         else await submitChannelApply(body)
-        uni.showToast({ title: '申请已提交', icon: 'success' })
+        uni.showToast({ title: this.isEditMode ? '已重新提交审核' : '申请已提交', icon: 'success' })
         setTimeout(() => uni.redirectTo({ url: '/pages-sub/channel/apply-status' }), 600)
       } finally { this.submitting = false }
     }
@@ -158,8 +215,74 @@ export default {
 @import '@/styles/design-tokens.scss';
 
 .af-page { min-height: 100vh; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); background: $jst-bg-page; }
-.af-hero { padding: 72rpx $jst-space-xl $jst-space-xxl; background: linear-gradient(135deg, $jst-brand, $jst-brand-dark); color: $jst-text-inverse; }
+.af-hero { padding: 72rpx $jst-space-xl $jst-space-xxl; background: linear-gradient(135deg, $jst-brand, $jst-brand-dark); color: $jst-text-inverse; display: flex; align-items: center; gap: $jst-space-md; flex-wrap: wrap; }
 .af-hero__title { display: block; font-size: $jst-font-xxl; font-weight: $jst-weight-semibold; }
+.af-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6rpx 18rpx;
+  background: rgba(255, 255, 255, 0.22);
+  border: 2rpx solid rgba(255, 255, 255, 0.38);
+  border-radius: $jst-radius-round;
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-semibold;
+}
+
+/* 上次驳回原因气泡卡 */
+.af-reject-banner {
+  margin: $jst-space-lg $jst-space-xl 0;
+  padding: $jst-space-md $jst-space-lg;
+  background: $jst-danger-light;
+  border: 2rpx solid $jst-danger;
+  border-radius: $jst-radius-md;
+  box-shadow: $jst-shadow-sm;
+}
+
+.af-reject-banner__head {
+  display: flex;
+  align-items: center;
+  gap: $jst-space-xs;
+  margin-bottom: $jst-space-xs;
+}
+
+.af-reject-banner__icon { font-size: $jst-font-md; }
+
+.af-reject-banner__title {
+  flex: 1;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-danger;
+}
+
+.af-reject-banner__close {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  font-weight: $jst-weight-regular;
+  color: $jst-text-secondary;
+  line-height: 1;
+}
+
+.af-reject-banner__reason {
+  display: block;
+  padding: $jst-space-sm $jst-space-md;
+  background: $jst-bg-card;
+  border-radius: $jst-radius-sm;
+  font-size: $jst-font-sm;
+  line-height: 1.7;
+  color: $jst-text-primary;
+  white-space: pre-wrap;
+}
+
+.af-reject-banner__tip {
+  display: block;
+  margin-top: $jst-space-xs;
+  font-size: $jst-font-xs;
+  color: $jst-danger;
+}
 .af-section { margin: $jst-space-lg $jst-space-xl 0; padding: $jst-space-md $jst-space-xl; background: $jst-bg-card; border-radius: $jst-radius-md; box-shadow: $jst-shadow-sm; }
 .af-section__title { display: block; font-size: $jst-font-base; font-weight: $jst-weight-semibold; color: $jst-text-primary; padding: 20rpx 0 $jst-space-xs; }
 

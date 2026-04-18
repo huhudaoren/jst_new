@@ -76,10 +76,7 @@
 
     <jst-empty
       v-else-if="!pageLoading"
-      icon="📄"
-      text="当前筛选下还没有报名记录。"
-      button-text="去浏览赛事"
-      button-url="switchTab:/pages/contest/list"
+      v-bind="EMPTY_ENROLL"
     />
   </view>
 </template>
@@ -89,6 +86,7 @@ import { getMyEnrolls } from '@/api/enroll'
 import JstEmpty from '@/components/jst-empty/jst-empty.vue'
 import JstLoading from '@/components/jst-loading/jst-loading.vue'
 import JstStatusBadge from '@/components/jst-status-badge/jst-status-badge.vue'
+import { EMPTY_ENROLL } from '@/utils/empty-state-preset'
 
 export default {
   components: {
@@ -98,6 +96,7 @@ export default {
   },
   data() {
     return {
+      EMPTY_ENROLL,
       pageLoading: false,
       currentTab: '',
       list: [],

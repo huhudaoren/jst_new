@@ -50,6 +50,21 @@
         </view>
       </view>
 
+      <!-- 中文注释: 退款规则折叠卡 (仅 paid/refunding + refundEnabled 时) -->
+      <view v-if="showRefundRules" class="order-detail-page__card order-detail-page__refund-rules">
+        <view class="order-detail-page__refund-rules-head" @tap="refundRulesOpen = !refundRulesOpen">
+          <text class="order-detail-page__refund-rules-icon">📜</text>
+          <text class="order-detail-page__refund-rules-title">退款规则说明</text>
+          <text class="order-detail-page__refund-rules-toggle">{{ refundRulesOpen ? '收起 ▲' : '展开 ▼' }}</text>
+        </view>
+        <view v-if="refundRulesOpen" class="order-detail-page__refund-rules-body">
+          <text class="order-detail-page__refund-rules-item">• 本期仅支持<text class="order-detail-page__refund-rules-strong">全额退款</text>，暂不支持部分退</text>
+          <text class="order-detail-page__refund-rules-item">• 全额退款时，使用的<text class="order-detail-page__refund-rules-strong">积分原路返回</text>（冻结→可用）</text>
+          <text class="order-detail-page__refund-rules-item">• 全额退款时，使用的<text class="order-detail-page__refund-rules-strong">优惠券原路返回</text>（状态 used→voided，有效期内）</text>
+          <text class="order-detail-page__refund-rules-item">• 现金部分按原支付路径退回（微信支付 1~7 个工作日）</text>
+        </view>
+      </view>
+
       <view class="order-detail-page__card">
         <text class="order-detail-page__card-title">订单信息</text>
         <view class="order-detail-page__info-row">
@@ -180,7 +195,8 @@ export default {
       originalParticipantName: '',
       refundPopupVisible: false,
       refundReason: '',
-      refundSubmitting: false
+      refundSubmitting: false,
+      refundRulesOpen: false
     }
   },
   computed: {
@@ -259,6 +275,16 @@ export default {
           time: this.formatDateTime(this.detail.payTime)
         })
       }
+      // 中文注释: 积分扣减节点 — 仅当订单使用了积分时显示 (审核通过后触发消耗)
+      if (this.hasPointsUsed) {
+        const pointsNode = {
+          label: `积分扣减（${this.pointsUsedLabel}）`,
+          time: this.detail.auditTime
+            ? this.formatDateTime(this.detail.auditTime)
+            : '审核通过后触发'
+        }
+        list.push(pointsNode)
+      }
       if (this.detail.aftersaleDeadline) {
         list.push({
           label: '售后截止',
@@ -272,6 +298,28 @@ export default {
         })
       }
       return list
+    },
+    // 中文注释: 判断订单是否使用了积分（pointsUsed / pointsDeductAmount 任一 > 0）
+    hasPointsUsed() {
+      const used = Number(this.detail.pointsUsed) || 0
+      const deduct = Number(this.detail.pointsDeductAmount) || 0
+      return used > 0 || deduct > 0
+    },
+    pointsUsedLabel() {
+      const used = Number(this.detail.pointsUsed) || 0
+      if (used > 0) {
+        return `-${used} 积分`
+      }
+      // TODO(backend): 优先返回 pointsUsed（整数积分数），否则回退到金额
+      return `-¥${this.formatAmount(this.detail.pointsDeductAmount)}`
+    },
+    // 中文注释: 退款规则卡显示条件：refundEnabled && status ∈ [paid, refunding]
+    showRefundRules() {
+      const status = this.detail.orderStatus
+      const eligibleStatus = status === 'paid' || this.isRefunding
+      // TODO(backend): refundEnabled 字段后端需返回，缺失时按 true 兜底展示规则
+      const refundEnabled = this.detail.refundEnabled !== false
+      return eligibleStatus && refundEnabled
     }
   },
   onLoad(query) {
@@ -786,6 +834,54 @@ export default {
   font-size: $jst-font-sm;
   line-height: 1.6;
   color: $jst-warning;
+}
+
+/* 退款规则折叠卡 */
+.order-detail-page__refund-rules {
+  border-left: 6rpx solid $jst-brand;
+}
+
+.order-detail-page__refund-rules-head {
+  display: flex;
+  align-items: center;
+  gap: $jst-space-sm;
+}
+
+.order-detail-page__refund-rules-icon {
+  font-size: $jst-font-md;
+}
+
+.order-detail-page__refund-rules-title {
+  flex: 1;
+  font-size: $jst-font-md;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
+}
+
+.order-detail-page__refund-rules-toggle {
+  font-size: $jst-font-xs;
+  color: $jst-brand;
+  font-weight: $jst-weight-semibold;
+}
+
+.order-detail-page__refund-rules-body {
+  margin-top: $jst-space-md;
+  padding-top: $jst-space-md;
+  border-top: 2rpx solid $jst-border;
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.order-detail-page__refund-rules-item {
+  font-size: $jst-font-sm;
+  line-height: 1.7;
+  color: $jst-text-secondary;
+}
+
+.order-detail-page__refund-rules-strong {
+  color: $jst-brand;
+  font-weight: $jst-weight-semibold;
 }
 
 ::v-deep .order-detail-page__bottom-btn.u-button,

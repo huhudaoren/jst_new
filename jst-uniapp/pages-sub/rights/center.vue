@@ -6,7 +6,7 @@
     <view class="rc-hero" :style="{ paddingTop: navPaddingTop }">
       <view class="rc-hero__cell"><text class="rc-hero__num">{{ stats.available || 0 }}</text><text class="rc-hero__lbl">可用权益</text></view>
       <view class="rc-hero__cell"><text class="rc-hero__num">{{ stats.applying || 0 }}</text><text class="rc-hero__lbl">申请中</text></view>
-      <view class="rc-hero__cell"><text class="rc-hero__num">{{ stats.used || 0 }}</text><text class="rc-hero__lbl">已使用</text></view>
+      <view class="rc-hero__cell"><text class="rc-hero__num">{{ (stats.used || 0) + (stats.expired || 0) }}</text><text class="rc-hero__lbl">已失效</text></view>
     </view>
 
     <scroll-view class="rc-tabs" scroll-x>
@@ -22,15 +22,24 @@
       <view v-for="item in list" :key="item.userRightsId" class="rc-card" @tap="goDetail(item.userRightsId)">
         <view class="rc-card__head">
           <text class="rc-card__name">{{ item.rightsName || '--' }}</text>
-          <text :class="['rc-card__status', 'rc-card__status--' + item.status]">{{ statusLabel(item.status) }}</text>
+          <text :class="['rc-card__status', 'rc-card__status--' + item.status]">{{ item.status === 'applying' ? '审核中' : statusLabel(item.status) }}</text>
         </view>
         <view class="rc-card__meta">
           <text class="rc-card__m">{{ quotaText(item) }}</text>
           <text class="rc-card__m">有效期至 {{ formatDate(item.validEnd) }}</text>
         </view>
-        <button v-if="item.status === 'available' && !item.expired" class="rc-card__btn" @tap.stop="goApply(item.userRightsId)">立即使用</button>
+        <view class="rc-card__actions">
+          <text class="rc-card__link" @tap.stop="goRecords(item.userRightsId)">查看申请记录</text>
+          <button v-if="item.status === 'available' && !item.expired" class="rc-card__btn" @tap.stop="goApply(item.userRightsId)">立即使用</button>
+        </view>
       </view>
-      <u-empty v-if="!list.length && !loading" mode="data" text="暂无权益" />
+      <jst-empty
+        v-if="!list.length && !loading"
+        text="暂无权益"
+        icon="📋"
+        buttonText="看看热门赛事"
+        buttonUrl="switchTab:/pages/contest/index"
+      />
       <u-loadmore v-if="loading" status="loading" />
       <u-loadmore v-if="!hasMore && list.length" status="nomore" />
     </view>
@@ -39,16 +48,18 @@
 
 <script>
 import { getMyRights } from '@/api/rights'
+import JstEmpty from '@/components/jst-empty/jst-empty.vue'
 
+// 对齐原型 3 状态: 可用 / 申请中 / 已失效 (已失效合并 used + expired)
 const TABS = [
-  { value: 'available', label: '可用' },
+  { value: 'available', label: '可用权益' },
   { value: 'applying', label: '申请中' },
-  { value: 'used', label: '已使用' },
-  { value: 'expired', label: '已过期' }
+  { value: 'invalid', label: '已失效' }
 ]
-const STATUS_LABEL = { available: '可用', applying: '申请中', used: '已使用', expired: '已过期' }
+const STATUS_LABEL = { available: '可用', applying: '申请中', used: '已使用', expired: '已过期', invalid: '已失效' }
 
 export default {
+  components: { JstEmpty },
   data() { return { tabs: TABS, activeStatus: 'available', list: [], stats: { available: 0, applying: 0, used: 0 }, pageNum: 1, pageSize: 10, total: 0, loading: false, hasMore: true } },
   onShow() { this.load(true) },
   onPullDownRefresh() { this.load(true).finally(() => uni.stopPullDownRefresh()) },
@@ -59,18 +70,26 @@ export default {
       if (!this.hasMore) return
       this.loading = true
       try {
-        const res = await getMyRights({ status: this.activeStatus, pageNum: this.pageNum, pageSize: this.pageSize })
-        const rows = (res && res.rows) || []
+        // 'invalid' (已失效) = used + expired, 后端未直接支持, 故不传 status 拉全部后客户端过滤
+        // TODO(BE): 可考虑后端 selectMyRights 支持 status='invalid' 直接返回 used+expired 合集, 省去客户端过滤
+        const query = { pageNum: this.pageNum, pageSize: this.pageSize }
+        if (this.activeStatus !== 'invalid') query.status = this.activeStatus
+        const res = await getMyRights(query)
+        let rows = (res && res.rows) || []
         this.total = (res && res.total) || 0
         if (res && res.stats) this.stats = res.stats
+        if (this.activeStatus === 'invalid') {
+          rows = rows.filter(r => r.status === 'used' || r.status === 'expired' || r.expired)
+        }
         this.list = reset ? rows : this.list.concat(rows)
-        this.hasMore = this.list.length < this.total
+        this.hasMore = this.list.length < this.total && this.activeStatus !== 'invalid' // invalid 走全量过滤, 不分页
         if (this.hasMore) this.pageNum += 1
       } finally { this.loading = false }
     },
     onChange(v) { if (this.activeStatus === v) return; this.activeStatus = v; this.load(true) },
     goDetail(id) { uni.navigateTo({ url: '/pages-sub/rights/detail?id=' + id }) },
     goApply(id) { uni.navigateTo({ url: '/pages-sub/rights/writeoff-apply?id=' + id }) },
+    goRecords(id) { uni.navigateTo({ url: '/pages-sub/appointment/writeoff-record?rightsId=' + id }) },
     // MyRightsVO: quotaMode('amount'|'count') + quotaValue + remainQuota
     quotaText(item) {
       const mode = item && item.quotaMode
@@ -107,5 +126,7 @@ export default {
 .rc-card__status--used, .rc-card__status--expired { background: $jst-bg-grey; color: $jst-text-secondary; }
 .rc-card__meta { display: flex; flex-wrap: wrap; gap: $jst-space-sm; }
 .rc-card__m { padding: 6rpx 14rpx; border-radius: $jst-radius-round; background: $jst-bg-page; font-size: $jst-font-xs; color: $jst-text-regular; }
-.rc-card__btn { margin-top: 20rpx; align-self: flex-end; height: 72rpx; line-height: 72rpx; border-radius: $jst-radius-round; background: linear-gradient(135deg, darken($jst-success, 15%), $jst-success); color: $jst-text-inverse; font-size: $jst-font-sm; font-weight: $jst-weight-semibold; border: none; }
+.rc-card__actions { display: flex; justify-content: space-between; align-items: center; margin-top: 20rpx; }
+.rc-card__link { font-size: $jst-font-xs; color: $jst-success; text-decoration: underline; padding: 10rpx 0; }
+.rc-card__btn { height: 72rpx; line-height: 72rpx; padding: 0 $jst-space-xl; border-radius: $jst-radius-round; background: linear-gradient(135deg, darken($jst-success, 15%), $jst-success); color: $jst-text-inverse; font-size: $jst-font-sm; font-weight: $jst-weight-semibold; border: none; }
 </style>
