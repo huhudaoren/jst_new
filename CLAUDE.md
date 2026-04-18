@@ -1,6 +1,6 @@
 # 竞赛通 (JST) - 项目上下文 (CLAUDE.md)
 
-> 会话恢复文件。上次更新：2026-04-18（**销售管理 + 渠道分销** plan-01+02 完成 → DDL+基础架构+销售核心+提成管线+Quartz 全部落地，plan-03 待启动）
+> 会话恢复文件。上次更新：2026-04-18（**销售管理 + 渠道分销** plan-01+02+03 完成 → CRM+销售工作台前端 9 页+组件就位，plan-04 待启动）
 
 ---
 
@@ -255,7 +255,7 @@ D:\coding\jst_v1\
 | **MP-SUCCESS-FLOW** | 5 处成功态加跳转/modal 引导：支付/批量报名/创建档案/预约/订单详情 | ✅ 完成 |
 | **CONTEST-ORGANIZER-CONTACT** | DDL 5 字段（organizer_logo/organizer_desc/contact_phone/contact_wechat/contact_email）+ Domain/VO/Mapper/Service/DTO/管理端编辑 Tab 全链路 | ✅ 完成 |
 | **CONTEST-DETAIL-RESHAPE** | 小程序赛事详情页：sticky tab 常驻吸顶+自动高亮、报名倒计时条、主办方卡、联系咨询卡（拨打/复制）、奖项改表格、相似赛事+推荐课程横滑（调已存在的 `getContestRecommend`） | ✅ 完成 |
-| **SALES-DISTRIBUTION** | 销售管理 + 渠道分销 + CRM 完整子系统。spec + 4 实施计划已写出，**plan-01+02 已执行完毕**（2026-04-18 subagent-driven + 部分 inline）。spec：`docs/superpowers/specs/2026-04-18-sales-channel-distribution-design.md`。4 计划：①plan-01 ✅ ②plan-02 ✅ ③plan-03-crm ⏳ ④plan-04-distribution-admin ⏳。**plan-02 产出**（feature/sales-distribution-02-sales-core 分支）：@SalesDataScope 注解+Aspect（self/manager 双模）；9 个 Service：Sales/CommissionRate/PreRegister/Binding/AutoBinding(B1-B12 边界)/Commission(4 类项+N2 穿透+J 上限压缩+E3 跳过)/Settlement(月结+审核)/Resignation(3 阶段编排)/Performance(业绩聚合+脱敏)；2 Listener：SalesAutoBindingListener 订阅 ChannelRegisteredEvent 触发自动绑定；SalesCommissionListener 订阅 OrderPaid/RefundSuccess；6 Quartz Task：PreRegisterExpire/CommissionAccrue/CommissionRepair/MonthlySettlement/ResignExecute/TransitionEnd；3 Controller：AdminSales/SalesPreRegister/SalesPerformance；RestrictedSalesActionInterceptor（申请离职阶段限权）；sys_job 注册 6 Quartz 全 paused；JstChannelServiceImpl.insertJstChannel 加 publishChannelRegisteredEvent；OrderServiceImpl/RefundServiceImpl extraData 扩充 channelId/businessType/payTime/orderId。**测试 84 单测全绿**（jst-common 30 + jst-channel 54），mvn 全模块编译绿。下一步 plan-03：CRM + 销售工作台前端 5 页。 | 🟢 plan-01+02 完成，待 merge + plan-03 启动 |
+| **SALES-DISTRIBUTION** | 销售管理 + 渠道分销 + CRM 完整子系统。spec + 4 实施计划已写出，**plan-01+02+03 已执行完毕**（2026-04-18 subagent-driven + 部分 inline）。spec：`docs/superpowers/specs/2026-04-18-sales-channel-distribution-design.md`。4 计划：①plan-01 ✅ ②plan-02 ✅ ③plan-03 ✅ ④plan-04-distribution-admin ⏳。**plan-02 产出**（feature/sales-distribution-02-sales-core 分支）：@SalesDataScope 注解+Aspect（self/manager 双模）；9 个 Service：Sales/CommissionRate/PreRegister/Binding/AutoBinding(B1-B12 边界)/Commission(4 类项+N2 穿透+J 上限压缩+E3 跳过)/Settlement(月结+审核)/Resignation(3 阶段编排)/Performance(业绩聚合+脱敏)；2 Listener：SalesAutoBindingListener 订阅 ChannelRegisteredEvent 触发自动绑定；SalesCommissionListener 订阅 OrderPaid/RefundSuccess；6 Quartz Task：PreRegisterExpire/CommissionAccrue/CommissionRepair/MonthlySettlement/ResignExecute/TransitionEnd；3 Controller：AdminSales/SalesPreRegister/SalesPerformance；RestrictedSalesActionInterceptor（申请离职阶段限权）；sys_job 注册 6 Quartz 全 paused；JstChannelServiceImpl.insertJstChannel 加 publishChannelRegisteredEvent；OrderServiceImpl/RefundServiceImpl extraData 扩充 channelId/businessType/payTime/orderId。**测试 84 单测全绿**（jst-common 30 + jst-channel 54），mvn 全模块编译绿。下一步 plan-03：CRM + 销售工作台前端 5 页。 | 🟢 plan-01+02+03 完成，plan-04 启动 |
 
 ---
 
