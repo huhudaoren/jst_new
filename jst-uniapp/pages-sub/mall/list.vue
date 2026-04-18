@@ -66,18 +66,23 @@
 import { getMallGoodsList } from '@/api/mall'
 import { useUserStore } from '@/store/user'
 
+// 中文注释: 对齐 V4.0 原型 points-mall.html 的 4 Tab 分类
+// 虚拟 = 优惠券 + 权益（后端 goodsType ∈ [coupon, rights/right]）
+// 实物 = 实体奖品（后端 goodsType = physical）
+// 我可兑换 = 所需积分 ≤ 当前可用积分（前端根据 availablePoints 过滤）
+// TODO(backend): 后端若支持直接按 "virtual" 过滤可简化前端逻辑
 const TABS = [
-  { value: '', label: '全部' },
-  { value: 'coupon', label: '优惠券' },
-  { value: 'right', label: '权益' },
-  { value: 'physical', label: '实物' }
+  { value: 'all', label: '全部' },
+  { value: 'virtual', label: '虚拟' },
+  { value: 'physical', label: '实物' },
+  { value: 'affordable', label: '我可兑换' }
 ]
 
 export default {
   data() {
     return {
       tabs: TABS,
-      activeType: '',
+      activeType: 'all',
       list: [],
       pageNum: 1,
       pageSize: 10,
@@ -99,20 +104,42 @@ export default {
   },
   onReachBottom() { if (this.hasMore && !this.loading) this.load(false) },
   methods: {
+    // 中文注释: 把前端 Tab 值映射成后端支持的 goodsType 参数（后端仅识别 coupon/rights/right/physical）
+    buildLoadParams() {
+      const params = { pageNum: this.pageNum, pageSize: this.pageSize }
+      // 全部 / 虚拟（多类型合并）/ 我可兑换：后端不传类型，前端再过滤
+      if (this.activeType === 'physical') {
+        params.goodsType = 'physical'
+      }
+      return params
+    },
+    // 中文注释: Tab = 虚拟 → 前端过滤 type ∈ [coupon, rights, right]；Tab = 我可兑换 → 过滤所需积分 ≤ 可用积分
+    applyClientFilter(rows) {
+      if (!Array.isArray(rows)) return []
+      if (this.activeType === 'virtual') {
+        return rows.filter((r) => {
+          const t = (r && r.goodsType) || ''
+          return t === 'coupon' || t === 'rights' || t === 'right'
+        })
+      }
+      if (this.activeType === 'affordable') {
+        const pts = this.availablePoints
+        return rows.filter((r) => Number((r && r.pointsPrice) || 0) <= pts)
+      }
+      return rows
+    },
     async load(reset) {
       if (reset) { this.pageNum = 1; this.list = []; this.hasMore = true }
       if (!this.hasMore) return
       this.loading = true
       try {
-        const res = await getMallGoodsList({
-          goodsType: this.activeType || undefined,
-          pageNum: this.pageNum,
-          pageSize: this.pageSize
-        })
-        const rows = (res && res.rows) || []
+        const res = await getMallGoodsList(this.buildLoadParams())
+        const rawRows = (res && res.rows) || []
         this.total = (res && res.total) || 0
+        const rows = this.applyClientFilter(rawRows)
         this.list = reset ? rows : this.list.concat(rows)
-        this.hasMore = this.list.length < this.total
+        // 中文注释: 由于前端做了过滤，hasMore 仍按原始 total 判断，过滤后列表可能短于 total
+        this.hasMore = (reset ? rawRows.length : this.list.length) < this.total
         if (this.hasMore) this.pageNum += 1
       } finally { this.loading = false }
     },

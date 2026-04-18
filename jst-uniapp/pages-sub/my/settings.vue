@@ -6,10 +6,10 @@
       <text class="settings-page__header-title">设置</text>
     </view>
 
-    <!-- 隐私保护 -->
+    <!-- 隐私与协议 -->
     <view class="settings-page__group">
-      <text class="settings-page__group-title">隐私保护</text>
-      <view class="settings-page__cell" @tap="navigatePrivacy">
+      <text class="settings-page__group-title">隐私与协议</text>
+      <view class="settings-page__cell" @tap="navigatePrivacyPolicy">
         <view class="settings-page__cell-icon settings-page__cell-icon--neutral">📄</view>
         <view class="settings-page__cell-body">
           <text class="settings-page__cell-name">隐私保护政策</text>
@@ -20,6 +20,14 @@
         <view class="settings-page__cell-icon settings-page__cell-icon--neutral">📋</view>
         <view class="settings-page__cell-body">
           <text class="settings-page__cell-name">用户服务协议</text>
+        </view>
+        <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
+      </view>
+      <view class="settings-page__cell" @tap="navigatePrivacySettings">
+        <view class="settings-page__cell-icon settings-page__cell-icon--brand">🔒</view>
+        <view class="settings-page__cell-body">
+          <text class="settings-page__cell-name">隐私设置</text>
+          <text class="settings-page__cell-desc">个人信息、权限授权管理</text>
         </view>
         <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
       </view>
@@ -35,6 +43,61 @@
           <text class="settings-page__cell-desc">查看或解除与老师/机构的绑定</text>
         </view>
         <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
+      </view>
+      <view class="settings-page__cell" @tap="navigateAddressList">
+        <view class="settings-page__cell-icon settings-page__cell-icon--brand">📍</view>
+        <view class="settings-page__cell-body">
+          <text class="settings-page__cell-name">地址管理</text>
+          <text class="settings-page__cell-desc">兑换实物商品的收货地址</text>
+        </view>
+        <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
+      </view>
+      <view class="settings-page__cell" @tap="navigateInvoiceTitle">
+        <view class="settings-page__cell-icon settings-page__cell-icon--neutral">🧾</view>
+        <view class="settings-page__cell-body">
+          <text class="settings-page__cell-name">发票抬头管理</text>
+          <text class="settings-page__cell-desc">开票时自动填充</text>
+        </view>
+        <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
+      </view>
+      <view v-if="isChannelUser" class="settings-page__cell" @tap="navigateSettlement">
+        <view class="settings-page__cell-icon settings-page__cell-icon--success">💳</view>
+        <view class="settings-page__cell-body">
+          <text class="settings-page__cell-name">收款账户</text>
+          <text class="settings-page__cell-desc">渠道提现结算账户管理</text>
+        </view>
+        <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
+      </view>
+    </view>
+
+    <!-- 消息通知 -->
+    <view class="settings-page__group">
+      <text class="settings-page__group-title">消息通知</text>
+      <view class="settings-page__cell">
+        <view class="settings-page__cell-icon settings-page__cell-icon--brand">🔔</view>
+        <view class="settings-page__cell-body">
+          <text class="settings-page__cell-name">系统推送</text>
+          <text class="settings-page__cell-desc">订单、审核结果等重要通知</text>
+        </view>
+        <u-switch
+          v-model="notifySystem"
+          :active-color="switchActiveColor"
+          size="18"
+          @change="onChangeNotifySystem"
+        />
+      </view>
+      <view class="settings-page__cell">
+        <view class="settings-page__cell-icon settings-page__cell-icon--neutral">📣</view>
+        <view class="settings-page__cell-body">
+          <text class="settings-page__cell-name">营销推送</text>
+          <text class="settings-page__cell-desc">活动、优惠券等促销信息</text>
+        </view>
+        <u-switch
+          v-model="notifyMarketing"
+          :active-color="switchActiveColor"
+          size="18"
+          @change="onChangeNotifyMarketing"
+        />
       </view>
     </view>
 
@@ -85,6 +148,18 @@
       </view>
     </view>
 
+    <!-- 危险操作 -->
+    <view class="settings-page__group settings-page__group--danger">
+      <view class="settings-page__cell settings-page__cell--danger" @tap="handleDeactivate">
+        <view class="settings-page__cell-icon settings-page__cell-icon--danger">⚠️</view>
+        <view class="settings-page__cell-body">
+          <text class="settings-page__cell-name settings-page__cell-name--danger">注销账号</text>
+          <text class="settings-page__cell-desc">永久删除账号及所有数据</text>
+        </view>
+        <u-icon name="arrow-right" class="settings-page__cell-arrow" size="22" />
+      </view>
+    </view>
+
     <u-button class="settings-page__logout" @click="handleLogout">退出登录</u-button>
   </view>
 </template>
@@ -92,16 +167,51 @@
 <script>
 import { useUserStore } from '@/store/user'
 
+const NOTIFY_STORAGE_KEY = 'jst_notify_prefs'
+// 中文注释: u-switch 的 active-color prop 只接收字符串，无法引入 SCSS 变量，这里显性复用 $jst-brand 色值
+const BRAND_COLOR = '#2B6CFF'
+
 export default {
   data() {
     return {
-      cacheText: '当前缓存计算中...'
+      cacheText: '当前缓存计算中...',
+      notifySystem: true,
+      notifyMarketing: true,
+      switchActiveColor: BRAND_COLOR
+    }
+  },
+  computed: {
+    // 中文注释: 渠道方视角（复用 my/index 的判定）
+    isChannelUser() {
+      const store = useUserStore()
+      const info = store.userInfo || {}
+      if (info.userType === 'channel') return true
+      const roles = store.roles || []
+      return Array.isArray(roles) && roles.includes('jst_channel')
     }
   },
   onLoad() {
     this.getCacheSize()
+    this.loadNotifyPrefs()
   },
   methods: {
+    // 中文注释: 从本地读取通知偏好（后端暂无此接口，本地存储为权宜之计）
+    // TODO(backend): 后端需提供 GET/POST /jst/wx/user/notify-prefs 同步偏好
+    loadNotifyPrefs() {
+      try {
+        const raw = uni.getStorageSync(NOTIFY_STORAGE_KEY)
+        const data = raw && typeof raw === 'object' ? raw : (raw ? JSON.parse(raw) : {})
+        if (typeof data.system === 'boolean') this.notifySystem = data.system
+        if (typeof data.marketing === 'boolean') this.notifyMarketing = data.marketing
+      } catch (e) { /* ignore */ }
+    },
+    saveNotifyPrefs() {
+      try {
+        uni.setStorageSync(NOTIFY_STORAGE_KEY, { system: this.notifySystem, marketing: this.notifyMarketing })
+      } catch (e) { /* ignore */ }
+    },
+    onChangeNotifySystem(v) { this.notifySystem = !!v; this.saveNotifyPrefs() },
+    onChangeNotifyMarketing(v) { this.notifyMarketing = !!v; this.saveNotifyPrefs() },
     getCacheSize() {
       try {
         const res = uni.getStorageInfoSync()
@@ -127,13 +237,34 @@ export default {
         }
       })
     },
-    navigatePrivacy() { uni.navigateTo({ url: '/pages-sub/my/privacy' }) },
+    navigatePrivacyPolicy() { uni.navigateTo({ url: '/pages-sub/my/privacy' }) },
+    navigatePrivacySettings() { uni.navigateTo({ url: '/pages-sub/my/privacy?type=settings' }) },
     navigateAgreement() {
       // 用户协议暂复用隐私政策页面结构
       uni.navigateTo({ url: '/pages-sub/my/privacy?type=agreement' })
     },
     navigateBinding() { uni.navigateTo({ url: '/pages-sub/my/binding' }) },
+    navigateAddressList() { uni.navigateTo({ url: '/pages-sub/my/address-list' }) },
+    // TODO(backend): 发票抬头管理后端接口未实现（缺 GET/POST /jst/wx/invoice-title），先占位
+    navigateInvoiceTitle() {
+      uni.showToast({ title: '发票抬头管理开发中', icon: 'none' })
+    },
+    navigateSettlement() { uni.navigateTo({ url: '/pages-sub/channel/settlement' }) },
     navigateHelp() { uni.navigateTo({ url: '/pages-sub/public/help' }) },
+    // 中文注释: 注销账号 — 微信小程序合规要求，需人工审核
+    // TODO(backend): 后端需提供 POST /jst/wx/user/deactivate 接口（走客服审核流程）
+    handleDeactivate() {
+      uni.showModal({
+        title: '注销账号',
+        content: '注销账号为不可恢复操作，如需办理请联系客服（400-888-xxxx），客服核实身份后协助办理。',
+        confirmText: '联系客服',
+        success: (res) => {
+          if (res.confirm) {
+            uni.showToast({ title: '请拨打 400-888-xxxx', icon: 'none', duration: 3000 })
+          }
+        }
+      })
+    },
     handleLogout() {
       uni.showModal({
         title: '退出登录',
@@ -242,6 +373,21 @@ export default {
 
 .settings-page__cell-icon--success {
   background: $jst-success-light;
+}
+
+.settings-page__cell-icon--danger {
+  background: $jst-danger-light;
+}
+
+.settings-page__cell-name--danger {
+  color: $jst-danger;
+}
+
+.settings-page__group--danger {
+  // 视觉弱化处理 — 注销入口不抢焦点
+  .settings-page__cell--danger:active {
+    opacity: 0.8;
+  }
 }
 
 .settings-page__cell-body {

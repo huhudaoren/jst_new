@@ -113,13 +113,40 @@
               </view>
             </view>
           </view>
-          <view v-if="detail.supportAppointment === 1" class="contest-detail-page__feature-tag">
-            <text class="contest-detail-page__feature-tag-icon">&#128205;</text>
-            <text class="contest-detail-page__feature-tag-text">支持线下预约</text>
-          </view>
           <view v-if="detail.supportChannelEnroll === 1" class="contest-detail-page__feature-tag">
             <text class="contest-detail-page__feature-tag-icon">&#128279;</text>
             <text class="contest-detail-page__feature-tag-text">支持渠道报名</text>
+          </view>
+        </view>
+
+        <!-- 线下预约强化卡（Wave 2 P1-3：左边红色 6rpx 边框 + 剩余名额/截止日期标签） -->
+        <!-- TODO(backend): 字段 offlineReserveRemaining / offlineReserveDeadline 暂未返回，UI 先做静态保留 -->
+        <view
+          v-if="showAppointmentEntry"
+          class="contest-detail-page__offline-card jst-anim-fade-up"
+          @tap="handleAppointmentTap"
+        >
+          <view class="contest-detail-page__offline-head">
+            <text class="contest-detail-page__offline-icon">&#128205;</text>
+            <view class="contest-detail-page__offline-body">
+              <text class="contest-detail-page__offline-title">线下预约</text>
+              <text class="contest-detail-page__offline-desc">选择线下场次，现场核销参赛</text>
+            </view>
+            <text class="contest-detail-page__offline-arrow">›</text>
+          </view>
+          <view class="contest-detail-page__offline-tags">
+            <view
+              v-if="offlineRemainingBadge"
+              class="contest-detail-page__offline-tag contest-detail-page__offline-tag--danger"
+            >🔥 仅剩 {{ offlineRemainingBadge }} 个名额</view>
+            <view
+              v-if="offlineDeadlineBadge"
+              class="contest-detail-page__offline-tag contest-detail-page__offline-tag--warning"
+            >⏰ {{ offlineDeadlineBadge }}</view>
+            <view
+              v-if="!offlineRemainingBadge && !offlineDeadlineBadge"
+              class="contest-detail-page__offline-tag contest-detail-page__offline-tag--info"
+            >名额充足 · 点击预约</view>
           </view>
         </view>
 
@@ -462,6 +489,27 @@ export default {
     hasContactCard() {
       if (!this.detail) return false
       return !!(this.detail.contactPhone || this.detail.contactWechat || this.detail.contactEmail)
+    },
+    // 中文注释: 线下预约剩余名额标签 — 仅在 remaining ≤ 10 时显示
+    // TODO(backend): 后端需返回 detail.offlineReserveRemaining (Number)
+    offlineRemainingBadge() {
+      const n = this.detail && Number(this.detail.offlineReserveRemaining)
+      if (!isFinite(n) || n <= 0 || n > 10) return ''
+      return String(n)
+    },
+    // 中文注释: 线下预约截止日期标签 — 仅在距截止 ≤ 3 天时显示
+    // TODO(backend): 后端需返回 detail.offlineReserveDeadline (yyyy-MM-dd HH:mm:ss)
+    offlineDeadlineBadge() {
+      const raw = this.detail && this.detail.offlineReserveDeadline
+      if (!raw) return ''
+      const end = new Date(String(raw).replace(/-/g, '/').replace('T', ' ')).getTime()
+      if (!end || isNaN(end)) return ''
+      const diff = end - Date.now()
+      if (diff <= 0) return ''
+      const days = diff / 86400000
+      if (days > 3) return ''
+      if (days < 1) return '今日截止'
+      return '本周截止（剩 ' + Math.ceil(days) + ' 天）'
     }
   },
   onLoad(query) {
@@ -1178,6 +1226,109 @@ export default {
   padding: 6rpx $jst-space-md;
   border-radius: $jst-radius-round;
   background: $jst-brand-light;
+}
+
+// 线下预约强化卡（Wave 2 P1-3）
+.contest-detail-page__offline-card {
+  position: relative;
+  margin-bottom: $jst-space-lg;
+  padding: $jst-space-lg $jst-space-lg $jst-space-lg calc(#{$jst-space-lg} + 6rpx);
+  border-radius: $jst-radius-card;
+  background: $jst-bg-card;
+  box-shadow: $jst-shadow-ring, $jst-shadow-ambient;
+  overflow: hidden;
+  transition: transform $jst-duration-fast $jst-easing;
+  &:active { transform: scale(0.98); }
+  // 左侧 6rpx 红色边框（视觉强化）
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6rpx;
+    background: $jst-danger;
+  }
+}
+
+.contest-detail-page__offline-head {
+  display: flex;
+  align-items: center;
+  gap: $jst-space-md;
+}
+
+.contest-detail-page__offline-icon {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: $jst-radius-md;
+  background: $jst-danger-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.contest-detail-page__offline-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.contest-detail-page__offline-title {
+  display: block;
+  font-size: $jst-font-base;
+  font-weight: $jst-weight-semibold;
+  color: $jst-text-primary;
+}
+
+.contest-detail-page__offline-desc {
+  display: block;
+  margin-top: 4rpx;
+  font-size: $jst-font-xs;
+  color: $jst-text-secondary;
+}
+
+.contest-detail-page__offline-arrow {
+  font-size: $jst-font-xl;
+  color: $jst-text-placeholder;
+  flex-shrink: 0;
+}
+
+.contest-detail-page__offline-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $jst-space-sm;
+  margin-top: $jst-space-md;
+}
+
+.contest-detail-page__offline-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6rpx $jst-space-md;
+  border-radius: $jst-radius-round;
+  font-size: $jst-font-xs;
+  font-weight: $jst-weight-medium;
+}
+
+.contest-detail-page__offline-tag--danger {
+  background: $jst-danger-light;
+  color: $jst-danger;
+  animation: offlinePulse 2s $jst-easing infinite;
+}
+
+.contest-detail-page__offline-tag--warning {
+  background: $jst-warning-light;
+  color: $jst-warning;
+}
+
+.contest-detail-page__offline-tag--info {
+  background: $jst-brand-light;
+  color: $jst-brand;
+}
+
+@keyframes offlinePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.35); }
+  50% { transform: scale(1.03); box-shadow: 0 0 0 6rpx rgba(255, 77, 79, 0); }
 }
 
 .contest-detail-page__feature-tag-icon {
