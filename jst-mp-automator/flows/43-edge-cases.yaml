@@ -2,11 +2,11 @@ name: 边界场景验证
 description: 验证已关闭赛事、空列表、过期场景等边界情况的用户体验
 login: MOCK_1001
 preconditions:
-  - "contestId=8202 赛事处于已结束或已关闭状态"
+  - "contestId=8804 赛事处于已结束或已关闭状态"
 steps:
   - name: 查看已关闭赛事详情
     action: navigate
-    path: /pages-sub/contest/detail?id=8202
+    path: /pages-sub/contest/detail?id=8804
     wait: 2000
     check:
       - screenshot: true

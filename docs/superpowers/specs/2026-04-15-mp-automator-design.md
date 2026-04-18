@@ -660,6 +660,17 @@ D:\coding\jst_v1\
 
 ---
 
+Session name: /rename to add a name
+Session ID: 4d5fef90-de76-4556-a4b6-394e9ee72cce
+
+
+然后重启 Claude Code 让它加载 .mcp.json 中注册的 MCP server。之后你就可以说：
+
+- "用 mp_query_db 查一下赛事数量"
+- "用 mp_launch 连接开发者工具"
+- "用 mp_run_flow 跑 04-browse-home 链路"
+- "跑全量回归"
+
 ## 十三、风险与缓解
 
 | 风险 | 缓解措施 |

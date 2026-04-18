@@ -37,8 +37,7 @@ export async function handler(args) {
 
   // Inject token into mini program storage
   const mp = bot.getMiniProgram();
-  const page = await mp.currentPage();
-  await page.evaluate((t) => {
+  await mp.evaluate((t) => {
     // eslint-disable-next-line no-undef
     wx.setStorageSync('jst-token', t);
   }, token);

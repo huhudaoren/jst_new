@@ -1,5 +1,7 @@
 import automator from 'miniprogram-automator';
+import { spawn } from 'child_process';
 import { writeFile } from 'fs/promises';
+import net from 'net';
 import config from './config.js';
 
 const TAB_PAGES = [
@@ -11,6 +13,7 @@ const TAB_PAGES = [
 ];
 
 let miniProgram = null;
+let cliProcess = null;
 
 /**
  * Promise-based sleep
@@ -47,8 +50,55 @@ async function withRetry(fn, label = 'action') {
 }
 
 /**
+ * Check if a TCP port is open.
+ */
+function isPortOpen(port, host = '127.0.0.1') {
+  return new Promise(resolve => {
+    const sock = new net.Socket();
+    sock.setTimeout(1000);
+    sock.once('connect', () => { sock.destroy(); resolve(true); });
+    sock.once('error', () => { sock.destroy(); resolve(false); });
+    sock.once('timeout', () => { sock.destroy(); resolve(false); });
+    sock.connect(port, host);
+  });
+}
+
+/**
+ * Launch CLI auto command with shell:true (Node.js 24 .bat fix),
+ * wait for WebSocket port, then connect via automator.connect().
+ */
+async function launchViaShell() {
+  const port = config.automatorPort;
+  console.error(`[automator] spawning CLI auto on port ${port} (shell mode)...`);
+
+  cliProcess = spawn(
+    config.devtoolsCliPath,
+    ['auto', '--project', config.projectPath, '--auto-port', String(port)],
+    { stdio: 'ignore', shell: true, detached: true }
+  );
+  cliProcess.unref();
+  cliProcess.on('error', e => console.error(`[automator] cli error: ${e.message}`));
+
+  // Wait up to 30s for the WebSocket port to open
+  const deadline = Date.now() + 30000;
+  while (Date.now() < deadline) {
+    if (await isPortOpen(port)) {
+      console.error(`[automator] port ${port} is open, connecting...`);
+      await sleep(2000); // give it a moment to stabilize
+      miniProgram = await automator.connect({ wsEndpoint: `ws://127.0.0.1:${port}` });
+      console.error('[automator] connected successfully');
+      return miniProgram;
+    }
+    await sleep(1000);
+  }
+  throw new Error(`Timed out waiting for WebSocket port ${port}`);
+}
+
+/**
  * Connect to or launch WeChat DevTools via miniprogram-automator.
- * If config.wsEndpoint is set, uses automator.connect(); otherwise automator.launch().
+ * If config.wsEndpoint is set, uses automator.connect().
+ * Otherwise spawns CLI with shell:true (workaround for Node.js 24 + .bat)
+ * then connects via WebSocket.
  */
 export async function launch() {
   if (miniProgram) {
@@ -61,17 +111,11 @@ export async function launch() {
     miniProgram = await automator.connect({
       wsEndpoint: config.wsEndpoint,
     });
-  } else {
-    console.error(`[automator] launching DevTools from ${config.devtoolsCliPath}`);
-    miniProgram = await automator.launch({
-      cliPath: config.devtoolsCliPath,
-      projectPath: config.projectPath,
-      port: config.automatorPort,
-    });
+    console.error('[automator] connected successfully');
+    return miniProgram;
   }
 
-  console.error('[automator] connected successfully');
-  return miniProgram;
+  return await launchViaShell();
 }
 
 /**
@@ -143,13 +187,12 @@ export async function screenshot(savePath) {
   await sleep(config.waitBeforeScreenshot);
 
   return await withRetry(async () => {
-    const page = await mp.currentPage();
     if (savePath) {
       console.error(`[automator] screenshot -> ${savePath}`);
-      await page.screenshot({ path: savePath });
+      await mp.screenshot({ path: savePath });
       return savePath;
     } else {
-      const buf = await page.screenshot();
+      const buf = await mp.screenshot();
       if (Buffer.isBuffer(buf)) {
         return buf.toString('base64');
       }
@@ -197,9 +240,9 @@ export async function scrollPage(direction = 'down', distance = 300) {
   const mp = getMiniProgram();
   await withRetry(async () => {
     const page = await mp.currentPage();
-    const scrollTop = direction === 'down' ? distance : -distance;
+    const offset = direction === 'down' ? distance : -distance;
     console.error(`[automator] scroll ${direction} by ${distance}px`);
-    await page.scroll(0, scrollTop);
+    await page.scrollTop(offset);
   }, `scrollPage(${direction})`);
 }
 
@@ -255,8 +298,7 @@ export async function getElement(selector) {
 export async function evaluate(fn, ...args) {
   const mp = getMiniProgram();
   return await withRetry(async () => {
-    const page = await mp.currentPage();
-    return await page.evaluate(fn, ...args);
+    return await mp.evaluate(fn, ...args);
   }, 'evaluate');
 }
 

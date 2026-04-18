@@ -13,7 +13,7 @@ export const inputSchema = z.object({
 export async function handler(args) {
   await bot.launch();
   const page = await bot.getCurrentPage();
-  const path = await page.path();
+  const path = page.path;
   return {
     content: [{ type: 'text', text: `DevTools connected. Current page: ${path}` }],
   };

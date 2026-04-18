@@ -2,17 +2,17 @@ name: 赛事报名（付费赛事）
 description: 验证付费赛事报名的完整流程——参赛人选择、动态表单、费用展示、提交
 login: MOCK_1001
 precondition:
-  - sql: "SELECT COUNT(*) as cnt FROM jst_contest WHERE contest_id = 8201 AND status = 'enrolling' AND del_flag = '0'"
+  - sql: "SELECT COUNT(*) as cnt FROM jst_contest WHERE contest_id = 8801 AND status = 'enrolling' AND del_flag = '0'"
     expect: "cnt >= 1"
   - sql: "SELECT COUNT(*) as cnt FROM jst_participant WHERE user_id = 1001 AND del_flag = '0'"
     expect: "cnt >= 1"
-    fix_sql: "INSERT INTO jst_participant (participant_id, user_id, name, gender, age, school, class_name, create_by, create_time, del_flag) VALUES (3001, 1001, '测试学生A', 'male', 12, '测试小学', '六年级1班', 'fixture', NOW(), '0') ON DUPLICATE KEY UPDATE del_flag = '0'"
+    fix_sql: "INSERT INTO jst_participant (participant_id, user_id, participant_type, name, gender, age, school, class_name, claim_status, claimed_user_id, create_by, create_time, del_flag) VALUES (3901, 1001, 'registered_participant', '测试学生A', 1, 12, '测试小学', '六年级1班', 'manual_claimed', 1001, 'fixture', NOW(), '0') ON DUPLICATE KEY UPDATE del_flag = '0'"
 steps:
   - name: 进入报名页面
     action: navigate
     path: /pages-sub/contest/enroll
     query:
-      contestId: "8201"
+      contestId: "8801"
     wait: 2500
     check:
       - screenshot: true

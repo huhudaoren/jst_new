@@ -4,7 +4,7 @@ login: MOCK_1001
 precondition:
   - sql: "SELECT COUNT(*) as cnt FROM jst_contest WHERE status = 'enrolling' AND del_flag = '0'"
     expect: "cnt >= 1"
-    fix_sql: "UPDATE jst_contest SET status = 'enrolling' WHERE contest_id = 8201 AND del_flag = '0'"
+    fix_sql: "UPDATE jst_contest SET status = 'enrolling' WHERE contest_id = 8801 AND del_flag = '0'"
 steps:
   - name: 进入赛事列表页
     action: reLaunch

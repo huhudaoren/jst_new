@@ -10,7 +10,7 @@ steps:
       - screenshot: true
       - element: ".login-page__title"
         expect: exists
-      - element: ".login-page__button--wx"
+      - element: ".t-login-wx"
         expect: exists
       - product_review:
           - "用户第一次打开登录页，品牌Logo和名称是否清晰可辨，能否立刻理解这是什么产品？"
@@ -32,7 +32,7 @@ steps:
     action: wait
     wait: 500
     check:
-      - element: ".login-page__button--dev"
+      - element: ".t-login-mock-channel"
         expect: exists
       - element: ".login-page__card-title"
         expect: exists
@@ -42,7 +42,7 @@ steps:
 
   - name: 执行Mock登录并验证跳转
     action: tap
-    selector: ".login-page__button--dev"
+    selector: ".t-login-mock-student"
     wait: 3000
     check:
       - screenshot: true

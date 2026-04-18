@@ -19,7 +19,7 @@ export async function handler(args) {
     await bot.navigateTo(args.path, args.query || {});
   }
   const page = await bot.getCurrentPage();
-  const currentPath = await page.path();
+  const currentPath = page.path;
   return {
     content: [{ type: 'text', text: `Navigated. Current page: ${currentPath}` }],
   };
