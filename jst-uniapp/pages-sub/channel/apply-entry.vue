@@ -64,7 +64,14 @@ import { getMyChannelApply } from '@/api/channel'
 export default {
   data() {
     return {
-      skeletonShow: true // [visual-effect]
+      skeletonShow: true, // [visual-effect]
+      inviteCode: ''
+    }
+  },
+  onLoad(query) {
+    // 分享链接携带邀请码透传到填表页
+    if (query && query.invite_code) {
+      this.inviteCode = query.invite_code
     }
   },
   onShow() { this.checkExisting() },
@@ -78,7 +85,9 @@ export default {
       } catch (e) {}
     },
     go(type) {
-      uni.navigateTo({ url: '/pages-sub/channel/apply-form?channelType=' + type })
+      let url = '/pages-sub/channel/apply-form?channelType=' + type
+      if (this.inviteCode) url += '&invite_code=' + encodeURIComponent(this.inviteCode)
+      uni.navigateTo({ url })
     }
   }
 }

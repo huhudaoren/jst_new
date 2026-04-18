@@ -194,4 +194,35 @@
          GROUP BY business_type
     </select>
 
+    <!-- admin 详情：按月结单查关联 ledger -->
+    <select id="selectBySettlementId" resultMap="JstSalesCommissionLedgerResult">
+        SELECT <include refid="cols"/> FROM jst_sales_commission_ledger
+         WHERE settlement_id = #{settlementId}
+         ORDER BY create_time DESC
+    </select>
+
+    <!-- Dashboard：月度汇总 -->
+    <select id="aggregateMonthSummary" resultType="java.util.LinkedHashMap">
+        SELECT
+            COUNT(DISTINCT order_id) AS orderCount,
+            COALESCE(SUM(base_amount), 0) AS gmv,
+            COALESCE(SUM(amount), 0) AS commissionCost
+          FROM jst_sales_commission_ledger
+         WHERE create_time &gt;= #{periodStart} AND create_time &lt; #{periodEnd}
+    </select>
+
+    <!-- Dashboard：销售排行榜（JOIN jst_sales 拿 sales_name） -->
+    <select id="selectSalesRanking" resultType="java.util.LinkedHashMap">
+        SELECT l.sales_id AS salesId,
+               s.sales_name AS salesName,
+               COUNT(DISTINCT l.order_id) AS orderCount,
+               COALESCE(SUM(l.amount), 0) AS commission
+          FROM jst_sales_commission_ledger l
+          LEFT JOIN jst_sales s ON s.sales_id = l.sales_id
+         WHERE l.create_time &gt;= #{periodStart} AND l.create_time &lt; #{periodEnd}
+         GROUP BY l.sales_id, s.sales_name
+         ORDER BY commission DESC
+         LIMIT #{limit}
+    </select>
+
 </mapper>

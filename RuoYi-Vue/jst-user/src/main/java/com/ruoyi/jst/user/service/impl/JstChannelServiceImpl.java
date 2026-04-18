@@ -52,7 +52,7 @@ public class JstChannelServiceImpl implements IJstChannelService
 
     /**
      * 新增渠道方档案
-     * 
+     *
      * @param jstChannel 渠道方档案
      * @return 结果
      */
@@ -61,16 +61,25 @@ public class JstChannelServiceImpl implements IJstChannelService
     public int insertJstChannel(JstChannel jstChannel)
     {
         jstChannel.setCreateTime(DateUtils.getNowDate());
+
+        // 暂存 filledInviteCode / businessNo（insert 前清空 invite_code，
+        // 防止上级邀请码污染自己的 invite_code 字段；
+        // 自己的邀请码将由 ChannelInviteBindingListener → InviteCodeService AFTER_COMMIT 生成并回写）。
+        String filledInviteCode = jstChannel.getInviteCode();
+        String businessNo = jstChannel.getBusinessNo();
+        jstChannel.setInviteCode(null);  // 自己的邀请码等 listener 生成
+
         int rows = jstChannelMapper.insertJstChannel(jstChannel);
-        // 发布渠道注册事件 → 触发销售自动绑定 (plan-02 Task 7 SalesAutoBindingService)
-        // 以及未来 plan-04 的渠道邀请关系建立 (ChannelInviteBindingListener)。
-        // businessNo / inviteCode 暂传 null，plan-04 Task 8 wire DTO 字段后填入。
+
+        // 发布渠道注册事件 → 触发：
+        //   1. SalesAutoBindingListener (Order=0): 销售自动绑定 (plan-02)
+        //   2. ChannelInviteBindingListener (Order=20): 生成邀请码 + 建立邀请关系 (plan-04)
         if (rows > 0 && jstChannel.getChannelId() != null) {
             eventPublisher.publishEvent(new ChannelRegisteredEvent(this,
                 jstChannel.getChannelId(),
                 jstChannel.getContactMobile(),   // 渠道联系手机号
-                null,   // filledBusinessNo: plan-04 wire
-                null    // filledInviteCode: plan-04 wire
+                businessNo,                       // filledBusinessNo: 销售推荐码
+                filledInviteCode                  // filledInviteCode: 上级渠道邀请码
             ));
         }
         return rows;

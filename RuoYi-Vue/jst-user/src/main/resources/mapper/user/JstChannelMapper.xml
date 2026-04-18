@@ -29,6 +29,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="businessNo"    column="business_no"    />
+        <result property="inviteCode"    column="invite_code"    />
+        <result property="parentInviteId"    column="parent_invite_id"    />
+        <result property="parentInviteAttempted"    column="parent_invite_attempted"    />
+        <result property="isOfficial"    column="is_official"    />
         <result property="userName"    column="user_name_"    />
     </resultMap>
 
@@ -161,4 +166,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{channelId}
         </foreach>
     </delete>
+
+    <select id="selectByInviteCode" parameterType="String" resultMap="JstChannelResult">
+        <include refid="selectJstChannelVo"/>
+        where t.invite_code = #{inviteCode}
+    </select>
+
+    <update id="updateInviteCode">
+        UPDATE jst_channel SET invite_code = #{inviteCode}, update_time = NOW()
+        WHERE channel_id = #{channelId}
+    </update>
+
+    <update id="updateParentInviteAttempted">
+        UPDATE jst_channel SET parent_invite_attempted = #{inviteCode}, update_time = NOW()
+        WHERE channel_id = #{channelId}
+    </update>
+
+    <update id="updateParentInviteId">
+        UPDATE jst_channel SET parent_invite_id = #{parentInviteId}, update_time = NOW()
+        WHERE channel_id = #{channelId}
+    </update>
+
 </mapper>

@@ -92,6 +92,21 @@ public class JstChannel extends BaseEntity
     /** 逻辑删除：0存在 2删除 */
     private String delFlag;
 
+    /** 销售业务编号（渠道注册时填写的销售推荐码，plan-02 自动绑定用） */
+    private String businessNo;
+
+    /** 本渠道自己的邀请码（8位，由 InviteCodeService 生成）：invite_code */
+    private String inviteCode;
+
+    /** 上级邀请关系 ID，FK→jst_channel_invite.invite_id */
+    private Long parentInviteId;
+
+    /** 注册时填写的上级邀请码（M1 互斥时无法建关系，记录留痕） */
+    private String parentInviteAttempted;
+
+    /** 是否官方渠道：0否 1是（官方渠道不充当邀请方） */
+    private Integer isOfficial;
+
     /** 关联用户昵称（JOIN查出，非持久化） */
     private String userName;
 
@@ -275,15 +290,30 @@ public class JstChannel extends BaseEntity
         return bankName;
     }
 
-    public void setDelFlag(String delFlag) 
+    public void setDelFlag(String delFlag)
     {
         this.delFlag = delFlag;
     }
 
-    public String getDelFlag() 
+    public String getDelFlag()
     {
         return delFlag;
     }
+
+    public void setBusinessNo(String businessNo) { this.businessNo = businessNo; }
+    public String getBusinessNo() { return businessNo; }
+
+    public void setInviteCode(String inviteCode) { this.inviteCode = inviteCode; }
+    public String getInviteCode() { return inviteCode; }
+
+    public void setParentInviteId(Long parentInviteId) { this.parentInviteId = parentInviteId; }
+    public Long getParentInviteId() { return parentInviteId; }
+
+    public void setParentInviteAttempted(String parentInviteAttempted) { this.parentInviteAttempted = parentInviteAttempted; }
+    public String getParentInviteAttempted() { return parentInviteAttempted; }
+
+    public void setIsOfficial(Integer isOfficial) { this.isOfficial = isOfficial; }
+    public Integer getIsOfficial() { return isOfficial; }
 
     public void setUserName(String userName)
     {

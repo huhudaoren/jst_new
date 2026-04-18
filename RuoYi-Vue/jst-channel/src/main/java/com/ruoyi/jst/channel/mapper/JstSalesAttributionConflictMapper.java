@@ -9,4 +9,7 @@ public interface JstSalesAttributionConflictMapper {
     int insertJstSalesAttributionConflict(JstSalesAttributionConflict row);
     int updateJstSalesAttributionConflict(JstSalesAttributionConflict row);
     int deleteJstSalesAttributionConflictByConflictId(Long conflictId);
+
+    /** 按状态查冲突列表（admin 用） */
+    List<JstSalesAttributionConflict> selectByStatus(@org.apache.ibatis.annotations.Param("status") String status);
 }

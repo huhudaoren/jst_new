@@ -124,4 +124,8 @@
          WHERE status = 'resigned_pending_settle' AND transition_end_date &lt;= NOW()
     </select>
 
+    <select id="countActive" resultType="int">
+        SELECT COUNT(*) FROM jst_sales WHERE status = 'active'
+    </select>
+
 </mapper>

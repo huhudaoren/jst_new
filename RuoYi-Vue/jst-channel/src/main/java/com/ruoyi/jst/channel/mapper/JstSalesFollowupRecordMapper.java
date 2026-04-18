@@ -28,4 +28,12 @@ public interface JstSalesFollowupRecordMapper {
     List<JstSalesFollowupRecord> selectDueReminders(
             @Param("startOfDay") Date startOfDay,
             @Param("endOfDay") Date endOfDay);
+
+    /**
+     * Dashboard：各销售本月跟进笔数 + 覆盖渠道数。
+     * 返回 map keys: salesId, salesName(JOIN), followupCount, coveredChannelCount。
+     */
+    List<java.util.Map<String, Object>> aggregateFollowupActivity(
+            @Param("periodStart") Date periodStart,
+            @Param("periodEnd") Date periodEnd);
 }

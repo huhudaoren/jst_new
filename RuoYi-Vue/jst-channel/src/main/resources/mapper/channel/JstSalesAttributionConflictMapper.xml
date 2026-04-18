@@ -65,4 +65,12 @@
         DELETE FROM jst_sales_attribution_conflict WHERE conflict_id = #{conflictId}
     </delete>
 
+    <select id="selectByStatus" resultMap="JstSalesAttributionConflictResult">
+        SELECT <include refid="cols"/> FROM jst_sales_attribution_conflict
+        <where>
+            <if test="status != null and status != ''">AND status = #{status}</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
 </mapper>

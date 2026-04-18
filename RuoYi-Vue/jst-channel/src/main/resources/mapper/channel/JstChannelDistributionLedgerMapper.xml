@@ -77,4 +77,61 @@
         DELETE FROM jst_channel_distribution_ledger WHERE ledger_id = #{ledgerId}
     </delete>
 
+
+    <insert id="batchInsert">
+        INSERT INTO jst_channel_distribution_ledger (
+            ledger_id, inviter_channel_id, invitee_channel_id, order_id, order_no,
+            base_amount, applied_rate, raw_amount, compress_ratio, amount, status,
+            accrue_at, accrued_at, create_time
+        ) VALUES
+        <foreach collection="list" item="r" separator=",">
+        (
+            #{r.ledgerId}, #{r.inviterChannelId}, #{r.inviteeChannelId}, #{r.orderId}, #{r.orderNo},
+            #{r.baseAmount}, #{r.appliedRate}, #{r.rawAmount}, #{r.compressRatio}, #{r.amount}, #{r.status},
+            #{r.accrueAt}, #{r.accruedAt}, NOW()
+        )
+        </foreach>
+    </insert>
+
+    <select id="selectPendingForAccrue" resultMap="JstChannelDistributionLedgerResult">
+        SELECT <include refid="cols"/> FROM jst_channel_distribution_ledger
+         WHERE status = 'pending'
+           AND accrue_at &lt;= NOW()
+         ORDER BY accrue_at ASC
+         LIMIT #{limit}
+    </select>
+
+    <update id="markAccruedBatch">
+        UPDATE jst_channel_distribution_ledger
+           SET status = 'accrued', accrued_at = NOW(), update_time = NOW()
+         WHERE ledger_id IN
+        <foreach collection="ledgerIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="cancelPendingByOrder">
+        UPDATE jst_channel_distribution_ledger
+           SET status = 'cancelled', update_time = NOW()
+         WHERE order_id = #{orderId}
+           AND status = 'pending'
+    </update>
+
+    <select id="selectByInviter" resultMap="JstChannelDistributionLedgerResult">
+        SELECT <include refid="cols"/> FROM jst_channel_distribution_ledger
+         WHERE inviter_channel_id = #{inviterChannelId}
+        <if test="status != null and status != ''">
+           AND status = #{status}
+        </if>
+         ORDER BY create_time DESC
+    </select>
+
+    <select id="sumAmountByInviter" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0) FROM jst_channel_distribution_ledger
+         WHERE inviter_channel_id = #{inviterChannelId}
+        <if test="status != null and status != ''">
+           AND status = #{status}
+        </if>
+    </select>
+
 </mapper>
