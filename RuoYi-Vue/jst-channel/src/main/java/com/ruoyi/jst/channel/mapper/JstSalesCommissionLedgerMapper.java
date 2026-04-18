@@ -26,4 +26,11 @@ public interface JstSalesCommissionLedgerMapper {
 
     /** 退款触发：撤销某订单所有 pending ledger → cancelled */
     int cancelPendingByOrder(@Param("orderId") Long orderId);
+
+    /**
+     * 兜底补偿查询：最近 N 天 paid 且 channelId 非空 但尚无 ledger 行的订单。
+     * 返回字段 map: orderId/orderNo/channelId/businessType/netPayAmount/payTime。
+     * 由 SalesCommissionRepairTask (每小时跑) 调用。
+     */
+    List<java.util.Map<String, Object>> selectPaidOrdersNeedRepair();
 }
