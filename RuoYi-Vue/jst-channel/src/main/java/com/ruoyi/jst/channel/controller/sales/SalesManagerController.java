@@ -4,6 +4,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.jst.channel.domain.JstSales;
 import com.ruoyi.jst.channel.mapper.JstSalesCommissionLedgerMapper;
+import com.ruoyi.jst.channel.service.ManagerDashboardService;
 import com.ruoyi.jst.channel.service.SalesService;
 import com.ruoyi.jst.common.util.SalesScopeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,9 @@ public class SalesManagerController extends BaseController {
     @Autowired
     private JstSalesCommissionLedgerMapper ledgerMapper;
 
+    @Autowired
+    private ManagerDashboardService managerDashboardService;
+
     /**
      * 团队成员列表（含当月订单数/GMV/提成简要聚合）。
      * admin / jst_operator 返所有销售；sales_manager 仅返下属。
@@ -82,6 +86,16 @@ public class SalesManagerController extends BaseController {
             result.add(row);
         }
         return AjaxResult.success(result);
+    }
+
+    /**
+     * 主管团队看板聚合（overview + ranking + healthAlerts）
+     */
+    @GetMapping("/dashboard")
+    public AjaxResult dashboard(@RequestParam(required = false) String month) {
+        Long salesId = SalesScopeUtils.currentSalesIdOrAllowAdminView();
+        Map<String, Object> data = managerDashboardService.aggregate(salesId, month);
+        return AjaxResult.success(data);
     }
 
     // ===== private helpers =====
