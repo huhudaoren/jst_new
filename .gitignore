@@ -19,3 +19,25 @@ tmp-captcha.jpg
 *.err.log
 *.out.log
 .m2repo/
+
+# 本地临时/备份
+tmp/
+backups/
+CLAUDE[0-9]*.md
+CLAUDE-backup*.md
+
+# 本地工具脚本 & 一次性查询
+scripts/check-tokens-import.py
+scripts/rebuild-local-db.ps1
+test/_*.py
+
+# 本地 DB 重建 / 清洗 / demo 数据（不进主仓库）
+架构设计/ddl/00-rebuild-local-db.sql
+架构设计/ddl/91-clean-business-data-local.sql
+架构设计/ddl/92-demo-data-local.sql
+
+# MCP 本地状态和启动器
+.mcp.json
+jst-mp-automator/MCP-CHAIN-STATE.md
+jst-mp-automator/launch-devtools.bat
+jst-mp-automator/scripts/
