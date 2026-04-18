@@ -75,4 +75,23 @@
          LIMIT 1
     </select>
 
+
+    <select id="selectActiveByInvitee" resultMap="JstChannelInviteResult">
+        SELECT <include refid="cols"/> FROM jst_channel_invite
+         WHERE invitee_channel_id = #{inviteeChannelId}
+           AND status = 'active'
+         LIMIT 1
+    </select>
+
+    <select id="selectByInviter" resultMap="JstChannelInviteResult">
+        SELECT <include refid="cols"/> FROM jst_channel_invite
+         WHERE inviter_channel_id = #{inviterChannelId}
+         ORDER BY invited_at DESC
+    </select>
+
+    <update id="unbindActive">
+        UPDATE jst_channel_invite SET status = 'unbound', update_time = NOW()
+         WHERE invite_id = #{inviteId}
+    </update>
+
 </mapper>
