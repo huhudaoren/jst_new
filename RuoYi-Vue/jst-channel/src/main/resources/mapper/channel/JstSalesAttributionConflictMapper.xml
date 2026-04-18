@@ -17,6 +17,10 @@
         <result property="updateTime"        column="update_time"/>
     </resultMap>
 
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSalesAttributionConflict" id="JstSalesAttributionConflictListResult" extends="JstSalesAttributionConflictResult">
+        <result property="channelName" column="channel_name_join"/>
+    </resultMap>
+
     <sql id="cols">
         conflict_id, channel_id, candidate_sales_ids, reason, status,
         resolved_by, resolved_at, resolution_remark, create_time, update_by, update_time
@@ -26,13 +30,16 @@
         SELECT <include refid="cols"/> FROM jst_sales_attribution_conflict WHERE conflict_id = #{conflictId}
     </select>
 
-    <select id="selectJstSalesAttributionConflictList" parameterType="com.ruoyi.jst.channel.domain.JstSalesAttributionConflict" resultMap="JstSalesAttributionConflictResult">
-        SELECT <include refid="cols"/> FROM jst_sales_attribution_conflict
+    <select id="selectJstSalesAttributionConflictList" parameterType="com.ruoyi.jst.channel.domain.JstSalesAttributionConflict" resultMap="JstSalesAttributionConflictListResult">
+        SELECT f.*,
+               ch.channel_name AS channel_name_join
+          FROM jst_sales_attribution_conflict f
+          LEFT JOIN jst_channel ch ON f.channel_id = ch.channel_id AND ch.del_flag = '0'
         <where>
-            <if test="channelId != null">AND channel_id = #{channelId}</if>
-            <if test="status != null and status != ''">AND status = #{status}</if>
+            <if test="channelId != null">AND f.channel_id = #{channelId}</if>
+            <if test="status != null and status != ''">AND f.status = #{status}</if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY f.create_time DESC
     </select>
 
     <insert id="insertJstSalesAttributionConflict" parameterType="com.ruoyi.jst.channel.domain.JstSalesAttributionConflict">
@@ -65,12 +72,15 @@
         DELETE FROM jst_sales_attribution_conflict WHERE conflict_id = #{conflictId}
     </delete>
 
-    <select id="selectByStatus" resultMap="JstSalesAttributionConflictResult">
-        SELECT <include refid="cols"/> FROM jst_sales_attribution_conflict
+    <select id="selectByStatus" resultMap="JstSalesAttributionConflictListResult">
+        SELECT f.*,
+               ch.channel_name AS channel_name_join
+          FROM jst_sales_attribution_conflict f
+          LEFT JOIN jst_channel ch ON f.channel_id = ch.channel_id AND ch.del_flag = '0'
         <where>
-            <if test="status != null and status != ''">AND status = #{status}</if>
+            <if test="status != null and status != ''">AND f.status = #{status}</if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY f.create_time DESC
     </select>
 
 </mapper>

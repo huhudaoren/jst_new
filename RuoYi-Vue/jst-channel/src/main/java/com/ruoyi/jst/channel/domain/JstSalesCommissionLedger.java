@@ -23,6 +23,8 @@ public class JstSalesCommissionLedger extends BaseEntity {
     private Date accrueAt;
     private Date accruedAt;
     private Long settlementId;
+    private String salesName;
+    private String channelName;
 
     public Long getLedgerId() { return ledgerId; }
     public void setLedgerId(Long ledgerId) { this.ledgerId = ledgerId; }
@@ -56,4 +58,8 @@ public class JstSalesCommissionLedger extends BaseEntity {
     public void setAccruedAt(Date accruedAt) { this.accruedAt = accruedAt; }
     public Long getSettlementId() { return settlementId; }
     public void setSettlementId(Long settlementId) { this.settlementId = settlementId; }
+    public String getSalesName() { return salesName; }
+    public void setSalesName(String salesName) { this.salesName = salesName; }
+    public String getChannelName() { return channelName; }
+    public void setChannelName(String channelName) { this.channelName = channelName; }
 }

@@ -20,6 +20,10 @@
         <result property="updateTime"    column="update_time"/>
     </resultMap>
 
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSalesCommissionSettlement" id="JstSalesCommissionSettlementListResult" extends="JstSalesCommissionSettlementResult">
+        <result property="salesName" column="sales_name_join"/>
+    </resultMap>
+
     <sql id="cols">
         settlement_id, sales_id, period, total_count, total_amount, status,
         approved_by, approved_at, paid_at, pay_voucher, reject_reason,
@@ -30,19 +34,22 @@
         SELECT <include refid="cols"/> FROM jst_sales_commission_settlement WHERE settlement_id = #{settlementId}
     </select>
 
-    <select id="selectJstSalesCommissionSettlementList" parameterType="com.ruoyi.jst.channel.domain.JstSalesCommissionSettlement" resultMap="JstSalesCommissionSettlementResult">
-        SELECT <include refid="cols"/> FROM jst_sales_commission_settlement
+    <select id="selectJstSalesCommissionSettlementList" parameterType="com.ruoyi.jst.channel.domain.JstSalesCommissionSettlement" resultMap="JstSalesCommissionSettlementListResult">
+        SELECT s.*,
+               sa.sales_name AS sales_name_join
+          FROM jst_sales_commission_settlement s
+          LEFT JOIN jst_sales sa ON s.sales_id = sa.sales_id
         <where>
-            <if test="salesId != null">AND sales_id = #{salesId}</if>
-            <if test="period != null and period != ''">AND period = #{period}</if>
-            <if test="status != null and status != ''">AND status = #{status}</if>
+            <if test="salesId != null">AND s.sales_id = #{salesId}</if>
+            <if test="period != null and period != ''">AND s.period = #{period}</if>
+            <if test="status != null and status != ''">AND s.status = #{status}</if>
             <!-- Plan-06 Task 21: 主管登录时 Controller 注入 scopeSalesIds 限制下属范围 -->
             <if test="params.scopeSalesIds != null and params.scopeSalesIds.size() > 0">
-                AND sales_id IN
+                AND s.sales_id IN
                 <foreach collection="params.scopeSalesIds" item="id" open="(" separator="," close=")">#{id}</foreach>
             </if>
         </where>
-        ORDER BY period DESC
+        ORDER BY s.period DESC
     </select>
 
     <insert id="insertJstSalesCommissionSettlement" parameterType="com.ruoyi.jst.channel.domain.JstSalesCommissionSettlement">

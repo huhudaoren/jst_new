@@ -20,6 +20,8 @@ public class JstChannelDistributionLedger extends BaseEntity {
     private String status;
     private Date accrueAt;
     private Date accruedAt;
+    private String inviterChannelName;
+    private String inviteeChannelName;
 
     public Long getLedgerId() { return ledgerId; }
     public void setLedgerId(Long ledgerId) { this.ledgerId = ledgerId; }
@@ -47,4 +49,8 @@ public class JstChannelDistributionLedger extends BaseEntity {
     public void setAccrueAt(Date accrueAt) { this.accrueAt = accrueAt; }
     public Date getAccruedAt() { return accruedAt; }
     public void setAccruedAt(Date accruedAt) { this.accruedAt = accruedAt; }
+    public String getInviterChannelName() { return inviterChannelName; }
+    public void setInviterChannelName(String inviterChannelName) { this.inviterChannelName = inviterChannelName; }
+    public String getInviteeChannelName() { return inviteeChannelName; }
+    public void setInviteeChannelName(String inviteeChannelName) { this.inviteeChannelName = inviteeChannelName; }
 }

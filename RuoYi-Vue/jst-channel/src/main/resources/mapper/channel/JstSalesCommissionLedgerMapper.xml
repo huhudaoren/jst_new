@@ -24,6 +24,11 @@
         <result property="updateTime"    column="update_time"/>
     </resultMap>
 
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSalesCommissionLedger" id="JstSalesCommissionLedgerListResult" extends="JstSalesCommissionLedgerResult">
+        <result property="salesName" column="sales_name_join"/>
+        <result property="channelName" column="channel_name_join"/>
+    </resultMap>
+
     <sql id="cols">
         ledger_id, sales_id, order_id, order_no, channel_id, binding_type, business_type,
         base_amount, applied_rate, raw_amount, compress_ratio, amount, status,
@@ -34,16 +39,21 @@
         SELECT <include refid="cols"/> FROM jst_sales_commission_ledger WHERE ledger_id = #{ledgerId}
     </select>
 
-    <select id="selectJstSalesCommissionLedgerList" parameterType="com.ruoyi.jst.channel.domain.JstSalesCommissionLedger" resultMap="JstSalesCommissionLedgerResult">
-        SELECT <include refid="cols"/> FROM jst_sales_commission_ledger
+    <select id="selectJstSalesCommissionLedgerList" parameterType="com.ruoyi.jst.channel.domain.JstSalesCommissionLedger" resultMap="JstSalesCommissionLedgerListResult">
+        SELECT l.*,
+               sa.sales_name AS sales_name_join,
+               ch.channel_name AS channel_name_join
+          FROM jst_sales_commission_ledger l
+          LEFT JOIN jst_sales sa ON l.sales_id = sa.sales_id
+          LEFT JOIN jst_channel ch ON l.channel_id = ch.channel_id AND ch.del_flag = '0'
         <where>
-            <if test="salesId != null">AND sales_id = #{salesId}</if>
-            <if test="channelId != null">AND channel_id = #{channelId}</if>
-            <if test="status != null and status != ''">AND status = #{status}</if>
-            <if test="settlementId != null">AND settlement_id = #{settlementId}</if>
-            <if test="businessType != null and businessType != ''">AND business_type = #{businessType}</if>
+            <if test="salesId != null">AND l.sales_id = #{salesId}</if>
+            <if test="channelId != null">AND l.channel_id = #{channelId}</if>
+            <if test="status != null and status != ''">AND l.status = #{status}</if>
+            <if test="settlementId != null">AND l.settlement_id = #{settlementId}</if>
+            <if test="businessType != null and businessType != ''">AND l.business_type = #{businessType}</if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY l.create_time DESC
     </select>
 
     <insert id="insertJstSalesCommissionLedger" parameterType="com.ruoyi.jst.channel.domain.JstSalesCommissionLedger">
@@ -201,10 +211,15 @@
     </select>
 
     <!-- admin 详情：按月结单查关联 ledger -->
-    <select id="selectBySettlementId" resultMap="JstSalesCommissionLedgerResult">
-        SELECT <include refid="cols"/> FROM jst_sales_commission_ledger
-         WHERE settlement_id = #{settlementId}
-         ORDER BY create_time DESC
+    <select id="selectBySettlementId" resultMap="JstSalesCommissionLedgerListResult">
+        SELECT l.*,
+               sa.sales_name AS sales_name_join,
+               ch.channel_name AS channel_name_join
+          FROM jst_sales_commission_ledger l
+          LEFT JOIN jst_sales sa ON l.sales_id = sa.sales_id
+          LEFT JOIN jst_channel ch ON l.channel_id = ch.channel_id AND ch.del_flag = '0'
+         WHERE l.settlement_id = #{settlementId}
+         ORDER BY l.create_time DESC
     </select>
 
     <!-- Dashboard：月度汇总 -->
