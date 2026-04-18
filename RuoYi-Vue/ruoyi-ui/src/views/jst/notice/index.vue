@@ -111,27 +111,38 @@
     >
       <div class="drawer-body">
         <el-form ref="form" :model="form" :rules="rules" :label-width="isMobile ? '90px' : '96px'">
-          <el-form-item label="标题" prop="title">
-            <el-input v-model="form.title" placeholder="请输入公告标题" />
-          </el-form-item>
-          <el-form-item label="分类" prop="category">
-            <el-select v-model="form.category" placeholder="请选择分类" class="full-width" @change="onCategoryChange">
-              <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="封面图" :prop="form.category === 'topic' ? 'coverImage' : ''">
-            <image-upload v-model="form.coverImage" :limit="1" />
-            <div v-if="form.category === 'topic'" class="field-tip">专题活动封面图必填，将在小程序首页展示。</div>
-          </el-form-item>
-          <el-form-item label="置顶">
-            <el-switch v-model="form.topFlag" :active-value="1" :inactive-value="0" />
-          </el-form-item>
-          <el-form-item v-if="form.category === 'topic'" label="跳转链接">
-            <el-input v-model="form.remark" placeholder="请输入跳转链接 URL" />
-          </el-form-item>
-          <el-form-item label="内容" prop="content">
-            <editor v-model="form.content" :min-height="280" />
-          </el-form-item>
+          <div class="form-section">
+            <div class="form-section__title">基本信息</div>
+            <el-form-item label="标题" prop="title">
+              <el-input v-model="form.title" placeholder="请输入公告标题" />
+            </el-form-item>
+            <el-form-item label="分类" prop="category">
+              <el-select v-model="form.category" placeholder="请选择分类" class="full-width" @change="onCategoryChange">
+                <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+          </div>
+          <el-divider />
+          <div class="form-section">
+            <div class="form-section__title">展示配置</div>
+            <el-form-item label="封面图" :prop="form.category === 'topic' ? 'coverImage' : ''">
+              <image-upload v-model="form.coverImage" :limit="1" />
+              <div v-if="form.category === 'topic'" class="field-tip">专题活动封面图必填，将在小程序首页展示。</div>
+            </el-form-item>
+            <el-form-item label="置顶">
+              <el-switch v-model="form.topFlag" :active-value="1" :inactive-value="0" />
+            </el-form-item>
+            <el-form-item v-if="form.category === 'topic'" label="跳转链接">
+              <el-input v-model="form.remark" placeholder="请输入跳转链接 URL" />
+            </el-form-item>
+          </div>
+          <el-divider />
+          <div class="form-section">
+            <div class="form-section__title">内容</div>
+            <el-form-item label="内容" prop="content">
+              <editor v-model="form.content" :min-height="280" />
+            </el-form-item>
+          </div>
         </el-form>
       </div>
       <div class="drawer-footer">
@@ -385,6 +396,31 @@ export default {
 
 .drawer-body {
   padding: 8px 20px 90px;
+}
+
+.form-section {
+  padding: 0 4px;
+}
+
+.form-section + .form-section {
+  margin-top: 4px;
+}
+
+.form-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 4px 0 14px;
+  padding-left: 10px;
+  border-left: 3px solid #409eff;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  .form-section__title {
+    font-size: 13px;
+    margin: 2px 0 10px;
+  }
 }
 
 .drawer-footer {

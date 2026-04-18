@@ -182,53 +182,101 @@
       </div>
     </el-drawer>
 
-    <el-dialog :title="title" :visible.sync="open" width="520px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="96px">
-        <el-form-item label="赛事ID" prop="contestId">
-          <el-input v-model="form.contestId" placeholder="请输入赛事ID" />
-        </el-form-item>
-        <el-form-item label="报名ID" prop="enrollId">
-          <el-input v-model="form.enrollId" placeholder="请输入报名ID" />
-        </el-form-item>
-        <el-form-item label="用户ID" prop="userId">
-          <el-input v-model="form.userId" placeholder="请输入用户ID" />
-        </el-form-item>
-        <el-form-item label="参赛人ID" prop="participantId">
-          <el-input v-model="form.participantId" placeholder="请输入参赛人ID" />
-        </el-form-item>
-        <el-form-item label="分数" prop="scoreValue">
-          <el-input v-model="form.scoreValue" placeholder="请输入分数" />
-        </el-form-item>
-        <el-form-item label="奖项" prop="awardLevel">
-          <el-input v-model="form.awardLevel" placeholder="请输入奖项等级" />
-        </el-form-item>
-        <el-form-item label="名次" prop="rankNo">
-          <el-input v-model="form.rankNo" placeholder="请输入名次" />
-        </el-form-item>
-        <el-form-item label="导入批次" prop="importBatchNo">
-          <el-input v-model="form.importBatchNo" placeholder="请输入导入批次号" />
-        </el-form-item>
-        <el-form-item label="审核状态" prop="auditStatus">
-          <el-select v-model="form.auditStatus" placeholder="请选择">
-            <el-option v-for="item in auditStatusOptions" :key="'f-a-' + item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="发布状态" prop="publishStatus">
-          <el-select v-model="form.publishStatus" placeholder="请选择">
-            <el-option v-for="item in publishStatusOptions" :key="'f-p-' + item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="发布时间" prop="publishTime">
-          <el-date-picker
-            v-model="form.publishTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择发布时间"
-          />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="请输入备注" />
-        </el-form-item>
+    <el-dialog :title="title" :visible.sync="open" :width="isMobile ? '100%' : '600px'" :fullscreen="isMobile" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" :label-width="isMobile ? '88px' : '96px'">
+        <div class="form-section">
+          <div class="form-section__title">关联信息</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="赛事ID" prop="contestId">
+                <el-input v-model="form.contestId" placeholder="请输入赛事ID" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="报名ID" prop="enrollId">
+                <el-input v-model="form.enrollId" placeholder="请输入报名ID" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="用户ID" prop="userId">
+                <el-input v-model="form.userId" placeholder="请输入用户ID" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="参赛人ID" prop="participantId">
+                <el-input v-model="form.participantId" placeholder="请输入参赛人ID" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">成绩与奖项</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="8">
+              <el-form-item label="分数" prop="scoreValue">
+                <el-input v-model="form.scoreValue" placeholder="请输入分数" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="8">
+              <el-form-item label="奖项" prop="awardLevel">
+                <el-input v-model="form.awardLevel" placeholder="请输入奖项等级" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="8">
+              <el-form-item label="名次" prop="rankNo">
+                <el-input v-model="form.rankNo" placeholder="请输入名次" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="导入批次" prop="importBatchNo">
+            <el-input v-model="form.importBatchNo" placeholder="请输入导入批次号" />
+          </el-form-item>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">审核与发布</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="审核状态" prop="auditStatus">
+                <el-select v-model="form.auditStatus" placeholder="请选择" class="full-width">
+                  <el-option v-for="item in auditStatusOptions" :key="'f-a-' + item.value" :label="item.label" :value="item.value" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="发布状态" prop="publishStatus">
+                <el-select v-model="form.publishStatus" placeholder="请选择" class="full-width">
+                  <el-option v-for="item in publishStatusOptions" :key="'f-p-' + item.value" :label="item.label" :value="item.value" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="发布时间" prop="publishTime">
+            <el-date-picker
+              v-model="form.publishTime"
+              type="date"
+              value-format="yyyy-MM-dd"
+              placeholder="请选择发布时间"
+              class="full-width"
+            />
+          </el-form-item>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">备注</div>
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="form.remark" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="请输入备注" />
+          </el-form-item>
+        </div>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -563,6 +611,35 @@ export default {
 
 .drawer-body {
   padding: 8px 16px 16px;
+}
+
+.form-section {
+  padding: 0 4px;
+}
+
+.form-section + .form-section {
+  margin-top: 4px;
+}
+
+.form-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 4px 0 14px;
+  padding-left: 10px;
+  border-left: 3px solid #409eff;
+  line-height: 1.2;
+}
+
+.full-width {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .form-section__title {
+    font-size: 13px;
+    margin: 2px 0 10px;
+  }
 }
 
 @media (max-width: 768px) {

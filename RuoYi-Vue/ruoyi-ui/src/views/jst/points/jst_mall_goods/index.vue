@@ -114,65 +114,86 @@
 
     <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" :width="isMobile ? '100%' : '660px'" :fullscreen="isMobile" append-to-body>
       <el-form ref="form" :model="form" :rules="formRules" :label-width="isMobile ? '84px' : '100px'">
-        <el-form-item label="商品名称" prop="goodsName">
-          <el-input v-model="form.goodsName" placeholder="请输入商品名称" />
-        </el-form-item>
-        <el-row :gutter="12">
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="商品类型" prop="goodsType">
-              <el-select v-model="form.goodsType" placeholder="请选择">
-                <el-option label="虚拟商品" value="virtual" />
-                <el-option label="实物商品" value="physical" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="角色限制" prop="roleLimit">
-              <el-select v-model="form.roleLimit" placeholder="请选择">
-                <el-option label="学生" value="student" />
-                <el-option label="渠道" value="channel" />
-                <el-option label="全部" value="both" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="封面图">
-          <image-upload v-model="form.coverImage" :limit="1" />
-        </el-form-item>
-        <el-form-item label="商品描述">
-          <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入商品描述" />
-        </el-form-item>
-        <el-row :gutter="12">
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="积分价格" prop="pointsPrice">
-              <el-input-number v-model="form.pointsPrice" :min="0" controls-position="right" class="full-width" />
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="现金补差" prop="cashPrice">
-              <el-input-number v-model="form.cashPrice" :min="0" :precision="2" controls-position="right" class="full-width" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="12">
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="库存" prop="stock">
-              <el-input-number v-model="form.stock" :min="0" controls-position="right" class="full-width" />
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="预警阈值" prop="stockWarning">
-              <el-input-number v-model="form.stockWarning" :min="0" controls-position="right" class="full-width" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="商品状态">
-          <el-select v-model="form.status" placeholder="请选择">
-            <el-option label="上架" value="on" />
-            <el-option label="下架" value="off" />
-            <el-option label="草稿" value="draft" />
-          </el-select>
-        </el-form-item>
+        <div class="form-section">
+          <div class="form-section__title">基本信息</div>
+          <el-form-item label="商品名称" prop="goodsName">
+            <el-input v-model="form.goodsName" placeholder="请输入商品名称" />
+          </el-form-item>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="商品类型" prop="goodsType">
+                <el-select v-model="form.goodsType" placeholder="请选择">
+                  <el-option label="虚拟商品" value="virtual" />
+                  <el-option label="实物商品" value="physical" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="角色限制" prop="roleLimit">
+                <el-select v-model="form.roleLimit" placeholder="请选择">
+                  <el-option label="学生" value="student" />
+                  <el-option label="渠道" value="channel" />
+                  <el-option label="全部" value="both" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">媒资与描述</div>
+          <el-form-item label="封面图">
+            <image-upload v-model="form.coverImage" :limit="1" />
+          </el-form-item>
+          <el-form-item label="商品描述">
+            <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入商品描述" />
+          </el-form-item>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">价格与库存</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="积分价格" prop="pointsPrice">
+                <el-input-number v-model="form.pointsPrice" :min="0" controls-position="right" class="full-width" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="现金补差" prop="cashPrice">
+                <el-input-number v-model="form.cashPrice" :min="0" :precision="2" controls-position="right" class="full-width" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="库存" prop="stock">
+                <el-input-number v-model="form.stock" :min="0" controls-position="right" class="full-width" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="预警阈值" prop="stockWarning">
+                <el-input-number v-model="form.stockWarning" :min="0" controls-position="right" class="full-width" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">上架状态</div>
+          <el-form-item label="商品状态">
+            <el-select v-model="form.status" placeholder="请选择">
+              <el-option label="上架" value="on" />
+              <el-option label="下架" value="off" />
+              <el-option label="草稿" value="draft" />
+            </el-select>
+          </el-form-item>
+        </div>
       </el-form>
       <div slot="footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
@@ -460,6 +481,24 @@ export default {
   gap: 6px;
 }
 
+.form-section {
+  padding: 0 4px;
+}
+
+.form-section + .form-section {
+  margin-top: 4px;
+}
+
+.form-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 4px 0 14px;
+  padding-left: 10px;
+  border-left: 3px solid #409eff;
+  line-height: 1.2;
+}
+
 @media (max-width: 768px) {
   .mall-goods-page {
     padding: 12px;
@@ -497,6 +536,11 @@ export default {
 
   .mobile-card__actions .el-button {
     min-height: 44px;
+  }
+
+  .form-section__title {
+    font-size: 13px;
+    margin: 2px 0 10px;
   }
 }
 </style>

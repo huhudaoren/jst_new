@@ -1,5 +1,20 @@
 <template>
   <div class="app-container jst-enroll-form-template-page">
+    <el-alert
+      class="deprecated-banner"
+      title="此页已弃用"
+      description="报名表单模板管理已迁移至新版「表单模板」可视化编辑器，请前往新版使用。本页仅保留只读数据查看。"
+      type="warning"
+      show-icon
+      :closable="false"
+    >
+      <template slot="default">
+        <div class="deprecated-action">
+          <el-button type="warning" size="small" icon="el-icon-right" @click="goNew">前往新版表单模板</el-button>
+        </div>
+      </template>
+    </el-alert>
+
     <div class="page-hero">
       <div>
         <p class="hero-eyebrow">报名配置</p>
@@ -352,6 +367,9 @@ export default {
     this.getList()
   },
   methods: {
+    goNew() {
+      this.$router.push('/jst/form-template')
+    },
     async getList() {
       this.loading = true
       try {
@@ -527,6 +545,15 @@ export default {
 .jst-enroll-form-template-page {
   background: #f6f8fb;
   min-height: calc(100vh - 84px);
+}
+
+.deprecated-banner {
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+.deprecated-action {
+  margin-top: 10px;
 }
 
 .page-hero {

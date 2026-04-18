@@ -105,50 +105,65 @@
     >
       <div class="drawer-body">
         <el-form ref="form" :model="form" :rules="formRules" :label-width="isMobile ? '88px' : '100px'">
-          <el-form-item label="权益名称" prop="rightsName">
-            <el-input v-model="form.rightsName" placeholder="请输入权益名称" />
-          </el-form-item>
-          <el-form-item label="类型" prop="rightsType">
-            <el-select v-model="form.rightsType" placeholder="请选择" class="full-width">
-              <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
-            </el-select>
-          </el-form-item>
-          <el-row :gutter="12">
-            <el-col :xs="24" :sm="12">
-              <el-form-item label="口径" prop="quotaMode">
-                <el-select v-model="form.quotaMode" placeholder="请选择" class="full-width">
-                  <el-option label="次数" value="times" />
-                  <el-option label="金额" value="amount" />
-                  <el-option label="周期" value="period" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12">
-              <el-form-item label="数值" prop="quotaValue">
-                <el-input-number v-model="form.quotaValue" :min="0" :precision="2" controls-position="right" class="full-width" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-form-item label="有效天数">
-            <el-input-number v-model="form.validDays" :min="0" controls-position="right" class="full-width" />
-          </el-form-item>
-          <el-form-item label="核销方式" prop="writeoffMode">
-            <el-select v-model="form.writeoffMode" placeholder="请选择" class="full-width">
-              <el-option label="线上自动" value="online_auto" />
-              <el-option label="人工审核" value="manual_review" />
-              <el-option label="线下确认" value="offline_confirm" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="适用角色">
-            <el-select v-model="form.applicableRole" placeholder="请选择" class="full-width">
-              <el-option label="学生" value="student" />
-              <el-option label="渠道" value="channel" />
-              <el-option label="全部" value="both" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="状态">
-            <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
-          </el-form-item>
+          <div class="form-section">
+            <div class="form-section__title">基本信息</div>
+            <el-form-item label="权益名称" prop="rightsName">
+              <el-input v-model="form.rightsName" placeholder="请输入权益名称" />
+            </el-form-item>
+            <el-form-item label="类型" prop="rightsType">
+              <el-select v-model="form.rightsType" placeholder="请选择" class="full-width">
+                <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+          </div>
+
+          <el-divider />
+
+          <div class="form-section">
+            <div class="form-section__title">配额与核销</div>
+            <el-row :gutter="12">
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="口径" prop="quotaMode">
+                  <el-select v-model="form.quotaMode" placeholder="请选择" class="full-width">
+                    <el-option label="次数" value="times" />
+                    <el-option label="金额" value="amount" />
+                    <el-option label="周期" value="period" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="数值" prop="quotaValue">
+                  <el-input-number v-model="form.quotaValue" :min="0" :precision="2" controls-position="right" class="full-width" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-form-item label="核销方式" prop="writeoffMode">
+              <el-select v-model="form.writeoffMode" placeholder="请选择" class="full-width">
+                <el-option label="线上自动" value="online_auto" />
+                <el-option label="人工审核" value="manual_review" />
+                <el-option label="线下确认" value="offline_confirm" />
+              </el-select>
+            </el-form-item>
+          </div>
+
+          <el-divider />
+
+          <div class="form-section">
+            <div class="form-section__title">有效期与适用</div>
+            <el-form-item label="有效天数">
+              <el-input-number v-model="form.validDays" :min="0" controls-position="right" class="full-width" />
+            </el-form-item>
+            <el-form-item label="适用角色">
+              <el-select v-model="form.applicableRole" placeholder="请选择" class="full-width">
+                <el-option label="学生" value="student" />
+                <el-option label="渠道" value="channel" />
+                <el-option label="全部" value="both" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="状态">
+              <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
+            </el-form-item>
+          </div>
         </el-form>
       </div>
       <div class="drawer-footer">
@@ -379,6 +394,24 @@ export default {
   width: 100%;
 }
 
+.form-section {
+  padding: 0 4px;
+}
+
+.form-section + .form-section {
+  margin-top: 4px;
+}
+
+.form-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 4px 0 14px;
+  padding-left: 10px;
+  border-left: 3px solid #409eff;
+  line-height: 1.2;
+}
+
 @media (max-width: 768px) {
   .jst-page {
     padding: 12px;
@@ -434,6 +467,11 @@ export default {
 
   .drawer-footer .el-button {
     min-height: 44px;
+  }
+
+  .form-section__title {
+    font-size: 13px;
+    margin: 2px 0 10px;
   }
 }
 </style>

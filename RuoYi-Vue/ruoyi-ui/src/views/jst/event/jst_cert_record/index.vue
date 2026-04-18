@@ -180,51 +180,97 @@
       </div>
     </el-dialog>
 
-    <el-dialog :title="title" :visible.sync="open" width="560px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="证书编号" prop="certNo">
-          <el-input v-model="form.certNo" placeholder="请输入证书编号" />
-        </el-form-item>
-        <el-form-item label="赛事ID" prop="contestId">
-          <el-input v-model="form.contestId" placeholder="请输入赛事ID" />
-        </el-form-item>
-        <el-form-item label="成绩ID" prop="scoreId">
-          <el-input v-model="form.scoreId" placeholder="请输入关联成绩ID" />
-        </el-form-item>
-        <el-form-item label="报名ID" prop="enrollId">
-          <el-input v-model="form.enrollId" placeholder="请输入报名ID" />
-        </el-form-item>
-        <el-form-item label="参赛人ID" prop="participantId">
-          <el-input v-model="form.participantId" placeholder="请输入参赛人ID" />
-        </el-form-item>
-        <el-form-item label="模板ID" prop="templateId">
-          <el-input v-model="form.templateId" placeholder="请输入模板ID" />
-        </el-form-item>
-        <el-form-item label="证书文件URL" prop="certFileUrl">
-          <el-input v-model="form.certFileUrl" placeholder="请输入证书文件URL" />
-        </el-form-item>
-        <el-form-item label="发放状态" prop="issueStatus">
-          <el-select v-model="form.issueStatus" placeholder="请选择">
-            <el-option v-for="item in issueStatusOptions" :key="'f-i-' + item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="发放时间" prop="issueTime">
-          <el-date-picker
-            v-model="form.issueTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择发放时间"
-          />
-        </el-form-item>
-        <el-form-item label="作废原因" prop="voidReason">
-          <el-input v-model="form.voidReason" placeholder="请输入作废原因" />
-        </el-form-item>
-        <el-form-item label="校验码" prop="verifyCode">
-          <el-input v-model="form.verifyCode" placeholder="请输入公开校验码" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="请输入备注" />
-        </el-form-item>
+    <el-dialog :title="title" :visible.sync="open" :width="isMobile ? '100%' : '640px'" :fullscreen="isMobile" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" :label-width="isMobile ? '88px' : '100px'">
+        <div class="form-section">
+          <div class="form-section__title">证书基础信息</div>
+          <el-form-item label="证书编号" prop="certNo">
+            <el-input v-model="form.certNo" placeholder="请输入证书编号" />
+          </el-form-item>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="模板ID" prop="templateId">
+                <el-input v-model="form.templateId" placeholder="请输入模板ID" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="证书文件URL" prop="certFileUrl">
+                <el-input v-model="form.certFileUrl" placeholder="请输入证书文件URL" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">关联赛事 / 成绩 / 报名</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="赛事ID" prop="contestId">
+                <el-input v-model="form.contestId" placeholder="请输入赛事ID" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="成绩ID" prop="scoreId">
+                <el-input v-model="form.scoreId" placeholder="请输入关联成绩ID" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="报名ID" prop="enrollId">
+                <el-input v-model="form.enrollId" placeholder="请输入报名ID" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="参赛人ID" prop="participantId">
+                <el-input v-model="form.participantId" placeholder="请输入参赛人ID" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">发放信息</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="发放状态" prop="issueStatus">
+                <el-select v-model="form.issueStatus" placeholder="请选择" class="full-width">
+                  <el-option v-for="item in issueStatusOptions" :key="'f-i-' + item.value" :label="item.label" :value="item.value" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="发放时间" prop="issueTime">
+                <el-date-picker
+                  v-model="form.issueTime"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="请选择发放时间"
+                  class="full-width"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="作废原因" prop="voidReason">
+            <el-input v-model="form.voidReason" placeholder="请输入作废原因" />
+          </el-form-item>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">校验与备注</div>
+          <el-form-item label="校验码" prop="verifyCode">
+            <el-input v-model="form.verifyCode" placeholder="请输入公开校验码" />
+          </el-form-item>
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="form.remark" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="请输入备注" />
+          </el-form-item>
+        </div>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -564,6 +610,28 @@ export default {
   height: 100%;
 }
 
+.form-section {
+  padding: 0 4px;
+}
+
+.form-section + .form-section {
+  margin-top: 4px;
+}
+
+.form-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 4px 0 14px;
+  padding-left: 10px;
+  border-left: 3px solid #409eff;
+  line-height: 1.2;
+}
+
+.full-width {
+  width: 100%;
+}
+
 @media (max-width: 768px) {
   .jst-cert-record-page {
     padding: 12px;
@@ -606,6 +674,11 @@ export default {
 
   .preview-dialog ::v-deep .el-dialog {
     width: 96% !important;
+  }
+
+  .form-section__title {
+    font-size: 13px;
+    margin: 2px 0 10px;
   }
 }
 </style>

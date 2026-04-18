@@ -104,66 +104,87 @@
 
     <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" :width="isMobile ? '100%' : '640px'" :fullscreen="isMobile" append-to-body>
       <el-form ref="form" :model="form" :rules="formRules" :label-width="isMobile ? '84px' : '100px'">
-        <el-row :gutter="12">
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="规则类型" prop="ruleType">
-              <el-select v-model="form.ruleType" placeholder="请选择">
-                <el-option label="积分规则" value="points" />
-                <el-option label="成长值规则" value="growth" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="来源行为" prop="sourceType">
-              <el-select v-model="form.sourceType" placeholder="请选择">
-                <el-option v-for="item in sourceTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="12">
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="奖励模式" prop="rewardMode">
-              <el-select v-model="form.rewardMode" placeholder="请选择">
-                <el-option label="固定值" value="fixed" />
-                <el-option label="比例" value="rate" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="奖励数值" prop="rewardValue">
-              <el-input-number v-model="form.rewardValue" :precision="4" :min="0" :max="999999" controls-position="right" class="full-width" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="适用角色" prop="applicableRole">
-          <el-select v-model="form.applicableRole" placeholder="请选择">
-            <el-option label="学生" value="student" />
-            <el-option label="渠道" value="channel" />
-            <el-option label="全部" value="both" />
-          </el-select>
-        </el-form-item>
-        <el-row :gutter="12">
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="生效时间">
-              <el-date-picker v-model="form.effectiveTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="可选" class="full-width" />
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="失效时间">
-              <el-date-picker v-model="form.expireTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="可选" class="full-width" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="互斥组">
-          <el-input v-model="form.mutexGroup" placeholder="请输入互斥组编码" />
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
-        </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="请输入备注" />
-        </el-form-item>
+        <div class="form-section">
+          <div class="form-section__title">基本信息</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="规则类型" prop="ruleType">
+                <el-select v-model="form.ruleType" placeholder="请选择">
+                  <el-option label="积分规则" value="points" />
+                  <el-option label="成长值规则" value="growth" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="来源行为" prop="sourceType">
+                <el-select v-model="form.sourceType" placeholder="请选择">
+                  <el-option v-for="item in sourceTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="适用角色" prop="applicableRole">
+            <el-select v-model="form.applicableRole" placeholder="请选择">
+              <el-option label="学生" value="student" />
+              <el-option label="渠道" value="channel" />
+              <el-option label="全部" value="both" />
+            </el-select>
+          </el-form-item>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">奖励配置</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="奖励模式" prop="rewardMode">
+                <el-select v-model="form.rewardMode" placeholder="请选择">
+                  <el-option label="固定值" value="fixed" />
+                  <el-option label="比例" value="rate" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="奖励数值" prop="rewardValue">
+                <el-input-number v-model="form.rewardValue" :precision="4" :min="0" :max="999999" controls-position="right" class="full-width" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">生效期与限制</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="生效时间">
+                <el-date-picker v-model="form.effectiveTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="可选" class="full-width" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="失效时间">
+                <el-date-picker v-model="form.expireTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="可选" class="full-width" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="互斥组">
+            <el-input v-model="form.mutexGroup" placeholder="请输入互斥组编码" />
+          </el-form-item>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">状态与备注</div>
+          <el-form-item label="状态">
+            <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
+          </el-form-item>
+          <el-form-item label="备注">
+            <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="请输入备注" />
+          </el-form-item>
+        </div>
       </el-form>
       <div slot="footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
@@ -402,6 +423,24 @@ export default {
   gap: 6px;
 }
 
+.form-section {
+  padding: 0 4px;
+}
+
+.form-section + .form-section {
+  margin-top: 4px;
+}
+
+.form-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 4px 0 14px;
+  padding-left: 10px;
+  border-left: 3px solid #409eff;
+  line-height: 1.2;
+}
+
 @media (max-width: 768px) {
   .points-rule-page {
     padding: 12px;
@@ -439,6 +478,11 @@ export default {
 
   .mobile-card__actions .el-button {
     min-height: 44px;
+  }
+
+  .form-section__title {
+    font-size: 13px;
+    margin: 2px 0 10px;
   }
 }
 </style>

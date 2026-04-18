@@ -97,43 +97,51 @@
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog :title="dialogTitle" :visible.sync="dialogOpen" width="560px" :fullscreen="isMobile" append-to-body>
+    <el-dialog :title="dialogTitle" :visible.sync="dialogOpen" :width="isMobile ? '100%' : '560px'" :fullscreen="isMobile" append-to-body>
       <el-form ref="ruleForm" :model="form" :rules="rules" label-width="100px">
-        <el-divider content-position="left">基本信息</el-divider>
-        <el-form-item label="规则名称" prop="ruleName">
-          <el-input v-model="form.ruleName" placeholder="请输入规则名称，如：证书编号规则" />
-        </el-form-item>
-        <el-form-item label="规则编码" prop="ruleCode">
-          <el-input v-model="form.ruleCode" placeholder="请输入唯一编码，如：cert_no" :disabled="isEdit" />
-        </el-form-item>
-        <el-form-item label="规则说明" prop="description">
-          <el-input v-model="form.description" type="textarea" :rows="2" placeholder="请输入规则说明" />
-        </el-form-item>
-        <el-divider content-position="left">编号格式</el-divider>
-        <el-form-item label="前缀" prop="prefix">
-          <el-input v-model="form.prefix" placeholder="如：CERT、AUTH" />
-        </el-form-item>
-        <el-form-item label="日期格式" prop="dateFormat">
-          <el-select v-model="form.dateFormat" placeholder="选择日期格式" clearable>
-            <el-option label="yyyyMMdd（如 20260415）" value="yyyyMMdd" />
-            <el-option label="yyyyMM（如 202604）" value="yyyyMM" />
-            <el-option label="yyyy（如 2026）" value="yyyy" />
-            <el-option label="无日期" value="" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="序号位数" prop="seqLength">
-          <el-input-number v-model="form.seqLength" :min="1" :max="10" />
-        </el-form-item>
-        <el-form-item label="起始序号" prop="seqStart">
-          <el-input-number v-model="form.seqStart" :min="1" :max="999999" />
-        </el-form-item>
-        <el-divider content-position="left">状态</el-divider>
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="form.status">
-            <el-radio :label="0">启用</el-radio>
-            <el-radio :label="1">停用</el-radio>
-          </el-radio-group>
-        </el-form-item>
+        <div class="form-section">
+          <div class="form-section__title">基本信息</div>
+          <el-form-item label="规则名称" prop="ruleName">
+            <el-input v-model="form.ruleName" placeholder="请输入规则名称，如：证书编号规则" />
+          </el-form-item>
+          <el-form-item label="规则编码" prop="ruleCode">
+            <el-input v-model="form.ruleCode" placeholder="请输入唯一编码，如：cert_no" :disabled="isEdit" />
+          </el-form-item>
+          <el-form-item label="规则说明" prop="description">
+            <el-input v-model="form.description" type="textarea" :rows="2" placeholder="请输入规则说明" />
+          </el-form-item>
+        </div>
+        <el-divider />
+        <div class="form-section">
+          <div class="form-section__title">编号格式</div>
+          <el-form-item label="前缀" prop="prefix">
+            <el-input v-model="form.prefix" placeholder="如：CERT、AUTH" />
+          </el-form-item>
+          <el-form-item label="日期格式" prop="dateFormat">
+            <el-select v-model="form.dateFormat" placeholder="选择日期格式" clearable class="full-width">
+              <el-option label="yyyyMMdd（如 20260415）" value="yyyyMMdd" />
+              <el-option label="yyyyMM（如 202604）" value="yyyyMM" />
+              <el-option label="yyyy（如 2026）" value="yyyy" />
+              <el-option label="无日期" value="" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="序号位数" prop="seqLength">
+            <el-input-number v-model="form.seqLength" :min="1" :max="10" />
+          </el-form-item>
+          <el-form-item label="起始序号" prop="seqStart">
+            <el-input-number v-model="form.seqStart" :min="1" :max="999999" />
+          </el-form-item>
+        </div>
+        <el-divider />
+        <div class="form-section">
+          <div class="form-section__title">状态</div>
+          <el-form-item label="状态" prop="status">
+            <el-radio-group v-model="form.status">
+              <el-radio :label="0">启用</el-radio>
+              <el-radio :label="1">停用</el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </div>
       </el-form>
       <div slot="footer">
         <el-button @click="dialogOpen = false">取 消</el-button>
@@ -266,6 +274,35 @@ export default {
 .biz-no-rule-page {
   background: #f6f8fb;
   min-height: calc(100vh - 84px);
+}
+
+.form-section {
+  padding: 0 4px;
+}
+
+.form-section + .form-section {
+  margin-top: 4px;
+}
+
+.form-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 4px 0 14px;
+  padding-left: 10px;
+  border-left: 3px solid #409eff;
+  line-height: 1.2;
+}
+
+.full-width {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .form-section__title {
+    font-size: 13px;
+    margin: 2px 0 10px;
+  }
 }
 
 .page-hero {

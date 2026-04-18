@@ -174,14 +174,14 @@ export default {
         pendingChannelAuth: 0
       },
       navGroupConfigs: [
-        { key: 'contest', title: '赛事运营', desc: '赛事管理、报名审核、课程管理、入驻审核', icon: 'el-icon-trophy', theme: 'theme-blue', candidates: ['/jst/contest', '/jst/group-contest/contest'] },
-        { key: 'order', title: '订单交易', desc: '订单管理、退款处理、预约记录', icon: 'el-icon-shopping-bag-1', theme: 'theme-green', candidates: ['/jst/order/admin-order', '/jst/group-order/order/admin-order'] },
-        { key: 'user', title: '用户渠道', desc: '用户管理、参赛档案、渠道管理、绑定关系', icon: 'el-icon-user', theme: 'theme-purple', candidates: ['/jst/user', '/jst/group-user/user'] },
-        { key: 'marketing', title: '营销权益', desc: '优惠券、权益模板、发放管理', icon: 'el-icon-present', theme: 'theme-orange', candidates: ['/jst/coupon/template', '/jst/group-marketing/coupon/template'] },
-        { key: 'points', title: '积分商城', desc: '积分账户、规则配置、商城商品、兑换订单', icon: 'el-icon-coin', theme: 'theme-blue', candidates: ['/jst/points/points-account', '/jst/group-points/points/points-account'] },
-        { key: 'event', title: '赛事数据', desc: '成绩记录、证书管理、表单模板', icon: 'el-icon-document', theme: 'theme-green', candidates: ['/jst/event/score-record', '/jst/group-event/event/score-record'] },
-        { key: 'finance', title: '财务管理', desc: '打款记录、合同管理、发票管理', icon: 'el-icon-wallet', theme: 'theme-purple', candidates: ['/jst/finance/payout', '/jst/group-finance/finance/payout'] },
-        { key: 'risk', title: '风控审计', desc: '风控规则、告警处理、黑名单、审计日志', icon: 'el-icon-warning', theme: 'theme-orange', candidates: ['/jst/risk/risk-rule', '/jst/group-risk/risk/risk-rule'] }
+        { key: 'contest', title: '赛事运营', desc: '赛事管理、报名审核、课程管理、入驻审核', icon: 'el-icon-trophy', theme: 'theme-blue', candidates: ['/jst/contest'] },
+        { key: 'order', title: '订单交易', desc: '订单管理、退款处理、预约记录', icon: 'el-icon-shopping-bag-1', theme: 'theme-green', candidates: ['/jst/order/admin-order'] },
+        { key: 'user', title: '用户渠道', desc: '用户管理、参赛档案、渠道管理、绑定关系', icon: 'el-icon-user', theme: 'theme-purple', candidates: ['/jst/user'] },
+        { key: 'marketing', title: '营销权益', desc: '优惠券、权益模板、发放管理', icon: 'el-icon-present', theme: 'theme-orange', candidates: ['/jst/coupon/template'] },
+        { key: 'points', title: '积分商城', desc: '积分账户、规则配置、商城商品、兑换订单', icon: 'el-icon-coin', theme: 'theme-blue', candidates: ['/jst/points/points-account'] },
+        { key: 'event', title: '赛事数据', desc: '成绩记录、证书管理、表单模板', icon: 'el-icon-document', theme: 'theme-green', candidates: ['/jst/event/score-record'] },
+        { key: 'finance', title: '财务管理', desc: '打款记录、合同管理、发票管理', icon: 'el-icon-wallet', theme: 'theme-purple', candidates: ['/jst/finance/payout'] },
+        { key: 'risk', title: '风控审计', desc: '风控规则、告警处理、黑名单、审计日志', icon: 'el-icon-warning', theme: 'theme-orange', candidates: ['/jst/risk/risk-rule'] }
       ],
       todoItemConfigs: [
         {
@@ -190,7 +190,7 @@ export default {
           countKey: 'pendingContestAudit',
           icon: 'el-icon-s-flag',
           theme: 'theme-blue',
-          candidates: ['/jst/contest', '/jst/group-contest/contest']
+          candidates: ['/jst/contest']
         },
         {
           key: 'enroll',
@@ -198,7 +198,7 @@ export default {
           countKey: 'pendingEnrollAudit',
           icon: 'el-icon-edit-outline',
           theme: 'theme-green',
-          candidates: ['/jst/enroll', '/jst/group-contest/enroll']
+          candidates: ['/jst/enroll']
         },
         {
           key: 'refund',
@@ -206,7 +206,7 @@ export default {
           countKey: 'pendingRefund',
           icon: 'el-icon-coin',
           theme: 'theme-orange',
-          candidates: ['/jst/order/admin-refund', '/jst/group-order/order/admin-refund']
+          candidates: ['/jst/order/admin-refund']
         },
         {
           key: 'withdraw',
@@ -214,7 +214,7 @@ export default {
           countKey: 'pendingWithdraw',
           icon: 'el-icon-wallet',
           theme: 'theme-purple',
-          candidates: ['/jst/channel/admin-withdraw', '/jst/group-user/channel/admin-withdraw']
+          candidates: ['/jst/channel/admin-withdraw']
         },
         {
           key: 'partner',
@@ -222,7 +222,7 @@ export default {
           countKey: 'pendingPartnerApply',
           icon: 'el-icon-office-building',
           theme: 'theme-blue',
-          candidates: ['/jst/partner-apply', '/jst/group-contest/partner-apply']
+          candidates: ['/jst/partner-apply']
         },
         {
           key: 'channel',
@@ -230,7 +230,7 @@ export default {
           countKey: 'pendingChannelAuth',
           icon: 'el-icon-postcard',
           theme: 'theme-green',
-          candidates: ['/jst/channel-auth', '/jst/group-user/channel-auth']
+          candidates: ['/jst/channel-auth']
         }
       ],
       quickActionConfigs: [
@@ -240,7 +240,7 @@ export default {
           desc: '按 6 个模块快速发起新赛事',
           icon: 'el-icon-plus',
           theme: 'theme-blue',
-          candidates: ['/jst/contest-edit', '/jst/group-contest/contest-edit']
+          candidates: ['/jst/contest-edit']
         },
         {
           key: 'auditEnroll',
@@ -248,7 +248,7 @@ export default {
           desc: '处理通过、驳回与补充材料',
           icon: 'el-icon-edit-outline',
           theme: 'theme-green',
-          candidates: ['/jst/enroll', '/jst/group-contest/enroll']
+          candidates: ['/jst/enroll']
         },
         {
           key: 'dealRefund',
@@ -256,7 +256,7 @@ export default {
           desc: '优先审核待处理退款申请',
           icon: 'el-icon-money',
           theme: 'theme-orange',
-          candidates: ['/jst/order/admin-refund', '/jst/group-order/order/admin-refund']
+          candidates: ['/jst/order/admin-refund']
         },
         {
           key: 'auditWithdraw',
@@ -264,7 +264,7 @@ export default {
           desc: '审核后执行渠道打款流程',
           icon: 'el-icon-wallet',
           theme: 'theme-purple',
-          candidates: ['/jst/channel/admin-withdraw', '/jst/group-user/channel/admin-withdraw']
+          candidates: ['/jst/channel/admin-withdraw']
         },
         {
           key: 'publishNotice',
@@ -272,7 +272,7 @@ export default {
           desc: '统一发布平台与赛事公告',
           icon: 'el-icon-bell',
           theme: 'theme-blue',
-          candidates: ['/jst/notice', '/jst/group-contest/notice']
+          candidates: ['/jst/notice']
         },
         {
           key: 'viewChannel',
@@ -280,7 +280,7 @@ export default {
           desc: '查看渠道状态和关键数据',
           icon: 'el-icon-user-solid',
           theme: 'theme-green',
-          candidates: ['/jst/channel', '/jst/group-user/channel']
+          candidates: ['/jst/channel']
         }
       ],
       contestRank: [],

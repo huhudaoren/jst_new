@@ -179,49 +179,103 @@
       </div>
     </el-drawer>
 
-    <el-dialog :title="title" :visible.sync="open" width="560px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="模板名称" prop="templateName">
-          <el-input v-model="form.templateName" placeholder="请输入模板名称" />
-        </el-form-item>
-        <el-form-item label="所属类型" prop="ownerType">
-          <el-select v-model="form.ownerType" placeholder="请选择">
-            <el-option v-for="item in ownerTypeOptions" :key="'f-o-' + item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="所属方ID" prop="ownerId">
-          <el-input v-model="form.ownerId" placeholder="请输入所属方ID" />
-        </el-form-item>
-        <el-form-item label="底图" prop="bgImage">
-          <image-upload v-model="form.bgImage" />
-        </el-form-item>
-        <el-form-item label="布局JSON" prop="layoutJson">
-          <el-input
-            v-model="form.layoutJson"
-            type="textarea"
-            :rows="4"
-            maxlength="5000"
-            show-word-limit
-            placeholder="请输入布局/字段配置JSON"
-          />
-        </el-form-item>
-        <el-form-item label="审核状态" prop="auditStatus">
-          <el-select v-model="form.auditStatus" placeholder="请选择">
-            <el-option v-for="item in auditStatusOptions" :key="'f-a-' + item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="启停状态" prop="status">
-          <el-select v-model="form.status" placeholder="请选择">
-            <el-option v-for="item in enableStatusOptions" :key="'f-s-' + item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="请输入备注" />
-        </el-form-item>
+    <el-dialog :title="title" :visible.sync="open" :width="isMobile ? '100%' : '620px'" :fullscreen="isMobile" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" :label-width="isMobile ? '88px' : '100px'">
+        <div class="form-section">
+          <div class="form-section__title">基本信息</div>
+          <el-form-item label="模板名称" prop="templateName">
+            <el-input v-model="form.templateName" placeholder="请输入模板名称" />
+          </el-form-item>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="所属类型" prop="ownerType">
+                <el-select v-model="form.ownerType" placeholder="请选择" class="full-width">
+                  <el-option v-for="item in ownerTypeOptions" :key="'f-o-' + item.value" :label="item.label" :value="item.value" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="所属方ID" prop="ownerId">
+                <el-input v-model="form.ownerId" placeholder="请输入所属方ID" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">底图与布局</div>
+          <el-form-item label="底图" prop="bgImage">
+            <image-upload v-model="form.bgImage" />
+          </el-form-item>
+          <el-form-item label="布局JSON" prop="layoutJson">
+            <div class="layout-json-panel">
+              <div class="layout-json-panel__summary">
+                <i class="el-icon-set-up" />
+                <span v-if="layoutJsonSummary.valid">
+                  已配置布局数据：{{ layoutJsonSummary.elementCount }} 个元素 · 画布 {{ layoutJsonSummary.canvasSize }}
+                </span>
+                <span v-else-if="layoutJsonSummary.hasValue" class="layout-json-panel__warn">
+                  已存在布局数据（非标准结构，请在设计器中校正）
+                </span>
+                <span v-else class="layout-json-panel__empty">
+                  暂无布局数据，请在证书设计器中完成拖拽布局
+                </span>
+              </div>
+              <div class="layout-json-panel__hint">
+                布局 JSON 由「证书设计器」统一管理。请在设计器中拖拽底图、文字、签章、二维码等元素，保存后会自动写入此字段。
+              </div>
+              <div class="layout-json-panel__actions">
+                <el-button size="small" type="primary" icon="el-icon-edit-outline" @click="goToCertDesigner">
+                  前往证书设计器
+                </el-button>
+                <el-button v-if="layoutJsonSummary.hasValue" size="small" plain @click="previewLayoutJson">
+                  查看原始 JSON
+                </el-button>
+                <el-button v-if="layoutJsonSummary.hasValue" size="small" type="text" class="danger-text" @click="clearLayoutJson">
+                  清空布局
+                </el-button>
+              </div>
+            </div>
+          </el-form-item>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">审核与状态</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="审核状态" prop="auditStatus">
+                <el-select v-model="form.auditStatus" placeholder="请选择" class="full-width">
+                  <el-option v-for="item in auditStatusOptions" :key="'f-a-' + item.value" :label="item.label" :value="item.value" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="启停状态" prop="status">
+                <el-select v-model="form.status" placeholder="请选择" class="full-width">
+                  <el-option v-for="item in enableStatusOptions" :key="'f-s-' + item.value" :label="item.label" :value="item.value" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="form.remark" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="请输入备注" />
+          </el-form-item>
+        </div>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="布局 JSON 原文" :visible.sync="layoutJsonRawVisible" :width="isMobile ? '100%' : '640px'" :fullscreen="isMobile" append-to-body>
+      <pre class="json-preview">{{ formatJson(form.layoutJson) }}</pre>
+      <div slot="footer">
+        <el-button @click="layoutJsonRawVisible = false">关闭</el-button>
       </div>
     </el-dialog>
   </div>
@@ -284,12 +338,50 @@ export default {
       enableStatusMap: {
         0: { label: '停用', type: 'info' },
         1: { label: '启用', type: 'success' }
-      }
+      },
+      layoutJsonRawVisible: false
     }
   },
   computed: {
     isMobile() {
       return this.$store.state.app.device === 'mobile'
+    },
+    layoutJsonSummary() {
+      const raw = this.form && this.form.layoutJson
+      const result = { hasValue: false, valid: false, elementCount: 0, canvasSize: '--' }
+      if (!raw) return result
+      result.hasValue = true
+      let parsed = raw
+      if (typeof raw === 'string') {
+        const trimmed = raw.trim()
+        if (!trimmed) {
+          result.hasValue = false
+          return result
+        }
+        try {
+          parsed = JSON.parse(trimmed)
+        } catch (e) {
+          return result
+        }
+      }
+      if (!parsed || typeof parsed !== 'object') {
+        return result
+      }
+      const elements = Array.isArray(parsed.objects)
+        ? parsed.objects
+        : Array.isArray(parsed.elements)
+          ? parsed.elements
+          : Array.isArray(parsed.items)
+            ? parsed.items
+            : []
+      const width = parsed.width || (parsed.canvas && parsed.canvas.width) || parsed.canvasWidth
+      const height = parsed.height || (parsed.canvas && parsed.canvas.height) || parsed.canvasHeight
+      result.valid = true
+      result.elementCount = elements.length
+      if (width && height) {
+        result.canvasSize = width + ' x ' + height
+      }
+      return result
     }
   },
   created() {
@@ -418,6 +510,22 @@ export default {
       } catch (e) {
         return value
       }
+    },
+    goToCertDesigner() {
+      this.$router.push({ path: '/partner/cert-manage' }).catch(() => {})
+    },
+    previewLayoutJson() {
+      if (!this.form || !this.form.layoutJson) {
+        this.$modal.msgWarning('当前暂无布局数据')
+        return
+      }
+      this.layoutJsonRawVisible = true
+    },
+    clearLayoutJson() {
+      this.$modal.confirm('确认清空当前布局数据？保存后将无法直接在此恢复。').then(() => {
+        this.$set(this.form, 'layoutJson', '')
+        this.$modal.msgSuccess('已清空')
+      }).catch(() => {})
     }
   }
 }
@@ -546,6 +654,69 @@ export default {
   border-radius: 6px;
 }
 
+.form-section {
+  padding: 0 4px;
+}
+
+.form-section + .form-section {
+  margin-top: 4px;
+}
+
+.form-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 4px 0 14px;
+  padding-left: 10px;
+  border-left: 3px solid #409eff;
+  line-height: 1.2;
+}
+
+.layout-json-panel {
+  padding: 12px 14px;
+  background: #f7f9fc;
+  border: 1px solid #e5eaf2;
+  border-radius: 6px;
+}
+
+.layout-json-panel__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #172033;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.layout-json-panel__summary .el-icon-set-up {
+  color: #409eff;
+  font-size: 15px;
+}
+
+.layout-json-panel__warn {
+  color: #e6a23c;
+}
+
+.layout-json-panel__empty {
+  color: #909399;
+  font-weight: 500;
+}
+
+.layout-json-panel__hint {
+  margin-top: 6px;
+  color: #6f7b8f;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.layout-json-panel__actions {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
 @media (max-width: 768px) {
   .jst-cert-template-page {
     padding: 12px;
@@ -583,6 +754,19 @@ export default {
 
   .mobile-actions .el-button {
     min-height: 44px;
+  }
+
+  .form-section__title {
+    font-size: 13px;
+    margin: 2px 0 10px;
+  }
+
+  .layout-json-panel {
+    padding: 10px 12px;
+  }
+
+  .layout-json-panel__actions .el-button {
+    min-height: 40px;
   }
 }
 </style>

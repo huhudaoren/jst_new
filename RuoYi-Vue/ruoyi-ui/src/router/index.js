@@ -30,19 +30,19 @@ export const constantRoutes = [
     hidden: true
   },
   {
-    path: '/partner-apply',
+    path: '/public/partner-apply',
     component: () => import('@/views/partner-apply/index'),
     hidden: true,
     meta: { title: '赛事方申请' }
   },
   {
-    path: '/partner-apply/form',
+    path: '/public/partner-apply/form',
     component: () => import('@/views/partner-apply/form'),
     hidden: true,
     meta: { title: '申请表单' }
   },
   {
-    path: '/partner-apply/status',
+    path: '/public/partner-apply/status',
     component: () => import('@/views/partner-apply/status'),
     hidden: true,
     meta: { title: '申请状态' }

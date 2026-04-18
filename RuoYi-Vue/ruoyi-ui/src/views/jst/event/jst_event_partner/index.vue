@@ -177,49 +177,89 @@
       </div>
     </el-drawer>
 
-    <el-dialog :title="title" :visible.sync="open" width="620px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="104px">
-        <el-form-item label="赛事方名称" prop="partnerName">
-          <el-input v-model="form.partnerName" placeholder="请输入赛事方名称" />
-        </el-form-item>
-        <el-form-item label="联系人姓名" prop="contactName">
-          <el-input v-model="form.contactName" placeholder="请输入联系人姓名" />
-        </el-form-item>
-        <el-form-item label="联系电话" prop="contactMobile">
-          <el-input v-model="form.contactMobile" placeholder="请输入联系电话" />
-        </el-form-item>
-        <el-form-item label="营业执照号" prop="businessLicenseNo">
-          <el-input v-model="form.businessLicenseNo" placeholder="请输入营业执照号" />
-        </el-form-item>
-        <el-form-item label="审核状态" prop="auditStatus">
-          <el-select v-model="form.auditStatus" placeholder="请选择">
-            <el-option v-for="item in auditStatusOptions" :key="'f-a-' + item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="审核时间" prop="auditTime">
-          <el-date-picker
-            v-model="form.auditTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择审核通过时间"
-          />
-        </el-form-item>
-        <el-form-item label="账号状态" prop="accountStatus">
-          <el-select v-model="form.accountStatus" placeholder="请选择">
-            <el-option v-for="item in accountStatusOptions" :key="'f-as-' + item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="合作状态" prop="coopStatus">
-          <el-select v-model="form.coopStatus" placeholder="请选择">
-            <el-option v-for="item in coopStatusOptions" :key="'f-cs-' + item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="审核备注" prop="auditRemark">
-          <el-input v-model="form.auditRemark" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="请输入审核备注" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="请输入备注" />
-        </el-form-item>
+    <el-dialog :title="title" :visible.sync="open" :width="isMobile ? '100%' : '640px'" :fullscreen="isMobile" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" :label-width="isMobile ? '92px' : '104px'">
+        <div class="form-section">
+          <div class="form-section__title">机构信息</div>
+          <el-form-item label="赛事方名称" prop="partnerName">
+            <el-input v-model="form.partnerName" placeholder="请输入赛事方名称" />
+          </el-form-item>
+          <el-form-item label="营业执照号" prop="businessLicenseNo">
+            <el-input v-model="form.businessLicenseNo" placeholder="请输入营业执照号" />
+          </el-form-item>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">联系方式</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="联系人姓名" prop="contactName">
+                <el-input v-model="form.contactName" placeholder="请输入联系人姓名" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="联系电话" prop="contactMobile">
+                <el-input v-model="form.contactMobile" placeholder="请输入联系电话" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">审核信息</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="审核状态" prop="auditStatus">
+                <el-select v-model="form.auditStatus" placeholder="请选择" class="full-width">
+                  <el-option v-for="item in auditStatusOptions" :key="'f-a-' + item.value" :label="item.label" :value="item.value" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="审核时间" prop="auditTime">
+                <el-date-picker
+                  v-model="form.auditTime"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="请选择审核通过时间"
+                  class="full-width"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="审核备注" prop="auditRemark">
+            <el-input v-model="form.auditRemark" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="请输入审核备注" />
+          </el-form-item>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">运营状态</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="账号状态" prop="accountStatus">
+                <el-select v-model="form.accountStatus" placeholder="请选择" class="full-width">
+                  <el-option v-for="item in accountStatusOptions" :key="'f-as-' + item.value" :label="item.label" :value="item.value" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="合作状态" prop="coopStatus">
+                <el-select v-model="form.coopStatus" placeholder="请选择" class="full-width">
+                  <el-option v-for="item in coopStatusOptions" :key="'f-cs-' + item.value" :label="item.label" :value="item.value" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="form.remark" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="请输入备注" />
+          </el-form-item>
+        </div>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -515,6 +555,28 @@ export default {
   padding: 8px 16px 16px;
 }
 
+.form-section {
+  padding: 0 4px;
+}
+
+.form-section + .form-section {
+  margin-top: 4px;
+}
+
+.form-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 4px 0 14px;
+  padding-left: 10px;
+  border-left: 3px solid #409eff;
+  line-height: 1.2;
+}
+
+.full-width {
+  width: 100%;
+}
+
 @media (max-width: 768px) {
   .jst-event-partner-page {
     padding: 12px;
@@ -552,6 +614,11 @@ export default {
 
   .mobile-actions .el-button {
     min-height: 44px;
+  }
+
+  .form-section__title {
+    font-size: 13px;
+    margin: 2px 0 10px;
   }
 }
 </style>

@@ -21,6 +21,11 @@
           <el-option v-for="item in channelOptions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
+      <el-form-item label="业务场景" prop="scene">
+        <el-select v-model="queryParams.scene" placeholder="全部" clearable>
+          <el-option v-for="item in sceneOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>
           <el-option label="启用" :value="1" />
@@ -128,9 +133,16 @@
         <el-row :gutter="12">
           <el-col :xs="24" :sm="12">
             <el-form-item label="发送通道" prop="channel">
-              <el-select v-model="form.channel" placeholder="请选择" class="full-width">
+              <el-select v-if="isMobile" v-model="form.channel" placeholder="请选择" class="full-width">
                 <el-option v-for="item in channelOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
+              <div v-else class="channel-switcher">
+                <el-radio-group v-model="form.channel" size="small">
+                  <el-radio-button v-for="item in channelOptions" :key="item.value" :label="item.value">
+                    {{ item.label }}
+                  </el-radio-button>
+                </el-radio-group>
+              </div>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
@@ -142,18 +154,14 @@
           </el-col>
         </el-row>
         <el-form-item label="模板内容" prop="content">
-          <el-input v-model="form.content" type="textarea" :rows="5" placeholder="请输入模板内容，支持 ${变量名} 占位符" />
+          <jst-message-template-editor
+            v-model="form.content"
+            :scene="form.scene"
+            :channel="form.channel"
+            :scene-options="sceneOptions"
+            :is-mobile="isMobile"
+          />
         </el-form-item>
-        <div v-if="form.content" class="tpl-preview-box">
-          <div class="tpl-preview-label">内容预览</div>
-          <div class="tpl-content-preview">
-            <template v-for="(seg, idx) in parseTemplateVars(form.content)">
-              <el-tag v-if="seg.isVar" :key="'v'+idx" size="mini" type="warning" class="tpl-var-tag">{{ seg.text }}</el-tag>
-              <span v-else :key="'t'+idx">{{ seg.text }}</span>
-            </template>
-          </div>
-        </div>
-        <el-alert title="变量占位符示例：${userName}、${pointsChange}、${orderNo}" type="info" :closable="false" style="margin-bottom: 12px" />
         <el-form-item label="备注">
           <el-input v-model="form.remark" type="textarea" :rows="2" placeholder="请输入备注" />
         </el-form-item>
@@ -171,6 +179,8 @@
 
 <script>
 import { listJst_message_template, getJst_message_template, addJst_message_template, updateJst_message_template } from '@/api/jst/message/jst_message_template'
+import JstMessageTemplateEditor from '@/components/JstJsonEditor/MessageTemplateEditor'
+import { parseTemplateVars } from '@/components/JstJsonEditor/variable-map'
 
 const CHANNEL_OPTIONS = [
   { label: '站内信', value: 'inner' },
@@ -179,7 +189,7 @@ const CHANNEL_OPTIONS = [
   { label: '微信订阅消息', value: 'wechat' }
 ]
 
-const SCENE_OPTIONS = [
+const SCENE_OPTIONS_FALLBACK = [
   { label: '认证结果', value: 'auth_result' },
   { label: '提现结果', value: 'withdraw_result' },
   { label: '结算结果', value: 'settle_result' },
@@ -190,6 +200,10 @@ const SCENE_OPTIONS = [
 
 export default {
   name: 'JstMessageTemplate',
+  dicts: ['jst_message_scene'],
+  components: {
+    JstMessageTemplateEditor
+  },
   data() {
     return {
       loading: false,
@@ -203,10 +217,10 @@ export default {
         templateCode: null,
         templateName: null,
         channel: null,
+        scene: null,
         status: null
       },
       channelOptions: CHANNEL_OPTIONS,
-      sceneOptions: SCENE_OPTIONS,
       dialogVisible: false,
       dialogTitle: '',
       form: {},
@@ -219,6 +233,12 @@ export default {
       }
     }
   },
+  computed: {
+    sceneOptions() {
+      const options = this.dict && this.dict.type ? this.dict.type.jst_message_scene : []
+      return Array.isArray(options) && options.length ? options : SCENE_OPTIONS_FALLBACK
+    }
+  },
   created() {
     this.updateViewport()
     window.addEventListener('resize', this.updateViewport)
@@ -226,32 +246,15 @@ export default {
   },
   beforeDestroy() { window.removeEventListener('resize', this.updateViewport) },
   methods: {
+    parseTemplateVars,
     updateViewport() { this.isMobile = window.innerWidth <= 768 },
     channelLabel(channel) {
-      const match = CHANNEL_OPTIONS.find(item => item.value === channel)
+      const match = this.channelOptions.find(item => item.value === channel)
       return match ? match.label : channel || '--'
     },
     sceneLabel(scene) {
-      const match = SCENE_OPTIONS.find(item => item.value === scene)
+      const match = this.sceneOptions.find(item => item.value === scene)
       return match ? match.label : scene || '--'
-    },
-    parseTemplateVars(content) {
-      if (!content) return []
-      const parts = []
-      const regex = /\$\{(\w+)\}/g
-      let lastIndex = 0
-      let match
-      while ((match = regex.exec(content)) !== null) {
-        if (match.index > lastIndex) {
-          parts.push({ text: content.substring(lastIndex, match.index), isVar: false })
-        }
-        parts.push({ text: '${' + match[1] + '}', isVar: true })
-        lastIndex = regex.lastIndex
-      }
-      if (lastIndex < content.length) {
-        parts.push({ text: content.substring(lastIndex), isVar: false })
-      }
-      return parts
     },
     async getList() {
       this.loading = true
@@ -266,7 +269,7 @@ export default {
       this.getList()
     },
     resetQuery() {
-      this.queryParams = { pageNum: 1, pageSize: 10, templateCode: null, templateName: null, channel: null, status: null }
+      this.queryParams = { pageNum: 1, pageSize: 10, templateCode: null, templateName: null, channel: null, scene: null, status: null }
       this.getList()
     },
     initForm() {
@@ -275,7 +278,7 @@ export default {
         templateCode: '',
         templateName: '',
         channel: 'inner',
-        scene: 'points_change',
+        scene: this.sceneOptions.length ? this.sceneOptions[0].value : 'points_change',
         content: '',
         status: 1,
         remark: ''
@@ -299,6 +302,9 @@ export default {
       }
       this.dialogTitle = '编辑消息模板'
       this.dialogVisible = true
+      this.$nextTick(() => {
+        this.$refs.form && this.$refs.form.clearValidate()
+      })
     },
     handleToggle(row) {
       const status = row.status === 1 ? 0 : 1
@@ -346,10 +352,12 @@ export default {
 .query-panel { padding: 16px 16px 0; margin-bottom: 16px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
 .action-bar { padding: 0 4px; margin-bottom: 12px; }
 .full-width { width: 100%; }
+.channel-switcher { width: 100%; }
+.channel-switcher ::v-deep .el-radio-group { display: flex; width: 100%; flex-wrap: wrap; }
+.channel-switcher ::v-deep .el-radio-button { flex: 1 1 45%; }
+.channel-switcher ::v-deep .el-radio-button__inner { width: 100%; text-align: center; }
 .tpl-content-preview { line-height: 1.8; font-size: 13px; color: #606266; }
 .tpl-var-tag { margin: 0 2px; vertical-align: baseline; }
-.tpl-preview-box { background: #f6f8fb; border: 1px solid #e5eaf2; border-radius: 6px; padding: 12px; margin-bottom: 12px; }
-.tpl-preview-label { font-size: 12px; color: #909399; margin-bottom: 6px; }
 .drawer-body { padding: 20px; }
 .mobile-list { min-height: 180px; }
 .mobile-card { padding: 16px; margin-bottom: 12px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
@@ -364,6 +372,7 @@ export default {
   .page-hero .el-button { width: 100%; min-height: 44px; margin-top: 16px; }
   .page-hero h2 { font-size: 20px; }
   .query-panel { padding-bottom: 8px; }
+  .channel-switcher ::v-deep .el-radio-button { flex: 1 1 100%; }
   .query-panel ::v-deep .el-form-item { display: block; margin-right: 0; }
   .query-panel ::v-deep .el-form-item__content, .query-panel ::v-deep .el-select, .query-panel ::v-deep .el-input { width: 100%; }
 }

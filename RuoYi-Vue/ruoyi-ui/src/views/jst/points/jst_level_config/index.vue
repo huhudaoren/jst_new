@@ -87,43 +87,58 @@
 
     <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" :width="isMobile ? '100%' : '620px'" :fullscreen="isMobile" append-to-body>
       <el-form ref="form" :model="form" :rules="formRules" :label-width="isMobile ? '84px' : '100px'">
-        <el-row :gutter="12">
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="等级编码" prop="levelCode">
-              <el-input v-model="form.levelCode" placeholder="请输入等级编码" />
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="等级名称" prop="levelName">
-              <el-input v-model="form.levelName" placeholder="请输入等级名称" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="12">
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="等级序号" prop="levelNo">
-              <el-input-number v-model="form.levelNo" :min="1" :max="9999" controls-position="right" class="full-width" />
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="成长阈值" prop="growthThreshold">
-              <el-input-number v-model="form.growthThreshold" :min="0" :max="99999999" controls-position="right" class="full-width" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="适用角色" prop="applicableRole">
-          <el-select v-model="form.applicableRole" placeholder="请选择">
-            <el-option label="学生" value="student" />
-            <el-option label="渠道" value="channel" />
-            <el-option label="全部" value="both" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="权益描述" prop="remark">
-          <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="请输入权益描述" />
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
-        </el-form-item>
+        <div class="form-section">
+          <div class="form-section__title">等级基本信息</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="等级编码" prop="levelCode">
+                <el-input v-model="form.levelCode" placeholder="请输入等级编码" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="等级名称" prop="levelName">
+                <el-input v-model="form.levelName" placeholder="请输入等级名称" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="适用角色" prop="applicableRole">
+            <el-select v-model="form.applicableRole" placeholder="请选择">
+              <el-option label="学生" value="student" />
+              <el-option label="渠道" value="channel" />
+              <el-option label="全部" value="both" />
+            </el-select>
+          </el-form-item>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">升级门槛</div>
+          <el-row :gutter="12">
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="等级序号" prop="levelNo">
+                <el-input-number v-model="form.levelNo" :min="1" :max="9999" controls-position="right" class="full-width" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+              <el-form-item label="成长阈值" prop="growthThreshold">
+                <el-input-number v-model="form.growthThreshold" :min="0" :max="99999999" controls-position="right" class="full-width" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+
+        <el-divider />
+
+        <div class="form-section">
+          <div class="form-section__title">权益与状态</div>
+          <el-form-item label="权益描述" prop="remark">
+            <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="请输入权益描述" />
+          </el-form-item>
+          <el-form-item label="状态">
+            <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
+          </el-form-item>
+        </div>
       </el-form>
       <div slot="footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
@@ -356,6 +371,24 @@ export default {
   gap: 6px;
 }
 
+.form-section {
+  padding: 0 4px;
+}
+
+.form-section + .form-section {
+  margin-top: 4px;
+}
+
+.form-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 4px 0 14px;
+  padding-left: 10px;
+  border-left: 3px solid #409eff;
+  line-height: 1.2;
+}
+
 @media (max-width: 768px) {
   .level-config-page {
     padding: 12px;
@@ -393,6 +426,11 @@ export default {
 
   .mobile-card__actions .el-button {
     min-height: 44px;
+  }
+
+  .form-section__title {
+    font-size: 13px;
+    margin: 2px 0 10px;
   }
 }
 </style>

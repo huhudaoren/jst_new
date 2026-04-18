@@ -9,10 +9,22 @@ import { isRelogin } from '@/utils/request'
 
 NProgress.configure({ showSpinner: false })
 
-const whiteList = ['/login', '/register', '/partner-apply', '/partner-apply/form', '/partner-apply/status']
+const whiteList = ['/login', '/register', '/public/partner-apply', '/public/partner-apply/form', '/public/partner-apply/status']
+const legacyPublicPartnerApplyPrefix = '/partner-apply'
+const publicPartnerApplyPrefix = '/public/partner-apply'
 
 const isWhiteList = (path) => {
   return whiteList.some(pattern => isPathMatch(pattern, path))
+}
+
+const resolveLegacyPublicPartnerApplyPath = (path) => {
+  if (path === legacyPublicPartnerApplyPrefix) {
+    return publicPartnerApplyPrefix
+  }
+  if (path.startsWith(`${legacyPublicPartnerApplyPrefix}/`)) {
+    return path.replace(legacyPublicPartnerApplyPrefix, publicPartnerApplyPrefix)
+  }
+  return ''
 }
 
 const isPartnerUser = () => {
@@ -37,7 +49,18 @@ const setPageTitle = (to) => {
 router.beforeEach((to, from, next) => {
   NProgress.start()
   setPageTitle(to)
-  if (getToken()) {
+  const token = getToken()
+
+  if (!token) {
+    const redirectedPublicPath = resolveLegacyPublicPartnerApplyPath(to.path || '')
+    if (redirectedPublicPath) {
+      next({ path: redirectedPublicPath, query: to.query, hash: to.hash, replace: true })
+      NProgress.done()
+      return
+    }
+  }
+
+  if (token) {
     const isLock = store.getters.isLock
     if (to.path === '/login') {
       next({ path: getDefaultHomePath() })

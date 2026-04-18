@@ -101,54 +101,75 @@
     >
       <div class="drawer-body">
         <el-form ref="form" :model="form" :rules="formRules" :label-width="isMobile ? '88px' : '100px'">
-          <el-form-item label="券名称" prop="couponName">
-            <el-input v-model="form.couponName" placeholder="请输入券名称" />
-          </el-form-item>
-          <el-form-item label="券类型" prop="couponType">
-            <el-select v-model="form.couponType" placeholder="请选择" class="full-width">
-              <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
-            </el-select>
-          </el-form-item>
-          <el-row :gutter="12">
-            <el-col :xs="24" :sm="12">
-              <el-form-item label="面额" prop="faceValue">
-                <el-input-number v-model="form.faceValue" :min="0" :precision="2" controls-position="right" class="full-width" />
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" v-if="form.couponType === 'discount'">
-              <el-form-item label="折扣率">
-                <el-input-number v-model="form.discountRate" :min="0" :max="1" :precision="2" :step="0.05" controls-position="right" class="full-width" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-form-item label="门槛金额">
-            <el-input-number v-model="form.thresholdAmount" :min="0" :precision="2" controls-position="right" class="full-width" />
-          </el-form-item>
-          <el-form-item label="适用角色">
-            <el-select v-model="form.applicableRole" placeholder="请选择" class="full-width">
-              <el-option label="全部" value="all" />
-              <el-option label="学生" value="student" />
-              <el-option label="渠道" value="channel" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="有效天数">
-            <el-input-number v-model="form.validDays" :min="0" controls-position="right" class="full-width" />
-          </el-form-item>
-          <el-row :gutter="12">
-            <el-col :xs="24" :sm="12">
-              <el-form-item label="有效开始">
-                <el-date-picker v-model="form.validStart" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="可选" class="full-width" />
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12">
-              <el-form-item label="有效结束">
-                <el-date-picker v-model="form.validEnd" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="可选" class="full-width" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-form-item label="状态">
-            <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
-          </el-form-item>
+          <div class="form-section">
+            <div class="form-section__title">基本信息</div>
+            <el-form-item label="券名称" prop="couponName">
+              <el-input v-model="form.couponName" placeholder="请输入券名称" />
+            </el-form-item>
+            <el-form-item label="券类型" prop="couponType">
+              <el-select v-model="form.couponType" placeholder="请选择" class="full-width">
+                <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+          </div>
+
+          <el-divider />
+
+          <div class="form-section">
+            <div class="form-section__title">面额与门槛</div>
+            <el-row :gutter="12">
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="面额" prop="faceValue">
+                  <el-input-number v-model="form.faceValue" :min="0" :precision="2" controls-position="right" class="full-width" />
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :sm="12" v-if="form.couponType === 'discount'">
+                <el-form-item label="折扣率">
+                  <el-input-number v-model="form.discountRate" :min="0" :max="1" :precision="2" :step="0.05" controls-position="right" class="full-width" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-form-item label="门槛金额">
+              <el-input-number v-model="form.thresholdAmount" :min="0" :precision="2" controls-position="right" class="full-width" />
+            </el-form-item>
+          </div>
+
+          <el-divider />
+
+          <div class="form-section">
+            <div class="form-section__title">有效期与适用范围</div>
+            <el-form-item label="适用角色">
+              <el-select v-model="form.applicableRole" placeholder="请选择" class="full-width">
+                <el-option label="全部" value="all" />
+                <el-option label="学生" value="student" />
+                <el-option label="渠道" value="channel" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="有效天数">
+              <el-input-number v-model="form.validDays" :min="0" controls-position="right" class="full-width" />
+            </el-form-item>
+            <el-row :gutter="12">
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="有效开始">
+                  <el-date-picker v-model="form.validStart" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="可选" class="full-width" />
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="有效结束">
+                  <el-date-picker v-model="form.validEnd" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="可选" class="full-width" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
+
+          <el-divider />
+
+          <div class="form-section">
+            <div class="form-section__title">状态</div>
+            <el-form-item label="状态">
+              <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
+            </el-form-item>
+          </div>
         </el-form>
       </div>
       <div class="drawer-footer">
@@ -372,6 +393,24 @@ export default {
   width: 100%;
 }
 
+.form-section {
+  padding: 0 4px;
+}
+
+.form-section + .form-section {
+  margin-top: 4px;
+}
+
+.form-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 4px 0 14px;
+  padding-left: 10px;
+  border-left: 3px solid #409eff;
+  line-height: 1.2;
+}
+
 @media (max-width: 768px) {
   .jst-page {
     padding: 12px;
@@ -427,6 +466,11 @@ export default {
 
   .drawer-footer .el-button {
     min-height: 44px;
+  }
+
+  .form-section__title {
+    font-size: 13px;
+    margin: 2px 0 10px;
   }
 }
 </style>

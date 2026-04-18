@@ -113,17 +113,36 @@
           <el-input v-model="form.ruleName" placeholder="请输入规则名" />
         </el-form-item>
         <el-form-item label="规则类型" prop="ruleType">
-          <el-select v-model="form.ruleType" placeholder="请选择" class="full-width">
+          <el-select v-if="isMobile" v-model="form.ruleType" placeholder="请选择" class="full-width">
             <el-option v-for="t in ruleTypes" :key="t.value" :label="t.label" :value="t.value" />
           </el-select>
+          <div v-else class="choice-grid">
+            <div
+              v-for="item in ruleTypes"
+              :key="item.value"
+              :class="['choice-card', { 'is-active': form.ruleType === item.value }]"
+              @click="form.ruleType = item.value"
+            >
+              <div class="choice-card__title">{{ item.label }}</div>
+              <div class="choice-card__desc">{{ item.desc }}</div>
+            </div>
+          </div>
         </el-form-item>
         <el-form-item label="维度" prop="dimension">
-          <el-select v-model="form.dimension" placeholder="请选择" class="full-width">
-            <el-option label="用户" value="user" />
-            <el-option label="设备" value="device" />
-            <el-option label="手机" value="mobile" />
-            <el-option label="渠道" value="channel" />
+          <el-select v-if="isMobile" v-model="form.dimension" placeholder="请选择" class="full-width">
+            <el-option v-for="item in dimensionOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
+          <div v-else class="choice-grid choice-grid--compact">
+            <div
+              v-for="item in dimensionOptions"
+              :key="item.value"
+              :class="['choice-card', 'choice-card--compact', { 'is-active': form.dimension === item.value }]"
+              @click="form.dimension = item.value"
+            >
+              <div class="choice-card__title">{{ item.label }}</div>
+              <div class="choice-card__desc">{{ item.desc }}</div>
+            </div>
+          </div>
         </el-form-item>
         <el-form-item label="触发动作" prop="action">
           <el-select v-model="form.action" placeholder="请选择" class="full-width">
@@ -133,7 +152,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="阈值配置" prop="thresholdJson">
-          <el-input v-model="form.thresholdJson" type="textarea" :rows="4" placeholder='JSON 格式，如 {"max_count":5,"window_minutes":60}' />
+          <jst-threshold-editor
+            v-model="form.thresholdJson"
+            :rule-type="form.ruleType"
+            :is-mobile="isMobile"
+          />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" :rows="2" placeholder="请输入备注" />
@@ -149,19 +172,30 @@
 
 <script>
 import { listJst_risk_rule, getJst_risk_rule, addJst_risk_rule, updateJst_risk_rule, delJst_risk_rule } from '@/api/jst/risk/jst_risk_rule'
+import JstThresholdEditor from '@/components/JstJsonEditor/ThresholdEditor'
 
 const RULE_TYPES = [
-  { value: 'bind_freq', label: '绑定频率' },
-  { value: 'coupon_freq', label: '优惠券频率' },
-  { value: 'refund_freq', label: '退款频率' },
-  { value: 'rebate_anomaly', label: '返点异常' },
-  { value: 'zero_order_freq', label: '零元订单频率' },
-  { value: 'aftersale_anomaly', label: '售后异常' }
+  { value: 'bind_freq', label: '绑定频率', desc: '适合限制短时间内重复绑定行为。' },
+  { value: 'coupon_freq', label: '优惠券频率', desc: '监控优惠券领取或使用频次。' },
+  { value: 'refund_freq', label: '退款频率', desc: '识别异常密集的退款申请。' },
+  { value: 'rebate_anomaly', label: '返点异常', desc: '用金额阈值识别返点异常波动。' },
+  { value: 'zero_order_freq', label: '零元订单频率', desc: '识别异常零元订单高频触发。' },
+  { value: 'aftersale_anomaly', label: '售后异常', desc: '适合售后金额或名单类阈值策略。' }
+]
+
+const DIMENSION_OPTIONS = [
+  { value: 'user', label: '用户', desc: '按用户主体统计。' },
+  { value: 'device', label: '设备', desc: '按设备维度聚合。' },
+  { value: 'mobile', label: '手机', desc: '按手机号维度判定。' },
+  { value: 'channel', label: '渠道', desc: '按渠道来源做风控。' }
 ]
 
 export default {
   name: 'RiskRuleManage',
   dicts: ['jst_risk_action'],
+  components: {
+    JstThresholdEditor
+  },
   data() {
     return {
       loading: false,
@@ -174,6 +208,7 @@ export default {
       dialogTitle: '',
       form: {},
       ruleTypes: RULE_TYPES,
+      dimensionOptions: DIMENSION_OPTIONS,
       rules: {
         ruleName: [{ required: true, message: '请输入规则名', trigger: 'blur' }],
         ruleType: [{ required: true, message: '请选择规则类型', trigger: 'change' }],
@@ -205,7 +240,7 @@ export default {
     },
     handleAdd() {
       this.dialogTitle = '新增风控规则'
-      this.form = { status: 1, action: 'warn', thresholdJson: '' }
+      this.form = { status: 1, action: 'warn', thresholdJson: '', ruleType: 'bind_freq', dimension: 'user' }
       this.dialogVisible = true
       this.$nextTick(() => this.$refs.editForm && this.$refs.editForm.clearValidate())
     },
@@ -243,7 +278,7 @@ export default {
       }).catch(() => {})
     },
     ruleTypeLabel(t) { const found = RULE_TYPES.find(r => r.value === t); return found ? found.label : t || '--' },
-    dimensionLabel(d) { return { user: '用户', device: '设备', mobile: '手机', channel: '渠道' }[d] || d || '--' },
+    dimensionLabel(d) { const found = DIMENSION_OPTIONS.find(item => item.value === d); return found ? found.label : d || '--' },
     formatJson(str) {
       try { return JSON.stringify(JSON.parse(str), null, 2) } catch (_) { return str }
     },
@@ -266,6 +301,15 @@ export default {
 .query-panel { padding: 16px 16px 0; margin-bottom: 16px; background: #fff; border: 1px solid #e5eaf2; border-radius: 8px; }
 .action-bar { padding: 0 4px; margin-bottom: 12px; }
 .danger-text { color: #f56c6c; }
+.full-width { width: 100%; }
+.choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.choice-grid--compact { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.choice-card { padding: 12px 14px; border: 1px solid #dbe5f1; border-radius: 10px; background: #fff; cursor: pointer; transition: all .2s ease; }
+.choice-card:hover { border-color: #93c5fd; box-shadow: 0 6px 18px rgba(37, 99, 235, 0.08); }
+.choice-card.is-active { border-color: #2563eb; background: #eff6ff; box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12); }
+.choice-card__title { font-size: 14px; font-weight: 600; color: #172033; }
+.choice-card__desc { margin-top: 4px; font-size: 12px; line-height: 1.5; color: #6b7280; }
+.choice-card--compact .choice-card__desc { min-height: 36px; }
 .json-block { background: #f6f8fb; border: 1px solid #e5eaf2; border-radius: 6px; padding: 12px; font-size: 13px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; margin: 0; }
 .threshold-preview { font-size: 12px; color: #606266; cursor: pointer; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; border-bottom: 1px dashed #c0c4cc; }
 .mobile-list { min-height: 180px; }
@@ -281,6 +325,8 @@ export default {
   .page-hero .el-button { width: 100%; min-height: 44px; margin-top: 16px; }
   .page-hero h2 { font-size: 20px; }
   .query-panel { padding-bottom: 8px; }
+  .choice-grid,
+  .choice-grid--compact { grid-template-columns: 1fr; }
   .query-panel ::v-deep .el-form-item { display: block; margin-right: 0; }
   .query-panel ::v-deep .el-form-item__content, .query-panel ::v-deep .el-select, .query-panel ::v-deep .el-input { width: 100%; }
 }

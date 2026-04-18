@@ -50,6 +50,7 @@
           </div>
           <div class="mobile-card__meta">
             <span>版本：v{{ row.templateVersion || 1 }}</span>
+            <span>{{ schemaSummary(row.schemaJson) }}</span>
             <span>{{ row.status === 1 ? '启用' : '停用' }}</span>
             <span>{{ parseTime(row.createTime) }}</span>
           </div>
@@ -80,6 +81,11 @@
           <el-tag size="small" :type="row.status === 1 ? 'success' : 'info'">{{ row.status === 1 ? '启用' : '停用' }}</el-tag>
         </template>
       </el-table-column>
+      <el-table-column label="字段概览" min-width="130">
+        <template slot-scope="{ row }">
+          <span>{{ schemaSummary(row.schemaJson) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="创建时间" width="160">
         <template slot-scope="{ row }">{{ parseTime(row.createTime) }}</template>
       </el-table-column>
@@ -107,32 +113,44 @@
           <el-form-item label="模板名称" prop="templateName">
             <el-input v-model="form.templateName" placeholder="请输入模板名称" />
           </el-form-item>
-          <el-form-item label="所属类型">
-            <el-select v-model="form.ownerType" placeholder="请选择" class="full-width">
+          <el-form-item v-if="!isPartnerUser" label="所属类型" prop="ownerType">
+            <el-select v-model="form.ownerType" placeholder="请选择" class="full-width" @change="onOwnerTypeChange">
               <el-option label="平台" value="platform" />
               <el-option label="赛事方" value="partner" />
             </el-select>
           </el-form-item>
+          <el-form-item
+            v-if="!isPartnerUser && form.ownerType === 'partner'"
+            label="所属赛事方"
+            prop="ownerId"
+          >
+            <el-select
+              v-model="form.ownerId"
+              filterable
+              remote
+              :remote-method="searchPartners"
+              :loading="partnerLoading"
+              placeholder="搜索赛事方名称"
+              class="full-width"
+              clearable
+            >
+              <el-option
+                v-for="p in partnerOptions"
+                :key="p.partnerId"
+                :label="p.partnerName"
+                :value="p.partnerId"
+              />
+            </el-select>
+          </el-form-item>
           <el-form-item label="Schema">
-            <el-row :gutter="12">
-              <el-col :xs="24" :sm="12">
-                <el-input v-model="schemaText" type="textarea" :rows="14" placeholder="请输入 JSON Schema" @input="onSchemaInput" />
-                <div v-if="schemaError" class="schema-error">{{ schemaError }}</div>
-              </el-col>
-              <el-col :xs="24" :sm="12">
-                <div class="schema-preview">
-                  <div class="schema-preview__title">预览</div>
-                  <div v-if="schemaFields.length === 0" class="schema-empty">输入有效 JSON 后显示预览</div>
-                  <div v-else class="schema-preview__list">
-                    <div v-for="(field, idx) in schemaFields" :key="idx" class="schema-field">
-                      <span class="schema-field__label">{{ field.label || field.key }}</span>
-                      <el-tag size="mini" type="info">{{ field.type || 'text' }}</el-tag>
-                      <el-tag v-if="field.required" size="mini" type="danger">必填</el-tag>
-                    </div>
-                  </div>
-                </div>
-              </el-col>
-            </el-row>
+            <jst-form-schema-editor
+              v-model="form.schemaJson"
+              :field-type-options="fieldTypeOptions"
+              :readonly="false"
+              :mobile-readonly="isMobile"
+              @change="handleSchemaEditorChange"
+              @fallback-change="handleSchemaFallbackChange"
+            />
           </el-form-item>
         </el-form>
       </div>
@@ -154,7 +172,9 @@
 
 <script>
 import { listFormTemplate, getFormTemplate, saveFormTemplate, submitFormTemplate, approveFormTemplate, rejectFormTemplate } from '@/api/jst/formTemplate'
+import { listJst_event_partner, getJst_event_partner } from '@/api/jst/event/jst_event_partner'
 import { parseTime } from '@/utils/ruoyi'
+import JstFormSchemaEditor from '@/components/JstJsonEditor/FormSchemaEditor'
 
 const AUDIT_META = {
   draft: { label: '草稿', type: 'info' },
@@ -163,8 +183,35 @@ const AUDIT_META = {
   rejected: { label: '已驳回', type: 'danger' }
 }
 
+const FIELD_TYPE_FALLBACK_OPTIONS = [
+  { label: '单行文本', value: 'text' },
+  { label: '多行文本', value: 'textarea' },
+  { label: '手机号(raw)', value: 'phone' },
+  { label: '身份证号(raw)', value: 'idcard' },
+  { label: '年龄', value: 'age' },
+  { label: '数字', value: 'number' },
+  { label: '单选', value: 'radio' },
+  { label: '多选', value: 'checkbox' },
+  { label: '下拉选择', value: 'select' },
+  { label: '日期', value: 'date' },
+  { label: '图片', value: 'image' },
+  { label: '音频', value: 'audio' },
+  { label: '视频', value: 'video' },
+  { label: '文件', value: 'file' },
+  { label: '分组(raw)', value: 'group' },
+  { label: '条件组(raw)', value: 'conditional' }
+]
+
+function clone(value) {
+  return value == null ? value : JSON.parse(JSON.stringify(value))
+}
+
 export default {
   name: 'JstFormTemplate',
+  dicts: ['jst_form_field_type'],
+  components: {
+    JstFormSchemaEditor
+  },
   data() {
     return {
       loading: false,
@@ -181,12 +228,31 @@ export default {
       ],
       dialogVisible: false,
       dialogTitle: '',
-      form: { templateName: '', ownerType: 'platform', schemaJson: null },
-      schemaText: '',
-      schemaError: '',
-      schemaFields: [],
+      form: { templateName: '', ownerType: 'platform', ownerId: null, schemaJson: null },
+      schemaEditorState: {
+        value: null,
+        rawText: '',
+        parseError: '',
+        fallbackMode: false,
+        reason: ''
+      },
+      partnerOptions: [],
+      partnerLoading: false,
       formRules: {
-        templateName: [{ required: true, message: '模板名称不能为空', trigger: 'blur' }]
+        templateName: [{ required: true, message: '模板名称不能为空', trigger: 'blur' }],
+        ownerType: [{ required: true, message: '请选择所属类型', trigger: 'change' }],
+        ownerId: [
+          {
+            validator: (rule, value, callback) => {
+              if (this.form.ownerType === 'partner' && !this.isPartnerUser && !value) {
+                callback(new Error('请选择所属赛事方'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'change'
+          }
+        ]
       },
       rejectVisible: false,
       rejectLoading: false,
@@ -195,12 +261,80 @@ export default {
     }
   },
   computed: {
-    isMobile() { return this.$store.state.app.device === 'mobile' }
+    isMobile() { return this.$store.state.app.device === 'mobile' },
+    fieldTypeOptions() {
+      const options = this.dict && this.dict.type ? this.dict.type.jst_form_field_type : []
+      return Array.isArray(options) && options.length ? options : FIELD_TYPE_FALLBACK_OPTIONS
+    },
+    isPartnerUser() {
+      const roles = this.$store.state.user.roles || []
+      // admin（超级管理员）或未持 jst_partner 的业务角色均视为"非 partner"，可看到归属配置
+      if (roles.includes('admin')) return false
+      return roles.includes('jst_partner')
+    }
   },
   created() { this.getList() },
   methods: {
     parseTime,
     auditMeta(s) { return AUDIT_META[s] || { label: s || '--', type: 'info' } },
+    schemaSummary(schemaJson) {
+      const summary = this.countSchemaFields(schemaJson)
+      return `${summary.total} 字段 · ${summary.required} 必填`
+    },
+    countSchemaFields(schemaJson) {
+      let source = schemaJson
+      if (typeof schemaJson === 'string') {
+        try {
+          source = JSON.parse(schemaJson)
+        } catch (e) {
+          return { total: 0, required: 0 }
+        }
+      }
+      let fields = []
+      if (Array.isArray(source)) {
+        fields = source
+      } else if (source && Array.isArray(source.fields)) {
+        fields = source.fields
+      }
+      const travel = list => (list || []).reduce((acc, field) => {
+        acc.total += 1
+        if (field && field.required) acc.required += 1
+        if (field && Array.isArray(field.fields)) {
+          const child = travel(field.fields)
+          acc.total += child.total
+          acc.required += child.required
+        }
+        return acc
+      }, { total: 0, required: 0 })
+      return travel(fields)
+    },
+    resetSchemaEditorState(schemaJson) {
+      this.schemaEditorState = {
+        value: clone(schemaJson),
+        rawText: schemaJson ? JSON.stringify(schemaJson, null, 2) : '',
+        parseError: '',
+        fallbackMode: false,
+        reason: ''
+      }
+    },
+    handleSchemaEditorChange(payload) {
+      this.schemaEditorState = {
+        value: clone(payload.value),
+        rawText: payload.rawText || '',
+        parseError: payload.parseError || '',
+        fallbackMode: Boolean(payload.fallbackMode),
+        reason: payload.reason || ''
+      }
+    },
+    handleSchemaFallbackChange(payload) {
+      this.schemaEditorState = {
+        value: clone(payload.value),
+        rawText: payload.rawText || '',
+        parseError: payload.parseError || '',
+        fallbackMode: Boolean(payload.fallbackMode),
+        reason: payload.reason || ''
+      }
+    },
     getList() {
       this.loading = true
       listFormTemplate(this.queryParams).then(res => {
@@ -210,28 +344,13 @@ export default {
     },
     handleQuery() { this.queryParams.pageNum = 1; this.getList() },
     resetQuery() { this.$refs.queryForm && this.$refs.queryForm.resetFields(); this.handleQuery() },
-    onSchemaInput() {
-      this.schemaError = ''
-      this.schemaFields = []
-      if (!this.schemaText.trim()) return
-      try {
-        const obj = JSON.parse(this.schemaText)
-        this.form.schemaJson = obj
-        const fields = obj.fields || obj.properties
-        if (Array.isArray(fields)) {
-          this.schemaFields = fields
-        } else if (fields && typeof fields === 'object') {
-          this.schemaFields = Object.entries(fields).map(([key, val]) => ({ key, ...val }))
-        }
-      } catch (e) {
-        this.schemaError = 'JSON 格式错误：' + e.message
-      }
-    },
     handleAdd() {
-      this.form = { templateName: '', ownerType: 'platform', schemaJson: null }
-      this.schemaText = ''
-      this.schemaError = ''
-      this.schemaFields = []
+      // partner 登录：默认 ownerType=partner 并跳过选择器（后端自动绑定 partnerId）
+      // admin / 运营：默认 platform，改 partner 时必须选赛事方
+      const defaultOwnerType = this.isPartnerUser ? 'partner' : 'platform'
+      this.form = { templateName: '', ownerType: defaultOwnerType, ownerId: null, schemaJson: null }
+      this.resetSchemaEditorState(null)
+      this.partnerOptions = []
       this.dialogTitle = '新增模板'
       this.dialogVisible = true
       this.$nextTick(() => { this.$refs.form && this.$refs.form.clearValidate() })
@@ -239,21 +358,55 @@ export default {
     handleEdit(row) {
       getFormTemplate(row.templateId).then(res => {
         const d = res.data || res
-        this.form = { templateId: d.templateId, templateName: d.templateName, ownerType: d.ownerType || 'platform', schemaJson: d.schemaJson }
-        this.schemaText = d.schemaJson ? JSON.stringify(d.schemaJson, null, 2) : ''
-        this.onSchemaInput()
+        this.form = {
+          templateId: d.templateId,
+          templateName: d.templateName,
+          ownerType: d.ownerType || 'platform',
+          ownerId: d.ownerId || null,
+          schemaJson: d.schemaJson
+        }
+        this.resetSchemaEditorState(d.schemaJson)
+        this.partnerOptions = []
+        // 回填赛事方名称作为预选项（仅 admin/运营 可见到选择器时需要）
+        if (!this.isPartnerUser && d.ownerType === 'partner' && d.ownerId) {
+          getJst_event_partner(d.ownerId).then(r => {
+            const p = r.data || r
+            if (p && p.partnerId) {
+              this.partnerOptions = [{ partnerId: p.partnerId, partnerName: p.partnerName || ('赛事方#' + p.partnerId) }]
+            }
+          }).catch(() => {})
+        }
         this.dialogTitle = '编辑模板'
         this.dialogVisible = true
+        this.$nextTick(() => { this.$refs.form && this.$refs.form.clearValidate() })
       })
+    },
+    onOwnerTypeChange(val) {
+      // 切换归属类型后清空 ownerId 与候选项
+      this.form.ownerId = null
+      this.partnerOptions = []
+    },
+    async searchPartners(keyword) {
+      if (!keyword || !keyword.trim()) return
+      this.partnerLoading = true
+      try {
+        const res = await listJst_event_partner({ partnerName: keyword.trim(), pageSize: 20 })
+        this.partnerOptions = res.rows || []
+      } finally {
+        this.partnerLoading = false
+      }
     },
     handleFormSubmit() {
       this.$refs.form.validate(valid => {
         if (!valid) return
-        if (this.schemaText.trim()) {
-          try { this.form.schemaJson = JSON.parse(this.schemaText) } catch (e) {
-            this.$modal.msgWarning('JSON Schema 格式错误')
-            return
-          }
+        if (this.schemaEditorState.parseError) {
+          this.$modal.msgWarning(this.schemaEditorState.parseError)
+          return
+        }
+        if (this.schemaEditorState.rawText && this.schemaEditorState.value) {
+          this.form.schemaJson = clone(this.schemaEditorState.value)
+        } else if (!this.schemaEditorState.rawText) {
+          this.form.schemaJson = null
         }
         this.submitLoading = true
         saveFormTemplate(this.form).then(() => {

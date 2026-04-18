@@ -118,14 +118,14 @@ const permission = {
   },
   actions: {
     // 生成路由
-    GenerateRoutes({ commit }) {
+    GenerateRoutes({ commit, rootState }) {
       return new Promise(resolve => {
         getRouters().then(res => {
           const sdata = JSON.parse(JSON.stringify(res.data))
           const rdata = JSON.parse(JSON.stringify(res.data))
           const sidebarRoutes = dedupeJstRootRoutes(filterAsyncRouter(sdata))
           const rewriteRoutes = dedupeJstRootRoutes(filterAsyncRouter(rdata, false, true))
-          const asyncRoutes = filterDynamicRoutes(dynamicRoutes)
+          const asyncRoutes = filterDynamicRoutes(dynamicRoutes, rootState.user.roles || [])
           rewriteRoutes.push({ path: '*', redirect: '/404', hidden: true })
           router.addRoutes(asyncRoutes)
           commit('SET_ROUTES', rewriteRoutes)
@@ -346,18 +346,27 @@ function filterChildren(childrenMap, lastRouter = false) {
   return children
 }
 
+function hasPermission(roles, route) {
+  const routeRoles = (route.meta && route.meta.roles) || route.roles
+  if (routeRoles && routeRoles.length > 0) {
+    return roles.some(role => routeRoles.includes(role))
+  }
+  return true
+}
+
 // 动态路由遍历，验证是否具备权限
-export function filterDynamicRoutes(routes) {
+export function filterDynamicRoutes(routes, roles = []) {
   const res = []
   routes.forEach(route => {
-    if (route.permissions) {
-      if (auth.hasPermiOr(route.permissions)) {
-        res.push(route)
+    const tmp = { ...route }
+    const hasPermi = !tmp.permissions || auth.hasPermiOr(tmp.permissions)
+    const hasRole = hasPermission(roles, tmp)
+
+    if (hasPermi && hasRole) {
+      if (tmp.children && tmp.children.length) {
+        tmp.children = filterDynamicRoutes(tmp.children, roles)
       }
-    } else if (route.roles) {
-      if (auth.hasRoleOr(route.roles)) {
-        res.push(route)
-      }
+      res.push(tmp)
     }
   })
   return res
