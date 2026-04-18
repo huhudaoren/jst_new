@@ -7,6 +7,10 @@
 
 ## 一、Round 2A · 字段扩展 + 小端点（本次做）
 
+> **已完成**：A1–A7 全部 ✅（2026-04-19, commit `ecf3c0c`，分支 `feat/backend-todo-round-2a`）。
+> 报告：`subagent/tasks/任务报告/BACKEND-UX-POLISH-TODO-ROUND-2A-报告.md`。
+> DDL：`架构设计/ddl/99-migration-backend-ux-polish-round2.sql`。
+
 ### ✅ A1. `DashboardMonthlyVO.totalStudentCount` 累计绑定学生数
 
 **文件**：`RuoYi-Vue/jst-channel/src/main/java/com/ruoyi/jst/channel/vo/DashboardMonthlyVO.java`（或 dto 目录）
