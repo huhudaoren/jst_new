@@ -19,6 +19,25 @@
         <u-form-item label="身份证号" customClass="af-field">
           <u--input class="af-field__input" v-model="form.idCard" placeholder="选填" maxlength="18" border="none"></u--input>
         </u-form-item>
+        <u-form-item label="邀请码" customClass="af-field">
+          <u--input
+            class="af-field__input"
+            v-model="form.inviteCode"
+            placeholder="如有邀请码请填写"
+            maxlength="16"
+            border="none"
+            :disabled="inviteCodeLocked"
+          ></u--input>
+        </u-form-item>
+        <u-form-item label="销售业务编号" customClass="af-field">
+          <u--input
+            class="af-field__input"
+            v-model="form.businessNo"
+            placeholder="如有销售对接请填写"
+            maxlength="64"
+            border="none"
+          ></u--input>
+        </u-form-item>
       </u--form>
     </view>
 
@@ -91,10 +110,11 @@ export default {
       skeletonShow: true, // [visual-effect]
       channelType: 'teacher',
       resubmitId: null,
-      form: { applyName: '', mobile: '', idCard: '' },
+      form: { applyName: '', mobile: '', idCard: '', inviteCode: '', businessNo: '' },
       materials: {},
       agreed: false,
-      submitting: false
+      submitting: false,
+      inviteCodeLocked: false
     }
   },
   computed: {
@@ -104,6 +124,12 @@ export default {
   onLoad(query) {
     this.channelType = (query && query.channelType) || 'teacher'
     this.resubmitId = (query && query.resubmitId) || null
+    // 分享链接自动回填邀请码
+    if (query && query.invite_code) {
+      this.form.inviteCode = query.invite_code
+      this.inviteCodeLocked = true
+      uni.showToast({ title: '已自动填入邀请码', icon: 'success', duration: 1500 })
+    }
   },
   methods: {
     async onSubmit() {
@@ -112,7 +138,9 @@ export default {
       const body = {
         channelType: this.channelType,
         applyName: this.form.applyName.trim(),
-        materialsJson: JSON.stringify(materialsObj)
+        materialsJson: JSON.stringify(materialsObj),
+        inviteCode: this.form.inviteCode || undefined,
+        businessNo: this.form.businessNo || undefined
       }
       this.submitting = true
       try {
