@@ -70,19 +70,14 @@ export default {
       if (!this.hasMore) return
       this.loading = true
       try {
-        // 'invalid' (已失效) = used + expired, 后端未直接支持, 故不传 status 拉全部后客户端过滤
-        // TODO(BE): 可考虑后端 selectMyRights 支持 status='invalid' 直接返回 used+expired 合集, 省去客户端过滤
-        const query = { pageNum: this.pageNum, pageSize: this.pageSize }
-        if (this.activeStatus !== 'invalid') query.status = this.activeStatus
+        // 2026-04-18: 后端 selectMyRights 已支持 status='invalid' (used+expired+voided+rejected)
+        const query = { pageNum: this.pageNum, pageSize: this.pageSize, status: this.activeStatus }
         const res = await getMyRights(query)
-        let rows = (res && res.rows) || []
+        const rows = (res && res.rows) || []
         this.total = (res && res.total) || 0
         if (res && res.stats) this.stats = res.stats
-        if (this.activeStatus === 'invalid') {
-          rows = rows.filter(r => r.status === 'used' || r.status === 'expired' || r.expired)
-        }
         this.list = reset ? rows : this.list.concat(rows)
-        this.hasMore = this.list.length < this.total && this.activeStatus !== 'invalid' // invalid 走全量过滤, 不分页
+        this.hasMore = this.list.length < this.total
         if (this.hasMore) this.pageNum += 1
       } finally { this.loading = false }
     },

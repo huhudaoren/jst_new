@@ -1,17 +1,27 @@
 # 后端补齐 TODO — UX 精品化遗留字段
 
 > **来源**：2026-04-18 前端 UX 精品化 5 个 Agent 交付（Wave 1 架构基石 + Wave 2 P0 业务修复）
-> **前置分支**：`feat/ux-polish-2026-04-18`（已 push，5 commits）
-> **PR URL**：https://github.com/huhudaoren/jst_new/pull/new/feat/ux-polish-2026-04-18
+> **前置分支**：`feat/ux-polish-2026-04-18`（已 merge）
+> **实施分支**：`feat/backend-ux-polish-todo`（2026-04-18 实施完成，3 commits）
 > **预估工作量**：1.5 ~ 2 人日（6 条 DDL/Mapper + 4 条 VO 扩展 + 1 条新端点 + 2 条 OSS 依赖）
 > **派发方式**：用 `subagent/BACKEND_AGENT_PROMPT.md` 模板 + 本文档作为任务卡
-> **⚠️ 注意**：执行前确认 RuoYi-Vue 下其他 agent 的 `entity-link` 工作已 merge，避免冲突
+
+## 实施进度（2026-04-18）
+
+| 批次 | 范围 | 状态 | commit |
+|---|---|---|---|
+| 批 1 | §1.1 §1.2 §2.4 Mapper LEFT JOIN + monthAmount | ✅ 完成 | `5341d51` |
+| 批 2 | §2.1 §2.2 §2.3 VO 字段扩展 + DDL migration | ✅ 完成 | `afd51d9` |
+| 批 3 | §3.1 §4.1 §4.2 DTO + 新端点 + status=invalid | ✅ 完成 | `ba9aa73` |
+| 跳过 | §5.1 §5.2 OSS 依赖 | ⏸️ 等 OSS 配置 | — |
+| 前端清理 | TODO(backend) 注释清理 + 新端点接入 | ✅ 完成 | 下批 |
+
 
 ---
 
-## 一、Mapper XML LEFT JOIN 补齐（P0，~2 小时）
+## 一、Mapper XML LEFT JOIN 补齐（P0，~2 小时）✅ 完成（commit 5341d51）
 
-### 1.1 邀请下级渠道名 `invitee_channel_name` / `auth_type`
+### 1.1 ✅ 邀请下级渠道名 `invitee_channel_name` / `auth_type`
 
 **文件**：`RuoYi-Vue/jst-channel/src/main/resources/mapper/channel/JstChannelInviteMapperExt.xml`（路径视实际）
 
@@ -32,7 +42,7 @@
 
 ---
 
-### 1.2 分销台账下级渠道名 `invitee_channel_name`
+### 1.2 ✅ 分销台账下级渠道名 `invitee_channel_name`
 
 **文件**：`RuoYi-Vue/jst-channel/src/main/resources/mapper/channel/JstChannelDistributionLedgerMapperExt.xml`
 
@@ -43,9 +53,9 @@
 
 ---
 
-## 二、VO 字段扩展（P0，~4 小时）
+## 二、VO 字段扩展（P0，~4 小时）✅ 完成（commit afd51d9）
 
-### 2.1 `SettlementListVO`（提现结算单列表）
+### 2.1 ✅ `SettlementListVO`（提现结算单列表）= WithdrawListVO
 
 **新增字段**：
 | 字段 | 类型 | 说明 | 数据来源 |
@@ -57,19 +67,19 @@
 **前端位置**：`settlement.vue`、`withdraw-list.vue` 卡片 3 chip
 **前端当前降级**：chip 用 `v-if` 保护，后端无数据则不显示
 
-### 2.2 `ContractDetailVO`
+### 2.2 ✅ `ContractDetailVO` = ContractRecordVO（+ 甲乙方 + 结算单号）
 
 **新增字段**：`partyA` / `partyAName` / `partyB` / `partyBName` / `settlementId` / `settlementNo`
 
 **前端位置**：`contract-detail.vue` 甲乙方信息区 + 关联结算单跳转行
 
-### 2.3 `InvoiceListVO`
+### 2.3 ✅ `InvoiceListVO` = InvoiceRecordVO（+ tracking + 邮箱脱敏 + settlementId）
 
 **新增字段**：`settlementId` / `settlementNo` / `trackingCompany` / `trackingNo` / `deliveryEmail`
 
 **前端位置**：`invoice-list.vue` 关联结算单 chip + 物流单号 chip + 邮箱脱敏 chip
 
-### 2.4 `ChannelDistributionSummaryVO`
+### 2.4 ✅ `ChannelDistributionSummaryVO` (monthAmount)
 
 **新增字段**：`monthAmount: BigDecimal` — 本月分销收益
 **SQL**：`WHERE accrue_time >= DATE_FORMAT(NOW(), '%Y-%m-01 00:00:00')` 聚合

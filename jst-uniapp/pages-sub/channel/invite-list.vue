@@ -56,7 +56,6 @@
         </view>
         <view class="il-item__info">
           <view class="il-item__name-row">
-            <!-- TODO(backend): 后端 invite/list 需补 inviteeChannelName/authType/avatarUrl 字段（当前 JstChannelInvite 仅有 inviteeChannelId） -->
             <text class="il-item__name">{{ item.inviteeChannelName || '渠道 #' + item.inviteeChannelId }}</text>
             <u-tag :text="statusLabel(item.status)" :type="statusTagType(item.status)" size="mini" shape="circle" plain />
           </view>

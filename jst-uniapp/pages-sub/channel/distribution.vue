@@ -73,7 +73,6 @@
               <u-tag :text="statusLabel(item.status)" :type="statusType(item.status)" size="mini" shape="circle" />
               <u-tag v-if="isMyMonth(item)" text="本月" type="warning" size="mini" shape="circle" plain />
             </view>
-            <!-- TODO(backend): ledger 返回需补 inviteeChannelName（当前仅 inviteeChannelId） -->
             <text class="dist-card__channel">下级 · {{ item.inviteeChannelName || '渠道 #' + item.inviteeChannelId }}</text>
             <text class="dist-card__order" v-if="item.orderNo">订单号 {{ item.orderNo }}</text>
           </view>
@@ -226,18 +225,10 @@ export default {
         this.summary.totalAmount = (data && data.totalAmount) || '0.00'
         this.summary.pendingAmount = (data && data.pendingAmount) || '0.00'
         this.summary.accruedAmount = (data && data.accruedAmount) || '0.00'
-        // 本月金额：前端聚合（后端 summary 暂不分月，拉第一页 ledger 聚合）
-        try {
-          const res = await listDistributionLedger({ pageNum: 1, pageSize: 100 })
-          const rows = (res && res.rows) || []
-          const ym = ymStr(new Date())
-          const sum = rows.reduce((acc, r) => {
-            if (r.status === 'cancelled') return acc
-            if (!String(r.createTime || '').startsWith(ym)) return acc
-            return acc + Number(r.amount || 0)
-          }, 0)
-          this.summary.monthAmount = sum.toFixed(2)
-        } catch (e) {}
+        // 本月金额：后端 summary.monthAmount (accrue_at 落在当月聚合)
+        this.summary.monthAmount = (data && data.monthAmount != null)
+          ? String(data.monthAmount)
+          : '0.00'
       } catch (e) {}
     },
     async loadList(reset) {

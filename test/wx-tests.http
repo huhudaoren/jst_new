@@ -4002,3 +4002,116 @@ client.test("RTP23-WX-3 member participantId should be linked", function() {
   }
 });
 %}
+
+### =====================================================================
+### BACKEND-UX-POLISH-TODO 后端补齐端点测试 (2026-04-18)
+### 对应任务卡: subagent/tasks/BACKEND-UX-POLISH-TODO.md
+### 前置: 需 channel 角色 token (channel_token) 与 student 角色 token (wx_token)
+### =====================================================================
+
+### BUPT-1. 渠道 invite/list 应返回 inviteeChannelName/authType (§1.1)
+### 期望: body.data 每条含 inviteeChannelName (非 null，LEFT JOIN jst_channel.channel_name)
+GET {{baseUrl}}/jst/wx/channel/invite/list
+Authorization: Bearer {{channel_token}}
+
+> {%
+client.test("BUPT-1 invite/list should return enriched fields", function() {
+  client.assert(response.body.code === 200 || response.body.code === 99902, "should return 200 or auth-denied if no channel");
+  if (response.body.code === 200 && response.body.data && response.body.data.length > 0) {
+    // 新字段应为 String 或 null（不应为 undefined）
+    var first = response.body.data[0];
+    client.assert("inviteeChannelName" in first, "missing inviteeChannelName field");
+    client.assert("authType" in first, "missing authType field");
+  }
+});
+%}
+
+### BUPT-2. 渠道 distribution/ledger 应返回 inviteeChannelName (§1.2)
+GET {{baseUrl}}/jst/wx/channel/distribution/ledger?pageNum=1&pageSize=10
+Authorization: Bearer {{channel_token}}
+
+> {%
+client.test("BUPT-2 distribution/ledger should return inviteeChannelName", function() {
+  client.assert(response.body.code === 200 || response.body.code === 99902);
+  if (response.body.code === 200 && response.body.rows && response.body.rows.length > 0) {
+    var first = response.body.rows[0];
+    client.assert("inviteeChannelName" in first, "missing inviteeChannelName field");
+  }
+});
+%}
+
+### BUPT-3. 分销 summary 应返回 monthAmount (§2.4)
+GET {{baseUrl}}/jst/wx/channel/distribution/summary
+Authorization: Bearer {{channel_token}}
+
+> {%
+client.test("BUPT-3 distribution/summary should include monthAmount", function() {
+  client.assert(response.body.code === 200 || response.body.code === 99902);
+  if (response.body.code === 200) {
+    client.assert("monthAmount" in response.body.data, "missing monthAmount field");
+    client.assert("totalAmount" in response.body.data);
+    client.assert("pendingAmount" in response.body.data);
+    client.assert("accruedAmount" in response.body.data);
+  }
+});
+%}
+
+### BUPT-4. 用户权益核销记录列表 (§4.1) - 空过滤
+GET {{baseUrl}}/jst/wx/rights/writeoff-records?pageNum=1&pageSize=10
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("BUPT-4 rights/writeoff-records endpoint should exist", function() {
+  // 200 可能数据为空，也可能返回数据
+  client.assert(response.body.code === 200 || response.body.code === 99902);
+  if (response.body.code === 200) {
+    client.assert(response.body.rows !== undefined, "should return paged response");
+    if (response.body.rows && response.body.rows.length > 0) {
+      var first = response.body.rows[0];
+      client.assert("recordId" in first);
+      client.assert("rightsId" in first);
+      client.assert("rightsName" in first);
+      client.assert("rightsType" in first);
+      client.assert("status" in first);
+      client.assert("applyTime" in first);
+    }
+  }
+});
+%}
+
+### BUPT-5. 用户权益核销记录列表 (§4.1) - status=invalid (used+expired+rolled_back)
+GET {{baseUrl}}/jst/wx/rights/writeoff-records?pageNum=1&pageSize=10&status=invalid
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("BUPT-5 writeoff-records status=invalid should filter used+expired+rolled_back", function() {
+  client.assert(response.body.code === 200 || response.body.code === 99902);
+  if (response.body.code === 200 && response.body.rows && response.body.rows.length > 0) {
+    response.body.rows.forEach(function(row) {
+      client.assert(
+        ["used", "expired", "rolled_back"].indexOf(row.status) >= 0,
+        "status should be in invalid set, got: " + row.status
+      );
+    });
+  }
+});
+%}
+
+### BUPT-6. 权益 /my 列表 status=invalid 扩展 (§4.2)
+GET {{baseUrl}}/jst/wx/rights/my?status=invalid
+Authorization: Bearer {{wx_token}}
+
+> {%
+client.test("BUPT-6 rights/my status=invalid should return used+expired+voided+rejected", function() {
+  client.assert(response.body.code === 200 || response.body.code === 99902);
+  if (response.body.code === 200 && response.body.rows && response.body.rows.length > 0) {
+    response.body.rows.forEach(function(row) {
+      client.assert(
+        ["used", "expired", "voided", "rejected"].indexOf(row.status) >= 0,
+        "status should be in invalid set, got: " + row.status
+      );
+    });
+  }
+});
+%}
+
