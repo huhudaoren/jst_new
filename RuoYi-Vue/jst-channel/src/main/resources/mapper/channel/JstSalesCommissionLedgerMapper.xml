@@ -141,4 +141,57 @@
          LIMIT 200
     </select>
 
+    <!-- 月结用：按销售+时间段汇总 accrued 行 -->
+    <select id="selectAccruedByPeriod" resultMap="JstSalesCommissionLedgerResult">
+        SELECT <include refid="cols"/> FROM jst_sales_commission_ledger
+         WHERE sales_id = #{salesId} AND status = 'accrued'
+           AND accrued_at &gt;= #{periodStart} AND accrued_at &lt; #{periodEnd}
+    </select>
+
+    <!-- 月结：accrued 行绑定到 settlement + status → settled -->
+    <update id="bindToSettlement">
+        UPDATE jst_sales_commission_ledger
+           SET status = 'settled', settlement_id = #{settlementId}, update_time = NOW()
+         WHERE sales_id = #{salesId} AND status = 'accrued'
+           AND accrued_at &gt;= #{periodStart} AND accrued_at &lt; #{periodEnd}
+    </update>
+
+    <update id="markSettledAsPaid">
+        UPDATE jst_sales_commission_ledger
+           SET status = 'paid', update_time = NOW()
+         WHERE settlement_id = #{settlementId} AND status = 'settled'
+    </update>
+
+    <update id="rollbackSettledToAccrued">
+        UPDATE jst_sales_commission_ledger
+           SET status = 'accrued', settlement_id = NULL, update_time = NOW()
+         WHERE settlement_id = #{settlementId} AND status = 'settled'
+    </update>
+
+
+    <select id="aggregatePerformance" resultType="java.util.LinkedHashMap">
+        SELECT
+            COUNT(DISTINCT order_id) AS orderCount,
+            COUNT(DISTINCT channel_id) AS channelCount,
+            COALESCE(SUM(base_amount), 0) AS totalGmv,
+            COALESCE(SUM(amount), 0) AS totalCommission,
+            COALESCE(SUM(CASE WHEN status IN ('pending','accrued') THEN amount ELSE 0 END), 0) AS pendingCommission,
+            COALESCE(SUM(CASE WHEN status IN ('settled','paid') THEN amount ELSE 0 END), 0) AS settledCommission
+          FROM jst_sales_commission_ledger
+         WHERE sales_id = #{salesId}
+           AND create_time &gt;= #{periodStart} AND create_time &lt; #{periodEnd}
+    </select>
+
+    <select id="aggregateByBusinessType" resultType="java.util.LinkedHashMap">
+        SELECT
+            business_type AS businessType,
+            COUNT(*) AS orderCount,
+            COALESCE(SUM(base_amount), 0) AS gmv,
+            COALESCE(SUM(amount), 0) AS commission
+          FROM jst_sales_commission_ledger
+         WHERE sales_id = #{salesId}
+           AND create_time &gt;= #{periodStart} AND create_time &lt; #{periodEnd}
+         GROUP BY business_type
+    </select>
+
 </mapper>
