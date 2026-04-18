@@ -33,6 +33,9 @@ public class JstContest extends BaseEntity
     @Excel(name = "所属赛事方ID，FK→jst_event_partner")
     private Long partnerId;
 
+    /** 所属赛事方名称 */
+    private String partnerName;
+
     /** 分类：艺术/音乐/舞蹈/美术/朗诵戏剧/文化/科技/体育 */
     @Excel(name = "分类：艺术/音乐/舞蹈/美术/朗诵戏剧/文化/科技/体育")
     private String category;
@@ -276,6 +279,16 @@ public class JstContest extends BaseEntity
     public Long getPartnerId() 
     {
         return partnerId;
+    }
+
+    public void setPartnerName(String partnerName)
+    {
+        this.partnerName = partnerName;
+    }
+
+    public String getPartnerName()
+    {
+        return partnerName;
     }
 
     public void setCategory(String category) 
@@ -706,6 +719,7 @@ public class JstContest extends BaseEntity
             .append("contestName", getContestName())
             .append("sourceType", getSourceType())
             .append("partnerId", getPartnerId())
+            .append("partnerName", getPartnerName())
             .append("category", getCategory())
             .append("groupLevels", getGroupLevels())
             .append("coverImage", getCoverImage())

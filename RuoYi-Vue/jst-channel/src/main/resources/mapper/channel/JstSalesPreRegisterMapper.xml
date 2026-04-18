@@ -19,6 +19,10 @@
         <result property="updateTime"      column="update_time"/>
     </resultMap>
 
+    <resultMap type="com.ruoyi.jst.channel.domain.JstSalesPreRegister" id="JstSalesPreRegisterListResult" extends="JstSalesPreRegisterResult">
+        <result property="matchedChannelName" column="matched_channel_name_join"/>
+    </resultMap>
+
     <sql id="cols">
         pre_id, sales_id, phone, target_name, status, matched_channel_id, matched_at,
         expire_at, renew_count, create_by, create_time, update_by, update_time
@@ -28,14 +32,16 @@
         SELECT <include refid="cols"/> FROM jst_sales_pre_register WHERE pre_id = #{preId}
     </select>
 
-    <select id="selectJstSalesPreRegisterList" parameterType="com.ruoyi.jst.channel.domain.JstSalesPreRegister" resultMap="JstSalesPreRegisterResult">
-        SELECT <include refid="cols"/> FROM jst_sales_pre_register
+    <select id="selectJstSalesPreRegisterList" parameterType="com.ruoyi.jst.channel.domain.JstSalesPreRegister" resultMap="JstSalesPreRegisterListResult">
+        SELECT p.*, ch.channel_name AS matched_channel_name_join
+        FROM jst_sales_pre_register p
+        LEFT JOIN jst_channel ch ON p.matched_channel_id = ch.channel_id AND ch.del_flag = '0'
         <where>
-            <if test="salesId != null">AND sales_id = #{salesId}</if>
-            <if test="phone != null and phone != ''">AND phone = #{phone}</if>
-            <if test="status != null and status != ''">AND status = #{status}</if>
+            <if test="salesId != null">AND p.sales_id = #{salesId}</if>
+            <if test="phone != null and phone != ''">AND p.phone = #{phone}</if>
+            <if test="status != null and status != ''">AND p.status = #{status}</if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY p.create_time DESC
     </select>
 
     <insert id="insertJstSalesPreRegister" parameterType="com.ruoyi.jst.channel.domain.JstSalesPreRegister">
@@ -92,13 +98,15 @@
          WHERE sales_id = #{salesId} AND status = 'pending'
     </select>
 
-    <select id="selectMineByStatus" resultMap="JstSalesPreRegisterResult">
-        SELECT <include refid="cols"/> FROM jst_sales_pre_register
+    <select id="selectMineByStatus" resultMap="JstSalesPreRegisterListResult">
+        SELECT p.*, ch.channel_name AS matched_channel_name_join
+        FROM jst_sales_pre_register p
+        LEFT JOIN jst_channel ch ON p.matched_channel_id = ch.channel_id AND ch.del_flag = '0'
         <where>
-            sales_id = #{salesId}
-            <if test="status != null and status != ''">AND status = #{status}</if>
+            p.sales_id = #{salesId}
+            <if test="status != null and status != ''">AND p.status = #{status}</if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY p.create_time DESC
     </select>
 
     <update id="markMatched">

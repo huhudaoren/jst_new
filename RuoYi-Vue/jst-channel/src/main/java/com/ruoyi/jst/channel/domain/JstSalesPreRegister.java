@@ -12,6 +12,7 @@ public class JstSalesPreRegister extends BaseEntity {
     private String targetName;
     private String status;
     private Long matchedChannelId;
+    private String matchedChannelName;
     private Date matchedAt;
     private Date expireAt;
     private Integer renewCount;
@@ -28,6 +29,8 @@ public class JstSalesPreRegister extends BaseEntity {
     public void setStatus(String status) { this.status = status; }
     public Long getMatchedChannelId() { return matchedChannelId; }
     public void setMatchedChannelId(Long matchedChannelId) { this.matchedChannelId = matchedChannelId; }
+    public String getMatchedChannelName() { return matchedChannelName; }
+    public void setMatchedChannelName(String matchedChannelName) { this.matchedChannelName = matchedChannelName; }
     public Date getMatchedAt() { return matchedAt; }
     public void setMatchedAt(Date matchedAt) { this.matchedAt = matchedAt; }
     public Date getExpireAt() { return expireAt; }
