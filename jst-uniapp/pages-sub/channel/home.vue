@@ -28,7 +28,9 @@
 
       <!-- 视角切换 -->
       <view class="ch-hero__switch">
-        <u-tag text="渠道方视角" type="primary" size="mini" shape="circle"></u-tag>
+        <u-tag v-if="authStatus === 'approved'" text="渠道方视角" type="primary" size="mini" shape="circle"></u-tag>
+        <u-tag v-else-if="authStatus === 'pending'" text="审核中" type="warning" size="mini" shape="circle"></u-tag>
+        <u-tag v-else text="未开通" type="info" size="mini" plain shape="circle"></u-tag>
         <u-button text="返回个人中心" size="mini" shape="circle" @click="goMyPage"></u-button>
       </view>
     </view>
@@ -36,11 +38,53 @@
     <!-- 未认证拦截 -->
     <view v-if="authStatus !== 'approved' && !pageLoading" class="ch-home__block">
       <view class="ch-home__block-card">
-        <text class="ch-home__block-icon">🔒</text>
-        <text class="ch-home__block-title">{{ authStatus === 'pending' ? '认证审核中' : '请先申请成为渠道方' }}</text>
-        <text class="ch-home__block-desc">{{ authStatus === 'pending' ? '您的认证申请正在审核中，通过后即可使用工作台全部功能' : '完成渠道方认证后，即可使用绑定学生、代报名等功能' }}</text>
-        <u-button v-if="authStatus !== 'pending'" text="立即申请" type="primary" shape="circle" @click="goApply"></u-button>
-        <u-button v-else text="查看进度" shape="circle" plain @click="goApplyStatus"></u-button>
+        <view class="ch-home__block-icon-wrap">
+          <text class="ch-home__block-icon">{{ authStatus === 'pending' ? '⏳' : '🚀' }}</text>
+        </view>
+        <text class="ch-home__block-title">{{ authStatus === 'pending' ? '认证审核中' : '成为渠道方 · 开启新收益' }}</text>
+        <text class="ch-home__block-desc">{{ authStatus === 'pending' ? '您的认证申请正在审核中，预计 1-3 个工作日完成，通过后通知您' : '认证通过后，即可享有以下特权与收益' }}</text>
+
+        <!-- 3 特权预览（仅未认证时展示） -->
+        <view v-if="authStatus !== 'pending'" class="ch-home__perks">
+          <view class="ch-home__perk">
+            <text class="ch-home__perk-emoji">💰</text>
+            <text class="ch-home__perk-label">返点收益</text>
+            <text class="ch-home__perk-desc">代报名享返点</text>
+          </view>
+          <view class="ch-home__perk">
+            <text class="ch-home__perk-emoji">🎓</text>
+            <text class="ch-home__perk-label">学生管理</text>
+            <text class="ch-home__perk-desc">绑定/批量操作</text>
+          </view>
+          <view class="ch-home__perk">
+            <text class="ch-home__perk-emoji">📊</text>
+            <text class="ch-home__perk-label">数据分析</text>
+            <text class="ch-home__perk-desc">报名/成绩看板</text>
+          </view>
+        </view>
+
+        <!-- 3 步流程 -->
+        <view v-if="authStatus !== 'pending'" class="ch-home__flow">
+          <view class="ch-home__flow-step">
+            <view class="ch-home__flow-num">1</view>
+            <text class="ch-home__flow-label">提交资料</text>
+          </view>
+          <view class="ch-home__flow-line"></view>
+          <view class="ch-home__flow-step">
+            <view class="ch-home__flow-num">2</view>
+            <text class="ch-home__flow-label">平台审核</text>
+          </view>
+          <view class="ch-home__flow-line"></view>
+          <view class="ch-home__flow-step">
+            <view class="ch-home__flow-num">3</view>
+            <text class="ch-home__flow-label">认证完成</text>
+          </view>
+        </view>
+
+        <view class="ch-home__block-cta">
+          <u-button v-if="authStatus !== 'pending'" text="立即申请成为渠道方" type="primary" shape="circle" @click="goApply"></u-button>
+          <u-button v-else text="查看审核进度" shape="circle" plain @click="goApplyStatus"></u-button>
+        </view>
       </view>
     </view>
 
@@ -233,20 +277,26 @@ export default {
         uni.reLaunch({ url: '/pages/login/login' })
         return
       }
-      // 先检查认证状态
+      const info = store.userInfo || {}
+      const roles = store.roles || []
+      // 已被授予 jst_channel 角色 = 认证已通过（兜底依据，防止 apply 接口返空 applyStatus 误拦截）
+      const hasChannelRole = roles.includes('jst_channel') || info.userType === 'channel'
+
       try {
         const apply = await getMyChannelApply()
-        if (apply) {
-          this.authStatus = apply.applyStatus || ''
-          this.channelName = apply.applyName || (store.userInfo && store.userInfo.nickname) || '渠道方'
+        if (apply && apply.applyStatus) {
+          this.authStatus = apply.applyStatus
+          this.channelName = apply.applyName || info.nickname || '渠道方'
           this.channelType = apply.channelType || ''
           this.schoolInfo = apply.school || ''
+        } else if (hasChannelRole) {
+          // apply 返回空但用户已有 channel role → 视为已认证
+          this.authStatus = 'approved'
+          this.channelName = info.nickname || info.channelName || '渠道方'
         }
       } catch (e) {
-        // 未申请过
-        const info = store.userInfo || {}
-        const roles = store.roles || []
-        if (roles.includes('jst_channel')) {
+        // apply 接口异常时，用 role 兜底
+        if (hasChannelRole) {
           this.authStatus = 'approved'
           this.channelName = info.nickname || info.channelName || '渠道方'
         }
@@ -341,11 +391,28 @@ export default {
 .ch-hero__switch { display: flex; align-items: center; gap: $jst-space-sm; position: relative; z-index: 1; }
 
 /* 未认证拦截 */
-.ch-home__block { padding: 80rpx $jst-space-xl; }
+.ch-home__block { padding: 48rpx $jst-space-xl; }
 .ch-home__block-card { display: flex; flex-direction: column; gap: $jst-space-md; padding: 56rpx 40rpx; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; text-align: center; }
-.ch-home__block-icon { display: block; font-size: 72rpx; margin-bottom: 20rpx; }
+.ch-home__block-icon-wrap { display: flex; align-items: center; justify-content: center; width: 128rpx; height: 128rpx; border-radius: 50%; background: linear-gradient(135deg, $jst-brand-light, rgba($jst-gold, 0.15)); margin: 0 auto $jst-space-md; box-shadow: 0 8rpx 24rpx rgba($jst-brand, 0.12); }
+.ch-home__block-icon { display: block; font-size: 64rpx; }
 .ch-home__block-title { display: block; font-size: $jst-font-lg; font-weight: $jst-weight-semibold; color: $jst-text-primary; }
 .ch-home__block-desc { display: block; font-size: $jst-font-sm; color: $jst-text-secondary; line-height: 1.6; }
+
+/* 3 特权预览 */
+.ch-home__perks { display: grid; grid-template-columns: repeat(3, 1fr); gap: $jst-space-sm; margin: $jst-space-lg 0 $jst-space-md; padding: $jst-space-lg 0; border-top: 2rpx dashed $jst-border; border-bottom: 2rpx dashed $jst-border; }
+.ch-home__perk { display: flex; flex-direction: column; align-items: center; gap: 6rpx; padding: 0 $jst-space-xs; }
+.ch-home__perk-emoji { font-size: 44rpx; line-height: 1; }
+.ch-home__perk-label { font-size: $jst-font-sm; font-weight: $jst-weight-semibold; color: $jst-text-primary; margin-top: 6rpx; }
+.ch-home__perk-desc { font-size: 22rpx; color: $jst-text-secondary; text-align: center; line-height: 1.4; }
+
+/* 3 步流程 */
+.ch-home__flow { display: flex; align-items: center; justify-content: center; gap: $jst-space-xs; margin: $jst-space-md 0 $jst-space-lg; }
+.ch-home__flow-step { display: flex; flex-direction: column; align-items: center; gap: 6rpx; }
+.ch-home__flow-num { width: 48rpx; height: 48rpx; border-radius: 50%; background: $jst-brand-light; color: $jst-brand; font-size: $jst-font-sm; font-weight: $jst-weight-semibold; display: flex; align-items: center; justify-content: center; }
+.ch-home__flow-label { font-size: 22rpx; color: $jst-text-secondary; }
+.ch-home__flow-line { width: 48rpx; height: 2rpx; background: $jst-border; margin-bottom: 24rpx; }
+
+.ch-home__block-cta { margin-top: $jst-space-md; }
 
 /* 4格 KPI */
 .ch-stats { display: grid; grid-template-columns: repeat(4, 1fr); margin: $jst-space-lg $jst-space-xl 0; background: $jst-bg-card; border-radius: $jst-radius-lg; box-shadow: $jst-shadow-sm; overflow: hidden; }

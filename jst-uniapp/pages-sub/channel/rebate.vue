@@ -153,11 +153,10 @@ export default {
       if (!this.hasMore) return
       this.loading = true
       try {
-        const res = await getRebateLedgerList({
-          status: this.activeStatus || undefined,
-          pageNum: this.pageNum,
-          pageSize: this.pageSize
-        })
+        // 修复: activeStatus 为空时不能传 undefined (会被序列化成字符串 "undefined" 导致后端校验失败)
+        const params = { pageNum: this.pageNum, pageSize: this.pageSize }
+        if (this.activeStatus) params.status = this.activeStatus
+        const res = await getRebateLedgerList(params)
         const rows = (res && res.rows) || []
         this.total = (res && res.total) || 0
         this.list = reset ? rows : this.list.concat(rows)
