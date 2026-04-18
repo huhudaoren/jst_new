@@ -133,4 +133,36 @@ public interface JstInvoiceRecordMapper
      * @return 结算单 ID，查无返回 null
      */
     Long selectEventSettlementIdByNo(@Param("settlementNo") String settlementNo);
+
+    /**
+     * 按结算单 ID 列表汇总渠道提现单实付金额（归属校验 + paid 状态）。
+     * 不属于该 channel / 非 paid / 已删除 的结算单不计入。
+     *
+     * @param settlementIds 结算单 ID 列表
+     * @param channelId     渠道 ID
+     * @return 匹配的结算单数量与金额汇总
+     */
+    java.util.Map<String, Object> sumRebateSettlementAmountByIds(@Param("settlementIds") java.util.List<Long> settlementIds,
+                                                                  @Param("channelId") Long channelId);
+
+    /**
+     * 按结算单 ID 列表汇总赛事方结算单最终金额。
+     *
+     * @param settlementIds 结算单 ID 列表
+     * @param partnerId     赛事方 ID
+     * @return 匹配的结算单数量与金额汇总
+     */
+    java.util.Map<String, Object> sumEventSettlementAmountByIds(@Param("settlementIds") java.util.List<Long> settlementIds,
+                                                                 @Param("partnerId") Long partnerId);
+
+    /**
+     * 查询哪些结算单已经被开票（status 非 voided/red_offset）。
+     * 用于防止重复开票。
+     *
+     * @param settlementIds 结算单 ID 列表
+     * @param targetType    对象类型 (channel/partner)
+     * @return 已开票的结算单 ID 列表
+     */
+    java.util.List<Long> selectAlreadyInvoicedSettlementIds(@Param("settlementIds") java.util.List<Long> settlementIds,
+                                                             @Param("targetType") String targetType);
 }

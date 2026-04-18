@@ -121,7 +121,12 @@ public class WxFinanceServiceImpl implements WxFinanceService {
     }
 
     /**
-     * 申请开票。
+     * 申请开票。支持单选 refSettlementNo 与多选 settlementIds：
+     * <ul>
+     *   <li>settlementIds 非空：按 ID 列表聚合金额，多选时 refSettlementNo 取 GROUP_CONCAT</li>
+     *   <li>settlementIds 为空：退回走单选 refSettlementNo 路径（原逻辑）</li>
+     * </ul>
+     * 多选校验：①归属当前渠道/partner ②全部 paid ③未被任何有效发票绑定 ④count 等于请求数
      *
      * @param form       申请参数
      * @param targetType 对象类型(channel/partner)
@@ -135,14 +140,34 @@ public class WxFinanceServiceImpl implements WxFinanceService {
     @Transactional(rollbackFor = Exception.class) // TX: applyInvoice
     @OperateLog(module = "财务", action = "WX_INVOICE_APPLY", target = "#{form.refSettlementNo}")
     public Long applyInvoice(InvoiceApplyForm form, String targetType, Long targetId) {
-        BigDecimal settlementAmount = querySettlementAmount(form.getRefSettlementNo(), targetType, targetId);
-        if (settlementAmount == null) {
-            throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
-                    BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+        List<Long> settlementIds = form.getSettlementIds();
+        boolean multi = settlementIds != null && !settlementIds.isEmpty();
+
+        BigDecimal totalSettlementAmount;
+        String refSettlementNo;
+
+        if (multi) {
+            // 多选路径
+            MultiSettlementResolved resolved = resolveMultiSettlements(settlementIds, targetType, targetId);
+            totalSettlementAmount = resolved.totalAmount;
+            refSettlementNo = resolved.settlementNos; // 多选拼接 settlement_no
+        } else {
+            // 单选路径兼容
+            if (form.getRefSettlementNo() == null || form.getRefSettlementNo().isBlank()) {
+                throw new ServiceException("关联结算单号不能为空",
+                        BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+            }
+            BigDecimal single = querySettlementAmount(form.getRefSettlementNo(), targetType, targetId);
+            if (single == null) {
+                throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
+                        BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+            }
+            totalSettlementAmount = single;
+            refSettlementNo = form.getRefSettlementNo();
         }
 
         BigDecimal applyAmount = normalizeAmount(form.getAmount());
-        if (applyAmount.compareTo(settlementAmount) > 0) {
+        if (applyAmount.compareTo(totalSettlementAmount) > 0) {
             throw new ServiceException("开票金额不能超过结算实付金额",
                     BizErrorCode.JST_COMMON_PARAM_INVALID.code());
         }
@@ -151,7 +176,7 @@ public class WxFinanceServiceImpl implements WxFinanceService {
         JstInvoiceRecord record = new JstInvoiceRecord();
         record.setTargetType(targetType);
         record.setTargetId(targetId);
-        record.setRefSettlementNo(form.getRefSettlementNo());
+        record.setRefSettlementNo(refSettlementNo);
         record.setInvoiceTitle(form.getInvoiceTitle());
         record.setTaxNo(form.getTaxNo());
         record.setAmount(applyAmount);
@@ -169,6 +194,73 @@ public class WxFinanceServiceImpl implements WxFinanceService {
                     BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
         }
         return record.getInvoiceId();
+    }
+
+    /**
+     * 多选结算单聚合校验。
+     */
+    private MultiSettlementResolved resolveMultiSettlements(List<Long> settlementIds,
+                                                             String targetType, Long targetId) {
+        // 防重复
+        java.util.Set<Long> dedup = new java.util.LinkedHashSet<>();
+        for (Long id : settlementIds) {
+            if (id != null) dedup.add(id);
+        }
+        if (dedup.isEmpty()) {
+            throw new ServiceException("结算单 ID 列表不能为空",
+                    BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+        }
+        List<Long> ids = new java.util.ArrayList<>(dedup);
+
+        // 已被开票的结算单（status 非 voided/red_offset）需拒绝
+        List<Long> alreadyInvoiced = jstInvoiceRecordMapper.selectAlreadyInvoicedSettlementIds(ids, targetType);
+        if (alreadyInvoiced != null && !alreadyInvoiced.isEmpty()) {
+            throw new ServiceException("结算单已被开票，请先作废原发票: " + alreadyInvoiced,
+                    BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+        }
+
+        java.util.Map<String, Object> row;
+        if ("channel".equals(targetType)) {
+            row = jstInvoiceRecordMapper.sumRebateSettlementAmountByIds(ids, targetId);
+        } else if ("partner".equals(targetType)) {
+            row = jstInvoiceRecordMapper.sumEventSettlementAmountByIds(ids, targetId);
+        } else {
+            throw new ServiceException(BizErrorCode.JST_COMMON_PARAM_INVALID.message(),
+                    BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+        }
+
+        Long matchedCount = toLong(row == null ? null : row.get("matchedCount"));
+        BigDecimal totalAmount = toBigDecimal(row == null ? null : row.get("totalAmount"));
+        String settlementNos = row == null ? null : (String) row.get("settlementNos");
+
+        if (matchedCount == null || matchedCount.intValue() != ids.size()) {
+            // 数量不匹配 → 有不归属 / 非 paid / 已删除的结算单
+            throw new ServiceException(BizErrorCode.JST_COMMON_AUTH_DENIED.message(),
+                    BizErrorCode.JST_COMMON_AUTH_DENIED.code());
+        }
+
+        MultiSettlementResolved r = new MultiSettlementResolved();
+        r.totalAmount = normalizeAmount(totalAmount);
+        r.settlementNos = settlementNos;
+        return r;
+    }
+
+    private static Long toLong(Object v) {
+        if (v == null) return null;
+        if (v instanceof Number n) return n.longValue();
+        try { return Long.parseLong(String.valueOf(v)); } catch (Exception e) { return null; }
+    }
+
+    private static BigDecimal toBigDecimal(Object v) {
+        if (v == null) return BigDecimal.ZERO;
+        if (v instanceof BigDecimal d) return d;
+        if (v instanceof Number n) return new BigDecimal(n.toString());
+        try { return new BigDecimal(String.valueOf(v)); } catch (Exception e) { return BigDecimal.ZERO; }
+    }
+
+    private static final class MultiSettlementResolved {
+        BigDecimal totalAmount;
+        String settlementNos;
     }
 
     private BigDecimal querySettlementAmount(String settlementNo, String targetType, Long targetId) {

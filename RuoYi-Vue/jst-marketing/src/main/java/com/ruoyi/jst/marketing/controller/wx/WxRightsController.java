@@ -38,6 +38,27 @@ public class WxRightsController extends BaseController {
         return getDataTable(rightsUserService.selectMyRights(currentUserId(), status));
     }
 
+    /**
+     * 当前用户核销记录列表（跨权益）。解决前端 N+1 聚合问题。
+     *
+     * <p>状态语义：
+     * <ul>
+     *   <li>pending / approved / rejected / rolled_back / used / expired：单值</li>
+     *   <li>invalid：等价于 used + expired + rolled_back 合集</li>
+     * </ul>
+     *
+     * @关联表 jst_rights_writeoff_record / jst_user_rights / jst_rights_template
+     * @关联权限 hasRole('jst_student') or hasPermi('jst:marketing:rights:my')
+     */
+    @PreAuthorize("@ss.hasRole('jst_student') or @ss.hasPermi('jst:marketing:rights:my')")
+    @GetMapping("/writeoff-records")
+    public TableDataInfo listMyWriteoffRecords(
+            @RequestParam(value = "rightsId", required = false) Long rightsId,
+            @RequestParam(value = "status", required = false) String status) {
+        startPage();
+        return getDataTable(rightsUserService.selectMyWriteoffRecords(currentUserId(), rightsId, status));
+    }
+
     @PreAuthorize("@ss.hasRole('jst_student') or @ss.hasPermi('jst:marketing:rights:my')")
     @GetMapping("/{userRightsId}")
     public AjaxResult detail(@PathVariable("userRightsId") Long userRightsId) {
