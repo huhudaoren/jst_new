@@ -21,7 +21,7 @@
 
     <!-- 列表 -->
     <view class="il-list">
-      <view v-for="item in list" :key="item.invoiceId" class="il-card">
+      <view v-for="item in list" :key="item.invoiceId" class="il-card" @tap="goDetail(item)">
         <view class="il-card__head">
           <text class="il-card__no">{{ item.invoiceNo || '--' }}</text>
           <u-tag
@@ -36,7 +36,32 @@
             <text class="il-card__title">{{ item.invoiceTitle || '--' }}</text>
             <text class="il-card__amount">¥{{ formatAmount(item.amount) }}</text>
           </view>
-          <text class="il-card__time">{{ formatTime(item.applyTime || item.createTime) }}</text>
+          <text class="il-card__time">{{ formatDateTime(item.applyTime || item.createTime) }}</text>
+        </view>
+        <!-- 关联结算单 + 追踪入口 -->
+        <view class="il-card__meta" v-if="item.settlementNo || item.settlementId || item.trackingNo || item.deliveryEmail">
+          <view
+            v-if="item.settlementId || item.settlementNo"
+            class="il-card__chip"
+            @tap.stop="goSettlement(item)"
+          >
+            <text class="il-card__chip-text">关联 {{ item.settlementNo || '结算单' }}</text>
+          </view>
+          <!-- 纸票：物流追踪 -->
+          <view
+            v-if="item.trackingNo"
+            :class="['il-card__chip', 'il-card__chip--gold']"
+            @tap.stop="trackDelivery(item)"
+          >
+            <text class="il-card__chip-text">快递 {{ item.trackingCompany || '' }} {{ item.trackingNo }}</text>
+          </view>
+          <!-- 电子票：邮箱 -->
+          <view
+            v-else-if="item.deliveryEmail"
+            :class="['il-card__chip', 'il-card__chip--primary']"
+          >
+            <text class="il-card__chip-text">已发送至 {{ maskEmail(item.deliveryEmail) }}</text>
+          </view>
         </view>
       </view>
 
@@ -106,10 +131,36 @@ export default {
     },
     goApply() { uni.navigateTo({ url: '/pages-sub/channel/invoice-apply' }) },
     goBack() { uni.navigateBack() },
+    goDetail(item) {
+      // TODO(后端): 若后端补 invoice-detail 页则 navigateTo；目前仅返回详情接口
+      // 目前静默不跳，避免 404
+    },
+    goSettlement(item) {
+      if (item.settlementId) uni.navigateTo({ url: '/pages-sub/channel/withdraw-detail?id=' + item.settlementId })
+      else uni.showToast({ title: '暂未关联结算单', icon: 'none' })
+    },
+    trackDelivery(item) {
+      // 复制物流单号到剪贴板供查询
+      if (!item.trackingNo) return
+      uni.setClipboardData({
+        data: String(item.trackingNo),
+        success: () => uni.showToast({ title: '单号已复制', icon: 'none' })
+      })
+    },
+    maskEmail(email) {
+      if (!email) return ''
+      const at = email.indexOf('@')
+      if (at <= 1) return email
+      const name = email.slice(0, at)
+      const domain = email.slice(at)
+      const keep = name.length <= 3 ? name.slice(0, 1) : name.slice(0, 3)
+      return keep + '***' + domain
+    },
     statusLabel(s) { return (STATUS_MAP[s] && STATUS_MAP[s].label) || s || '--' },
     statusType(s) { return (STATUS_MAP[s] && STATUS_MAP[s].type) || 'info' },
     formatAmount(v) { if (v == null || v === '') return '0.00'; return Number(v).toFixed(2) },
-    formatTime(v) { if (!v) return '--'; return String(v).replace('T', ' ').slice(0, 16) }
+    formatTime(v) { if (!v) return '--'; return String(v).replace('T', ' ').slice(0, 16) },
+    formatDateTime(v) { if (!v) return '--'; const s = String(v).replace('T', ' '); return s.length >= 16 ? s.slice(0, 16) : s }
   }
 }
 </script>
@@ -139,4 +190,13 @@ export default {
 .il-card__title { font-size: $jst-font-base; color: $jst-text-primary; font-weight: $jst-weight-medium; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .il-card__amount { font-size: $jst-font-xl; font-weight: $jst-weight-bold; color: $jst-warning; margin-left: $jst-space-md; flex-shrink: 0; }
 .il-card__time { font-size: $jst-font-xs; color: $jst-text-secondary; }
+
+/* 关联 chip */
+.il-card__meta { display: flex; flex-wrap: wrap; gap: $jst-space-xs; margin-top: $jst-space-md; padding-top: $jst-space-md; border-top: 2rpx dashed $jst-border; }
+.il-card__chip { padding: 4rpx 16rpx; background: $jst-bg-page; border-radius: $jst-radius-sm; }
+.il-card__chip-text { font-size: 22rpx; color: $jst-text-regular; }
+.il-card__chip--primary { background: $jst-brand-light; }
+.il-card__chip--primary .il-card__chip-text { color: $jst-brand; }
+.il-card__chip--gold { background: $jst-gold-light; }
+.il-card__chip--gold .il-card__chip-text { color: $jst-indigo; font-weight: 600; }
 </style>
