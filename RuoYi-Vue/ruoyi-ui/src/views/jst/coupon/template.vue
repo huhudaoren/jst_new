@@ -215,8 +215,29 @@ export default {
     isMobile() { return this.$store.state.app.device === 'mobile' }
   },
   created() { this.getList() },
+  mounted() {
+    // PATCH-2: Picker「查看详情」自动打开目标记录
+    const autoId = this.$route.query.couponTemplateId || this.$route.query.autoOpenId
+    if (autoId) {
+      this.$nextTick(() => this.handleAutoOpen(Number(autoId)))
+    }
+  },
   methods: {
     typeLabel(t) { const o = TYPE_OPTIONS.find(x => x.value === t); return o ? o.label : t || '--' },
+    async handleAutoOpen(id) {
+      if (!id || Number.isNaN(id)) return
+      try {
+        const res = await getCouponTemplate(id)
+        const data = res && (res.data || res)
+        if (data && data.couponTemplateId) {
+          this.handleEdit({ couponTemplateId: data.couponTemplateId })
+        } else {
+          this.$modal.msgWarning('未找到指定券模板，可能已删除')
+        }
+      } catch (e) {
+        this.$modal.msgWarning('未找到指定券模板，可能已删除')
+      }
+    },
     getList() {
       this.loading = true
       listCouponTemplate(this.queryParams).then(res => {

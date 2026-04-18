@@ -192,6 +192,13 @@ export default {
     this.loadTemplates()
     this.getList()
   },
+  mounted() {
+    // PATCH-2: Picker「查看详情」自动打开对应证书模板到设计器
+    const autoId = this.$route.query.templateId || this.$route.query.autoOpenId
+    if (autoId) {
+      this.$nextTick(() => this.handleAutoOpen(Number(autoId)))
+    }
+  },
   methods: {
     loadContests() {
       listPartnerContests({ pageNum: 1, pageSize: 100 }).then(response => {
@@ -200,11 +207,34 @@ export default {
     },
     loadTemplates() {
       this.templateLoading = true
-      listCertTemplates().then(response => {
+      return listCertTemplates().then(response => {
         this.templates = Array.isArray(response.data) ? response.data : []
       }).finally(() => {
         this.templateLoading = false
       })
+    },
+    async handleAutoOpen(id) {
+      if (!id || Number.isNaN(id)) return
+      // 证书设计器：先确保 templates 拉好，再按 id 找到记录 → openDesigner
+      try {
+        // 等 loadTemplates 若仍在跑，再并等一次（created 已经触发）
+        if (this.templateLoading) {
+          await new Promise(r => setTimeout(r, 300))
+        }
+        let template = (this.templates || []).find(t => Number(t.templateId) === Number(id))
+        if (!template) {
+          // 可能分页未取全，兜底再拉一次
+          await this.loadTemplates()
+          template = (this.templates || []).find(t => Number(t.templateId) === Number(id))
+        }
+        if (template) {
+          this.openDesigner(template)
+        } else {
+          this.$modal.msgWarning('未找到指定证书模板，可能已删除')
+        }
+      } catch (e) {
+        this.$modal.msgWarning('未找到指定证书模板，可能已删除')
+      }
     },
     getList() {
       this.loading = true

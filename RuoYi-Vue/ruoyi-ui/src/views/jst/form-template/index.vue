@@ -274,8 +274,29 @@ export default {
     }
   },
   created() { this.getList() },
+  mounted() {
+    // PATCH-2: Picker「查看详情」自动打开目标记录
+    const autoId = this.$route.query.templateId || this.$route.query.autoOpenId
+    if (autoId) {
+      this.$nextTick(() => this.handleAutoOpen(Number(autoId)))
+    }
+  },
   methods: {
     parseTime,
+    async handleAutoOpen(id) {
+      if (!id || Number.isNaN(id)) return
+      try {
+        const res = await getFormTemplate(id)
+        const data = res && (res.data || res)
+        if (data && data.templateId) {
+          this.handleEdit({ templateId: data.templateId })
+        } else {
+          this.$modal.msgWarning('未找到指定模板，可能已删除')
+        }
+      } catch (e) {
+        this.$modal.msgWarning('未找到指定模板，可能已删除')
+      }
+    },
     auditMeta(s) { return AUDIT_META[s] || { label: s || '--', type: 'info' } },
     schemaSummary(schemaJson) {
       const summary = this.countSchemaFields(schemaJson)

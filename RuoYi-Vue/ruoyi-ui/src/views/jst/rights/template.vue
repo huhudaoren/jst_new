@@ -215,8 +215,29 @@ export default {
     isMobile() { return this.$store.state.app.device === 'mobile' }
   },
   created() { this.getList() },
+  mounted() {
+    // PATCH-2: Picker「查看详情」自动打开目标记录
+    const autoId = this.$route.query.rightsTemplateId || this.$route.query.autoOpenId
+    if (autoId) {
+      this.$nextTick(() => this.handleAutoOpen(Number(autoId)))
+    }
+  },
   methods: {
     typeLabel(t) { const o = TYPE_OPTIONS.find(x => x.value === t); return o ? o.label : t || '--' },
+    async handleAutoOpen(id) {
+      if (!id || Number.isNaN(id)) return
+      try {
+        const res = await getRightsTemplate(id)
+        const data = res && (res.data || res)
+        if (data && data.rightsTemplateId) {
+          this.handleEdit({ rightsTemplateId: data.rightsTemplateId })
+        } else {
+          this.$modal.msgWarning('未找到指定权益模板，可能已删除')
+        }
+      } catch (e) {
+        this.$modal.msgWarning('未找到指定权益模板，可能已删除')
+      }
+    },
     quotaModeLabel(m) { return QUOTA_MODE_MAP[m] || m || '--' },
     writeoffLabel(w) { return WRITEOFF_MAP[w] || w || '--' },
     getList() {
