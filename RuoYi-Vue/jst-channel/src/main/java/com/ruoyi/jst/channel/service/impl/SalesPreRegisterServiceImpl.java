@@ -107,6 +107,11 @@ public class SalesPreRegisterServiceImpl implements SalesPreRegisterService {
     }
 
     @Override
+    public List<JstSalesPreRegister> listAllForAdmin() {
+        return preRegMapper.selectJstSalesPreRegisterList(new JstSalesPreRegister());
+    }
+
+    @Override
     public JstSalesPreRegister findActiveByPhone(String phone) {
         if (phone == null || phone.isEmpty()) return null;
         return preRegMapper.selectByPhonePending(phone);

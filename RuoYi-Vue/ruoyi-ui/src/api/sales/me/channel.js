@@ -1,23 +1,21 @@
 import request from '@/utils/request'
 
-/**
- * 我的渠道列表（通过 binding 查销售名下当前渠道）。
- * 后端基于 jst_sales_channel_binding LEFT JOIN jst_channel。
- * plan-04 会补 /sales/me/channels 专属端点；此处先走 admin 渠道列表 + salesId 过滤。
- */
+/** 我的渠道列表（binding 查当前归属渠道，admin 可见全量）*/
 export function listMyChannels(query) {
   return request({ url: '/sales/me/channels/list', method: 'get', params: query })
 }
 
-/** 渠道详情（复用 admin 渠道详情接口）*/
+/** 渠道详情 */
 export function getChannelDetail(channelId) {
-  return request({ url: '/jst/user/jst_channel/' + channelId, method: 'get' })
+  return request({ url: '/sales/me/channels/' + channelId, method: 'get' })
 }
 
-/**
- * 查看完整手机号（脱敏解密）。
- * plan-04 补 /sales/me/channels/{id}/phone-full；此处暂返回 channelDetail 中的 contactMobile。
- */
+/** 查看完整手机号（写审计日志） */
 export function getPhoneFull(channelId) {
   return request({ url: '/sales/me/channels/' + channelId + '/phone-full', method: 'get' })
+}
+
+/** 渠道画像（跟进次数/成交笔数/业务类型/近6月趋势）*/
+export function getChannelProfile(channelId) {
+  return request({ url: '/sales/me/channels/' + channelId + '/profile', method: 'get' })
 }

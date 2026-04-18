@@ -112,4 +112,20 @@
          ORDER BY followupCount DESC
     </select>
 
+    <!-- 渠道画像：渠道总跟进次数 -->
+    <select id="selectFollowupCountByChannel" resultType="java.util.LinkedHashMap">
+        SELECT COUNT(*) AS cnt
+          FROM jst_sales_followup_record
+         WHERE channel_id = #{channelId}
+    </select>
+
+    <!-- 渠道画像：渠道在指定时间段内的跟进次数 -->
+    <select id="selectFollowupCountByChannelAndPeriod" resultType="java.util.LinkedHashMap">
+        SELECT COUNT(*) AS cnt
+          FROM jst_sales_followup_record
+         WHERE channel_id = #{channelId}
+           AND followup_at &gt;= #{periodStart}
+           AND followup_at &lt; #{periodEnd}
+    </select>
+
 </mapper>

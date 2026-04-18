@@ -16,4 +16,7 @@ public interface JstSalesChannelBindingMapper {
     int closeBinding(@org.apache.ibatis.annotations.Param("bindingId") Long bindingId,
                      @org.apache.ibatis.annotations.Param("closeAt") java.util.Date closeAt);
     java.util.List<JstSalesChannelBinding> selectCurrentByOwnerSales(@org.apache.ibatis.annotations.Param("salesId") Long salesId);
+
+    /** admin 视角：全量有效 binding（effective_to IS NULL），LIMIT 避免爆 */
+    java.util.List<JstSalesChannelBinding> selectAllCurrent(@org.apache.ibatis.annotations.Param("limit") int limit);
 }

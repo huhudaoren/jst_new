@@ -57,6 +57,8 @@ public class AdminSalesDashboardServiceImpl implements AdminSalesDashboardServic
         result.put("monthGmv", monthSummary.getOrDefault("gmv", 0));
         result.put("monthCommissionCost", monthSummary.getOrDefault("commissionCost", 0));
         result.put("salesRanking", salesRanking);
+        // 前端兼容别名
+        result.put("salesRank", salesRanking);
         return result;
     }
 

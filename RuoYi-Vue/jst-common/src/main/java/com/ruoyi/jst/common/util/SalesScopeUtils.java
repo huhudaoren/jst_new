@@ -77,6 +77,22 @@ public final class SalesScopeUtils {
                 && !isPlatformOpOrAdminOrManager(loginUser);
     }
 
+    /**
+     * 销售身份读视图：
+     * <ul>
+     *   <li>销售 / 销售主管：返自己的 salesId</li>
+     *   <li>admin / jst_operator / jst_platform_op：返 null（Service 层据此查全量）</li>
+     *   <li>其他角色：抛 99902</li>
+     * </ul>
+     * 用于销售工作台的"列表/查询"类接口，让 admin 能无缝看到全量数据。
+     */
+    public static Long currentSalesIdOrAllowAdminView() {
+        LoginUser u = getLoginUserQuietly();
+        if (u != null && u.getUser() != null && u.getUser().isAdmin()) return null;
+        if (hasRole(u, ROLE_PLATFORM_OP) || hasRole(u, ROLE_OPERATOR)) return null;
+        return currentSalesIdRequired();
+    }
+
     public static LoginUser getLoginUserQuietly() {
         try {
             return com.ruoyi.common.utils.SecurityUtils.getLoginUser();

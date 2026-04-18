@@ -18,6 +18,9 @@ public interface SalesPreRegisterService {
     /** 列表（销售视角） */
     List<JstSalesPreRegister> listMine(Long salesId);
 
+    /** 列表（admin 全量视角） */
+    List<JstSalesPreRegister> listAllForAdmin();
+
     /** 取一行 pending（自动绑定 Step 1 用） */
     JstSalesPreRegister findActiveByPhone(String phone);
 

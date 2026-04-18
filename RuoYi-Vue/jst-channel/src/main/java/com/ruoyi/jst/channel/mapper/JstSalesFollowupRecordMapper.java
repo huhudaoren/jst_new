@@ -36,4 +36,14 @@ public interface JstSalesFollowupRecordMapper {
     List<java.util.Map<String, Object>> aggregateFollowupActivity(
             @Param("periodStart") Date periodStart,
             @Param("periodEnd") Date periodEnd);
+
+    /** 渠道画像：按渠道统计总跟进次数，返回 [{cnt}] */
+    List<java.util.Map<String, Object>> selectFollowupCountByChannel(
+            @Param("channelId") Long channelId);
+
+    /** 渠道画像：按渠道 + 时间段统计跟进次数，返回 [{cnt}] */
+    List<java.util.Map<String, Object>> selectFollowupCountByChannelAndPeriod(
+            @Param("channelId") Long channelId,
+            @Param("periodStart") Date periodStart,
+            @Param("periodEnd") Date periodEnd);
 }

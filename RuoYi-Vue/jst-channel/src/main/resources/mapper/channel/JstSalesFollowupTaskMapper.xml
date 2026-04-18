@@ -69,11 +69,13 @@
     </delete>
 
 
-    <!-- listMine -->
+    <!-- listMine：salesId=null 时查全量（admin 视角） -->
     <select id="listMine" resultMap="JstSalesFollowupTaskResult">
         SELECT <include refid="cols"/> FROM jst_sales_followup_task
-        WHERE assignee_sales_id = #{salesId}
-        <if test="status != null and status != ''">AND status = #{status}</if>
+        <where>
+            <if test="salesId != null">AND assignee_sales_id = #{salesId}</if>
+            <if test="status != null and status != ''">AND status = #{status}</if>
+        </where>
         ORDER BY due_date ASC
     </select>
 
