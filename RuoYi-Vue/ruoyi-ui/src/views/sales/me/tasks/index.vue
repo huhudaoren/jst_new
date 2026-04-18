@@ -17,7 +17,7 @@
     </el-tabs>
 
     <div v-loading="loading" style="min-height:200px">
-      <el-empty v-if="!loading && list.length === 0" :description="`暂无${tabLabel}任务`" :image-size="80" />
+      <empty-state-cta v-if="!loading && list.length === 0" :title="`暂无${tabLabel}任务`" description="主管派发的跟进任务会在这里显示" :image-size="80" />
       <followup-task-card
         v-for="task in list"
         :key="task.taskId"

@@ -49,7 +49,7 @@
             <el-button type="text" @click="$router.push('/sales-workbench/tasks')">查看全部</el-button>
           </div>
           <div v-loading="tasksLoading">
-            <el-empty v-if="!tasksLoading && todayTasks.length === 0" description="今日暂无待跟进任务" :image-size="60" />
+            <empty-state-cta v-if="!tasksLoading && todayTasks.length === 0" title="今日无待跟进任务" description="放松心情，业绩稳如泰山" :image-size="60" />
             <followup-task-card
               v-for="task in todayTasks"
               :key="task.taskId"
@@ -65,7 +65,7 @@
         <el-card shadow="never" class="section-card">
           <div slot="header">业务类型分布</div>
           <div v-loading="statsLoading">
-            <el-empty v-if="!statsLoading && (!stats.byType || stats.byType.length === 0)" description="暂无业绩数据" :image-size="60" />
+            <empty-state-cta v-if="!statsLoading && (!stats.byType || stats.byType.length === 0)" title="暂无业绩数据" description="本月尚无成交记录" :image-size="60" />
             <el-table v-else :data="stats.byType || []" size="small" border stripe>
               <el-table-column label="业务类型" prop="businessType" min-width="100" />
               <el-table-column label="订单数" prop="orderCount" width="80" align="center" />

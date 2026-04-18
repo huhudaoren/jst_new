@@ -63,7 +63,7 @@
               </template>
             </el-table-column>
           </el-table>
-          <el-empty v-if="!loadingOverview && !salesRankList.length" description="暂无数据" :image-size="60" />
+          <empty-state-cta v-if="!loadingOverview && !salesRankList.length" title="暂无业绩数据" description="本月尚无成交记录" :image-size="60" />
         </el-card>
       </el-col>
 
@@ -74,7 +74,7 @@
             <span>跟进活跃度</span>
           </div>
           <div ref="barChart" style="height: 300px;" />
-          <el-empty v-if="!loadingActivity && !activityData.length" description="暂无数据" :image-size="60" />
+          <empty-state-cta v-if="!loadingActivity && !activityData.length" title="暂无跟进活跃度" description="本月尚无跟进记录" :image-size="60" />
         </el-card>
       </el-col>
     </el-row>
