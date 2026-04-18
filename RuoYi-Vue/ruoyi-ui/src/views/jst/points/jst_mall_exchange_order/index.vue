@@ -13,8 +13,8 @@
       <el-form-item label="订单号" prop="exchangeNo">
         <el-input v-model="queryParams.exchangeNo" placeholder="请输入兑换订单号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="用户ID" prop="userId">
-        <el-input v-model="queryParams.userId" placeholder="请输入用户ID" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="用户" prop="userId">
+        <user-picker v-model="queryParams.userId" clearable />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>

@@ -10,8 +10,8 @@
     </div>
 
     <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="80px" class="query-panel">
-      <el-form-item label="用户ID" prop="userId">
-        <el-input v-model="queryParams.userId" placeholder="请输入用户ID" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="用户" prop="userId">
+        <user-picker v-model="queryParams.userId" clearable />
       </el-form-item>
       <el-form-item label="模板ID" prop="couponTemplateId">
         <el-input v-model="queryParams.couponTemplateId" placeholder="请输入券模板ID" clearable @keyup.enter.native="handleQuery" />
