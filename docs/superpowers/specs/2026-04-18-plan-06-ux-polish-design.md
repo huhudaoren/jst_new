@@ -411,19 +411,102 @@ Phase 3 完成后，用如下场景验证：
 
 ---
 
-## 12. 下一步
+## 12. 用户决策（2026-04-18）
 
-请 review 本方案，决定：
-
-1. 是否采纳 Phase 1/2/3 三期划分
-2. 哪些方案要本期做，哪些延后
-3. 三角色看板具体要看的数据指标（哪些留，哪些加）
-4. RelationPicker 组件的展示规范（是否要显示"查看详情"链接等）
-
-review 通过后我 invoke writing-plans 生成实施计划。
-
-**重要**：本方案写作时严格遵守用户指令"先不要开发"——未动任何代码。
+1. **✅ Phase 1 + 2 + 3 一次性合并做** —— 不分期，避免反复 review 开销
+2. **✅ 三角色看板按推荐方案，加：**
+   - **日期范围筛选器**（近 7 日 / 近 30 日 / 本月 / 上月 / 自定义区间）
+   - **地区筛选器**（渠道所在省/市）
+   - **业务类型筛选**（赛事/课程/商城）
+3. **✅ RelationPicker 带"查看详情"跳转链接**
+4. **🔴 新增铁律四（关键）**：**所有业务关联字段在展示时**都要显示**业务名称**，且是**可点击跳转详情页**的链接。
 
 ---
 
-**End of Design**
+## 12.5 铁律四详述 — 关联字段展示层改造
+
+### 问题
+当前列表表格列 `prop="channelId"` 显示 `#10023` 数字，业务人员完全看不懂。现有 `ID2NAME` 改造覆盖了部分页面，但不全面且不统一。
+
+### 解决方案：`<EntityLink>` 组件
+
+新建 `ruoyi-ui/src/components/EntityLink.vue`（与 `<RelationPicker>` 族互补——**Picker 负责选择，Link 负责展示**）。
+
+```vue
+<EntityLink
+  entity="channel"
+  :id="row.channelId"
+  :name="row.channelName"      <!-- 优先用行内 JOIN 出的名称，避免二次查询 -->
+  :target="'_blank'"            <!-- 新标签跳转，不打断当前任务 -->
+  mode="text"                   <!-- text: 纯链接 / tag: 彩色 tag 链接 / card: 悬浮卡 -->
+  :disabled="false"
+/>
+```
+
+**组件内部**：
+- 如果 `name` 已传：直接渲染 `<a class="entity-link">{{ name }}</a>` + 点击触发 `$router.push('/jst/' + entity + '/' + id)`
+- 如果 `name` 缺失（旧数据）：先调 `GET /admin/entity-brief?type=channel&id=xxx` 拿名称，再渲染
+- hover 显示小 popover 卡片（实体概要：名称 + 状态 + 1-2 条关键属性），点击才跳转详情页
+- 权限检查：若当前用户没有该实体详情页的 perms，链接显示为纯文本（不可点击）
+
+### 实体跳转路由映射表（router/permission 里维护）
+
+| entity | 详情路由 | 需要权限点 |
+|---|---|---|
+| `channel` | `/jst/channel/detail/:id` | `jst:channel:detail` |
+| `sales` | `/jst/sales/:id` | `jst:sales:list` |
+| `user` | `/jst/user/detail/:id` | `system:user:query` |
+| `partner` | `/jst/event/partner/detail/:id` | `jst:partner:detail` |
+| `contest` | `/jst/event/contest/detail/:id` | `jst:contest:detail` |
+| `participant` | `/jst/participant/detail/:id` | `jst:participant:detail` |
+| `order` | `/jst/order/detail/:id` | `jst:order:detail` |
+| `settlement` | `/jst/sales/settlement/detail/:id` | `jst:sales:settlement:review` |
+
+### 与 `<RelationPicker>` 的互补关系
+
+| 场景 | 用什么 |
+|---|---|
+| **编辑态**（form 表单要选一个外键） | `<RelationPicker>`（选中后 v-model=id） |
+| **查看态**（列表/详情页展示外键数据） | `<EntityLink>`（展示 name，点击跳详情） |
+
+两者共用同一套后端 API（search / brief）。
+
+### 统一工作量
+
+- `<EntityLink>` 组件：0.5 人日
+- 后端补 `/admin/entity-brief` 统一端点：0.5 人日（支持按 type 路由到不同 service）
+- 列表页/详情页全量替换 `<span>{{ row.channelId }}</span>` 为 `<EntityLink>`：~2 人日（扫描 ~30+ 处）
+
+**合计新增：3 人日**（并入 Phase 3，不额外分期）
+
+---
+
+## 13. 更新后的总工作量
+
+| Phase | 原估 | 新增 | 合计 |
+|---|---|---|---|
+| Phase 1 防御性底线 | 3 人日 | — | 3 人日 |
+| Phase 2 三角色看板 | 3 人日 | 0.5 人日（看板加日期/地区/业务类型筛选） | 3.5 人日 |
+| Phase 3 全量扫尾 + EntityLink | 5 人日 | 3 人日（EntityLink + 跳转 + 30 处替换） | 8 人日 |
+| **总计（3 phase 合并一起做）** | 11 人日 | 3.5 人日 | **~14.5 人日** |
+
+---
+
+## 14. 下一步
+
+**方案已 review 通过**，用户确认 3 phase 合并 + 4 个铁律全部实施。
+
+下一步：invoke superpowers:writing-plans 生成完整实施计划，包含：
+- 7 个 RelationPicker + 1 个 EntityLink + 1 个 PageHeader + 1 个 EmptyStateCTA 组件创建
+- 后端 search API + entity-brief API 补齐
+- 销售/主管/admin 3 个 dashboard 含日期/地区/业务类型筛选
+- 56 处 `_id` 输入改造 + 30 处列表展示改 EntityLink
+- 删 3 个 DEPRECATED 页面 + 清菜单
+- 销售主管 settlement scope 精细化（plan-05 遗留）
+- 字段别名字典 fieldLabelMap 全覆盖
+- 每页加 PageHeader（面包屑 + help-text + primary action）
+- 空态 CTA 标准化
+
+---
+
+**End of Design（用户决策版 v2）**
