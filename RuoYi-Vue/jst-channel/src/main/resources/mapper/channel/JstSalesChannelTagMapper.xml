@@ -52,4 +52,12 @@
         DELETE FROM jst_sales_channel_tag WHERE id = #{id}
     </delete>
 
+
+    <!-- listByChannel -->
+    <select id="listByChannel" parameterType="Long" resultMap="JstSalesChannelTagResult">
+        SELECT <include refid="cols"/> FROM jst_sales_channel_tag
+        WHERE channel_id = #{channelId}
+        ORDER BY create_time
+    </select>
+
 </mapper>
