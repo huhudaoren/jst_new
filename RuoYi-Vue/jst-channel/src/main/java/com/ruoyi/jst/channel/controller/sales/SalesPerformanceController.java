@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 销售本人业绩聚合视图。
  * <p>
@@ -31,5 +34,15 @@ public class SalesPerformanceController extends BaseSalesController {
         Long salesId = SalesScopeUtils.currentSalesIdOrAllowAdminView();
         SalesPerformanceVO vo = performanceService.aggregate(salesId, month);
         return AjaxResult.success(vo);
+    }
+
+    @GetMapping("/reminders")
+    @PreAuthorize("@ss.hasPermi('sales:me:performance:view')")
+    public AjaxResult reminders() {
+        Long salesId = SalesScopeUtils.currentSalesIdOrAllowAdminView();
+        Map<String, Object> data = new HashMap<>();
+        data.put("inactiveChannels", performanceService.listInactiveChannels(salesId, 14));
+        data.put("expiringPreReg", performanceService.listExpiringPreReg(salesId, 7));
+        return AjaxResult.success(data);
     }
 }
