@@ -38,12 +38,30 @@ public class AdminSettlementController extends BaseController {
     @Autowired
     private JstSalesCommissionLedgerMapper ledgerMapper;
 
+    @Autowired
+    private com.ruoyi.jst.channel.service.SalesService salesService;
+
     /**
-     * 月结单列表（分页）
+     * 月结单列表（分页）。
+     * <p>
+     * Plan-06 Task 21: 销售主管登录时自动按下属 salesIds 过滤（只能看自己团队的月结单）；
+     * admin / jst_operator 不过滤看全量。
      */
     @GetMapping("/list")
     @Log(title = "月结单", businessType = BusinessType.OTHER)
     public TableDataInfo list(JstSalesCommissionSettlement query) {
+        // 销售主管自动按下属团队过滤
+        com.ruoyi.common.core.domain.model.LoginUser u =
+            com.ruoyi.jst.common.util.SalesScopeUtils.getLoginUserQuietly();
+        if (com.ruoyi.jst.common.util.SalesScopeUtils.isManagerRole(u)
+                && !(u.getUser() != null && u.getUser().isAdmin())) {
+            Long managerSalesId = com.ruoyi.jst.common.util.SalesScopeUtils.currentSalesId();
+            if (managerSalesId != null) {
+                java.util.List<Long> teamIds = salesService.resolveScopeSalesIds(managerSalesId);
+                if (teamIds == null || teamIds.isEmpty()) teamIds = java.util.Collections.singletonList(-1L);
+                query.getParams().put("scopeSalesIds", teamIds);
+            }
+        }
         startPage();
         return getDataTable(settlementService.listForAdmin(query));
     }
