@@ -48,7 +48,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-empty v-if="!teamLoading && teamList.length === 0" description="暂无团队成员数据" :image-size="60" />
+        <empty-state-cta v-if="!teamLoading && teamList.length === 0" title="还没有下属销售" description="联系管理员为你分配下属" :image-size="60" />
       </div>
     </el-card>
 
@@ -58,7 +58,11 @@
       <div v-loading="tasksLoading">
         <el-table :data="assignedTasks" border stripe size="small">
           <el-table-column label="任务标题" prop="title" min-width="160" show-overflow-tooltip />
-          <el-table-column label="被分配销售ID" prop="assigneeSalesId" width="130" align="center" />
+          <el-table-column label="被分配销售" width="160">
+            <template slot-scope="scope">
+              <entity-link entity="sales" :id="scope.row.assigneeSalesId" :name="scope.row.assigneeSalesName" />
+            </template>
+          </el-table-column>
           <el-table-column label="截止日期" prop="dueDate" width="120" align="center">
             <template slot-scope="scope">{{ formatDate(scope.row.dueDate) }}</template>
           </el-table-column>
@@ -68,7 +72,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-empty v-if="!tasksLoading && assignedTasks.length === 0" description="暂无派发任务" :image-size="60" />
+        <empty-state-cta v-if="!tasksLoading && assignedTasks.length === 0" title="无待办任务" description="放松心情，业绩稳如泰山" :image-size="60" />
       </div>
     </el-card>
 
