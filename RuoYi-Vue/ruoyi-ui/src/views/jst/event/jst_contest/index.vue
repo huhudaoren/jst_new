@@ -191,7 +191,11 @@
           <dict-tag :options="dict.type.jst_source_type" :value="scope.row.sourceType" />
         </template>
       </el-table-column>
-      <el-table-column label="所属赛事方ID，FK→jst_event_partner" align="center" prop="partnerId" />
+      <el-table-column label="所属赛事方" align="center" prop="partnerId" min-width="160">
+        <template slot-scope="scope">
+          <entity-link entity="partner" :id="scope.row.partnerId" :name="scope.row.partnerName" />
+        </template>
+      </el-table-column>
       <el-table-column label="分类" align="center" prop="category">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.jst_contest_category" :value="scope.row.category" />
