@@ -68,7 +68,7 @@ public class JstChannelServiceImpl implements IJstChannelService
         if (rows > 0 && jstChannel.getChannelId() != null) {
             eventPublisher.publishEvent(new ChannelRegisteredEvent(this,
                 jstChannel.getChannelId(),
-                jstChannel.getPhone(),
+                jstChannel.getContactMobile(),   // 渠道联系手机号
                 null,   // filledBusinessNo: plan-04 wire
                 null    // filledInviteCode: plan-04 wire
             ));
