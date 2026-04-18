@@ -35,11 +35,9 @@
       class="query-panel"
     >
       <el-form-item label="赛事ID" prop="contestId">
-        <el-input-number
+        <contest-picker
           v-model="queryParams.contestId"
-          :min="1"
-          :controls="false"
-          placeholder="赛事ID"
+          clearable
           class="contest-id-input"
           @change="handleQuery"
         />
@@ -278,9 +276,13 @@
 
 <script>
 import { auditAdminEnroll, getAdminEnrollDetail, listAdminEnrolls, listEnrollChannelGroups } from '@/api/jst/event/admin-enroll'
+import ContestPicker from '@/components/RelationPicker/ContestPicker.vue'
 
 export default {
   name: 'JstAdminEnrollIndex',
+  components: {
+    ContestPicker
+  },
   data() {
     return {
       loading: false,

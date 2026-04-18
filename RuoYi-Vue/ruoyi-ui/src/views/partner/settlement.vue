@@ -31,11 +31,9 @@
         </el-select>
       </el-form-item>
       <el-form-item label="赛事ID" prop="contestId">
-        <el-input
+        <contest-picker
           v-model="queryParams.contestId"
-          placeholder="输入赛事ID"
           clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item>
@@ -232,11 +230,15 @@ import {
   getPartnerSettlement,
   listPartnerSettlements
 } from '@/api/partner/settlement'
+import ContestPicker from '@/components/RelationPicker/ContestPicker.vue'
 import { formatMoney as formatMoneyUtil } from '@/utils/format'
 
 export default {
   name: 'PartnerSettlement',
   dicts: ['jst_refund_status'],
+  components: {
+    ContestPicker
+  },
   data() {
     return {
       loading: false,

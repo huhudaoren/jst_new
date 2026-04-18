@@ -35,11 +35,9 @@
       class="query-form"
     >
       <el-form-item label="赛事 ID" prop="contestId">
-        <el-input
+        <contest-picker
           v-model="queryParams.contestId"
-          placeholder="请输入赛事 ID"
           clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="学生姓名" prop="participantName">
@@ -432,6 +430,7 @@
 <script>
 import { auditPartnerEnroll, batchAuditEnrolls, listPartnerEnrolls, listScoreItems } from '@/api/partner/enroll'
 import { getPartnerEnrollDetail } from '@/api/partner/enroll'
+import ContestPicker from '@/components/RelationPicker/ContestPicker.vue'
 import EnrollDetailDrawer from './components/EnrollDetailDrawer'
 import { parseTime } from '@/utils/ruoyi'
 
@@ -451,6 +450,7 @@ const SOURCE_META = {
 export default {
   name: 'PartnerEnrollManage',
   components: {
+    ContestPicker,
     EnrollDetailDrawer
   },
   data() {

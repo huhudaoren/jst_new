@@ -346,7 +346,7 @@
             <el-row :gutter="16">
               <el-col :xs="24" :md="8">
                 <el-form-item label="报名表单ID">
-                  <el-input-number v-model="form.formTemplateId" :min="0" controls-position="right" class="full-width" />
+                  <form-template-picker v-model="form.formTemplateId" />
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :md="12">
@@ -450,6 +450,7 @@
 <script>
 import { getAdminContest, updateAdminContest } from '@/api/jst/event/admin-contest'
 import { listJst_cert_template } from '@/api/jst/event/jst_cert_template'
+import FormTemplatePicker from '@/components/RelationPicker/FormTemplatePicker.vue'
 
 function createDefaultForm() {
   return {
@@ -515,6 +516,9 @@ function createDefaultWriteoffConfig() {
 
 export default {
   name: 'JstContestEditDialog',
+  components: {
+    FormTemplatePicker
+  },
   props: {
     visible: {
       type: Boolean,

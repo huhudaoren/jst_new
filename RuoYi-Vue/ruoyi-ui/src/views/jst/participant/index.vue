@@ -140,7 +140,7 @@
           <span>{{ claimForm.participantId || '--' }}</span>
         </el-form-item>
         <el-form-item label="认领用户ID" prop="userId">
-          <el-input-number v-model="claimForm.userId" :min="1" controls-position="right" class="full-width" />
+          <user-picker v-model="claimForm.userId" />
         </el-form-item>
         <el-form-item label="认领原因" prop="reason">
           <el-input
@@ -226,9 +226,13 @@ import {
   listParticipantUserMaps,
   revokeParticipantClaim
 } from '@/api/jst/user/admin-participant'
+import UserPicker from '@/components/RelationPicker/UserPicker.vue'
 
 export default {
   name: 'JstAdminParticipantIndex',
+  components: {
+    UserPicker
+  },
   data() {
     return {
       loading: false,

@@ -10,11 +10,9 @@
         />
       </el-form-item>
       <el-form-item label="通过后生成的赛事方ID" prop="partnerId">
-        <el-input
+        <partner-picker
           v-model="queryParams.partnerId"
-          placeholder="请输入通过后生成的赛事方ID"
           clearable
-          @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="申请名称" prop="partnerName">
@@ -300,10 +298,14 @@
 
 <script>
 import { listJst_event_partner_apply, getJst_event_partner_apply, delJst_event_partner_apply, addJst_event_partner_apply, updateJst_event_partner_apply } from "@/api/jst/organizer/jst_event_partner_apply"
+import PartnerPicker from "@/components/RelationPicker/PartnerPicker.vue"
 
 export default {
   name: "Jst_event_partner_apply",
   dicts: ['jst_audit_status'],
+  components: {
+    PartnerPicker
+  },
   data() {
     return {
       // 遮罩层
