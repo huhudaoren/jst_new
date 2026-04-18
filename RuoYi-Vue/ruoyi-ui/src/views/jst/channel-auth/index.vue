@@ -37,6 +37,7 @@
     <el-table v-loading="loading" :data="list" border stripe>
       <el-table-column label="ID" prop="applyId" width="70" />
       <el-table-column label="申请名称" prop="applyName" min-width="120" show-overflow-tooltip />
+      <el-table-column label="地区" prop="region" min-width="120" show-overflow-tooltip />
       <el-table-column label="渠道类型" prop="channelType" width="90" align="center">
         <template slot-scope="scope">
           <el-tag size="mini" :type="scope.row.channelType === 'institution' ? '' : 'info'">{{ scope.row.channelType === 'institution' ? '机构' : '个人' }}</el-tag>
@@ -86,6 +87,7 @@
         <el-descriptions :column="1" border size="medium">
           <el-descriptions-item label="申请ID">{{ detailData.applyId }}</el-descriptions-item>
           <el-descriptions-item label="申请名称">{{ detailData.applyName }}</el-descriptions-item>
+          <el-descriptions-item label="地区">{{ detailData.region || '--' }}</el-descriptions-item>
           <el-descriptions-item label="渠道类型">{{ detailData.channelType === 'institution' ? '机构' : '个人' }}</el-descriptions-item>
           <el-descriptions-item label="联系手机">{{ detailData.contactMobile }}</el-descriptions-item>
           <el-descriptions-item label="审核状态">

@@ -20,6 +20,7 @@ public class ChannelAuthApplyVO {
     private Long channelId;
     private String channelType;
     private String applyName;
+    private String region;
     private String materialsJson;
     private String applyStatus;
     private String auditRemark;
@@ -74,6 +75,14 @@ public class ChannelAuthApplyVO {
 
     public void setApplyName(String applyName) {
         this.applyName = applyName;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public String getMaterialsJson() {

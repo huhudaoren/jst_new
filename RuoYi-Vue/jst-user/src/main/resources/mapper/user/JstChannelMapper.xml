@@ -9,6 +9,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="userId"    column="user_id"    />
         <result property="channelType"    column="channel_type"    />
         <result property="channelName"    column="channel_name"    />
+        <result property="region"    column="region"    />
         <result property="contactMobile"    column="contact_mobile"    />
         <result property="idCardNo"    column="id_card_no"    />
         <result property="businessLicenseNo"    column="business_license_no"    />
@@ -50,6 +51,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userId != null "> and t.user_id = #{userId}</if>
             <if test="channelType != null  and channelType != ''"> and t.channel_type = #{channelType}</if>
             <if test="channelName != null  and channelName != ''"> and t.channel_name like concat('%', #{channelName}, '%')</if>
+            <if test="region != null  and region != ''"> and t.region like concat('%', #{region}, '%')</if>
             <if test="contactMobile != null  and contactMobile != ''"> and t.contact_mobile = #{contactMobile}</if>
             <if test="idCardNo != null  and idCardNo != ''"> and t.id_card_no = #{idCardNo}</if>
             <if test="businessLicenseNo != null  and businessLicenseNo != ''"> and t.business_license_no = #{businessLicenseNo}</if>
@@ -78,6 +80,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userId != null">user_id,</if>
             <if test="channelType != null and channelType != ''">channel_type,</if>
             <if test="channelName != null and channelName != ''">channel_name,</if>
+            <if test="region != null and region != ''">region,</if>
             <if test="contactMobile != null and contactMobile != ''">contact_mobile,</if>
             <if test="idCardNo != null">id_card_no,</if>
             <if test="businessLicenseNo != null">business_license_no,</if>
@@ -103,6 +106,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userId != null">#{userId},</if>
             <if test="channelType != null and channelType != ''">#{channelType},</if>
             <if test="channelName != null and channelName != ''">#{channelName},</if>
+            <if test="region != null and region != ''">#{region},</if>
             <if test="contactMobile != null and contactMobile != ''">#{contactMobile},</if>
             <if test="idCardNo != null">#{idCardNo},</if>
             <if test="businessLicenseNo != null">#{businessLicenseNo},</if>
@@ -132,6 +136,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userId != null">user_id = #{userId},</if>
             <if test="channelType != null and channelType != ''">channel_type = #{channelType},</if>
             <if test="channelName != null and channelName != ''">channel_name = #{channelName},</if>
+            <if test="region != null and region != ''">region = #{region},</if>
             <if test="contactMobile != null and contactMobile != ''">contact_mobile = #{contactMobile},</if>
             <if test="idCardNo != null">id_card_no = #{idCardNo},</if>
             <if test="businessLicenseNo != null">business_license_no = #{businessLicenseNo},</if>

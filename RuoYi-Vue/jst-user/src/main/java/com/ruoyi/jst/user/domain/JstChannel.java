@@ -32,6 +32,10 @@ public class JstChannel extends BaseEntity
     @Excel(name = "渠道方名称")
     private String channelName;
 
+    /** 渠道地区（省级维度） */
+    @Excel(name = "渠道地区")
+    private String region;
+
     /** 联系手机 */
     @Excel(name = "联系手机")
     private String contactMobile;
@@ -148,6 +152,16 @@ public class JstChannel extends BaseEntity
     public String getChannelName() 
     {
         return channelName;
+    }
+
+    public void setRegion(String region)
+    {
+        this.region = region;
+    }
+
+    public String getRegion()
+    {
+        return region;
     }
 
     public void setContactMobile(String contactMobile) 
@@ -332,6 +346,7 @@ public class JstChannel extends BaseEntity
             .append("userId", getUserId())
             .append("channelType", getChannelType())
             .append("channelName", getChannelName())
+            .append("region", getRegion())
             .append("contactMobile", getContactMobile())
             .append("idCardNo", getIdCardNo())
             .append("businessLicenseNo", getBusinessLicenseNo())

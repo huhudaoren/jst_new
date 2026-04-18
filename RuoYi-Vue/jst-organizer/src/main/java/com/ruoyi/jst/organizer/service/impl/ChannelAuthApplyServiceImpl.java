@@ -108,6 +108,7 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
         apply.setUserId(userId);
         apply.setChannelType(req.getChannelType());
         apply.setApplyName(req.getApplyName());
+        apply.setRegion(req.getRegion());
         apply.setMaterialsJson(req.getMaterialsJson());
         apply.setApplyStatus(ChannelAuthStatus.PENDING.dbValue()); // SM-3
         apply.setSubmitTime(now);
@@ -203,6 +204,7 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
             channel.setUserId(apply.getUserId());
             channel.setChannelType(apply.getChannelType());
             channel.setChannelName(apply.getApplyName());
+            channel.setRegion(apply.getRegion());
             channel.setContactMobile(user.getMobile());
             channel.setCertMaterialsJson(apply.getMaterialsJson());
             channel.setAuthStatus(ChannelAuthStatus.APPROVED.dbValue());
@@ -440,17 +442,12 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
 
             // 更新原申请为 pending + 覆盖材料
             Date now = DateUtils.getNowDate();
-            apply.setChannelType(req.getChannelType());
-            apply.setApplyName(req.getApplyName());
-            apply.setMaterialsJson(req.getMaterialsJson());
-
-            int updated = channelAuthApplyMapperExt.updateApplyStatus(
+            int updated = channelAuthApplyMapperExt.resubmitApply(
                     applyId,
-                    ChannelAuthStatus.REJECTED.dbValue(),
-                    ChannelAuthStatus.PENDING.dbValue(),
-                    apply.getChannelId(),
-                    null,
-                    null,
+                    req.getChannelType(),
+                    req.getApplyName(),
+                    req.getRegion(),
+                    req.getMaterialsJson(),
                     now,
                     String.valueOf(userId));
             if (updated == 0) {

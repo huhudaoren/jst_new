@@ -108,4 +108,15 @@ public interface ChannelAuthApplyMapperExt {
                           @Param("auditUserId") Long auditUserId,
                           @Param("auditTime") Date auditTime,
                           @Param("updateBy") String updateBy);
+
+    /**
+     * 驳回后重提并覆盖申请内容。
+     */
+    int resubmitApply(@Param("applyId") Long applyId,
+                      @Param("channelType") String channelType,
+                      @Param("applyName") String applyName,
+                      @Param("region") String region,
+                      @Param("materialsJson") String materialsJson,
+                      @Param("submitTime") Date submitTime,
+                      @Param("updateBy") String updateBy);
 }

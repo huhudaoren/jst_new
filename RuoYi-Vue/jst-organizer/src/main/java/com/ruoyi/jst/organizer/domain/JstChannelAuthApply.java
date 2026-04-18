@@ -40,6 +40,10 @@ public class JstChannelAuthApply extends BaseEntity
     @Excel(name = "申请名称")
     private String applyName;
 
+    /** 申请地区（省级维度） */
+    @Excel(name = "申请地区")
+    private String region;
+
     /** 认证材料JSON */
     @Excel(name = "认证材料JSON")
     private String materialsJson;
@@ -133,6 +137,16 @@ public class JstChannelAuthApply extends BaseEntity
     public String getApplyName() 
     {
         return applyName;
+    }
+
+    public void setRegion(String region)
+    {
+        this.region = region;
+    }
+
+    public String getRegion()
+    {
+        return region;
     }
 
     public void setMaterialsJson(String materialsJson) 
@@ -230,6 +244,7 @@ public class JstChannelAuthApply extends BaseEntity
             .append("channelId", getChannelId())
             .append("channelType", getChannelType())
             .append("applyName", getApplyName())
+            .append("region", getRegion())
             .append("materialsJson", getMaterialsJson())
             .append("applyStatus", getApplyStatus())
             .append("auditRemark", getAuditRemark())

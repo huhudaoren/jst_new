@@ -12,6 +12,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="channelId" column="channel_id"/>
         <result property="channelType" column="channel_type"/>
         <result property="applyName" column="apply_name"/>
+        <result property="region" column="region"/>
         <result property="materialsJson" column="materials_json"/>
         <result property="applyStatus" column="apply_status"/>
         <result property="auditRemark" column="audit_remark"/>
@@ -36,6 +37,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="channelId" column="channel_id"/>
         <result property="channelType" column="channel_type"/>
         <result property="applyName" column="apply_name"/>
+        <result property="region" column="region"/>
         <result property="materialsJson" column="materials_json"/>
         <result property="applyStatus" column="apply_status"/>
         <result property="auditRemark" column="audit_remark"/>
@@ -46,7 +48,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="applyColumns">
-        apply_id, apply_no, user_id, channel_id, channel_type, apply_name, materials_json,
+        apply_id, apply_no, user_id, channel_id, channel_type, apply_name, region, materials_json,
         apply_status, audit_remark, audit_user_id, submit_time, audit_time,
         reject_count, locked_for_manual,
         create_by, create_time, update_by, update_time, remark, del_flag
@@ -68,7 +70,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectMyApplyList" resultMap="ChannelAuthApplyVOResult">
-        select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, materials_json,
+        select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, region, materials_json,
                apply_status, audit_remark, reject_count, locked_for_manual, submit_time, audit_time
         from jst_channel_auth_apply
         where del_flag = '0'
@@ -77,7 +79,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectLatestByUserId" resultMap="ChannelAuthApplyVOResult">
-        select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, materials_json,
+        select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, region, materials_json,
                apply_status, audit_remark, reject_count, locked_for_manual, submit_time, audit_time
         from jst_channel_auth_apply
         where del_flag = '0'
@@ -87,7 +89,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectAdminApplyList" resultMap="ChannelAuthApplyVOResult">
-        select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, materials_json,
+        select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, region, materials_json,
                apply_status, audit_remark, reject_count, locked_for_manual, submit_time, audit_time
         from jst_channel_auth_apply
         <where>
@@ -112,7 +114,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectApplyDetail" resultMap="ChannelAuthApplyVOResult">
-        select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, materials_json,
+        select apply_id, apply_no, user_id, channel_id, channel_type, apply_name, region, materials_json,
                apply_status, audit_remark, reject_count, locked_for_manual, submit_time, audit_time
         from jst_channel_auth_apply
         where apply_id = #{applyId}
@@ -122,10 +124,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <insert id="insertApply" parameterType="com.ruoyi.jst.organizer.domain.JstChannelAuthApply"
             useGeneratedKeys="true" keyProperty="applyId">
         insert into jst_channel_auth_apply (
-            apply_no, user_id, channel_type, apply_name, materials_json,
+            apply_no, user_id, channel_type, apply_name, region, materials_json,
             apply_status, submit_time, create_by, create_time
         ) values (
-            #{applyNo}, #{userId}, #{channelType}, #{applyName}, #{materialsJson},
+            #{applyNo}, #{userId}, #{channelType}, #{applyName}, #{region}, #{materialsJson},
             #{applyStatus}, #{submitTime}, #{createBy}, #{createTime}
         )
     </insert>
@@ -152,6 +154,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             locked_for_manual = #{lockedForManual},
             update_time = now()
         where apply_id = #{applyId}
+          and del_flag = '0'
+    </update>
+
+    <update id="resubmitApply">
+        update jst_channel_auth_apply
+        set channel_type = #{channelType},
+            apply_name = #{applyName},
+            region = #{region},
+            materials_json = #{materialsJson},
+            apply_status = 'pending',
+            submit_time = #{submitTime},
+            audit_remark = null,
+            audit_user_id = null,
+            audit_time = null,
+            update_by = #{updateBy},
+            update_time = now()
+        where apply_id = #{applyId}
+          and apply_status = 'rejected'
           and del_flag = '0'
     </update>
 </mapper>

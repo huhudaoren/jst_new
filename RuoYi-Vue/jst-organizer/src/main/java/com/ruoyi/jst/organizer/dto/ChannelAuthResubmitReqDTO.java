@@ -24,6 +24,10 @@ public class ChannelAuthResubmitReqDTO {
     @Size(max = 128, message = "申请名称长度不能超过128个字符")
     private String applyName;
 
+    @NotBlank(message = "地区不能为空")
+    @Size(max = 64, message = "地区长度不能超过64个字符")
+    private String region;
+
     @NotBlank(message = "认证材料不能为空")
     private String materialsJson;
 
@@ -41,6 +45,14 @@ public class ChannelAuthResubmitReqDTO {
 
     public void setApplyName(String applyName) {
         this.applyName = applyName;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public String getMaterialsJson() {
