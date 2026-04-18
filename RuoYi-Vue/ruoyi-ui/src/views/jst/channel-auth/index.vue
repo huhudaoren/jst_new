@@ -37,7 +37,13 @@
     <el-table v-loading="loading" :data="list" border stripe>
       <el-table-column label="ID" prop="applyId" width="70" />
       <el-table-column label="申请名称" prop="applyName" min-width="120" show-overflow-tooltip />
-      <el-table-column label="地区" prop="region" min-width="120" show-overflow-tooltip />
+      <el-table-column label="地区" prop="region" min-width="120" show-overflow-tooltip>
+        <template slot-scope="scope">
+          <!-- PATCH-5: 用字典翻译 region 拼音 value → 中文 label -->
+          <dict-tag v-if="scope.row.region" :options="dict.type.jst_region_province" :value="scope.row.region" />
+          <span v-else class="region-empty">未设置</span>
+        </template>
+      </el-table-column>
       <el-table-column label="渠道类型" prop="channelType" width="90" align="center">
         <template slot-scope="scope">
           <el-tag size="mini" :type="scope.row.channelType === 'institution' ? '' : 'info'">{{ scope.row.channelType === 'institution' ? '机构' : '个人' }}</el-tag>
@@ -55,12 +61,14 @@
       <el-table-column label="审核时间" prop="auditTime" width="160" align="center">
         <template slot-scope="scope">{{ parseTime(scope.row.auditTime) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="240" align="center" fixed="right">
+      <el-table-column label="操作" width="320" align="center" fixed="right">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleDetail(scope.row)">材料</el-button>
           <el-button size="mini" type="text" icon="el-icon-check" v-if="scope.row.applyStatus === 'pending'" v-hasPermi="['jst:organizer:channelApply:approve']" @click="handleApprove(scope.row)">通过</el-button>
           <el-button size="mini" type="text" icon="el-icon-close" v-if="scope.row.applyStatus === 'pending'" v-hasPermi="['jst:organizer:channelApply:reject']" @click="handleReject(scope.row)">驳回</el-button>
           <el-button size="mini" type="text" icon="el-icon-video-pause" v-if="scope.row.applyStatus === 'approved'" v-hasPermi="['jst:organizer:channelApply:suspend']" @click="handleSuspend(scope.row)">暂停</el-button>
+          <!-- PATCH-5: 编辑地区 — admin / 运营主管 -->
+          <el-button size="mini" type="text" icon="el-icon-edit" v-if="canEditRegion" @click="handleEditRegion(scope.row)">编辑地区</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -81,13 +89,37 @@
       </div>
     </el-dialog>
 
+    <!-- PATCH-5: 编辑地区弹窗 -->
+    <el-dialog title="修改地区" :visible.sync="regionOpen" width="420px" append-to-body>
+      <el-form ref="regionForm" :model="regionForm" :rules="regionRules" label-width="80px">
+        <el-form-item label="省份" prop="region">
+          <el-select v-model="regionForm.region" placeholder="请选择省份" filterable style="width: 100%;">
+            <el-option
+              v-for="dict in dict.type.jst_region_province"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button @click="regionOpen = false">取 消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitRegion">确 定</el-button>
+      </div>
+    </el-dialog>
+
     <!-- 材料详情抽屉 -->
     <el-drawer title="申请材料详情" :visible.sync="detailOpen" :size="drawerSize" direction="rtl">
       <div style="padding: 20px;" v-if="detailData">
         <el-descriptions :column="1" border size="medium">
           <el-descriptions-item label="申请ID">{{ detailData.applyId }}</el-descriptions-item>
           <el-descriptions-item label="申请名称">{{ detailData.applyName }}</el-descriptions-item>
-          <el-descriptions-item label="地区">{{ detailData.region || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="地区">
+            <!-- PATCH-5: 抽屉也用字典翻译 -->
+            <dict-tag v-if="detailData.region" :options="dict.type.jst_region_province" :value="detailData.region" />
+            <span v-else>--</span>
+          </el-descriptions-item>
           <el-descriptions-item label="渠道类型">{{ detailData.channelType === 'institution' ? '机构' : '个人' }}</el-descriptions-item>
           <el-descriptions-item label="联系手机">{{ detailData.contactMobile }}</el-descriptions-item>
           <el-descriptions-item label="审核状态">
@@ -113,10 +145,12 @@
 </template>
 
 <script>
-import { listChannelAuth, getChannelAuth, approveChannelAuth, rejectChannelAuth, suspendChannelAuth } from '@/api/admin/channel-auth'
+import { listChannelAuth, getChannelAuth, approveChannelAuth, rejectChannelAuth, suspendChannelAuth, updateChannelAuthRegion } from '@/api/admin/channel-auth'
 
 export default {
   name: 'ChannelAuth',
+  // PATCH-5: 注入省级行政区字典
+  dicts: ['jst_region_province'],
   data() {
     return {
       loading: false,
@@ -145,10 +179,19 @@ export default {
       currentApplyId: null,
       // 详情抽屉
       detailOpen: false,
-      detailData: null
+      detailData: null,
+      // PATCH-5: 编辑地区弹窗
+      regionOpen: false,
+      regionForm: { region: '' },
+      regionRules: { region: [{ required: true, message: '请选择省份', trigger: 'change' }] }
     }
   },
   computed: {
+    // PATCH-5: 权限 — admin 或 jst_operator 可编辑
+    canEditRegion() {
+      const roles = (this.$store && this.$store.getters && this.$store.getters.roles) || []
+      return roles.includes('admin') || roles.includes('jst_operator')
+    },
     drawerSize() {
       return window.innerWidth <= 768 ? '100%' : '500px'
     },
@@ -233,6 +276,26 @@ export default {
       getChannelAuth(row.applyId).then(res => {
         this.detailData = res.data || row
       }).catch(() => {})
+    },
+    // PATCH-5: 打开编辑地区弹窗
+    handleEditRegion(row) {
+      this.currentApplyId = row.applyId
+      this.regionForm.region = row.region || ''
+      this.regionOpen = true
+      this.$nextTick(() => {
+        if (this.$refs.regionForm) this.$refs.regionForm.clearValidate()
+      })
+    },
+    submitRegion() {
+      this.$refs.regionForm.validate(valid => {
+        if (!valid) return
+        this.submitLoading = true
+        updateChannelAuthRegion(this.currentApplyId, this.regionForm.region).then(() => {
+          this.$modal.msgSuccess('地区已更新')
+          this.regionOpen = false
+          this.getList()
+        }).finally(() => { this.submitLoading = false })
+      })
     }
   }
 }
@@ -257,5 +320,10 @@ export default {
   font-size: 12px;
   color: #909399;
   margin-top: 6px;
+}
+/* PATCH-5: 未设置地区灰化提示 */
+.region-empty {
+  color: #c0c4cc;
+  font-size: 12px;
 }
 </style>

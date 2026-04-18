@@ -24,3 +24,12 @@ export function rejectChannelAuth(applyId, data) {
 export function suspendChannelAuth(applyId) {
   return request({ url: '/jst/organizer/channel/apply/' + applyId + '/suspend', method: 'post' })
 }
+
+// PATCH-5: admin/jst_operator 修正渠道地区（省级维度）
+export function updateChannelAuthRegion(applyId, region) {
+  return request({
+    url: '/jst/organizer/channel/apply/' + applyId + '/region',
+    method: 'put',
+    data: { region }
+  })
+}

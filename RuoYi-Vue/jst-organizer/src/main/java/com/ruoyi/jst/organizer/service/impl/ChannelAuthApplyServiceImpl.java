@@ -514,6 +514,49 @@ public class ChannelAuthApplyServiceImpl implements ChannelAuthApplyService {
         });
     }
 
+    /**
+     * PATCH-5: admin 修正某申请/渠道的 region（省级维度）
+     * <p>
+     * 同步更新 jst_channel_auth_apply.region 与（若已关联）jst_channel.region，
+     * 保证 dashboard 热力图口径一致。字典校验由 Controller 侧 RegionDictService 负责。
+     *
+     * @param applyId 申请ID
+     * @param region  省级 dict_value
+     * @关联表 jst_channel_auth_apply / jst_channel
+     * @关联权限 admin / jst_operator
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class) // TX: updateRegion
+    @OperateLog(module = "渠道认证", action = "APPLY_REGION_UPDATE", target = "#{applyId}")
+    public void updateRegion(Long applyId, String region) {
+        if (StringUtils.isBlank(region)) {
+            throw new ServiceException("region 不能为空",
+                    BizErrorCode.JST_COMMON_PARAM_INVALID.code());
+        }
+        JstChannelAuthApply apply = getRequiredApply(applyId);
+        String operatorName = currentOperatorName();
+
+        int updated = channelAuthApplyMapperExt.updateApplyRegion(applyId, region, operatorName);
+        if (updated == 0) {
+            throw new ServiceException("修改 region 失败，申请记录不存在",
+                    BizErrorCode.JST_COMMON_DATA_TAMPERED.code());
+        }
+
+        // 审核通过后 channel 已建立，同步刷新以免热力图脱钩
+        if (apply.getChannelId() != null) {
+            JstChannel channel = jstChannelService.selectJstChannelByChannelId(apply.getChannelId());
+            if (channel != null) {
+                channel.setRegion(region);
+                channel.setUpdateBy(operatorName);
+                channel.setUpdateTime(DateUtils.getNowDate());
+                jstChannelService.updateJstChannel(channel);
+            }
+        }
+
+        log.info("[ChannelAuthApply] admin 修正 region applyId={} channelId={} region={}",
+                applyId, apply.getChannelId(), region);
+    }
+
     private void publishAfterCommit(Object event) {
         if (event == null) {
             return;

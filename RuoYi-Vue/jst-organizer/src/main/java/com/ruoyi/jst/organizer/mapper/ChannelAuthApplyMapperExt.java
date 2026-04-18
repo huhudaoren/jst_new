@@ -119,4 +119,16 @@ public interface ChannelAuthApplyMapperExt {
                       @Param("materialsJson") String materialsJson,
                       @Param("submitTime") Date submitTime,
                       @Param("updateBy") String updateBy);
+
+    /**
+     * PATCH-5: admin 修正申请 region（省级维度）。
+     *
+     * @param applyId  申请ID
+     * @param region   省级字典 dict_value
+     * @param updateBy 更新人
+     * @return 影响行数
+     */
+    int updateApplyRegion(@Param("applyId") Long applyId,
+                          @Param("region") String region,
+                          @Param("updateBy") String updateBy);
 }

@@ -174,4 +174,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           and apply_status = 'rejected'
           and del_flag = '0'
     </update>
+
+    <!-- PATCH-5: admin 修正省级 region -->
+    <update id="updateApplyRegion">
+        update jst_channel_auth_apply
+        set region = #{region},
+            update_by = #{updateBy},
+            update_time = now()
+        where apply_id = #{applyId}
+          and del_flag = '0'
+    </update>
 </mapper>

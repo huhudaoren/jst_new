@@ -104,4 +104,15 @@ public interface ChannelAuthApplyService {
      * @param applyId 申请ID
      */
     void cancelApply(Long userId, Long applyId);
+
+    /**
+     * PATCH-5: admin 修正某申请/渠道的 region（省级维度）
+     * <p>
+     * 同步更新 {@code jst_channel_auth_apply.region}；若该申请已关联 channel，
+     * 同步更新 {@code jst_channel.region}，确保热力图口径一致。
+     *
+     * @param applyId 申请ID
+     * @param region  新 region（必须在 jst_region_province 字典内，由 Controller 校验）
+     */
+    void updateRegion(Long applyId, String region);
 }
