@@ -53,6 +53,10 @@ import ContestPicker from '@/components/RelationPicker/ContestPicker.vue'
 import ParticipantPicker from '@/components/RelationPicker/ParticipantPicker.vue'
 import PartnerPicker from '@/components/RelationPicker/PartnerPicker.vue'
 import OrderPicker from '@/components/RelationPicker/OrderPicker.vue'
+import FormTemplatePicker from '@/components/RelationPicker/FormTemplatePicker.vue'
+import CertTemplatePicker from '@/components/RelationPicker/CertTemplatePicker.vue'
+import CouponTemplatePicker from '@/components/RelationPicker/CouponTemplatePicker.vue'
+import RightsTemplatePicker from '@/components/RelationPicker/RightsTemplatePicker.vue'
 
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts
@@ -88,6 +92,10 @@ Vue.component('ContestPicker', ContestPicker)
 Vue.component('ParticipantPicker', ParticipantPicker)
 Vue.component('PartnerPicker', PartnerPicker)
 Vue.component('OrderPicker', OrderPicker)
+Vue.component('FormTemplatePicker', FormTemplatePicker)
+Vue.component('CertTemplatePicker', CertTemplatePicker)
+Vue.component('CouponTemplatePicker', CouponTemplatePicker)
+Vue.component('RightsTemplatePicker', RightsTemplatePicker)
 
 Vue.use(directive)
 Vue.use(plugins)

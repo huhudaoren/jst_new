@@ -31,6 +31,10 @@ import java.util.*;
  *   <li>jst_contest: contest_id, contest_name, category, audit_status</li>
  *   <li>jst_participant: participant_id, name (非 participant_name), guardian_mobile — 无 phone 字段</li>
  *   <li>jst_order_main: order_id, order_no, net_pay_amount, order_status</li>
+ *   <li>jst_enroll_form_template: template_id, template_name, template_version, owner_type, owner_id, audit_status</li>
+ *   <li>jst_cert_template: template_id, template_name, owner_type, owner_id, bg_image, audit_status</li>
+ *   <li>jst_coupon_template: coupon_template_id, coupon_name, coupon_type, threshold_amount, status</li>
+ *   <li>jst_rights_template: rights_template_id, rights_name, rights_type, quota_mode, quota_value, status</li>
  * </ul>
  *
  * @author jst
@@ -89,6 +93,10 @@ public class EntityBriefController extends BaseController {
             case "participant":
             case "participantStudent":  return searchParticipant(kw, limit);
             case "order":               return searchOrder(kw, limit);
+            case "formTemplate":        return searchFormTemplate(kw, limit);
+            case "certTemplate":        return searchCertTemplate(kw, limit);
+            case "couponTemplate":      return searchCouponTemplate(kw, limit);
+            case "rightsTemplate":      return searchRightsTemplate(kw, limit);
             default:                    return Collections.emptyList();
         }
     }
@@ -215,6 +223,93 @@ public class EntityBriefController extends BaseController {
         return jdbcTemplate.queryForList(base + "ORDER BY order_id DESC LIMIT ?", limit);
     }
 
+    /**
+     * jst_enroll_form_template: template_id, template_name, template_version, owner_type, owner_id, audit_status
+     * owner_type=platform 表示平台模板；owner_type=partner 时 owner_id 对应 jst_event_partner.partner_id
+     */
+    private List<Map<String, Object>> searchFormTemplate(String kw, int limit) {
+        String base = "SELECT t.template_id AS id, t.template_name AS name, "
+                + "CONCAT("
+                + "CASE "
+                + "WHEN t.owner_type = 'platform' THEN '平台模板' "
+                + "ELSE IFNULL(p.partner_name, CONCAT('赛事方#', CAST(t.owner_id AS CHAR))) "
+                + "END, "
+                + "' · V', CAST(IFNULL(t.template_version, 1) AS CHAR)"
+                + ") AS subtitle, "
+                + "t.audit_status AS statusTag "
+                + "FROM jst_enroll_form_template t "
+                + "LEFT JOIN jst_event_partner p ON t.owner_type = 'partner' AND t.owner_id = p.partner_id AND p.del_flag = '0' "
+                + "WHERE t.del_flag = '0' ";
+        if (StringUtils.isNotBlank(kw)) {
+            String like = "%" + kw + "%";
+            return jdbcTemplate.queryForList(
+                    base + "AND (t.template_name LIKE ? OR p.partner_name LIKE ?) ORDER BY t.template_id DESC LIMIT ?",
+                    like, like, limit);
+        }
+        return jdbcTemplate.queryForList(base + "ORDER BY t.template_id DESC LIMIT ?", limit);
+    }
+
+    /**
+     * jst_cert_template: template_id, template_name, owner_type, owner_id, bg_image, audit_status
+     * owner_type=platform 表示平台模板；owner_type=partner 时 owner_id 对应 jst_event_partner.partner_id
+     */
+    private List<Map<String, Object>> searchCertTemplate(String kw, int limit) {
+        String base = "SELECT t.template_id AS id, t.template_name AS name, "
+                + "CONCAT("
+                + "CASE "
+                + "WHEN t.owner_type = 'platform' THEN '平台模板' "
+                + "ELSE IFNULL(p.partner_name, CONCAT('赛事方#', CAST(t.owner_id AS CHAR))) "
+                + "END, "
+                + "' · ', "
+                + "CASE WHEN t.bg_image IS NULL OR t.bg_image = '' THEN '空白模板' ELSE '已配底图' END"
+                + ") AS subtitle, "
+                + "t.audit_status AS statusTag "
+                + "FROM jst_cert_template t "
+                + "LEFT JOIN jst_event_partner p ON t.owner_type = 'partner' AND t.owner_id = p.partner_id AND p.del_flag = '0' "
+                + "WHERE t.del_flag = '0' ";
+        if (StringUtils.isNotBlank(kw)) {
+            String like = "%" + kw + "%";
+            return jdbcTemplate.queryForList(
+                    base + "AND (t.template_name LIKE ? OR p.partner_name LIKE ?) ORDER BY t.template_id DESC LIMIT ?",
+                    like, like, limit);
+        }
+        return jdbcTemplate.queryForList(base + "ORDER BY t.template_id DESC LIMIT ?", limit);
+    }
+
+    /**
+     * jst_coupon_template: coupon_template_id, coupon_name, coupon_type, threshold_amount, status
+     */
+    private List<Map<String, Object>> searchCouponTemplate(String kw, int limit) {
+        String base = "SELECT coupon_template_id AS id, coupon_name AS name, "
+                + "CONCAT(coupon_type, ' · 门槛¥', CAST(IFNULL(threshold_amount, 0) AS CHAR)) AS subtitle, "
+                + "status AS statusTag "
+                + "FROM jst_coupon_template WHERE del_flag = '0' ";
+        if (StringUtils.isNotBlank(kw)) {
+            String like = "%" + kw + "%";
+            return jdbcTemplate.queryForList(
+                    base + "AND coupon_name LIKE ? ORDER BY coupon_template_id DESC LIMIT ?",
+                    like, limit);
+        }
+        return jdbcTemplate.queryForList(base + "ORDER BY coupon_template_id DESC LIMIT ?", limit);
+    }
+
+    /**
+     * jst_rights_template: rights_template_id, rights_name, rights_type, quota_mode, quota_value, status
+     */
+    private List<Map<String, Object>> searchRightsTemplate(String kw, int limit) {
+        String base = "SELECT rights_template_id AS id, rights_name AS name, "
+                + "CONCAT(rights_type, ' · ', quota_mode, ':', CAST(IFNULL(quota_value, 0) AS CHAR)) AS subtitle, "
+                + "status AS statusTag "
+                + "FROM jst_rights_template WHERE del_flag = '0' ";
+        if (StringUtils.isNotBlank(kw)) {
+            String like = "%" + kw + "%";
+            return jdbcTemplate.queryForList(
+                    base + "AND rights_name LIKE ? ORDER BY rights_template_id DESC LIMIT ?",
+                    like, limit);
+        }
+        return jdbcTemplate.queryForList(base + "ORDER BY rights_template_id DESC LIMIT ?", limit);
+    }
+
     // ============================================================
     // Private: brief 派发
     // ============================================================
@@ -253,6 +348,43 @@ public class EntityBriefController extends BaseController {
             case "order":
                 return "SELECT order_id AS id, order_no AS name, CAST(net_pay_amount AS CHAR) AS subtitle, order_status AS statusTag"
                         + " FROM jst_order_main WHERE del_flag = '0' AND order_id = ?";
+            case "formTemplate":
+                return "SELECT t.template_id AS id, t.template_name AS name, "
+                        + "CONCAT("
+                        + "CASE "
+                        + "WHEN t.owner_type = 'platform' THEN '平台模板' "
+                        + "ELSE IFNULL(p.partner_name, CONCAT('赛事方#', CAST(t.owner_id AS CHAR))) "
+                        + "END, "
+                        + "' · V', CAST(IFNULL(t.template_version, 1) AS CHAR)"
+                        + ") AS subtitle, "
+                        + "t.audit_status AS statusTag "
+                        + "FROM jst_enroll_form_template t "
+                        + "LEFT JOIN jst_event_partner p ON t.owner_type = 'partner' AND t.owner_id = p.partner_id AND p.del_flag = '0' "
+                        + "WHERE t.del_flag = '0' AND t.template_id = ?";
+            case "certTemplate":
+                return "SELECT t.template_id AS id, t.template_name AS name, "
+                        + "CONCAT("
+                        + "CASE "
+                        + "WHEN t.owner_type = 'platform' THEN '平台模板' "
+                        + "ELSE IFNULL(p.partner_name, CONCAT('赛事方#', CAST(t.owner_id AS CHAR))) "
+                        + "END, "
+                        + "' · ', "
+                        + "CASE WHEN t.bg_image IS NULL OR t.bg_image = '' THEN '空白模板' ELSE '已配底图' END"
+                        + ") AS subtitle, "
+                        + "t.audit_status AS statusTag "
+                        + "FROM jst_cert_template t "
+                        + "LEFT JOIN jst_event_partner p ON t.owner_type = 'partner' AND t.owner_id = p.partner_id AND p.del_flag = '0' "
+                        + "WHERE t.del_flag = '0' AND t.template_id = ?";
+            case "couponTemplate":
+                return "SELECT coupon_template_id AS id, coupon_name AS name, "
+                        + "CONCAT(coupon_type, ' · 门槛¥', CAST(IFNULL(threshold_amount, 0) AS CHAR)) AS subtitle, "
+                        + "status AS statusTag "
+                        + "FROM jst_coupon_template WHERE del_flag = '0' AND coupon_template_id = ?";
+            case "rightsTemplate":
+                return "SELECT rights_template_id AS id, rights_name AS name, "
+                        + "CONCAT(rights_type, ' · ', quota_mode, ':', CAST(IFNULL(quota_value, 0) AS CHAR)) AS subtitle, "
+                        + "status AS statusTag "
+                        + "FROM jst_rights_template WHERE del_flag = '0' AND rights_template_id = ?";
             default:
                 return null;
         }
