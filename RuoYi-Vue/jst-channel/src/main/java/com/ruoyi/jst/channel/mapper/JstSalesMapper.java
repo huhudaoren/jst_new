@@ -21,4 +21,7 @@ public interface JstSalesMapper {
     /** 离职 Quartz Job 用 */
     java.util.List<Long> selectExpectedToResign();
     java.util.List<Long> selectTransitionExpired();
+
+    /** Dashboard：活跃销售数量 */
+    int countActive();
 }

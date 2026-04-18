@@ -118,6 +118,11 @@ public class SalesCommissionSettlementServiceImpl implements SalesCommissionSett
         return settlementMapper.selectJstSalesCommissionSettlementList(query);
     }
 
+    @Override
+    public JstSalesCommissionSettlement getBySettlementId(Long settlementId) {
+        return settlementMapper.selectJstSalesCommissionSettlementBySettlementId(settlementId);
+    }
+
     private JstSalesCommissionSettlement require(Long id) {
         JstSalesCommissionSettlement s = settlementMapper.selectJstSalesCommissionSettlementBySettlementId(id);
         if (s == null) throw new ServiceException("月结单不存在: " + id);

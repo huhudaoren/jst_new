@@ -99,4 +99,17 @@
         ORDER BY sales_id, next_followup_at
     </select>
 
+    <!-- Dashboard：各销售跟进活动聚合（JOIN jst_sales 拿 sales_name） -->
+    <select id="aggregateFollowupActivity" resultType="java.util.LinkedHashMap">
+        SELECT r.sales_id AS salesId,
+               s.sales_name AS salesName,
+               COUNT(*) AS followupCount,
+               COUNT(DISTINCT r.channel_id) AS coveredChannelCount
+          FROM jst_sales_followup_record r
+          LEFT JOIN jst_sales s ON s.sales_id = r.sales_id
+         WHERE r.followup_at &gt;= #{periodStart} AND r.followup_at &lt; #{periodEnd}
+         GROUP BY r.sales_id, s.sales_name
+         ORDER BY followupCount DESC
+    </select>
+
 </mapper>

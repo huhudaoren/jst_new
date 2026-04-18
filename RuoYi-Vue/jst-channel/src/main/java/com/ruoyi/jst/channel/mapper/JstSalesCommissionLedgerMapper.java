@@ -60,4 +60,23 @@ public interface JstSalesCommissionLedgerMapper {
     List<java.util.Map<String, Object>> aggregateByBusinessType(@Param("salesId") Long salesId,
                                                                  @Param("periodStart") java.util.Date periodStart,
                                                                  @Param("periodEnd") java.util.Date periodEnd);
+
+    /** 按月结单 ID 查关联 ledger 行（admin 详情用） */
+    List<JstSalesCommissionLedger> selectBySettlementId(@Param("settlementId") Long settlementId);
+
+    /**
+     * 平台 Dashboard 月度汇总：本月 orderCount / gmv / commissionCost。
+     * 参数：periodStart / periodEnd。
+     * 返回 map keys: orderCount, gmv, commissionCost。
+     */
+    java.util.Map<String, Object> aggregateMonthSummary(@Param("periodStart") java.util.Date periodStart,
+                                                         @Param("periodEnd") java.util.Date periodEnd);
+
+    /**
+     * Dashboard 销售 TOP 榜（按月 commission 倒序）。
+     * 返回 map keys: salesId, salesName, commission, orderCount。
+     */
+    List<java.util.Map<String, Object>> selectSalesRanking(@Param("periodStart") java.util.Date periodStart,
+                                                            @Param("periodEnd") java.util.Date periodEnd,
+                                                            @Param("limit") int limit);
 }

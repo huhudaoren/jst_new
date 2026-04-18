@@ -32,4 +32,7 @@ public interface SalesCommissionSettlementService {
 
     /** 列表（admin 端用） */
     List<JstSalesCommissionSettlement> listForAdmin(JstSalesCommissionSettlement query);
+
+    /** 按主键查单条（admin 详情用） */
+    JstSalesCommissionSettlement getBySettlementId(Long settlementId);
 }
