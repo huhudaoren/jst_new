@@ -4,7 +4,7 @@
     <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="my-course-page__nav">
-      <view class="my-course-page__back" @tap="handleBack"><</view>
+      <view class="my-course-page__back" @tap="handleBack">返回</view>
       <text class="my-course-page__nav-title">我的课程</text>
       <u-button class="my-course-page__nav-action" size="mini" plain @click="goCourseTab">去选课</u-button>
     </view>

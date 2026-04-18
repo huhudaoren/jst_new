@@ -31,17 +31,23 @@
       <text class="login-page__card-title">欢迎登录</text>
       <text class="login-page__card-desc">微信一键登录，开启竞赛之旅</text>
 
-      <u-button class="login-page__button login-page__button--wx" @click="handleWxLogin">
-        <text class="login-page__button-icon">&#128172;</text>
-        微信一键登录
-      </u-button>
+      <view class="t-login-wx">
+        <u-button class="login-page__button login-page__button--wx" @click="handleWxLogin">
+          <text class="login-page__button-icon">&#128172;</text>
+          微信一键登录
+        </u-button>
+      </view>
 
-      <u-button v-if="isDev" class="login-page__button login-page__button--dev" :loading="submitting" @click="handleMockLogin(MOCK_1003)">
-        Mock 登录（渠道测试账号）
-      </u-button>
-<u-button v-if="isDev" class="login-page__button login-page__button--dev" :loading="submitting" @click="handleMockLogin(MOCK_9212)">
-        Mock 登录（学生测试账号）
-      </u-button>
+      <view v-if="isDev" class="t-login-mock-channel">
+        <u-button class="login-page__button login-page__button--dev" :loading="submitting" @click="handleMockLogin('MOCK_1003')">
+          Mock 登录（渠道测试账号）
+        </u-button>
+      </view>
+      <view v-if="isDev" class="t-login-mock-student">
+        <u-button class="login-page__button login-page__button--dev" :loading="submitting" @click="handleMockLogin('MOCK_9212')">
+          Mock 登录（学生测试账号）
+        </u-button>
+      </view>
       <text v-if="message" class="login-page__message">{{ message }}</text>
     </view>
 
@@ -98,6 +104,7 @@ export default {
 
       try {
         const userStore = useUserStore()
+		console.log(mock)
         const res = await userStore.login(mock)
         await this.finishLogin(res)
       } catch (error) {

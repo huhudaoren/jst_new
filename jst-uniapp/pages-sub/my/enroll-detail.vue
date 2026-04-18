@@ -4,7 +4,7 @@
     <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="enroll-detail-page__nav">
-      <view class="enroll-detail-page__back" @tap="handleBack"><</view>
+      <view class="enroll-detail-page__back" @tap="handleBack">返回</view>
       <text class="enroll-detail-page__nav-title">报名详情</text>
       <view class="enroll-detail-page__nav-placeholder"></view>
     </view>

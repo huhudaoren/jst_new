@@ -4,7 +4,7 @@
     <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="address-edit-page__header">
-      <view class="address-edit-page__back" @tap="handleBack"><</view>
+      <view class="address-edit-page__back" @tap="handleBack"> 返回 </view>
       <text class="address-edit-page__title">{{ addressId ? '编辑地址' : '新增地址' }}</text>
       <u-button class="address-edit-page__save" size="mini" shape="circle" plain @click="submitForm">保存</u-button>
     </view>

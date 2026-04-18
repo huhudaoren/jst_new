@@ -21,7 +21,7 @@
       <view class="help-page__hero-icon">💬</view>
       <view class="help-page__hero-body">
         <text class="help-page__hero-title">在线客服</text>
-        <text class="help-page__hero-subtitle">平均响应时间 &lt; 3 分钟</text>
+        <text class="help-page__hero-subtitle">平均响应时间小于3 分钟</text>
         <text class="help-page__hero-tag">在线服务中</text>
       </view>
       <text class="help-page__hero-arrow">›</text>

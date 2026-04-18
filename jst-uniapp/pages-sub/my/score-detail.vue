@@ -3,7 +3,7 @@
   <view class="score-detail-page">
     <!-- 头部导航 -->
     <view class="score-detail-page__header">
-      <view class="score-detail-page__back" @tap="goBack">&lt;</view>
+      <view class="score-detail-page__back" @tap="goBack">返回</view>
       <text class="score-detail-page__header-title">成绩详情</text>
       <view class="score-detail-page__header-placeholder"></view>
     </view>

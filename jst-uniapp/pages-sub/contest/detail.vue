@@ -254,9 +254,9 @@
             <view class="contest-detail-page__recommend-inner">
               <view
                 v-for="rc in relatedContests"
-                :key="'rc-' + rc.contestId"
+                :key="rc.contestId"
                 class="contest-detail-page__recommend-card"
-                @tap="openRelatedContest(rc)"
+                @tap="openRelatedContest(rc.contestId)"
               >
                 <image
                   class="contest-detail-page__recommend-cover"
@@ -278,9 +278,9 @@
             <view class="contest-detail-page__recommend-inner">
               <view
                 v-for="cc in relatedCourses"
-                :key="'cc-' + cc.courseId"
+                :key="cc.courseId"
                 class="contest-detail-page__recommend-card"
-                @tap="openRelatedCourse(cc)"
+                @tap="openRelatedCourse(cc.courseId)"
               >
                 <image
                   class="contest-detail-page__recommend-cover"
@@ -606,13 +606,13 @@ export default {
     },
 
     // 中文注释: 跳转到推荐赛事/课程
-    openRelatedContest(rc) {
-      if (!rc || !rc.contestId) return
-      uni.redirectTo({ url: '/pages-sub/contest/detail?id=' + rc.contestId })
+    openRelatedContest(contestId) {
+      if (!contestId) return
+      uni.redirectTo({ url: '/pages-sub/contest/detail?id=' + contestId })
     },
-    openRelatedCourse(cc) {
-      if (!cc || !cc.courseId) return
-      uni.navigateTo({ url: '/pages-sub/course/detail?id=' + cc.courseId })
+    openRelatedCourse(courseId) {
+      if (!courseId) return
+      uni.navigateTo({ url: '/pages-sub/course/detail?id=' + courseId })
     },
     formatPrice(price) {
       const n = Number(price)

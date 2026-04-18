@@ -4,7 +4,7 @@
     <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="order-list-page__nav">
-      <view class="order-list-page__back" @tap="handleBack"><</view>
+      <view class="order-list-page__back" @tap="handleBack">返回</view>
       <text class="order-list-page__nav-title">我的订单</text>
       <view class="order-list-page__nav-placeholder"></view>
     </view>

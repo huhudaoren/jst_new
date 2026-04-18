@@ -4,7 +4,7 @@
     <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="binding-page__nav">
-      <view class="binding-page__back" @tap="handleBack"><</view>
+      <view class="binding-page__back" @tap="handleBack">返回</view>
       <text class="binding-page__nav-title">我的绑定</text>
       <view class="binding-page__nav-placeholder"></view>
     </view>

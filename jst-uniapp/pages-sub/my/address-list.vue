@@ -4,7 +4,7 @@
     <u-skeleton v-if="pageLoading" :loading="true" :rows="7" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="address-page__header">
-      <view class="address-page__back" @tap="handleBack"><</view>
+      <view class="address-page__back" @tap="handleBack">返回</view>
       <text class="address-page__title">{{ pickMode ? '选择收货地址' : '收货地址' }}</text>
       <u-button class="address-page__header-btn" size="mini" plain @click="goCreate">新增</u-button>
     </view>

@@ -4,7 +4,7 @@
     <u-skeleton v-if="pageLoading" :loading="true" :rows="8" title :avatar="false" class="jst-page-skeleton" />
 
     <view class="order-detail-page__nav">
-      <view class="order-detail-page__back" @tap="handleBack"><</view>
+      <view class="order-detail-page__back" @tap="handleBack">返回</view>
       <text class="order-detail-page__nav-title">订单详情</text>
       <view class="order-detail-page__nav-placeholder"></view>
     </view>
@@ -772,38 +772,6 @@ export default {
 .order-detail-page__popup-btn--primary {
   background: $jst-brand;
   color: $jst-text-inverse;
-}
-
-:deep(.jst-status-badge--pending) {
-  background: rgba($jst-warning, 0.18);
-}
-
-:deep(.jst-status-badge--pending .jst-status-badge__text) {
-  color: $jst-warning;
-}
-
-:deep(.jst-status-badge--active) {
-  background: rgba($jst-brand, 0.18);
-}
-
-:deep(.jst-status-badge--active .jst-status-badge__text) {
-  color: $jst-brand;
-}
-
-:deep(.jst-status-badge--refund) {
-  background: rgba($jst-indigo, 0.18);
-}
-
-:deep(.jst-status-badge--refund .jst-status-badge__text) {
-  color: $jst-indigo;
-}
-
-:deep(.jst-status-badge--success) {
-  background: rgba($jst-success, 0.18);
-}
-
-:deep(.jst-status-badge--success .jst-status-badge__text) {
-  color: $jst-success;
 }
 
 .order-detail-page__merge-tag {

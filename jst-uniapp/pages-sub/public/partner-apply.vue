@@ -267,16 +267,21 @@ export default {
         ? { remark: this.form.financeRemark }
         : null
 
-      return {
+      // 中文注释: *_json 字段只在有值时提交；空值不传 key，避免后端写入 MySQL JSON 列时报 "The document is empty."
+      const payload = {
         partnerName: this.form.partnerName,
         contactName: this.form.contactName,
         contactMobile: this.form.contactMobile,
-        businessLicenseNo: this.form.businessLicenseNo || '',
-        qualificationJson: qualificationList.length ? JSON.stringify(qualificationList) : '',
-        settlementInfoJson: financeRemark ? JSON.stringify(financeRemark) : '',
-        invoiceInfoJson: financeRemark ? JSON.stringify(financeRemark) : '',
-        contractFilesJson: ''
+        businessLicenseNo: this.form.businessLicenseNo || ''
       }
+      if (qualificationList.length) {
+        payload.qualificationJson = JSON.stringify(qualificationList)
+      }
+      if (financeRemark) {
+        payload.settlementInfoJson = JSON.stringify(financeRemark)
+        payload.invoiceInfoJson = JSON.stringify(financeRemark)
+      }
+      return payload
     },
 
     async submitForm() {

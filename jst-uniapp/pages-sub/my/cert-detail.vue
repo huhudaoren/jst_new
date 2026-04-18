@@ -3,7 +3,7 @@
   <view class="cert-detail-page">
     <!-- 头部导航 -->
     <view class="cert-detail-page__header">
-      <view class="cert-detail-page__back" @tap="goBack">&lt;</view>
+      <view class="cert-detail-page__back" @tap="goBack">返回</view>
       <text class="cert-detail-page__header-title">证书详情</text>
       <view class="cert-detail-page__header-placeholder"></view>
     </view>
