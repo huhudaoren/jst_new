@@ -75,11 +75,11 @@
     <!-- 派发任务弹窗 -->
     <el-dialog title="派发跟进任务" :visible.sync="assignVisible" width="480px" @closed="resetAssignForm">
       <el-form ref="assignForm" :model="assignForm" :rules="assignRules" label-width="100px" size="small">
-        <el-form-item label="销售ID" prop="assigneeSalesId">
-          <el-input-number v-model="assignForm.assigneeSalesId" :min="1" placeholder="输入销售 sales_id" style="width:100%" />
+        <el-form-item label="销售" prop="assigneeSalesId">
+          <sales-picker v-model="assignForm.assigneeSalesId" placeholder="搜索销售姓名" style="width:100%" />
         </el-form-item>
-        <el-form-item label="关联渠道ID">
-          <el-input-number v-model="assignForm.channelId" :min="1" placeholder="选填" style="width:100%" />
+        <el-form-item label="关联渠道">
+          <channel-picker v-model="assignForm.channelId" :clearable="true" placeholder="选填" style="width:100%" />
         </el-form-item>
         <el-form-item label="任务标题" prop="title">
           <el-input v-model="assignForm.title" placeholder="简短描述任务目标" maxlength="100" />
@@ -128,7 +128,7 @@ export default {
         dueDate: ''
       },
       assignRules: {
-        assigneeSalesId: [{ required: true, message: '请输入销售ID', trigger: 'blur' }],
+        assigneeSalesId: [{ required: true, message: '请选择销售', trigger: 'change' }],
         title: [{ required: true, message: '请输入任务标题', trigger: 'blur' }],
         dueDate: [{ required: true, message: '请选择截止日期', trigger: 'change' }]
       }
